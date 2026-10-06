@@ -31,4 +31,4 @@ AI assistance was used to develop and test the implementation and to draft origi
 
 ## Status and unresolved gates
 
-Local project only. ForgeHacks/Devpost account and join status remain unverified. Nothing was logged into, joined, registered, published, pushed, uploaded, submitted, or messaged. Before any future submission, confirm current entry/join eligibility and deadline, disclosure requirements, and whether the hackathon accepts this local browser-only work. This task deliberately does not perform those actions.
+This public source repository supports the ForgeHacks 2026 demo. The Devpost account and join status for jacobsmetoyer@gmail.com are not verified; no contest join, terms acceptance, upload, or submission was made. Before submitting, confirm eligibility and the live entry form’s required fields, disclosure format, and deadline; this offline demo is not evidence of learning efficacy.
