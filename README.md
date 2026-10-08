@@ -6,6 +6,14 @@
 
 Open `demo.html` directly in a browser—no server, install, build step, internet, login, API key, or user data storage is required. It is a single self-contained file with embedded CSS, JavaScript and deck. The modular source is in `index.html`, `src/`, and `data/`; to test that version locally, serve this directory with `python3 -m http.server 8080` and visit `http://localhost:8080`. Rebuild the direct-open demo with `python3 tools/make_demo.py` after source changes. No hosted endpoint is called by either version.
 
+## Trace a maximum flow
+
+Open **[More flow needs a way through](courses/network-flow-explorer.html)** directly in a browser to follow a small directed capacity network from zero assignment to a matching flow-and-cut certificate. Inspect each breadth-first residual path, including cancellation of an earlier edge assignment, and keep independently supplied opposite edges distinct. The original-edge, residual and conservation tables expose every integer value.
+
+Load a worked example or enter 2–8 named vertices and capacities from 0 to 99, then select **Build the trace**. Back, Next and the step selector inspect retained snapshots. Editing retires the displayed result until another successful build. Download the exact applied observation, the original [fourteen-question course](courses/network-flow.json) or its [worked guide](courses/network-flow.md). Import the course through **Bring your own lesson** to use the existing feedback, review, practice and notes flow.
+
+The self-contained page needs no server, account, connection or automatic browser storage. Its observation is a mathematical teaching trace, separate from learner-answer archives. Rebuild with `node tools/build-network-flow.mjs`; add `--check` to verify exact model, UI, template, course and guide parity.
+
 ## Interactive binary-search companion
 
 Open [the binary-search explorer](courses/binary-search-explorer.html) to step through the exact lower-bound loop from the existing **Binary search: precise boundaries** course. The file works directly in a browser without a server or connection. Enter up to 32 sorted integers, choose a target, and inspect each comparison, the classified prefix/suffix, unresolved element indices `[lo, hi)`, and possible answer boundaries `[lo, hi]`. Repeated values, absent targets, empty arrays and the boundary after the last element have explicit examples.

@@ -1,0 +1,248 @@
+{
+  "format": "recallweave-deck/1",
+  "title": "Maximum flow: capacity, rerouting and a cut certificate",
+  "attribution": "Original graphs, questions, distractors, worked explanations and teaching interface authored for RecallWeave with AI assistance. Mathematical background checked against MIT OpenCourseWare, 6.046J Design and Analysis of Algorithms, Spring 2015, Lecture 13: https://ocw.mit.edu/courses/6-046j-design-and-analysis-of-algorithms-spring-2015/resources/lecture-13-incremental-improvement-max-flow-min-cut/. No reference exercise, diagram or passage is copied.",
+  "license": "Original course content authored for Jacob’s RecallWeave project; no additional reuse license is granted here. Linked reference material retains its published terms.",
+  "concepts": [
+    "capacity-and-conservation",
+    "path-bottlenecks",
+    "residual-rerouting",
+    "augmenting-paths",
+    "cut-certificates"
+  ],
+  "items": [
+    {
+      "id": "nf-capacity",
+      "concept": "capacity-and-conservation",
+      "prerequisites": [],
+      "prompt": "An original directed edge A → B has capacity 7. A proposed feasible flow assigns 4 to that edge. Which statement correctly distinguishes the two numbers?",
+      "options": [
+        "The edge must always carry 7.",
+        "The unused capacity becomes flow in the opposite original edge.",
+        "The flow uses 4 of the edge’s permitted 7; 3 remains available in that direction.",
+        "The edge now has capacity 4."
+      ],
+      "answer": 2,
+      "explanation": "Capacity is a bound supplied by the network, while flow is the amount currently assigned within that bound. Here 0 ≤ 4 ≤ 7, and an additional 3 can be assigned forward. Using capacity does not change the original capacity or create an independently supplied opposite edge.",
+      "transfer": "If the assignment increases from 4 to 6, state the unchanged capacity, the new flow and the remaining forward capacity."
+    },
+    {
+      "id": "nf-conservation",
+      "concept": "capacity-and-conservation",
+      "prerequisites": [],
+      "prompt": "An intermediate vertex A receives flows 3 and 2 on its incoming edges. Its only outgoing edges carry 1 and x. What must x be for flow conservation at A?",
+      "options": [
+        "4",
+        "5",
+        "2",
+        "6"
+      ],
+      "answer": 0,
+      "explanation": "The incoming total is 3 + 2 = 5. An intermediate vertex must send out that same total, so 1 + x = 5 and x = 4. This is a feasibility condition; it does not by itself prove that the entire network carries the largest possible source-to-sink flow.",
+      "transfer": "If the edge carrying x has capacity 3, can these assignments all remain unchanged in a feasible flow? Identify the conflicting conditions."
+    },
+    {
+      "id": "nf-value",
+      "concept": "capacity-and-conservation",
+      "prerequisites": [],
+      "prompt": "A feasible directed flow sends a total of 5 out of source S and a total of 1 into S. What is its source-to-sink flow value?",
+      "options": [
+        "6, adding every edge incident to S",
+        "5, counting only outgoing flow",
+        "1, counting the returned flow",
+        "4, subtracting source inflow from source outflow"
+      ],
+      "answer": 3,
+      "explanation": "Flow value is net flow leaving the source: 5 − 1 = 4. An assignment may include circulation that returns to the source; counting all outgoing flow would count that returned contribution too. A feasible full network has the same net amount entering its sink.",
+      "transfer": "Suppose one extra unit circulates from S through other vertices and back to S. What happens to source outflow, source inflow and net flow value?"
+    },
+    {
+      "id": "nf-series",
+      "concept": "path-bottlenecks",
+      "prerequisites": [
+        "capacity-and-conservation"
+      ],
+      "prompt": "The only route from S to T is S → A → T. Its two edge capacities are 7 and 2. What is the maximum feasible flow value?",
+      "options": [
+        "9",
+        "2",
+        "7",
+        "5"
+      ],
+      "answer": 1,
+      "explanation": "Every unit delivered must use both edges. The second edge allows only 2, so it bounds the route. Assigning 2 to both edges is feasible and reaches that bound. The first edge’s extra capacity cannot bypass the smaller edge.",
+      "transfer": "Increase only S → A from 7 to 12. Does the maximum change? Explain using both a feasible assignment and a limiting edge."
+    },
+    {
+      "id": "nf-parallel",
+      "concept": "path-bottlenecks",
+      "prerequisites": [
+        "capacity-and-conservation"
+      ],
+      "prompt": "A network has exactly S → A with capacity 3, A → T with capacity 3, S → B with capacity 2, and B → T with capacity 2. What is its maximum flow value?",
+      "options": [
+        "3, because only one route may be used",
+        "2, the smallest capacity anywhere",
+        "5, using both separate routes",
+        "10, adding all four capacities"
+      ],
+      "answer": 2,
+      "explanation": "The two routes share only S and T. Sending 3 through A and 2 through B delivers 5 while conserving flow at both intermediate vertices. Total capacity out of S is also 3 + 2 = 5, so a larger value is impossible.",
+      "transfer": "If the two branches instead joined at C before one C → T edge of capacity 4, which part of the previous argument would change?"
+    },
+    {
+      "id": "nf-forward",
+      "concept": "residual-rerouting",
+      "prerequisites": [
+        "path-bottlenecks"
+      ],
+      "prompt": "An original edge A → B has capacity 9 and currently carries flow 4. What is its available forward residual capacity?",
+      "options": [
+        "5",
+        "9",
+        "4",
+        "13"
+      ],
+      "answer": 0,
+      "explanation": "The forward residual option represents additional assignment on the same original edge. It has capacity 9 − 4 = 5. The original edge keeps capacity 9, and its already assigned 4 is tracked separately.",
+      "transfer": "If a later augmenting path adds 3 on this edge, compute the new flow and both its forward and cancellation residual capacities."
+    },
+    {
+      "id": "nf-cancel",
+      "concept": "residual-rerouting",
+      "prerequisites": [
+        "path-bottlenecks"
+      ],
+      "prompt": "An original edge A → B currently carries flow 4. An augmenting path uses 3 units of that edge’s reverse residual option B → A. What happens to the original assignment?",
+      "options": [
+        "Its capacity increases by 3.",
+        "Its flow becomes 7.",
+        "An original B → A edge is created with flow 3.",
+        "Its flow decreases to 1; its original capacity is unchanged."
+      ],
+      "answer": 3,
+      "explanation": "A reverse residual option permits undoing some flow previously assigned to its associated original edge. Using 3 on the cancellation option changes A → B from 4 to 1. It is bookkeeping for rerouting the complete source-to-sink assignment, not a newly supplied opposite edge.",
+      "transfer": "Why can this cancellation option never permit more than the flow currently assigned to A → B? Relate the answer to the lower bound of zero."
+    },
+    {
+      "id": "nf-opposite",
+      "concept": "residual-rerouting",
+      "prerequisites": [
+        "path-bottlenecks"
+      ],
+      "prompt": "Two original edges coexist: A → B has capacity 8 and flow 5; B → A has capacity 4 and flow 1. Which residual options go from B to A?",
+      "options": [
+        "Only the original B → A edge, with 4 available",
+        "Use 3 more on original B → A, or cancel up to 5 on original A → B",
+        "Only cancellation of A → B, with 5 available",
+        "Use 4 more on B → A and cancel 8 on A → B"
+      ],
+      "answer": 1,
+      "explanation": "Original B → A has 4 − 1 = 3 available forward. Separately, the reverse option associated with original A → B can cancel its assigned 5. Both options point from B to A, but they change different original edge records. The explorer labels them separately to preserve those identities.",
+      "transfer": "If 2 units use the cancellation option, what are the two original flows afterward? Compare with using 2 on the forward option instead."
+    },
+    {
+      "id": "nf-reroute",
+      "concept": "residual-rerouting",
+      "prerequisites": [
+        "path-bottlenecks"
+      ],
+      "prompt": "Every listed edge has capacity 1: S → A, S → B, A → C, A → D, B → C, C → T, D → T. A first path assigns 1 along S → A → C → T. Which residual path can raise total flow to 2?",
+      "options": [
+        "S → A → D → T, reusing the already full S → A edge",
+        "S → B → C → T, reusing the already full C → T edge",
+        "S → B → C → A → D → T, cancelling A → C on its C → A step",
+        "No path can improve the initial flow"
+      ],
+      "answer": 2,
+      "explanation": "S → B and B → C are unused. The C → A residual step cancels the first path’s A → C assignment, after which A → D and D → T are available. The resulting original routes are S → A → D → T and S → B → C → T. Total delivery rises from 1 to 2 even though one original edge’s flow falls.",
+      "transfer": "Write the final flow on each of the seven original edges. Check conservation separately at A and C, where the reassignment may be easiest to misread."
+    },
+    {
+      "id": "nf-bfs",
+      "concept": "augmenting-paths",
+      "prerequisites": [
+        "residual-rerouting"
+      ],
+      "prompt": "At the current residual state, one S-to-T path has 2 residual edges and bottleneck 1. Another has 3 residual edges and bottleneck 8. Which path does the breadth-first rule used by Edmonds–Karp prefer?",
+      "options": [
+        "The 2-edge path, because BFS minimizes the number of residual edges",
+        "The 3-edge path, because its bottleneck is larger",
+        "Either path chosen by the largest original capacity",
+        "Neither, because all augmenting paths must have equal capacity"
+      ],
+      "answer": 0,
+      "explanation": "Breadth-first search chooses a path with the fewest residual edges. Its criterion is separate from the bottleneck used to determine how much to augment. Choosing a small first augmentation does not make it the final maximum; the algorithm continues searching in each updated residual network.",
+      "transfer": "If two residual paths each use 2 edges, why should an explorer document its tie order even though different valid tie choices can still reach the same maximum value?"
+    },
+    {
+      "id": "nf-cut",
+      "concept": "cut-certificates",
+      "prerequisites": [
+        "capacity-and-conservation"
+      ],
+      "prompt": "For the cut with source side {S, A} and sink side {B, T}, the crossing original edges are S → B of capacity 3, A → T of capacity 4, and B → A of capacity 9. What is the cut capacity?",
+      "options": [
+        "16",
+        "9",
+        "3",
+        "7"
+      ],
+      "answer": 3,
+      "explanation": "Cut capacity sums original capacities directed from the source side to the sink side: 3 + 4 = 7. The edge B → A points back into the source side and is not included in that capacity sum. Net flow across the cut, by contrast, subtracts any flow crossing back.",
+      "transfer": "Would adding an edge S → A of capacity 20 change this cut’s capacity? Explain using the membership of both endpoints."
+    },
+    {
+      "id": "nf-certificate",
+      "concept": "cut-certificates",
+      "prerequisites": [
+        "augmenting-paths"
+      ],
+      "prompt": "You have a feasible flow of value 6 and a source-to-sink cut of capacity 6 in the same network. What do these two objects establish together?",
+      "options": [
+        "Only that the chosen flow is feasible",
+        "The maximum flow value is exactly 6",
+        "That every edge in the graph is saturated",
+        "That this is the only possible maximum-flow assignment"
+      ],
+      "answer": 1,
+      "explanation": "The feasible assignment proves that value 6 can be delivered. The cut bounds every feasible value above by 6. Because those bounds meet, 6 is optimal. The argument does not require every original edge to be saturated, nor does it make the maximizing edge assignment unique.",
+      "transfer": "If your feasible flow had value 4 and your displayed cut capacity were 6, what would remain unknown? State the interval still allowed for the maximum."
+    },
+    {
+      "id": "nf-unreachable",
+      "concept": "cut-certificates",
+      "prerequisites": [
+        "augmenting-paths"
+      ],
+      "prompt": "A completed residual search from S cannot reach T. In a disconnected example the current feasible flow value is 0. Can that be a valid maximum-flow result?",
+      "options": [
+        "Yes; lack of a residual S-to-T path certifies completion, and the resulting cut can have capacity 0.",
+        "No; every network must deliver at least 1.",
+        "No; completion requires saturating every edge.",
+        "Only if the source has no outgoing original edges."
+      ],
+      "answer": 0,
+      "explanation": "A maximum can be zero when no positive-capacity route connects the source to the sink. Residual reachability identifies a source-side set with no positive residual exit, and its outward original cut capacity matches the final value. The source may still have outgoing edges within that set.",
+      "transfer": "In S → A of capacity 8 and A → T of capacity 0, identify the final source-side set and calculate its outward cut capacity."
+    },
+    {
+      "id": "nf-upgrade",
+      "concept": "cut-certificates",
+      "prerequisites": [
+        "path-bottlenecks",
+        "augmenting-paths"
+      ],
+      "prompt": "The only edges are S → A with capacity 2 and A → T with capacity 7. A proposed upgrade changes only A → T to capacity 9. What happens to the maximum flow?",
+      "options": [
+        "It increases from 2 to 4.",
+        "It becomes 9.",
+        "It remains 2 because the source-side capacity is still 2.",
+        "It decreases because the capacities become less balanced."
+      ],
+      "answer": 2,
+      "explanation": "The assignment of 2 on each edge remains feasible, and the cut separating S from {A, T} still has capacity 2. Those matching lower and upper bounds show that the upgrade leaves the maximum at 2. Increasing a capacity cannot reduce the optimum, but it need not increase it.",
+      "transfer": "Change the capacity that actually prevents improvement. How much can you raise the maximum before the other edge becomes the new bound?"
+    }
+  ]
+}

@@ -38,7 +38,7 @@ The browser author’s initial filename assumption for the dated notes download 
 
 ## Source and operational boundaries
 
-The original source parent was `6f920f177ae90a09958146d41612a0e83f52702f`. The current learner supplement qualified `aa057fe7eaf3a152ae44c8e3816f76adf20a11f7`, actual tree `82c88ef5729646ddad2c6d6917f82dea89a5e35e`. This publication is composed against `3a3704c352f8a12e20c208445c2c5ade412b365d`, actual tree `6e2d15579a60b2961b121d231e3c8238e68a433b`. Existing learner runtime files, the generated learner, and its generator are unchanged between the receiving parent and this publication parent. The README addition preserves every existing byte; catalog ownership and other course contributions remain intact.
+The original source parent was `6f920f177ae90a09958146d41612a0e83f52702f`. The current learner supplement qualified `aa057fe7eaf3a152ae44c8e3816f76adf20a11f7`, actual tree `82c88ef5729646ddad2c6d6917f82dea89a5e35e`. This publication is composed against `b1b8a0b0e304694040e0965ad0eff2e8cab306a2`, actual tree `9aa46c55a730e12be8e95ef9ef96d56f76b41049`. Existing learner runtime files, the generated learner, and its generator are unchanged between the receiving parent and this publication parent. The README addition preserves every existing byte; catalog ownership and other course contributions remain intact.
 
 Run `node --test tests/prefix-coding*.test.mjs` for the contribution gates. The existing repository workflow runs `node --test tests/*.test.mjs`, including the new exact generated-page check, and separately reconstructs `demo.html`. These commands are instructions; their hosted results must be recorded after execution.
 
