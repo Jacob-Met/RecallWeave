@@ -1,0 +1,128 @@
+{
+  "format": "recallweave-170-independent-source-review/1",
+  "reviewed_at": "2026-10-08 22:00:51 UTC",
+  "reviewer": "estate-6e5752b49b6f/github_integration",
+  "status": "accepted",
+  "findings": [],
+  "source": {
+    "commit": "35ba3fe7a611395016fc5c808604ea1a815dc81b",
+    "tree": "8c509b174be3e799d2265558c9e0b3720b0b63ad",
+    "parent": "698902f9c9c1d5c5023092b85b3632a7cb7a01ed",
+    "parent_tree": "d6d3707b691850af7928299242631534cff89aa8"
+  },
+  "contract": "https://github.com/Jacob-Met/RecallWeave/issues/170",
+  "mechanical": {
+    "status": "pass",
+    "base_leaves": 2915,
+    "candidate_leaves": 2916,
+    "inherited_leaves_and_modes_exact": 2909,
+    "changes": [
+      {
+        "path": "README.md",
+        "before": "9bac51c26e294db35c0dd48200b47f6e88655ce2",
+        "after": "464caf5854cb1eef0496e35a7054395bab0b60b7",
+        "mode": "100644"
+      },
+      {
+        "path": "handout.html",
+        "before": "f349e78de0095da8989a0d6552a8bf180b82713f",
+        "after": "901c411bd9c3707a6272df10f785d68be5279bf2",
+        "mode": "100644"
+      },
+      {
+        "path": "handout/handout.css",
+        "before": "1ade9039823c3eac92e1872ce02d88efcaf7e9cf",
+        "after": "59e0239ec4f43f603be4a91778433c9a2e9cfdd3",
+        "mode": "100644"
+      },
+      {
+        "path": "handout/index.html",
+        "before": "cce5a658d81a8887337339534000e350e0755f6a",
+        "after": "57d8fc708f336eb7c637a38ae5cac9c76152a75a",
+        "mode": "100644"
+      },
+      {
+        "path": "src/course-handout-ui.mjs",
+        "before": "7462b6713a1ff7ab8a2462d979719e52005fbdc5",
+        "after": "d3f725b6cf0dce6e135e6ba497947a2e811d2206",
+        "mode": "100644"
+      },
+      {
+        "path": "src/course-handout.mjs",
+        "before": "1da93ffca03186aca71189541bb85c4b5b972b92",
+        "after": "4b535e29bc59da9fa2f2a74bf99da9220db45009",
+        "mode": "100644"
+      },
+      {
+        "path": "tests/course-handout-selection.test.mjs",
+        "before": null,
+        "after": "1e6b392b04977e6a021ed4d15a20bfdfe58c585c",
+        "mode": "100644"
+      }
+    ],
+    "standalone_parity": true,
+    "serializer_renderer_css_preserved": true,
+    "existing_file_admission_preserved": true,
+    "validator_and_builder_preserved": true,
+    "scope": "static source/byte admission only; no browser or product runtime execution"
+  },
+  "receiver_git_blob": "c0ffbc18d2b24086456fea9676e508a902be6c0c",
+  "source_read": [
+    {
+      "path": "src/course-handout.mjs",
+      "blob": "4b535e29bc59da9fa2f2a74bf99da9220db45009",
+      "baseline_blob": "1da93ffca03186aca71189541bb85c4b5b972b92"
+    },
+    {
+      "path": "src/course-handout-ui.mjs",
+      "blob": "d3f725b6cf0dce6e135e6ba497947a2e811d2206",
+      "baseline_blob": "7462b6713a1ff7ab8a2462d979719e52005fbdc5"
+    },
+    {
+      "path": "src/deck.mjs",
+      "blob": "f0f8a4b234489c2388f427633f548d56c6ed4c03",
+      "unchanged": true
+    },
+    {
+      "path": "tools/make_handout.py",
+      "blob": "2b5894686db55bb61b9ecc32a7f53a4c79e5a0a9",
+      "unchanged": true
+    },
+    {
+      "path": "handout/index.html",
+      "blob": "57d8fc708f336eb7c637a38ae5cac9c76152a75a"
+    },
+    {
+      "path": "handout/handout.css",
+      "blob": "59e0239ec4f43f603be4a91778433c9a2e9cfdd3"
+    },
+    {
+      "path": "handout.html",
+      "blob": "901c411bd9c3707a6272df10f785d68be5279bf2",
+      "bytes": 38458
+    },
+    {
+      "path": "tests/course-handout-selection.test.mjs",
+      "blob": "1e6b392b04977e6a021ed4d15a20bfdfe58c585c",
+      "reviewed_via_complete_added_patch": true
+    }
+  ],
+  "rationale": {
+    "selection_admission": "Omitted/undefined selection retains default behavior. Explicit selection must be a nonempty array no longer than checked item count. Each numeric slot must be an own property, primitive string and member of the validated exact-ID Set; duplicates refuse. There is no trim/coercion or object-key lookup. Input arrays are only read; a detached Set is constructed.",
+    "full_deck_validation": "The entire input is validated before projection, so selecting a valid question cannot bypass invalid unselected content. The existing validator returns detached frozen values and requires every declared concept to be covered by at least one question.",
+    "order_number_and_concepts": "Projection iterates the validated source items, skips unselected entries and derives number from original index+1. Caller selection order does not reorder questions. Included concept names are collected from selected items, then the original concept list is filtered, preserving source concept order without prerequisite expansion.",
+    "legacy_all_question_equivalence": "With default or all selection, all source questions remain in the same order with the same property insertion order. Because the unchanged validator enforces complete concept coverage, filtering by all selected concepts equals the old complete concept array. CSS/renderer/filename/document body are byte-identical except two signature/forwarding lines. This is a source proof; runtime hash controls belong to the separate native receiver.",
+    "worksheet_key_separation": "Worksheet question objects contain only id, original number, prompt, detached frozen options and transfer. Only answer-key mode adds canonical answer index and authored explanation. Complete saved documents serialize that projection rather than the deck. Existing payload escaping and self-contained literal-text renderer are unchanged. The generic renderer has key-rendering code but worksheet payloads contain no answer/explanation values.",
+    "ui_lifecycle": "All checkboxes have native implicit labels containing original ordinal, concept and literal prompt. The original ordinal disambiguates otherwise identical/whitespace-collapsed labels. Selection changes increment requestVersion, clear pending replacement and render current state. Empty selection disables output controls, removes previous paper children and shows repair instructions; print/save handlers also guard empty selection. All-selection controls stay separately enabled.",
+    "replacement_and_stale_reads": "Successful explicit Use this deck replaces the selected deck, resets selection to all and resets kind to worksheet. Original file read/size/parser/cancel handlers are byte-identical. Both successful and rejected asynchronous reads compare the captured revision. Selection edits retire pending success/error paths without clearing the chosen deck or selection.",
+    "output_actions": "Print re-renders the current selection in the requested mode immediately before window.print. Save projects the current selected IDs directly into the requested standalone document. No prior accepted projection is cached. Text-only DOM construction and bounded wrapped/scrolling question controls preserve existing offline behavior.",
+    "ownership": "Only the seven declared paths differ; all 2909 inherited other leaves and modes are exact. Validator, learner, studio, focus, catalog, courses, builder, existing receiver and workflows are unchanged. README makes the paper-only/no-prerequisite-expansion boundary explicit."
+  },
+  "limitations": [
+    "Source review and exact static byte checks only. No domain tests, browser, downloaded-file, printer, accessibility-tree or layout execution claimed here.",
+    "Root owns independent browser receiving; native_runtime owns candidate-blind domain/model receiving; author tests remain separately attributed.",
+    "No Actions, product edit, dependency install, ref update, PR, merge or tag was performed.",
+    "The first guessed builder path tools/build_handout.py returned404; README identified tools/make_handout.py, whose exact source was then read. This was a source-discovery miss, not a product failure.",
+    "Frozen source35ba remains distinct from the author's evidence-only successor3626946f."
+  ]
+}

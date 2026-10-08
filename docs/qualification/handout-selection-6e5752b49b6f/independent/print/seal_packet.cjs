@@ -1,0 +1,22 @@
+const fs=require('node:fs'),path=require('node:path'),cp=require('node:child_process'),crypto=require('node:crypto');
+const root=__dirname, hash=b=>crypto.createHash('sha256').update(b).digest('hex');
+const invoke=args=>{const r=cp.spawnSync('tar.exe',args,{encoding:'utf8',timeout:30000,maxBuffer:8*1024*1024});if(r.status!==0)throw Error(JSON.stringify(r));return r.stdout;};
+const version=invoke(['--version']).trim();
+const files=fs.readdirSync(root).filter(n=>!n.endsWith('.b64')&&!['packet-manifest.json','archive-file-list.txt'].includes(n)).sort();
+const manifest={format:'recall170-independent-print-packet/1',archive_utility:version,files:files.map(name=>{const b=fs.readFileSync(path.join(root,name));return {path:name,bytes:b.length,sha256:hash(b)};})};
+const manifestBytes=Buffer.from(JSON.stringify(manifest,null,2)+'\n');
+fs.writeFileSync(path.join(root,'packet-manifest.json'),manifestBytes,{flag:'wx'});
+const listed=[...files,'packet-manifest.json'];
+fs.writeFileSync(path.join(root,'archive-file-list.txt'),listed.join('\n')+'\n',{flag:'wx'});
+const archive=root+'.tar.gz';
+invoke(['-czf',archive,'-C',root,'-T',path.join(root,'archive-file-list.txt')]);
+const members=invoke(['-tzf',archive]).trim().split(/\r?\n/);
+if(JSON.stringify(members)!==JSON.stringify(listed))throw Error('archive member inventory');
+const verify=root+'-archive-check';fs.mkdirSync(verify);
+invoke(['-xzf',archive,'-C',verify]);
+for(const item of manifest.files){const b=fs.readFileSync(path.join(verify,item.path));if(b.length!==item.bytes||hash(b)!==item.sha256)throw Error('archive member hash '+item.path);}
+if(!fs.readFileSync(path.join(verify,'packet-manifest.json')).equals(manifestBytes))throw Error('manifest bytes');
+const data=fs.readFileSync(archive);
+const receipt={archive,bytes:data.length,sha256:hash(data),git_blob:crypto.createHash('sha1').update(Buffer.concat([Buffer.from('blob '+data.length+'\0'),data])).digest('hex'),members:members.length,all_members_verified:true,manifest_sha256:hash(manifestBytes),archive_utility:version};
+fs.writeFileSync(root+'-packet-identity.json',JSON.stringify(receipt,null,2)+'\n',{flag:'wx'});
+console.log(JSON.stringify(receipt));
