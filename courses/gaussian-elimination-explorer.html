@@ -1,0 +1,310 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gaussian elimination — RecallWeave</title>
+<style>
+:root{color-scheme:light;--ink:#18313e;--paper:#f5f5ef;--accent:#166861;--line:#bed0cb}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:17px/1.5 system-ui,sans-serif}
+main{max-width:1100px;margin:auto;padding:28px 20px 48px}h1{font-size:clamp(1.8rem,4vw,2.8rem);line-height:1.1;margin:.3em 0}h2{font-size:1.25rem;margin:0 0 12px}p{max-width:76ch}
+.eyebrow{color:var(--accent);font-weight:700;letter-spacing:.08em;text-transform:uppercase;font-size:.8rem}
+.layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:20px}.card{border:1px solid var(--line);border-radius:14px;background:white;padding:20px;margin:18px 0}
+label{display:block;font-weight:650;margin:12px 0 5px}select,input,textarea,button{font:inherit;max-width:100%}
+select,input,textarea{width:100%;border:1px solid #78958f;border-radius:6px;padding:8px;color:var(--ink);background:white}textarea{font-family:ui-monospace,monospace;resize:vertical;min-height:102px}
+button{border:1px solid var(--accent);border-radius:7px;padding:9px 13px;background:var(--accent);color:white;cursor:pointer}button.secondary{background:white;color:var(--accent)}button:disabled{opacity:.45;cursor:default}
+:focus-visible{outline:3px solid #df8c24;outline-offset:3px}.buttons{display:flex;flex-wrap:wrap;gap:9px;margin-top:14px}
+.fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 12px}.wide{grid-column:1/-1}
+pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#eef4f1;padding:12px;border-radius:6px;font-size:.95rem}
+table{border-collapse:collapse;width:100%;font:1.2rem ui-monospace,monospace;table-layout:fixed}caption{font:600 .9rem system-ui;text-align:left;margin-bottom:8px}th{font:600 .85rem system-ui;color:#506d70}td,th{text-align:center;padding:12px 5px;overflow-wrap:anywhere}td{border-top:1px solid #dde7e2}.rhs{border-left:2px solid #78958f}
+.hint{font-size:.9rem;color:#4c6669}#error{color:#982d25;min-height:1.5em;font-weight:650}#result{border-left:4px solid var(--accent);background:#eef7f1;padding:14px;overflow-wrap:anywhere}#operation-log{padding-left:0;list-style:none;max-height:210px;overflow:auto;font-family:ui-monospace,monospace;font-size:.9rem}#operation-log li{padding:5px 0;border-bottom:1px solid #e3ebe7}#rank{overflow-wrap:anywhere}
+footer{font-size:.85rem;color:#4c6669;border-top:1px solid var(--line);margin-top:24px;padding-top:16px}[hidden]{display:none!important}
+@media(max-width:720px){.layout{grid-template-columns:1fr;gap:0}main{padding:20px 12px}.card{padding:16px}button{min-height:44px}}
+</style>
+</head>
+<body>
+<main>
+<div class="eyebrow">RecallWeave · Linear algebra</div>
+<h1>Keep the solutions. Change the equations.</h1>
+<p>Explore Gaussian elimination one exact row operation at a time. A row represents an equation; its final entry is the right-hand side. Find a unique solution, a family, or a contradiction.</p>
+<div class="layout">
+<section class="card" aria-labelledby="setup-title">
+<h2 id="setup-title">1. Choose a system</h2>
+<label for="preset">Worked example</label><select id="preset"></select>
+<label for="input">Augmented matrix</label>
+<textarea id="input" spellcheck="false" aria-describedby="input-help"></textarea>
+<p class="hint" id="input-help">Use 2–3 rows and 2–3 variables. Separate entries with spaces or commas, rows with newlines or semicolons. Use integers or exact fractions such as 2/5.</p>
+<button id="load">Load matrix</button>
+<h2 style="margin-top:24px">Original equations</h2><pre id="original"></pre>
+<p class="hint">These stay fixed while you transform the current matrix. Every legal operation preserves their entire solution set.</p>
+</section>
+<section class="card" aria-labelledby="work-title">
+<h2 id="work-title">2. Build pivots</h2><div id="matrix"></div>
+<div class="fields">
+<div class="wide"><label for="kind">Operation</label><select id="kind"><option value="add">Add a multiple of another row</option><option value="swap">Swap two rows</option><option value="scale">Scale a row</option></select></div>
+<div><label for="target">Target row</label><select id="target"></select></div>
+<div id="source-field"><label for="source">Source row</label><select id="source"></select></div>
+<div id="factor-field"><label for="factor">Factor</label><input id="factor" value="-2" inputmode="text" spellcheck="false"></div>
+</div>
+<div class="buttons"><button id="apply">Apply operation</button><button id="next">Next guided step</button><button id="undo" class="secondary">Undo</button><button id="reset" class="secondary">Reset</button></div>
+<p id="next-hint" class="hint"></p><p id="error" role="alert" aria-live="assertive"></p>
+<p id="status" role="status" aria-live="polite"></p><p id="rank" class="hint"></p>
+<p id="result"></p>
+<details open><summary>Operation history <span id="count" class="hint"></span></summary><ol id="operation-log"></ol></details>
+</section>
+</div>
+<section class="card" aria-labelledby="practice-title">
+<h2 id="practice-title">3. Explain what the rows mean</h2>
+<p>A pivot identifies a leading variable. A zero row adds no restriction. A row such as 0 = 1 makes the system inconsistent. When the reduction is complete, read the solution and check it in the original equations.</p>
+<p>Use the question deck in RecallWeave for twelve retrieval and transfer prompts. The guide includes worked examples, explanations, and the limits of this exact-arithmetic model.</p>
+<div class="buttons"><button id="download-deck">Download question deck</button><button id="download-guide" class="secondary">Download study guide</button></div>
+</section>
+<footer>Original AI-assisted educational material; educator review is still needed. This explorer runs locally without network calls or saved progress. Exact rational arithmetic is limited to small systems; it does not model floating-point numerical stability. References are in the study guide.</footer>
+</main>
+<script>
+const DECK_TEXT = "{\n  \"format\": \"recallweave-deck/1\",\n  \"title\": \"Gaussian elimination: equivalent equations and solution structure\",\n  \"attribution\": \"Original AI-assisted questions, explanations, examples, and transfer prompts for RecallWeave. General mathematical references: MIT OpenCourseWare 18.06SC, Elimination with Matrices and Solving Ax = b: Row Reduced Form R (Gilbert Strang, Fall 2011). No source exercises or figures are reproduced. Educator review is still needed.\",\n  \"license\": \"Original contribution provided under the repository's applicable license; cited MIT OCW material remains under its own terms and is linked as a reference only.\",\n  \"concepts\": [\n    \"equivalent systems\",\n    \"pivot construction\",\n    \"solution structure\",\n    \"verification and transfer\"\n  ],\n  \"items\": [\n    {\n      \"id\": \"gauss-equivalence-1\",\n      \"concept\": \"equivalent systems\",\n      \"prerequisites\": [],\n      \"prompt\": \"The augmented row [2, -3 | 7] is multiplied by -2. Which new row preserves the equation?\",\n      \"options\": [\n        \"[-4, 6 | -14]\",\n        \"[-4, 6 | 7]\",\n        \"[2, -3 | -14]\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"Every term, including the right-hand side, is multiplied by the same nonzero number: 2x - 3y = 7 becomes -4x + 6y = -14. Scaling only one side changes the solutions.\",\n      \"transfer\": \"Write the result of multiplying [3, 1 | -4] by 1/3. Explain why the reverse operation exists.\"\n    },\n    {\n      \"id\": \"gauss-equivalence-2\",\n      \"concept\": \"equivalent systems\",\n      \"prerequisites\": [],\n      \"prompt\": \"Why is multiplying a row by zero excluded from elementary row operations?\",\n      \"options\": [\n        \"It makes all numbers too small.\",\n        \"It replaces an equation by 0 = 0 and can lose a restriction.\",\n        \"It always proves the system has no solution.\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"The equation x + y = 5 restricts x and y. Multiplication by zero leaves 0 = 0, which every pair satisfies. There is no inverse operation that reconstructs the lost equation.\",\n      \"transfer\": \"Give one pair that satisfies 0 = 0 but does not satisfy x + y = 5.\"\n    },\n    {\n      \"id\": \"gauss-equivalence-3\",\n      \"concept\": \"equivalent systems\",\n      \"prerequisites\": [],\n      \"prompt\": \"R2 is replaced by R2 - 3R1 while R1 is kept. Which operation undoes this?\",\n      \"options\": [\n        \"Replace R1 by R1 + 3R2.\",\n        \"Replace R2 by R2 + 3R1.\",\n        \"Multiply R2 by -1/3.\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"Because R1 is unchanged, adding 3R1 back to the new R2 recovers the original R2. This reversibility explains why adding a multiple of another row preserves the whole solution set.\",\n      \"transfer\": \"Explain why simultaneously replacing both rows using already changed values needs separate, explicitly ordered steps.\"\n    },\n    {\n      \"id\": \"gauss-pivot-1\",\n      \"concept\": \"pivot construction\",\n      \"prerequisites\": [\n        \"equivalent systems\"\n      ],\n      \"prompt\": \"For [0, 2 | 4; 3, 1 | 5], how can you start a pivot in the first column?\",\n      \"options\": [\n        \"Divide the first row by zero.\",\n        \"Swap the two rows.\",\n        \"Declare that the system is inconsistent.\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"A zero candidate pivot does not prove inconsistency. The second row has a nonzero first entry, so swapping rows moves it into position. The system has x = 1 and y = 2.\",\n      \"transfer\": \"What would you do if every remaining entry in a candidate coefficient column were zero?\"\n    },\n    {\n      \"id\": \"gauss-pivot-2\",\n      \"concept\": \"pivot construction\",\n      \"prerequisites\": [\n        \"equivalent systems\"\n      ],\n      \"prompt\": \"Start with [1, 1 | 5; 2, -1 | 1]. After R2 ← R2 - 2R1, what is R2?\",\n      \"options\": [\n        \"[0, -3 | -9]\",\n        \"[0, 1 | -9]\",\n        \"[0, -3 | 1]\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"Compute every entry: 2 - 2(1) = 0, -1 - 2(1) = -3, and 1 - 2(5) = -9. Forgetting the right-hand side breaks equivalence.\",\n      \"transfer\": \"Normalize the new second row, then use it to clear the entry above its pivot.\"\n    },\n    {\n      \"id\": \"gauss-pivot-3\",\n      \"concept\": \"pivot construction\",\n      \"prerequisites\": [\n        \"equivalent systems\"\n      ],\n      \"prompt\": \"A row is [0, -7/3 | -11/3]. Which nonzero scale produces a leading 1?\",\n      \"options\": [\n        \"Multiply by -7/3.\",\n        \"Multiply by -3/7.\",\n        \"Multiply by 3/7.\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"The reciprocal of -7/3 is -3/7. Multiplying the whole row gives [0, 1 | 11/7], exactly. The sign matters as well as the reciprocal.\",\n      \"transfer\": \"Normalize [0, 5/2 | -3/4] without converting either entry to a decimal.\"\n    },\n    {\n      \"id\": \"gauss-structure-1\",\n      \"concept\": \"solution structure\",\n      \"prerequisites\": [\n        \"pivot construction\"\n      ],\n      \"prompt\": \"Which reduced augmented row proves that a system has no solution?\",\n      \"options\": [\n        \"[0, 0 | 0]\",\n        \"[0, 0 | 1]\",\n        \"[1, 0 | 0]\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"The row [0, 0 | 1] asserts 0x + 0y = 1, impossible for all x and y. A zero row adds no restriction; [1, 0 | 0] simply requires x = 0.\",\n      \"transfer\": \"Explain why [0, 0, 0 | -4] is also a contradiction, even though its final entry is not 1.\"\n    },\n    {\n      \"id\": \"gauss-structure-2\",\n      \"concept\": \"solution structure\",\n      \"prerequisites\": [\n        \"pivot construction\"\n      ],\n      \"prompt\": \"The reduced system is [1, 2, -1 | 3; 0, 0, 0 | 0]. Which describes all solutions?\",\n      \"options\": [\n        \"(x1, x2, x3) = (3, 0, 0) only.\",\n        \"(x1, x2, x3) = (3 - 2s + t, s, t) for any real s and t.\",\n        \"There are no solutions because one row is zero.\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"Only x1 is a pivot variable. Let x2 = s and x3 = t; then x1 + 2s - t = 3 gives x1 = 3 - 2s + t. Two free variables produce a two-parameter family.\",\n      \"transfer\": \"Choose s = -1 and t = 2, then check all three coordinates in the original nonzero equation.\"\n    },\n    {\n      \"id\": \"gauss-structure-3\",\n      \"concept\": \"solution structure\",\n      \"prerequisites\": [\n        \"pivot construction\"\n      ],\n      \"prompt\": \"A system with three variables has coefficient rank 2 and augmented rank 2. How many free variables does its solution family have?\",\n      \"options\": [\n        \"Zero: equal ranks always give a unique solution.\",\n        \"One: it is consistent and 3 - 2 variables are free.\",\n        \"Two: rank directly counts free variables.\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"Equal coefficient and augmented ranks mean consistency. The number of free variables is the number of variables minus the coefficient rank: 3 - 2 = 1. Uniqueness additionally requires a pivot in every variable column.\",\n      \"transfer\": \"How would the conclusion change if the augmented rank were 3 while the coefficient rank stayed 2?\"\n    },\n    {\n      \"id\": \"gauss-check-1\",\n      \"concept\": \"verification and transfer\",\n      \"prerequisites\": [\n        \"solution structure\"\n      ],\n      \"prompt\": \"Which pair satisfies both x + y = 5 and 2x - y = 1?\",\n      \"options\": [\n        \"(2, 3)\",\n        \"(3, 2)\",\n        \"(1, 4)\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"Substitute (2, 3): 2 + 3 = 5 and 2(2) - 3 = 1. Checking only the first equation would fail to distinguish all three options.\",\n      \"transfer\": \"Check the pair obtained by solving x + y = 7 and 3x - y = 1 in both original equations.\"\n    },\n    {\n      \"id\": \"gauss-check-2\",\n      \"concept\": \"verification and transfer\",\n      \"prerequisites\": [\n        \"solution structure\"\n      ],\n      \"prompt\": \"A proposed row reduction of x - y = 2 and 2x - 2y = 5 claims x = 2, y = 0. What is the decisive check?\",\n      \"options\": [\n        \"It satisfies the first equation, so accept it.\",\n        \"The second equation gives 4 rather than 5; in fact subtracting twice the first equation yields 0 = 1.\",\n        \"Any pair with y = 0 is invalid.\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"The candidate fails the second original equation. More strongly, R2 - 2R1 produces a contradiction, proving that no pair can satisfy both. An attractive-looking final vector cannot override the original constraints.\",\n      \"transfer\": \"Write the linear combination of these original equations that certifies inconsistency.\"\n    },\n    {\n      \"id\": \"gauss-check-3\",\n      \"concept\": \"verification and transfer\",\n      \"prerequisites\": [\n        \"solution structure\"\n      ],\n      \"prompt\": \"Exact row reduction shows an observed-data system Ax = b is inconsistent. What does a least-squares problem change?\",\n      \"options\": [\n        \"It finds an exact solution to the same equations by rounding a pivot.\",\n        \"It chooses x to minimize a stated residual objective such as the squared length of Ax - b.\",\n        \"It permits scaling a row by zero while preserving every original solution.\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"Least squares solves a different optimization problem when exact equality is impossible. Row operations diagnose consistency; they cannot create an exact solution to contradictory original equations. A least-squares result must be interpreted through its residuals.\",\n      \"transfer\": \"Explain why a small residual in every measured equation is a different claim from satisfying every equation exactly.\"\n    }\n  ]\n}\n";
+const GUIDE_TEXT = "# Gaussian elimination: keep the solution set\n\nThis original course introduces the row-reduction ideas used when solving small linear systems. It supplies a foundation for RecallWeave's least-squares and normal-modes courses: recognize pivots, distinguish a solution family from inconsistency, and verify a result in the original equations.\n\nOpen the self-contained **gaussian-elimination-explorer.html**. It works offline. Download its question deck and import that JSON through RecallWeave's existing deck import flow. The deck contains twelve retrieval questions with explanations and transfer prompts. The explorer does not save progress.\n\n## Before starting\n\nYou should be able to substitute a value in an equation, add signed fractions, and recognize an ordered pair or triple. An augmented matrix records each equation's coefficients, followed by its right-hand side. For example,\n\n    x + y = 5       [1   1 | 5]\n   2x - y = 1       [2  -1 | 1]\n\nThe vertical bar separates the right-hand side; it does not introduce another variable. Changing an equation is useful only when its set of possible simultaneous solutions is preserved.\n\n## Three reversible operations\n\n1. Swap two rows. This changes the order of equations.\n2. Multiply a row by a **nonzero** number. Multiply every entry, including the right-hand side. The reciprocal reverses this operation.\n3. Add a multiple of one row to a different row, leaving the source row unchanged. Subtracting that multiple reverses the operation.\n\nMultiplication by zero can erase a restriction, so it is not an elementary row operation. For example, x + y = 5 becomes the uninformative 0 = 0. Also, operations act on whole augmented rows. Changing only a coefficient or only the right-hand side generally changes the solution set.\n\nIn the explorer, choose the operation and its target row. An add operation uses the selected source row and factor. Each successful operation appears in the history; Undo reverses your last recorded step by restoring that exact prior matrix. Reset returns to the loaded original system. Changing a preset or loading a new matrix starts a new attempt.\n\n## Build a pivot, then clear its column\n\nA pivot is the leading nonzero entry in a row after arranging the rows in echelon order. Reduced row-echelon form goes further: each pivot is 1 and is the only nonzero entry in its column; zero rows are at the bottom. Pivots move to the right as you move down rows.\n\nFor the first example, try:\n\n    R2 ← R2 - 2R1       [1   1 |  5]\n                        [0  -3 | -9]\n\n    R2 ← (-1/3)R2       [1   1 | 5]\n                        [0   1 | 3]\n\n    R1 ← R1 - R2        [1   0 | 2]\n                        [0   1 | 3]\n\nRead x = 2 and y = 3. Verify both original equations: 2 + 3 = 5 and 2(2) - 3 = 1. This independent substitution catches errors that a tidy final matrix can hide.\n\nThe guided button performs one legal operation at a time using the first available nonzero pivot. It normalizes the pivot and clears entries above and below it. A different legal operation order may take a different route to the same reduced form.\n\nA zero candidate pivot is not a verdict on the whole system. In the preset\n\n    [0  2 | 4]\n    [3  1 | 5]\n\nswap the rows to find a nonzero first-column pivot. The solution is x = 1, y = 2. If every remaining entry in a coefficient column is zero, continue to the next column instead of dividing by zero.\n\n## Three possible outcomes\n\n**One solution.** A consistent system has a pivot in every variable column. The final right-hand sides then specify each variable.\n\n**Infinitely many solutions.** A consistent system leaves one or more variable columns without pivots. These variables are free; they are not automatically zero. For\n\n    [1  2  -1 | 3]\n    [2  4  -2 | 6]\n\nsubtracting twice the first row from the second yields a zero row. Write x2 = s and x3 = t. Then\n\n    (x1, x2, x3) = (3 - 2s + t, s, t)\n                 = (3, 0, 0) + s(-2, 1, 0) + t(1, 0, 1),\n\nwhere s and t may be any real numbers. The first vector is one particular solution. Each direction vector produces zero when substituted into the left sides of the original equations. This is why adding any combination of them to the particular solution preserves the right sides.\n\n**No solution.** A row with all coefficient entries zero and a nonzero right-hand side asserts an impossibility. For\n\n    [1  -1 | 2]\n    [2  -2 | 5]\n\nR2 - 2R1 gives [0, 0 | 1], or 0 = 1. The combination weights (-2, 1) on the original equations certify the contradiction. A zero row [0, 0 | 0] is entirely different: it adds no restriction and does not itself prove inconsistency.\n\nThe coefficient rank counts pivots in variable columns. The augmented rank counts pivots when the right-hand-side column is included. Unequal ranks mean no solution. When the ranks agree, the number of free variables equals the number of variables minus the coefficient rank.\n\n## Fractions stay exact\n\nThe fraction preset represents\n\n    (1/2)x + y = 2\n       x - (1/3)y = 1/3.\n\nIts exact solution is x = 6/7 and y = 11/7. Substitution gives 3/7 + 11/7 = 2 and 6/7 - 11/21 = 1/3. The explorer uses normalized rational numbers, so a value such as 1/3 is never silently replaced by a rounded decimal.\n\nYou may enter 2 or 3 equations in 2 or 3 variables. Separate entries with spaces or commas and rows with newlines or semicolons. Enter integers or fractions, not decimal or exponential notation. Each typed scalar is limited to 40 characters. Canonical intermediate values may be longer; normalized numerators and denominators are bounded to 128 bits. If exact arithmetic would exceed that classroom bound, the attempted operation is refused and the current matrix remains intact. Each attempt permits 80 operations; Undo frees a slot.\n\nThis is a small exact-arithmetic teaching model. Floating-point computation introduces rounding error and numerical stability questions. Choosing a large-magnitude pivot, scaling strategies, and more advanced factorizations matter in numerical software; the explorer's first-nonzero-pivot rule is not a numerical-stability recommendation.\n\n## Practice and transfer\n\nWork through the first example manually, then use the guided button on the same system and explain why both sequences preserve the original equations. Use Undo to compare adjacent matrices.\n\nTry the family and contradiction presets. Before finishing the reduction, predict whether a zero row will mean freedom or inconsistency. Then check the right-hand side.\n\nFinally, connect this to least squares: an inconsistent observed-data system has no exact solution. Minimizing the squared length of Ax - b asks a different, useful question; it does not make contradictory equalities true. For normal modes and other nullspace problems, a nonzero free direction has meaning, whereas setting every free variable to zero would conceal it.\n\nFor each quiz answer, give your reasoning before revealing the explanation. Then attempt its transfer prompt without copying the previous numbers. Correctness on these examples does not establish mastery of larger systems or measured learning gains.\n\n## References and authorship\n\nGeneral mathematical references, not copied exercises or prose:\n\n- MIT OpenCourseWare, Gilbert Strang, *18.06SC Linear Algebra*, Fall 2011, [Elimination with Matrices](https://ocw.mit.edu/courses/18-06sc-linear-algebra-fall-2011/pages/ax-b-and-the-four-subspaces/elimination-with-matrices/).\n- MIT OpenCourseWare, Gilbert Strang, *18.06SC Linear Algebra*, Fall 2011, [Solving Ax = b: Row Reduced Form R](https://ocw.mit.edu/courses/18-06sc-linear-algebra-fall-2011/pages/ax-b-and-the-four-subspaces/solving-ax-b-row-reduced-form-r/).\n\nThe questions, explanations, worked examples, guide, and explorer were drafted with AI assistance for RecallWeave. A subject-matter educator should review the material before learner deployment. The running explorer calls no AI or hosted service. Cited materials retain their own terms; no source exercise or figure is reproduced here.\n";
+const { LIMITS, PRESETS, parseMatrix, applyOperation, replayOperation, analyze, formatOperation } = (() => {
+/** Exact classroom row reduction. No floating-point tolerance or input mutation. */
+const LIMITS = Object.freeze({ bits: 128, text: 4096, token: 40, operations: 80 });
+const abs = n => n < 0n ? -n : n;
+function gcd(a, b) { a = abs(a); b = abs(b); while (b) [a, b] = [b, a % b]; return a; }
+function q(n, d = 1n) {
+  if (d === 0n) throw new Error('A denominator must not be zero.');
+  if (d < 0n) { n = -n; d = -d; }
+  const g = gcd(n, d); n /= g; d /= g;
+  if (abs(n).toString(2).length > LIMITS.bits || d.toString(2).length > LIMITS.bits)
+    throw new Error('Exact arithmetic exceeds the 128-bit classroom limit. Use smaller values.');
+  return { n, d };
+}
+function read(value, tokenLimit = LIMITS.token) {
+  if (typeof value !== 'string' || value.length > tokenLimit || !/^[+-]?\d+(?:\/[+-]?\d+)?$/.test(value))
+    throw new Error('Use an integer or fraction such as -3 or 2/5, at most 40 characters.');
+  const [n, d = '1'] = value.split('/'); return q(BigInt(n), BigInt(d));
+}
+const add = (a, b) => q(a.n * b.d + b.n * a.d, a.d * b.d);
+const mul = (a, b) => q(a.n * b.n, a.d * b.d);
+const neg = a => q(-a.n, a.d);
+const inv = a => q(a.d, a.n);
+const str = a => a.d === 1n ? String(a.n) : a.n + '/' + a.d;
+const external = a => a.map(row => row.map(str));
+function internal(matrix) {
+  const invalid = () => new Error('Use 2 or 3 complete equations with 2 or 3 variables; each row ends with its right-hand side.');
+  if (!Array.isArray(matrix) || matrix.length < 2 || matrix.length > 3) throw invalid();
+  const width = matrix[0]?.length;
+  if (!Number.isInteger(width) || width < 3 || width > 4) throw invalid();
+  for (let r = 0; r < matrix.length; r++) {
+    if (!Object.hasOwn(matrix, r) || !Array.isArray(matrix[r]) || matrix[r].length !== width) throw invalid();
+    for (let col = 0; col < width; col++) if (!Object.hasOwn(matrix[r], col)) throw invalid();
+  }
+  return matrix.map(row => row.map(value => read(value, 80)));
+}
+function parseMatrix(text) {
+  if (typeof text !== 'string' || text.length > LIMITS.text)
+    throw new Error('Enter a matrix of at most 4096 characters.');
+  const rows = text.trim().split(/[;\n]/).map(row => row.trim());
+  if (rows.some(row => !row)) throw new Error('Each equation needs a nonempty row.');
+  const tokens = rows.map(row => row.split(/[\s,]+/));
+  tokens.forEach(row => row.forEach(value => read(value)));
+  return external(internal(tokens));
+}
+function operation(value, count, replay = false) {
+  const factorValue = value => {
+    const factor = read(value, replay ? 80 : LIMITS.token);
+    if (replay && str(factor) !== value) throw new Error('A replay factor must use its normalized exact form.');
+    return factor;
+  };
+  if (!value || typeof value !== 'object' || Array.isArray(value))
+    throw new Error('Choose a row operation.');
+  const row = r => { if (!Number.isInteger(r) || r < 0 || r >= count) throw new Error('Choose an existing row.'); return r; };
+  const target = row(value.target);
+  if (value.kind === 'scale') {
+    const factor = factorValue(value.factor);
+    if (!factor.n) throw new Error('Scaling by zero loses an equation. Choose a nonzero factor.');
+    return { kind: 'scale', target, factor };
+  }
+  if (value.kind === 'swap' || value.kind === 'add') {
+    const source = row(value.source);
+    if (target === source) throw new Error('Choose two different rows.');
+    return { kind: value.kind, target, source, ...(value.kind === 'add' ? { factor: factorValue(value.factor) } : {}) };
+  }
+  throw new Error('Choose swap, scale, or add.');
+}
+function act(matrix, op) {
+  const next = matrix.map(row => row.slice());
+  if (op.kind === 'swap') [next[op.target], next[op.source]] = [next[op.source], next[op.target]];
+  else if (op.kind === 'scale') next[op.target] = next[op.target].map(v => mul(v, op.factor));
+  else next[op.target] = next[op.target].map((v, c) => add(v, mul(op.factor, next[op.source][c])));
+  return next;
+}
+function applyOperation(matrix, value) {
+  const input = internal(matrix); return external(act(input, operation(value, input.length)));
+}
+/** Replay a generated exact step. Canonical factors may need up to 80 characters
+ * for two 128-bit components; typed learner factors still use applyOperation.
+ * Every row index, canonical factor and normalized arithmetic bound is checked.
+ */
+function replayOperation(matrix, value) {
+  const input = internal(matrix); return external(act(input, operation(value, input.length, true)));
+}
+function formatOperation(value) {
+  const row = r => 'R' + (r + 1);
+  if (value.kind === 'swap') return row(value.target) + ' ↔ ' + row(value.source);
+  if (value.kind === 'scale') return row(value.target) + ' ← (' + value.factor + ') × ' + row(value.target);
+  return row(value.target) + ' ← ' + row(value.target) + ' + (' + value.factor + ') × ' + row(value.source);
+}
+function analyze(matrix) {
+  const original = internal(matrix), n = original[0].length - 1;
+  let reduced = original.map(row => row.slice());
+  let transform = original.map((_, r) => original.map((__, c) => q(r === c ? 1n : 0n)));
+  const steps = [], pivots = [];
+  function take(value) {
+    const op = operation(value, reduced.length, true);
+    // Compute both before committing, so the arithmetic bound cannot yield a partial result.
+    const next = act(reduced, op), nextTransform = act(transform, op);
+    reduced = next; transform = nextTransform;
+    steps.push({ operation: { ...value }, label: formatOperation(value), matrix: external(reduced) });
+  }
+  let r = 0;
+  for (let c = 0; c <= n && r < reduced.length; c++) {
+    const found = reduced.findIndex((row, i) => i >= r && row[c].n !== 0n);
+    if (found < 0) continue;
+    if (found !== r) take({ kind: 'swap', target: r, source: found });
+    if (str(reduced[r][c]) !== '1') take({ kind: 'scale', target: r, factor: str(inv(reduced[r][c])) });
+    for (let i = 0; i < reduced.length; i++) {
+      if (i !== r && reduced[i][c].n) take({ kind: 'add', target: i, source: r, factor: str(neg(reduced[i][c])) });
+    }
+    pivots.push(c); r++;
+  }
+  const coefficientPivots = pivots.filter(c => c < n);
+  const free = Array.from({ length: n }, (_, c) => c).filter(c => !coefficientPivots.includes(c));
+  const common = { rref: external(reduced), steps, pivots: coefficientPivots, free,
+    rank: coefficientPivots.length, augmentedRank: pivots.length };
+  const contradiction = pivots.indexOf(n);
+  if (contradiction >= 0) return { ...common, kind: 'none', witness: transform[contradiction].map(str) };
+  const particular = Array.from({ length: n }, () => q(0n));
+  coefficientPivots.forEach((c, i) => { particular[c] = reduced[i][n]; });
+  const basis = free.map(c => {
+    const vector = Array.from({ length: n }, () => q(0n)); vector[c] = q(1n);
+    coefficientPivots.forEach((pivot, i) => { vector[pivot] = neg(reduced[i][c]); });
+    return vector.map(str);
+  });
+  return { ...common, kind: free.length ? 'infinite' : 'unique', particular: particular.map(str), basis };
+}
+function deepFreeze(value) {
+  if (value && typeof value === 'object') { Object.values(value).forEach(deepFreeze); Object.freeze(value); }
+  return value;
+}
+const PRESETS = deepFreeze([
+  { id: 'unique', label: 'Two equations, one solution', text: '1 1 5\n2 -1 1' },
+  { id: 'swap', label: 'A zero first pivot', text: '0 2 4\n3 1 5' },
+  { id: 'family', label: 'Three variables, a solution family', text: '1 2 -1 3\n2 4 -2 6' },
+  { id: 'inconsistent', label: 'A contradiction', text: '1 -1 2\n2 -2 5' },
+  { id: 'fractions', label: 'Exact fractions', text: '1/2 1 2\n1 -1/3 1/3' },
+]);
+
+return { LIMITS, PRESETS, parseMatrix, applyOperation, replayOperation, analyze, formatOperation };
+})();
+
+const byId = id => document.getElementById(id);
+let original, current, history = [], report, originalReport;
+function element(tag, text) { const node = document.createElement(tag); if (text !== undefined) node.textContent = text; return node; }
+function guarded(fn) {
+  try { fn(); byId('error').textContent = ''; }
+  catch (error) { byId('error').textContent = error.message; }
+}
+function equations(matrix) {
+  return matrix.map(row => row.slice(0, -1).map((value, i) => '(' + value + ')x' + (i + 1)).join(' + ') + ' = ' + row.at(-1)).join('\n');
+}
+function matrixTable(matrix) {
+  const table = element('table'), caption = element('caption', 'Current augmented matrix');
+  table.append(caption);
+  const head = element('tr');
+  matrix[0].forEach((_, c) => { const th = element('th', c === matrix[0].length - 1 ? 'Right side' : 'x' + (c + 1)); th.scope = 'col'; head.append(th); });
+  const thead = element('thead'); thead.append(head); table.append(thead);
+  const body = element('tbody');
+  matrix.forEach(row => {
+    const tr = element('tr'); row.forEach((value, c) => { const td = element('td', value); if (c === row.length - 1) td.className = 'rhs'; tr.append(td); }); body.append(tr);
+  }); table.append(body); return table;
+}
+function populateRows() {
+  for (const id of ['target', 'source']) {
+    const select = byId(id); select.replaceChildren();
+    current.forEach((_, i) => { const option = element('option', 'Row ' + (i + 1)); option.value = i; select.append(option); });
+  }
+  byId('source').value = 1;
+}
+function explain(result) {
+  if (result.kind === 'none') {
+    return 'No solution. A row becomes 0 = 1. Combining the original equations with weights [' +
+      result.witness.join(', ') + '] gives this contradiction.';
+  }
+  const vector = '(' + result.particular.join(', ') + ')';
+  if (result.kind === 'unique') return 'One solution: (x1, x2' + (result.particular.length === 3 ? ', x3' : '') + ') = ' + vector + '. Substituting into every original equation verifies it.';
+  return 'Infinitely many solutions: x = ' + vector + result.basis.map((v, i) => ' + t' + (i + 1) + '(' + v.join(', ') + ')').join('') +
+    '. Each t is any real number. The first vector satisfies the original equations; each direction vector gives zero on their left sides.';
+}
+function render() {
+  byId('original').textContent = equations(original);
+  byId('matrix').replaceChildren(matrixTable(current));
+  byId('operation-log').replaceChildren(...history.map((entry, i) => element('li', (i + 1) + '. ' + entry.label)));
+  byId('count').textContent = history.length + ' / ' + LIMITS.operations + ' operations';
+  byId('undo').disabled = history.length === 0;
+  byId('next').disabled = report.steps.length === 0 || history.length >= LIMITS.operations;
+  byId('apply').disabled = history.length >= LIMITS.operations;
+  byId('next-hint').textContent = report.steps.length ? 'Next guided operation: ' + report.steps[0].label :
+    'The augmented matrix is in reduced row-echelon form.';
+  byId('status').textContent = report.steps.length ? 'Row reduction in progress.' : 'Row reduction complete.';
+  byId('result').hidden = report.steps.length !== 0;
+  byId('result').textContent = explain(originalReport);
+  byId('rank').textContent = 'Coefficient rank: ' + report.rank + '; augmented rank: ' + report.augmentedRank +
+    '. Free variables: ' + (report.free.length ? report.free.map(c => 'x' + (c + 1)).join(', ') : 'none') + '.';
+  operationFields();
+}
+function operationFields() {
+  const kind = byId('kind').value;
+  byId('source-field').hidden = kind === 'scale';
+  byId('factor-field').hidden = kind === 'swap';
+}
+function loadAttempt(text) {
+  const next = parseMatrix(text), nextReport = analyze(next);
+  original = next.map(row => row.slice()); current = next; report = nextReport; originalReport = nextReport; history = [];
+  populateRows(); render();
+}
+function commit(op, replay = false) {
+  if (history.length >= LIMITS.operations) throw new Error('This attempt has reached 80 operations. Undo or reset to continue.');
+  const next = replay ? replayOperation(current, op) : applyOperation(current, op);
+  const nextReport = analyze(next);
+  history.push({ matrix: current, label: formatOperation(op) + (JSON.stringify(next) === JSON.stringify(current) ? ' (unchanged)' : '') });
+  current = next; report = nextReport; render();
+}
+for (const preset of PRESETS) {
+  const option = element('option', preset.label); option.value = preset.id; byId('preset').append(option);
+}
+byId('preset').addEventListener('change', () => guarded(() => {
+  byId('input').value = PRESETS.find(p => p.id === byId('preset').value).text; loadAttempt(byId('input').value);
+}));
+byId('load').addEventListener('click', () => guarded(() => loadAttempt(byId('input').value)));
+byId('kind').addEventListener('change', operationFields);
+byId('apply').addEventListener('click', () => guarded(() => commit({
+  kind: byId('kind').value, target: Number(byId('target').value),
+  source: Number(byId('source').value), factor: byId('factor').value.trim(),
+})));
+byId('next').addEventListener('click', () => guarded(() => { if (report.steps.length) commit(report.steps[0].operation, true); }));
+byId('undo').addEventListener('click', () => guarded(() => {
+  if (!history.length) return; const previous = history.at(-1), previousReport = analyze(previous.matrix);
+  history.pop(); current = previous.matrix; report = previousReport; render();
+}));
+byId('reset').addEventListener('click', () => guarded(() => {
+  current = original.map(row => row.slice()); history = []; report = analyze(current); render();
+}));
+function download(text, name, type) {
+  const url = URL.createObjectURL(new Blob([text], { type })), anchor = element('a');
+  anchor.href = url; anchor.download = name; document.body.append(anchor); anchor.click(); anchor.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+byId('download-deck').addEventListener('click', () => download(DECK_TEXT, 'gaussian-elimination.json', 'application/json'));
+byId('download-guide').addEventListener('click', () => download(GUIDE_TEXT, 'gaussian-elimination.md', 'text/markdown;charset=utf-8'));
+byId('input').value = PRESETS[0].text; guarded(() => loadAttempt(byId('input').value));
+
+</script>
+</body></html>

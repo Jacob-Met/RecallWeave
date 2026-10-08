@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gaussian elimination — RecallWeave</title>
+<style>
+:root{color-scheme:light;--ink:#18313e;--paper:#f5f5ef;--accent:#166861;--line:#bed0cb}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:17px/1.5 system-ui,sans-serif}
+main{max-width:1100px;margin:auto;padding:28px 20px 48px}h1{font-size:clamp(1.8rem,4vw,2.8rem);line-height:1.1;margin:.3em 0}h2{font-size:1.25rem;margin:0 0 12px}p{max-width:76ch}
+.eyebrow{color:var(--accent);font-weight:700;letter-spacing:.08em;text-transform:uppercase;font-size:.8rem}
+.layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:20px}.card{border:1px solid var(--line);border-radius:14px;background:white;padding:20px;margin:18px 0}
+label{display:block;font-weight:650;margin:12px 0 5px}select,input,textarea,button{font:inherit;max-width:100%}
+select,input,textarea{width:100%;border:1px solid #78958f;border-radius:6px;padding:8px;color:var(--ink);background:white}textarea{font-family:ui-monospace,monospace;resize:vertical;min-height:102px}
+button{border:1px solid var(--accent);border-radius:7px;padding:9px 13px;background:var(--accent);color:white;cursor:pointer}button.secondary{background:white;color:var(--accent)}button:disabled{opacity:.45;cursor:default}
+:focus-visible{outline:3px solid #df8c24;outline-offset:3px}.buttons{display:flex;flex-wrap:wrap;gap:9px;margin-top:14px}
+.fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 12px}.wide{grid-column:1/-1}
+pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#eef4f1;padding:12px;border-radius:6px;font-size:.95rem}
+table{border-collapse:collapse;width:100%;font:1.2rem ui-monospace,monospace;table-layout:fixed}caption{font:600 .9rem system-ui;text-align:left;margin-bottom:8px}th{font:600 .85rem system-ui;color:#506d70}td,th{text-align:center;padding:12px 5px;overflow-wrap:anywhere}td{border-top:1px solid #dde7e2}.rhs{border-left:2px solid #78958f}
+.hint{font-size:.9rem;color:#4c6669}#error{color:#982d25;min-height:1.5em;font-weight:650}#result{border-left:4px solid var(--accent);background:#eef7f1;padding:14px;overflow-wrap:anywhere}#operation-log{padding-left:0;list-style:none;max-height:210px;overflow:auto;font-family:ui-monospace,monospace;font-size:.9rem}#operation-log li{padding:5px 0;border-bottom:1px solid #e3ebe7}#rank{overflow-wrap:anywhere}
+footer{font-size:.85rem;color:#4c6669;border-top:1px solid var(--line);margin-top:24px;padding-top:16px}[hidden]{display:none!important}
+@media(max-width:720px){.layout{grid-template-columns:1fr;gap:0}main{padding:20px 12px}.card{padding:16px}button{min-height:44px}}
+</style>
+</head>
+<body>
+<main>
+<div class="eyebrow">RecallWeave · Linear algebra</div>
+<h1>Keep the solutions. Change the equations.</h1>
+<p>Explore Gaussian elimination one exact row operation at a time. A row represents an equation; its final entry is the right-hand side. Find a unique solution, a family, or a contradiction.</p>
+<div class="layout">
+<section class="card" aria-labelledby="setup-title">
+<h2 id="setup-title">1. Choose a system</h2>
+<label for="preset">Worked example</label><select id="preset"></select>
+<label for="input">Augmented matrix</label>
+<textarea id="input" spellcheck="false" aria-describedby="input-help"></textarea>
+<p class="hint" id="input-help">Use 2–3 rows and 2–3 variables. Separate entries with spaces or commas, rows with newlines or semicolons. Use integers or exact fractions such as 2/5.</p>
+<button id="load">Load matrix</button>
+<h2 style="margin-top:24px">Original equations</h2><pre id="original"></pre>
+<p class="hint">These stay fixed while you transform the current matrix. Every legal operation preserves their entire solution set.</p>
+</section>
+<section class="card" aria-labelledby="work-title">
+<h2 id="work-title">2. Build pivots</h2><div id="matrix"></div>
+<div class="fields">
+<div class="wide"><label for="kind">Operation</label><select id="kind"><option value="add">Add a multiple of another row</option><option value="swap">Swap two rows</option><option value="scale">Scale a row</option></select></div>
+<div><label for="target">Target row</label><select id="target"></select></div>
+<div id="source-field"><label for="source">Source row</label><select id="source"></select></div>
+<div id="factor-field"><label for="factor">Factor</label><input id="factor" value="-2" inputmode="text" spellcheck="false"></div>
+</div>
+<div class="buttons"><button id="apply">Apply operation</button><button id="next">Next guided step</button><button id="undo" class="secondary">Undo</button><button id="reset" class="secondary">Reset</button></div>
+<p id="next-hint" class="hint"></p><p id="error" role="alert" aria-live="assertive"></p>
+<p id="status" role="status" aria-live="polite"></p><p id="rank" class="hint"></p>
+<p id="result"></p>
+<details open><summary>Operation history <span id="count" class="hint"></span></summary><ol id="operation-log"></ol></details>
+</section>
+</div>
+<section class="card" aria-labelledby="practice-title">
+<h2 id="practice-title">3. Explain what the rows mean</h2>
+<p>A pivot identifies a leading variable. A zero row adds no restriction. A row such as 0 = 1 makes the system inconsistent. When the reduction is complete, read the solution and check it in the original equations.</p>
+<p>Use the question deck in RecallWeave for twelve retrieval and transfer prompts. The guide includes worked examples, explanations, and the limits of this exact-arithmetic model.</p>
+<div class="buttons"><button id="download-deck">Download question deck</button><button id="download-guide" class="secondary">Download study guide</button></div>
+</section>
+<footer>Original AI-assisted educational material; educator review is still needed. This explorer runs locally without network calls or saved progress. Exact rational arithmetic is limited to small systems; it does not model floating-point numerical stability. References are in the study guide.</footer>
+</main>
+<script>
+const DECK_TEXT = @@DECK_JSON@@;
+const GUIDE_TEXT = @@GUIDE_JSON@@;
+@@SCRIPT@@
+</script>
+</body></html>

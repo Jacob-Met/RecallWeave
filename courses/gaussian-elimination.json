@@ -1,0 +1,200 @@
+{
+  "format": "recallweave-deck/1",
+  "title": "Gaussian elimination: equivalent equations and solution structure",
+  "attribution": "Original AI-assisted questions, explanations, examples, and transfer prompts for RecallWeave. General mathematical references: MIT OpenCourseWare 18.06SC, Elimination with Matrices and Solving Ax = b: Row Reduced Form R (Gilbert Strang, Fall 2011). No source exercises or figures are reproduced. Educator review is still needed.",
+  "license": "Original contribution provided under the repository's applicable license; cited MIT OCW material remains under its own terms and is linked as a reference only.",
+  "concepts": [
+    "equivalent systems",
+    "pivot construction",
+    "solution structure",
+    "verification and transfer"
+  ],
+  "items": [
+    {
+      "id": "gauss-equivalence-1",
+      "concept": "equivalent systems",
+      "prerequisites": [],
+      "prompt": "The augmented row [2, -3 | 7] is multiplied by -2. Which new row preserves the equation?",
+      "options": [
+        "[-4, 6 | -14]",
+        "[-4, 6 | 7]",
+        "[2, -3 | -14]"
+      ],
+      "answer": 0,
+      "explanation": "Every term, including the right-hand side, is multiplied by the same nonzero number: 2x - 3y = 7 becomes -4x + 6y = -14. Scaling only one side changes the solutions.",
+      "transfer": "Write the result of multiplying [3, 1 | -4] by 1/3. Explain why the reverse operation exists."
+    },
+    {
+      "id": "gauss-equivalence-2",
+      "concept": "equivalent systems",
+      "prerequisites": [],
+      "prompt": "Why is multiplying a row by zero excluded from elementary row operations?",
+      "options": [
+        "It makes all numbers too small.",
+        "It replaces an equation by 0 = 0 and can lose a restriction.",
+        "It always proves the system has no solution."
+      ],
+      "answer": 1,
+      "explanation": "The equation x + y = 5 restricts x and y. Multiplication by zero leaves 0 = 0, which every pair satisfies. There is no inverse operation that reconstructs the lost equation.",
+      "transfer": "Give one pair that satisfies 0 = 0 but does not satisfy x + y = 5."
+    },
+    {
+      "id": "gauss-equivalence-3",
+      "concept": "equivalent systems",
+      "prerequisites": [],
+      "prompt": "R2 is replaced by R2 - 3R1 while R1 is kept. Which operation undoes this?",
+      "options": [
+        "Replace R1 by R1 + 3R2.",
+        "Replace R2 by R2 + 3R1.",
+        "Multiply R2 by -1/3."
+      ],
+      "answer": 1,
+      "explanation": "Because R1 is unchanged, adding 3R1 back to the new R2 recovers the original R2. This reversibility explains why adding a multiple of another row preserves the whole solution set.",
+      "transfer": "Explain why simultaneously replacing both rows using already changed values needs separate, explicitly ordered steps."
+    },
+    {
+      "id": "gauss-pivot-1",
+      "concept": "pivot construction",
+      "prerequisites": [
+        "equivalent systems"
+      ],
+      "prompt": "For [0, 2 | 4; 3, 1 | 5], how can you start a pivot in the first column?",
+      "options": [
+        "Divide the first row by zero.",
+        "Swap the two rows.",
+        "Declare that the system is inconsistent."
+      ],
+      "answer": 1,
+      "explanation": "A zero candidate pivot does not prove inconsistency. The second row has a nonzero first entry, so swapping rows moves it into position. The system has x = 1 and y = 2.",
+      "transfer": "What would you do if every remaining entry in a candidate coefficient column were zero?"
+    },
+    {
+      "id": "gauss-pivot-2",
+      "concept": "pivot construction",
+      "prerequisites": [
+        "equivalent systems"
+      ],
+      "prompt": "Start with [1, 1 | 5; 2, -1 | 1]. After R2 ← R2 - 2R1, what is R2?",
+      "options": [
+        "[0, -3 | -9]",
+        "[0, 1 | -9]",
+        "[0, -3 | 1]"
+      ],
+      "answer": 0,
+      "explanation": "Compute every entry: 2 - 2(1) = 0, -1 - 2(1) = -3, and 1 - 2(5) = -9. Forgetting the right-hand side breaks equivalence.",
+      "transfer": "Normalize the new second row, then use it to clear the entry above its pivot."
+    },
+    {
+      "id": "gauss-pivot-3",
+      "concept": "pivot construction",
+      "prerequisites": [
+        "equivalent systems"
+      ],
+      "prompt": "A row is [0, -7/3 | -11/3]. Which nonzero scale produces a leading 1?",
+      "options": [
+        "Multiply by -7/3.",
+        "Multiply by -3/7.",
+        "Multiply by 3/7."
+      ],
+      "answer": 1,
+      "explanation": "The reciprocal of -7/3 is -3/7. Multiplying the whole row gives [0, 1 | 11/7], exactly. The sign matters as well as the reciprocal.",
+      "transfer": "Normalize [0, 5/2 | -3/4] without converting either entry to a decimal."
+    },
+    {
+      "id": "gauss-structure-1",
+      "concept": "solution structure",
+      "prerequisites": [
+        "pivot construction"
+      ],
+      "prompt": "Which reduced augmented row proves that a system has no solution?",
+      "options": [
+        "[0, 0 | 0]",
+        "[0, 0 | 1]",
+        "[1, 0 | 0]"
+      ],
+      "answer": 1,
+      "explanation": "The row [0, 0 | 1] asserts 0x + 0y = 1, impossible for all x and y. A zero row adds no restriction; [1, 0 | 0] simply requires x = 0.",
+      "transfer": "Explain why [0, 0, 0 | -4] is also a contradiction, even though its final entry is not 1."
+    },
+    {
+      "id": "gauss-structure-2",
+      "concept": "solution structure",
+      "prerequisites": [
+        "pivot construction"
+      ],
+      "prompt": "The reduced system is [1, 2, -1 | 3; 0, 0, 0 | 0]. Which describes all solutions?",
+      "options": [
+        "(x1, x2, x3) = (3, 0, 0) only.",
+        "(x1, x2, x3) = (3 - 2s + t, s, t) for any real s and t.",
+        "There are no solutions because one row is zero."
+      ],
+      "answer": 1,
+      "explanation": "Only x1 is a pivot variable. Let x2 = s and x3 = t; then x1 + 2s - t = 3 gives x1 = 3 - 2s + t. Two free variables produce a two-parameter family.",
+      "transfer": "Choose s = -1 and t = 2, then check all three coordinates in the original nonzero equation."
+    },
+    {
+      "id": "gauss-structure-3",
+      "concept": "solution structure",
+      "prerequisites": [
+        "pivot construction"
+      ],
+      "prompt": "A system with three variables has coefficient rank 2 and augmented rank 2. How many free variables does its solution family have?",
+      "options": [
+        "Zero: equal ranks always give a unique solution.",
+        "One: it is consistent and 3 - 2 variables are free.",
+        "Two: rank directly counts free variables."
+      ],
+      "answer": 1,
+      "explanation": "Equal coefficient and augmented ranks mean consistency. The number of free variables is the number of variables minus the coefficient rank: 3 - 2 = 1. Uniqueness additionally requires a pivot in every variable column.",
+      "transfer": "How would the conclusion change if the augmented rank were 3 while the coefficient rank stayed 2?"
+    },
+    {
+      "id": "gauss-check-1",
+      "concept": "verification and transfer",
+      "prerequisites": [
+        "solution structure"
+      ],
+      "prompt": "Which pair satisfies both x + y = 5 and 2x - y = 1?",
+      "options": [
+        "(2, 3)",
+        "(3, 2)",
+        "(1, 4)"
+      ],
+      "answer": 0,
+      "explanation": "Substitute (2, 3): 2 + 3 = 5 and 2(2) - 3 = 1. Checking only the first equation would fail to distinguish all three options.",
+      "transfer": "Check the pair obtained by solving x + y = 7 and 3x - y = 1 in both original equations."
+    },
+    {
+      "id": "gauss-check-2",
+      "concept": "verification and transfer",
+      "prerequisites": [
+        "solution structure"
+      ],
+      "prompt": "A proposed row reduction of x - y = 2 and 2x - 2y = 5 claims x = 2, y = 0. What is the decisive check?",
+      "options": [
+        "It satisfies the first equation, so accept it.",
+        "The second equation gives 4 rather than 5; in fact subtracting twice the first equation yields 0 = 1.",
+        "Any pair with y = 0 is invalid."
+      ],
+      "answer": 1,
+      "explanation": "The candidate fails the second original equation. More strongly, R2 - 2R1 produces a contradiction, proving that no pair can satisfy both. An attractive-looking final vector cannot override the original constraints.",
+      "transfer": "Write the linear combination of these original equations that certifies inconsistency."
+    },
+    {
+      "id": "gauss-check-3",
+      "concept": "verification and transfer",
+      "prerequisites": [
+        "solution structure"
+      ],
+      "prompt": "Exact row reduction shows an observed-data system Ax = b is inconsistent. What does a least-squares problem change?",
+      "options": [
+        "It finds an exact solution to the same equations by rounding a pivot.",
+        "It chooses x to minimize a stated residual objective such as the squared length of Ax - b.",
+        "It permits scaling a row by zero while preserving every original solution."
+      ],
+      "answer": 1,
+      "explanation": "Least squares solves a different optimization problem when exact equality is impossible. Row operations diagnose consistency; they cannot create an exact solution to contradictory original equations. A least-squares result must be interpreted through its residuals.",
+      "transfer": "Explain why a small residual in every measured equation is a different claim from satisfying every equation exactly."
+    }
+  ]
+}
