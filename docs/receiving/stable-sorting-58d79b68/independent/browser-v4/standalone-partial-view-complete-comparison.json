@@ -1,0 +1,719 @@
+{
+  "schema": "recallweave-sorting-comparison/1",
+  "input": [
+    {
+      "id": "record-1",
+      "originalPosition": 1,
+      "key": 2,
+      "label": "A"
+    },
+    {
+      "id": "record-2",
+      "originalPosition": 2,
+      "key": 2,
+      "label": "B"
+    },
+    {
+      "id": "record-3",
+      "originalPosition": 3,
+      "key": 1,
+      "label": "C"
+    }
+  ],
+  "rules": {
+    "direction": "Ascending numeric key; records retain their original identities.",
+    "insertion": "Compare adjacent records and exchange only when the later key is strictly smaller.",
+    "selection": "Choose the earliest strictly minimal remaining record; exchange with the pass position only when those positions differ.",
+    "comparison": "One strict-less-than decision by the sorting recipe. Equality classification for narration, index bounds and rendering are not counted.",
+    "exchange": "One exchange of two distinct positions; no self-exchanges.",
+    "countMeaning": "Operation counts for these two recipes, not timings or a benchmark.",
+    "exportMeaning": "Both complete deterministic traces. This is an inspection artifact, not a restorable learner session."
+  },
+  "algorithms": {
+    "insertion": {
+      "name": "Insertion sort",
+      "guaranteedStable": true,
+      "observedStable": true,
+      "tieGroups": [
+        {
+          "key": 2,
+          "inputIds": [
+            "record-1",
+            "record-2"
+          ],
+          "outputIds": [
+            "record-1",
+            "record-2"
+          ],
+          "preserved": true
+        }
+      ],
+      "finalRecords": [
+        {
+          "id": "record-3",
+          "originalPosition": 3,
+          "key": 1,
+          "label": "C"
+        },
+        {
+          "id": "record-1",
+          "originalPosition": 1,
+          "key": 2,
+          "label": "A"
+        },
+        {
+          "id": "record-2",
+          "originalPosition": 2,
+          "key": 2,
+          "label": "B"
+        }
+      ],
+      "counts": {
+        "comparisons": 3,
+        "exchanges": 2
+      },
+      "steps": [
+        {
+          "index": 0,
+          "kind": "initial",
+          "message": "Start with the records in their original input order.",
+          "records": [
+            {
+              "id": "record-1",
+              "originalPosition": 1,
+              "key": 2,
+              "label": "A"
+            },
+            {
+              "id": "record-2",
+              "originalPosition": 2,
+              "key": 2,
+              "label": "B"
+            },
+            {
+              "id": "record-3",
+              "originalPosition": 3,
+              "key": 1,
+              "label": "C"
+            }
+          ],
+          "sortedPrefix": 1,
+          "counts": {
+            "comparisons": 0,
+            "exchanges": 0
+          }
+        },
+        {
+          "index": 1,
+          "kind": "compare",
+          "message": "The keys are equal. Keep their relative order and finish this insertion pass.",
+          "records": [
+            {
+              "id": "record-1",
+              "originalPosition": 1,
+              "key": 2,
+              "label": "A"
+            },
+            {
+              "id": "record-2",
+              "originalPosition": 2,
+              "key": 2,
+              "label": "B"
+            },
+            {
+              "id": "record-3",
+              "originalPosition": 3,
+              "key": 1,
+              "label": "C"
+            }
+          ],
+          "sortedPrefix": 1,
+          "counts": {
+            "comparisons": 1,
+            "exchanges": 0
+          },
+          "pass": 1,
+          "comparison": {
+            "leftIndex": 1,
+            "rightIndex": 0,
+            "leftId": "record-2",
+            "rightId": "record-1",
+            "result": "equal"
+          }
+        },
+        {
+          "index": 2,
+          "kind": "pass-complete",
+          "message": "The first 2 records now form a sorted prefix.",
+          "records": [
+            {
+              "id": "record-1",
+              "originalPosition": 1,
+              "key": 2,
+              "label": "A"
+            },
+            {
+              "id": "record-2",
+              "originalPosition": 2,
+              "key": 2,
+              "label": "B"
+            },
+            {
+              "id": "record-3",
+              "originalPosition": 3,
+              "key": 1,
+              "label": "C"
+            }
+          ],
+          "sortedPrefix": 2,
+          "counts": {
+            "comparisons": 1,
+            "exchanges": 0
+          },
+          "pass": 1
+        },
+        {
+          "index": 3,
+          "kind": "compare",
+          "message": "The key at position 3 is smaller than its predecessor; exchange these neighbors next.",
+          "records": [
+            {
+              "id": "record-1",
+              "originalPosition": 1,
+              "key": 2,
+              "label": "A"
+            },
+            {
+              "id": "record-2",
+              "originalPosition": 2,
+              "key": 2,
+              "label": "B"
+            },
+            {
+              "id": "record-3",
+              "originalPosition": 3,
+              "key": 1,
+              "label": "C"
+            }
+          ],
+          "sortedPrefix": 2,
+          "counts": {
+            "comparisons": 2,
+            "exchanges": 0
+          },
+          "pass": 2,
+          "comparison": {
+            "leftIndex": 2,
+            "rightIndex": 1,
+            "leftId": "record-3",
+            "rightId": "record-2",
+            "result": "less"
+          }
+        },
+        {
+          "index": 4,
+          "kind": "exchange",
+          "message": "Exchange the complete records at positions 2 and 3.",
+          "records": [
+            {
+              "id": "record-1",
+              "originalPosition": 1,
+              "key": 2,
+              "label": "A"
+            },
+            {
+              "id": "record-3",
+              "originalPosition": 3,
+              "key": 1,
+              "label": "C"
+            },
+            {
+              "id": "record-2",
+              "originalPosition": 2,
+              "key": 2,
+              "label": "B"
+            }
+          ],
+          "sortedPrefix": 1,
+          "counts": {
+            "comparisons": 2,
+            "exchanges": 1
+          },
+          "pass": 2,
+          "exchange": {
+            "indices": [
+              1,
+              2
+            ],
+            "idsBefore": [
+              "record-2",
+              "record-3"
+            ]
+          }
+        },
+        {
+          "index": 5,
+          "kind": "compare",
+          "message": "The key at position 2 is smaller than its predecessor; exchange these neighbors next.",
+          "records": [
+            {
+              "id": "record-1",
+              "originalPosition": 1,
+              "key": 2,
+              "label": "A"
+            },
+            {
+              "id": "record-3",
+              "originalPosition": 3,
+              "key": 1,
+              "label": "C"
+            },
+            {
+              "id": "record-2",
+              "originalPosition": 2,
+              "key": 2,
+              "label": "B"
+            }
+          ],
+          "sortedPrefix": 1,
+          "counts": {
+            "comparisons": 3,
+            "exchanges": 1
+          },
+          "pass": 2,
+          "comparison": {
+            "leftIndex": 1,
+            "rightIndex": 0,
+            "leftId": "record-3",
+            "rightId": "record-1",
+            "result": "less"
+          }
+        },
+        {
+          "index": 6,
+          "kind": "exchange",
+          "message": "Exchange the complete records at positions 1 and 2.",
+          "records": [
+            {
+              "id": "record-3",
+              "originalPosition": 3,
+              "key": 1,
+              "label": "C"
+            },
+            {
+              "id": "record-1",
+              "originalPosition": 1,
+              "key": 2,
+              "label": "A"
+            },
+            {
+              "id": "record-2",
+              "originalPosition": 2,
+              "key": 2,
+              "label": "B"
+            }
+          ],
+          "sortedPrefix": 0,
+          "counts": {
+            "comparisons": 3,
+            "exchanges": 2
+          },
+          "pass": 2,
+          "exchange": {
+            "indices": [
+              0,
+              1
+            ],
+            "idsBefore": [
+              "record-1",
+              "record-3"
+            ]
+          }
+        },
+        {
+          "index": 7,
+          "kind": "pass-complete",
+          "message": "The first 3 records now form a sorted prefix.",
+          "records": [
+            {
+              "id": "record-3",
+              "originalPosition": 3,
+              "key": 1,
+              "label": "C"
+            },
+            {
+              "id": "record-1",
+              "originalPosition": 1,
+              "key": 2,
+              "label": "A"
+            },
+            {
+              "id": "record-2",
+              "originalPosition": 2,
+              "key": 2,
+              "label": "B"
+            }
+          ],
+          "sortedPrefix": 3,
+          "counts": {
+            "comparisons": 3,
+            "exchanges": 2
+          },
+          "pass": 2
+        },
+        {
+          "index": 8,
+          "kind": "complete",
+          "message": "The keys are in ascending order. Inspect the original identities within each tied-key group.",
+          "records": [
+            {
+              "id": "record-3",
+              "originalPosition": 3,
+              "key": 1,
+              "label": "C"
+            },
+            {
+              "id": "record-1",
+              "originalPosition": 1,
+              "key": 2,
+              "label": "A"
+            },
+            {
+              "id": "record-2",
+              "originalPosition": 2,
+              "key": 2,
+              "label": "B"
+            }
+          ],
+          "sortedPrefix": 3,
+          "counts": {
+            "comparisons": 3,
+            "exchanges": 2
+          }
+        }
+      ]
+    },
+    "selection": {
+      "name": "Selection sort",
+      "guaranteedStable": false,
+      "observedStable": false,
+      "tieGroups": [
+        {
+          "key": 2,
+          "inputIds": [
+            "record-1",
+            "record-2"
+          ],
+          "outputIds": [
+            "record-2",
+            "record-1"
+          ],
+          "preserved": false
+        }
+      ],
+      "finalRecords": [
+        {
+          "id": "record-3",
+          "originalPosition": 3,
+          "key": 1,
+          "label": "C"
+        },
+        {
+          "id": "record-2",
+          "originalPosition": 2,
+          "key": 2,
+          "label": "B"
+        },
+        {
+          "id": "record-1",
+          "originalPosition": 1,
+          "key": 2,
+          "label": "A"
+        }
+      ],
+      "counts": {
+        "comparisons": 3,
+        "exchanges": 1
+      },
+      "steps": [
+        {
+          "index": 0,
+          "kind": "initial",
+          "message": "Start with the records in their original input order.",
+          "records": [
+            {
+              "id": "record-1",
+              "originalPosition": 1,
+              "key": 2,
+              "label": "A"
+            },
+            {
+              "id": "record-2",
+              "originalPosition": 2,
+              "key": 2,
+              "label": "B"
+            },
+            {
+              "id": "record-3",
+              "originalPosition": 3,
+              "key": 1,
+              "label": "C"
+            }
+          ],
+          "sortedPrefix": 0,
+          "counts": {
+            "comparisons": 0,
+            "exchanges": 0
+          }
+        },
+        {
+          "index": 1,
+          "kind": "compare",
+          "message": "The candidate ties the current minimum. Keep the earlier minimum in this scan.",
+          "records": [
+            {
+              "id": "record-1",
+              "originalPosition": 1,
+              "key": 2,
+              "label": "A"
+            },
+            {
+              "id": "record-2",
+              "originalPosition": 2,
+              "key": 2,
+              "label": "B"
+            },
+            {
+              "id": "record-3",
+              "originalPosition": 3,
+              "key": 1,
+              "label": "C"
+            }
+          ],
+          "sortedPrefix": 0,
+          "counts": {
+            "comparisons": 1,
+            "exchanges": 0
+          },
+          "pass": 1,
+          "comparison": {
+            "leftIndex": 1,
+            "rightIndex": 0,
+            "leftId": "record-2",
+            "rightId": "record-1",
+            "result": "equal"
+          }
+        },
+        {
+          "index": 2,
+          "kind": "compare",
+          "message": "Position 3 has a smaller key than the current minimum at position 1. Select it as the new minimum.",
+          "records": [
+            {
+              "id": "record-1",
+              "originalPosition": 1,
+              "key": 2,
+              "label": "A"
+            },
+            {
+              "id": "record-2",
+              "originalPosition": 2,
+              "key": 2,
+              "label": "B"
+            },
+            {
+              "id": "record-3",
+              "originalPosition": 3,
+              "key": 1,
+              "label": "C"
+            }
+          ],
+          "sortedPrefix": 0,
+          "counts": {
+            "comparisons": 2,
+            "exchanges": 0
+          },
+          "pass": 1,
+          "comparison": {
+            "leftIndex": 2,
+            "rightIndex": 0,
+            "leftId": "record-3",
+            "rightId": "record-1",
+            "result": "less"
+          }
+        },
+        {
+          "index": 3,
+          "kind": "exchange",
+          "message": "Exchange the complete records at positions 1 and 3.",
+          "records": [
+            {
+              "id": "record-3",
+              "originalPosition": 3,
+              "key": 1,
+              "label": "C"
+            },
+            {
+              "id": "record-2",
+              "originalPosition": 2,
+              "key": 2,
+              "label": "B"
+            },
+            {
+              "id": "record-1",
+              "originalPosition": 1,
+              "key": 2,
+              "label": "A"
+            }
+          ],
+          "sortedPrefix": 1,
+          "counts": {
+            "comparisons": 2,
+            "exchanges": 1
+          },
+          "pass": 1,
+          "exchange": {
+            "indices": [
+              0,
+              2
+            ],
+            "idsBefore": [
+              "record-1",
+              "record-3"
+            ]
+          }
+        },
+        {
+          "index": 4,
+          "kind": "pass-complete",
+          "message": "The first 1 position is fixed in ascending order.",
+          "records": [
+            {
+              "id": "record-3",
+              "originalPosition": 3,
+              "key": 1,
+              "label": "C"
+            },
+            {
+              "id": "record-2",
+              "originalPosition": 2,
+              "key": 2,
+              "label": "B"
+            },
+            {
+              "id": "record-1",
+              "originalPosition": 1,
+              "key": 2,
+              "label": "A"
+            }
+          ],
+          "sortedPrefix": 1,
+          "counts": {
+            "comparisons": 2,
+            "exchanges": 1
+          },
+          "pass": 1
+        },
+        {
+          "index": 5,
+          "kind": "compare",
+          "message": "The candidate ties the current minimum. Keep the earlier minimum in this scan.",
+          "records": [
+            {
+              "id": "record-3",
+              "originalPosition": 3,
+              "key": 1,
+              "label": "C"
+            },
+            {
+              "id": "record-2",
+              "originalPosition": 2,
+              "key": 2,
+              "label": "B"
+            },
+            {
+              "id": "record-1",
+              "originalPosition": 1,
+              "key": 2,
+              "label": "A"
+            }
+          ],
+          "sortedPrefix": 1,
+          "counts": {
+            "comparisons": 3,
+            "exchanges": 1
+          },
+          "pass": 2,
+          "comparison": {
+            "leftIndex": 2,
+            "rightIndex": 1,
+            "leftId": "record-1",
+            "rightId": "record-2",
+            "result": "equal"
+          }
+        },
+        {
+          "index": 6,
+          "kind": "pass-complete",
+          "message": "The first 2 positions are fixed in ascending order.",
+          "records": [
+            {
+              "id": "record-3",
+              "originalPosition": 3,
+              "key": 1,
+              "label": "C"
+            },
+            {
+              "id": "record-2",
+              "originalPosition": 2,
+              "key": 2,
+              "label": "B"
+            },
+            {
+              "id": "record-1",
+              "originalPosition": 1,
+              "key": 2,
+              "label": "A"
+            }
+          ],
+          "sortedPrefix": 2,
+          "counts": {
+            "comparisons": 3,
+            "exchanges": 1
+          },
+          "pass": 2
+        },
+        {
+          "index": 7,
+          "kind": "complete",
+          "message": "The keys are in ascending order. Inspect the original identities within each tied-key group.",
+          "records": [
+            {
+              "id": "record-3",
+              "originalPosition": 3,
+              "key": 1,
+              "label": "C"
+            },
+            {
+              "id": "record-2",
+              "originalPosition": 2,
+              "key": 2,
+              "label": "B"
+            },
+            {
+              "id": "record-1",
+              "originalPosition": 1,
+              "key": 2,
+              "label": "A"
+            }
+          ],
+          "sortedPrefix": 3,
+          "counts": {
+            "comparisons": 3,
+            "exchanges": 1
+          }
+        }
+      ]
+    }
+  }
+}

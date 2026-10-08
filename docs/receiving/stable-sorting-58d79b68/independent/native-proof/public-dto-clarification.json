@@ -1,0 +1,53 @@
+{
+  "schema": "chatgpt.independent-sorting-contract-clarification.v1",
+  "source": "Producer message after blind freeze; implementation remains unread.",
+  "semantics": [
+    "Null-prototype records are accepted when they contain exactly the two own key/label data properties.",
+    "Nonenumerable required own data properties and array slots are accepted.",
+    "Inherited/accessor/extra fields remain rejected.",
+    "originalPosition in returned records is one-based; comparison/exchange indices are zero-based.",
+    "sortedPrefix guarantees a currently sorted leading segment, may shrink inside an insertion pass, and does not mean fixed final positions.",
+    "A compare step's three-way narration does not add a second counted predicate; count tracks the declared strict-less-than decision."
+  ],
+  "dto": {
+    "schema": "recallweave-sorting-comparison/1",
+    "input": "[{id,originalPosition,key,label}]",
+    "rules": [
+      "direction",
+      "insertion",
+      "selection",
+      "comparison",
+      "exchange",
+      "countMeaning",
+      "exportMeaning"
+    ],
+    "algorithms": "insertion,selection",
+    "algorithmFields": [
+      "name",
+      "guaranteedStable",
+      "observedStable",
+      "tieGroups",
+      "finalRecords",
+      "counts",
+      "steps"
+    ],
+    "stepFields": [
+      "index",
+      "kind",
+      "message",
+      "records",
+      "sortedPrefix",
+      "counts"
+    ],
+    "stepKinds": [
+      "initial",
+      "compare",
+      "exchange",
+      "pass-complete",
+      "complete"
+    ],
+    "comparison": "{leftIndex,rightIndex,leftId,rightId,result:less|equal|greater}",
+    "exchange": "{indices:[zeroBasedA,B],idsBefore:[...]}",
+    "tieGroup": "{key,inputIds,outputIds,preserved}"
+  }
+}

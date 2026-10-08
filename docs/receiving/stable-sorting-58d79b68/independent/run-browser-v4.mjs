@@ -1,0 +1,12 @@
+import fs from 'node:fs';
+import {spawn} from 'node:child_process';
+import crypto from 'node:crypto';
+const root="/Users/me/recallweave-stable-sorting-independent-review-58d79b68c9e4";
+const began=new Date().toISOString(),disk=fs.statfsSync(root),available=disk.bavail*disk.bsize;
+if(available<250000000)throw Error('Insufficient observed headroom for bounded browser receiving');
+const args=[root+'/independent-browser-review-v4.mjs',root+'/source',root+'/current-parent-source-v1.json',root+'/browser-v4'];
+const stdout=fs.openSync(root+'/browser-v4.stdout.log','wx'),stderr=fs.openSync(root+'/browser-v4.stderr.log','wx');
+const child=spawn(process.execPath,args,{stdio:['ignore',stdout,stderr]});
+console.log(JSON.stringify({startedAt:began,childPid:child.pid,availableBytes:available}));
+child.on('error',error=>console.log(JSON.stringify({launchError:error.message})));
+child.on('exit',(code,signal)=>{fs.closeSync(stdout);fs.closeSync(stderr);const hash=p=>crypto.createHash('sha256').update(fs.readFileSync(p)).digest('hex');const receipt={startedAt:began,completedAt:new Date().toISOString(),node:process.version,childPid:child.pid,exitCode:code,signal,availableBytesBefore:available,driverSha256:hash(args[0]),manifestSha256:hash(args[2]),stdoutSha256:hash(root+'/browser-v4.stdout.log'),stderrSha256:hash(root+'/browser-v4.stderr.log')};fs.writeFileSync(root+'/browser-native-receipt-v4.json',JSON.stringify(receipt,null,2)+'\n',{flag:'wx'});console.log(JSON.stringify(receipt));process.exitCode=code??1;});
