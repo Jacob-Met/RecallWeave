@@ -276,3 +276,10 @@ This public source repository supports the ForgeHacks 2026 demo. The Devpost acc
 [Open the offline lab](courses/mendelian-inheritance-lab.html), [download the original course](courses/mendelian-inheritance.json), or [read the worked guide](courses/mendelian-inheritance.md). Twelve questions connect allele segregation, genotype and phenotype, one-locus crosses and independent two-locus crosses. The explorer follows each parental gamete route and shows exact genotype and phenotype fractions, with explicit complete-dominance and independent-assortment assumptions. Its downloads preserve the checked course and a worked cross record.
 
 Import the course through the existing local-file preview and **Start this deck** flow, then use the learner's review, separate missed-item practice and study-note downloads. All traits are hypothetical plant examples; the model gives probabilities, not guaranteed finite offspring counts. Build and optional browser-receiving commands are in the guide.
+
+
+## Inspect rounding and stored geometry
+
+Open the offline [Floating-point lab](courses/floating-point-lab.html) to inspect binary32 input rounding, neighbors, halfway cases, subnormal values, overflow, and a triangle whose stored coordinates change after translation. Compare the exact source and stored signed areas, change the origin and power-of-two unit, and download the current experiment.
+
+The [worked guide](courses/floating-point.md) explains the numerical boundaries and the separate-origin alternative. Download the original [fourteen-question course](courses/floating-point.json), then use the existing **Bring your own lesson** preview and explicit **Start this deck** flow. The lesson complements the existing [Numerical precision guide](courses/numerical-precision.md).
