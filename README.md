@@ -32,6 +32,10 @@ Open **[Rates become change](courses/rates-accumulation-explorer.html)** for an 
 
 The [worked guide](courses/rates-accumulation.md) develops the examples from slopes and signed areas. Download the original [twelve-question course](courses/rates-accumulation.json) from the explorer, then choose it under **Bring your own lesson** in RecallWeave. The lesson, guide and current calculation download without a server or account. Rebuild the standalone explorer with `node tools/build-rates-accumulation.mjs`, or verify the checked-in file with `--check`.
 
+## Explore complex multiplication
+
+Open **[Turn, scale, repeat](courses/complex-plane-lab.html)** to multiply a starting complex point by a fixed multiplier, inspect equal-scale coordinates and follow up to eight repeated products. The offline explorer shows the zero cases explicitly and downloads the current experiment with its numeric values and conventions. Its [worked guide](courses/complex-plane.md) connects the algebra and geometry. Download the original [twelve-question lesson](courses/complex-plane.json), then choose it under **Bring your own lesson** in RecallWeave to study it with the existing review, practice and notes flow.
+
 ## Explore grouped rates
 
 Open **[When groups and totals disagree](courses/grouped-data-explorer.html)** for a separate offline lesson about group rates, pooled samples and a chosen common mix. Edit the recorded counts, inspect exact fractions and download the current comparison. The worked examples explain why both groups can favor one option while the pooled sample favors the other, and why this alone does not establish a causal effect.
