@@ -5,6 +5,12 @@ Project scope: [RecallWeave #74](https://github.com/Jacob-Met/RecallWeave/issues
 Team source fence: [HAMON #140](https://github.com/Jacob-Met/hamon/issues/140#issuecomment-6063479903)  
 Date: 2026-10-08
 
+## Open the offline review bundle
+
+Download [RecallWeave rates and accumulation review v1](RecallWeave-rates-accumulation-review-20261008-v1.zip), extract the complete folder, then open `courses/rates-accumulation-explorer.html` inside it. The ZIP includes the exact same-source learner at `demo.html`, the original course JSON, the worked guide and concise opening instructions. The explorer's existing relative learner link works within the extracted folder. No source checkout, build, server or account is needed.
+
+This is a five-file user review bundle, version `20261008-v1`, with product bytes taken from public source `9207da3fe40a5376886c656d68b073815a563f8c`. [The bundle manifest](review-bundle-manifest.json) gives its SHA-256, each member's bytes and original source identity. It is a review download, not a hosted deployment or release. Windows extraction and direct-file receiving are recorded separately.
+
 ## Delivered experience
 
 [Rates become change](../../../courses/rates-accumulation-explorer.html) is an original, offline motion explorer with a [twelve-question lesson](../../../courses/rates-accumulation.json) and [worked guide](../../../courses/rates-accumulation.md). It connects velocity, signed displacement, total distance, average velocity and acceleration through editable continuous piecewise-linear curves.
@@ -37,7 +43,9 @@ All browser runs used a new, isolated Chrome profile. Network emulation was set 
 | Real curve/guide/course files | All three physical downloads were checked against exact source or arithmetic output bytes | `browser-final/downloads/` |
 | Existing learner integration | Downloaded lesson preview/cancel preserved an ongoing session; all twelve items then completed after explicit start | `browser-final/report.json` |
 | Separate practice and notes | Initial score remained 11/12 after correcting the single missed item; physical notes retained every prompt, first answer, explanation, transfer prompt and distinct practice answer | `browser-final/downloads/recallweave-study-notes-2026-10-08.txt` |
-| Narrow-screen presentation | 390- and 320-pixel viewports had no page overflow; physical graph-label size met the receiver's 12-pixel threshold; screenshots inspected | `browser-final/03-graphs-phone.png`, `browser-final/03-graphs-320.png` |
+| Narrow-screen presentation | 390- and 320-pixel viewports had no page overflow; effective SVG font size met the receiver's 12-pixel threshold; screenshots inspected | `browser-final/03-graphs-phone.png`, `browser-final/03-graphs-320.png` |
+
+The author browser reported effective SVG font size of 15 CSS pixels at both narrow widths: computed font size multiplied by the SVG screen scale. This is not a rendered glyph-box height; actual text boxes vary with the font and viewport. Independent visual assessment is recorded separately.
 
 The full suite was run on the composed candidate before the final SVG layout repair. That repair touched only the graph UI, its generated HTML and the authored browser receiver; the final focused native and complete browser paths exercised the repaired product. Independent receiving is a separate review and should be read with its own source pins and scope.
 
