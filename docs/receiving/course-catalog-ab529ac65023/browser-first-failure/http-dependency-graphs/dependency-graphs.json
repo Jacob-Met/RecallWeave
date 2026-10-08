@@ -1,0 +1,129 @@
+{
+  "format": "recallweave-deck/1",
+  "title": "Directed graphs: from arrows to dependency plans",
+  "attribution": "Original scenarios, questions, distractors and worked feedback by the HAMON estate contribution e137a7f86391, with AI assistance. Mathematical background: NIST Dictionary of Algorithms and Data Structures, directed graph and topological sort; MIT OpenCourseWare 6.006 (Spring 2020), Lecture 9 and Recitation 10. References and per-question reasoning are in courses/dependency-graphs.md. No source exercises, figures or passages are copied.",
+  "license": "Original course wording and examples: CC BY 4.0. Attribute this course and retain its source note when sharing or adapting it. Linked reference materials retain their own terms.",
+  "concepts": ["directed-links", "reachability", "dependency-orders", "cycles-and-updates"],
+  "items": [
+    {
+      "id": "dg-links-1",
+      "concept": "directed-links",
+      "prerequisites": [],
+      "prompt": "For a job plan, X → Y means X must finish before Y may begin. Render needs the completed output of Parse. Which single directed edge records that requirement?",
+      "options": ["Render → Parse", "Parse ↔ Render", "Parse → Render", "Parse → Parse"],
+      "answer": 2,
+      "explanation": "The arrow goes from the prerequisite to the dependent job, so Parse → Render expresses the stated requirement. Render → Parse reverses it. The two-way arrow adds an unstated reverse requirement, and the self-loop says nothing about Render. A graph's arrow legend must be established before interpreting its dependencies.",
+      "transfer": "When another tool draws an arrow from a consumer to its prerequisite instead, reverse your reading of that arrow. Preserve the requirement itself; do not assume every dependency diagram uses this course's direction convention."
+    },
+    {
+      "id": "dg-links-2",
+      "concept": "directed-links",
+      "prerequisites": [],
+      "prompt": "Vertices: {A, B, C, D, E}. Edges: {A → B, C → B, B → D, E → D}. No other edges exist. How many direct predecessors (incoming neighbors) does D have?",
+      "options": ["2", "1", "3", "4"],
+      "answer": 0,
+      "explanation": "Only B → D and E → D end at D, so D has two direct predecessors: B and E. A and C can reach D through B, but neither has a direct edge to D. Counting every earlier vertex would confuse a transitive prerequisite with a direct predecessor.",
+      "transfer": "To review a job's immediate inputs, inspect the arrows that end at that job. To review everything it indirectly relies on, follow incoming arrows through additional steps. Those are different questions."
+    },
+    {
+      "id": "dg-links-3",
+      "concept": "directed-links",
+      "prerequisites": [],
+      "prompt": "Vertices: {A, B, C, D}. Edges: {A → B, A → C, C → D}. No other edges exist. Which set is the outgoing neighbor set of A, meaning the vertices reached in exactly one edge?",
+      "options": ["{B, D}", "{C, D}", "{A, B}", "{B, C}"],
+      "answer": 3,
+      "explanation": "The two arrows that start at A end at B and C. D is reachable along A → C → D, but that route uses two edges. A itself is not an outgoing neighbor because there is no A → A edge. An adjacency list records direct neighbors, not the complete reachable set.",
+      "transfer": "Compare an adjacency list with a graph search result: the first lists one-step links, while the second can include vertices several steps away."
+    },
+    {
+      "id": "dg-reach-1",
+      "concept": "reachability",
+      "prerequisites": ["directed-links"],
+      "prompt": "Vertices: {A, B, C, D, E, F}. Edges: {A → B, A → C, B → D, C → D, E → F}. No other edges exist. Starting at A and following one or more arrows in their direction, which vertices can be reached?",
+      "options": ["{B, C, D, E}", "{B, C, D}", "{A, B, C, D}", "{B, D, F}"],
+      "answer": 1,
+      "explanation": "A reaches B and C directly, and D through either of them. There is no directed route from A to the separate E → F component. The question requires at least one edge, and no route returns to A, so A is excluded. Reaching D by two routes still contributes only one vertex to the set.",
+      "transfer": "When counting affected components or reachable pages, collect distinct vertices rather than counting each route to the same destination. State whether a zero-edge path includes the starting vertex."
+    },
+    {
+      "id": "dg-reach-2",
+      "concept": "reachability",
+      "prerequisites": ["directed-links"],
+      "prompt": "Vertices: {S, A, B, C, T}. Edges: {S → A, A → B, B → T, S → C, C → T}. No other edges exist. Every edge counts as one step. What is the smallest number of directed edges on a route from S to T?",
+      "options": ["2", "1", "3", "4"],
+      "answer": 0,
+      "explanation": "S → C → T uses two edges. No S → T edge exists, so one step is impossible. The alternative S → A → B → T takes three steps. Breadth-first search explores by edge count and can discover the two-step route; finding the longer route first would not prove it is shortest.",
+      "transfer": "This count treats every edge equally. If links have different travel times or costs, the fewest-edge route need not have the smallest total cost."
+    },
+    {
+      "id": "dg-reach-3",
+      "concept": "reachability",
+      "prerequisites": ["directed-links"],
+      "prompt": "Vertices: {Raw, Clean, Chart, Summary, Glossary}. Edges: {Raw → Clean, Clean → Chart, Clean → Summary}. Here X → Y means Y is derived from X. Raw changes. Under the explicit rule 'recompute every downstream vertex of Raw, exclude Raw itself, and make no unrelated updates', which set must be recomputed?",
+      "options": ["{Clean, Chart}", "{Raw, Clean, Chart, Summary}", "{Clean, Chart, Summary}", "{Chart, Summary, Glossary}"],
+      "answer": 2,
+      "explanation": "Clean depends directly on Raw. Chart and Summary depend on Raw through Clean, so both are downstream as well. The rule excludes the already changed Raw and gives no reason to recompute the disconnected Glossary. The affected set therefore contains Clean, Chart and Summary exactly.",
+      "transfer": "A dependency system can have a more selective policy, such as comparing output digests before propagating a change. Reachability gives the answer only under the propagation rule that was actually specified."
+    },
+    {
+      "id": "dg-order-1",
+      "concept": "dependency-orders",
+      "prerequisites": ["directed-links", "reachability"],
+      "prompt": "Vertices: {A, B, C, D}. Edges: {A → C, B → C, C → D}. Each arrow requires its source before its destination. Which sequence lists every vertex exactly once and satisfies every requirement?",
+      "options": ["A, C, B, D", "B, A, C, D", "D, A, B, C", "A, B, D, C"],
+      "answer": 1,
+      "explanation": "B, A, C, D places both prerequisites A and B before C, then C before D. A, C, B, D violates B → C. The sequence starting with D and the sequence placing D just before C both violate C → D. A valid topological order need not be alphabetical.",
+      "transfer": "Check a proposed plan against every directed edge. A plan can satisfy a long chain while still violating a different immediate prerequisite."
+    },
+    {
+      "id": "dg-order-2",
+      "concept": "dependency-orders",
+      "prerequisites": ["directed-links", "reachability"],
+      "prompt": "Vertices: {A, B, C, D}. Edges: {A → C, B → C, C → D}. A job may begin only after all its incoming prerequisites have finished. Exactly {A} has finished and no job is running. Which unfinished vertices are ready now?",
+      "options": ["{C}", "{B, C}", "{B, D}", "{B}"],
+      "answer": 3,
+      "explanation": "B has no unfinished prerequisite, so it is ready. C still requires B, even though its other prerequisite A has finished. D requires the unfinished C. Readiness requires every predecessor, not merely one predecessor, to be complete.",
+      "transfer": "A set of ready jobs describes dependency permission. Whether those jobs can actually run together also depends on worker capacity, shared resources and other constraints outside this graph."
+    },
+    {
+      "id": "dg-order-3",
+      "concept": "dependency-orders",
+      "prerequisites": ["directed-links", "reachability"],
+      "prompt": "Vertices: {A, B, C}. Edges: {A → C, B → C}. Each arrow requires its source before its destination. How many topological orders list all three vertices exactly once?",
+      "options": ["2", "1", "3", "6"],
+      "answer": 0,
+      "explanation": "C must follow both A and B, so C is last. No edge or path orders A relative to B. The complete possibilities are A, B, C and B, A, C: two orders. A valid dependency plan may therefore be non-unique without being ambiguous about any stated requirement.",
+      "transfer": "To make a scheduler's output reproducible, specify a tie-break for simultaneously ready jobs. That selects one valid order without claiming the graph forced that tie-break."
+    },
+    {
+      "id": "dg-update-1",
+      "concept": "cycles-and-updates",
+      "prerequisites": ["reachability", "dependency-orders"],
+      "prompt": "Vertices: {A, B, C, D}. Edges: {A → B, B → C, A → D}. No other edges exist. Which single additional directed edge creates a directed cycle?",
+      "options": ["B → D", "D → C", "A → C", "C → A"],
+      "answer": 3,
+      "explanation": "C → A closes A → B → C → A. The other proposed edges do not have a directed return route and keep the graph acyclic. More generally, adding X → Y creates a cycle when the existing graph already contains a route from Y back to X, with the self-loop case considered separately.",
+      "transfer": "Before adding a prerequisite, search in the reverse direction of the proposed new edge. An existing path in that direction would make the new requirement circular."
+    },
+    {
+      "id": "dg-update-2",
+      "concept": "cycles-and-updates",
+      "prerequisites": ["reachability", "dependency-orders"],
+      "prompt": "Vertices: {A, B, C, D, E}. Edges: {A → B, B → A, B → C, D → E}. Repeatedly remove any vertex with zero incoming edges and remove its outgoing edges, stopping when no such vertex remains. Which vertices remain?",
+      "options": ["{A, B}", "{A, B, D}", "{A, B, C}", "{C, D, E}"],
+      "answer": 2,
+      "explanation": "D can be removed first, then E loses its only incoming edge and can also be removed. A and B keep each other blocked by their cycle. C retains its incoming edge from B, so C remains even though C itself is not on the cycle. A stalled dependency-removal process can leave both cyclic work and work downstream of a cycle.",
+      "transfer": "Do not label every blocked job as a cycle member. Separate the circular core from jobs that are merely waiting on it when explaining why a plan cannot finish."
+    },
+    {
+      "id": "dg-update-3",
+      "concept": "cycles-and-updates",
+      "prerequisites": ["reachability", "dependency-orders"],
+      "prompt": "Vertices: {A, B, C, D}. Edges: {A → B, B → C, A → D}. Each arrow requires its source before its destination. Compare all valid topological orders before and after adding A → C. What changes?",
+      "options": ["Only orders with B before D remain.", "The valid-order set stays exactly the same.", "Every valid order must now start with C.", "The additional edge makes ordering impossible."],
+      "answer": 1,
+      "explanation": "Every original valid order already places A before B and B before C, so it also places A before C. Adding that direct edge makes an existing transitive requirement explicit and excludes no original order. D's position relative to B or C remains unconstrained except that D follows A. The graph stays acyclic.",
+      "transfer": "A direct edge can be redundant for ordering yet still matter to another application, such as one that records distinct data transfers. State which graph property you are preserving before removing or adding a redundant edge."
+    }
+  ]
+}

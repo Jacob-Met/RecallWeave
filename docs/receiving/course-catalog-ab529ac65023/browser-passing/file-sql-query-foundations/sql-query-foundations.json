@@ -1,0 +1,218 @@
+{
+  "format": "recallweave-deck/1",
+  "title": "SQL query foundations — rows, NULLs, groups, and joins",
+  "attribution": "RecallWeave contributors. Original fictional dataset, questions, and explanations; query results checked with SQLite. Primary references: https://sqlite.org/lang_select.html ; https://sqlite.org/lang_expr.html ; https://sqlite.org/lang_aggfunc.html .",
+  "license": "Original course material: you may use, adapt, and redistribute it with attribution to RecallWeave contributors. The linked SQLite documentation retains its own terms and is not reproduced here.",
+  "concepts": [
+    "rows",
+    "nulls",
+    "groups",
+    "joins"
+  ],
+  "items": [
+    {
+      "id": "sql-01-rows",
+      "concept": "rows",
+      "prerequisites": [],
+      "prompt": "Using SQLite and only these fictional rows:\nreadings(id, station_id, value): (1, 1, 10); (2, 1, NULL); (3, 2, 20); (4, 2, 20); (5, 2, 0); (6, NULL, 30).\nNULL is unknown; 0 is a known value.\nWhich ordered result rows does this query return?\nSQL:\nSELECT value FROM readings\nWHERE station_id = 2\nORDER BY id;\nEach tuple is one result row. Columns: (value).",
+      "options": [
+        "(20); (20); (0)",
+        "(20); (0)",
+        "(20); (20)",
+        "(10); (20); (20); (0)"
+      ],
+      "answer": 0,
+      "explanation": "Station 2 has reading IDs 3, 4, and 5. Their values are 20, 20, and 0 in that order. Both rows containing 20 remain; the query does not request DISTINCT. Zero is a recorded value.",
+      "transfer": "Predict SELECT DISTINCT value FROM readings WHERE station_id = 2 ORDER BY value. Which duplicate disappears, and why does 0 still appear?"
+    },
+    {
+      "id": "sql-02-filter",
+      "concept": "rows",
+      "prerequisites": [],
+      "prompt": "Using SQLite and only these fictional rows:\nreadings(id, station_id, value): (1, 1, 10); (2, 1, NULL); (3, 2, 20); (4, 2, 20); (5, 2, 0); (6, NULL, 30).\nNULL is unknown; 0 is a known value.\nWhich reading IDs meet the predicate, in the requested order?\nSQL:\nSELECT id FROM readings\nWHERE value >= 20\nORDER BY id;\nEach tuple is one result row. Columns: (id).",
+      "options": [
+        "(3); (4)",
+        "(3); (4); (6)",
+        "(1); (3); (4); (6)",
+        "(6)"
+      ],
+      "answer": 1,
+      "explanation": "Readings 3 and 4 each contain 20; reading 6 contains 30. The predicate checks value, so reading 6 qualifies even though its station_id is NULL. The unknown value in reading 2 does not satisfy the comparison.",
+      "transfer": "Use the explorer's threshold control to compare >= 0, >= 10, >= 20, and >= 30. Check whether the zero and the unknown value behave alike."
+    },
+    {
+      "id": "sql-03-order",
+      "concept": "rows",
+      "prerequisites": [],
+      "prompt": "Using SQLite and only these fictional rows:\nreadings(id, station_id, value): (1, 1, 10); (2, 1, NULL); (3, 2, 20); (4, 2, 20); (5, 2, 0); (6, NULL, 30).\nNULL is unknown; 0 is a known value.\nWhich three (id, value) rows are returned?\nSQL:\nSELECT id, value FROM readings\nWHERE value IS NOT NULL\nORDER BY value DESC, id ASC\nLIMIT 3;\nEach tuple is one result row. Columns: (id, value).",
+      "options": [
+        "(6, 30); (4, 20); (3, 20)",
+        "(3, 20); (4, 20); (6, 30)",
+        "(6, 30); (3, 20); (4, 20)",
+        "(1, 10); (3, 20); (4, 20)"
+      ],
+      "answer": 2,
+      "explanation": "Value 30 sorts first. Values 20 tie, so id ASC puts reading 3 before reading 4. LIMIT keeps the first three rows after that ordering. The query states the tie-break explicitly rather than relying on storage order.",
+      "transfer": "Change the secondary ordering to id DESC in your own SQLite scratch database. Which two rows swap places?"
+    },
+    {
+      "id": "sql-04-null-equals",
+      "concept": "nulls",
+      "prerequisites": [
+        "rows"
+      ],
+      "prompt": "Using SQLite and only these fictional rows:\nreadings(id, station_id, value): (1, 1, 10); (2, 1, NULL); (3, 2, 20); (4, 2, 20); (5, 2, 0); (6, NULL, 30).\nNULL is unknown; 0 is a known value.\nWhich reading IDs does this WHERE clause retain?\nSQL:\nSELECT id FROM readings\nWHERE value = NULL\nORDER BY id;\nEach tuple is one result row. Columns: (id).",
+      "options": [
+        "(2)",
+        "(5)",
+        "(1); (2); (3); (4); (5); (6)",
+        "(no rows)"
+      ],
+      "answer": 3,
+      "explanation": "The ordinary equality comparison with NULL is unknown for every row, including reading 2. WHERE retains rows whose condition is true, so this query returns no rows. It does not test whether a value is missing.",
+      "transfer": "Compare this empty result with the Find the missing measurement example, which uses value IS NULL. Predict the change before revealing it."
+    },
+    {
+      "id": "sql-05-null-is",
+      "concept": "nulls",
+      "prerequisites": [
+        "rows"
+      ],
+      "prompt": "Using SQLite and only these fictional rows:\nreadings(id, station_id, value): (1, 1, 10); (2, 1, NULL); (3, 2, 20); (4, 2, 20); (5, 2, 0); (6, NULL, 30).\nNULL is unknown; 0 is a known value.\nWhich reading IDs have a NULL value?\nSQL:\nSELECT id FROM readings\nWHERE value IS NULL\nORDER BY id;\nEach tuple is one result row. Columns: (id).",
+      "options": [
+        "(2)",
+        "(6)",
+        "(2); (6)",
+        "(no rows)"
+      ],
+      "answer": 0,
+      "explanation": "Only reading 2 has NULL in the value column. Reading 6 has an unknown station_id but a known value of 30. IS NULL tests the named expression; it does not search every column for missing data.",
+      "transfer": "Predict the IDs for WHERE station_id IS NULL, then for WHERE value = 0. These are three different questions about the fixture."
+    },
+    {
+      "id": "sql-06-count-average",
+      "concept": "nulls",
+      "prerequisites": [
+        "rows"
+      ],
+      "prompt": "Using SQLite and only these fictional rows:\nreadings(id, station_id, value): (1, 1, 10); (2, 1, NULL); (3, 2, 20); (4, 2, 20); (5, 2, 0); (6, NULL, 30).\nNULL is unknown; 0 is a known value.\nWhat single row (all_rows, known_values, mean_value) is returned? Numerically equal forms such as 16 and 16.0 mean the same answer here.\nSQL:\nSELECT COUNT(*) AS all_rows,\n       COUNT(value) AS known_values,\n       AVG(value) AS mean_value\nFROM readings;\nEach tuple is one result row. Columns: (all_rows, known_values, mean_value).",
+      "options": [
+        "(6, 6, 13.333333333333334)",
+        "(6, 5, 16)",
+        "(5, 5, 16)",
+        "(6, 4, 20)"
+      ],
+      "answer": 1,
+      "explanation": "There are six rows and five non-NULL values. Those values sum to 80, giving an average of 80 / 5 = 16. The recorded zero counts in the denominator; the NULL does not. COUNT(*) still includes the row containing NULL.",
+      "transfer": "In SQLite, filter to value IS NULL and repeat the three aggregates. Predict which counts become 1 and 0, and whether AVG can return a known number."
+    },
+    {
+      "id": "sql-07-groups",
+      "concept": "groups",
+      "prerequisites": [
+        "rows",
+        "nulls"
+      ],
+      "prompt": "Using SQLite and only these fictional rows:\nreadings(id, station_id, value): (1, 1, 10); (2, 1, NULL); (3, 2, 20); (4, 2, 20); (5, 2, 0); (6, NULL, 30).\nNULL is unknown; 0 is a known value.\nWhich ordered (station_id, all_rows, known_values, total_value) rows are returned? This query uses SQLite's ascending NULL-first order.\nSQL:\nSELECT station_id, COUNT(*) AS all_rows,\n       COUNT(value) AS known_values,\n       SUM(value) AS total_value\nFROM readings\nGROUP BY station_id\nORDER BY station_id ASC;\nEach tuple is one result row. Columns: (station_id, all_rows, known_values, total_value).",
+      "options": [
+        "(1, 2, 1, 10); (2, 3, 3, 40)",
+        "(NULL, 1, 1, 30); (1, 2, 2, 10); (2, 3, 3, 40)",
+        "(NULL, 1, 1, 30); (1, 2, 1, 10); (2, 3, 3, 40)",
+        "(NULL, 1, 1, 30); (1, 2, 1, 10); (2, 2, 2, 20)"
+      ],
+      "answer": 2,
+      "explanation": "The NULL station_id forms a group containing reading 6. Station 1 has two rows but one known value. Station 2 has three known values, including zero, totaling 40. GROUP BY does not remove the repeated value 20.",
+      "transfer": "Compare COUNT(value) with COUNT(DISTINCT value) for station 2. Which count changes when repeated values are deliberately collapsed?"
+    },
+    {
+      "id": "sql-08-having",
+      "concept": "groups",
+      "prerequisites": [
+        "rows",
+        "nulls"
+      ],
+      "prompt": "Using SQLite and only these fictional rows:\nreadings(id, station_id, value): (1, 1, 10); (2, 1, NULL); (3, 2, 20); (4, 2, 20); (5, 2, 0); (6, NULL, 30).\nNULL is unknown; 0 is a known value.\nWhich (station_id, qualifying_rows, total_value) rows survive both filters?\nSQL:\nSELECT station_id, COUNT(*) AS qualifying_rows,\n       SUM(value) AS total_value\nFROM readings\nWHERE value >= 10\nGROUP BY station_id\nHAVING COUNT(*) >= 2\nORDER BY station_id;\nEach tuple is one result row. Columns: (station_id, qualifying_rows, total_value).",
+      "options": [
+        "(1, 2, 10); (2, 3, 40)",
+        "(2, 3, 40)",
+        "(NULL, 1, 30); (1, 1, 10); (2, 2, 40)",
+        "(2, 2, 40)"
+      ],
+      "answer": 3,
+      "explanation": "After value >= 10, station 1 and the NULL station group have one row each; station 2 has two. HAVING keeps only the group with at least two remaining rows. Its total is 20 + 20 = 40; the zero was removed by WHERE.",
+      "transfer": "Keep the WHERE filter but change HAVING to COUNT(*) >= 1. Predict all three resulting groups before running it in SQLite."
+    },
+    {
+      "id": "sql-09-missing-group",
+      "concept": "groups",
+      "prerequisites": [
+        "rows",
+        "nulls"
+      ],
+      "prompt": "Using SQLite and only these fictional rows:\nreadings(id, station_id, value): (1, 1, 10); (2, 1, NULL); (3, 2, 20); (4, 2, 20); (5, 2, 0); (6, NULL, 30).\nNULL is unknown; 0 is a known value.\nWhich station_id groups contain at least one NULL measurement?\nSQL:\nSELECT station_id FROM readings\nGROUP BY station_id\nHAVING COUNT(value) < COUNT(*)\nORDER BY station_id;\nEach tuple is one result row. Columns: (station_id).",
+      "options": [
+        "(1)",
+        "(NULL)",
+        "(1); (2)",
+        "(NULL); (1)"
+      ],
+      "answer": 0,
+      "explanation": "Station 1 has one known value among two rows, so its two counts differ. Station 2's zero is known, and the NULL station_id group contains a known measurement of 30. A missing group key and a missing measurement are different facts.",
+      "transfer": "For this fixture, compare SUM(value IS NULL) within each station_id group with COUNT(*) - COUNT(value). Explain why both identify station 1."
+    },
+    {
+      "id": "sql-10-inner",
+      "concept": "joins",
+      "prerequisites": [
+        "rows",
+        "nulls"
+      ],
+      "prompt": "Using SQLite and only these fictional rows:\nstations(id, name): (1, \"North\"); (2, \"South\"); (3, \"East\"); (4, \"West\").\nreadings(id, station_id, value): (1, 1, 10); (2, 1, NULL); (3, 2, 20); (4, 2, 20); (5, 2, 0); (6, NULL, 30).\nNULL is unknown; 0 is a known value.\nWhat single joined_rows count is returned?\nSQL:\nSELECT COUNT(*) AS joined_rows\nFROM stations AS s\nINNER JOIN readings AS r ON r.station_id = s.id;\nEach tuple is one result row. Columns: (joined_rows).",
+      "options": [
+        "(6)",
+        "(5)",
+        "(4)",
+        "(7)"
+      ],
+      "answer": 1,
+      "explanation": "North matches two readings and South matches three, producing five joined rows. East and West have no match. Reading 6's NULL station_id does not equal a station ID, so that reading is absent from this inner join.",
+      "transfer": "Select s.name and r.id instead of COUNT(*) in your SQLite scratch database. List the five matches rather than assuming one output row per station."
+    },
+    {
+      "id": "sql-11-left-count",
+      "concept": "joins",
+      "prerequisites": [
+        "rows",
+        "nulls"
+      ],
+      "prompt": "Using SQLite and only these fictional rows:\nstations(id, name): (1, \"North\"); (2, \"South\"); (3, \"East\"); (4, \"West\").\nreadings(id, station_id, value): (1, 1, 10); (2, 1, NULL); (3, 2, 20); (4, 2, 20); (5, 2, 0); (6, NULL, 30).\nNULL is unknown; 0 is a known value.\nWhat single (joined_rows, matched_readings) row is returned?\nSQL:\nSELECT COUNT(*) AS joined_rows,\n       COUNT(r.id) AS matched_readings\nFROM stations AS s\nLEFT JOIN readings AS r ON r.station_id = s.id;\nEach tuple is one result row. Columns: (joined_rows, matched_readings).",
+      "options": [
+        "(5, 5)",
+        "(4, 4)",
+        "(7, 5)",
+        "(7, 7)"
+      ],
+      "answer": 2,
+      "explanation": "The five matches remain. East and West each add one output row whose reading columns are NULL, giving seven rows. COUNT(r.id) counts only the five actual matches because a reading's primary key is never NULL. Reading 6 is still unmatched.",
+      "transfer": "Compare COUNT(r.id) with COUNT(r.value). The stored NULL value at reading 2 makes those two counts differ even before considering placeholders."
+    },
+    {
+      "id": "sql-12-left-where",
+      "concept": "joins",
+      "prerequisites": [
+        "rows",
+        "nulls"
+      ],
+      "prompt": "Using SQLite and only these fictional rows:\nstations(id, name): (1, \"North\"); (2, \"South\"); (3, \"East\"); (4, \"West\").\nreadings(id, station_id, value): (1, 1, 10); (2, 1, NULL); (3, 2, 20); (4, 2, 20); (5, 2, 0); (6, NULL, 30).\nNULL is unknown; 0 is a known value.\nWhich ordered (station, reading_id, value) rows remain after this WHERE filter?\nSQL:\nSELECT s.name AS station, r.id AS reading_id, r.value\nFROM stations AS s\nLEFT JOIN readings AS r ON r.station_id = s.id\nWHERE r.value >= 20\nORDER BY s.id, r.id;\nEach tuple is one result row. Columns: (station, reading_id, value).",
+      "options": [
+        "(\"North\", NULL, NULL); (\"South\", 3, 20); (\"South\", 4, 20); (\"East\", NULL, NULL); (\"West\", NULL, NULL)",
+        "(\"South\", 3, 20); (\"South\", 4, 20); (NULL, 6, 30)",
+        "(\"South\", 3, 20)",
+        "(\"South\", 3, 20); (\"South\", 4, 20)"
+      ],
+      "answer": 3,
+      "explanation": "Only South's two readings of 20 pass WHERE. North's lower or unknown values and the East/West placeholders fail that condition. Moving r.value >= 20 into ON instead keeps all four stations, adding a placeholder wherever no reading meets the threshold.",
+      "transfer": "In the explorer, keep threshold 20 and move the predicate from WHERE to ON. Predict both the result row count and which reading_id cells become NULL."
+    }
+  ]
+}
