@@ -107,6 +107,20 @@ This separate page works offline without dependencies or automatic storage. Rebu
 - The completed learning trace keeps every question, the learner's first answer, its correct answer, explanation, and transfer prompt available in keyboard-operable review panels. `src/review.mjs` takes an immutable snapshot and keeps a bounded practice round separate from the first session.
 - The welcome panel includes a clearly labeled, deterministic synthetic learner simulation comparing adaptive selection with fixed deck order using the same toy learner assumptions and random seed. Its tiny run is demonstrative, not empirical evidence or an efficacy claim. Test coverage separately evaluates model invariants, not learning outcomes.
 
+## Download the complete offline course pack
+
+Save [the offline course pack](offline/) as one ZIP, extract the entire
+RecallWeave folder, and open its catalog.html. The matching demo.html and original
+registered course files are included. Choose a course from the courses folder
+under **Bring your own lesson**, inspect its preview, then explicitly start it.
+
+After changing the learner, rebuild it with `python3 tools/make_demo.py`.
+After catalog or registered-course changes, run `node tools/build-course-catalog.mjs`.
+Then run `python3 tools/build-offline-pack.py` to update the ZIP;
+`python3 tools/build-offline-pack.py --check` checks exact bytes without writing.
+The pack uses the explicit catalog/courses.json registration list. Its
+SHA256SUMS.json records every other included file's byte length and content hash.
+
 ## Bring your own lesson
 
 Open the **[Course catalog](catalog.html)** to browse supplied courses, search their
