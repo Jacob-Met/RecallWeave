@@ -114,3 +114,4 @@ Conceptual background was checked on 2026-10-08 against Barbara Illowsky and Sus
 The course's counts, questions, distractors, explanations, transfer prompts and worked numerical derivations are original. No textbook exercise, dataset or passage is reproduced. The assignment explanation explicitly retains the possibility of chance imbalance.
 
 The original course JSON and this guide are offered under [Creative Commons Attribution 4.0](https://creativecommons.org/licenses/by/4.0/). Attribute them to **HAMON estate — Reading data and evaluating evidence**, retain that license link and indicate changes. This grant covers this original course content only. The textbook has a separate license; its [current preface](https://openstax.org/books/introductory-statistics-2e/pages/preface) states **CC BY-NC-SA 4.0**. The app's own code license remains as stated by its repository.
+
