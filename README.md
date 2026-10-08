@@ -6,6 +6,12 @@
 
 Open `demo.html` directly in a browser—no server, install, build step, internet, login, API key, or user data storage is required. It is a single self-contained file with embedded CSS, JavaScript and deck. The modular source is in `index.html`, `src/`, and `data/`; to test that version locally, serve this directory with `python3 -m http.server 8080` and visit `http://localhost:8080`. Rebuild the direct-open demo with `python3 tools/make_demo.py` after source changes. No hosted endpoint is called by either version.
 
+### Make a course handout
+
+Open [Course handouts](handout.html), choose a checked local deck JSON, review its title and source credit, then select **Use this deck**. Print or save an unanswered worksheet for learners and an explicitly separate answer key with the correct choices and authored explanations. Both keep the original question and option order, literal wording, attribution and permission; transfer prompts leave room for a written response because the deck supplies no separate transfer answer.
+
+Each saved HTML file opens and prints offline on its own. The worksheet file contains questions only; the teacher’s builder and the separate key receive the full checked deck. Cancelling a selection or choosing an invalid file leaves the current handout in place. This is a separate preparation flow; it does not start or change a learning session. Modular source lives in `handout/` and `src/course-handout*.mjs`; rebuild `handout.html` with `python3 tools/make_handout.py`, or verify it with `--check`.
+
 ## Core and interaction
 
 - `src/knowledge.mjs` implements a transparent BKT update: initial knowledge, learning transition, guess, and slip are explicit probabilities. It also computes binary entropy and expected information gain.
