@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>Build a course deck · RecallWeave</title>
+  <link rel="stylesheet" href="author.css">
+</head>
+<body>
+  <a class="skip-link" href="#author-main">Skip to deck editor</a>
+  <header class="site-header">
+    <a class="brand" href="../index.html" target="_blank" rel="noopener">RecallWeave <span>Deck studio</span></a>
+    <a class="text-link" href="../index.html" target="_blank" rel="noopener">Open learning app <span aria-hidden="true">↗</span></a>
+  </header>
+  <main id="author-main">
+    <section class="intro" aria-labelledby="page-title">
+      <div><p class="eyebrow">AUTHOR A LOCAL LESSON</p><h1 id="page-title">Build a course deck.</h1>
+      <p class="lead">Write questions, connect concepts, and give each answer an explanation. Save a reusable local deck.</p></div>
+      <div class="draft-note"><strong>Your ideas, in your browser.</strong><p>This draft stays in this tab. Download it to keep your work, then reopen the file here whenever you want to edit it.</p></div>
+    </section>
+    <div class="workspace-bar">
+      <p id="author-status" role="status" aria-live="polite">Start with your deck title, or open a deck you already have.</p>
+      <button type="button" id="open-deck-button" class="secondary">Open a deck to edit</button>
+      <input type="file" id="open-deck" accept=".json,application/json" hidden>
+    </div>
+    <section id="open-preview" class="card incoming" aria-labelledby="open-preview-title" hidden>
+      <h2 id="open-preview-title" tabindex="-1">Open this deck?</h2><p id="open-preview-summary"></p>
+      <p>Replacing the draft changes this editor. Download your current draft first if you want to keep it.</p>
+      <div class="button-row"><button type="button" id="replace-draft" class="primary">Replace draft</button><button type="button" id="cancel-open" class="secondary">Keep current draft</button></div>
+    </section>
+    <form id="author-form" novalidate>
+      <div class="setup-grid">
+        <section class="card" aria-labelledby="metadata-heading">
+          <p class="step">01 · THE LESSON</p><h2 id="metadata-heading">Describe your deck</h2>
+          <label for="deck-title">Deck title</label><textarea id="deck-title" rows="2" maxlength="160" required placeholder="What will this lesson connect?"></textarea>
+          <label for="deck-attribution">Author or source</label><textarea id="deck-attribution" rows="3" maxlength="2000" required placeholder="Name yourself, your sources, or both."></textarea>
+          <label for="deck-license">Permission to use this deck</label><textarea id="deck-license" rows="3" maxlength="2000" required placeholder="Describe the license or how others may use your work."></textarea>
+        </section>
+        <section class="card" aria-labelledby="concepts-heading">
+          <p class="step">02 · THE CONNECTIONS</p><h2 id="concepts-heading" tabindex="-1">Name the concepts</h2>
+          <p class="hint">Every concept needs at least one question. Rename a concept here and its question links follow.</p>
+          <div id="concept-list"></div><button type="button" id="add-concept" class="secondary">Add concept</button>
+          <p id="concept-count" class="small-note"></p>
+        </section>
+      </div>
+      <section class="card question-card" aria-labelledby="questions-heading">
+        <div class="section-heading"><div><p class="step">03 · THE CHALLENGES</p><h2 id="questions-heading" tabindex="-1">Write the questions</h2></div><p id="question-count" class="count"></p></div>
+        <div class="question-navigation"><div class="question-picker-wrap"><label for="question-picker">Question to edit</label><select id="question-picker"></select></div><button type="button" id="add-question" class="secondary">Add question</button><button type="button" id="move-question-up" class="secondary">Move question up</button><button type="button" id="move-question-down" class="secondary">Move question down</button><button type="button" id="remove-question" class="quiet">Remove question</button></div>
+        <div id="undo-removal" class="undo" hidden><p id="undo-message"></p><button type="button" id="undo-question" class="secondary">Undo removed question</button></div>
+        <div id="question-editor"></div>
+      </section>
+      <section class="card check-card" aria-labelledby="check-heading">
+        <div><p class="step">04 · READY TO SHARE</p><h2 id="check-heading">Check the complete deck</h2><p id="check-help" class="hint">Preview checks your answer choices, concept links and the file's size. It does not check the accuracy of your course content.</p></div>
+        <div class="button-row"><button type="submit" id="check-draft" class="primary">Check and preview</button><button type="button" id="download-deck" class="secondary" disabled aria-describedby="download-help">Download deck (.json)</button></div>
+        <p id="download-help" class="small-note">Check and preview before downloading. Edits require a fresh check.</p>
+        <div id="author-error" class="error" role="alert" hidden><h3>Check this part of your deck</h3><p id="author-error-message"></p><button type="button" id="go-to-error" class="secondary">Go to field</button></div>
+      </section>
+    </form>
+    <section id="author-preview" class="card author-preview" aria-labelledby="preview-heading" hidden>
+      <p class="step">YOUR LESSON · ANSWER KEY</p><h2 id="preview-heading" tabindex="-1">Preview your deck</h2><div id="preview-content"></div>
+    </section>
+    <footer><p>Download the JSON file to save or share your lesson. Reopen it here whenever you want to edit it. Opening the learning demo keeps this editor open.</p><p>No upload or account is needed. Refreshing this page clears an unsaved draft.</p></footer>
+  </main>
+  <script type="module" src="../src/deck-author-ui.mjs"></script>
+</body>
+</html>

@@ -39,13 +39,25 @@ A trace must match the exact loaded course content and learning model. The app c
 
 Trace files contain answers and practice progress. They do not include personal reflections or replace reflections already in the tab. The current session supplies the displayed option order; saved answers always identify the original option, regardless of its A–D position. Saving and restoring work offline in the standalone demo. There is no automatic browser persistence, account, or upload.
 
+## Build a course deck
+
+Open **[Deck studio](author.html)** directly from your files, or visit `author/` when serving the modular app. Write a title, author/source and permission statement; name the concepts; then add questions, answer options, explanations and transfer prompts. Every concept needs a question. Optional prerequisite choices connect an earlier concept to a later one and cannot form a loop.
+
+Select the correct answer explicitly. Moving an option keeps that selection attached to the same option; removing the selected option requires another choice. Concept renaming updates its question links. A used concept cannot be deleted accidentally, and the last removed question can be restored without discarding later edits elsewhere.
+
+**Check and preview** validates the complete draft and shows its answer key. **Download deck (.json)** saves the exact checked file, including the importer's 256 KiB byte limit. Edits clear the previous preview and require another check. The check verifies the deck's structure and links; the author remains responsible for its course content and attribution.
+
+Choose **Open a deck to edit** to reopen a previously saved JSON file. Review it before **Replace draft**; cancellation or a rejected file preserves the current editor. The draft stays only in this tab, so download it before refreshing or closing the page. The saved JSON uses the shared RecallWeave deck format; the separate local lesson importer is tracked in [issue 7](https://github.com/Jacob-Met/RecallWeave/issues/7).
+
+The separate author page leaves ongoing learning sessions open. It has no account, upload, provider or persistence service. Rebuild its direct-file version with `python3 tools/make_author.py`; `python3 tools/make_author.py --check` verifies that it matches the modular sources. Authoring, reopening and standalone parity tests run with the existing `node --test tests/*.test.mjs` command.
+
 ## Demo deck provenance
 
 Question text and distractors are newly authored for this demo. Scientific concepts are adapted from OpenStax, *Biology 2e*, Chapters 7–8, Rice University, CC BY 4.0: <https://openstax.org/details/books/biology-2e>. Deck attribution and license are also embedded in `data/deck.json` and shown at completion. This work does not copy an existing hackathon entry or project.
 
 ## Tests
 
-Run the dependency-free unit/property tests with Node 18+: `node --test tests/*.test.mjs`. Tests cover bounded probabilities over repeated updates, directional evidence behavior, invalid parameter rejection, entropy/information-gain bounds, prerequisite selection, exhaustion, and initialization.
+Run the unit/property tests with Node 20+ and Python 3 (`python3` on your PATH): `node --test tests/*.test.mjs`. The local-file tests use Node's global [`File`](https://nodejs.org/api/globals.html#class-file), added in Node 20; Python verifies that the checked-in standalone author HTML matches its modular sources. No npm packages are required. Tests cover bounded probabilities over repeated updates, directional evidence behavior, invalid parameter rejection, entropy/information-gain bounds, prerequisite selection, exhaustion, and initialization.
 
 Review tests also cover immutable first-answer snapshots, missed-question order, separate correct/incorrect retries, resumption, duplicate/out-of-order refusal, and all-correct sessions. The existing knowledge model and deck are unchanged.
 
