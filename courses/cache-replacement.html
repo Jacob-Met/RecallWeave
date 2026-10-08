@@ -1,0 +1,597 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Trace FIFO and LRU cache decisions, compare capacities and study an original RecallWeave lesson offline.">
+  <title>Cache decisions · RecallWeave</title>
+<style>
+:root {
+  color-scheme: light;
+  --ink: #162b38;
+  --muted: #52636d;
+  --paper: #f3f5f2;
+  --panel: #fff;
+  --line: #d7e0dc;
+  --teal: #09675f;
+  --teal-pale: #e7f3ed;
+  --fifo: #865318;
+  --fifo-pale: #fff4dd;
+  --lru: #55408c;
+  --lru-pale: #f0ebfa;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--paper); color: var(--ink); font: 16px/1.55 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+a { color: var(--teal); text-underline-offset: .2em; }
+button, input, select, textarea { font: inherit; }
+button, .button-link { min-height: 44px; border: 1px solid var(--line); border-radius: 9px; background: white; color: var(--ink); padding: .65rem 1rem; cursor: pointer; font-weight: 650; }
+button:hover:not(:disabled), .button-link:hover { border-color: var(--teal); background: var(--teal-pale); }
+button:disabled { opacity: .45; cursor: default; }
+button.primary { background: var(--teal); border-color: var(--teal); color: #fff; }
+button.primary:hover:not(:disabled) { background: #064e49; color: #fff; }
+:focus-visible { outline: 3px solid #147dcb; outline-offset: 3px; }
+[hidden] { display: none !important; }
+h1, h2, h3, p { margin-top: 0; }
+h1 { max-width: 760px; font-size: clamp(2rem, 5vw, 3.6rem); line-height: 1.12; letter-spacing: -.045em; margin-bottom: 1rem; }
+h2 { font-size: 1.35rem; line-height: 1.3; letter-spacing: -.02em; }
+h3 { font-size: 1.05rem; }
+p { margin-bottom: .8rem; }
+nav { display: flex; justify-content: space-between; gap: 1rem; align-items: center; padding: 1.1rem 0; border-bottom: 1px solid var(--line); }
+nav a { font-weight: 650; }
+.brand { color: var(--ink); text-decoration: none; letter-spacing: -.025em; }
+.wrap { width: min(1120px, calc(100% - 40px)); margin: 0 auto; }
+.hero { padding: 2.7rem 0 2rem; }
+.eyebrow { color: var(--teal); text-transform: uppercase; letter-spacing: .14em; font-weight: 750; font-size: .75rem; margin-bottom: .9rem; }
+.lede { max-width: 730px; color: var(--muted); font-size: 1.1rem; }
+.pill-row { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: 1.2rem; }
+.pill { display: inline-block; padding: .25rem .7rem; border: 1px solid var(--line); border-radius: 100px; color: var(--muted); background: #ffffff80; font-size: .83rem; }
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 15px; padding: 1.4rem; margin-bottom: 1.2rem; box-shadow: 0 3px 12px #16372905; }
+.input-layout { display: grid; grid-template-columns: minmax(0, 1fr) 180px; gap: 1rem 1.4rem; }
+label { display: block; font-weight: 700; margin-bottom: .45rem; }
+textarea, select { display: block; width: 100%; border: 1px solid #9caea6; border-radius: 8px; background: white; color: var(--ink); padding: .7rem .85rem; }
+textarea { min-height: 86px; resize: vertical; font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: 1.08rem; letter-spacing: .08em; }
+.hint { color: var(--muted); font-size: .84rem; margin: .4rem 0 0; }
+.examples { display: flex; flex-wrap: wrap; gap: .6rem; align-items: center; margin: 1rem 0; }
+.examples span { font-size: .86rem; color: var(--muted); }
+.examples button { font-size: .84rem; min-height: 38px; padding: .45rem .7rem; }
+.form-bottom { display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; }
+.form-bottom p { color: var(--muted); font-size: .88rem; margin: 0; flex: 1 1 300px; }
+.error { color: #a12424; font-weight: 650; margin: .75rem 0 0; }
+.error:empty { display: none; }
+.inspection-heading { display: flex; gap: 1rem; align-items: flex-start; justify-content: space-between; }
+.inspection-heading h2 { margin-bottom: .2rem; }
+.reference-line { font: .85rem/1.6 ui-monospace, SFMono-Regular, Consolas, monospace; color: var(--muted); overflow-wrap: anywhere; margin: .6rem 0 1rem; }
+.step-controls { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; }
+.step-controls button { min-width: 72px; padding: .6rem .8rem; }
+.step-controls .step-status { margin: 0 0 0 .4rem; color: var(--muted); font-size: .9rem; font-weight: 650; }
+progress { display: block; height: 7px; width: 100%; margin: 1rem 0 1.3rem; accent-color: var(--teal); }
+.policy-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.policy { min-width: 0; border-radius: 12px; padding: 1.25rem; border: 1px solid; }
+.policy.fifo { background: var(--fifo-pale); border-color: #ead8b5; }
+.policy.lru { background: var(--lru-pale); border-color: #d6ccef; }
+.policy header { display: flex; align-items: baseline; gap: .6rem; margin-bottom: .3rem; }
+.policy header h3 { font-size: 1.45rem; margin: 0; letter-spacing: -.03em; }
+.policy.fifo h3 { color: var(--fifo); }
+.policy.lru h3 { color: var(--lru); }
+.policy header span { font-size: .8rem; color: var(--muted); }
+.order { font-size: .77rem; color: var(--muted); margin: 0 0 .6rem; }
+.slots { list-style: none; display: flex; gap: .45rem; margin: 0 0 1rem; padding: 0; }
+.slot { display: grid; place-items: center; min-width: 39px; height: 45px; background: #fff; border: 1px solid #b9b3a9; border-radius: 7px; font: 750 1.05rem ui-monospace, SFMono-Regular, Consolas, monospace; }
+.slot.empty { color: #596b6b; background: #ffffff70; border-style: dashed; font: .6rem system-ui, sans-serif; }
+.slot.requested { border: 2px solid var(--teal); }
+.outcome { font-weight: 750; margin-bottom: .3rem; }
+.outcome[data-outcome="hit"] { color: #11573c; }
+.outcome[data-outcome="miss"] { color: #7c3c13; }
+.explanation { min-height: 3em; color: var(--muted); font-size: .86rem; }
+.counts { display: flex; gap: 1.7rem; margin: .8rem 0 0; }
+.counts div { display: flex; gap: .45rem; align-items: baseline; }
+.counts dt { font-size: .8rem; color: var(--muted); order: 1; }
+.counts dd { margin: 0; font-weight: 780; font-size: 1.45rem; font-variant-numeric: tabular-nums; }
+.lower-grid { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr); gap: 1.2rem; }
+.lower-grid .panel { height: 100%; margin: 0; }
+table { width: 100%; border-collapse: collapse; font-size: .85rem; font-variant-numeric: tabular-nums; }
+caption { text-align: left; color: var(--muted); font-size: .82rem; padding-bottom: .65rem; }
+th, td { padding: .65rem .7rem; text-align: left; border-bottom: 1px solid var(--line); }
+thead th { color: var(--muted); font-size: .78rem; }
+tbody th { font-weight: 650; }
+.selected-capacity { background: var(--teal-pale); }
+.observation { font-size: .88rem; color: var(--muted); margin-top: 1rem; }
+.lesson-panel { display: flex; flex-direction: column; }
+.lesson-panel .eyebrow { margin-bottom: .6rem; }
+.lesson-panel p { color: var(--muted); font-size: .9rem; }
+.lesson-panel ul { padding-left: 1.1rem; font-size: .9rem; margin: .2rem 0 1.2rem; }
+.lesson-panel li { margin-bottom: .45rem; }
+.lesson-panel button { align-self: flex-start; margin-top: auto; }
+.lesson-panel .course-counts { font-size: .8rem; margin-top: .5rem; }
+.trace-panel { margin-top: 1.2rem; }
+summary { cursor: pointer; font-weight: 700; min-height: 30px; }
+.table-scroll { overflow-x: auto; margin-top: .8rem; }
+.trace-table { min-width: 780px; }
+.trace-table td { white-space: nowrap; }
+.current-step { background: var(--teal-pale); }
+footer { padding: 1.8rem 0 2.5rem; color: var(--muted); font-size: .82rem; }
+footer p { max-width: 930px; }
+@media (max-width: 760px) {
+  .wrap { width: min(100% - 28px, 1120px); }
+  .hero { padding: 2rem 0 1.5rem; }
+  .input-layout, .policy-grid, .lower-grid { grid-template-columns: 1fr; }
+  .input-layout { gap: 1rem; }
+  .input-layout .capacity-field { max-width: 190px; }
+  .panel { padding: 1.1rem; }
+  .policy { padding: 1rem; }
+  .lower-grid .panel { margin: 0; }
+  .inspection-heading { flex-direction: column; gap: .7rem; }
+  .step-controls .step-status { flex-basis: 100%; margin: .25rem 0 0; }
+  nav { font-size: .85rem; }
+  h1 { max-width: 460px; }
+}
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <nav aria-label="RecallWeave"><a class="brand" href="../demo.html">RecallWeave</a><a href="./cache-replacement.md">Worked guide</a></nav>
+    <header class="hero">
+      <p class="eyebrow">Systems lab · memory and history</p>
+      <h1>Same requests.<br>Different pages kept.</h1>
+      <p class="lede">Follow FIFO and LRU one request at a time. See how a hit changes the next eviction, then test what happens when the cache has more room.</p>
+      <div class="pill-row"><span class="pill">Starts empty</span><span class="pill">Equal-size pages</span><span class="pill">Any page can use any slot</span></div>
+    </header>
+    <main>
+      <section class="panel" aria-labelledby="input-title">
+        <h2 id="input-title">Choose a request sequence</h2>
+        <form id="comparison-form">
+          <div class="input-layout">
+            <div>
+              <label for="references">Page requests, in order</label>
+              <textarea id="references" rows="2" maxlength="512" spellcheck="false" aria-describedby="reference-help input-error">A B A C B</textarea>
+              <p class="hint" id="reference-help">Use up to 24 single page IDs: A–H or 1–8. Separate them with spaces or commas. A and 1 are different pages; an empty list is allowed.</p>
+            </div>
+            <div class="capacity-field">
+              <label for="capacity">Pages that fit</label>
+              <select id="capacity"><option value="1">1 page</option><option value="2" selected>2 pages</option><option value="3">3 pages</option><option value="4">4 pages</option><option value="5">5 pages</option></select>
+              <p class="hint">The same capacity for both policies.</p>
+            </div>
+          </div>
+          <div class="examples"><span>Try a worked example:</span><button type="button" id="load-recency">A hit changes the next eviction</button><button type="button" id="load-anomaly">The FIFO capacity anomaly</button></div>
+          <div class="form-bottom"><button type="submit" class="primary" id="run-comparison" disabled>Run comparison</button><p id="form-status" role="status">Loading the checked lesson…</p></div>
+          <p class="error" id="input-error" role="alert"></p>
+        </form>
+      </section>
+
+      <div id="results" hidden>
+        <section class="panel" aria-labelledby="inspection-title">
+          <div class="inspection-heading">
+            <div><h2 id="inspection-title">One shared sequence, two histories</h2><p class="hint"><span id="request-count">0</span> requests · capacity <span id="shown-capacity">2</span> · each card shows the selected prefix</p></div>
+            <button type="button" id="download-trace" disabled>Download experiment</button>
+          </div>
+          <p class="reference-line" id="accepted-references"></p>
+          <div class="step-controls" aria-label="Inspect retained steps">
+            <button type="button" id="step-first" disabled>First</button><button type="button" id="step-back" disabled>Back</button><button type="button" id="step-next" disabled>Next</button><button type="button" id="step-last" disabled>Last</button>
+            <p class="step-status" id="step-status" role="status" aria-live="polite"></p>
+          </div>
+          <progress id="step-progress" max="1" value="0" aria-label="Requests inspected"></progress>
+          <div class="policy-grid">
+            <article class="policy fifo" aria-labelledby="fifo-heading">
+              <header><h3 id="fifo-heading">FIFO</h3><span>First in, first out</span></header>
+              <p class="order">Oldest inserted → newest inserted</p><ol class="slots" id="fifo-slots" aria-label="FIFO cache in insertion order"></ol>
+              <p class="outcome" id="fifo-outcome"></p><p class="explanation" id="fifo-explanation"></p>
+              <dl class="counts" aria-label="FIFO cumulative counts at this step"><div><dt>hits</dt><dd id="fifo-hits">0</dd></div><div><dt>misses</dt><dd id="fifo-misses">0</dd></div></dl>
+            </article>
+            <article class="policy lru" aria-labelledby="lru-heading">
+              <header><h3 id="lru-heading">LRU</h3><span>Least recently used</span></header>
+              <p class="order">Least recently used → most recently used</p><ol class="slots" id="lru-slots" aria-label="LRU cache in recency order"></ol>
+              <p class="outcome" id="lru-outcome"></p><p class="explanation" id="lru-explanation"></p>
+              <dl class="counts" aria-label="LRU cumulative counts at this step"><div><dt>hits</dt><dd id="lru-hits">0</dd></div><div><dt>misses</dt><dd id="lru-misses">0</dd></div></dl>
+            </article>
+          </div>
+        </section>
+        <section class="panel" aria-labelledby="capacity-title">
+          <h2 id="capacity-title">More room, same complete sequence</h2>
+          <p class="hint">These totals use every request, regardless of the step selected above. Each row starts empty.</p>
+          <table id="capacity-table"><caption>Whole-sequence misses by capacity</caption><thead><tr><th scope="col">Capacity</th><th scope="col">FIFO misses</th><th scope="col">LRU misses</th></tr></thead><tbody id="capacity-rows"></tbody></table>
+          <p class="observation" id="whole-observation"></p><p class="observation" id="capacity-observation"></p>
+        </section>
+        <details class="panel trace-panel"><summary>Inspect the complete trace</summary><p class="hint">Cache contents are shown after each request, in each policy's order. “None” means no eviction.</p><p id="empty-trace" hidden>No requests to list.</p>
+          <div class="table-scroll" tabindex="0" role="region" aria-label="Complete two-policy trace">
+            <table class="trace-table"><caption>All requests; the selected step is highlighted</caption><thead><tr><th scope="col">Step</th><th scope="col">Page</th><th scope="col">FIFO</th><th scope="col">Evicts</th><th scope="col">FIFO contents</th><th scope="col">LRU</th><th scope="col">Evicts</th><th scope="col">LRU contents</th></tr></thead><tbody id="trace-rows"></tbody></table>
+          </div>
+        </details>
+      </div>
+
+      <div class="lower-grid">
+        <section class="panel" aria-labelledby="rules-title">
+          <h2 id="rules-title">Read the rule before the result</h2>
+          <p><strong>A hit</strong> finds the requested page already present. A miss loads it; if all slots are occupied, one page must leave first.</p>
+          <p><strong>FIFO</strong> keeps the insertion order on a hit. <strong>LRU</strong> refreshes the hit to most recent. The highlighted page is the request you just inspected.</p>
+          <p class="hint">Neither rule knows future requests. LRU's capacity guarantee compares LRU with itself at different capacities; it does not make LRU the winner on every workload.</p>
+        </section>
+        <section class="panel lesson-panel" aria-labelledby="lesson-title">
+          <p class="eyebrow">Take the next step</p><h2 id="lesson-title">Turn the trace into a lesson</h2>
+          <p>Predict the next eviction, explain the capacity anomaly and distinguish a trace count from a timing claim.</p>
+          <ul><li>Download the original course JSON.</li><li>Open RecallWeave and choose <strong>Bring your own lesson</strong>.</li><li>Review the preview, then explicitly start the lesson.</li></ul>
+          <button type="button" class="primary" id="download-course" disabled>Download the lesson</button><p class="course-counts" id="course-counts">12 questions · 4 concepts</p>
+        </section>
+      </div>
+    </main>
+    <footer>
+      <p>This is a small, fully associative model: pages have equal size, any page can use any slot, and every Run starts empty. Counts describe the supplied sequence; they are not a computer benchmark. Nothing is saved automatically.</p>
+      <p>Algorithm background: <a href="https://pages.cs.wisc.edu/~remzi/OSTEP/vm-beyondphys-policy.pdf">Arpaci-Dusseau &amp; Arpaci-Dusseau, <em>Operating Systems: Three Easy Pieces</em>, chapter 22</a>. The classic FIFO anomaly sequence is credited to Bélády, Nelson and Shedler. <a href="./cache-replacement.md">Read the worked guide and model limits.</a></p>
+    </footer>
+  </div>
+<script id="cache-course-source" type="application/json">"{\n  \"format\": \"recallweave-deck/1\",\n  \"title\": \"Cache decisions: FIFO, LRU and capacity\",\n  \"attribution\": \"Original RecallWeave question wording, worked traces and explanations, 2026, authored with AI assistance. Algorithm background: Remzi H. Arpaci-Dusseau and Andrea C. Arpaci-Dusseau, Operating Systems: Three Easy Pieces, chapter 22, Beyond Physical Memory: Policies (https://pages.cs.wisc.edu/~remzi/OSTEP/vm-beyondphys-policy.pdf). The classic 1,2,3,4,1,2,5,1,2,3,4,5 FIFO anomaly sequence is credited to L. A. Bélády, R. A. Nelson and G. S. Shedler (1969). No source prose or figures are reproduced.\",\n  \"license\": \"CC0-1.0 for the original course wording and worked derivations. Referenced materials retain their own terms and are not included. Educational review guidance remains in RecallWeave's AI-DISCLOSURE.md.\",\n  \"concepts\": [\n    \"Requests and cache state\",\n    \"FIFO and recency\",\n    \"Capacity and misses\",\n    \"Reading a trace\"\n  ],\n  \"items\": [\n    {\n      \"id\": \"cache-count-hits\",\n      \"concept\": \"Requests and cache state\",\n      \"prerequisites\": [],\n      \"prompt\": \"A cache starts empty and can hold two distinct pages. It receives A, A, B, A, in that order. A hit means the requested page is present immediately before that request. How many hits and misses occur under either FIFO or LRU?\",\n      \"options\": [\n        \"Three hits and one miss.\",\n        \"Two hits and two misses.\",\n        \"One hit and three misses.\",\n        \"Zero hits and four misses.\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"The first A is absent, so it misses and is loaded. The next A hits. B is absent, so it misses and fills the second slot. The last A hits because neither policy has had to evict a page. There are two hits and two misses; their sum is the four requests.\",\n      \"transfer\": \"Try B, B, B with capacity one. The first B misses and the next two hit. A repeated request is not a new distinct page, and a hit does not consume another slot.\"\n    },\n    {\n      \"id\": \"cache-resident-not-seen\",\n      \"concept\": \"Requests and cache state\",\n      \"prerequisites\": [],\n      \"prompt\": \"An empty two-page FIFO cache receives A, B, C, A. The first three requests miss, and loading C evicts A. What happens on the final A?\",\n      \"options\": [\n        \"It hits because A appeared earlier in the sequence.\",\n        \"It is ignored because repeated page names are duplicates.\",\n        \"It misses because A is no longer resident.\",\n        \"It hits because the cache has already made three requests.\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"A hit depends on the current contents, not whether the page has ever been requested. Before the final request the FIFO order is B, C. A is absent, so it misses, evicts B and leaves C, A. This trace has four misses even though only three distinct page names occur.\",\n      \"transfer\": \"At capacity three, A, B and C all remain resident before the final A. That last request then hits. Keep the initial state and request sequence fixed when comparing capacities.\"\n    },\n    {\n      \"id\": \"cache-literal-identity\",\n      \"concept\": \"Requests and cache state\",\n      \"prerequisites\": [],\n      \"prompt\": \"In this lab, A and 1 are different literal page IDs. An empty two-page cache receives A, 1, A. What is the result?\",\n      \"options\": [\n        \"One miss, because A and 1 refer to the same page.\",\n        \"Three misses, because every request creates a new page.\",\n        \"Zero misses, because both IDs fit in the capacity.\",\n        \"Two misses followed by one hit.\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"The first A and the first 1 are different absent pages, so both miss. They fill the two slots. The final A finds the original A still resident and hits. The letters and digits name pages; they are not page sizes, priorities or values to add.\",\n      \"transfer\": \"Changing the final A to B creates a third distinct page. That request misses and requires an eviction at capacity two. Naming a page with a digit does not give it a larger or smaller storage cost in this equal-size model.\"\n    },\n    {\n      \"id\": \"cache-lru-refresh\",\n      \"concept\": \"FIFO and recency\",\n      \"prerequisites\": [\n        \"Requests and cache state\"\n      ],\n      \"prompt\": \"An empty three-page LRU cache receives A, B, C, A. Its order is displayed least recently used first. What is the order now, and which page will a following request D evict?\",\n      \"options\": [\n        \"B, C, A; D evicts B.\",\n        \"A, B, C; D evicts A.\",\n        \"C, B, A; D evicts C.\",\n        \"B, A, C; D evicts B.\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"After A, B, C, the recency order is A, B, C. The hit on A refreshes A's position to most recently used, giving B, C, A. A following absent D finds a full cache, evicts B and leaves C, A, D. LRU changes recency on a hit as well as on loading a missed page.\",\n      \"transfer\": \"If the fourth request were B instead, the order would be A, C, B and the next absent D would evict A. Trace the actual last access of each resident page; frequency is a different rule.\"\n    },\n    {\n      \"id\": \"cache-fifo-hit-order\",\n      \"concept\": \"FIFO and recency\",\n      \"prerequisites\": [\n        \"Requests and cache state\"\n      ],\n      \"prompt\": \"An empty three-page FIFO cache receives A, B, C, A, D. FIFO evicts the page inserted earliest among those still resident. Which page does D evict, and what is the final insertion order, oldest first?\",\n      \"options\": [\n        \"B is evicted; the order is C, A, D.\",\n        \"D is evicted; the order stays A, B, C.\",\n        \"A is evicted; the order is B, C, D.\",\n        \"C is evicted; the order is A, B, D.\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"The hit on A does not change FIFO's insertion order. Immediately before D, the queue is still A, B, C, so A is first out. Loading D leaves B, C, D. Refreshing A on its hit would implement a recency rule instead of the FIFO rule used here.\",\n      \"transfer\": \"Request B next. It hits and the insertion order stays B, C, D. If the next request after that is an absent E, FIFO still evicts B despite that recent hit.\"\n    },\n    {\n      \"id\": \"cache-policy-counterexample\",\n      \"concept\": \"FIFO and recency\",\n      \"prerequisites\": [\n        \"Requests and cache state\"\n      ],\n      \"prompt\": \"Start both policies empty at capacity two and request A, B, A, C, B. FIFO leaves insertion order unchanged on a hit; LRU moves the hit to most recent. Which comparison is correct for these five requests?\",\n      \"options\": [\n        \"FIFO has four misses and LRU has three, so LRU always wins.\",\n        \"Both have three misses because they start with the same contents.\",\n        \"FIFO has three misses and LRU has four; this one trace does not rank every workload.\",\n        \"FIFO has five misses and LRU has five because three page IDs exceed capacity.\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"Both miss on A and B, then hit on A. FIFO still holds A, B, so C evicts A and the last B hits: three misses. LRU has refreshed A, so C evicts B; the final B then misses: four misses. This is a concrete workload where FIFO has fewer misses. LRU's use of recent history does not make it optimal on every sequence.\",\n      \"transfer\": \"Compare A, B, A, C, A at the same capacity. FIFO then misses on the final A while LRU hits, reversing the advantage. A finite request trace is evidence about that trace, not a universal policy ranking.\"\n    },\n    {\n      \"id\": \"cache-fifo-anomaly\",\n      \"concept\": \"Capacity and misses\",\n      \"prerequisites\": [\n        \"FIFO and recency\"\n      ],\n      \"prompt\": \"Run FIFO from empty on the classic reference sequence 1, 2, 3, 4, 1, 2, 5, 1, 2, 3, 4, 5. Compare capacities three and four with no other change. Which pair of miss counts occurs?\",\n      \"options\": [\n        \"Capacity three: 10; capacity four: 9.\",\n        \"Capacity three: 9; capacity four: 10.\",\n        \"Capacity three: 9; capacity four: 9.\",\n        \"Capacity three: 12; capacity four: 5.\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"At capacity three, misses occur at requests 1–7, 10 and 11: nine misses. At capacity four, requests 1–4 and 7–12 miss: ten misses. Increasing FIFO capacity makes this particular trace worse. This classic sequence is credited to Bélády, Nelson and Shedler and is commonly used to demonstrate the FIFO anomaly.\",\n      \"transfer\": \"In the explorer, load the anomaly example and compare complete-trace counts rather than only the selected step. Capacity five fits all five distinct pages and misses five times. The anomaly does not mean every capacity increase makes FIFO worse.\"\n    },\n    {\n      \"id\": \"cache-lru-inclusion\",\n      \"concept\": \"Capacity and misses\",\n      \"prerequisites\": [\n        \"FIFO and recency\"\n      ],\n      \"prompt\": \"Run LRU from empty on the same request prefix at capacities two and three. With equal-size pages and no restriction on their slots, which statement explains why adding LRU capacity cannot increase misses on that fixed sequence?\",\n      \"options\": [\n        \"Every hit clears both caches, so their contents are always identical.\",\n        \"The smaller LRU cache's resident pages are included in the larger cache's most-recent distinct pages.\",\n        \"LRU knows every future request and always selects the optimal victim.\",\n        \"The larger cache must have strictly fewer misses, even for an empty sequence.\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"After any prefix, an LRU cache holds up to its capacity of the most recently requested distinct pages. The two-page set is therefore contained in the three-page set for the same prefix. If the smaller cache hits on the next request, the larger one also has that page. Summing over the fixed sequence gives no more misses for larger LRU capacity. Counts may be equal.\",\n      \"transfer\": \"After A, B, A, C, the capacity-two LRU order is A, C; capacity three is B, A, C. The first set is contained in the second. This argument compares capacities within LRU; it does not assert that LRU beats FIFO at equal capacity.\"\n    },\n    {\n      \"id\": \"cache-loop-fits\",\n      \"concept\": \"Capacity and misses\",\n      \"prerequisites\": [\n        \"FIFO and recency\"\n      ],\n      \"prompt\": \"Start empty and request A, B, C, D, A, B, C, D. For both FIFO and LRU, what changes when capacity rises from three pages to four?\",\n      \"options\": [\n        \"Misses stay at four for both capacities.\",\n        \"Misses rise from four to eight because more pages are tracked.\",\n        \"Misses fall from eight to four; four slots retain the whole four-page loop after its first pass.\",\n        \"Misses fall from eight to zero because a large cache starts full.\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"At capacity three, each policy evicts the page that is requested again next in this four-page cycle, so all eight requests miss. At capacity four, the first A, B, C and D still miss, but they all remain resident for the second pass, which hits four times. More capacity does not remove the empty cache's first access to each distinct page.\",\n      \"transfer\": \"Repeat the four-page cycle again without restarting that same trace. At capacity four the next four requests all hit. Starting a new Run is a different experiment: its initial cache is empty again.\"\n    },\n    {\n      \"id\": \"cache-prefix-reading\",\n      \"concept\": \"Reading a trace\",\n      \"prerequisites\": [\n        \"Capacity and misses\"\n      ],\n      \"prompt\": \"A retained comparison contains A, B, A, C, B at capacity two. You inspect only the prefix after request three. Which cumulative counts belong on each policy's step card at that point?\",\n      \"options\": [\n        \"One hit and two misses, from the first three requests.\",\n        \"Two hits and three misses, using FIFO's whole-sequence totals on both cards.\",\n        \"One hit and four misses, using LRU's whole-sequence totals on both cards.\",\n        \"Zero hits and zero misses, because stepping does not execute real hardware.\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"The inspected prefix is A, B, A: miss, miss, hit for both policies. Each card should show one hit and two misses. Later C and B are outside this prefix. A separate table explicitly labeled for the whole sequence may show different totals. Moving Back and Next inspects retained states; it does not append more requests.\",\n      \"transfer\": \"Move back to the state before any request: both counts are zero. Move forward to request three again: the same one hit and two misses return. Repeatedly viewing a state does not warm a new cache or change the experiment.\"\n    },\n    {\n      \"id\": \"cache-empty-rate\",\n      \"concept\": \"Reading a trace\",\n      \"prerequisites\": [\n        \"Requests and cache state\"\n      ],\n      \"prompt\": \"The request list is empty and both caches start empty. What can this experiment report without inventing a hit rate?\",\n      \"options\": [\n        \"A 100% hit rate, because no request missed.\",\n        \"A 0% hit rate, because no request hit.\",\n        \"One miss to initialize each empty cache.\",\n        \"Zero requests, zero hits and zero misses; no hit-rate percentage from a zero denominator.\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"There are no accesses to classify. Both counts are zero, and hits divided by total requests would be 0/0. The empty experiment has a valid empty trace and zero misses at every capacity, but these facts do not determine a percentage. Saying 'No requests' keeps that boundary visible.\",\n      \"transfer\": \"Add one A and run again. It misses from empty, making the hit rate 0/1 = 0% if a rate is computed. The denominator has changed from zero to one; that is why the percentage now has a defined value.\"\n    },\n    {\n      \"id\": \"cache-counts-not-timing\",\n      \"concept\": \"Reading a trace\",\n      \"prerequisites\": [\n        \"Capacity and misses\"\n      ],\n      \"prompt\": \"Two policies are compared on the same finite page sequence, with the same capacity and empty initial state. One has fewer misses in this lab. Which conclusion is supported by those counts alone?\",\n      \"options\": [\n        \"It misses fewer times on this modeled sequence; the counts alone do not establish actual program speed or superiority on other workloads.\",\n        \"It must run faster on every computer, regardless of bookkeeping and miss costs.\",\n        \"It will have fewer misses on every possible future sequence.\",\n        \"It proves that a larger cache can never be useful.\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"The experiment counts requests under two specified replacement rules. It does not measure hardware, policy bookkeeping, transfer latency, different page sizes, prefetching or future workloads. Fewer misses is an exact result for this input and model; converting it to timing or a general recommendation requires more evidence.\",\n      \"transfer\": \"When comparing two saved experiments, first check their reference lists, capacities and empty initial states. If those differ, the counts mix changes in the workload or setup with the policy difference. Keep such comparisons explicitly labeled.\"\n    }\n  ]\n}\n"</script>
+<script id="cache-lab-runtime">
+(function () {
+'use strict';
+const { parseDeck } = (function () {
+/** Local lesson content. Imported data cannot replace the model or run code. */
+const DECK_FORMAT = 'recallweave-deck/1';
+const MAX_DECK_BYTES = 262144;
+
+function deckRecord(value, path) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    throw new Error(`${path} must be an object.`);
+  }
+  return value;
+}
+
+function deckText(value, path, limit) {
+  if (typeof value !== 'string' || !value.trim() || value.length > limit) {
+    throw new Error(`${path} must be nonempty text of at most ${limit} characters.`);
+  }
+  return value;
+}
+
+function deckList(value, path, minimum, maximum) {
+  if (!Array.isArray(value) || value.length < minimum || value.length > maximum) {
+    throw new Error(`${path} must contain ${minimum}–${maximum} entries.`);
+  }
+  return value;
+}
+
+/** Validate and copy only the content fields used by the existing lesson runtime. */
+function validateDeck(value) {
+  const input = deckRecord(value, 'Deck');
+  if (input.format !== undefined && input.format !== DECK_FORMAT) {
+    throw new Error(`Unsupported deck format. Use ${DECK_FORMAT}.`);
+  }
+  const title = deckText(input.title, 'title', 160);
+  const attribution = deckText(input.attribution, 'attribution', 2000);
+  const license = deckText(input.license, 'license', 2000);
+  const concepts = deckList(input.concepts, 'concepts', 1, 32).map((concept, index) =>
+    deckText(concept, `concepts[${index}]`, 80));
+  if (new Set(concepts).size !== concepts.length) throw new Error('Concept names must be unique.');
+  const knownConcepts = new Set(concepts);
+  const ids = new Set();
+  const coveredConcepts = new Set();
+  const links = new Map(concepts.map(concept => [concept, new Set()]));
+  const items = deckList(input.items, 'items', 1, 100).map((value, index) => {
+    const path = `items[${index}]`;
+    const item = deckRecord(value, path);
+    const id = deckText(item.id, `${path}.id`, 80);
+    if (ids.has(id)) throw new Error(`${path}.id duplicates another question ID.`);
+    ids.add(id);
+    const concept = deckText(item.concept, `${path}.concept`, 80);
+    if (!knownConcepts.has(concept)) throw new Error(`${path}.concept is not in concepts.`);
+    coveredConcepts.add(concept);
+    const prerequisites = deckList(item.prerequisites, `${path}.prerequisites`, 0, 31).map((name, p) => {
+      deckText(name, `${path}.prerequisites[${p}]`, 80);
+      if (!knownConcepts.has(name)) throw new Error(`${path}.prerequisites contains an unknown concept.`);
+      if (name === concept) throw new Error(`${path} cannot require its own concept.`);
+      links.get(concept).add(name);
+      return name;
+    });
+    if (new Set(prerequisites).size !== prerequisites.length) throw new Error(`${path}.prerequisites contains a duplicate.`);
+    const options = deckList(item.options, `${path}.options`, 2, 6).map((option, o) =>
+      deckText(option, `${path}.options[${o}]`, 1000));
+    if (new Set(options).size !== options.length) throw new Error(`${path}.options must be distinct.`);
+    if (!Number.isInteger(item.answer) || item.answer < 0 || item.answer >= options.length) {
+      throw new Error(`${path}.answer must be a zero-based index of an option.`);
+    }
+    return Object.freeze({
+      id, concept, prerequisites: Object.freeze(prerequisites),
+      prompt: deckText(item.prompt, `${path}.prompt`, 2000),
+      options: Object.freeze(options), answer: item.answer,
+      explanation: deckText(item.explanation, `${path}.explanation`, 4000),
+      transfer: deckText(item.transfer, `${path}.transfer`, 2000)
+    });
+  });
+  if (coveredConcepts.size !== concepts.length) throw new Error('Every concept must have at least one question.');
+  const visiting = new Set();
+  const visited = new Set();
+  const visit = concept => {
+    if (visiting.has(concept)) throw new Error('Prerequisite links must not form a cycle.');
+    if (visited.has(concept)) return;
+    visiting.add(concept);
+    for (const prerequisite of links.get(concept)) visit(prerequisite);
+    visiting.delete(concept);
+    visited.add(concept);
+  };
+  concepts.forEach(visit);
+  return Object.freeze({
+    format: DECK_FORMAT, title, attribution, license,
+    concepts: Object.freeze(concepts), items: Object.freeze(items)
+  });
+}
+
+/** The same size limit applies to a File and to programmatically supplied UTF-8 JSON. */
+function parseDeck(text) {
+  if (typeof text !== 'string' || new TextEncoder().encode(text).length > MAX_DECK_BYTES) {
+    throw new Error('Choose a JSON deck no larger than 256 KiB.');
+  }
+  let value;
+  try { value = JSON.parse(text); }
+  catch { throw new Error('The file is not valid JSON. Check its commas, quotes and brackets.'); }
+  return validateDeck(value);
+}
+
+/** Export the existing bundled lesson as an editable example of the same contract. */
+function serializeDeck(deck) {
+  return JSON.stringify(validateDeck(deck), null, 2) + '\n';
+}
+
+return { parseDeck };
+})();
+const { analyzeCacheTrace, parseReferenceText } = (function () {
+/** Equal-size, fully associative page-cache teaching model. All runs start empty. */
+const MAX_REFERENCES = 24;
+const MAX_TEXT_LENGTH = 512;
+const PAGE = /^[A-H1-8]$/;
+
+function freezeTree(value) {
+  if (value && typeof value === 'object' && !Object.isFrozen(value)) {
+    for (const child of Object.values(value)) freezeTree(child);
+    Object.freeze(value);
+  }
+  return value;
+}
+
+/** Parse literal page IDs. Separators do not become requests; case is not normalized. */
+function parseReferenceText(text) {
+  if (typeof text !== 'string' || text.length > MAX_TEXT_LENGTH) {
+    throw new Error('Enter page references as text of at most 512 characters.');
+  }
+  const trimmed = text.trim();
+  const references = trimmed ? trimmed.split(/[\s,]+/).filter(Boolean) : [];
+  if (references.length > MAX_REFERENCES) throw new Error('Enter at most 24 page references.');
+  if (references.some(page => !PAGE.test(page))) {
+    throw new Error('Use single page IDs A–H or 1–8, separated by spaces or commas.');
+  }
+  return Object.freeze(references);
+}
+
+function checkedInput(value) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)
+      || ![Object.prototype, null].includes(Object.getPrototypeOf(value))
+      || Reflect.ownKeys(value).length !== 2
+      || !Object.hasOwn(value, 'references') || !Object.hasOwn(value, 'capacity')) {
+    throw new Error('Comparison input must contain only references and capacity.');
+  }
+  const { references, capacity } = value;
+  if (!Number.isInteger(capacity) || capacity < 1 || capacity > 5) {
+    throw new Error('Choose a whole-number capacity from 1 to 5.');
+  }
+  if (!Array.isArray(references) || references.length > MAX_REFERENCES
+      || Reflect.ownKeys(references).length !== references.length + 1) {
+    throw new Error('References must be a dense array of at most 24 page IDs.');
+  }
+  for (let index = 0; index < references.length; index++) {
+    if (!Object.hasOwn(references, index) || typeof references[index] !== 'string'
+        || !PAGE.test(references[index])) {
+      throw new Error('Each reference must be one literal page ID: A–H or 1–8.');
+    }
+  }
+  return { references: [...references], capacity };
+}
+
+function runPolicy(references, capacity, policy) {
+  const pages = [];
+  let hits = 0, misses = 0;
+  const steps = references.map((request, index) => {
+    const before = [...pages];
+    const resident = pages.indexOf(request);
+    const hit = resident !== -1;
+    let evicted = null;
+    if (hit) {
+      hits++;
+      if (policy === 'lru') {
+        pages.splice(resident, 1);
+        pages.push(request);
+      }
+    } else {
+      misses++;
+      if (pages.length === capacity) evicted = pages.shift();
+      pages.push(request);
+    }
+    return { step: index + 1, request, before, hit, evicted, after: [...pages], hits, misses };
+  });
+  return {
+    order: policy === 'fifo' ? 'oldest-inserted-first' : 'least-recently-used-first',
+    initial: [], steps, totals: { requests: references.length, hits, misses }
+  };
+}
+
+/** Return owned immutable traces and a same-sequence, empty-start capacity comparison. */
+function analyzeCacheTrace(value) {
+  const input = checkedInput(value);
+  const fifo = runPolicy(input.references, input.capacity, 'fifo');
+  const lru = runPolicy(input.references, input.capacity, 'lru');
+  const capacityComparison = Array.from({ length: 5 }, (_, index) => {
+    const capacity = index + 1;
+    return {
+      capacity,
+      fifoMisses: (capacity === input.capacity ? fifo : runPolicy(input.references, capacity, 'fifo')).totals.misses,
+      lruMisses: (capacity === input.capacity ? lru : runPolicy(input.references, capacity, 'lru')).totals.misses
+    };
+  });
+  return freezeTree({ format: 'recallweave-cache-trace/1', input, policies: { fifo, lru }, capacityComparison });
+}
+
+return { analyzeCacheTrace, parseReferenceText };
+})();
+
+function element(tag, text, className) {
+  const node = document.createElement(tag);
+  if (text !== undefined) node.textContent = text;
+  if (className) node.className = className;
+  return node;
+}
+
+/** Mount only this separate lab; the learner and its state are never accessed. */
+function mountCacheLab(root, { courseText }) {
+  const course = parseDeck(courseText);
+  const get = id => {
+    const node = root.querySelector('#' + id);
+    if (!node) throw new Error('Missing cache-lab control: ' + id);
+    return node;
+  };
+  const references = get('references'), capacity = get('capacity');
+  const form = get('comparison-form'), error = get('input-error'), formStatus = get('form-status');
+  const resultPanel = get('results'), traceDownload = get('download-trace');
+  const buttons = ['step-first', 'step-back', 'step-next', 'step-last'].map(get);
+  let analysis = null, shownStep = 0, acceptedDraft = null;
+
+  function invalidate(message = 'Inputs changed. Run a new comparison.') {
+    analysis = null; shownStep = 0; acceptedDraft = null;
+    resultPanel.hidden = true; traceDownload.disabled = true;
+    buttons.forEach(button => { button.disabled = true; });
+    error.textContent = ''; references.removeAttribute('aria-invalid');
+    formStatus.textContent = message;
+  }
+
+  function current() {
+    if (analysis && (references.value !== acceptedDraft.references || capacity.value !== acceptedDraft.capacity)) {
+      invalidate();
+    }
+    return analysis !== null;
+  }
+
+  function download(text, filename) {
+    const url = URL.createObjectURL(new Blob([text], { type: 'application/json;charset=utf-8' }));
+    const anchor = document.createElement('a');
+    anchor.href = url; anchor.download = filename;
+    document.body.append(anchor); anchor.click(); anchor.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+
+  function renderPolicy(name) {
+    const policy = analysis.policies[name];
+    const step = shownStep ? policy.steps[shownStep - 1] : null;
+    const pages = step ? step.after : policy.initial;
+    const slots = get(name + '-slots'); slots.replaceChildren();
+    for (let index = 0; index < analysis.input.capacity; index++) {
+      const page = pages[index];
+      const slot = element('li', page ?? 'Empty', page === undefined ? 'slot empty' : 'slot');
+      if (step && page === step.request) slot.classList.add('requested');
+      slot.setAttribute('aria-label', page === undefined ? 'Unused slot' : 'Page ' + page);
+      slots.append(slot);
+    }
+    get(name + '-hits').textContent = String(step?.hits ?? 0);
+    get(name + '-misses').textContent = String(step?.misses ?? 0);
+    get(name + '-outcome').textContent = !step ? 'Cache starts empty'
+      : step.hit ? 'Hit · ' + step.request + ' is present'
+      : 'Miss · load ' + step.request;
+    get(name + '-outcome').dataset.outcome = !step ? 'initial' : step.hit ? 'hit' : 'miss';
+    get(name + '-explanation').textContent = !step
+      ? 'No request has been processed.'
+      : step.hit
+        ? name === 'fifo' ? 'A hit leaves the insertion order unchanged.' : 'A hit refreshes this page to most recently used.'
+        : step.evicted === null ? 'There is a free slot; no page is evicted.' : 'Evict page ' + step.evicted + ' before adding the requested page.';
+  }
+
+  function renderStep() {
+    renderPolicy('fifo'); renderPolicy('lru');
+    const count = analysis.input.references.length;
+    get('step-status').textContent = !count ? 'No requests · empty caches'
+      : !shownStep ? 'Before request 1 of ' + count
+      : 'After request ' + shownStep + ' of ' + count + ' · page ' + analysis.input.references[shownStep - 1];
+    get('step-progress').value = shownStep; get('step-progress').max = Math.max(count, 1);
+    buttons[0].disabled = buttons[1].disabled = shownStep === 0;
+    buttons[2].disabled = buttons[3].disabled = shownStep === count;
+    for (const row of get('trace-rows').children) row.classList.toggle('current-step', Number(row.dataset.step) === shownStep);
+  }
+
+  function renderWholeTrace() {
+    get('shown-capacity').textContent = String(analysis.input.capacity);
+    get('request-count').textContent = String(analysis.input.references.length);
+    get('accepted-references').textContent = analysis.input.references.join(' ') || 'No requests';
+    const tbody = get('capacity-rows'); tbody.replaceChildren();
+    for (const row of analysis.capacityComparison) {
+      const tr = element('tr'); tr.dataset.capacity = String(row.capacity);
+      tr.classList.toggle('selected-capacity', row.capacity === analysis.input.capacity);
+      const heading = element('th', String(row.capacity) + (row.capacity === analysis.input.capacity ? ' · shown' : ''));
+      heading.scope = 'row'; tr.append(heading, element('td', String(row.fifoMisses)), element('td', String(row.lruMisses)));
+      tbody.append(tr);
+    }
+    const { fifo, lru } = analysis.policies;
+    get('whole-observation').textContent = analysis.input.references.length
+      ? 'Across the complete sequence: FIFO has ' + fifo.totals.misses + ' misses; LRU has ' + lru.totals.misses + '. These counts describe this input.'
+      : 'No requests: both policies have zero hits and zero misses. There is no hit-rate percentage for an empty sequence.';
+    const rise = analysis.capacityComparison.find((row, index, all) => index && row.fifoMisses > all[index - 1].fifoMisses);
+    get('capacity-observation').textContent = rise
+      ? 'Here FIFO rises from ' + analysis.capacityComparison[rise.capacity - 2].fifoMisses + ' misses at capacity ' + (rise.capacity - 1) + ' to ' + rise.fifoMisses + ' at capacity ' + rise.capacity + '. More capacity can change its eviction order unfavorably.'
+      : 'FIFO does not gain misses across these five capacities for this sequence. Other sequences can behave differently.';
+    const rows = get('trace-rows'); rows.replaceChildren();
+    for (let index = 0; index < analysis.input.references.length; index++) {
+      const a = fifo.steps[index], b = lru.steps[index];
+      const tr = element('tr'); tr.dataset.step = String(index + 1);
+      const number = element('th', String(index + 1)); number.scope = 'row';
+      tr.append(number, element('td', a.request),
+        element('td', a.hit ? 'Hit' : 'Miss'), element('td', a.evicted ?? 'None'),
+        element('td', a.after.join(' → ')),
+        element('td', b.hit ? 'Hit' : 'Miss'), element('td', b.evicted ?? 'None'),
+        element('td', b.after.join(' → ')));
+      rows.append(tr);
+    }
+    get('empty-trace').hidden = analysis.input.references.length !== 0;
+  }
+
+  references.addEventListener('input', () => invalidate());
+  capacity.addEventListener('change', () => invalidate());
+  form.addEventListener('submit', event => {
+    event.preventDefault();
+    invalidate('');
+    try {
+      analysis = analyzeCacheTrace({ references: parseReferenceText(references.value), capacity: Number(capacity.value) });
+      acceptedDraft = { references: references.value, capacity: capacity.value };
+      shownStep = 0;
+      renderWholeTrace(); renderStep();
+      resultPanel.hidden = false; traceDownload.disabled = false;
+      formStatus.textContent = 'Comparison ready. Inspect the same request in both policies.';
+    } catch (failure) {
+      analysis = null; acceptedDraft = null;
+      resultPanel.hidden = true; traceDownload.disabled = true;
+      error.textContent = failure.message;
+      references.setAttribute('aria-invalid', 'true'); references.focus();
+    }
+  });
+  const move = value => { if (current()) { shownStep = value(); renderStep(); } };
+  buttons[0].addEventListener('click', () => move(() => 0));
+  buttons[1].addEventListener('click', () => move(() => Math.max(0, shownStep - 1)));
+  buttons[2].addEventListener('click', () => move(() => Math.min(analysis.input.references.length, shownStep + 1)));
+  buttons[3].addEventListener('click', () => move(() => analysis.input.references.length));
+  get('load-recency').addEventListener('click', () => {
+    references.value = 'A B A C B'; capacity.value = '2';
+    invalidate('Recency example loaded. Run it to compare both policies.'); references.focus();
+  });
+  get('load-anomaly').addEventListener('click', () => {
+    references.value = '1 2 3 4 1 2 5 1 2 3 4 5'; capacity.value = '3';
+    invalidate('Classic FIFO anomaly loaded. Run it, then inspect the whole-sequence capacity table.'); references.focus();
+  });
+  traceDownload.addEventListener('click', () => {
+    if (!current()) return;
+    download(JSON.stringify({ format: 'recallweave-cache-experiment/1', shownStep, result: analysis }, null, 2) + '\n', 'cache-replacement-experiment.json');
+  });
+  get('download-course').addEventListener('click', () => download(courseText, 'cache-replacement.json'));
+  get('course-counts').textContent = course.items.length + ' questions · ' + course.concepts.length + ' concepts';
+  get('run-comparison').disabled = false; get('download-course').disabled = false;
+  invalidate('Choose a sequence and run the comparison. Both caches start empty.');
+  root.documentElement.dataset.cacheReady = 'true';
+}
+
+const courseText = JSON.parse(document.querySelector('#cache-course-source').textContent);
+mountCacheLab(document, { courseText });
+})();
+</script>
+</body>
+</html>
