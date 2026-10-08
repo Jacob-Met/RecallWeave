@@ -104,6 +104,39 @@ A trace must match the exact loaded course content and learning model. For an im
 
 Trace files contain answers and practice progress. They do not include personal reflections or replace reflections already in the tab. The current session supplies the displayed option order; saved answers always identify the original option, regardless of its A–D position. Saving and restoring work offline in the standalone demo. There is no automatic browser persistence, account, or upload.
 
+## Compare two saved learning traces
+
+Open **[Compare learning traces](compare-traces.html)** directly from your files.
+Choose two completed learning-trace JSON files to inspect both sets of answers.
+The reader accepts only the exact same course content and current model, using the
+existing archive checks; it does not replace a learner session or modify the files.
+
+Questions appear in course order and match by canonical question identity, even
+when the two sessions answered them in different orders. Each side keeps its
+original first answer and question position. Practice is separate: initially
+correct questions, an unstarted round, a pending retry and a recorded retry have
+distinct labels. Filter to differing first answers or practice records, filter by
+concept, or print the current filtered comparison. Course answers, explanations,
+transfer prompts, attribution and permission stay available beside the records.
+
+A and B are the selected file positions, not an inferred chronology. Save times
+are file metadata; two files may be different snapshots of the same session.
+Correctness counts and answer differences do not establish learning improvement,
+grades or the validity of the illustrative model. Files are editable records,
+not authenticated observations. The reader does not compare model estimates.
+
+Finish a first session in the learner and choose **Download trace (.json)** under
+**Keep or restore a learning trace** to obtain a compatible file. Completed traces
+with no practice, partial practice or completed practice are supported. Decks,
+author drafts and unfinished-lesson files are separate formats. Each trace must
+be at most 2 MiB of valid UTF-8 JSON. Replacing or clearing either selection
+immediately retires the old paired view; canceled file selection preserves the
+accepted files, and rejected or superseded reads cannot restore a stale pair.
+
+This separate page works offline with no dependencies, upload or browser storage.
+Rebuild it by running: node tools/build-trace-comparison.mjs.
+The existing learner and author builders and generated pages are unchanged.
+
 ## Build a course deck
 
 Open **[Deck studio](author.html)** directly from your files, or visit `author/` when serving the modular app. Write a title, author/source and permission statement; name the concepts; then add questions, answer options, explanations and transfer prompts. A complete lesson needs a question for every concept. Optional prerequisite choices connect an earlier concept to a later one and must not form a loop in the checked lesson.
