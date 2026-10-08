@@ -1,0 +1,104 @@
+{
+  "schema": "hamon.independent_source_review.v1",
+  "reviewer": "chatgpt-b47cbcf18759/integration_review",
+  "recorded_at": "2026-10-08T15:23:10.242215+00:00",
+  "scope": "Original RecallWeave floating-point lesson answers, explanations, transfer prompts, guide, and content fit against the recovered importer contract. No author-file mutation.",
+  "verdict": "No blocking content finding in the exact reviewed source. Actual importer receiving remains pending.",
+  "sources": [
+    {
+      "path": "/workspace/scratch/b47cbcf18759/recallweave-floating-point-stage/courses/floating-point.json",
+      "sha256": "1a033a6e205ae3c90df56e26bd17c08f78731422f501215baf5aa8331ae32158",
+      "bytes": 16029
+    },
+    {
+      "path": "/workspace/scratch/b47cbcf18759/recallweave-floating-point-stage/courses/floating-point.md",
+      "sha256": "bc434d2b194ad8ad18c5e46c39b7e5b4c5f7497c7dc3757d8977ae5d054df2cf",
+      "bytes": 9115
+    },
+    {
+      "path": "/workspace/scratch/b47cbcf18759/recallweave-floating-point-stage/src/floating-point.mjs",
+      "sha256": "34346c16c71eab9560e246e5cfce2f7c65ab7d181e8b1ad876fc52021549c15a",
+      "bytes": 9451
+    }
+  ],
+  "content_review": {
+    "items": 14,
+    "concepts": 7,
+    "coverage": {
+      "Binary representation": 2,
+      "Spacing and ties": 2,
+      "Range limits": 2,
+      "Rounded arithmetic": 2,
+      "Stored geometry": 2,
+      "Coordinate choices": 2,
+      "Sensitivity and scale": 2
+    },
+    "answer_positions": [
+      0,
+      2,
+      1,
+      3,
+      1,
+      2,
+      0,
+      3,
+      2,
+      1,
+      3,
+      0,
+      2,
+      1
+    ],
+    "answer_distribution": {
+      "0": 3,
+      "1": 4,
+      "2": 4,
+      "3": 3
+    },
+    "answer_permutation": "Every selected option retains the original correct answer text; the earlier all-first-option cue is removed.",
+    "findings": [],
+    "checked_distinctions": [
+      "An intended decimal, its parsed binary64 input, and the resulting binary32 value are separate reference data sets.",
+      "Neighbor gaps are side-specific at powers of two; ties to even selects both lower and upper neighbors in the paired examples.",
+      "Subnormal/overflow range behavior is distinguished from a conditioning diagnosis.",
+      "Cancellation can expose an earlier lost contribution; widening after that boundary cannot recover it.",
+      "The stated determinant is signed double area, not triangle area. A nonzero stored determinant can reverse sign after translation and output quantization.",
+      "Preserved winding does not imply preserved shape, and the origin examples do not claim a monotonic fidelity scale.",
+      "Local storage protects the source differences only until a later global quantization boundary.",
+      "The power-of-two invariant is bounded; the angle sine is not presented as a complete condition number."
+    ],
+    "transfer_review": "Prompts extend the same model to reduced fractions, negative spacing, nearby midpoint inputs, alternate exact controls, data-reference attribution, output checks, and explicit perturbation assumptions without contradicting the stated answers."
+  },
+  "importer_boundary": {
+    "actual_module_available_locally": false,
+    "actual_module_executed": false,
+    "author_reported_module_sha256": "621438c166ec4bfafd9d87c698a1d46cb1722f4fb92dcbb8d9f52fce682c338b",
+    "basis": "Producer previously read the exact native deck.mjs. Reviewer checked local JSON against the reported limits and graph/field rules; this is not a replacement parser or a native importer qualification.",
+    "structural_check": "16,029 UTF-8 bytes; format and all required text fields fit; unique IDs, concepts, and options; zero-based answer indexes in range; known unique nonself prerequisites; acyclic concept graph; every concept covered.",
+    "remaining_gate": "Run the unchanged real parseDeck/serializeDeck receiving path when the original module is available."
+  },
+  "primary_reference_checks": [
+    {
+      "url": "https://tc39.es/ecma262/2025/multipage/numbers-and-dates.html#sec-math.fround",
+      "section": "21.3.2.17",
+      "supports": "Number to binary32 using roundTiesToEven, then binary64 Number result."
+    },
+    {
+      "url": "https://docs.oracle.com/cd/E19957-01/806-3568/ncg_math.html",
+      "section": "Single Format",
+      "supports": "Binary32 field widths, normal precision, subnormal leading bit and range boundaries."
+    },
+    {
+      "url": "https://docs.oracle.com/cd/E19957-01/806-3568/ncg_goldberg.html",
+      "section": "Cancellation",
+      "supports": "Cancellation can expose prior operand error; exact operands and intended original data remain distinct."
+    }
+  ],
+  "execution_limits": [
+    "No author source changes.",
+    "No arithmetic suite or root integer-lattice oracle rerun.",
+    "No actual importer, browser, standalone build, or native receiving execution claimed.",
+    "No GitHub requests, native command retries, or production deployment."
+  ],
+  "custody": "Local review evidence prepared for the existing RecallWeave Git-backed receiving record when native transport recovers."
+}
