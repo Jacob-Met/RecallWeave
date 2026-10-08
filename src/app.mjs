@@ -1,6 +1,7 @@
 import { DEFAULT_BKT, initialMastery, runLearnerSimulation, selectNextItem, updateMastery } from './knowledge.mjs';
 import { answerPractice, beginPractice, createReview, currentPracticeItem } from './review.mjs';
 import { createStudyNotes } from './session-export.mjs';
+import { mountTraceArchive } from './trace-archive-ui.mjs';
 import { orderOptions } from './answer-order.mjs';
 
 const root = document.querySelector('#session-content');
@@ -15,12 +16,14 @@ const answers = [];
 let review = null;
 let practice = null;
 let inPractice = false;
+let traceArchiveControls = null;
 const progressFill = document.querySelector('#progress-fill');
 const progressTrack = document.querySelector('[role="progressbar"]');
 const stepLabel = document.querySelector('#step-label');
 const stepCount = document.querySelector('#step-count');
 
 function setProgress() {
+  traceArchiveControls?.refresh();
   const count = inPractice ? practice.answers.length : answers.length;
   const total = inPractice ? practice.items.length : deck.items.length;
   stepCount.textContent = `${count} / ${total}`;
@@ -166,4 +169,18 @@ document.querySelector('#simulation-button').addEventListener('click', () => {
   document.querySelector('#simulation-output').innerHTML = `<div class="simulation-result"><strong>Scripted run · not learner evidence</strong><p>One deterministic toy profile (latent concept strengths: 0.53–0.82), same seed and response model; only item order changes.</p><div class="simulation-compare"><span>Adaptive: ${correctCount(adaptive)}/${adaptive.trace.length} correct · mean estimated mastery ${Math.round(adaptive.meanEstimatedMastery * 100)}%</span><span>Fixed order: ${correctCount(fixed)}/${fixed.trace.length} correct · mean estimated mastery ${Math.round(fixed.meanEstimatedMastery * 100)}%</span></div><p>One tiny synthetic run is not a performance claim. Use the test suite for invariants; efficacy needs a larger, preregistered study.</p></div>`;
 });
 document.querySelector('#start-button').addEventListener('click', renderQuestion);
+traceArchiveControls = mountTraceArchive({
+  container: document.querySelector('#trace-archive'),
+  getDeck: () => deck,
+  getTrace: () => ({answers, mastery, practice}),
+  restoreTrace: state => {
+    answers.splice(0, answers.length, ...state.answers);
+    asked.clear();
+    for (const answer of state.answers) asked.add(answer.item);
+    Object.assign(mastery, state.mastery);
+    review = state.review;
+    practice = state.practice;
+    renderResults();
+  }
+});
 setProgress();
