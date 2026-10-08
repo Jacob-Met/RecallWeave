@@ -2,6 +2,8 @@
 
 An optional twelve-question RecallWeave unit for introductory biology learners who have encountered the existing cellular-energy lesson.
 
+Try the optional [enzyme kinetics explorer](enzyme-kinetics-lab.html) to vary substrate and compare saturation with two explicitly stated inhibition models. Its [model guide](enzyme-kinetics.md) connects the controls to `enz-binding-2` and `enz-regulation-1`; the course JSON and answer keys are unchanged.
+
 ## Why this unit belongs here
 
 The receiving curriculum at `4775af91ba6a5d4df787669f39b44364dd1e37ba` contains six questions on photosynthesis, glucose, cellular respiration and ATP (`data/deck.json`, Git blob `f1d4eb431c073b7bda268a2008e733b254a115fc`). It asks how cells transfer energy and mentions linked reaction pathways, but has no question on activation barriers, catalysis, substrate saturation or feedback regulation. This unit supplies those missing ideas. It does not replace the original lesson.
