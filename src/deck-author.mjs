@@ -67,6 +67,9 @@ export function restoreQuestion(draft, removal) {
   if (draft.questions.some(item => item.key === removal.item.key || item.id === removal.item.id)) {
     throw new Error('That question is already present.');
   }
+  const knownConcepts = new Set(draft.concepts.map(concept => concept.key));
+  if (!knownConcepts.has(removal.item.conceptKey)) removal.item.conceptKey = null;
+  removal.item.prerequisiteKeys = removal.item.prerequisiteKeys.filter(key => knownConcepts.has(key));
   draft.questions.splice(Math.min(removal.index, draft.questions.length), 0, removal.item);
   return removal.item;
 }
