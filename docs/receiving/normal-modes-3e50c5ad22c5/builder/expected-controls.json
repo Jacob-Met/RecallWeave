@@ -1,0 +1,42 @@
+{
+  "scope": "Independent standalone-builder and embedded-download serialization receiving; no physics rerun.",
+  "candidateBuilderInspected": false,
+  "expectedControls": [
+    {
+      "control": "deterministic source parity",
+      "expectation": "Two builds from identical core, UI, template, checked deck, and guide sources must produce byte-identical HTML. Check mode must accept exact output and refuse stale output without rewriting it. Changing one input must change the appropriate rendered output."
+    },
+    {
+      "control": "token cardinality",
+      "expectation": "Every required template marker occurs exactly once. Missing or duplicate required markers must refuse the build and preserve any prior output byte-for-byte. Marker names are discovered from the interface after this contract is frozen."
+    },
+    {
+      "control": "checked deck",
+      "expectation": "An invalid answer index, malformed JSON, or a structural prerequisite violation must be refused by the native checked-deck path before replacing prior HTML."
+    },
+    {
+      "control": "literal serialization",
+      "expectation": "Embedded deck and guide payloads retain literal closing script tags, HTML-like text, quotes, ampersands, U+2028 and U+2029 when decoded. Such text must not terminate or inject script elements. Source downloads should retain original source text, including formatting and trailing newline."
+    },
+    {
+      "control": "standalone dependencies",
+      "expectation": "The rendered executable script compiles and runs as classic self-contained JavaScript under a minimal authored fixture, with no residual static module imports or exports and no external script src dependency."
+    },
+    {
+      "control": "rename failure",
+      "expectation": "An existing output directory containing an authored sentinel must survive a failed file rename intact. The failed build must leave no own temporary output artifact."
+    },
+    {
+      "control": "working directory independence",
+      "expectation": "Running the actual builder entry point by absolute path from a different working directory uses its own project sources and the intended destination; check mode behaves the same way."
+    }
+  ],
+  "fixtureDesign": {
+    "isolation": "All source mutations and prior-output sentinels live in independently authored fixture directories under /tmp/hamon-normal-modes-builder-review-3e50c5ad22c5.",
+    "literal": "</script><script>globalThis.__injected = true</script><b data-value=\"q'&\">literal & < >   LINE   PARAGRAPH</b>",
+    "priorOutput": "REVIEW_PRIOR_HTML_SENTINEL_3e50c5ad22c5\n",
+    "directorySentinel": "REVIEW_EXISTING_DIRECTORY_MUST_SURVIVE\n",
+    "realTemplatePolicy": "Use a minimal authored template if the production template is still in flight; retain that scope and later repeat only the rendering/serialization controls against the final production template."
+  },
+  "preservation": "Original physical/content review packet remains untouched. Actual builder implementation is owned by /root; any proposed fix stays isolated in this new review directory."
+}

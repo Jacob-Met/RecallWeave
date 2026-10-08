@@ -88,12 +88,20 @@ The reader admits at most 2 MiB of UTF-8 input before parsing. It checks the
 version and canonical timestamp, compares the source and model, and then:
 
 1. Starts from native `initialMastery`.
-2. Selects the next unseen item with native `selectNextItem`.
+2. Selects an unseen item with native `selectNextItem`, allowing the recorded
+   answer ID only when it has exactly the maximum native score.
 3. Requires the next saved answer to name that item and a valid canonical choice.
 4. Applies native `updateMastery` exactly once and proceeds to the next answer.
 5. Requires the complete saved mastery record to equal the replay result without
    rounding or a numerical tolerance.
 6. Verifies the question or feedback cursor and every answer permutation.
+
+Replay uses the same exact-score preference for the recorded pending question.
+This admits existing valid version 1 files across locales whose item-ID sort
+orders differ. The default selector still uses its existing locale order for
+fresh choices; no score, prerequisite bonus, or BKT update changes. A preferred
+ID with a lower score is refused even when the scores are numerically close:
+there is no tie tolerance. No archive migration or additional field is needed.
 
 Unknown or duplicate items, a non-adaptive answer prefix, invalid choices, altered
 model estimates, mismatched source, malformed presentation, and unsupported or
@@ -101,14 +109,14 @@ oversized JSON throw a `RangeError`. The current session is never mutated by the
 codec. Deep source/model values beyond the admitted native deck's shallow
 structure are rejected instead of recursively traversing an unbounded structure.
 
-A started lesson with zero first answers is supported: it must show the first
-native question with initial mastery and valid option permutations. A welcome
+A started lesson with zero first answers is supported: its recorded question
+must have the maximum native score at initial mastery, with valid option permutations. A welcome
 screen has no active question and should leave the save control disabled.
 
 Once every item has a first answer, the new writer directs the caller to the
 existing completed learning-trace format. This includes the final question's
 feedback screen. `src/trace-archive.mjs`, its v1 format, review/practice state,
-the BKT formulas and the adaptive selection function are unchanged.
+the BKT formulas and default adaptive selection behavior are unchanged.
 
 This format checks **internal consistency and the loaded source/model
 relationship**. It is a local learner file, not an authenticated record of learner
@@ -119,8 +127,9 @@ It contains no reflection state, account data or automatic storage instructions.
 
 The active course importer is coordinated in
 [issue #7](https://github.com/Jacob-Met/RecallWeave/issues/7). Integrate against that
-owner's current frozen app composition. The codec contribution changes no app,
-course-admission, author-draft, completed-trace, model or builder source.
+owner's current frozen app composition. Course admission, author drafts,
+completed-trace handling, BKT formulas and the standalone builder source remain
+unchanged by locale-compatible replay.
 
 The current app adds an item to `asked` when it **displays** the question, before
 the answer exists. Do not serialize or blindly reuse that set on restore.
@@ -131,9 +140,10 @@ const answeredIds = new Set(state.answers.map(answer => answer.item));
 ~~~
 
 For a question restore, replace the first answers, mastery and option orders,
-set `asked` to answered IDs, then render the native next question. The ordinary
-question renderer selects `state.nextItemId` and marks it asked. Adding the saved
-pending question before that selection would skip it.
+set `asked` to answered IDs, then pass the loaded item matching the validated
+`state.presentation.itemId` to `renderLessonQuestion`. That renderer marks the
+saved question asked. Do not reselect it using the destination locale: another
+maximal tie could otherwise replace the saved pending question.
 
 For a feedback restore, reconstruct the last answered question from
 `state.presentation.itemId` and its last canonical answer. Render its existing
@@ -168,7 +178,7 @@ alone do not establish either browser result.
 Run:
 
 ~~~sh
-node --test tests/lesson-archive.test.mjs
+node --test tests/knowledge.test.mjs tests/lesson-archive.test.mjs tests/lesson-locale.test.mjs
 ~~~
 
 The authored cases cover a mixed two-answer shipped-course prefix, continuation
@@ -176,7 +186,11 @@ equivalence with an uninterrupted native session, started-empty state, feedback,
 the existing completed archive with separate practice progress, source/model
 tampering, incorrect adaptive prefixes and choice indices, exact mastery,
 presentation permutations, immutable results and refusal preservation, UTF-8
-limits, timestamps and ordinary identifiers such as `__proto__`.
+limits, timestamps and ordinary identifiers such as `__proto__`. Locale replay
+regressions use fresh German and Swedish Node processes and the unchanged
+original v1 archive bytes. They cover cross-locale answers, pending questions,
+feedback, exact-score ties, and refusal of strictly lower or near-but-unequal
+scores. These native API checks do not establish rendered-browser behavior.
 
 The exact received baseline, the native demonstration of the completed-only
 boundary, and the new test receipt are retained under

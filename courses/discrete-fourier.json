@@ -1,0 +1,209 @@
+{
+  "format": "recallweave-deck/1",
+  "title": "Discrete Fourier: coefficients, pairs and reconstruction",
+  "attribution": "Original RecallWeave lesson and worked examples. Transform convention cross-checked against NumPy's Discrete Fourier Transform reference: https://numpy.org/doc/stable/reference/routines.fft.html. No reference prose or external datasets are reproduced.",
+  "license": "Original lesson content is available under CC BY 4.0: https://creativecommons.org/licenses/by/4.0/ . Attribute the RecallWeave contributors.",
+  "concepts": [
+    "Finite sample grids",
+    "Fourier coefficients",
+    "Real-sample frequency pairs",
+    "Reconstruction and residuals"
+  ],
+  "items": [
+    {
+      "id": "dft-grid-count",
+      "concept": "Finite sample grids",
+      "prerequisites": [],
+      "prompt": "A list has N = 8 real samples. How many complex coefficients does its discrete Fourier transform contain?",
+      "options": [
+        "4, because samples are real",
+        "8, one for each bin k = 0 through 7",
+        "Infinitely many, one for every frequency"
+      ],
+      "answer": 1,
+      "explanation": "The N-point DFT maps N ordered samples to N complex coefficients. Real inputs give conjugate symmetry, which reduces independent information but does not remove bins from the full transform.",
+      "transfer": "Separate the number of stored bins from the number of independent values."
+    },
+    {
+      "id": "dft-grid-scope",
+      "concept": "Finite sample grids",
+      "prerequisites": [],
+      "prompt": "An inverse DFT reproduces all eight entered sample values with a tiny numerical residual. What has this checked?",
+      "options": [
+        "The reconstructed values on those eight sample positions",
+        "The unknown continuous waveform between samples",
+        "The accuracy of a physical sensor"
+      ],
+      "answer": 0,
+      "explanation": "The calculation compares two finite arrays on the same index grid. It does not establish which continuous signal produced them or validate a sensor. Those questions require assumptions and evidence beyond the array.",
+      "transfer": "When a model fits observations, state the domain on which the fit was checked."
+    },
+    {
+      "id": "dft-grid-rate",
+      "concept": "Finite sample grids",
+      "prerequisites": [],
+      "prompt": "Bin k = 1 represents one cycle per periodic block of N samples. No sampling rate was supplied. Which label is justified?",
+      "options": [
+        "Exactly 1 Hz",
+        "Exactly N Hz",
+        "1/N cycles per sample"
+      ],
+      "answer": 2,
+      "explanation": "A frequency in hertz needs a time scale. Here k/N describes cycles per sample. If a sampling rate fs were separately justified, a signed-frequency interpretation could use k*fs/N for positive-frequency bins.",
+      "transfer": "Check the units before converting an index into a physical frequency."
+    },
+    {
+      "id": "dft-dc-sum",
+      "concept": "Fourier coefficients",
+      "prerequisites": [
+        "Finite sample grids"
+      ],
+      "prompt": "Using the lab's unscaled forward transform, what is X[0] for [3, 3, 3, 3]?",
+      "options": [
+        "3",
+        "12",
+        "0"
+      ],
+      "answer": 1,
+      "explanation": "At k = 0 all complex exponentials equal 1, so X[0] is the sum, 12. The mean is X[0]/N = 3. The inverse transform supplies the factor 1/N.",
+      "transfer": "Distinguish a raw transform coefficient from a sample amplitude or mean."
+    },
+    {
+      "id": "dft-cosine-coeff",
+      "concept": "Fourier coefficients",
+      "prerequisites": [
+        "Finite sample grids"
+      ],
+      "prompt": "For [1, 0, -1, 0], the four-bin DFT is [0, 2, 0, 2], up to floating-point residuals. Why are the two nonzero coefficients both 2?",
+      "options": [
+        "Each cosine sample is doubled",
+        "A real cosine is represented by positive and negative frequency partners; the inverse divides by N = 4",
+        "The transform has been normalized to unit energy"
+      ],
+      "answer": 1,
+      "explanation": "The inverse contribution is (2*exp(i*pi*n/2) + 2*exp(-i*pi*n/2))/4 = cos(pi*n/2). Both bins jointly reconstruct the real cosine.",
+      "transfer": "Before reading a magnitude as amplitude, check the normalization and whether a conjugate partner contributes."
+    },
+    {
+      "id": "dft-sine-sign",
+      "concept": "Fourier coefficients",
+      "prerequisites": [
+        "Finite sample grids"
+      ],
+      "prompt": "The forward transform uses exp(-i*2*pi*k*n/N). For [0, 1, 0, -1], what is X[1]?",
+      "options": [
+        "-2i",
+        "+2i",
+        "2"
+      ],
+      "answer": 0,
+      "explanation": "At n = 1 the contribution is -i; at n = 3 the sample -1 multiplies +i and contributes another -i. Thus X[1] = -2i. Its partner X[3] = +2i.",
+      "transfer": "Use a small hand-checkable input to identify the transform's sign convention."
+    },
+    {
+      "id": "dft-pair-partner",
+      "concept": "Real-sample frequency pairs",
+      "prerequisites": [
+        "Finite sample grids",
+        "Fourier coefficients"
+      ],
+      "prompt": "For N = 8 real samples, which bins are retained when the lab selects interior pair 2?",
+      "options": [
+        "2 and 6",
+        "2 and 3",
+        "Only 2"
+      ],
+      "answer": 0,
+      "explanation": "The partner of k is N-k: 8-2 = 6. Keeping both conjugate coefficients retains a real-valued contribution apart from floating-point residuals.",
+      "transfer": "Treat a conjugate pair as one selection when editing a spectrum of real samples."
+    },
+    {
+      "id": "dft-singletons",
+      "concept": "Real-sample frequency pairs",
+      "prerequisites": [
+        "Finite sample grids",
+        "Fourier coefficients"
+      ],
+      "prompt": "Which selections are single bins, rather than two different bins, for N = 8?",
+      "options": [
+        "1 and 7",
+        "All bins are singletons",
+        "DC bin 0 and Nyquist bin 4"
+      ],
+      "answer": 2,
+      "explanation": "DC is its own partner modulo N. For even N, k = N/2 is also its own partner. Bin 4 corresponds to the alternating pattern on this grid.",
+      "transfer": "Do not double the DC or Nyquist contribution when reconstructing from a one-sided selection."
+    },
+    {
+      "id": "dft-phase-resolution",
+      "concept": "Real-sample frequency pairs",
+      "prerequisites": [
+        "Finite sample grids",
+        "Fourier coefficients"
+      ],
+      "prompt": "A bin's magnitude is at or below the lab's displayed numerical phase-resolution threshold. What should the phase table say?",
+      "options": [
+        "Its mathematical phase is exactly zero",
+        "Phase unresolved at this numerical scale",
+        "The original samples must all be zero"
+      ],
+      "answer": 1,
+      "explanation": "Near numerical cancellation, a tiny computed complex coefficient can have a very unstable angle. The lab marks phase unresolved, retains the raw real and imaginary components, and does not claim the coefficient is mathematically zero.",
+      "transfer": "A displayed angle can be unreliable even when software can compute atan2."
+    },
+    {
+      "id": "dft-parseval",
+      "concept": "Reconstruction and residuals",
+      "prerequisites": [
+        "Finite sample grids",
+        "Fourier coefficients",
+        "Real-sample frequency pairs"
+      ],
+      "prompt": "For [1, 0, 0, 0], every DFT coefficient has magnitude 1. Which equality matches this lab's normalization?",
+      "options": [
+        "Sum |x[n]|^2 = (sum |X[k]|^2)/N = 1",
+        "Sum |x[n]|^2 = sum |X[k]|^2 = 4",
+        "Sum |x[n]|^2 = N*(sum |X[k]|^2) = 16"
+      ],
+      "answer": 0,
+      "explanation": "The sample energy is 1. The four coefficient squared magnitudes sum to 4, and division by N = 4 gives 1. Different transform normalizations move this scale factor.",
+      "transfer": "An energy comparison must use the same normalization as the forward and inverse formulas."
+    },
+    {
+      "id": "dft-drop-dc",
+      "concept": "Reconstruction and residuals",
+      "prerequisites": [
+        "Finite sample grids",
+        "Fourier coefficients",
+        "Real-sample frequency pairs"
+      ],
+      "prompt": "The four input samples are [3, 3, 3, 3]. You deselect DC and retain the other pairs. What reconstruction and RMS residual should you expect?",
+      "options": [
+        "The original constant, with RMS residual 0",
+        "Approximately zero at each sample, with RMS residual 3",
+        "A constant 12, with RMS residual 9"
+      ],
+      "answer": 1,
+      "explanation": "All the constant input's energy is in DC. Removing it leaves only numerical residuals. Each real reconstruction error is approximately -3, so sqrt(mean(error^2)) is approximately 3.",
+      "transfer": "A residual caused by omitted coefficients is expected; it is not evidence that the inverse formula is broken."
+    },
+    {
+      "id": "dft-empty-selection",
+      "concept": "Reconstruction and residuals",
+      "prerequisites": [
+        "Finite sample grids",
+        "Fourier coefficients",
+        "Real-sample frequency pairs"
+      ],
+      "prompt": "If you deselect every pair for [1, -1, 1, -1], what is the RMS residual?",
+      "options": [
+        "0, because nothing was selected",
+        "4, the Nyquist coefficient",
+        "1, because the zero reconstruction differs by magnitude 1 at every sample"
+      ],
+      "answer": 2,
+      "explanation": "The sum over no retained bins is zero. The errors are [-1, 1, -1, 1], whose mean square is 1. The raw Nyquist coefficient is 4, which is a different quantity.",
+      "transfer": "Define an empty selection explicitly rather than treating it as an implicit 'select all'."
+    }
+  ]
+}

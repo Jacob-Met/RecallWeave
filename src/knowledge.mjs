@@ -46,14 +46,16 @@ export function expectedInformationGain(mastery, parameters = DEFAULT_BKT) {
 
 /**
  * Select an unseen item maximizing uncertainty reduction plus prerequisite repair.
- * Tie-break is stable by item id, making the choice reproducible.
+ * Default ties use the current locale's item-id order. A recorded ID may choose
+ * another exact maximum-score tie without changing the default choice.
  * @param {Item[]} items
  * @param {Set<string>} asked
  * @param {Record<string,number>} mastery
  * @param {BktParameters} parameters
+ * @param {string} [preferredItemId] recorded identity, honored only at the exact maximum score
  * @returns {Item|null}
  */
-export function selectNextItem(items, asked, mastery, parameters = DEFAULT_BKT) {
+export function selectNextItem(items, asked, mastery, parameters = DEFAULT_BKT, preferredItemId) {
   const candidates = items.filter(item => !asked.has(item.id));
   if (!candidates.length) return null;
   const score = item => {
@@ -63,7 +65,10 @@ export function selectNextItem(items, asked, mastery, parameters = DEFAULT_BKT) 
     const prerequisiteRepair = (1 - m) * Math.min(3, downstream) * 0.12;
     return expectedInformationGain(m, parameters) + prerequisiteRepair;
   };
-  return candidates.sort((a, b) => score(b) - score(a) || a.id.localeCompare(b.id))[0];
+  const selected = candidates.sort((a, b) => score(b) - score(a) || a.id.localeCompare(b.id))[0];
+  if (preferredItemId === undefined) return selected;
+  const preferred = candidates.find(item => item.id === preferredItemId);
+  return preferred && score(preferred) === score(selected) ? preferred : selected;
 }
 
 /** Clone session probabilities so learners' local run has no shared state. */

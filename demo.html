@@ -290,14 +290,16 @@ function expectedInformationGain(mastery, parameters = DEFAULT_BKT) {
 
 /**
  * Select an unseen item maximizing uncertainty reduction plus prerequisite repair.
- * Tie-break is stable by item id, making the choice reproducible.
+ * Default ties use the current locale's item-id order. A recorded ID may choose
+ * another exact maximum-score tie without changing the default choice.
  * @param {Item[]} items
  * @param {Set<string>} asked
  * @param {Record<string,number>} mastery
  * @param {BktParameters} parameters
+ * @param {string} [preferredItemId] recorded identity, honored only at the exact maximum score
  * @returns {Item|null}
  */
-function selectNextItem(items, asked, mastery, parameters = DEFAULT_BKT) {
+function selectNextItem(items, asked, mastery, parameters = DEFAULT_BKT, preferredItemId) {
   const candidates = items.filter(item => !asked.has(item.id));
   if (!candidates.length) return null;
   const score = item => {
@@ -307,7 +309,10 @@ function selectNextItem(items, asked, mastery, parameters = DEFAULT_BKT) {
     const prerequisiteRepair = (1 - m) * Math.min(3, downstream) * 0.12;
     return expectedInformationGain(m, parameters) + prerequisiteRepair;
   };
-  return candidates.sort((a, b) => score(b) - score(a) || a.id.localeCompare(b.id))[0];
+  const selected = candidates.sort((a, b) => score(b) - score(a) || a.id.localeCompare(b.id))[0];
+  if (preferredItemId === undefined) return selected;
+  const preferred = candidates.find(item => item.id === preferredItemId);
+  return preferred && score(preferred) === score(selected) ? preferred : selected;
 }
 
 /** Clone session probabilities so learners' local run has no shared state. */
@@ -1077,8 +1082,11 @@ function lessonReplay(document, deck) {
   const mastery = initialMastery(deck.concepts);
   const answers = [];
   for (const answer of document.firstAnswers) {
-    const item = selectNextItem(deck.items, asked, mastery);
-    if (!lessonRecord(answer, ['item', 'choice']) || !item || answer.item !== item.id
+    if (!lessonRecord(answer, ['item', 'choice'])) {
+      throw new RangeError('This lesson has invalid first answers or question order.');
+    }
+    const item = selectNextItem(deck.items, asked, mastery, DEFAULT_BKT, answer.item);
+    if (!item || answer.item !== item.id
         || !Number.isInteger(answer.choice) || answer.choice < 0 || answer.choice >= item.options.length) {
       throw new RangeError('This lesson has invalid first answers or question order.');
     }
@@ -1092,8 +1100,9 @@ function lessonReplay(document, deck) {
     throw new RangeError('This lesson does not preserve the original model estimates.');
   }
 
-  const nextItem = selectNextItem(deck.items, asked, mastery);
   const presentation = document.presentation;
+  const nextItem = selectNextItem(deck.items, asked, mastery, DEFAULT_BKT,
+    presentation?.phase === 'question' ? presentation.itemId : undefined);
   if (!lessonRecord(presentation, ['phase', 'itemId', 'optionOrders'])
       || !['question', 'feedback'].includes(presentation.phase)
       || presentation.itemId !== (presentation.phase === 'question' ? nextItem?.id : answers.at(-1)?.item)
@@ -1594,7 +1603,10 @@ lessonArchiveControls = mountLessonArchive({
     if (state.presentation.phase === 'feedback') {
       const item = deck.items.find(candidate => candidate.id === state.presentation.itemId);
       renderLessonQuestion(item, state.answers[state.answers.length - 1]);
-    } else renderQuestion();
+    } else {
+      const item = deck.items.find(candidate => candidate.id === state.presentation.itemId);
+      renderLessonQuestion(item);
+    }
   }
 });
 traceArchiveControls = mountTraceArchive({

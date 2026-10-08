@@ -38,9 +38,25 @@ Inputs are whole numbers from 0 to 10. Every invocation counts, including base c
 
 The explorer needs no server or account and keeps no automatic browser storage. Its trace is an algorithm inspection record, separate from learner-answer archives. Rebuild it with `node tools/build_recursion_call_stack.mjs`; add `--check` to verify that the checked-in page matches its exact sources and validated deck.
 
+## Explore coupled motion
+
+Open **[Coupled motion: two patterns inside one system](courses/normal-modes-lab.html)** directly in a browser. Set the masses, spring stiffnesses and initial motion, then inspect how two independent normal modes combine into the motion of two coupled masses. Compare in-phase, opposite, localized and uncoupled motion; the exact values and energy decomposition accompany the schematic and time traces.
+
+The original **[sixteen-question course](courses/normal-modes.json)** and **[worked guide](courses/normal-modes.md)** develop the force balance, initial-value solution, conserved modal energies and zero-coupling limit. Download the course from the lab and open it through **Bring your own lesson**, preview it and choose **Start this deck** in RecallWeave. The separate observation download retains the applied parameters, inspection time and full analytical trajectory.
+
+The lab works offline and saves only explicit downloads. Rebuild with `node tools/build-normal-modes.mjs`; `--check` verifies exact source, course and guide parity. Run its focused native controls with `node --test tests/normal-modes.test.mjs`.
+
 ## Explore coherent waves
 
 Open **[Coherent waves: from phasors to interference](courses/phasor-interference-lab.html)** for an offline lab that connects two rotating complex amplitudes to their real cosine signals. Predict cancellation, vary relative and common phase, and compare the arrow diagram with the time trace and downloadable values. The [worked guide](courses/phasor-interference.md) explains the assumptions and original examples; save the [sixteen-question course](courses/phasor-interference.json) and open it through **Bring your own lesson** to practice the connections.
+
+## Discrete Fourier: coefficients and reconstruction
+
+Open the **[offline Fourier lab](courses/discrete-fourier-lab.html)** to enter 4, 8 or 16 real samples, inspect every complex coefficient, and reconstruct the finite sample grid from selected conjugate pairs. Compare the original and reconstructed points, residuals and normalization-aware energy values. DC and Nyquist remain single-bin selections; unresolved phase is labeled rather than assigned a confident angle.
+
+The **[worked guide](courses/discrete-fourier.md)** connects the existing sampling and phasor lessons to four experiments. Download the original **[twelve-question course](courses/discrete-fourier.json)** from the lab, then use **Bring your own lesson**, preview it and select **Start this deck** in the unchanged learner. A separate analysis JSON records the numerical inputs, pair selection and raw calculations. The lab runs from a local file with no network requests or automatic saving; it does not infer a continuous signal between samples.
+
+Rebuild only this lab with `node tools/build-discrete-fourier.mjs`, or verify its committed artifact with `--check`. Run its focused regression checks with `node --test tests/discrete-fourier.test.mjs tests/discrete-fourier-course.test.mjs`.
 
 ## Explore rates and accumulation
 
@@ -67,6 +83,12 @@ Each saved HTML file opens and prints offline on its own. The worksheet file con
 ## Explore Boolean logic
 
 Open the [Boolean explorer](courses/boolean-logic-explorer.html) directly from your files to compare expressions, inspect complete truth tables, and find a counterexample when two expressions differ. Download the current full table as CSV or the original twelve-question course as JSON. Import that course through the learner’s existing preview and explicit start flow, then review, practice and save your notes. The [course guide](courses/boolean-logic.md) explains the supported grammar, worked answers and content sources.
+
+## Solve two remainder conditions together
+
+Open the [Congruences together lab](courses/congruences-explorer.html) directly from your files. Enter two signed remainders with positive moduli, then inspect an exact gcd/Bézout construction, a compatible solution class or an explicit contradiction. Shared factors, repeated conditions and modulus 1 remain distinct cases. The integer inspector shows every value in a bounded 24-integer window without rounding large integers or confusing an empty window with impossibility.
+
+Download the exact applied observation, the original [fourteen-question course](courses/congruences.json), or its [worked guide](courses/congruences.md). Import the course through **Bring your own lesson** for the existing feedback, review, separate practice and notes flow. The lab needs no connection or automatic browser storage. Rebuild with `node tools/build-congruences.mjs`, or add `--check` to verify source parity.
 
 ## Explore Euclid's algorithm
 
@@ -377,9 +399,3 @@ The [original twelve-question course](courses/momentum-collisions.json) imports 
 Open **[Straight steps. Curved paths.](courses/bezier-curves-explorer.html)** directly in a browser to construct a linear, quadratic or cubic Bézier curve from exact fractions. Inspect each interpolation level, split the curve into two exact subcurves, and compare derivatives with parameter-dependent travel. The tables preserve signed rational coordinates, including stationary and coincident-control cases.
 
 Download the original [sixteen-question lesson](courses/bezier-curves.json) and [worked guide](courses/bezier-curves.md), then use **Bring your own lesson** for the existing learner, review, practice and study-notes flow. The standalone page works offline without installation or automatic storage. Rebuild it with `node tools/build-bezier-curves.mjs`; use `--check` to verify parity with its exact sources and validated course.
-
-## Solve two remainder conditions together
-
-Open the [Congruences together lab](courses/congruences-explorer.html) directly from your files. Enter two signed remainders with positive moduli, then inspect an exact gcd/Bézout construction, a compatible solution class or an explicit contradiction. Shared factors, repeated conditions and modulus 1 remain distinct cases. The integer inspector shows every value in a bounded 24-integer window without rounding large integers or confusing an empty window with impossibility.
-
-Download the exact applied observation, the original [fourteen-question course](courses/congruences.json), or its [worked guide](courses/congruences.md). Import the course through **Bring your own lesson** for the existing feedback, review, separate practice and notes flow. The lab needs no connection or automatic browser storage. Rebuild with `node tools/build-congruences.mjs`, or add `--check` to verify source parity.

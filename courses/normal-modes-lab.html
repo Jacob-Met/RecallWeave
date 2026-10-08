@@ -1,0 +1,566 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<title>Normal Modes — RecallWeave Field Lab</title>
+<style>
+:root{--paper:#f5f3eb;--panel:#fffef9;--ink:#183c38;--muted:#526762;--line:#cbd5cb;--teal:#00786e;--orange:#ab421d;--gold:#ead29c;--warn:#75400c;--shadow:0 4px 22px #183c3809;font:16px/1.5 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--ink);background:var(--paper)}
+*{box-sizing:border-box}body{margin:0}button,input{font:inherit}button,a,input{-webkit-tap-highlight-color:transparent}button{cursor:pointer}button:disabled{cursor:not-allowed;opacity:.48}a{color:var(--teal)}:focus-visible{outline:3px solid #98511a;outline-offset:4px}input:focus-visible{outline-offset:2px}button,input{min-height:44px}button{border:1px solid var(--line);border-radius:9px;background:var(--panel);color:var(--ink);padding:10px 13px;font-weight:650}button:hover:not(:disabled){border-color:var(--teal);background:#edf6f0}button.primary{background:var(--ink);border-color:var(--ink);color:white}button.primary:hover:not(:disabled){background:#23594f;color:white}button.active{border-color:var(--teal);box-shadow:inset 0 0 0 1px var(--teal);background:#e7f3ed}input{width:100%;min-width:0;border:1px solid #9eb2a7;border-radius:7px;background:#fff;padding:9px 10px;color:var(--ink);font-variant-numeric:tabular-nums}input[aria-invalid=true]{border-color:var(--orange);box-shadow:inset 0 0 0 1px var(--orange)}[hidden]{display:none!important}.wrap{max-width:1460px;padding:0 28px;margin:auto}.topbar{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:22px 0;border-bottom:1px solid var(--line)}.wordmark{font-size:14px;font-weight:800;letter-spacing:.11em;text-transform:uppercase}.wordmark span{display:inline-grid;place-items:center;background:var(--ink);color:var(--paper);width:32px;height:32px;margin-right:10px;border-radius:50%;font-size:17px;letter-spacing:0}.topbar small{font-size:12px;color:var(--muted)}.hero{display:grid;grid-template-columns:1.5fr 1fr;gap:36px;padding:42px 0 30px;align-items:end}.eyebrow{font:750 11px/1.4 ui-monospace,monospace;letter-spacing:.14em;text-transform:uppercase;color:var(--orange);margin:0 0 12px}h1{font-family:Georgia,"Times New Roman",serif;font-weight:400;letter-spacing:-.045em;font-size:clamp(36px,4.8vw,66px);line-height:1.02;margin:0}h1 em{font-weight:400;color:var(--teal)}.hero p:not(.eyebrow){max-width:550px;margin:0;color:var(--muted);font-size:15px}.tags{display:flex;flex-wrap:wrap;gap:7px;margin-top:17px}.tag{font:650 10px/1.4 ui-monospace,monospace;letter-spacing:.04em;border:1px solid var(--line);border-radius:99px;padding:5px 8px;color:var(--muted);text-transform:uppercase}.workspace{display:grid;grid-template-columns:310px minmax(0,1fr);gap:20px;align-items:start}.card{border:1px solid var(--line);border-radius:14px;background:var(--panel);box-shadow:var(--shadow);min-width:0}.pad{padding:20px}.card-head{display:flex;justify-content:space-between;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:12px}.card-head h2,.card-head h3{margin:0;font-size:17px;line-height:1.25;letter-spacing:-.02em}.card-head .meta{font:650 10px/1.4 ui-monospace,monospace;letter-spacing:.05em;color:var(--muted);text-transform:uppercase}.caption{font-size:12px;color:var(--muted);margin:8px 0 0}.presets{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin:15px 0 20px}.presets button{font-size:12px;padding:8px;min-height:44px}.presets button:last-child{grid-column:1/-1}fieldset{border:0;padding:0;margin:18px 0}legend{font:750 10px/1.4 ui-monospace,monospace;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);padding:0;margin-bottom:10px}.field-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px 10px}.field label{font-size:12px;font-weight:650;display:block;margin-bottom:4px}.field small{color:var(--muted);font-size:10px;display:block;margin-top:3px}.full{width:100%}.notice{font-size:12px;padding:12px;border-radius:8px;border:1px solid var(--line);background:#f0f5ee;margin:12px 0 0;overflow-wrap:anywhere}.notice.pending{background:#fff5df;border-color:#d6b876;color:var(--warn)}.notice.error{background:#fff0e6;border-color:#cc865d;color:#75310b}.applied-label{display:inline-block;border-radius:5px;background:#e7f2eb;padding:4px 7px;font:750 10px/1.3 ui-monospace,monospace;text-transform:uppercase;letter-spacing:.04em}.applied-label.pending{background:#fff0ca;color:var(--warn)}.instruments{display:grid;gap:16px;min-width:0}.applied-summary{font:11px/1.65 ui-monospace,monospace;color:var(--muted);margin:3px 0 0;overflow-wrap:anywhere}.apparatus-svg{display:block;width:100%;max-height:210px}.apparatus-note{font-size:11px;color:var(--muted);margin:0 0 12px}.scrubber{border-top:1px solid var(--line);padding-top:15px}.scrub-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:2px}.scrub-head label{font-size:12px;font-weight:700}.time-output{font:700 18px/1.3 ui-monospace,monospace;color:var(--teal);font-variant-numeric:tabular-nums}.time-output small{font-size:12px;font-weight:400}input[type=range]{padding:0;min-height:44px;accent-color:var(--teal);background:transparent;border:0}.range-labels{display:flex;justify-content:space-between;color:var(--muted);font:10px ui-monospace,monospace}.exact-time{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:end;margin-top:12px}.exact-time label{font-size:11px;display:block;margin-bottom:3px;color:var(--muted)}.exact-time button{font-size:12px}.plot-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.plot{padding:17px 15px 12px}.plot h3{font-size:14px;margin:0 0 5px}.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:11px;margin:9px 0 0}.legend span{display:inline-flex;align-items:center;gap:6px}.swatch{display:inline-block;width:24px;height:0;border-top:3px solid var(--teal)}.swatch.dashed{border-top:3px dashed var(--orange)}.trace-svg{display:block;width:100%;aspect-ratio:18/11;overflow:visible}.plot-note{font-size:10px;color:var(--muted);margin:3px 0 0}.readings{display:grid;grid-template-columns:1fr 1fr;gap:16px}.table-wrap{overflow-x:auto;overscroll-behavior-x:contain}table{width:100%;border-collapse:collapse;font-size:12px;font-variant-numeric:tabular-nums}th{text-align:left;color:var(--muted);font-weight:600;font-size:11px}td,th{padding:7px 0;border-bottom:1px solid #e2e7dc}td.number{text-align:right;font-family:ui-monospace,monospace;color:var(--ink);white-space:nowrap}td.unit{text-align:right;width:44px;color:var(--muted);padding-left:7px;font-size:10px}tbody tr:last-child td,tbody tr:last-child th{border-bottom:0}.mode-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0}.mode{padding:13px;background:#eef5ed;border-radius:9px;border-left:3px solid var(--teal);min-width:0}.mode.minus{border-left:3px dashed var(--orange);background:#f8f0e7}.mode-label{font-size:11px;color:var(--muted);margin:0}.omega{display:block;font:700 22px/1.4 ui-monospace,monospace;letter-spacing:-.03em;overflow-wrap:anywhere}.mode small{color:var(--muted);font-size:10px}.energy-meter{height:12px;display:flex;background:#e4eade;border-radius:4px;overflow:hidden;margin-top:12px}.energy-meter span{display:block;height:100%}.kinetic{background:var(--teal)}.wall{background:#b39237}.coupling{background:var(--orange)}.energy-key{display:flex;gap:10px;flex-wrap:wrap;font-size:10px;margin-top:6px;color:var(--muted)}.energy-key b{font-weight:600}.definitions{margin-top:20px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}.definition h2{font-size:15px;margin:0 0 10px}.definition p{font-size:12px;margin:8px 0;color:var(--muted)}.formula{display:block;font:12px/1.8 ui-monospace,monospace;overflow-wrap:anywhere;color:var(--ink)}.downloads{margin:20px 0 38px;padding:20px;display:flex;justify-content:space-between;gap:20px;align-items:center}.downloads h2{font-size:16px;margin:0 0 4px}.downloads p{font-size:12px;margin:0;color:var(--muted);max-width:500px}.download-actions{display:flex;gap:8px;flex-wrap:wrap}.download-actions button{font-size:12px}.footer{border-top:1px solid var(--line);padding:17px 0 24px;font-size:11px;color:var(--muted);display:flex;gap:20px;justify-content:space-between}.footer a{text-decoration-thickness:1px;text-underline-offset:3px}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+@media(min-width:1280px){.workspace{grid-template-columns:330px minmax(0,1fr)}}
+@media(max-width:950px){.wrap{padding:0 20px}.hero{gap:22px}.workspace{grid-template-columns:270px minmax(0,1fr)}.plot-grid,.readings{grid-template-columns:1fr}.definitions{grid-template-columns:1fr 1fr}.definition:last-child{grid-column:1/-1}.downloads{align-items:flex-start;flex-direction:column}}
+@media(max-width:680px){.wrap{padding:0 14px}.topbar{padding:16px 0;gap:8px}.topbar small{max-width:110px;text-align:right;font-size:10px}.wordmark{font-size:11px}.hero{grid-template-columns:1fr;gap:18px;padding:28px 0 23px}.hero p:not(.eyebrow){font-size:13px}.workspace{grid-template-columns:1fr;gap:16px}.pad{padding:17px}.presets{grid-template-columns:1fr 1fr 1fr;margin-bottom:15px}.presets button:last-child{grid-column:auto}.field-grid{grid-template-columns:1fr 1fr}.mode-grid{gap:8px}.omega{font-size:18px}.plot-grid,.readings,.definitions{grid-template-columns:1fr}.definition:last-child{grid-column:auto}.downloads{padding:17px;margin-bottom:25px}.download-actions{display:grid;grid-template-columns:1fr 1fr;width:100%}.download-actions button:last-child{grid-column:1/-1}.footer{flex-direction:column;gap:6px}.exact-time{grid-template-columns:minmax(0,1fr) auto}.apparatus-note{font-size:10px}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
+@media print{body{background:white}.wrap{max-width:none}.workspace{grid-template-columns:260px minmax(0,1fr)}button,.download-actions{display:none}.card{box-shadow:none;break-inside:avoid}.footer{margin-top:15px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="topbar"><div class="wordmark"><span aria-hidden="true">≈</span>RecallWeave</div><small>FIELD LAB 02<br>ORIGINAL · OFFLINE</small></header>
+<section class="hero" aria-labelledby="lab-title">
+<div><p class="eyebrow">Oscillations / normal coordinates</p><h1 id="lab-title">Two masses.<br><em>Two independent modes.</em></h1></div>
+<div><p>Choose a motion, inspect an instant, and separate what each mass does from the two modes that describe it. Every reading comes from the analytical solution.</p><div class="tags"><span class="tag">Equal masses</span><span class="tag">Ideal springs</span><span class="tag">No damping or drive</span></div></div>
+</section>
+<main>
+<div class="workspace">
+<section class="card pad" id="experiment" aria-labelledby="experiment-title">
+<div class="card-head"><h2 id="experiment-title">Set the experiment</h2><span class="meta">01 / inputs</span></div>
+<p class="caption">A preset applies all eight values and returns the inspection time to zero.</p>
+<div class="presets" aria-label="Apply a complete initial condition">
+<button type="button" data-preset="in-phase">In phase</button><button type="button" data-preset="opposite">Opposite</button><button type="button" data-preset="localized">One mass</button><button type="button" data-preset="rest">At rest</button><button type="button" data-preset="uncoupled">Uncoupled</button>
+</div>
+<form id="normal-modes-form" novalidate aria-describedby="experiment-status input-error">
+<fieldset><legend>System &amp; time window</legend><div class="field-grid">
+<div class="field"><label for="mass">Each mass <span aria-hidden="true">m</span></label><input id="mass" name="mass" type="number" min="0.1" max="10" step="any" value="1" required><small>kg · 0.1–10</small></div>
+<div class="field"><label for="wallStiffness">Wall stiffness k</label><input id="wallStiffness" name="wallStiffness" type="number" min="1" max="200" step="any" value="16" required><small>N/m · 1–200</small></div>
+<div class="field"><label for="coupling">Coupling c</label><input id="coupling" name="coupling" type="number" min="0" max="200" step="any" value="9" required><small>N/m · 0–200</small></div>
+<div class="field"><label for="duration">Time window</label><input id="duration" name="duration" type="number" min="0.1" max="20" step="any" value="8" required><small>s · 0.1–20</small></div>
+</div></fieldset>
+<fieldset><legend>Initial displacement &amp; velocity</legend><div class="field-grid">
+<div class="field"><label for="x1">Mass 1 position x₁(0)</label><input id="x1" name="x1" type="number" min="-1" max="1" step="any" value="0.6" required><small>m · −1 to +1</small></div>
+<div class="field"><label for="x2">Mass 2 position x₂(0)</label><input id="x2" name="x2" type="number" min="-1" max="1" step="any" value="0" required><small>m · −1 to +1</small></div>
+<div class="field"><label for="v1">Mass 1 velocity v₁(0)</label><input id="v1" name="v1" type="number" min="-2" max="2" step="any" value="0" required><small>m/s · −2 to +2</small></div>
+<div class="field"><label for="v2">Mass 2 velocity v₂(0)</label><input id="v2" name="v2" type="number" min="-2" max="2" step="any" value="0" required><small>m/s · −2 to +2</small></div>
+</div></fieldset>
+<button class="primary full" id="apply-experiment" type="submit">Apply experiment</button>
+</form>
+<p id="experiment-status" class="notice" role="status" aria-live="polite">Preparing the applied experiment…</p>
+<p id="input-error" class="notice error" role="alert" tabindex="-1" hidden></p>
+</section>
+<div class="instruments">
+<section class="card pad" aria-labelledby="scene-title">
+<div class="card-head"><h2 id="scene-title">The applied motion</h2><span id="applied-badge" class="applied-label">Preparing</span></div>
+<p id="applied-parameters" class="applied-summary"></p>
+<svg id="apparatus-svg" class="apparatus-svg" viewBox="0 0 600 164" role="img" aria-labelledby="apparatus-title apparatus-description">
+<title id="apparatus-title">Two equal masses connected to wall springs and one coupling spring</title><desc id="apparatus-description">Displacements are scaled for this schematic. Dashed lines mark the two equilibrium positions.</desc>
+</svg>
+<p class="apparatus-note">Schematic displacements are scaled to fit. Wall spacing and spring lengths do not define a geometric contact model. Positive x points right.</p>
+<div class="scrubber">
+<div class="scrub-head"><label for="time-scrubber">Inspect time</label><output class="time-output" for="time-scrubber time-input"><span id="time-value">0</span> <small>s</small></output></div>
+<input id="time-scrubber" class="applied-only" type="range" min="0" max="8" step="any" value="0" disabled aria-label="Inspection time in seconds">
+<div class="range-labels"><span>0 s</span><span id="time-end">8 s</span></div>
+<div class="exact-time"><div><label for="time-input">Enter an exact time (seconds)</label><input id="time-input" class="applied-only" type="number" min="0" max="8" step="any" value="0" disabled></div><button id="set-time" class="applied-only" type="button" disabled>Set time</button></div>
+<p id="time-error" class="notice error" role="alert" hidden></p>
+</div>
+</section>
+<section class="card pad" id="mode-summary" aria-labelledby="modes-title">
+<div class="card-head"><h2 id="modes-title">The two modal clocks</h2><span class="meta">Angular frequency</span></div>
+<div class="mode-grid"><div class="mode"><p class="mode-label">+ / in-phase basis vector (1, 1)</p><span id="omega-plus" class="omega">—</span><small>rad/s · ω₊ = √(k/m)</small></div><div class="mode minus"><p class="mode-label">− / opposite basis vector (1, −1)</p><span id="omega-minus" class="omega">—</span><small>rad/s · ω₋ = √((k + 2c)/m)</small></div></div>
+<p id="degeneracy-note" class="notice" hidden>At c = 0 the frequencies are equal. We keep the sum/difference basis here; the normal-mode basis is not unique in this degenerate case.</p>
+<p class="caption">Each mode evolves independently. A mass generally combines both frequencies; a generic initial condition need not transfer all its energy to the other mass.</p>
+</section>
+<div class="plot-grid">
+<section class="card plot" aria-labelledby="physical-plot-title"><h3 id="physical-plot-title">Physical coordinates</h3><div class="legend"><span><i class="swatch" aria-hidden="true"></i>x₁ · solid</span><span><i class="swatch dashed" aria-hidden="true"></i>x₂ · dashed</span></div><svg id="physical-trace-svg" class="trace-svg" viewBox="0 0 360 220" role="img" aria-label="Displacement of mass 1 and mass 2 over the applied time window"></svg><p class="plot-note">Displacement (m) / time (s). Marker: inspected instant.</p></section>
+<section class="card plot" aria-labelledby="modal-plot-title"><h3 id="modal-plot-title">Normal coordinates</h3><div class="legend"><span><i class="swatch" aria-hidden="true"></i>q₊ · solid</span><span><i class="swatch dashed" aria-hidden="true"></i>q₋ · dashed</span></div><svg id="modal-trace-svg" class="trace-svg" viewBox="0 0 360 220" role="img" aria-label="Sum and difference normal coordinates over the applied time window"></svg><p class="plot-note">Same displacement and time scales as the physical plot.</p></section>
+</div>
+<p id="sampling-note" class="caption" style="margin:0 4px"></p>
+<div class="readings">
+<section class="card pad" aria-labelledby="state-title"><div class="card-head"><h2 id="state-title">Instantaneous state</h2><span class="meta">02 / readings</span></div><div class="table-wrap"><table id="state-table"><caption class="sr-only">Applied state at the inspection time; values displayed to eight significant digits</caption><thead><tr><th scope="col">Quantity</th><th scope="col" style="text-align:right">Value</th><th scope="col" style="text-align:right">Unit</th></tr></thead><tbody>
+<tr><th scope="row">Time t</th><td class="number" id="state-time">—</td><td class="unit">s</td></tr>
+<tr><th scope="row">Position x₁</th><td class="number" id="state-x1">—</td><td class="unit">m</td></tr><tr><th scope="row">Position x₂</th><td class="number" id="state-x2">—</td><td class="unit">m</td></tr>
+<tr><th scope="row">Velocity v₁</th><td class="number" id="state-v1">—</td><td class="unit">m/s</td></tr><tr><th scope="row">Velocity v₂</th><td class="number" id="state-v2">—</td><td class="unit">m/s</td></tr>
+<tr><th scope="row">Acceleration a₁</th><td class="number" id="state-a1">—</td><td class="unit">m/s²</td></tr><tr><th scope="row">Acceleration a₂</th><td class="number" id="state-a2">—</td><td class="unit">m/s²</td></tr>
+<tr><th scope="row">Net force F₁</th><td class="number" id="state-force1">—</td><td class="unit">N</td></tr><tr><th scope="row">Net force F₂</th><td class="number" id="state-force2">—</td><td class="unit">N</td></tr>
+<tr><th scope="row">Normal position q₊</th><td class="number" id="state-qPlus">—</td><td class="unit">m</td></tr><tr><th scope="row">Normal position q₋</th><td class="number" id="state-qMinus">—</td><td class="unit">m</td></tr>
+<tr><th scope="row">Normal velocity u₊</th><td class="number" id="state-uPlus">—</td><td class="unit">m/s</td></tr><tr><th scope="row">Normal velocity u₋</th><td class="number" id="state-uMinus">—</td><td class="unit">m/s</td></tr>
+</tbody></table></div></section>
+<section class="card pad" aria-labelledby="energy-title"><div class="card-head"><h2 id="energy-title">One conserved total</h2><span class="meta">Energy / joules</span></div><div class="table-wrap"><table id="energy-table"><caption class="sr-only">Physical and modal energy decompositions of the same conserved total</caption><tbody>
+<tr><th scope="row">Kinetic T</th><td class="number" id="energy-kinetic">—</td><td class="unit">J</td></tr><tr><th scope="row">Wall springs V<sub>wall</sub></th><td class="number" id="energy-wallPotential">—</td><td class="unit">J</td></tr><tr><th scope="row">Coupling spring V<sub>c</sub></th><td class="number" id="energy-couplingPotential">—</td><td class="unit">J</td></tr>
+<tr><th scope="row">Physical total T + V</th><td class="number" id="energy-total">—</td><td class="unit">J</td></tr><tr><th scope="row">Mode energy E₊</th><td class="number" id="energy-plus">—</td><td class="unit">J</td></tr><tr><th scope="row">Mode energy E₋</th><td class="number" id="energy-minus">—</td><td class="unit">J</td></tr><tr><th scope="row">Signed drift E(t) − E(0)</th><td class="number" id="energy-drift">—</td><td class="unit">J</td></tr>
+</tbody></table></div><div class="energy-meter" aria-hidden="true"><span id="bar-kinetic" class="kinetic"></span><span id="bar-wall" class="wall"></span><span id="bar-coupling" class="coupling"></span></div><div class="energy-key"><b>T / kinetic</b><b>Vwall / walls</b><b>Vc / coupling</b></div><p class="caption">E₊ and E₋ are individually constant. The physical kinetic and spring energies can vary. The two decompositions describe the same total; do not add them together.</p><p class="caption">Readings use eight significant digits. The observation JSON retains the model’s full numeric precision and sampled trajectory.</p></section>
+</div>
+</div>
+</div>
+<section class="definitions" id="definitions" aria-label="Persistent model definitions">
+<article class="card pad definition"><p class="eyebrow">Coordinate convention</p><h2>A half-sum, a half-difference.</h2><span class="formula">q₊ = (x₁ + x₂)/2<br>q₋ = (x₁ − x₂)/2<br>x₁ = q₊ + q₋ · x₂ = q₊ − q₋<br>u₊ = (v₁ + v₂)/2<br>u₋ = (v₁ − v₂)/2</span><p>Each modal coordinate has effective mass 2m in this convention. Displacements are measured from equilibrium. The ideal springs are unstrained at equilibrium.</p></article>
+<article class="card pad definition"><p class="eyebrow">Equations of motion</p><h2>Coupling cancels in the sum.</h2><span class="formula">m ẍ₁ = −k x₁ + c(x₂ − x₁)<br>m ẍ₂ = −k x₂ + c(x₁ − x₂)<br>q̈₊ + (k/m)q₊ = 0<br>q̈₋ + ((k + 2c)/m)q₋ = 0</span><p>The + mode leaves the coupling spring unextended. The − mode changes its extension and has the larger frequency when c &gt; 0.</p></article>
+<article class="card pad definition"><p class="eyebrow">Energy bookkeeping</p><h2>Two descriptions, one E.</h2><span class="formula">T = ½m(v₁² + v₂²)<br>V = ½k(x₁² + x₂²) + ½c(x₂ − x₁)²<br>E₊ = m u₊² + k q₊²<br>E₋ = m u₋² + (k + 2c)q₋²<br>E = T + V = E₊ + E₋</span><p>The ideal solution has no damping or external drive. Small displayed drift reflects floating-point evaluation, not a dissipative model.</p></article>
+</section>
+<section class="card downloads" aria-labelledby="downloads-title"><div><p class="eyebrow">Keep the reasoning</p><h2 id="downloads-title">Take the course, guide, or observation.</h2><p>The course and guide are always available. An observation contains only a successfully applied experiment and its inspected time. All files are created in this page; nothing is sent over the network and there is no automatic saving.</p><p>In RecallWeave, choose <strong>Course JSON</strong> under <strong>Bring your own lesson</strong>, preview, then <strong>Start this deck</strong>.</p></div><div class="download-actions"><button id="download-course" type="button">Course JSON</button><button id="download-guide" type="button">Learning guide</button><button id="download-observation" class="primary" type="button" disabled>Observation JSON</button></div></section>
+<p id="download-status" class="sr-only" role="status" aria-live="polite"></p>
+</main>
+<footer class="footer"><span>RecallWeave · original normal-modes course · offline analytical lab</span><a href="#definitions">Coordinate and energy definitions ↑</a></footer>
+</div>
+<script type="module">
+const normalModesDeckText = "{\n  \"format\": \"recallweave-deck/1\",\n  \"title\": \"Coupled motion: two patterns inside one system\",\n  \"attribution\": \"Original AI-assisted questions, distractors, explanations, examples and diagrams for RecallWeave. Mathematical background: MIT OpenCourseWare 8.03SC, Chapter 3, Normal Modes (Fall 2016), https://ocw.mit.edu/courses/8-03sc-physics-iii-vibrations-and-waves-fall-2016/d96262076cff658e551107bbb7c4b14c_MIT8_03SCF16_Text_Ch3.pdf. This course derives an ideal two-mass, three-spring model using half-sum normal coordinates; no source exercises, passages or figures are copied.\",\n  \"license\": \"Original question wording, explanations, worked examples and diagrams in this course: CC0-1.0. Referenced materials retain their own licenses. Other repository content is unchanged.\",\n  \"concepts\": [\n    \"restoring-and-coupling\",\n    \"normal-coordinates\",\n    \"initial-motion\",\n    \"energy-and-limits\"\n  ],\n  \"items\": [\n    {\n      \"id\": \"modes-force-balance\",\n      \"concept\": \"restoring-and-coupling\",\n      \"prerequisites\": [],\n      \"prompt\": \"Two equal masses move horizontally. Each has a wall spring k, and a spring c connects the masses. Displacements x1 and x2 are measured rightward from equilibrium. With k = 10 N/m, c = 5 N/m, x1 = 0.10 m and x2 = 0.30 m, what is the net force on mass 1?\",\n      \"options\": [\n        \"−2 N\",\n        \"0 N\",\n        \"+1 N\",\n        \"+2 N\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"The wall force is −k x1 = −1 N. The coupling force on mass 1 is c(x2 − x1) = +1 N. They cancel at this instant. Zero instantaneous force means zero acceleration then; it does not imply zero displacement, zero velocity, or permanent equilibrium.\",\n      \"transfer\": \"Keep x1 at 0.10 m but change x2 to 0.10 m. Calculate both contributions and explain the sign of the new force.\"\n    },\n    {\n      \"id\": \"modes-common-displacement\",\n      \"concept\": \"restoring-and-coupling\",\n      \"prerequisites\": [],\n      \"prompt\": \"In the same ideal two-mass model, both displacements equal +0.20 m. The wall stiffness is k = 8 N/m and the coupling stiffness is positive. Which statement describes the coupling spring at this instant?\",\n      \"options\": [\n        \"Its extension is 0.40 m and it pushes both masses right.\",\n        \"Its extension is 0.20 m and it stops both masses.\",\n        \"Its extension from equilibrium is zero, so its force is zero.\",\n        \"Its force is unknown until the masses are specified.\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"The change in the separation of the masses is x2 − x1 = 0. Equal displacements leave the coupling spring's extension unchanged. Its force is zero, while each wall spring exerts −8×0.20 = −1.60 N. Equal motion does not remove the wall forces.\",\n      \"transfer\": \"In the in-phase preset, follow a quarter period. Explain why the coupling contribution remains zero throughout that pure mode.\"\n    },\n    {\n      \"id\": \"modes-opposite-acceleration\",\n      \"concept\": \"restoring-and-coupling\",\n      \"prerequisites\": [],\n      \"prompt\": \"Let m = 2 kg for each mass, k = 8 N/m and c = 6 N/m. At one instant x1 = +0.25 m and x2 = −0.25 m. What is the acceleration of mass 1?\",\n      \"options\": [\n        \"−2.5 m/s²\",\n        \"−1.0 m/s²\",\n        \"+2.5 m/s²\",\n        \"−5.0 m/s²\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"F1 = −k x1 + c(x2 − x1) = −2 −3 = −5 N. Dividing by m = 2 kg gives a1 = −2.5 m/s². Opposite displacements stretch or compress the central spring twice as much as either individual displacement.\",\n      \"transfer\": \"Calculate the acceleration of mass 2, then explain the symmetry without starting a second full calculation.\"\n    },\n    {\n      \"id\": \"modes-total-force\",\n      \"concept\": \"restoring-and-coupling\",\n      \"prerequisites\": [],\n      \"prompt\": \"For two equal masses with wall stiffness k and coupling stiffness c, add the two equations F1 = −k x1 + c(x2 − x1) and F2 = −k x2 + c(x1 − x2). What is the total force on the two masses?\",\n      \"options\": [\n        \"−(k + 2c)(x1 + x2)\",\n        \"0 for every configuration\",\n        \"c(x2 − x1)\",\n        \"−k(x1 + x2)\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"The equal and opposite coupling forces cancel in the sum. The two wall forces remain, giving −k(x1 + x2). The masses are not an isolated system for momentum because the fixed walls exert external forces.\",\n      \"transfer\": \"If x1 + x2 = 0 at one instant but v1 + v2 is nonzero, does that guarantee the sum of positions remains zero? Explain.\"\n    },\n    {\n      \"id\": \"modes-half-sum\",\n      \"concept\": \"normal-coordinates\",\n      \"prerequisites\": [\n        \"restoring-and-coupling\"\n      ],\n      \"prompt\": \"Use q+ = (x1 + x2)/2 and q− = (x1 − x2)/2. If x1 = +0.60 m and x2 = −0.20 m, what are the two normal coordinates?\",\n      \"options\": [\n        \"q+ = 0.40 m; q− = 0.80 m\",\n        \"q+ = 0.20 m; q− = 0.40 m\",\n        \"q+ = 0.40 m; q− = 0.20 m\",\n        \"q+ = −0.20 m; q− = 0.60 m\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"The half-sum is (0.60 −0.20)/2 = 0.20 m; the half-difference is (0.60 +0.20)/2 = 0.40 m. Reconstruction gives x1 = q+ + q− = 0.60 m and x2 = q+ − q− = −0.20 m. The factor of one half is part of this course's coordinate convention.\",\n      \"transfer\": \"Reconstruct the physical positions for q+ = −0.10 m and q− = +0.30 m.\"\n    },\n    {\n      \"id\": \"modes-frequencies\",\n      \"concept\": \"normal-coordinates\",\n      \"prerequisites\": [\n        \"restoring-and-coupling\"\n      ],\n      \"prompt\": \"For two equal masses m = 2 kg, wall stiffness k = 8 N/m and coupling stiffness c = 6 N/m, which pair gives the in-phase and opposite-motion angular frequencies, respectively?\",\n      \"options\": [\n        \"2 rad/s and √7 rad/s\",\n        \"√8 rad/s and √20 rad/s\",\n        \"2 rad/s and √10 rad/s\",\n        \"4 rad/s and 10 rad/s\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"The half-sum obeys q+'' = −(k/m)q+, so ω+ = √(8/2) = 2 rad/s. The half-difference obeys q−'' = −((k+2c)/m)q−, so ω− = √(20/2) = √10 rad/s. These are angular frequencies; divide by 2π to obtain cycles per second.\",\n      \"transfer\": \"Increase only c. Which frequency changes, and what physical deformation accounts for that change?\"\n    },\n    {\n      \"id\": \"modes-stiffer-coupling\",\n      \"concept\": \"normal-coordinates\",\n      \"prerequisites\": [\n        \"restoring-and-coupling\"\n      ],\n      \"prompt\": \"Keep m and k fixed and positive, then increase the nonnegative coupling stiffness c. What happens to the two angular frequencies?\",\n      \"options\": [\n        \"Both decrease.\",\n        \"The in-phase frequency stays fixed; the opposite-motion frequency increases.\",\n        \"Both increase by the same amount.\",\n        \"The opposite-motion frequency stays fixed; the in-phase frequency increases.\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"In the in-phase pattern, the coupling spring has no changing extension, so ω+ = √(k/m) is independent of c. Opposite motion changes the separation; ω− = √((k+2c)/m) increases with c. The increase is not generally linear in c.\",\n      \"transfer\": \"Set the coupling to zero and then restore it. Describe what changes in the two mode traces without changing the initial state.\"\n    },\n    {\n      \"id\": \"modes-degenerate-basis\",\n      \"concept\": \"normal-coordinates\",\n      \"prerequisites\": [\n        \"restoring-and-coupling\"\n      ],\n      \"prompt\": \"Set c = 0 while m and k remain positive. Which statement is correct?\",\n      \"options\": [\n        \"The two masses are uncoupled and both natural angular frequencies equal √(k/m); the chosen normal-coordinate basis is not unique.\",\n        \"Both natural frequencies become zero.\",\n        \"Only the in-phase pattern remains possible.\",\n        \"The total mechanical energy must become zero.\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"Removing the coupling leaves two independent, identical wall-spring oscillators. Their frequencies coincide. The half-sum and half-difference remain a valid basis, but other independent combinations also work at this repeated frequency. Frequency degeneracy does not erase the possible motions or their energy.\",\n      \"transfer\": \"Can one mass oscillate while the other stays at equilibrium when c = 0? Give the required initial state.\"\n    },\n    {\n      \"id\": \"modes-position-not-enough\",\n      \"concept\": \"initial-motion\",\n      \"prerequisites\": [\n        \"normal-coordinates\"\n      ],\n      \"prompt\": \"At t = 0, x1 = x2 = 0.40 m, but v1 = +0.20 m/s and v2 = −0.20 m/s. The coupling c is positive. Is this a pure in-phase motion?\",\n      \"options\": [\n        \"Yes, equal starting positions are sufficient.\",\n        \"Yes, because the total initial velocity is zero.\",\n        \"No, because q− starts at 0.40 m.\",\n        \"No, because q− starts at zero but its initial velocity is 0.20 m/s.\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"A pure in-phase solution requires both q−(0) = 0 and q−'(0) = 0. Equal positions give the first condition, but (v1 − v2)/2 = 0.20 m/s violates the second. The opposite-motion coordinate immediately begins to change.\",\n      \"transfer\": \"Give one nonzero initial state that excites only the in-phase mode, including both positions and velocities.\"\n    },\n    {\n      \"id\": \"modes-pure-opposite\",\n      \"concept\": \"initial-motion\",\n      \"prerequisites\": [\n        \"normal-coordinates\"\n      ],\n      \"prompt\": \"With positive coupling, which initial state excites only the opposite-motion mode?\",\n      \"options\": [\n        \"x1 = x2 = 0.30 m; v1 = v2 = 0.40 m/s\",\n        \"x1 = 0.30 m, x2 = −0.30 m; v1 = 0.40 m/s, v2 = −0.40 m/s\",\n        \"x1 = 0.30 m, x2 = −0.30 m; v1 = v2 = 0.40 m/s\",\n        \"x1 = x2 = 0; v1 = 0.40 m/s, v2 = 0\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"The in-phase coordinate must have both initial value and initial velocity zero. Opposite positions make (x1+x2)/2 = 0, and opposite velocities make (v1+v2)/2 = 0. Opposite positions alone are insufficient if the velocities contain an in-phase component.\",\n      \"transfer\": \"Swap the labels of the two masses. Which normal coordinate changes sign, and which mode energy changes?\"\n    },\n    {\n      \"id\": \"modes-quarter-period\",\n      \"concept\": \"initial-motion\",\n      \"prerequisites\": [\n        \"normal-coordinates\"\n      ],\n      \"prompt\": \"A pure in-phase motion has q+(0) = 0.20 m, q+'(0) = 0 and ω+ = 2 rad/s. The opposite-motion coordinate is identically zero. At t = π/4 s, what are the physical positions and velocities?\",\n      \"options\": [\n        \"Both positions are zero; both velocities are −0.40 m/s.\",\n        \"Both positions are +0.20 m; both velocities are zero.\",\n        \"The positions are equal and opposite; the velocities are zero.\",\n        \"Both positions are zero; both velocities are +0.40 m/s.\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"This time is a quarter period because ω+t = π/2. Thus q+ = 0.20 cos(π/2) = 0 and q+' = −0.20×2 sin(π/2) = −0.40 m/s. With q− = 0, both physical positions equal q+ and both velocities equal q+'.\",\n      \"transfer\": \"Predict the same four values at t = π/2 s before using the time control.\"\n    },\n    {\n      \"id\": \"modes-uncoupled-localized\",\n      \"concept\": \"initial-motion\",\n      \"prerequisites\": [\n        \"normal-coordinates\"\n      ],\n      \"prompt\": \"With c = 0, start mass 1 at x1 = 0.50 m with v1 = 0. Start mass 2 at x2 = 0 with v2 = 0. What happens to mass 2 in this ideal model?\",\n      \"options\": [\n        \"It gradually takes all of mass 1's energy.\",\n        \"It begins to move after one quarter cycle.\",\n        \"It remains at equilibrium, even though both chosen normal coordinates are excited.\",\n        \"It must move because the normal frequencies are equal.\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"Without coupling, mass 2 satisfies its own oscillator equation with zero initial position and velocity, so it stays at zero. The half-sum and half-difference initially both equal 0.25 m and have the same frequency. They cancel exactly in x2 = q+ − q−. A decomposition can contain two nonzero coordinates while one physical component remains zero.\",\n      \"transfer\": \"Restore a positive coupling without changing that initial state. Calculate mass 2's initial acceleration.\"\n    },\n    {\n      \"id\": \"modes-three-spring-energy\",\n      \"concept\": \"energy-and-limits\",\n      \"prerequisites\": [\n        \"normal-coordinates\",\n        \"initial-motion\"\n      ],\n      \"prompt\": \"At one instant m = 1 kg, k = 4 N/m, c = 6 N/m, x1 = +0.50 m, x2 = −0.50 m, and both velocities are zero. What is the total mechanical energy?\",\n      \"options\": [\n        \"1 J\",\n        \"2 J\",\n        \"3 J\",\n        \"4 J\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"Kinetic energy is zero. The wall springs store ½k(x1²+x2²) = 1 J. The coupling spring stores ½c(x2−x1)² = 3 J, since its extension has magnitude 1 m. The total is 4 J. Omitting the central spring loses most of this state's energy.\",\n      \"transfer\": \"Keep the positions fixed but set both velocities to +1 m/s. How much energy is added?\"\n    },\n    {\n      \"id\": \"modes-modal-normalization\",\n      \"concept\": \"energy-and-limits\",\n      \"prerequisites\": [\n        \"normal-coordinates\",\n        \"initial-motion\"\n      ],\n      \"prompt\": \"In the half-sum convention q+ = (x1+x2)/2, let m = 2 kg, k = 8 N/m, q+ = 0.10 m and q+' = 0.20 m/s. What is the energy in the in-phase mode?\",\n      \"options\": [\n        \"0.08 J\",\n        \"0.16 J\",\n        \"0.24 J\",\n        \"0.32 J\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"For this convention E+ = m(q+')² + k(q+)² = 2×0.20² + 8×0.10² = 0.16 J. The coordinate moves both physical masses, so its effective modal mass is 2m. Adding an extra factor of one half would mix this convention with an orthonormal coordinate normalization.\",\n      \"transfer\": \"Derive the opposite-mode expression and identify where the additional 2c stiffness enters.\"\n    },\n    {\n      \"id\": \"modes-energy-conservation\",\n      \"concept\": \"energy-and-limits\",\n      \"prerequisites\": [\n        \"normal-coordinates\",\n        \"initial-motion\"\n      ],\n      \"prompt\": \"A mixed initial state excites both normal modes. The springs are ideal, the walls fixed, and there is no damping or drive. Which energy statement is generally valid?\",\n      \"options\": [\n        \"Each individual mass keeps a constant kinetic energy.\",\n        \"The coupling spring keeps a constant potential energy.\",\n        \"Total mechanical energy and each modal energy remain constant, while the physical kinetic and spring energies can change.\",\n        \"All the energy must transfer completely from one physical mass to the other at a regular interval.\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"The two normal coordinates obey independent conservative oscillator equations, so E+ and E− are separately constant, and their sum is the conserved total. Physical kinetic, wall-spring and coupling-spring energies vary as the modes combine. Complete transfer between physical masses is not a general consequence of a visible amplitude envelope; the coupling spring and velocity terms must be accounted for.\",\n      \"transfer\": \"Choose the localized preset. Compare an instant of small x1 with v1 and the coupling-spring energy. Why is small displacement alone insufficient to show zero energy?\"\n    },\n    {\n      \"id\": \"modes-rest-and-frequency\",\n      \"concept\": \"energy-and-limits\",\n      \"prerequisites\": [\n        \"normal-coordinates\",\n        \"initial-motion\"\n      ],\n      \"prompt\": \"All initial displacements and velocities are zero, while m and k are positive and c is nonnegative. What should the ideal lab show?\",\n      \"options\": [\n        \"Rest at every time and zero energies, with the two natural frequencies still determined by m, k and c.\",\n        \"Undefined natural frequencies because no motion was excited.\",\n        \"Spontaneous oscillation after a small waiting time.\",\n        \"Nonzero coupling energy whenever c is positive.\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"The zero initial state stays zero in these homogeneous linear equations. Every kinetic and spring energy is zero. The natural frequencies describe how the same system would respond to an excited initial state; they do not require the current state to be moving.\",\n      \"transfer\": \"Keep the initial state at rest and double both masses. Which displayed quantities change, and which remain zero?\"\n    }\n  ]\n}\n";
+const normalModesGuideText = "# Coupled motion: two patterns inside one system\n\nOpen [the normal-modes lab](normal-modes-lab.html) directly in a browser. It works from a local file without an account, server, connection or automatic browser storage. Download the [sixteen-question course](normal-modes.json), then choose it under **Bring your own lesson** in RecallWeave and select **Start this deck**. Its questions use the existing feedback, review, practice and study-note flows.\n\nThis lesson connects spring forces, superposition and eigenvector reasoning. Two physical coordinates can look complicated together while two carefully chosen combinations each behave as a single oscillator. The lab evaluates that analytical solution; it does not integrate time steps or measure an apparatus.\n\n## 1. State the system before choosing coordinates\n\nThere are two equal point masses, each of mass **m**. Each mass is attached to a fixed wall by a spring of stiffness **k**. A third spring of stiffness **c** connects the masses. The springs are massless and obey an ideal linear force law. There is no friction, forcing or moving support.\n\nThe ideal springs are unstrained at equilibrium; there is no preload.\n\nBoth displacements **x1** and **x2** are positive rightward and measured from equilibrium. These are displacement coordinates; the drawn spacing is schematic. The lab does not assign physical spring rest lengths or model contact between the masses.\n\nThe coupling spring's extension relative to equilibrium is x2 − x1. Its force on mass 1 is c(x2 − x1); its force on mass 2 is the opposite. The wall springs supply −kx1 and −kx2. Therefore:\n\n```\nm x1'' = −(k+c)x1 + c x2\nm x2'' = c x1 − (k+c)x2\n```\n\nThe two coupling forces cancel when the equations are added. The wall forces do not. Momentum of the pair alone is generally not conserved because the walls exert external forces.\n\n**Predict before inspecting.** Set k = 10 N/m, c = 5 N/m, x1 = 0.10 m and x2 = 0.30 m. Mass 1's wall force is −1 N and its coupling force is +1 N. Its net force is zero at that instant. This is not a statement that it will stay still: its velocity and the subsequent motion of both masses still matter.\n\n## 2. Choose the two patterns\n\nThis course uses the **half-sum** convention:\n\n```\nq+ = (x1+x2)/2       q− = (x1−x2)/2\nx1 = q+ + q−        x2 = q+ − q−\nu+ = (v1+v2)/2      u− = (v1−v2)/2\n```\n\nHere u+ and u− mean the time derivatives of q+ and q−. They have velocity units.\n\nAdd and subtract the force equations:\n\n```\nq+'' = −(k/m) q+\nq−'' = −((k+2c)/m) q−\n```\n\nThe angular frequencies are:\n\n```\nω+ = sqrt(k/m)\nω− = sqrt((k+2c)/m)\n```\n\nAngular frequency is measured in radians per second. The corresponding frequency in cycles per second is ω/(2π), and the period is 2π/ω.\n\nThe in-phase pattern has x1 = x2: both masses move together, so the coupling spring does not change its extension. The opposite-motion pattern has x1 = −x2: changing either displacement changes the separation by twice that amount. This is why its stiffness expression contains **2c**.\n\nIn matrix language, the stiffness matrix has diagonal entries k+c and off-diagonal entries −c. Its pattern vectors (1,1) and (1,−1) have stiffness eigenvalues k and k+2c. Dividing by the mass gives squared angular frequencies. These physical patterns connect the lab to the separately developed eigen-directions lesson without depending on that lesson's files.\n\n**Worked values.** With m = 2 kg, k = 8 N/m and c = 6 N/m, ω+ = 2 rad/s and ω− = sqrt(10) rad/s. Increasing only the coupling raises the second frequency and leaves the first unchanged.\n\nWhen c = 0, both frequencies equal sqrt(k/m). The masses are uncoupled. The half-sum and half-difference are still useful coordinates, but they are no longer a uniquely selected basis: any independent pair of combinations can span the repeated-frequency motions.\n\n## 3. Specify positions and velocities\n\nThe complete initial state includes four numbers: x1(0), x2(0), v1(0) and v2(0). Convert both the positions and velocities into normal coordinates.\n\nFor either sign, the analytical solution is:\n\n```\nq(t) = q(0) cos(ωt) + u(0)/ω sin(ωt)\nu(t) = −ω q(0) sin(ωt) + u(0) cos(ωt)\n```\n\nThen reconstruct x1, x2, v1 and v2 using the half-sum formulas.\n\nA pure in-phase motion requires **q−(0) = 0 and u−(0) = 0**. Equal initial positions alone do not suffice. For example, x1 = x2 = 0.40 m with v1 = +0.20 m/s and v2 = −0.20 m/s starts with q− = 0 but u− = 0.20 m/s. The opposite-motion coordinate is excited.\n\nA pure opposite-motion state requires **q+(0) = 0 and u+(0) = 0**. Thus both the positions and velocities must be opposite.\n\n**Quarter-period check.** Let q+(0) = 0.20 m, u+(0) = 0, ω+ = 2 rad/s, and set the other mode to zero. At t = π/4 s, both physical positions are zero and both velocities are −0.40 m/s. At t = π/2 s, both positions are −0.20 m and the velocities are zero.\n\nThe **Localized** preset starts only mass 1 displaced. Both normal modes are present. For positive coupling, their different phases produce changing physical motion. The displayed time window is an inspection interval, not a promised common period: arbitrary frequency ratios need not give an exact shared recurrence.\n\nThe **Uncoupled** preset uses the same idea with c = 0. Both chosen normal coordinates can be nonzero while mass 2 remains at rest, because their equal-frequency contributions cancel in x2.\n\n## 4. Account for all three springs\n\nThe physical mechanical energy is:\n\n```\nE = ½m(v1²+v2²) + ½k(x1²+x2²) + ½c(x2−x1)²\n    kinetic        wall springs       coupling spring\n```\n\nSubstitute the half-sum reconstruction:\n\n```\nE+ = m u+² + k q+²\nE− = m u−² + (k+2c) q−²\nE = E+ + E−\n```\n\nEach normal coordinate has effective modal mass **2m** with this normalization. An extra factor of one half would be wrong here. An orthonormal convention using division by sqrt(2) would have differently scaled coordinates and energy formulas; neither convention should be mixed with the other.\n\nBoth modal energies are constant in this ideal conservative model. Physical kinetic energy and the energy in each spring can vary. The lab displays both descriptions at the same inspection time and reports the numerical residual E(t) − E(0) in joules.\n\n**Worked energy.** For m = 1 kg, k = 4 N/m, c = 6 N/m, x1 = +0.50 m, x2 = −0.50 m and zero velocities, the wall springs store 1 J and the coupling spring stores 3 J. The total is 4 J. The same result comes from q− = 0.50 m and E− = (4+12)×0.50² = 4 J.\n\nA small displacement of one mass is not evidence that its energy has disappeared: its velocity may be large, and the coupling spring may also hold energy. A visible amplitude envelope does not establish complete energy transfer between masses. The explicit kinetic and spring terms provide the appropriate accounting.\n\nAt the all-zero initial state, every displacement, velocity and energy stays zero. The natural frequencies remain defined because they are properties of the system, even when neither mode is excited.\n\n## 5. Use the lab deliberately\n\n1. Choosing a preset applies it immediately and returns the inspection time to zero. Otherwise, edit any of the eight initial-system fields.\n2. After editing fields, select **Apply experiment** to accept the complete set together. A pending or refused edit leaves the previous applied diagram visible and labeled; it disables time inspection and observation export until you successfully apply.\n3. Use the time slider or the exact time field to inspect the analytical state. Compare physical coordinates, mode coordinates and energy at the same time.\n4. Download the **applied observation** to keep the accepted parameters, inspection state and sampled trajectory. Download the course and this guide separately to study or share them.\n\nThe controls accept mass 0.1–10 kg, wall stiffness 1–200 N/m, coupling stiffness 0–200 N/m, each initial displacement −1–1 m, each initial velocity −2–2 m/s, and a time window 0.1–20 s. Entries must be complete finite decimal numbers. The positive wall stiffness keeps both mode frequencies nonzero, including the c = 0 case.\n\nThe graphs use at least 240 intervals and at least 48 intervals per fastest mode cycle over the chosen window. Each point is evaluated from the analytical formula. Connecting those samples is a visual approximation, not another numerical solution. Displayed numbers are rounded; the downloaded JSON retains the underlying JavaScript numbers.\n\nThe observation format is `recallweave-normal-modes-observation/1`. It includes the model assumptions and units, applied numeric parameters, angular frequencies, initial normal coordinates and energies, selected time/state, sampling metadata, and the complete sampled trajectory. It contains no learner answers and does not change a learner session. It is a calculation record, not a measurement or proof of learning.\n\n## Question checks\n\nThe course contains sixteen original questions across four linked concepts. Correct answers are identified here by their values or meaning, independently of the option order shown in a learner session.\n\n| Question | Check |\n|---|---|\n| Force balance | −1 N + 1 N = 0 N |\n| Common displacement | The coupling extension and force are zero |\n| Opposite acceleration | −5 N / 2 kg = −2.5 m/s² |\n| Total force | −k(x1+x2) |\n| Half-sum coordinates | q+ = 0.20 m; q− = 0.40 m |\n| Frequencies | 2 rad/s; sqrt(10) rad/s |\n| Stiffer coupling | ω+ unchanged; ω− increases |\n| Degenerate basis | c = 0 gives two uncoupled equal-frequency oscillators |\n| Equal positions only | u− = 0.20 m/s still excites the opposite mode |\n| Pure opposite motion | Both positions and velocities are opposite |\n| Quarter period | Both x = 0; both v = −0.40 m/s |\n| Uncoupled localized state | Mass 2 stays at rest |\n| Three-spring energy | 1 J + 3 J = 4 J |\n| Modal normalization | 0.08 J + 0.08 J = 0.16 J |\n| Conserved energies | E+, E− and their sum are constant |\n| Rest and frequencies | Motion and energy zero; natural frequencies still defined |\n\n## Sources and original-content provenance\n\nMathematical background was checked against [MIT OpenCourseWare 8.03SC, Chapter 3: Normal Modes](https://ocw.mit.edu/courses/8-03sc-physics-iii-vibrations-and-waves-fall-2016/d96262076cff658e551107bbb7c4b14c_MIT8_03SCF16_Text_Ch3.pdf) and [Lecture 4: Coupled Oscillators, Normal Modes](https://ocw.mit.edu/courses/8-03sc-physics-iii-vibrations-and-waves-fall-2016/pages/part-i-mechanical-vibrations-and-waves/lecture-4/), accessed 2026-10-08. The equations above are derived for the explicitly stated wall-spring model; they do not reuse a source exercise, apparatus diagram or narrative.\n\nAll course wording, distractors, transfer prompts, numerical examples, explanatory derivations and lab graphics are original, produced with AI assistance for RecallWeave. Original lesson content is offered under CC0-1.0. Referenced materials and other repository content retain their own terms. Structural deck checks do not establish subject accuracy or learning efficacy; independent physical/content review and executable receiving evidence are retained separately with the source contribution.\n";
+/**
+ * Original RecallWeave analytical lab: two equal masses, fixed-wall springs k,
+ * and one coupling spring c. No damping, forcing, or geometric contact model.
+ * Coordinates are displacements from equilibrium; q± use the half-sum convention.
+ */
+const PARAMETER_LIMITS = Object.freeze({
+  mass: Object.freeze([0.1, 10, 'Mass (kg)']),
+  wallStiffness: Object.freeze([1, 200, 'Wall stiffness (N/m)']),
+  coupling: Object.freeze([0, 200, 'Coupling stiffness (N/m)']),
+  x1: Object.freeze([-1, 1, 'Initial displacement 1 (m)']),
+  x2: Object.freeze([-1, 1, 'Initial displacement 2 (m)']),
+  v1: Object.freeze([-2, 2, 'Initial velocity 1 (m/s)']),
+  v2: Object.freeze([-2, 2, 'Initial velocity 2 (m/s)']),
+  duration: Object.freeze([0.1, 20, 'Time window (s)']),
+});
+const DECIMAL = /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?$/i;
+const TAU = 2 * Math.PI;
+
+function readNumber(value, name, lower, upper) {
+  let number = value;
+  if (typeof value === 'string') {
+    const text = value.trim();
+    if (!DECIMAL.test(text)) throw new RangeError(name + ' needs one complete decimal number.');
+    number = Number(text);
+    if (number === 0 && /[1-9]/.test(text.split(/e/i)[0]))
+      throw new RangeError(name + ' is too small to represent.');
+  }
+  if (typeof number !== 'number' || !Number.isFinite(number) ||
+      number < lower || number > upper)
+    throw new RangeError(name + ' must be between ' + lower + ' and ' + upper + '.');
+  return number === 0 ? 0 : number;
+}
+
+function makeExperiment(raw) {
+  if (raw === null || typeof raw !== 'object' || Array.isArray(raw))
+    throw new TypeError('Supply a complete parameter record.');
+  const values = {};
+  for (const [key, [lower, upper, label]] of Object.entries(PARAMETER_LIMITS))
+    values[key] = readNumber(raw[key], label, lower, upper);
+  const parameters = Object.freeze(values);
+  const {mass: m, wallStiffness: k, coupling: c, x1, x2, v1, v2} = parameters;
+  const plus = Math.sqrt(k / m), minus = Math.sqrt((k + 2 * c) / m);
+  const initial = Object.freeze({
+    qPlus: (x1 + x2) / 2, qMinus: (x1 - x2) / 2,
+    uPlus: (v1 + v2) / 2, uMinus: (v1 - v2) / 2,
+  });
+  const plusEnergy = m * initial.uPlus ** 2 + k * initial.qPlus ** 2;
+  const minusEnergy = m * initial.uMinus ** 2 + (k + 2 * c) * initial.qMinus ** 2;
+  const amplitudeBound = Math.hypot(initial.qPlus, initial.uPlus / plus) +
+    Math.hypot(initial.qMinus, initial.uMinus / minus);
+  return Object.freeze({
+    parameters,
+    omega: Object.freeze({plus, minus}),
+    initial,
+    energy: Object.freeze({plus: plusEnergy, minus: minusEnergy, total: plusEnergy + minusEnergy}),
+    amplitudeBound,
+    degenerate: c === 0,
+  });
+}
+
+function stateAt(experiment, time) {
+  const t = readNumber(time, 'Inspection time (s)', -20, 20);
+  const {mass: m, wallStiffness: k, coupling: c} = experiment.parameters;
+  const {qPlus: qp0, qMinus: qm0, uPlus: up0, uMinus: um0} = experiment.initial;
+  const {plus: wp, minus: wm} = experiment.omega;
+  const cp = Math.cos(wp * t), sp = Math.sin(wp * t);
+  const cm = Math.cos(wm * t), sm = Math.sin(wm * t);
+  const qPlus = qp0 * cp + up0 / wp * sp;
+  const qMinus = qm0 * cm + um0 / wm * sm;
+  const uPlus = -qp0 * wp * sp + up0 * cp;
+  const uMinus = -qm0 * wm * sm + um0 * cm;
+  const x1 = qPlus + qMinus, x2 = qPlus - qMinus;
+  const v1 = uPlus + uMinus, v2 = uPlus - uMinus;
+  const force1 = -k * x1 + c * (x2 - x1);
+  const force2 = -k * x2 + c * (x1 - x2);
+  const kinetic = 0.5 * m * (v1 * v1 + v2 * v2);
+  const wallPotential = 0.5 * k * (x1 * x1 + x2 * x2);
+  const couplingPotential = 0.5 * c * (x2 - x1) ** 2;
+  const total = kinetic + wallPotential + couplingPotential;
+  return Object.freeze({
+    t, x1, x2, v1, v2, a1: force1 / m, a2: force2 / m, force1, force2,
+    qPlus, qMinus, uPlus, uMinus,
+    energies: Object.freeze({
+      kinetic, wallPotential, couplingPotential, total,
+      plus: m * uPlus ** 2 + k * qPlus ** 2,
+      minus: m * uMinus ** 2 + (k + 2 * c) * qMinus ** 2,
+      drift: total - experiment.energy.total,
+    }),
+  });
+}
+
+function sampleTrajectory(experiment) {
+  const duration = experiment.parameters.duration;
+  // At least 48 intervals per fastest modal cycle, so a long/high-frequency
+  // window cannot turn the plotted signal into a low-rate alias.
+  const intervals = Math.max(240, Math.ceil(duration * experiment.omega.minus / TAU * 48));
+  return Object.freeze(Array.from({length: intervals + 1}, (_, index) =>
+    stateAt(experiment, index === intervals ? duration : duration * index / intervals)));
+}
+
+function makeObservation(experiment, time) {
+  const t = readNumber(time, 'Inspection time (s)', 0, experiment.parameters.duration);
+  const trajectory = sampleTrajectory(experiment);
+  return {
+    format: 'recallweave-normal-modes-observation/1',
+    model: 'Two equal point masses; two wall springs k; one coupling spring c; no damping or drive.',
+    method: 'Closed analytical modal solution evaluated with JavaScript binary64 arithmetic.',
+    convention: 'qPlus=(x1+x2)/2; qMinus=(x1-x2)/2; effective modal mass=2*mass.',
+    units: {mass: 'kg', stiffness: 'N/m', displacement: 'm', velocity: 'm/s', acceleration: 'm/s^2', force: 'N', energy: 'J', time: 's', angularFrequency: 'rad/s'},
+    parameters: {...experiment.parameters},
+    omega: {...experiment.omega},
+    initialModes: {...experiment.initial},
+    initialEnergies: {...experiment.energy},
+    degenerate: experiment.degenerate,
+    inspectionTime: t,
+    state: stateAt(experiment, t),
+    sampling: {intervals: trajectory.length - 1, points: trajectory.length, start: 0, end: experiment.parameters.duration, minimumIntervalsPerFastestCycle: 48},
+    trajectory,
+  };
+}
+
+// Original offline UI. The builder supplies canonical deck/guide strings and
+// the analytical core in the same module; no dependencies or browser storage.
+(() => {
+  "use strict";
+  const byId = id => document.getElementById(id);
+  const keys = ["mass", "wallStiffness", "coupling", "x1", "x2", "v1", "v2", "duration"];
+  const fields = Object.fromEntries(keys.map(key => [key, byId(key)]));
+  const defaults = { mass: 1, wallStiffness: 16, coupling: 9, x1: 0.6, x2: 0, v1: 0, v2: 0, duration: 8 };
+  const presets = {
+    "in-phase": { ...defaults, x1: 0.5, x2: 0.5 },
+    opposite: { ...defaults, x1: 0.5, x2: -0.5 },
+    localized: { ...defaults },
+    rest: { ...defaults, x1: 0, x2: 0 },
+    uncoupled: { ...defaults, coupling: 0 }
+  };
+  const presetNames = {
+    "in-phase": "In-phase preset", opposite: "Opposite preset",
+    localized: "One-mass preset", rest: "Rest preset", uncoupled: "Uncoupled preset"
+  };
+  const status = byId("experiment-status");
+  const inputError = byId("input-error");
+  const timeError = byId("time-error");
+  const slider = byId("time-scrubber");
+  const exactTime = byId("time-input");
+  const observationButton = byId("download-observation");
+  const appliedBadge = byId("applied-badge");
+  const palette = { teal: "#00786e", orange: "#ab421d", ink: "#183c38", muted: "#526762", line: "#cbd5cb" };
+  const plot = { left: 48, right: 344, top: 22, bottom: 183 };
+  let applied = null;
+  let trajectory = [];
+  let inspectionTime = 0;
+  let dirty = false;
+  let timeDraft = false;
+  let ordinateBound = 1;
+
+  function shown(value, digits = 8) {
+    if (!Number.isFinite(value)) return "—";
+    return value === 0 || Object.is(value, -0) ? "0" : Number(value.toPrecision(digits)).toString();
+  }
+
+  function numberCell(id, value) {
+    const node = byId(id);
+    node.textContent = shown(value);
+    node.dataset.value = String(value);
+    node.title = "Full numeric value: " + String(value);
+  }
+
+  function disableAppliedControls() {
+    const blocked = !applied || dirty;
+    document.querySelectorAll(".applied-only").forEach(node => { node.disabled = blocked; });
+    observationButton.disabled = blocked || timeDraft;
+    observationButton.setAttribute("aria-describedby", dirty ? "experiment-status" : timeDraft ? "time-error" : "downloads-title");
+  }
+
+  function clearFieldErrors() {
+    keys.forEach(key => fields[key].removeAttribute("aria-invalid"));
+    inputError.hidden = true;
+    inputError.textContent = "";
+  }
+
+  function pendingInputs() {
+    dirty = true;
+    timeDraft = false;
+    timeError.hidden = true;
+    clearFieldErrors();
+    appliedBadge.textContent = applied ? "Last applied view" : "No applied view";
+    appliedBadge.classList.add("pending");
+    status.className = "notice pending";
+    status.textContent = applied
+      ? "Unapplied inputs. Graphs and readings show the last applied experiment. Apply to update them; an observation download is available after a successful Apply."
+      : "Unapplied inputs. Apply a valid experiment to show its motion.";
+    document.querySelectorAll("[data-preset]").forEach(button => {
+      button.classList.remove("active");
+      button.setAttribute("aria-pressed", "false");
+    });
+    disableAppliedControls();
+  }
+
+  function appliedStatus(prefix = "Experiment applied.") {
+    status.className = "notice";
+    status.textContent = prefix + " Graphs, readings and observation use these applied values. Inspect any time in the selected window.";
+    appliedBadge.textContent = "Applied";
+    appliedBadge.classList.remove("pending");
+    document.body.dataset.experimentState = "applied";
+  }
+
+  function spring(from, to, y) {
+    const inset = Math.min(13, (to - from) / 6);
+    const start = from + inset;
+    const end = to - inset;
+    let path = "M " + from + " " + y + " L " + start + " " + y;
+    for (let index = 1; index < 12; index++) {
+      const x = start + (end - start) * index / 12;
+      path += " L " + x.toFixed(2) + " " + (y + (index % 2 ? -9 : 9));
+    }
+    return path + " L " + end + " " + y + " L " + to + " " + y;
+  }
+
+  function drawApparatus(state) {
+    // Divide first: the bounded displacement ratio also stays finite for subnormal inputs.
+    const displacement = value => applied.amplitudeBound > 0 ? (value / applied.amplitudeBound) * 49 : 0;
+    const center1 = 205 + displacement(state.x1);
+    const center2 = 395 + displacement(state.x2);
+    const couplingStroke = applied.parameters.coupling === 0 ? ' stroke-dasharray="4 6" opacity=".45"' : "";
+    byId("apparatus-svg").innerHTML =
+      '<title id="apparatus-title">Applied two-mass motion at ' + shown(state.t) + ' seconds</title>' +
+      '<desc id="apparatus-description">Mass 1 displacement ' + shown(state.x1) + ' metres; mass 2 displacement ' + shown(state.x2) + ' metres. Scaled schematic, with dashed equilibrium guides.</desc>' +
+      '<path d="M 35 28 V 123 M 565 28 V 123" stroke="' + palette.ink + '" stroke-width="7"/>' +
+      '<path d="M 28 34 l -10 10 M 28 57 l -10 10 M 28 80 l -10 10 M 28 103 l -10 10 M 572 34 l 10 10 M 572 57 l 10 10 M 572 80 l 10 10 M 572 103 l 10 10" stroke="' + palette.muted + '" stroke-width="2"/>' +
+      '<path d="M 205 28 V 124 M 395 28 V 124" stroke="' + palette.line + '" stroke-width="2" stroke-dasharray="4 5"/>' +
+      '<path d="' + spring(38, center1 - 27, 76) + '" fill="none" stroke="' + palette.muted + '" stroke-width="2.5"/>' +
+      '<path d="' + spring(center1 + 27, center2 - 27, 76) + '" fill="none" stroke="' + palette.orange + '" stroke-width="2.5"' + couplingStroke + '/>' +
+      '<path d="' + spring(center2 + 27, 562, 76) + '" fill="none" stroke="' + palette.muted + '" stroke-width="2.5"/>' +
+      '<rect x="' + (center1 - 27).toFixed(2) + '" y="49" width="54" height="54" rx="10" fill="' + palette.teal + '"/>' +
+      '<rect x="' + (center2 - 27).toFixed(2) + '" y="49" width="54" height="54" rx="10" fill="#fff5e8" stroke="' + palette.orange + '" stroke-width="3"/>' +
+      '<text x="' + center1.toFixed(2) + '" y="84" text-anchor="middle" font-family="system-ui,sans-serif" font-size="25" font-weight="700" fill="white">1</text>' +
+      '<text x="' + center2.toFixed(2) + '" y="84" text-anchor="middle" font-family="system-ui,sans-serif" font-size="25" font-weight="700" fill="' + palette.orange + '">2</text>' +
+      '<g text-anchor="middle" font-family="system-ui,sans-serif" font-size="22" fill="' + palette.muted + '"><text x="111" y="38">k</text><text x="300" y="38">' +
+      (applied.parameters.coupling === 0 ? "c = 0" : "c") + '</text><text x="489" y="38">k</text></g>' +
+      '<path d="M 262 142 H 335 l -8 -5 M 335 142 l -8 5" fill="none" stroke="' + palette.ink + '" stroke-width="2"/>' +
+      '<text x="241" y="149" text-anchor="end" font-family="system-ui,sans-serif" font-size="21" fill="' + palette.muted + '">+x</text>';
+  }
+
+  function plotX(time, experiment = applied) {
+    return plot.left + time / experiment.parameters.duration * (plot.right - plot.left);
+  }
+
+  function plotY(value, bound = ordinateBound) {
+    return (plot.top + plot.bottom) / 2 - value / bound * (plot.bottom - plot.top) / 2;
+  }
+
+  function traceMarkup(experiment, samples, kind, bound) {
+    const physical = kind === "physical";
+    const names = physical ? ["x1", "x2"] : ["qPlus", "qMinus"];
+    const labels = physical ? ["x₁, solid line", "x₂, dashed line"] : ["q₊, solid line", "q₋, dashed line"];
+    let grid = "";
+    for (const fraction of [-1, 0, 1]) {
+      const value = fraction * bound;
+      const y = plotY(value, bound);
+      grid += '<line x1="' + plot.left + '" y1="' + y + '" x2="' + plot.right + '" y2="' + y + '" stroke="' + palette.line + '"' + (fraction === 0 ? "" : ' stroke-dasharray="3 4"') + '/>';
+      grid += '<text x="' + (plot.left - 6) + '" y="' + (y + 5) + '" text-anchor="end" fill="' + palette.muted + '" font-size="12">' + shown(value, 3) + '</text>';
+    }
+    for (const fraction of [0, 0.5, 1]) {
+      const time = experiment.parameters.duration * fraction;
+      const x = plotX(time, experiment);
+      grid += '<line x1="' + x + '" y1="' + plot.top + '" x2="' + x + '" y2="' + plot.bottom + '" stroke="' + palette.line + '" stroke-dasharray="3 4"/>';
+      grid += '<text x="' + x + '" y="207" text-anchor="' + (fraction === 1 ? "end" : fraction === 0 ? "start" : "middle") + '" fill="' + palette.muted + '" font-size="14">' + shown(time, 4) + '</text>';
+    }
+    const lines = names.map((name, index) => {
+      const path = samples.map((state, i) => (i ? "L" : "M") + plotX(state.t, experiment).toFixed(3) + " " + plotY(state[name], bound).toFixed(3)).join(" ");
+      return '<path data-series="' + name + '" d="' + path + '" fill="none" stroke="' + (index ? palette.orange : palette.teal) + '" stroke-width="2.2"' + (index ? ' stroke-dasharray="6 4"' : "") + '><title>' + labels[index] + '</title></path>';
+    }).join("");
+    return '<title>' + (physical ? "Physical" : "Normal") + ' displacement over ' + experiment.parameters.duration + ' seconds</title>' +
+      '<desc>Both plots share a displacement axis from ' + (-bound) + ' to ' + bound + ' metres and the same time axis. Solid: ' + labels[0] + '. Dashed: ' + labels[1] + '.</desc>' +
+      '<g font-family="system-ui,sans-serif">' + grid + lines +
+      '<line id="' + kind + '-cursor" x1="' + plot.left + '" x2="' + plot.left + '" y1="' + plot.top + '" y2="' + plot.bottom + '" stroke="' + palette.ink + '" stroke-width="1.3" stroke-dasharray="2 3"/>' +
+      '<circle id="' + kind + '-point-0" r="3.5" cx="' + plot.left + '" cy="' + plotY(samples[0][names[0]], bound) + '" fill="' + palette.teal + '" stroke="white" stroke-width="1.2"/>' +
+      '<rect id="' + kind + '-point-1" width="7" height="7" x="' + (plot.left - 3.5) + '" y="' + (plotY(samples[0][names[1]], bound) - 3.5) + '" fill="white" stroke="' + palette.orange + '" stroke-width="1.6"/></g>';
+  }
+
+  function renderInstant(time) {
+    const state = stateAt(applied, time);
+    inspectionTime = time;
+    timeDraft = false;
+    slider.value = String(time);
+    exactTime.value = String(time);
+    byId("time-value").textContent = shown(time);
+    byId("time-value").dataset.value = String(time);
+    timeError.hidden = true;
+    numberCell("state-time", state.t);
+    ["x1", "x2", "v1", "v2", "a1", "a2", "force1", "force2", "qPlus", "qMinus", "uPlus", "uMinus"].forEach(key => numberCell("state-" + key, state[key]));
+    ["kinetic", "wallPotential", "couplingPotential", "plus", "minus", "total", "drift"].forEach(key => numberCell("energy-" + key, state.energies[key]));
+    const total = applied.energy.total;
+    [["bar-kinetic", "kinetic"], ["bar-wall", "wallPotential"], ["bar-coupling", "couplingPotential"]].forEach(([id, key]) => {
+      const fraction = total > 0 ? Math.max(0, Math.min(1, state.energies[key] / total)) : 0;
+      byId(id).style.width = String(fraction * 100) + "%";
+    });
+    for (const [kind, names] of [["physical", ["x1", "x2"]], ["modal", ["qPlus", "qMinus"]]]) {
+      const x = plotX(time);
+      byId(kind + "-cursor").setAttribute("x1", String(x));
+      byId(kind + "-cursor").setAttribute("x2", String(x));
+      byId(kind + "-point-0").setAttribute("cx", String(x));
+      byId(kind + "-point-0").setAttribute("cy", String(plotY(state[names[0]])));
+      byId(kind + "-point-1").setAttribute("x", String(x - 3.5));
+      byId(kind + "-point-1").setAttribute("y", String(plotY(state[names[1]]) - 3.5));
+    }
+    drawApparatus(state);
+    disableAppliedControls();
+  }
+
+  function applyExperiment(presetName = null) {
+    clearFieldErrors();
+    const raw = Object.fromEntries(keys.map(key => [key, fields[key].value]));
+    let candidate, samples, bound, physicalMarkup, modalMarkup;
+    try {
+      candidate = makeExperiment(raw);
+      samples = sampleTrajectory(candidate);
+      bound = candidate.amplitudeBound > 0 ? candidate.amplitudeBound * 1.08 : 1;
+      physicalMarkup = traceMarkup(candidate, samples, "physical", bound);
+      modalMarkup = traceMarkup(candidate, samples, "modal", bound);
+    } catch (error) {
+      dirty = true;
+      timeDraft = false;
+      document.body.dataset.experimentState = "invalid";
+      appliedBadge.textContent = applied ? "Last applied view" : "No applied view";
+      appliedBadge.classList.add("pending");
+      status.className = "notice pending";
+      status.textContent = applied
+        ? "Inputs were not applied. Graphs and readings still show the last applied experiment. Correct the inputs and Apply; its observation download is disabled until then."
+        : "No experiment has been applied. Correct the inputs and Apply.";
+      inputError.textContent = error instanceof Error ? error.message : "Check every parameter before applying.";
+      inputError.hidden = false;
+      const invalid = keys.find(key => !fields[key].validity.valid || fields[key].value.trim() === "");
+      if (invalid) fields[invalid].setAttribute("aria-invalid", "true");
+      inputError.focus();
+      disableAppliedControls();
+      return false;
+    }
+    applied = candidate;
+    trajectory = samples;
+    ordinateBound = bound;
+    dirty = false;
+    timeDraft = false;
+    timeError.hidden = true;
+    exactTime.removeAttribute("aria-invalid");
+    slider.max = String(applied.parameters.duration);
+    exactTime.max = String(applied.parameters.duration);
+    byId("time-end").textContent = shown(applied.parameters.duration) + " s";
+    byId("physical-trace-svg").innerHTML = physicalMarkup;
+    byId("modal-trace-svg").innerHTML = modalMarkup;
+    numberCell("omega-plus", applied.omega.plus);
+    numberCell("omega-minus", applied.omega.minus);
+    byId("degeneracy-note").hidden = !applied.degenerate;
+    const p = applied.parameters;
+    byId("applied-parameters").textContent =
+      "APPLIED  m = " + shown(p.mass) + " kg · k = " + shown(p.wallStiffness) + " N/m · c = " + shown(p.coupling) +
+      " N/m · x(0) = [" + shown(p.x1) + ", " + shown(p.x2) + "] m · v(0) = [" +
+      shown(p.v1) + ", " + shown(p.v2) + "] m/s · window " + shown(p.duration) + " s";
+    byId("sampling-note").textContent =
+      "Both plots use the same axes and " + trajectory.length.toLocaleString("en-US") +
+      " analytical samples, including both endpoints; at least 48 intervals per fastest modal period. Readings evaluate the selected time directly.";
+    document.querySelectorAll("[data-preset]").forEach(button => {
+      const active = button.dataset.preset === presetName;
+      button.classList.toggle("active", active);
+      button.setAttribute("aria-pressed", String(active));
+    });
+    renderInstant(0);
+    appliedStatus(presetName ? presetNames[presetName] + " applied." : "Experiment applied.");
+    return true;
+  }
+
+  function setExactTime() {
+    if (!applied || dirty) return;
+    const text = exactTime.value.trim();
+    const validDecimal = /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?$/i.test(text);
+    const value = Number(text);
+    const underflow = value === 0 && /[1-9]/.test(text.split(/e/i)[0]);
+    if (!validDecimal || !Number.isFinite(value) || underflow || value < 0 || value > applied.parameters.duration) {
+      timeDraft = true;
+      timeError.className = "notice error";
+      timeError.textContent = "Enter one finite time from 0 to " + shown(applied.parameters.duration) +
+        " seconds, then Set time. The readings remain at " + shown(inspectionTime) + " seconds.";
+      timeError.hidden = false;
+      exactTime.setAttribute("aria-invalid", "true");
+      disableAppliedControls();
+      return;
+    }
+    exactTime.removeAttribute("aria-invalid");
+    renderInstant(value === 0 ? 0 : value);
+    appliedStatus("Inspection time set.");
+  }
+
+  function download(content, filename, type) {
+    const blob = new Blob([content], { type });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+    document.body.append(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    byId("download-status").textContent = filename + " prepared for download.";
+  }
+
+  byId("normal-modes-form").addEventListener("input", () => {
+    document.body.dataset.experimentState = "pending";
+    pendingInputs();
+  });
+  byId("normal-modes-form").addEventListener("submit", event => {
+    event.preventDefault();
+    applyExperiment();
+  });
+  document.querySelectorAll("[data-preset]").forEach(button => {
+    button.addEventListener("click", () => {
+      const name = button.dataset.preset;
+      keys.forEach(key => { fields[key].value = String(presets[name][key]); });
+      applyExperiment(name);
+    });
+  });
+  slider.addEventListener("input", () => {
+    if (!applied || dirty) return;
+    const value = Number(slider.value);
+    if (!Number.isFinite(value) || value < 0 || value > applied.parameters.duration) return;
+    exactTime.removeAttribute("aria-invalid");
+    renderInstant(value);
+    appliedStatus("Inspection time updated.");
+  });
+  exactTime.addEventListener("input", () => {
+    if (!applied || dirty) return;
+    timeDraft = true;
+    exactTime.removeAttribute("aria-invalid");
+    timeError.className = "notice pending";
+    timeError.textContent = "Time entry is pending. Set time to update the inspected state, or use the time slider.";
+    timeError.hidden = false;
+    disableAppliedControls();
+  });
+  exactTime.addEventListener("keydown", event => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      setExactTime();
+    }
+  });
+  byId("set-time").addEventListener("click", setExactTime);
+  byId("download-course").addEventListener("click", () => download(normalModesDeckText, "normal-modes.json", "application/json;charset=utf-8"));
+  byId("download-guide").addEventListener("click", () => download(normalModesGuideText, "normal-modes.md", "text/markdown;charset=utf-8"));
+  observationButton.addEventListener("click", () => {
+    if (!applied || dirty || timeDraft) return;
+    const observation = makeObservation(applied, inspectionTime);
+    download(JSON.stringify(observation, null, 2) + "\n", "normal-modes-observation.json", "application/json;charset=utf-8");
+  });
+  applyExperiment("localized");
+})();
+
+</script>
+</body>
+</html>

@@ -296,7 +296,10 @@ lessonArchiveControls = mountLessonArchive({
     if (state.presentation.phase === 'feedback') {
       const item = deck.items.find(candidate => candidate.id === state.presentation.itemId);
       renderLessonQuestion(item, state.answers[state.answers.length - 1]);
-    } else renderQuestion();
+    } else {
+      const item = deck.items.find(candidate => candidate.id === state.presentation.itemId);
+      renderLessonQuestion(item);
+    }
   }
 });
 traceArchiveControls = mountTraceArchive({
