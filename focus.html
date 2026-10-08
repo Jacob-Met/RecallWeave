@@ -1,0 +1,606 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lesson focus · RecallWeave</title>
+  <meta name="description" content="Make a focused RecallWeave lesson while retaining its authored prerequisite links.">
+  <style>
+:root { color-scheme: light; --ink: #203832; --muted: #5d6b64; --paper: #f6f5ed; --line: #d5dbcf; --green: #234f42; --pale: #e7eddf; --accent: #c9df82; --error: #9a3027; font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { margin: 0; color: var(--ink); background: var(--paper); line-height: 1.6; }
+button, input { font: inherit; }
+button, a, input, summary { -webkit-tap-highlight-color: transparent; }
+a { color: inherit; text-underline-offset: .2em; }
+button { cursor: pointer; border: 1px solid var(--green); border-radius: .45rem; padding: .78rem 1.1rem; font-weight: 650; line-height: 1.3; max-width: 100%; }
+button:disabled { cursor: default; opacity: .5; }
+.primary { color: white; background: var(--green); }
+.primary:hover:not(:disabled) { background: #153c30; }
+.quiet { color: var(--ink); background: transparent; border-color: #aebdaf; }
+.quiet:hover:not(:disabled) { background: var(--pale); }
+:focus-visible { outline: 3px solid #537fa5; outline-offset: 4px; }
+[tabindex="-1"]:focus { outline: none; }
+.skip-link { position: absolute; left: 1rem; top: -5rem; z-index: 5; padding: .7rem 1rem; color: white; background: var(--green); }
+.skip-link:focus { top: 1rem; }
+.site-header, main, footer { width: min(1160px, calc(100% - 64px)); margin-inline: auto; }
+.site-header { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding-block: 28px; border-bottom: 1px solid var(--line); }
+.wordmark { font-family: Georgia, serif; font-size: 1.6rem; font-weight: 700; letter-spacing: -.04em; text-decoration: none; }
+.wordmark span { font: 400 .9rem system-ui, sans-serif; color: var(--muted); }
+nav { display: flex; flex-wrap: wrap; gap: 10px 24px; font-size: .9rem; }
+.hero { padding: 56px 0 40px; max-width: 860px; }
+.eyebrow { margin: 0 0 .65rem; font-size: .71rem; font-weight: 700; letter-spacing: .14em; color: var(--muted); }
+h1, h2, h3, p { margin-top: 0; }
+h1 { margin-bottom: 20px; font-family: Georgia, "Times New Roman", serif; font-size: clamp(2.6rem, 5vw, 4.35rem); line-height: 1.1; letter-spacing: -.045em; font-weight: 400; }
+h1 em { color: #517342; font-weight: 400; }
+h2 { font-size: 1.35rem; line-height: 1.3; letter-spacing: -.025em; }
+h3 { font-size: 1.1rem; line-height: 1.4; }
+.lede { max-width: 650px; font-size: 1.06rem; color: var(--muted); }
+.hero-notes { display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: .8rem; color: var(--muted); }
+.hero-notes span::before { content: "●"; color: #739743; margin-right: .6em; font-size: .58rem; vertical-align: 2px; }
+.source-card { padding: 28px 30px; border: 1px solid var(--line); border-radius: .85rem; background: #fffef9; }
+.section-label { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+.section-label h2 { margin: 0; }
+.step-number { flex: 0 0 auto; font-size: .73rem; font-weight: 650; display: inline-grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; background: var(--pale); color: var(--green); }
+.source-card > p, .selection-panel > p { color: var(--muted); }
+.status { margin: 12px 0 0; font-size: .86rem; color: var(--muted); white-space: pre-wrap; overflow-wrap: anywhere; }
+.status[data-error="true"], [data-error="true"] { color: var(--error); }
+.incoming { margin-top: 24px; padding: 24px; border: 1px solid #b6c996; border-radius: .65rem; background: #f0f5e8; overflow-wrap: anywhere; }
+.incoming h3 { font-size: 1.4rem; }
+.metadata { display: grid; grid-template-columns: minmax(100px, 140px) minmax(0, 1fr); gap: 8px 18px; margin: 18px 0; font-size: .88rem; }
+.metadata dt { color: var(--muted); }
+.metadata dd { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.compact button { font-size: .78rem; padding: .55rem .7rem; }
+.active-source { display: flex; justify-content: space-between; gap: 28px; margin: 36px 0 24px; padding-bottom: 20px; border-bottom: 1px solid var(--line); }
+.active-source > div { min-width: 0; }
+.active-source h2 { margin-bottom: 4px; font-family: Georgia, serif; font-size: 1.7rem; font-weight: 400; white-space: pre-wrap; overflow-wrap: anywhere; }
+.source-credits { flex: 0 1 430px; min-width: 0; font-size: .87rem; }
+summary { cursor: pointer; }
+.hint { color: var(--muted); font-size: .83rem; white-space: pre-wrap; overflow-wrap: anywhere; }
+.workspace-grid { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.35fr); gap: 36px; align-items: start; }
+.selection-panel { min-width: 0; }
+.selection-panel > p { font-size: .9rem; }
+.targets-fieldset { padding: 0; margin: 24px 0 14px; border: 0; min-width: 0; }
+legend, .title-field > label { font-size: .84rem; font-weight: 700; padding: 0; margin-bottom: 10px; }
+.target-list { display: grid; gap: 8px; }
+.target { display: flex; align-items: flex-start; gap: 12px; padding: 13px 14px; background: #fffef9; border: 1px solid var(--line); border-radius: .5rem; cursor: pointer; }
+.target:has(input:checked) { border-color: #789253; background: #edf3e1; }
+.target input { flex: 0 0 auto; margin: 5px 0 0; width: 18px; height: 18px; accent-color: var(--green); }
+.target-text { min-width: 0; display: grid; gap: 2px; }
+.target-name { font-size: .92rem; font-weight: 600; white-space: pre-wrap; overflow-wrap: anywhere; }
+.target-count { font-size: .76rem; color: var(--muted); }
+.title-field { margin: 27px 0 24px; }
+.title-field > label { display: block; }
+.title-field input { display: block; width: 100%; min-width: 0; padding: .8rem .9rem; border: 1px solid #aebcaf; border-radius: .4rem; background: #fffef9; color: var(--ink); }
+.title-field input[aria-invalid="true"] { border-color: var(--error); }
+.title-field .hint { margin-top: 8px; }
+.selection-note { padding: 16px 0; border-top: 1px solid var(--line); font-size: .79rem !important; }
+.preview-panel { min-width: 0; padding: 26px 28px; border: 1px solid var(--line); border-radius: .8rem; background: #fffef9; }
+.selection-summary { color: var(--green); font-size: .92rem; font-weight: 600; }
+.inclusions { list-style: none; padding: 0; margin: 22px 0; }
+.inclusion { padding: 13px 0; border-top: 1px solid var(--line); font-size: .83rem; }
+.inclusion-head { display: flex; gap: 8px 12px; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; }
+.inclusion strong { min-width: 0; overflow-wrap: anywhere; white-space: pre-wrap; font-size: .9rem; }
+.badge { flex: 0 0 auto; font-size: .65rem; padding: 3px 7px; border-radius: .25rem; color: #46573b; background: #edf0e8; }
+.badge.target-badge { background: #dcebba; color: #29482f; }
+.inclusion p { margin: 6px 0 0; color: var(--muted); font-size: .8rem; overflow-wrap: anywhere; }
+.question { border-top: 1px solid var(--line); padding: 13px 0; }
+.question summary { font-size: .89rem; line-height: 1.5; white-space: pre-wrap; overflow-wrap: anywhere; }
+.question-number { display: block; color: var(--muted); font-size: .7rem; letter-spacing: .06em; margin-bottom: 4px; }
+.question-content { padding: 16px 0 0; font-size: .85rem; white-space: pre-wrap; overflow-wrap: anywhere; }
+.question-content p { margin-bottom: 12px; }
+.question-content ol { padding-left: 1.7rem; }
+.question-content li { margin: 7px 0; padding-left: 3px; }
+.correct-option { font-weight: 650; color: #335b36; }
+.download-panel { margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--line); }
+.download-panel .primary { width: 100%; }
+.download-panel > .hint { margin-bottom: 12px; }
+.next-step { margin: 36px 0; padding: 24px 28px; background: var(--pale); border-radius: .65rem; }
+.next-step h2 { font-family: Georgia, serif; font-weight: 400; font-size: 1.6rem; }
+.next-step p { max-width: 850px; font-size: .9rem; margin-bottom: 8px; }
+footer { margin-top: 40px; padding: 28px 0 32px; border-top: 1px solid var(--line); display: flex; align-items: flex-start; gap: 36px; color: var(--muted); font-size: .76rem; }
+footer > span { flex: 0 0 auto; font-weight: 600; }
+footer p { max-width: 700px; margin: 0; }
+@media (max-width: 780px) { .workspace-grid { grid-template-columns: 1fr; gap: 22px; } .active-source { flex-direction: column; gap: 12px; } .source-credits { flex-basis: auto; } }
+@media (max-width: 480px) {
+  .site-header, main, footer { width: calc(100% - 32px); }
+  .site-header { flex-direction: column; align-items: flex-start; gap: 12px; padding-block: 18px; }
+  nav { gap: 20px; font-size: .83rem; }
+  .hero { padding: 34px 0 28px; }
+  .hero h1 { font-size: 2.55rem; }
+  .lede { font-size: .96rem; }
+  .source-card, .preview-panel, .next-step { padding: 20px 18px; }
+  .incoming { padding: 18px 14px; }
+  .metadata { grid-template-columns: minmax(0, 1fr); gap: 4px; }
+  .metadata dd { margin-bottom: 9px; }
+  .section-label h2 { font-size: 1.22rem; }
+  .download-panel .primary { font-size: .89rem; }
+  footer { flex-direction: column; gap: 10px; }
+}
+</style>
+</head>
+<body>
+  <a class="skip-link" href="#course-focus">Skip to Lesson focus</a>
+  <header class="site-header">
+    <a class="wordmark" href="demo.html" target="_blank" rel="noopener">RecallWeave <span>↗</span></a>
+    <nav aria-label="Other tools">
+      <a href="demo.html" target="_blank" rel="noopener">Learning app ↗</a>
+      <a href="author.html" target="_blank" rel="noopener">Deck studio ↗</a>
+    </nav>
+  </header>
+
+  <main id="course-focus" tabindex="-1">
+    <section class="hero" aria-labelledby="page-title">
+      <p class="eyebrow">RECALLWEAVE / LESSON TOOLS</p>
+      <h1 id="page-title">Give one topic<br><em>room to connect.</em></h1>
+      <p class="lede">Make a focused lesson from a checked course. Choose the concepts you want; keep the questions and prerequisite concepts that support them.</p>
+      <div class="hero-notes"><span>Local files</span><span>Works offline</span><span>Your source stays intact</span></div>
+    </section>
+
+    <section class="source-card" aria-labelledby="open-heading">
+      <div class="section-label"><span class="step-number">01</span><h2 id="open-heading">Choose a source lesson</h2></div>
+      <p>Open a checked RecallWeave deck JSON, up to 256 KiB. An editable draft needs to be checked in Deck studio first.</p>
+      <button type="button" id="open-source" class="primary">Open checked deck <span aria-hidden="true">↗</span></button>
+      <input id="source-file" type="file" accept=".json,application/json" hidden>
+      <p id="file-status" class="status" role="status" aria-live="polite">The file stays in this tab. Nothing is uploaded or saved automatically.</p>
+
+      <section id="source-preview" class="incoming" aria-labelledby="source-preview-title" hidden>
+        <p class="eyebrow">LOCAL FILE PREVIEW</p>
+        <h3 id="source-preview-title" tabindex="-1"></h3>
+        <p id="source-preview-summary"></p>
+        <dl class="metadata"><dt>Author / source</dt><dd id="source-preview-attribution"></dd><dt>Permission / license</dt><dd id="source-preview-license"></dd></dl>
+        <p>Use this deck to replace the current source, target choices and lesson title. Until then, your current selection stays in place.</p>
+        <div class="actions"><button type="button" id="use-source" class="primary">Use this deck</button><button type="button" id="cancel-source" class="quiet">Cancel preview</button></div>
+      </section>
+    </section>
+
+    <div id="focus-editor" hidden>
+      <section class="active-source" aria-labelledby="source-title">
+        <div><p class="eyebrow">CURRENT SOURCE</p><h2 id="source-title"></h2><p id="source-summary" class="hint"></p></div>
+        <details class="source-credits"><summary>Source and permission</summary><dl class="metadata"><dt>Author / source</dt><dd id="source-attribution"></dd><dt>Permission / license</dt><dd id="source-license"></dd></dl></details>
+      </section>
+
+      <div class="workspace-grid">
+        <section class="selection-panel" aria-labelledby="targets-heading">
+          <div class="section-label"><span class="step-number">02</span><h2 id="targets-heading" tabindex="-1">Choose your focus</h2></div>
+          <p>Select target concepts. All their questions stay, together with every prerequisite concept linked from those questions.</p>
+          <fieldset class="targets-fieldset"><legend>Target concepts</legend><div id="target-concepts" class="target-list"></div></fieldset>
+          <div class="actions compact"><button type="button" id="select-all" class="quiet">Select all targets</button><button type="button" id="clear-targets" class="quiet" disabled>Clear targets</button></div>
+          <div class="title-field"><label for="focus-title">Title for the focused lesson</label><input id="focus-title" type="text" maxlength="160" autocomplete="off" placeholder="Give this lesson its own title" aria-describedby="title-help"><p id="title-help" class="hint">Required for download. The source title and original attribution remain visible here.</p></div>
+          <p class="selection-note">These are the author's prerequisite links. Keeping them does not verify the subject matter or prescribe a teaching order. The learner keeps its existing question-selection behavior.</p>
+        </section>
+
+        <section class="preview-panel" aria-labelledby="focus-preview-heading">
+          <div class="section-label"><span class="step-number">03</span><h2 id="focus-preview-heading">Inspect the lesson</h2></div>
+          <p id="selection-summary" class="selection-summary" role="status" aria-live="polite">Choose at least one target concept to see what stays.</p>
+          <ul id="included-concepts" class="inclusions" aria-label="Included concepts"></ul>
+          <section id="question-preview" aria-labelledby="questions-heading" hidden><h3 id="questions-heading">Questions that stay</h3><p class="hint">Original source order, answer choices and explanations are preserved. Expand a question to inspect its answer key.</p><div id="included-questions"></div></section>
+          <div class="download-panel"><p id="download-help" class="hint">Choose a target concept and add a lesson title before downloading.</p><button type="button" id="download-focus" class="primary" disabled>Download focused lesson (.json)</button><p id="download-status" class="status" role="status" aria-live="polite"></p></div>
+        </section>
+      </div>
+      <section class="next-step" aria-labelledby="next-heading"><h2 id="next-heading">Take it into a lesson.</h2><p>In the learning app, choose the downloaded JSON under <strong>Bring your own lesson</strong>, inspect the preview, then select <strong>Start this deck</strong>. That starts a fresh lesson; this page does not transfer or change existing answers.</p><p>You can also reopen the checked file in Deck studio to edit it. Keep the original course file for its full content.</p></section>
+    </div>
+  </main>
+  <footer><span>RecallWeave / Lesson focus</span><p>Source wording, answer identities and permission statements stay with the selected questions. Download explicitly before closing this tab; nothing is saved automatically.</p></footer>
+  <script type="module">
+// src/deck.mjs
+/** Local lesson content. Imported data cannot replace the model or run code. */
+const DECK_FORMAT = 'recallweave-deck/1';
+const MAX_DECK_BYTES = 262144;
+
+function deckRecord(value, path) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    throw new Error(`${path} must be an object.`);
+  }
+  return value;
+}
+
+function deckText(value, path, limit) {
+  if (typeof value !== 'string' || !value.trim() || value.length > limit) {
+    throw new Error(`${path} must be nonempty text of at most ${limit} characters.`);
+  }
+  return value;
+}
+
+function deckList(value, path, minimum, maximum) {
+  if (!Array.isArray(value) || value.length < minimum || value.length > maximum) {
+    throw new Error(`${path} must contain ${minimum}–${maximum} entries.`);
+  }
+  return value;
+}
+
+/** Validate and copy only the content fields used by the existing lesson runtime. */
+function validateDeck(value) {
+  const input = deckRecord(value, 'Deck');
+  if (input.format !== undefined && input.format !== DECK_FORMAT) {
+    throw new Error(`Unsupported deck format. Use ${DECK_FORMAT}.`);
+  }
+  const title = deckText(input.title, 'title', 160);
+  const attribution = deckText(input.attribution, 'attribution', 2000);
+  const license = deckText(input.license, 'license', 2000);
+  const concepts = deckList(input.concepts, 'concepts', 1, 32).map((concept, index) =>
+    deckText(concept, `concepts[${index}]`, 80));
+  if (new Set(concepts).size !== concepts.length) throw new Error('Concept names must be unique.');
+  const knownConcepts = new Set(concepts);
+  const ids = new Set();
+  const coveredConcepts = new Set();
+  const links = new Map(concepts.map(concept => [concept, new Set()]));
+  const items = deckList(input.items, 'items', 1, 100).map((value, index) => {
+    const path = `items[${index}]`;
+    const item = deckRecord(value, path);
+    const id = deckText(item.id, `${path}.id`, 80);
+    if (ids.has(id)) throw new Error(`${path}.id duplicates another question ID.`);
+    ids.add(id);
+    const concept = deckText(item.concept, `${path}.concept`, 80);
+    if (!knownConcepts.has(concept)) throw new Error(`${path}.concept is not in concepts.`);
+    coveredConcepts.add(concept);
+    const prerequisites = deckList(item.prerequisites, `${path}.prerequisites`, 0, 31).map((name, p) => {
+      deckText(name, `${path}.prerequisites[${p}]`, 80);
+      if (!knownConcepts.has(name)) throw new Error(`${path}.prerequisites contains an unknown concept.`);
+      if (name === concept) throw new Error(`${path} cannot require its own concept.`);
+      links.get(concept).add(name);
+      return name;
+    });
+    if (new Set(prerequisites).size !== prerequisites.length) throw new Error(`${path}.prerequisites contains a duplicate.`);
+    const options = deckList(item.options, `${path}.options`, 2, 6).map((option, o) =>
+      deckText(option, `${path}.options[${o}]`, 1000));
+    if (new Set(options).size !== options.length) throw new Error(`${path}.options must be distinct.`);
+    if (!Number.isInteger(item.answer) || item.answer < 0 || item.answer >= options.length) {
+      throw new Error(`${path}.answer must be a zero-based index of an option.`);
+    }
+    return Object.freeze({
+      id, concept, prerequisites: Object.freeze(prerequisites),
+      prompt: deckText(item.prompt, `${path}.prompt`, 2000),
+      options: Object.freeze(options), answer: item.answer,
+      explanation: deckText(item.explanation, `${path}.explanation`, 4000),
+      transfer: deckText(item.transfer, `${path}.transfer`, 2000)
+    });
+  });
+  if (coveredConcepts.size !== concepts.length) throw new Error('Every concept must have at least one question.');
+  const visiting = new Set();
+  const visited = new Set();
+  const visit = concept => {
+    if (visiting.has(concept)) throw new Error('Prerequisite links must not form a cycle.');
+    if (visited.has(concept)) return;
+    visiting.add(concept);
+    for (const prerequisite of links.get(concept)) visit(prerequisite);
+    visiting.delete(concept);
+    visited.add(concept);
+  };
+  concepts.forEach(visit);
+  return Object.freeze({
+    format: DECK_FORMAT, title, attribution, license,
+    concepts: Object.freeze(concepts), items: Object.freeze(items)
+  });
+}
+
+/** The same size limit applies to a File and to programmatically supplied UTF-8 JSON. */
+function parseDeck(text) {
+  if (typeof text !== 'string' || new TextEncoder().encode(text).length > MAX_DECK_BYTES) {
+    throw new Error('Choose a JSON deck no larger than 256 KiB.');
+  }
+  let value;
+  try { value = JSON.parse(text); }
+  catch { throw new Error('The file is not valid JSON. Check its commas, quotes and brackets.'); }
+  return validateDeck(value);
+}
+
+/** Export the existing bundled lesson as an editable example of the same contract. */
+function serializeDeck(deck) {
+  return JSON.stringify(validateDeck(deck), null, 2) + '\n';
+}
+
+// src/course-focus.mjs
+
+/** Select complete concepts, including dependencies declared by any of their questions. */
+function planAdmittedDeck(deck, targetConcepts) {
+  if (!Array.isArray(targetConcepts) || targetConcepts.length > deck.concepts.length) {
+    throw new Error('Choose a list of target concepts from this deck.');
+  }
+  const known = new Set(deck.concepts);
+  const requested = new Set();
+  for (const concept of targetConcepts) {
+    if (typeof concept !== 'string' || !known.has(concept)) {
+      throw new Error('Every target concept must belong to this deck.');
+    }
+    if (requested.has(concept)) throw new Error('Choose each target concept only once.');
+    requested.add(concept);
+  }
+
+  const dependencies = new Map(deck.concepts.map(concept => [concept, new Set()]));
+  const counts = new Map(deck.concepts.map(concept => [concept, 0]));
+  for (const item of deck.items) {
+    counts.set(item.concept, counts.get(item.concept) + 1);
+    for (const prerequisite of item.prerequisites) dependencies.get(item.concept).add(prerequisite);
+  }
+
+  const included = new Set(requested);
+  const pending = [...requested];
+  while (pending.length) {
+    for (const prerequisite of dependencies.get(pending.pop())) {
+      if (!included.has(prerequisite)) {
+        included.add(prerequisite);
+        pending.push(prerequisite);
+      }
+    }
+  }
+
+  const concepts = deck.concepts.filter(concept => included.has(concept));
+  const inclusions = concepts.map(concept => Object.freeze({
+    concept,
+    requested: requested.has(concept),
+    questionCount: counts.get(concept),
+    requiredBy: Object.freeze(concepts.filter(other => dependencies.get(other).has(concept)))
+  }));
+  return Object.freeze({
+    requested: Object.freeze(deck.concepts.filter(concept => requested.has(concept))),
+    required: Object.freeze(concepts.filter(concept => !requested.has(concept))),
+    concepts: Object.freeze(concepts),
+    items: Object.freeze(deck.items.filter(item => included.has(item.concept))),
+    inclusions: Object.freeze(inclusions)
+  });
+}
+
+/** Empty selections are useful while editing, but do not produce a checked lesson. */
+function planCourseFocus(sourceDeck, targetConcepts) {
+  return planAdmittedDeck(validateDeck(sourceDeck), targetConcepts);
+}
+
+/** Produce the exact downloadable checked file without changing the source deck. */
+function createFocusedLesson(sourceDeck, targetConcepts, title) {
+  const source = validateDeck(sourceDeck);
+  const plan = planAdmittedDeck(source, targetConcepts);
+  if (!plan.requested.length) throw new Error('Choose at least one target concept before downloading.');
+  const candidate = validateDeck({
+    format: source.format,
+    title,
+    attribution: source.attribution,
+    license: source.license,
+    concepts: plan.concepts,
+    items: plan.items
+  });
+  const utf8 = new TextEncoder();
+  let json = serializeDeck(candidate);
+  if (utf8.encode(json).length > MAX_DECK_BYTES) json = JSON.stringify(candidate);
+  const deck = parseDeck(json);
+  return Object.freeze({ ...plan, deck, json, bytes: utf8.encode(json).length });
+}
+
+// src/course-focus-ui.mjs
+
+function focusNode(tag, attributes = {}, text) {
+  const element = document.createElement(tag);
+  for (const [key, value] of Object.entries(attributes)) element.setAttribute(key, String(value));
+  if (text !== undefined) element.textContent = text;
+  return element;
+}
+
+/** A selected source and its output stay separate from asynchronous file previews. */
+function mountCourseFocus(root) {
+  const byId = id => root.querySelector('#' + id);
+  const fileInput = byId('source-file');
+  const titleInput = byId('focus-title');
+  const download = byId('download-focus');
+  let source = null;
+  let pending = null;
+  let readingFile = false;
+  let fileRevision = 0;
+  let targets = new Set();
+  let ready = null;
+
+  function conceptReference(concept) {
+    return `Source concept ${source.concepts.indexOf(concept) + 1}: ${concept}`;
+  }
+  function status(id, message, error = false) {
+    const element = byId(id);
+    element.textContent = message;
+    element.dataset.error = String(error);
+  }
+  function retireFilePreview() {
+    fileRevision++;
+    pending = null;
+    readingFile = false;
+    byId('source-preview').hidden = true;
+  }
+  function editingStarted() {
+    if (readingFile || pending) {
+      status('file-status', 'File selection cancelled because you continued editing the current lesson.');
+    }
+    retireFilePreview();
+    status('download-status', '');
+  }
+  function renderQuestions(plan) {
+    const container = byId('included-questions');
+    container.replaceChildren();
+    byId('question-preview').hidden = !plan.items.length;
+    const positions = new Map(source.items.map((item, index) => [item.id, index + 1]));
+    for (const item of plan.items) {
+      const detail = focusNode('details', { class: 'question', 'data-item-id': item.id });
+      const summary = focusNode('summary');
+      summary.append(focusNode('span', { class: 'question-number' }, `SOURCE QUESTION ${String(positions.get(item.id)).padStart(2, '0')}`), focusNode('span', {}, item.prompt));
+      const content = focusNode('div', { class: 'question-content' });
+      content.append(focusNode('p', { class: 'hint' }, conceptReference(item.concept)));
+      content.append(focusNode('p', { class: 'hint' }, item.prerequisites.length ? `Prerequisites: ${item.prerequisites.map(conceptReference).join('; ')}` : 'No prerequisite links.'));
+      const options = focusNode('ol', { type: 'A' });
+      item.options.forEach((option, index) => {
+        const row = focusNode('li', index === item.answer ? { class: 'correct-option' } : {}, option);
+        if (index === item.answer) row.append(focusNode('span', {}, ' — correct answer'));
+        options.append(row);
+      });
+      content.append(options, focusNode('p', {}, item.explanation), focusNode('p', {}, `Try this transfer: ${item.transfer}`));
+      detail.append(summary, content);
+      container.append(detail);
+    }
+  }
+
+  function renderSelection() {
+    ready = null;
+    download.disabled = true;
+    titleInput.removeAttribute('aria-invalid');
+    byId('clear-targets').disabled = targets.size === 0;
+    byId('select-all').disabled = targets.size === source.concepts.length;
+    const plan = planCourseFocus(source, [...targets]);
+    const list = byId('included-concepts');
+    list.replaceChildren();
+    status('selection-summary', plan.requested.length
+      ? `${plan.requested.length} target ${plan.requested.length === 1 ? 'concept' : 'concepts'} + ${plan.required.length} prerequisite ${plan.required.length === 1 ? 'concept' : 'concepts'} · ${plan.items.length} of ${source.items.length} questions`
+      : 'Choose at least one target concept to see what stays.');
+    for (const inclusion of plan.inclusions) {
+      const row = focusNode('li', { class: 'inclusion', 'data-concept': inclusion.concept });
+      const heading = focusNode('div', { class: 'inclusion-head' });
+      heading.append(focusNode('strong', {}, conceptReference(inclusion.concept)), focusNode('span', { class: 'badge' + (inclusion.requested ? ' target-badge' : '') }, inclusion.requested ? 'Selected target' : 'Required by links'));
+      row.append(heading, focusNode('p', {}, `${inclusion.questionCount} ${inclusion.questionCount === 1 ? 'question stays' : 'questions stay'}.`));
+      if (inclusion.requiredBy.length) row.append(focusNode('p', {}, `Linked as a prerequisite by: ${inclusion.requiredBy.map(conceptReference).join('; ')}`));
+      list.append(row);
+    }
+    renderQuestions(plan);
+    if (!plan.requested.length) {
+      status('download-help', 'Choose a target concept and add a lesson title before downloading.');
+      return;
+    }
+    if (!titleInput.value.trim()) {
+      status('download-help', 'Add a title for the focused lesson before downloading.');
+      return;
+    }
+    try {
+      ready = createFocusedLesson(source, [...targets], titleInput.value);
+      status('download-help', `Checked lesson · ${ready.deck.items.length} questions · ${ready.bytes.toLocaleString('en-US')} UTF-8 bytes. Original attribution and permission are included.`);
+      download.disabled = false;
+    } catch (error) {
+      if (/title/.test(error.message)) titleInput.setAttribute('aria-invalid', 'true');
+      status('download-help', error.message, true);
+    }
+  }
+
+  function renderTargets() {
+    const container = byId('target-concepts');
+    container.replaceChildren();
+    source.concepts.forEach((concept, index) => {
+      const label = focusNode('label', { class: 'target', for: `focus-target-${index}` });
+      const input = focusNode('input', { type: 'checkbox', id: `focus-target-${index}`, 'data-concept-index': index });
+      input.checked = targets.has(concept);
+      input.addEventListener('change', () => {
+        editingStarted();
+        if (input.checked) targets.add(concept); else targets.delete(concept);
+        renderSelection();
+      });
+      const text = focusNode('span', { class: 'target-text' });
+      const count = source.items.filter(item => item.concept === concept).length;
+      text.append(focusNode('span', { class: 'target-name' }, concept), focusNode('span', { class: 'target-count' }, `Source concept ${index + 1} · ${count} ${count === 1 ? 'question' : 'questions'}`));
+      label.append(input, text);
+      container.append(label);
+    });
+  }
+
+  byId('open-source').addEventListener('click', () => {
+    retireFilePreview();
+    fileInput.value = '';
+    fileInput.click();
+  });
+  fileInput.addEventListener('cancel', () => {
+    retireFilePreview();
+    status('file-status', 'File choice cancelled. The current source and selection are unchanged.');
+    byId('open-source').focus();
+  });
+  fileInput.addEventListener('change', async () => {
+    retireFilePreview();
+    const revision = fileRevision;
+    const file = fileInput.files?.[0];
+    fileInput.value = '';
+    if (!file) {
+      status('file-status', 'No file selected. The current source and selection are unchanged.');
+      byId('open-source').focus();
+      return;
+    }
+    readingFile = true;
+    status('file-status', 'Checking the selected file. Your current source and selection stay in place.');
+    try {
+      if (!Number.isFinite(file.size) || file.size < 0 || file.size > MAX_DECK_BYTES) {
+        throw new Error('Choose a checked JSON deck no larger than 256 KiB.');
+      }
+      const text = await file.text();
+      if (revision !== fileRevision) return;
+      const deck = parseDeck(text);
+      readingFile = false;
+      pending = { deck, filename: file.name };
+      byId('source-preview-title').textContent = deck.title;
+      byId('source-preview-summary').textContent = `${file.name} · ${deck.items.length} questions · ${deck.concepts.length} concepts`;
+      byId('source-preview-attribution').textContent = deck.attribution;
+      byId('source-preview-license').textContent = deck.license;
+      byId('source-preview').hidden = false;
+      status('file-status', 'File checked. Inspect the preview, then choose Use this deck or Cancel preview.');
+      byId('source-preview-title').focus();
+    } catch (error) {
+      if (revision !== fileRevision) return;
+      readingFile = false;
+      status('file-status', `${error.message || 'The file could not be read.'} The current source and selection are unchanged.`, true);
+      byId('open-source').focus();
+    }
+  });
+  byId('cancel-source').addEventListener('click', () => {
+    retireFilePreview();
+    status('file-status', 'Preview cancelled. The current source and selection are unchanged.');
+    byId('open-source').focus();
+  });
+  byId('use-source').addEventListener('click', () => {
+    if (!pending) return;
+    const incoming = pending;
+    retireFilePreview();
+    source = incoming.deck;
+    targets = new Set();
+    titleInput.value = '';
+    byId('source-title').textContent = source.title;
+    byId('source-summary').textContent = `${incoming.filename} · ${source.items.length} questions · ${source.concepts.length} concepts`;
+    byId('source-attribution').textContent = source.attribution;
+    byId('source-license').textContent = source.license;
+    byId('focus-editor').hidden = false;
+    status('file-status', 'Source selected. Choose target concepts and give the focused lesson a title.');
+    status('download-status', '');
+    renderTargets();
+    renderSelection();
+    byId('targets-heading').focus();
+  });
+  for (const [id, all] of [['select-all', true], ['clear-targets', false]]) {
+    byId(id).addEventListener('click', () => {
+      if (!source) return;
+      editingStarted();
+      targets = new Set(all ? source.concepts : []);
+      renderTargets();
+      renderSelection();
+      // The clicked action becomes disabled; keep the next keyboard action usable.
+      byId(all ? 'clear-targets' : 'select-all').focus();
+    });
+  }
+  titleInput.addEventListener('input', () => {
+    if (!source) return;
+    editingStarted();
+    renderSelection();
+  });
+  download.addEventListener('click', () => {
+    if (!source) return;
+    renderSelection();
+    if (!ready) return;
+    let url, link;
+    try {
+      url = URL.createObjectURL(new Blob([ready.json], { type: 'application/json;charset=utf-8' }));
+      const stem = ready.deck.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 64) || 'focused-lesson';
+      link = focusNode('a', { href: url, download: stem + '.focus.json' });
+      link.hidden = true;
+      document.body.append(link);
+      link.click();
+      status('download-status', 'Lesson download started. Keep this checked JSON file, then open it in the learning app or Deck studio.');
+    } catch {
+      status('download-status', 'The download could not start. Your source and selection are still here; try again.', true);
+    } finally {
+      link?.remove();
+      if (url) setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+  });
+}
+
+const courseFocusRoot = document.querySelector('#course-focus');
+if (courseFocusRoot) mountCourseFocus(courseFocusRoot);
+</script>
+</body>
+</html>

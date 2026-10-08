@@ -10,7 +10,17 @@ Try the below-half-rate, boundary and constant-looking presets. In each case, de
 
 **Download these samples · CSV** saves the current frequency, sample rate, comparison frequency, lowest representative, time and both cosine values for every displayed sample. The table rounds to six decimal places; the CSV keeps numeric precision. Empty, out-of-range or off-step inputs pause the results and disable sampling export until corrected. Downloads are explicit; this lab does not retain a session after refresh.
 
-**Download practice course · JSON** saves the adjacent [sampling-aliasing.json](sampling-aliasing.json) in the existing `recallweave-deck/1` format. It has four concepts and twelve questions, each with an explanation and a transfer prompt. Open it in RecallWeave's separate **Deck studio** using **Open a deck to edit**, review the preview, then choose **Replace draft**. **Check and preview** shows the native answer key; **Download deck (.json)** exports a checked course. A local lesson importer is tracked separately in [issue 7](https://github.com/Jacob-Met/RecallWeave/issues/7); import availability depends on the version you are using. This addition does not replace the six-question default course or change that importer's behavior.
+**Download practice course · JSON** saves the adjacent [sampling-aliasing.json](sampling-aliasing.json) in the existing `recallweave-deck/1` format. It has four concepts and twelve questions, each with an explanation and a transfer prompt.
+
+### Take the lesson and save your review
+
+Open the [self-contained learner](../demo.html), or follow the [README](../README.md) to serve the modular app. Under **Bring your own lesson**, choose the downloaded JSON. Inspect its title, twelve questions, four concepts, prerequisites and source credit, then choose **Start this deck**. **Cancel preview** keeps your current lesson.
+
+After all twelve first answers, use the practice controls to revisit missed questions. Retries leave the first-answer result unchanged. **Download study notes (.txt)** keeps the question details and your written reflections in a text file.
+
+Under **Keep or restore a learning trace**, **Download trace (.json)** saves the completed first answers and practice progress. In a fresh learner, import the same course first, choose the saved trace, inspect its preview, and select **Restore these answers**. **Resume practice** returns to the next unanswered practice item when one remains. Trace files omit written reflections; save study notes to keep your writing.
+
+The [course receiving record](../docs/receiving/sampling-aliasing-consumer-31a349052b90/README.md) documents the actual course download, learner versions and checked results.
 
 ## What the model assumes
 

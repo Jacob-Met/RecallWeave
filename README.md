@@ -29,6 +29,12 @@ Each saved HTML file opens and prints offline on its own. The worksheet file con
 
 ## Bring your own lesson
 
+Open the **[Course catalog](catalog.html)** to browse supplied courses, search their
+titles and concepts, read source and permission statements, and download an original
+course file. In the learner, choose that file under **Bring your own lesson**, inspect
+the preview, then select **Start this deck**. The catalog also works directly from
+your files without a server or internet connection.
+
 Use **Download example deck** to get an editable JSON copy of the bundled lesson,
 including its original attribution. Replace the lesson content using the
 [deck format guide](docs/deck-format.md), then choose the file under **Bring your
@@ -150,6 +156,45 @@ Choose **Open draft or deck** to reopen either an editable draft or a checked le
 **Check and preview** validates the complete draft and shows its answer key. **Download checked deck (.json)** saves the exact checked lesson file, including the shared deck format's 256 KiB byte limit. Edits clear the previous lesson preview and require another check. The check verifies the deck's structure and links; the author remains responsible for its course content and attribution. Checked lesson files use the shared RecallWeave deck format. Return to the lesson, choose the downloaded checked deck under **Bring your own lesson**, inspect its preview, and select **Start this deck**. Editable draft files must first be repaired and downloaded as checked decks in the studio.
 
 The separate author page leaves ongoing learning sessions open. It has no account, upload, provider or persistence service. Rebuild its direct-file version with `python3 tools/make_author.py`; `python3 tools/make_author.py --check` verifies that it matches the modular sources. Authoring, reopening and standalone parity tests run with the existing `node --test tests/*.test.mjs` command.
+
+## Focus a lesson
+
+Open **[Lesson focus](focus.html)** directly from your files, or visit `focus/`
+when serving the modular app. Choose a checked lesson JSON file, inspect its
+source/permission preview, and select **Use this deck**. A cancelled, unreadable,
+malformed or oversized file leaves your current source and selection intact.
+Continuing to edit the current selection cancels a pending file read or preview.
+
+Choose one or more **target concepts** and give the focused lesson its own title.
+The preview separates your selected targets from prerequisite concepts that are
+included automatically. It retains every question belonging to those concepts,
+then follows every prerequisite link from those questions until all required
+concepts are present. A link on a concept's second question matters just as much
+as a link on its first. Selecting a required concept explicitly marks it as a
+target too; clearing a target does not remove it while another retained concept
+still requires it.
+
+Inspect the retained questions, including their expandable answer keys, then
+choose **Download focused lesson (.json)**. The file preserves original question
+IDs, question/concept/option order, correct answers, explanations, transfer prompts,
+prerequisite links and the source's attribution and license. Its title is the one
+you entered. The exact downloaded JSON passes the shared 256 KiB lesson limit;
+compact formatting is used when necessary. Empty selections, invalid titles or
+an output over that limit cannot leave an older file ready to download.
+
+In the learning app, choose this checked JSON under **Bring your own lesson**,
+inspect the preview, and select **Start this deck**. It starts a fresh lesson with
+the existing question-selection behavior; no answers or mastery estimates are
+transferred. You can also reopen the checked file in Deck studio. Keep the
+original course file for its full content.
+
+This separate page works offline and keeps everything in the current tab until
+an explicit download. It does not alter the source file or an open learning or
+authoring session. Its prerequisite closure follows the author's links; it does
+not establish subject accuracy, reuse rights, learning efficacy or a required
+teaching order. Rebuild it with `python3 tools/make_focus.py`, or verify its
+standalone parity with `python3 tools/make_focus.py --check`. Its focused native
+and builder tests are included in the existing Node test command.
 
 ## Demo deck provenance
 
