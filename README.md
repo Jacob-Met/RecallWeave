@@ -30,6 +30,12 @@ Open [Course handouts](handout.html), choose a checked local deck JSON, review i
 
 Each saved HTML file opens and prints offline on its own. The worksheet file contains questions only; the teacher’s builder and the separate key receive the full checked deck. Cancelling a selection or choosing an invalid file leaves the current handout in place. This is a separate preparation flow; it does not start or change a learning session. Modular source lives in `handout/` and `src/course-handout*.mjs`; rebuild `handout.html` with `python3 tools/make_handout.py`, or verify it with `--check`.
 
+## Traceable measurements course
+
+Follow six received software event records back to their input, crop, sampling clocks, units and missing values. The original [twelve-question course](courses/traceable-measurements.json) and [worked guide](courses/traceable-measurements.md) practise source identity, time origins, paired sampling grids, signed values, summary operations and the limits of a result. Download the course JSON and use **Bring your own lesson** in the existing learner.
+
+The examples describe one pinned computation. They do not establish clinical status, calibration, contact-event accuracy or learning efficacy. The separate [authoring source](courses/traceable-measurements.source.json) retains the source facts and regeneration inputs.
+
 ## Core and interaction
 
 - `src/knowledge.mjs` implements a transparent BKT update: initial knowledge, learning transition, guess, and slip are explicit probabilities. It also computes binary entropy and expected information gain.
