@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#f3f2e9">
+<meta name="description" content="An original offline RecallWeave explorer for Euclid's algorithm, exact remainders, and integer combinations.">
+<title>Euclid, one division at a time — RecallWeave</title>
+<style>
+:root{color-scheme:light;--paper:#f3f2e9;--card:#fffefa;--ink:#183431;--muted:#526964;--line:#c8d2c9;--green:#245e4d;--blue:#286169;--gold:#b88a26;--pale:#e6eee4;--error:#932d30}
+*{box-sizing:border-box} [hidden]{display:none!important}
+body{margin:0;background:var(--paper);color:var(--ink);font:17px/1.6 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+a{color:var(--green)} button,input,select{font:inherit} button,input,select,summary{touch-action:manipulation}
+button,select,input{min-height:46px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink)}
+button{padding:10px 16px;cursor:pointer;font-weight:650} button:hover:not(:disabled){background:var(--pale)} button:disabled{opacity:.48;cursor:default}
+input,select{padding:9px 12px;width:100%;min-width:0} input{font-variant-numeric:tabular-nums} select{font-size:15px}
+:focus-visible{outline:3px solid var(--gold);outline-offset:3px} .primary{background:var(--green);color:#fff;border-color:var(--green)} .primary:hover:not(:disabled){background:#174735}
+.skip{position:absolute;top:-100px;left:16px;background:white;padding:10px;z-index:10}.skip:focus{top:10px}
+.topbar{max-width:1180px;margin:0 auto;padding:24px 28px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);gap:12px}
+.brand{font-size:21px;font-weight:750;letter-spacing:-.5px}.brand span{font-weight:400}.badge,.eyebrow{font:700 12px/1.5 system-ui;letter-spacing:1.5px;text-transform:uppercase}.badge{color:var(--green)}
+main{max-width:1180px;margin:auto;padding:42px 28px 72px}.hero{max-width:850px;margin-bottom:30px}.eyebrow{color:var(--green);margin:0 0 12px}
+h1{font:500 clamp(34px,5vw,57px)/1.12 Georgia,serif;letter-spacing:-1.4px;margin:0 0 20px}h2{font:500 28px/1.25 Georgia,serif;margin:0 0 14px}h3{font-size:17px;margin:0 0 8px}
+.lead{font-size:19px;max-width:780px;color:var(--muted);margin:0}.workbench{display:grid;grid-template-columns:280px minmax(0,1fr);gap:24px;align-items:start}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:24px;min-width:0}.controls{display:grid;gap:22px}.controls h2{font-size:25px}
+.field{display:grid;gap:5px;margin-bottom:14px}.field label{font-weight:650}.hint{font-size:14px;line-height:1.5;color:var(--muted);margin:7px 0 0}
+.controls .primary{width:100%}.example{padding-top:20px;border-top:1px solid var(--line)}.example button{width:100%;margin-top:9px}
+.status{padding:15px 18px;border-left:4px solid var(--green);background:var(--pale);margin:0 0 18px;min-height:58px}.error{color:var(--error);font-weight:600;margin:10px 0 0}
+.empty{min-height:230px;display:grid;place-content:center;gap:12px;text-align:center;color:var(--muted)}.empty strong{font:500 28px/1.3 Georgia,serif;color:var(--ink)}
+.result-heading{display:flex;justify-content:space-between;gap:16px;align-items:center;margin-bottom:18px}.result-heading h2{margin:0}.gcd{font:600 42px/1.1 Georgia,serif}
+.summary{padding:17px 20px;background:var(--pale);border-radius:10px;margin-bottom:22px}.summary p{margin:4px 0;overflow-wrap:anywhere}.exact{font-variant-numeric:tabular-nums}
+.nav{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:12px 0}.nav button{flex:1}.step-count{font-weight:650;margin:18px 0 5px}
+.equation{font:550 clamp(20px,2.2vw,28px)/1.55 Georgia,serif;margin:8px 0;overflow-wrap:anywhere}
+.diagram{width:100%;height:auto;display:block;margin:16px 0 2px}.diagram text{font:15px system-ui;fill:var(--ink)}
+.detail-grid{display:grid;grid-template-columns:max-content minmax(0,1fr);gap:8px 14px;margin:12px 0}.detail-grid dt{font-weight:650}.detail-grid dd{margin:0;overflow-wrap:anywhere}
+details{border-top:1px solid var(--line);padding-top:16px;margin-top:22px}summary{cursor:pointer;font-weight:700;min-height:42px}
+.table-scroll{overflow-x:auto;margin-top:20px;border:1px solid var(--line);border-radius:9px}table{border-collapse:collapse;width:100%;font-size:14px;font-variant-numeric:tabular-nums;text-align:right}
+caption{text-align:left;padding:13px 14px;color:var(--muted);font-size:14px}th,td{padding:9px 12px;border-top:1px solid var(--line);white-space:nowrap}th:first-child,td:first-child{text-align:left}
+thead{background:var(--paper)}tr[aria-current="step"]{background:var(--pale)}td button{padding:5px 11px;min-height:42px;font-size:14px}.download-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:24px}
+.lesson{margin-top:28px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px}.lesson p{margin:8px 0}.lesson button{margin-top:12px}.muted{color:var(--muted)}
+footer{margin-top:28px;font-size:14px;color:var(--muted);border-top:1px solid var(--line);padding-top:20px}
+@media(max-width:760px){.workbench,.lesson{grid-template-columns:1fr}.controls{gap:16px}.input-pair{display:grid;grid-template-columns:1fr 1fr;gap:12px}.example{padding-top:14px}.topbar{padding:19px 18px;align-items:flex-start}.badge{font-size:10px;max-width:120px;text-align:right}main{padding:28px 16px 48px}.card{padding:20px}.hero{margin-bottom:24px}h1{letter-spacing:-.7px}.lead{font-size:17px}.result-heading{align-items:flex-start}.detail-grid{grid-template-columns:1fr;gap:3px}.detail-grid dd{margin-bottom:9px}th,td{padding:8px}.equation{font-size:23px}.download-row button{width:100%}}
+@media(prefers-reduced-motion:no-preference){button{transition:background-color .12s}}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to the explorer</a>
+<header class="topbar"><div class="brand">recall<span>weave</span></div><div class="badge">Offline · exact integers</div></header>
+<main id="main">
+<section class="hero" aria-labelledby="title"><p class="eyebrow">Number theory / Euclid's algorithm</p><h1 id="title">One division.<br>A smaller remainder.</h1><p class="lead">Follow the common divisor through each step. Then see how the answer can be built from an integer combination of the two numbers you started with.</p></section>
+<div class="workbench">
+<aside class="card controls" aria-label="Explorer inputs">
+<form id="euclid-form" novalidate>
+<h2>Your two integers</h2>
+<div class="input-pair">
+<div class="field"><label for="euclid-a">First integer A</label><input id="euclid-a" inputmode="numeric" maxlength="32" value="252" aria-describedby="input-help" autocomplete="off"></div>
+<div class="field"><label for="euclid-b">Second integer B</label><input id="euclid-b" inputmode="numeric" maxlength="32" value="198" aria-describedby="input-help" autocomplete="off"></div>
+</div>
+<p class="hint" id="input-help">Use whole decimal numbers from 0 through 999999. Surrounding spaces and leading zeros are allowed.</p>
+<p class="error" id="euclid-error" role="alert" hidden></p>
+<button class="primary" id="compute" type="submit" style="margin-top:18px">Compute the steps</button>
+</form>
+<div class="example"><label for="example"><strong>Try a worked pair</strong></label><select id="example">
+<option value="252,198">A common factor · 252 and 198</option><option value="55,34">Coprime · 55 and 34</option><option value="144,24">Exactly divisible · 144 and 24</option><option value="18,105">Smaller first · 18 and 105</option><option value="0,45">One zero · 0 and 45</option><option value="0,0">Both zero · the stated convention</option><option value="999999,999998">At the upper bound</option>
+</select><button id="load-example" type="button">Load this pair</button><p class="hint">Loading fills the inputs. Compute when you are ready.</p></div>
+</aside>
+<section aria-label="Computed Euclidean divisions">
+<p class="status" id="euclid-status" role="status" aria-live="polite">Choose two integers, then compute their division steps.</p>
+<div class="card empty" id="empty"><strong>The divisor becomes<br>the next dividend.</strong><span>The remainder becomes the next divisor.<br>Repeat until that divisor is zero.</span></div>
+<div class="card" id="results" hidden>
+<div class="result-heading"><div><p class="eyebrow" style="margin-bottom:6px">Complete computed result</p><h2 id="result-title">Greatest common divisor</h2></div><div class="gcd exact" id="gcd-value"></div></div>
+<div class="summary"><p id="result-inputs"></p><p id="result-count"></p><p class="exact" id="bezout-result"></p><p class="hint" id="zero-convention" hidden>For (0, 0), this explorer uses gcd(0, 0) = 0. This is a convention, not a greatest positive divisor of zero.</p></div>
+<div id="no-divisions" hidden><h3>No division is needed</h3><p>The initial second entry is already zero. The algorithm stops at the original pair and returns its first entry.</p></div>
+<div id="inspector">
+<p class="step-count" id="step-count"></p>
+<div class="nav" aria-label="Inspect a division"><button id="previous-step" type="button">Previous</button><button id="next-step" type="button">Next</button><button id="last-step" type="button">Last division</button></div>
+<p class="equation exact" id="division-equation"></p><p id="remainder-bound"></p><p id="next-pair"></p>
+<svg class="diagram" id="division-diagram" viewBox="0 0 700 110" role="img" aria-labelledby="diagram-title diagram-desc"><title id="diagram-title"></title><desc id="diagram-desc"></desc><g id="diagram-marks"></g></svg>
+<p class="hint">Blue groups the complete multiple; gold is the remainder. Strip widths show approximate relative sizes. Exact values are written above, including remainders too small to see at this scale.</p>
+<details><summary>Check the integer combinations</summary><p class="hint">Each row still uses the original A and B. Subtracting q copies of the divisor's coefficients gives the remainder's coefficients.</p><dl class="detail-grid exact"><dt>Dividend</dt><dd id="dividend-combination"></dd><dt>Divisor</dt><dd id="divisor-combination"></dd><dt>Remainder</dt><dd id="remainder-combination"></dd></dl></details>
+<div class="table-scroll" tabindex="0" aria-label="All division rows; scroll horizontally if needed"><table><caption>Every computed division. Choose a step to inspect it above.</caption><thead><tr><th scope="col">Step</th><th scope="col">Dividend</th><th scope="col">Divisor</th><th scope="col">q</th><th scope="col">r</th></tr></thead><tbody id="division-rows"></tbody></table></div>
+</div>
+<div class="download-row"><button id="download-trace" type="button" disabled>Download this exact trace</button></div>
+<p class="hint">The JSON contains the original integer values, every division and its coefficients, and the terminal result. It uses decimal text for exact integers.</p>
+</div>
+</section>
+</div>
+<section class="lesson">
+<div class="card"><p class="eyebrow">Why the answer survives</p><h2>Keep the common divisors.</h2><p>If A = qB + r, a number that divides A and B also divides r. A number that divides B and r also divides A. Both pairs therefore have the same common divisors.</p><p>Every new remainder lies from zero up to—but excluding—the divisor. That shrinking nonnegative integer guarantees a stopping point.</p></div>
+<div class="card"><p class="eyebrow">Study the connections</p><h2>A twelve-question lesson.</h2><p>Practice division, the stopping rule, common-divisor problems and integer combinations. Each question includes a worked explanation and a new problem to try.</p><button id="download-course" type="button">Download the RecallWeave lesson</button><p class="hint">In RecallWeave, choose <strong>Bring your own lesson</strong>, select the JSON and review it before choosing <strong>Start this deck</strong>. This page's trace is a worked calculation; the lesson file is a separate download.</p></div>
+</section>
+<footer><p>Original lesson, examples and diagram by RecallWeave contributors. Background: <a href="https://ocw.mit.edu/courses/6-1200j-mathematics-for-computer-science-spring-2024/mit6_1200j_s24_lec08.pdf">MIT OpenCourseWare, Divisibility (2024)</a> and <a href="https://ocw.mit.edu/courses/6-042j-mathematics-for-computer-science-fall-2010/4f6767747decf6209215cfe789cef5f6_MIT6_042JF10_rec04_sol.pdf">Euclidean integer combinations (2010)</a>. No source exercises, passages or figures are reproduced.</p><p>This file works offline. It saves nothing automatically and sends no inputs anywhere. Source links open only when you choose them.</p></footer>
+<noscript><p class="error">JavaScript is needed for the interactive calculations and downloads. The explanation above remains available.</p></noscript>
+</main>
+<script type="application/json" id="euclid-course-json">__EUCLID_COURSE_LITERAL__</script>
+<script type="module">
+__EUCLID_CODE__
+mountEuclidExplorer(document, JSON.parse(document.getElementById('euclid-course-json').textContent));
+</script>
+</body>
+</html>
