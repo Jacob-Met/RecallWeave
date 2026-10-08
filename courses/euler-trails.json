@@ -1,0 +1,254 @@
+{
+  "format": "recallweave-deck/1",
+  "title": "Euler trails — every edge, once",
+  "attribution": "Original lesson, examples and explanations authored for RecallWeave by HAMON estate worker 7a9310dad255 with AI assistance. Mathematical background and the edge-coverage convention are documented in the companion guide; no source exercises or illustrations are reproduced.",
+  "license": "CC0-1.0",
+  "concepts": [
+    "Edge identity",
+    "Degree and connectivity",
+    "Choosing a start",
+    "Verifying a route"
+  ],
+  "items": [
+    {
+      "id": "et-e1",
+      "concept": "Edge identity",
+      "prerequisites": [],
+      "prompt": "An undirected graph has exactly two distinct edges e1 and e2, both joining A to B. The walk A —e1→ B —e2→ A uses each edge once. Which statement is correct?",
+      "options": [
+        "It is invalid because a vertex appears twice.",
+        "It is an Euler circuit: a closed walk using every edge exactly once.",
+        "It uses the same edge twice because both edges have the same endpoints.",
+        "It is open because the edges have different IDs."
+      ],
+      "answer": 1,
+      "explanation": "Parallel edges have separate identities. This walk traverses e1 and e2 once each and returns to A. Repeated vertices are allowed in an Euler trail or circuit; repeated edge identities are not.",
+      "transfer": "Add a third distinct A–B edge e3. Can a walk still cover every edge exactly once, and must it be open or closed?"
+    },
+    {
+      "id": "et-e2",
+      "concept": "Edge identity",
+      "prerequisites": [],
+      "prompt": "An undirected graph contains one loop e1 from A to A and one edge e2 from A to B. A loop contributes two to its vertex's degree. What are the degrees of A and B?",
+      "options": [
+        "A: 2; B: 1",
+        "A: 1; B: 1",
+        "A: 3; B: 1",
+        "A: 4; B: 2"
+      ],
+      "answer": 2,
+      "explanation": "The loop has two ends at A, contributing 2 to A's degree. Edge A–B contributes 1 to each endpoint. The degrees are therefore 3 and 1, and their sum 4 equals twice the two-edge count.",
+      "transfer": "Add one more loop at B. Find both new degrees and predict whether the odd-degree vertices change."
+    },
+    {
+      "id": "et-e3",
+      "concept": "Edge identity",
+      "prerequisites": [],
+      "prompt": "A walk covers all four distinct edges of an undirected graph exactly once. When the walk is written as a sequence of vertices, counting every occurrence including repeated vertices, how many entries does it contain?",
+      "options": [
+        "4",
+        "It depends on how many vertices the graph has.",
+        "8",
+        "5"
+      ],
+      "answer": 3,
+      "explanation": "A walk starts with one vertex occurrence, then adds one occurrence after each traversed edge. Four edges therefore give five occurrences. A loop still consumes one edge and adds one occurrence of the same vertex.",
+      "transfer": "A route covers 16 edges exactly once, including three loops. How many vertex occurrences and how many edge IDs should its record contain?"
+    },
+    {
+      "id": "et-d1",
+      "concept": "Degree and connectivity",
+      "prerequisites": [
+        "Edge identity"
+      ],
+      "prompt": "Use the edge-coverage convention: every edge must be used exactly once, but isolated vertices need not be visited. An undirected graph has edges A–B, B–C and C–A; D is isolated. Which classification is correct?",
+      "options": [
+        "An Euler circuit exists in the triangle; isolated D does not prevent edge coverage.",
+        "No Euler trail exists because all declared vertices must be reached.",
+        "Only an open Euler trail exists because D has degree zero.",
+        "Every possible starting vertex, including D, yields an Euler circuit."
+      ],
+      "answer": 0,
+      "explanation": "A, B and C each have degree 2 and form one edge-bearing component. Their triangle admits a closed edge-covering walk. D contributes no edge to cover. Starting at isolated D is nevertheless ineligible for that circuit.",
+      "transfer": "Add an isolated E without adding an edge. What changes in the degree list, the number of edge-bearing components and the existence of a circuit?"
+    },
+    {
+      "id": "et-d2",
+      "concept": "Degree and connectivity",
+      "prerequisites": [
+        "Edge identity"
+      ],
+      "prompt": "An undirected graph consists of two separate triangles: edges A–B, B–C, C–A and D–E, E–F, F–D. Every vertex has degree 2. Can one walk cover all six edges exactly once?",
+      "options": [
+        "Yes, because every degree is even.",
+        "Yes, if the walk starts at the smallest label.",
+        "No: the edges lie in two disconnected components.",
+        "No: an Euler circuit requires exactly two odd-degree vertices."
+      ],
+      "answer": 2,
+      "explanation": "Even degrees alone are insufficient. A walk cannot move from one triangle to the other because no edge connects them. There are two edge-bearing components, so neither one Euler circuit nor one open Euler trail covers all six edges.",
+      "transfer": "Instead of joining the triangles, add a loop at A. Does that repair the obstruction? Explain which necessary condition still fails."
+    },
+    {
+      "id": "et-d3",
+      "concept": "Degree and connectivity",
+      "prerequisites": [
+        "Edge identity"
+      ],
+      "prompt": "An undirected graph has exactly the three edges A–B, A–C and A–D. Which statement explains whether an Euler trail exists?",
+      "options": [
+        "It exists because all edges touch A.",
+        "It does not exist: A, B, C and D all have odd degree.",
+        "It is a circuit because A has three choices.",
+        "It is an open trail from any leaf to any other leaf."
+      ],
+      "answer": 1,
+      "explanation": "The degrees are A=3 and B=C=D=1, giving four odd vertices. An open edge-covering trail can have only two odd endpoints; a closed one has none. Connectivity holds, but the parity condition fails.",
+      "transfer": "Add one new edge B–C. Recalculate the degrees and identify the endpoints of an open Euler trail if one exists."
+    },
+    {
+      "id": "et-d4",
+      "concept": "Degree and connectivity",
+      "prerequisites": [
+        "Edge identity"
+      ],
+      "prompt": "An undirected graph has exactly A–B, B–C, C–A and A–D. Which conclusion follows from its degrees and connectivity?",
+      "options": [
+        "It has a circuit because it contains a triangle.",
+        "It has no Euler trail because D has only one edge.",
+        "Every vertex has even degree.",
+        "It has an open Euler trail with endpoints A and D."
+      ],
+      "answer": 3,
+      "explanation": "The degrees are A=3, B=2, C=2 and D=1. All edges belong to one connected component and only A and D are odd, so an open Euler trail starts at one of those two vertices and ends at the other.",
+      "transfer": "Add a second distinct A–D edge. Does the graph then admit an Euler circuit? Explain using degrees rather than a drawing alone."
+    },
+    {
+      "id": "et-s1",
+      "concept": "Choosing a start",
+      "prerequisites": [
+        "Degree and connectivity"
+      ],
+      "prompt": "An undirected graph has edges A–B, B–C, C–A and A–D. It admits an open Euler trail with odd endpoints A and D. A learner requests start B. What should an explorer report?",
+      "options": [
+        "The graph has an open Euler trail, but B is an ineligible starting vertex.",
+        "No Euler trail exists anywhere in this graph.",
+        "A circuit can start at B because B has even degree.",
+        "The explorer should silently replace B with A."
+      ],
+      "answer": 0,
+      "explanation": "Existence for the graph and eligibility of a requested start are different questions. An open Euler trail must start at one odd endpoint and finish at the other. The explorer should explain why B fails while preserving the fact that a route from A or D exists.",
+      "transfer": "Keep the graph fixed and request start D. Give one complete edge-covering vertex sequence."
+    },
+    {
+      "id": "et-s2",
+      "concept": "Choosing a start",
+      "prerequisites": [
+        "Degree and connectivity"
+      ],
+      "prompt": "An undirected graph contains two distinct A–B edges and one loop at A. C is isolated. Under the edge-coverage convention, which set is exactly the set of eligible starts for a positive-edge Euler circuit?",
+      "options": [
+        "Only A",
+        "A, B and C",
+        "A and B",
+        "Only C"
+      ],
+      "answer": 2,
+      "explanation": "A has degree 4, B has degree 2 and C has degree 0. The edges form one component and all degrees are even. Either A or B can start the circuit; isolated C cannot reach an edge.",
+      "transfer": "Start at B and name a vertex sequence that uses both distinct A–B edges and the loop once."
+    },
+    {
+      "id": "et-s3",
+      "concept": "Choosing a start",
+      "prerequisites": [
+        "Degree and connectivity"
+      ],
+      "prompt": "An explorer declares vertices A, B and C but no edges. Its convention reports an empty edge set separately from a positive-edge Euler circuit. With requested start C, what is the appropriate result?",
+      "options": [
+        "An error, because every graph must have an edge.",
+        "A zero-edge walk [C], with no edge IDs and no positive-edge circuit claim.",
+        "An open trail from C to A.",
+        "A route [A, B, C] because all declared vertices must be visited."
+      ],
+      "answer": 1,
+      "explanation": "There is nothing to traverse. Staying at the requested vertex gives a length-zero walk: one vertex occurrence and zero edge IDs. Separating this boundary case makes the explorer's circuit convention explicit.",
+      "transfer": "Change only the requested start from C to A. What should the zero-edge route and its edge count become?"
+    },
+    {
+      "id": "et-v1",
+      "concept": "Verifying a route",
+      "prerequisites": [
+        "Edge identity",
+        "Degree and connectivity",
+        "Choosing a start"
+      ],
+      "prompt": "An undirected graph has edges A–B, B–C, C–A and A–D. Starting at A, a learner takes A–D first and gets stuck with three unused edges. Which interpretation is correct?",
+      "options": [
+        "The graph cannot have an Euler trail.",
+        "The learner should reuse A–D to return.",
+        "Any first unused edge is always safe.",
+        "This first choice fails, but A–B–C–A–D is a complete Euler trail."
+      ],
+      "answer": 3,
+      "explanation": "The graph has exactly two odd vertices, A and D, so an Euler trail exists. Taking the only edge to D first strands this particular partial walk. A completed valid route can visit the triangle before taking A–D. An arbitrary greedy prefix need not be extendable.",
+      "transfer": "Starting at D instead, explain why taking D–A first does not cause the same dead end."
+    },
+    {
+      "id": "et-v2",
+      "concept": "Verifying a route",
+      "prerequisites": [
+        "Edge identity",
+        "Degree and connectivity",
+        "Choosing a start"
+      ],
+      "prompt": "The only edges of an undirected graph are e1=A–B and e2=A–B. A proposed record lists vertices [A, B, A] and edge IDs [e1, e1]. Why must it be rejected as an Euler circuit record?",
+      "options": [
+        "It repeats e1 and omits e2, even though each listed vertex transition joins A and B.",
+        "It returns to its start.",
+        "Two-edge circuits are never permitted when parallel edges exist.",
+        "A vertex sequence may not repeat A."
+      ],
+      "answer": 0,
+      "explanation": "Endpoint adjacency is necessary but not sufficient. The record must use each distinct edge identity once. Here e1 appears twice and e2 is absent. Replacing the second ID with e2 gives a valid circuit record.",
+      "transfer": "If a proposed route has the correct number of steps, what additional checks are needed before accepting it as an edge-covering trail?"
+    },
+    {
+      "id": "et-v3",
+      "concept": "Verifying a route",
+      "prerequisites": [
+        "Edge identity",
+        "Degree and connectivity",
+        "Choosing a start"
+      ],
+      "prompt": "An undirected graph has e1=A–B, e2=B–C, e3=C–D, e4=D–A and e5=A–C. Which record is a valid Euler trail using every edge exactly once?",
+      "options": [
+        "Vertices [A,B,C,A,D,A]; IDs [e1,e2,e5,e4,e4]",
+        "Vertices [A,B,C,D,A,C]; IDs [e1,e2,e3,e4,e5]",
+        "Vertices [B,A,D,C,A,B]; IDs [e1,e4,e3,e5,e1]",
+        "Vertices [A,C,D,A]; IDs [e5,e3,e4]"
+      ],
+      "answer": 1,
+      "explanation": "The second record uses all five IDs once, and every adjacent vertex pair matches its corresponding edge. It begins at odd vertex A and ends at odd vertex C. The first and third records repeat and omit edges; the fourth omits e1 and e2.",
+      "transfer": "Reverse the valid route. Write its new vertex sequence and edge-ID order, and identify its endpoints."
+    },
+    {
+      "id": "et-v4",
+      "concept": "Verifying a route",
+      "prerequisites": [
+        "Edge identity",
+        "Degree and connectivity",
+        "Choosing a start"
+      ],
+      "prompt": "Two disconnected triangles have edges A–B, B–C, C–A and D–E, E–F, F–D. You may add exactly one undirected edge. Which proposed change and explanation is correct?",
+      "options": [
+        "Add a loop at C; all even degrees guarantee one circuit.",
+        "Add a second A–B edge; parallel edges join the triangles.",
+        "Add C–D; the edges become connected with exactly C and D odd, so an open Euler trail exists.",
+        "Add C–D; every degree remains even, so a circuit exists."
+      ],
+      "answer": 2,
+      "explanation": "The new edge joins the two edge-bearing components. C and D each gain one degree, changing from 2 to 3; the other four vertices remain even. The result has an open Euler trail between C and D, not a circuit.",
+      "transfer": "Now add a second distinct C–D edge. Explain how connectivity, parity and the possibility of a circuit change."
+    }
+  ]
+}

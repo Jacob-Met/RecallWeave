@@ -1,0 +1,397 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#f4f2e9">
+<meta name="description" content="An offline, edge-by-edge introduction to Euler trails and circuits.">
+<title>Every edge, once — RecallWeave</title>
+<style>
+:root{color-scheme:light;--paper:#f4f2e9;--panel:#fffef9;--ink:#233b32;--muted:#57695f;--line:#c9d2c7;--green:#29664e;--soft:#e4ecdf;--accent:#a54e2a;--warning:#78391e}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.55 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}button,input,select,textarea{font:inherit;color:inherit}button,input,select,textarea,a{touch-action:manipulation}button{cursor:pointer}button:disabled{cursor:default;opacity:.48}a{color:var(--green);text-underline-offset:3px}button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,a:focus-visible,summary:focus-visible{outline:3px solid var(--accent);outline-offset:4px}[hidden]{display:none!important}.skip{position:absolute;left:1rem;top:-5rem;background:white;padding:.7rem;z-index:5}.skip:focus{top:1rem}
+.wrap{width:min(1220px,calc(100% - 64px));margin:auto}header{border-bottom:1px solid var(--line)}header .wrap{min-height:78px;display:flex;align-items:center;justify-content:space-between;gap:20px}.brand{font-weight:750;letter-spacing:-.6px;text-decoration:none;font-size:21px}.brand small{font-weight:400}.offline{font-size:11px;letter-spacing:1.6px;text-transform:uppercase;color:var(--muted)}.offline:before{content:"";display:inline-block;width:7px;height:7px;background:var(--green);border-radius:50%;margin-right:9px}
+.hero{display:grid;grid-template-columns:1.2fr .8fr;gap:56px;padding:54px 0 40px;align-items:end}.kicker{font:700 11px/1.5 system-ui;letter-spacing:1.7px;text-transform:uppercase;color:var(--green)}h1{font-family:Georgia,"Times New Roman",serif;font-size:clamp(40px,5.8vw,76px);line-height:1.06;letter-spacing:-2.3px;font-weight:400;margin:14px 0 18px}h1 em{color:var(--accent);font-weight:400}h2{font-size:21px;line-height:1.3;margin:0 0 12px}h3{font-size:16px;margin:0 0 12px}p{margin:0 0 14px}.lede{max-width:610px;color:var(--muted);font-size:18px}.hero-note{border-left:3px solid var(--accent);padding:0 0 0 22px;margin-bottom:20px}.hero-note p{font-family:Georgia,serif;font-size:23px;line-height:1.35}.hero-note small{color:var(--muted);font-size:13px}.pathway{display:flex;gap:8px;flex-wrap:wrap;color:var(--muted);font-size:12px}.pathway span{border:1px solid var(--line);border-radius:20px;padding:5px 10px}.workbench{display:grid;grid-template-columns:300px minmax(0,1fr);border:1px solid var(--line);background:var(--panel);border-radius:12px;overflow:hidden;box-shadow:0 10px 35px #233b3206}.inputs{padding:26px;border-right:1px solid var(--line);background:#edf0e7}.step-label{font:700 11px/1.5 system-ui;color:var(--muted);letter-spacing:1.4px;text-transform:uppercase;margin-bottom:13px}.inputs label{display:block;font-weight:650;font-size:13px;margin:17px 0 6px}.inputs input,.inputs select,.inputs textarea{width:100%;border:1px solid #9cafa0;border-radius:5px;background:var(--panel);padding:9px 11px}.inputs textarea{min-height:155px;resize:vertical;font:15px/1.65 ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.5px}.help{font-size:12px;color:var(--muted);margin-top:6px}.button{border:1px solid var(--line);background:var(--panel);border-radius:5px;padding:10px 14px;min-height:44px;font-weight:650;font-size:13px}.button:hover:not(:disabled){background:var(--soft);border-color:var(--green)}.primary{background:var(--green);color:white;border-color:var(--green)}.primary:hover:not(:disabled){background:#1d4e3a;color:white}.wide{width:100%;margin-top:16px}.preset{padding-top:20px;border-top:1px solid var(--line);margin-top:22px}.status{font-size:13px;margin:16px 0 0;min-height:3em}.status[data-error="true"]{color:var(--warning);font-weight:650}
+.output{min-width:0;padding:26px}.result-head{display:flex;justify-content:space-between;align-items:start;gap:18px}.result-head h2{font:400 30px/1.15 Georgia,serif;margin:7px 0 10px}.badge{display:inline-block;font-size:11px;letter-spacing:.8px;font-weight:700;color:var(--green);background:var(--soft);padding:5px 9px;border-radius:4px;white-space:nowrap}.reason{font-size:14px;max-width:690px;color:var(--muted)}.graph-shell{border:1px solid var(--line);border-radius:8px;background:linear-gradient(45deg,#fffef9,#f3f5ed);margin:18px 0 14px;position:relative}.graph-legend{display:flex;justify-content:space-between;padding:12px 16px;font-size:11px;letter-spacing:.7px;color:var(--muted);border-bottom:1px solid #dfe4d9}.graph-legend span{display:flex;align-items:center;gap:5px}.legend-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--accent)}.legend-line{display:inline-block;width:18px;height:3px;background:var(--green)}#graph-svg{display:block;width:100%;height:350px}.route-controls{display:grid;grid-template-columns:auto 1fr auto;gap:16px;align-items:center}input[type=range]{width:100%;accent-color:var(--green);min-height:36px}.route-note{font-size:12px;color:var(--muted);margin:8px 0 16px}.route-status{font-size:15px;font-weight:650;margin:12px 0 6px}.route-sequence{font:14px/2 ui-monospace,SFMono-Regular,Consolas,monospace;overflow-wrap:anywhere;color:var(--green);padding:13px 15px;border:1px solid var(--line);border-radius:5px;margin-bottom:21px}.route-sequence span{display:inline-block;margin-right:6px}.evidence{display:grid;grid-template-columns:.8fr 1.2fr;gap:24px;border-top:1px solid var(--line);padding-top:21px}.table-wrap{overflow-x:auto}table{width:100%;border-collapse:collapse;font-size:13px;text-align:left}th{font-size:11px;letter-spacing:.5px;color:var(--muted);font-weight:650}td,th{padding:8px 7px;border-bottom:1px solid #e1e5db}td:first-child,th:first-child{padding-left:0}tr.used td{color:var(--green);font-weight:650}tr.latest{background:var(--soft)}.component{font-size:12px;color:var(--muted);margin-top:13px;overflow-wrap:anywhere}.download-row{margin-top:22px;border-top:1px solid var(--line);padding-top:18px;display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;align-items:center}.download-row small{color:var(--muted);font-size:12px}.draft{min-height:510px;display:grid;place-content:center;max-width:470px;padding:40px;text-align:center;margin:auto}.draft .symbol{font:70px Georgia,serif;color:var(--accent);margin-bottom:15px}.draft p{color:var(--muted)}.learn{display:grid;grid-template-columns:1fr 1fr;gap:32px;padding:34px 0 42px}.learn-card{border-top:2px solid var(--green);padding-top:20px}.learn-card h2{font:400 28px Georgia,serif}.learn-card p{font-size:14px;color:var(--muted)}.download-buttons{display:flex;gap:10px;flex-wrap:wrap}.rules{margin:0;padding-left:20px;color:var(--muted);font-size:14px}.rules li{margin-bottom:8px}footer{border-top:1px solid var(--line);font-size:11px;color:var(--muted);padding:24px 0 32px}.footer-grid{display:flex;gap:20px;justify-content:space-between;flex-wrap:wrap}.privacy{max-width:540px}.footer-grid a{margin-right:10px}
+@media(max-width:900px){.wrap{width:calc(100% - 36px)}.hero{gap:26px;grid-template-columns:1.2fr .8fr}.hero-note p{font-size:20px}.workbench{grid-template-columns:250px minmax(0,1fr)}.inputs,.output{padding:20px}.evidence{grid-template-columns:1fr}.route-controls{gap:8px}.route-controls .button{padding:8px}.graph-legend{padding:10px}#graph-svg{height:310px}}
+@media(max-width:650px){.wrap{width:calc(100% - 28px)}header .wrap{min-height:64px}.offline{font-size:9px;letter-spacing:.6px}.hero{display:block;padding:32px 0 26px}.hero-note{margin-top:24px;margin-bottom:0}h1{letter-spacing:-1.5px}.lede{font-size:16px}.workbench{display:block}.inputs{border-right:0;border-bottom:1px solid var(--line)}.inputs textarea{min-height:135px}.output{padding:18px}.result-head{display:block}.result-head .badge{margin-bottom:8px}.evidence{grid-template-columns:1fr 1fr;gap:14px}.route-controls{grid-template-columns:1fr 1fr}.route-controls input{grid-column:1/-1;grid-row:1}.result-head h2{font-size:27px}.learn{grid-template-columns:1fr;gap:28px}.graph-legend{font-size:10px}#graph-svg{height:280px}.draft{min-height:280px;padding:26px}.download-row{align-items:stretch}.download-row button{width:100%}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<a class="skip" href="#explorer">Skip to graph explorer</a>
+<header><div class="wrap"><a class="brand" href="#top">recall<small>weave</small></a><span class="offline">An offline learning companion</span></div></header>
+<main class="wrap" id="top">
+<section class="hero" aria-labelledby="page-title">
+<div><div class="kicker">Graph theory · Field study 01</div><h1>Every edge,<br><em>once.</em></h1><p class="lede">Find out when a graph can be walked in one continuous trail. Count the degrees, inspect the connections, then follow every edge.</p><div class="pathway" aria-label="Learning sequence"><span>01 · Identity</span><span>02 · Parity</span><span>03 · Start</span><span>04 · Verify</span></div></div>
+<aside class="hero-note"><p>Revisit a place.<br>Never repeat an edge.</p><small>A trail can return to the same vertex. What matters is the identity of each edge it uses.</small></aside>
+</section>
+<section class="workbench" id="explorer" aria-label="Euler trail explorer">
+<form class="inputs" id="graph-form" novalidate>
+<div class="step-label">01 / Define your graph</div><h2>A small network,<br>an exact question.</h2>
+<label for="vertex-count">Number of vertices</label><input id="vertex-count" type="number" min="1" max="8" step="1" value="4" aria-describedby="vertex-help"><p id="vertex-help" class="help">1–8 vertices, labeled A onward.</p>
+<label for="edge-input">Edges, one per line</label><textarea id="edge-input" spellcheck="false" autocapitalize="characters" maxlength="4096" aria-describedby="edge-help">A B
+B C
+C A
+A D</textarea><p id="edge-help" class="help">Up to 16 rows. A A is a loop. Repeated pairs are distinct parallel edges. Blank rows are ignored.</p>
+<label for="start-vertex">Starting vertex</label><select id="start-vertex"><option value="auto">Automatic</option><option>A</option><option>B</option><option>C</option><option>D</option><option>E</option><option>F</option><option>G</option><option>H</option></select>
+<button id="apply-graph" class="button primary wide" type="submit">Apply graph →</button><p id="input-status" class="status" role="status"></p>
+<div class="preset"><label for="example-select">Try a different question</label><select id="example-select"><option value="open">Triangle with a tail</option><option value="circuit">Circuit + an isolated vertex</option><option value="parallel">Parallel edges + a loop</option><option value="disconnected">Two separate triangles</option><option value="greedy">A tempting dead end</option><option value="empty">No edges to cover</option></select><button id="load-example" type="button" class="button wide">Load example</button></div>
+</form>
+<div class="output">
+<div id="draft-state" class="draft" hidden><div class="symbol" aria-hidden="true">∿</div><h2>Your graph has changed.</h2><p>Apply your input to compute a fresh result. The previous route and analysis download have been retired.</p></div>
+<section id="analysis" aria-label="Applied graph and edge-coverage evidence">
+<div class="result-head"><div><div class="step-label">02 / Read the evidence</div><h2 id="classification"></h2></div><span class="badge" id="graph-size"></span></div><p id="analysis-reason" class="reason"></p>
+<div class="graph-shell"><div class="graph-legend"><span><i class="legend-dot" aria-hidden="true"></i>Current vertex</span><span><i class="legend-line" aria-hidden="true"></i>Used edge</span><span>Every edge has an ID</span></div><svg id="graph-svg" viewBox="0 0 640 520" role="img" aria-labelledby="graph-title graph-description"></svg></div>
+<div class="step-label">03 / Replay a completed route</div><p id="route-status" class="route-status" role="status"></p><div class="route-controls"><button id="step-back" type="button" class="button">← Previous edge</button><input id="replay-step" type="range" min="0" max="0" value="0" aria-label="Number of route edges shown"><button id="step-next" type="button" class="button">Next edge →</button></div><p class="route-note">These are prefixes of a checked, complete route. An arbitrary greedy first choice may still get stuck.</p><div id="route-sequence" class="route-sequence" aria-label="Complete edge-labeled route"></div>
+<div class="evidence"><section><h3>Degree evidence</h3><div class="table-wrap"><table><thead><tr><th scope="col">Vertex</th><th scope="col">Degree</th><th scope="col">Parity</th></tr></thead><tbody id="degree-body"></tbody></table></div><p id="component-summary" class="component"></p></section><section><h3>Edge identities</h3><div class="table-wrap"><table><thead><tr><th scope="col">Edge</th><th scope="col">Joins</th><th scope="col">Replay</th></tr></thead><tbody id="edge-body"></tbody></table></div></section></div>
+</section>
+<div class="download-row"><button id="download-analysis" type="button" class="button">Download analysis ↓</button><small>Applied graph + full route · JSON</small></div>
+</div>
+</section>
+<section class="learn" aria-label="Lesson and conventions"><div class="learn-card"><div class="kicker">Keep the connection</div><h2>From a route to a reason.</h2><p>Fourteen original questions connect edge identity, degree parity, valid starts and route verification. Download the lesson, then import it into RecallWeave’s “Bring your own lesson” panel.</p><div class="download-buttons"><button id="download-course" type="button" class="button primary">Download lesson ↓</button><button id="download-guide" type="button" class="button">Download guide ↓</button></div><p id="download-status" class="status" role="status">Downloads happen only when you ask. Your inputs stay in this tab.</p></div><div class="learn-card"><div class="kicker">Read the convention</div><h2>Edges are what we cover.</h2><ul class="rules"><li>Undirected edges may be used in either direction. Loops count twice toward degree and once toward traversal.</li><li>Only edge-bearing components must connect. Isolated vertices need not be visited.</li><li>A circuit has at least one edge here. With no edges, we report a separate zero-edge walk.</li><li>A wrong requested start does not mean the whole graph has no Euler trail.</li></ul></div></section>
+</main>
+<footer><div class="wrap footer-grid"><span>RECALLWEAVE · ORIGINAL EULER LESSON</span><span class="privacy">No accounts, automatic saving or network requests. Course and guide: CC0-1.0. Mathematical references and worked transfer answers are in the guide.</span></div></footer>
+<script>
+'use strict';
+const COURSE_TEXT = "{\n  \"format\": \"recallweave-deck/1\",\n  \"title\": \"Euler trails — every edge, once\",\n  \"attribution\": \"Original lesson, examples and explanations authored for RecallWeave by HAMON estate worker 7a9310dad255 with AI assistance. Mathematical background and the edge-coverage convention are documented in the companion guide; no source exercises or illustrations are reproduced.\",\n  \"license\": \"CC0-1.0\",\n  \"concepts\": [\n    \"Edge identity\",\n    \"Degree and connectivity\",\n    \"Choosing a start\",\n    \"Verifying a route\"\n  ],\n  \"items\": [\n    {\n      \"id\": \"et-e1\",\n      \"concept\": \"Edge identity\",\n      \"prerequisites\": [],\n      \"prompt\": \"An undirected graph has exactly two distinct edges e1 and e2, both joining A to B. The walk A —e1→ B —e2→ A uses each edge once. Which statement is correct?\",\n      \"options\": [\n        \"It is invalid because a vertex appears twice.\",\n        \"It is an Euler circuit: a closed walk using every edge exactly once.\",\n        \"It uses the same edge twice because both edges have the same endpoints.\",\n        \"It is open because the edges have different IDs.\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"Parallel edges have separate identities. This walk traverses e1 and e2 once each and returns to A. Repeated vertices are allowed in an Euler trail or circuit; repeated edge identities are not.\",\n      \"transfer\": \"Add a third distinct A–B edge e3. Can a walk still cover every edge exactly once, and must it be open or closed?\"\n    },\n    {\n      \"id\": \"et-e2\",\n      \"concept\": \"Edge identity\",\n      \"prerequisites\": [],\n      \"prompt\": \"An undirected graph contains one loop e1 from A to A and one edge e2 from A to B. A loop contributes two to its vertex's degree. What are the degrees of A and B?\",\n      \"options\": [\n        \"A: 2; B: 1\",\n        \"A: 1; B: 1\",\n        \"A: 3; B: 1\",\n        \"A: 4; B: 2\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"The loop has two ends at A, contributing 2 to A's degree. Edge A–B contributes 1 to each endpoint. The degrees are therefore 3 and 1, and their sum 4 equals twice the two-edge count.\",\n      \"transfer\": \"Add one more loop at B. Find both new degrees and predict whether the odd-degree vertices change.\"\n    },\n    {\n      \"id\": \"et-e3\",\n      \"concept\": \"Edge identity\",\n      \"prerequisites\": [],\n      \"prompt\": \"A walk covers all four distinct edges of an undirected graph exactly once. When the walk is written as a sequence of vertices, counting every occurrence including repeated vertices, how many entries does it contain?\",\n      \"options\": [\n        \"4\",\n        \"It depends on how many vertices the graph has.\",\n        \"8\",\n        \"5\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"A walk starts with one vertex occurrence, then adds one occurrence after each traversed edge. Four edges therefore give five occurrences. A loop still consumes one edge and adds one occurrence of the same vertex.\",\n      \"transfer\": \"A route covers 16 edges exactly once, including three loops. How many vertex occurrences and how many edge IDs should its record contain?\"\n    },\n    {\n      \"id\": \"et-d1\",\n      \"concept\": \"Degree and connectivity\",\n      \"prerequisites\": [\n        \"Edge identity\"\n      ],\n      \"prompt\": \"Use the edge-coverage convention: every edge must be used exactly once, but isolated vertices need not be visited. An undirected graph has edges A–B, B–C and C–A; D is isolated. Which classification is correct?\",\n      \"options\": [\n        \"An Euler circuit exists in the triangle; isolated D does not prevent edge coverage.\",\n        \"No Euler trail exists because all declared vertices must be reached.\",\n        \"Only an open Euler trail exists because D has degree zero.\",\n        \"Every possible starting vertex, including D, yields an Euler circuit.\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"A, B and C each have degree 2 and form one edge-bearing component. Their triangle admits a closed edge-covering walk. D contributes no edge to cover. Starting at isolated D is nevertheless ineligible for that circuit.\",\n      \"transfer\": \"Add an isolated E without adding an edge. What changes in the degree list, the number of edge-bearing components and the existence of a circuit?\"\n    },\n    {\n      \"id\": \"et-d2\",\n      \"concept\": \"Degree and connectivity\",\n      \"prerequisites\": [\n        \"Edge identity\"\n      ],\n      \"prompt\": \"An undirected graph consists of two separate triangles: edges A–B, B–C, C–A and D–E, E–F, F–D. Every vertex has degree 2. Can one walk cover all six edges exactly once?\",\n      \"options\": [\n        \"Yes, because every degree is even.\",\n        \"Yes, if the walk starts at the smallest label.\",\n        \"No: the edges lie in two disconnected components.\",\n        \"No: an Euler circuit requires exactly two odd-degree vertices.\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"Even degrees alone are insufficient. A walk cannot move from one triangle to the other because no edge connects them. There are two edge-bearing components, so neither one Euler circuit nor one open Euler trail covers all six edges.\",\n      \"transfer\": \"Instead of joining the triangles, add a loop at A. Does that repair the obstruction? Explain which necessary condition still fails.\"\n    },\n    {\n      \"id\": \"et-d3\",\n      \"concept\": \"Degree and connectivity\",\n      \"prerequisites\": [\n        \"Edge identity\"\n      ],\n      \"prompt\": \"An undirected graph has exactly the three edges A–B, A–C and A–D. Which statement explains whether an Euler trail exists?\",\n      \"options\": [\n        \"It exists because all edges touch A.\",\n        \"It does not exist: A, B, C and D all have odd degree.\",\n        \"It is a circuit because A has three choices.\",\n        \"It is an open trail from any leaf to any other leaf.\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"The degrees are A=3 and B=C=D=1, giving four odd vertices. An open edge-covering trail can have only two odd endpoints; a closed one has none. Connectivity holds, but the parity condition fails.\",\n      \"transfer\": \"Add one new edge B–C. Recalculate the degrees and identify the endpoints of an open Euler trail if one exists.\"\n    },\n    {\n      \"id\": \"et-d4\",\n      \"concept\": \"Degree and connectivity\",\n      \"prerequisites\": [\n        \"Edge identity\"\n      ],\n      \"prompt\": \"An undirected graph has exactly A–B, B–C, C–A and A–D. Which conclusion follows from its degrees and connectivity?\",\n      \"options\": [\n        \"It has a circuit because it contains a triangle.\",\n        \"It has no Euler trail because D has only one edge.\",\n        \"Every vertex has even degree.\",\n        \"It has an open Euler trail with endpoints A and D.\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"The degrees are A=3, B=2, C=2 and D=1. All edges belong to one connected component and only A and D are odd, so an open Euler trail starts at one of those two vertices and ends at the other.\",\n      \"transfer\": \"Add a second distinct A–D edge. Does the graph then admit an Euler circuit? Explain using degrees rather than a drawing alone.\"\n    },\n    {\n      \"id\": \"et-s1\",\n      \"concept\": \"Choosing a start\",\n      \"prerequisites\": [\n        \"Degree and connectivity\"\n      ],\n      \"prompt\": \"An undirected graph has edges A–B, B–C, C–A and A–D. It admits an open Euler trail with odd endpoints A and D. A learner requests start B. What should an explorer report?\",\n      \"options\": [\n        \"The graph has an open Euler trail, but B is an ineligible starting vertex.\",\n        \"No Euler trail exists anywhere in this graph.\",\n        \"A circuit can start at B because B has even degree.\",\n        \"The explorer should silently replace B with A.\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"Existence for the graph and eligibility of a requested start are different questions. An open Euler trail must start at one odd endpoint and finish at the other. The explorer should explain why B fails while preserving the fact that a route from A or D exists.\",\n      \"transfer\": \"Keep the graph fixed and request start D. Give one complete edge-covering vertex sequence.\"\n    },\n    {\n      \"id\": \"et-s2\",\n      \"concept\": \"Choosing a start\",\n      \"prerequisites\": [\n        \"Degree and connectivity\"\n      ],\n      \"prompt\": \"An undirected graph contains two distinct A–B edges and one loop at A. C is isolated. Under the edge-coverage convention, which set is exactly the set of eligible starts for a positive-edge Euler circuit?\",\n      \"options\": [\n        \"Only A\",\n        \"A, B and C\",\n        \"A and B\",\n        \"Only C\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"A has degree 4, B has degree 2 and C has degree 0. The edges form one component and all degrees are even. Either A or B can start the circuit; isolated C cannot reach an edge.\",\n      \"transfer\": \"Start at B and name a vertex sequence that uses both distinct A–B edges and the loop once.\"\n    },\n    {\n      \"id\": \"et-s3\",\n      \"concept\": \"Choosing a start\",\n      \"prerequisites\": [\n        \"Degree and connectivity\"\n      ],\n      \"prompt\": \"An explorer declares vertices A, B and C but no edges. Its convention reports an empty edge set separately from a positive-edge Euler circuit. With requested start C, what is the appropriate result?\",\n      \"options\": [\n        \"An error, because every graph must have an edge.\",\n        \"A zero-edge walk [C], with no edge IDs and no positive-edge circuit claim.\",\n        \"An open trail from C to A.\",\n        \"A route [A, B, C] because all declared vertices must be visited.\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"There is nothing to traverse. Staying at the requested vertex gives a length-zero walk: one vertex occurrence and zero edge IDs. Separating this boundary case makes the explorer's circuit convention explicit.\",\n      \"transfer\": \"Change only the requested start from C to A. What should the zero-edge route and its edge count become?\"\n    },\n    {\n      \"id\": \"et-v1\",\n      \"concept\": \"Verifying a route\",\n      \"prerequisites\": [\n        \"Edge identity\",\n        \"Degree and connectivity\",\n        \"Choosing a start\"\n      ],\n      \"prompt\": \"An undirected graph has edges A–B, B–C, C–A and A–D. Starting at A, a learner takes A–D first and gets stuck with three unused edges. Which interpretation is correct?\",\n      \"options\": [\n        \"The graph cannot have an Euler trail.\",\n        \"The learner should reuse A–D to return.\",\n        \"Any first unused edge is always safe.\",\n        \"This first choice fails, but A–B–C–A–D is a complete Euler trail.\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"The graph has exactly two odd vertices, A and D, so an Euler trail exists. Taking the only edge to D first strands this particular partial walk. A completed valid route can visit the triangle before taking A–D. An arbitrary greedy prefix need not be extendable.\",\n      \"transfer\": \"Starting at D instead, explain why taking D–A first does not cause the same dead end.\"\n    },\n    {\n      \"id\": \"et-v2\",\n      \"concept\": \"Verifying a route\",\n      \"prerequisites\": [\n        \"Edge identity\",\n        \"Degree and connectivity\",\n        \"Choosing a start\"\n      ],\n      \"prompt\": \"The only edges of an undirected graph are e1=A–B and e2=A–B. A proposed record lists vertices [A, B, A] and edge IDs [e1, e1]. Why must it be rejected as an Euler circuit record?\",\n      \"options\": [\n        \"It repeats e1 and omits e2, even though each listed vertex transition joins A and B.\",\n        \"It returns to its start.\",\n        \"Two-edge circuits are never permitted when parallel edges exist.\",\n        \"A vertex sequence may not repeat A.\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"Endpoint adjacency is necessary but not sufficient. The record must use each distinct edge identity once. Here e1 appears twice and e2 is absent. Replacing the second ID with e2 gives a valid circuit record.\",\n      \"transfer\": \"If a proposed route has the correct number of steps, what additional checks are needed before accepting it as an edge-covering trail?\"\n    },\n    {\n      \"id\": \"et-v3\",\n      \"concept\": \"Verifying a route\",\n      \"prerequisites\": [\n        \"Edge identity\",\n        \"Degree and connectivity\",\n        \"Choosing a start\"\n      ],\n      \"prompt\": \"An undirected graph has e1=A–B, e2=B–C, e3=C–D, e4=D–A and e5=A–C. Which record is a valid Euler trail using every edge exactly once?\",\n      \"options\": [\n        \"Vertices [A,B,C,A,D,A]; IDs [e1,e2,e5,e4,e4]\",\n        \"Vertices [A,B,C,D,A,C]; IDs [e1,e2,e3,e4,e5]\",\n        \"Vertices [B,A,D,C,A,B]; IDs [e1,e4,e3,e5,e1]\",\n        \"Vertices [A,C,D,A]; IDs [e5,e3,e4]\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"The second record uses all five IDs once, and every adjacent vertex pair matches its corresponding edge. It begins at odd vertex A and ends at odd vertex C. The first and third records repeat and omit edges; the fourth omits e1 and e2.\",\n      \"transfer\": \"Reverse the valid route. Write its new vertex sequence and edge-ID order, and identify its endpoints.\"\n    },\n    {\n      \"id\": \"et-v4\",\n      \"concept\": \"Verifying a route\",\n      \"prerequisites\": [\n        \"Edge identity\",\n        \"Degree and connectivity\",\n        \"Choosing a start\"\n      ],\n      \"prompt\": \"Two disconnected triangles have edges A–B, B–C, C–A and D–E, E–F, F–D. You may add exactly one undirected edge. Which proposed change and explanation is correct?\",\n      \"options\": [\n        \"Add a loop at C; all even degrees guarantee one circuit.\",\n        \"Add a second A–B edge; parallel edges join the triangles.\",\n        \"Add C–D; the edges become connected with exactly C and D odd, so an open Euler trail exists.\",\n        \"Add C–D; every degree remains even, so a circuit exists.\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"The new edge joins the two edge-bearing components. C and D each gain one degree, changing from 2 to 3; the other four vertices remain even. The result has an open Euler trail between C and D, not a circuit.\",\n      \"transfer\": \"Now add a second distinct C–D edge. Explain how connectivity, parity and the possibility of a circuit change.\"\n    }\n  ]\n}\n";
+const GUIDE_TEXT = "# Euler trails — every edge, once\n\nAn edge-covering walk asks a different question from a shortest path: **can you traverse every edge exactly once?** The route may revisit a vertex. The edges are the things you must account for.\n\nThis original fourteen-question RecallWeave lesson comes with an offline explorer. Download the lesson JSON, then choose it in RecallWeave’s **Bring your own lesson** panel. Inspect the preview and explicitly start it. The explorer and the lesson are separate: changing a graph does not change the authored questions or your learning session.\n\n## The convention used here\n\nOur graphs are undirected. An edge can be traversed in either direction. Each edge row has its own identity, even when another row has the same endpoints.\n\n- A **walk** follows adjacent vertices; vertices and edges may repeat.\n- A **trail** does not repeat an edge.\n- An **Euler trail** covers every edge exactly once. It may be open or closed.\n- An **Euler circuit** here is a closed Euler trail with at least one edge.\n- A loop joins a vertex to itself. It is one edge to traverse and contributes **two** to that vertex’s degree.\n- Parallel edges share endpoints but are distinct edges.\n- An isolated vertex has degree zero. Our edge-coverage convention does **not** require visiting isolated vertices.\n- When there are no edges, we report a **zero-edge walk** at the selected start, separately from a positive-edge circuit.\n\nTerminology varies. In particular, the MIT lecture linked below includes visiting every vertex in its Euler definitions. Our lesson states its edge-coverage convention explicitly, so an isolated vertex does not change whether all existing edges can be covered. Do not silently substitute one convention for the other.\n\n## A small graph you can inspect\n\nDeclare A, B, C and D. Enter:\n\n```text\nA B\nB C\nC A\nA D\n```\n\nThe rows become e1, e2, e3 and e4. Degrees are A=3, B=2, C=2 and D=1. There is one edge-bearing component, and the odd vertices are A and D.\n\nOne complete route is:\n\n```text\nA —e1→ B —e2→ C —e3→ A —e4→ D\n```\n\nIt has four edge IDs and five vertex occurrences. A occurs twice; that is permitted. Every edge ID appears once.\n\nNow request start B and apply again. The graph still has an open Euler trail, but **B is an ineligible start**. That is a different result from “this graph has no Euler trail.” Request D and you can reverse the route:\n\n```text\nD —e4→ A —e3→ C —e2→ B —e1→ A\n```\n\n## Two checks before construction\n\nFor a graph with at least one edge:\n\n1. **Connectivity of the edges:** all vertices with positive degree must lie in one connected component.\n2. **Degree parity:** either every degree is even, giving a circuit, or exactly two degrees are odd, giving an open trail between those two vertices.\n\nWhy parity? At an interior visit, an arrival and departure use two edge ends. An open route has one unpaired departure at its start and one unpaired arrival at its finish. A closed route pairs them everywhere. A loop contributes two ends at its single vertex, so it does not change that vertex’s parity.\n\nConnectivity is a separate requirement. Two disjoint triangles have only even degrees, but a walk in one cannot reach the edges in the other. A separate isolated point is different: it has no edge that the route must cover.\n\nThese conditions are also sufficient under our undirected edge-coverage convention. One way to see the closed case is to follow unused edges, then insert further closed portions wherever a vertex on the route still has unused edges. Connectivity prevents an unused edge-bearing part from remaining unreachable from the assembled route. For the two-odd case, imagine a temporary extra edge joining the odd vertices; it makes their degrees even. Construct a closed route, then remove that temporary edge and start just after it. The remaining route runs between the two original odd vertices. This explanation permits a temporary parallel edge.\n\n## A route is not a greedy promise\n\nIn the four-edge example, taking A–D first strands you at D while the triangle remains unused. That failed partial choice does not disprove the existence of the full route above.\n\nThe explorer constructs and checks a complete route **before** showing replay steps. Its slider reveals prefixes of that completed route. It does not claim that every locally available unused edge is a safe next choice.\n\nThe construction keeps track of distinct unused edges. It continues from the current vertex while possible and assembles the finished portions when it runs out of unused incident edges. Input row order makes its choice deterministic; reversing or reordering rows may select a different valid route. No claim of a unique or shortest Euler route is made.\n\n## Audit the record, not only the picture\n\nA route record must satisfy all of these checks:\n\n1. It has one more vertex occurrence than edge IDs.\n2. It lists exactly the original number of edges.\n3. Every original edge ID appears once, with no foreign ID or repetition.\n4. Each edge’s endpoints match the adjacent vertex occurrences, in either orientation.\n5. For a circuit the first and last vertices match; for an open Euler trail they are the odd vertices.\n\nWith parallel edges e1=A–B and e2=A–B, the record A, B, A paired with e1, e1 fails. Its drawn transitions look plausible, but e2 is missing. The table and edge IDs in the explorer preserve this distinction. Loops and parallel edges are valid; the drawing is only a view of the exact table.\n\n## Use the offline explorer\n\nOpen `euler-trails-explorer.html` directly or serve the repository locally.\n\n- Declare 1–8 vertices. Their labels are A through the chosen count.\n- Enter 0–16 edge rows, each as two uppercase labels separated by whitespace. Blank rows are ignored. A repeated row is a new parallel edge. `A A` is a loop.\n- Choose Automatic or an explicit start. Automatic uses the first odd vertex if one exists; otherwise the first vertex with an edge; with no edges it uses A.\n- Select **Apply graph**. The result shows degree evidence, edge-bearing components, isolated vertices and the requested-start outcome.\n- Use **Previous edge**, **Next edge** or the replay slider to inspect the already completed route. Used and remaining IDs also appear in text.\n- Any edit retires the prior result and analysis download until you apply again. Invalid input never keeps a stale result visible.\n- **Download analysis** saves the complete applied analysis, independent of the current replay position. A valid impossibility or wrong-start result can also be saved.\n- **Download lesson** and **Download guide** save the exact authored companion files. Nothing is automatically saved or uploaded.\n\nThe bounds keep the model small enough to inspect. Directed edges, weights, required visits to isolated vertices, route optimization and real road restrictions are outside this lesson. A route’s existence in this model is not a real-world travel recommendation.\n\n## Transfer answers\n\nTry the transfer prompt after each question before reading its working here.\n\n| Item | Working |\n| --- | --- |\n| et-e1 | Three parallel A–B edges give degree 3 at each endpoint. An open trail exists, for example A–B–A–B using the three distinct IDs. |\n| et-e2 | Adding a loop at B adds 2 there: A=3, B=3. Both remain odd. Loops preserve parity. |\n| et-e3 | A sixteen-edge route has sixteen edge IDs and seventeen vertex occurrences. The three loops do not change that count. |\n| et-d1 | E adds one degree-zero entry. The one edge-bearing component and the circuit’s existence remain unchanged. |\n| et-d2 | A’s degree rises from 2 to 4. The two triangles remain disconnected; the extra loop does not join them. |\n| et-d3 | Adding B–C gives A=3, B=2, C=2, D=1. The graph is connected and the odd endpoints are A and D. One route is D–A–B–C–A. |\n| et-d4 | A becomes degree 4 and D becomes degree 2; B and C remain degree 2. All edges are connected, so a circuit exists. The two A–D edges must retain separate IDs. |\n| et-s1 | D–A–B–C–A covers the four edges once, starting at D and ending at A. D–A–C–B–A is another valid answer. |\n| et-s2 | B–A–A–B uses the first B–A edge, the loop at A, and the other A–B edge. It is closed. |\n| et-s3 | The route becomes [A] with zero edge IDs. There is still no positive-edge circuit claim. |\n| et-v1 | D has only the edge to A. After taking it, the remaining triangle can be traversed from A back to A, so D–A–B–C–A completes the route. |\n| et-v2 | Check all original edge identities occur exactly once, verify every adjacent vertex transition matches its listed edge, and check the record has one extra vertex occurrence. A correct length alone does not establish coverage or adjacency. |\n| et-v3 | Reverse vertices: C,A,D,C,B,A. Reverse IDs: e5,e4,e3,e2,e1. Endpoints are C and A; undirected traversal allows each edge’s reversed orientation. |\n| et-v4 | A second distinct C–D edge makes C and D degree 4; all other degrees stay 2. Connectivity remains one edge-bearing component, so a circuit now exists. |\n\n## Source and authorship notes\n\nThe questions, examples, explanations, transfer working and explorer visuals are original to this contribution. The course JSON and this guide are released under **CC0-1.0**. No source exercises, illustrations or implementation code were copied. The repository’s existing software license continues to apply to the explorer implementation.\n\nPrimary mathematical background:\n\n- Z. Abel, B. Chapman and E. Demaine, MIT 6.1200J/18.062J, Spring 2024, [Lecture 13: Connectivity and Trees](https://ocw.mit.edu/courses/6-1200j-mathematics-for-computer-science-spring-2024/mit6_1200j_s24_lec13.pdf), sections 1–3. The all-vertices terminology difference is stated above.\n- Princeton Algorithms, [Graph API](https://algs4.cs.princeton.edu/code/javadoc/edu/princeton/cs/algs4/Graph.html), for its explicit undirected multigraph and loop-degree convention.\n- Princeton Algorithms, [EulerianPath](https://algs4.cs.princeton.edu/code/edu/princeton/cs/algs4/EulerianPath.java.html), as a primary reference for edge-coverage existence with isolated vertices ignored. Its route terminology is not our separate positive-edge circuit label.\n\nThe MIT PDF was read directly. Princeton’s directly opened pages returned HTTP 403 during this contribution; available indexed primary excerpts were used for the cited conventions. This access limitation is not an execution or proof claim about Princeton’s implementation.\n\n## Rebuild and verify\n\nFrom the repository root:\n\n```sh\nnode tools/build-euler-trails.mjs\nnode tools/build-euler-trails.mjs --check\nnode tools/check-euler-trails.mjs\nnode --test tests/euler-trails.test.mjs\n```\n\nThe standalone contains the exact checked lesson and guide bytes. The builder does not require a package install or external service. Independent receiving records bind actual source, math/content review and downloaded-file/browser results separately from the authored tests.\n";
+// Original bounded undirected edge-coverage model for RecallWeave.
+const LABELS = 'ABCDEFGH';
+const freeze = value => {
+  if (value && typeof value === 'object') {
+    for (const child of Object.values(value)) freeze(child);
+    Object.freeze(value);
+  }
+  return value;
+};
+
+function parseEdgeText(text) {
+  if (typeof text !== 'string' || text.length > 4096) {
+    throw new Error('Use at most 4,096 characters for the edge list.');
+  }
+  const edges = [];
+  for (const [index, line] of text.split(/\r?\n/).entries()) {
+    if (!line.trim()) continue;
+    const match = /^\s*([A-H])\s+([A-H])\s*$/.exec(line);
+    if (!match) throw new Error(`Line ${index + 1}: enter two uppercase vertices, for example A B.`);
+    edges.push([match[1], match[2]]);
+    if (edges.length > 16) throw new Error('Use at most 16 edge rows.');
+  }
+  return edges;
+}
+
+function analyzeEuler(input) {
+  if (!input || typeof input !== 'object' || Array.isArray(input)) {
+    throw new Error('Provide a graph with vertexCount, edges, and an optional start.');
+  }
+  const { vertexCount, edges: pairs, start: requestedStart = 'auto' } = input;
+  if (!Number.isInteger(vertexCount) || vertexCount < 1 || vertexCount > 8) {
+    throw new Error('Choose a whole number of vertices from 1 to 8.');
+  }
+  const vertices = [...LABELS.slice(0, vertexCount)];
+  if (!Array.isArray(pairs) || pairs.length > 16) {
+    throw new Error('Provide an array of 0 to 16 edges.');
+  }
+  if (requestedStart !== 'auto' && !vertices.includes(requestedStart)) {
+    throw new Error(`Start must be Automatic or one of ${vertices.join(', ')}.`);
+  }
+  const edges = Array.from(pairs, (pair, index) => {
+    if (!Array.isArray(pair) || pair.length !== 2 ||
+        !vertices.includes(pair[0]) || !vertices.includes(pair[1])) {
+      throw new Error(`Edge e${index + 1} must join two declared vertices (${vertices.join(', ')}).`);
+    }
+    return { id: `e${index + 1}`, from: pair[0], to: pair[1] };
+  });
+  const degree = Object.fromEntries(vertices.map(vertex => [vertex, 0]));
+  const neighbors = Object.fromEntries(vertices.map(vertex => [vertex, new Set()]));
+  for (const edge of edges) {
+    degree[edge.from] += 1;
+    degree[edge.to] += 1;
+    neighbors[edge.from].add(edge.to);
+    neighbors[edge.to].add(edge.from);
+  }
+  const degrees = vertices.map(vertex => ({ vertex, degree: degree[vertex] }));
+  const oddVertices = vertices.filter(vertex => degree[vertex] % 2 === 1);
+  const isolatedVertices = vertices.filter(vertex => degree[vertex] === 0);
+  const seen = new Set();
+  const components = [];
+  for (const vertex of vertices) {
+    if (!degree[vertex] || seen.has(vertex)) continue;
+    const queue = [vertex];
+    seen.add(vertex);
+    for (let index = 0; index < queue.length; index += 1) {
+      for (const neighbor of neighbors[queue[index]]) {
+        if (!seen.has(neighbor)) { seen.add(neighbor); queue.push(neighbor); }
+      }
+    }
+    components.push(queue.sort());
+  }
+  const start = requestedStart === 'auto'
+    ? (oddVertices[0] ?? vertices.find(vertex => degree[vertex] > 0) ?? 'A')
+    : requestedStart;
+  let graphKind;
+  let routeStatus = 'ready';
+  let reason;
+  if (!edges.length) {
+    graphKind = 'empty';
+    reason = `There are no edges to cover. The zero-edge walk stays at ${start}; this is reported separately from a positive-edge Euler circuit.`;
+  } else if (components.length !== 1) {
+    graphKind = 'none'; routeStatus = 'no-route';
+    reason = `The edges occupy ${components.length} separate components. A single walk cannot cover them all, even if their degrees are even.`;
+  } else if (oddVertices.length !== 0 && oddVertices.length !== 2) {
+    graphKind = 'none'; routeStatus = 'no-route';
+    reason = `There are ${oddVertices.length} odd-degree vertices (${oddVertices.join(', ')}). Edge coverage needs zero or two.`;
+  } else {
+    graphKind = oddVertices.length === 2 ? 'trail' : 'circuit';
+    if (graphKind === 'trail' && !oddVertices.includes(start)) {
+      routeStatus = 'start-ineligible';
+      reason = `An open Euler trail exists, but it must start at ${oddVertices.join(' or ')}. The requested start ${start} is ineligible.`;
+    } else if (graphKind === 'circuit' && degree[start] === 0) {
+      routeStatus = 'start-ineligible';
+      reason = `An Euler circuit exists among the edge-bearing vertices, but ${start} is isolated. Choose a vertex with positive degree.`;
+    } else if (graphKind === 'trail') {
+      reason = `All edges are connected and only ${oddVertices.join(' and ')} have odd degree. Start at ${start} and finish at the other odd vertex.`;
+    } else {
+      reason = `All edges are connected and every degree is even. A circuit can start and finish at ${start}.`;
+    }
+  }
+  let route = null;
+  if (routeStatus === 'ready') {
+    // Complete the route before presenting a prefix to the learner.
+    const used = new Set();
+    const stack = [{ vertex: start, incoming: null }];
+    const reverseVertices = [];
+    const reverseEdges = [];
+    while (stack.length) {
+      const current = stack.at(-1).vertex;
+      const edge = edges.find(item => !used.has(item.id) &&
+        (item.from === current || item.to === current));
+      if (edge) {
+        used.add(edge.id);
+        stack.push({ vertex: edge.from === current ? edge.to : edge.from, incoming: edge.id });
+      } else {
+        const finished = stack.pop();
+        reverseVertices.push(finished.vertex);
+        if (finished.incoming !== null) reverseEdges.push(finished.incoming);
+      }
+    }
+    route = { vertices: reverseVertices.reverse(), edgeIds: reverseEdges.reverse() };
+    if (route.edgeIds.length !== edges.length || new Set(route.edgeIds).size !== edges.length ||
+        route.vertices.length !== edges.length + 1 ||
+        route.edgeIds.some((id, index) => {
+          const edge = edges.find(item => item.id === id);
+          const a = route.vertices[index], b = route.vertices[index + 1];
+          return !edge || !((edge.from === a && edge.to === b) || (edge.from === b && edge.to === a));
+        })) throw new Error('The constructed route did not pass its edge-identity check.');
+  }
+  return freeze({
+    vertexCount, vertices, edges, degrees, oddVertices, components, isolatedVertices,
+    graphKind, requestedStart, start, routeStatus, reason, route
+  });
+}
+
+
+const byId = id => document.getElementById(id);
+const ui = Object.fromEntries([
+  'graph-form','vertex-count','edge-input','start-vertex','input-status',
+  'analysis','draft-state','classification','analysis-reason','graph-size',
+  'degree-body','component-summary','graph-svg','route-status','route-sequence',
+  'edge-body','replay-step','step-back','step-next','download-analysis',
+  'example-select','load-example','download-course','download-guide','download-status'
+].map(id => [id, byId(id)]));
+let applied = null;
+let step = 0;
+const examples = {
+  open: { vertexCount: 4, edges: 'A B\nB C\nC A\nA D', start: 'auto' },
+  circuit: { vertexCount: 4, edges: 'A B\nB C\nC A', start: 'auto' },
+  parallel: { vertexCount: 3, edges: 'A B\nA B\nA A', start: 'B' },
+  disconnected: { vertexCount: 6, edges: 'A B\nB C\nC A\nD E\nE F\nF D', start: 'auto' },
+  greedy: { vertexCount: 4, edges: 'A D\nA B\nB C\nC A', start: 'A' },
+  empty: { vertexCount: 3, edges: '', start: 'C' }
+};
+
+function retire() {
+  applied = null; step = 0;
+  ui.analysis.hidden = true;
+  ui['draft-state'].hidden = false;
+  ui['graph-svg'].replaceChildren();
+  ui['download-analysis'].disabled = true;
+  ui['replay-step'].disabled = true;
+  ui['step-back'].disabled = true;
+  ui['step-next'].disabled = true;
+  ui['input-status'].dataset.error = 'false';
+  ui['input-status'].textContent = 'Unapplied edits. Apply graph to compute fresh evidence.';
+}
+
+function row(parent, values, className = '') {
+  const tr = document.createElement('tr');
+  tr.className = className;
+  for (const value of values) {
+    const td = document.createElement('td');
+    td.textContent = String(value); tr.append(td);
+  }
+  parent.append(tr);
+}
+
+function svgElement(name, attributes = {}, text = null) {
+  const element = document.createElementNS('http://www.w3.org/2000/svg', name);
+  for (const [key, value] of Object.entries(attributes)) element.setAttribute(key, String(value));
+  if (text !== null) element.textContent = text;
+  return element;
+}
+
+function drawGraph(used, current) {
+  const svg = ui['graph-svg']; svg.replaceChildren();
+  svg.append(svgElement('title', { id: 'graph-title' }, 'Applied undirected graph'));
+  svg.append(svgElement('desc', { id: 'graph-description' },
+    `${applied.vertices.length} vertices and ${applied.edges.length} distinct edges. ${current ? 'Current vertex ' + current + '. ' : ''}Exact endpoints and replay state follow in the edge table.`));
+  const positions = Object.fromEntries(applied.vertices.map((vertex, index) => {
+    const angle = -Math.PI / 2 + 2 * Math.PI * index / applied.vertices.length;
+    return [vertex, { x: 320 + (applied.vertices.length === 1 ? 0 : 135 * Math.cos(angle)),
+      y: 260 + (applied.vertices.length === 1 ? 0 : 135 * Math.sin(angle)), angle }];
+  }));
+  const groups = new Map();
+  for (const edge of applied.edges) {
+    const key = [edge.from, edge.to].sort().join('');
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(edge);
+  }
+  for (const edges of groups.values()) {
+    edges.forEach((edge, index) => {
+      const sorted = [edge.from, edge.to].sort();
+      const a = positions[sorted[0]], b = positions[sorted[1]];
+      let d, lx, ly;
+      if (edge.from === edge.to) {
+        const radius = 24 + index * 3;
+        const ux = Math.cos(a.angle), uy = Math.sin(a.angle);
+        const tx = -uy, ty = ux;
+        const sx = a.x + tx * 15, sy = a.y + ty * 15;
+        const ex = a.x - tx * 15, ey = a.y - ty * 15;
+        d = `M ${sx} ${sy} C ${a.x + ux * radius * 1.5 + tx * radius} ${a.y + uy * radius * 1.5 + ty * radius}, ${a.x + ux * radius * 1.5 - tx * radius} ${a.y + uy * radius * 1.5 - ty * radius}, ${ex} ${ey}`;
+        lx = a.x + ux * radius * 1.13; ly = a.y + uy * radius * 1.13;
+      } else {
+        const dx = b.x - a.x, dy = b.y - a.y, length = Math.hypot(dx, dy);
+        const bend = (index - (edges.length - 1) / 2) * 28;
+        const cx = (a.x + b.x) / 2 - dy / length * bend;
+        const cy = (a.y + b.y) / 2 + dx / length * bend;
+        d = `M ${a.x} ${a.y} Q ${cx} ${cy} ${b.x} ${b.y}`;
+        lx = (a.x + 2 * cx + b.x) / 4; ly = (a.y + 2 * cy + b.y) / 4;
+      }
+      const color = used.has(edge.id) ? '#29664e' : '#8c9d92';
+      svg.append(svgElement('path', { d, fill: 'none', stroke: color,
+        'stroke-width': used.has(edge.id) ? 5 : 2.5, 'data-edge-id': edge.id }));
+      svg.append(svgElement('text', { x: lx, y: ly - 6, fill: '#233b32',
+        'font-size': 15, 'text-anchor': 'middle', 'font-family': 'ui-monospace, monospace',
+        stroke: '#fffef9', 'stroke-width': 5, 'paint-order': 'stroke', 'aria-hidden': 'true' }, edge.id));
+    });
+  }
+  for (const vertex of applied.vertices) {
+    const point = positions[vertex], active = vertex === current;
+    svg.append(svgElement('circle', { cx: point.x, cy: point.y, r: active ? 24 : 21,
+      fill: active ? '#a54e2a' : '#fffef9', stroke: active ? '#7e3b1f' : '#29664e', 'stroke-width': 2.5 }));
+    svg.append(svgElement('text', { x: point.x, y: point.y + 6, fill: active ? '#ffffff' : '#233b32',
+      'font-size': 20, 'font-weight': 700, 'text-anchor': 'middle', 'font-family': 'system-ui, sans-serif' }, vertex));
+  }
+}
+
+function renderReplay() {
+  if (!applied) return;
+  const route = applied.route;
+  const used = new Set(route ? route.edgeIds.slice(0, step) : []);
+  const current = route ? route.vertices[step] : null;
+  ui['replay-step'].max = String(applied.edges.length);
+  ui['replay-step'].value = String(step);
+  ui['replay-step'].disabled = !route || !applied.edges.length;
+  ui['step-back'].disabled = !route || step === 0;
+  ui['step-next'].disabled = !route || step === applied.edges.length;
+  ui['route-status'].textContent = route
+    ? `${step} of ${applied.edges.length} edges used · Current vertex ${current}${step === applied.edges.length ? ' · Complete' : ''}`
+    : (applied.routeStatus === 'start-ineligible' ? 'No route from the requested start.' : 'No single edge-covering route.');
+  ui['route-sequence'].replaceChildren();
+  if (route) {
+    const first = document.createElement('span'); first.textContent = route.vertices[0]; ui['route-sequence'].append(first);
+    route.edgeIds.forEach((id, index) => {
+      const token = document.createElement('span');
+      token.textContent = `—${id}→ ${route.vertices[index + 1]}`;
+      ui['route-sequence'].append(token);
+    });
+  } else ui['route-sequence'].textContent = 'A route is only shown after all existence and starting-vertex checks pass.';
+  ui['edge-body'].replaceChildren();
+  for (const edge of applied.edges) {
+    row(ui['edge-body'], [edge.id, `${edge.from}–${edge.to}`, used.has(edge.id) ? 'Used' : 'Remaining'],
+      used.has(edge.id) ? ('used' + (route.edgeIds[step - 1] === edge.id ? ' latest' : '')) : '');
+  }
+  if (!applied.edges.length) row(ui['edge-body'], ['—', 'No edges', 'None to cover']);
+  drawGraph(used, current);
+}
+
+function apply() {
+  retire();
+  try {
+    const countText = ui['vertex-count'].value.trim();
+    if (!/^\d+$/.test(countText)) throw new Error('Choose a whole number of vertices from 1 to 8.');
+    applied = analyzeEuler({
+      vertexCount: Number(countText), edges: parseEdgeText(ui['edge-input'].value),
+      start: ui['start-vertex'].value
+    });
+    ui.analysis.hidden = false;
+    ui['draft-state'].hidden = true;
+    ui['download-analysis'].disabled = false;
+    const labels = { empty: 'Zero-edge walk', circuit: 'Euler circuit', trail: 'Open Euler trail', none: 'No Euler trail' };
+    ui.classification.textContent = labels[applied.graphKind] +
+      (applied.routeStatus === 'start-ineligible' ? ' · Start ineligible' : '');
+    ui['analysis-reason'].textContent = applied.reason;
+    ui['graph-size'].textContent = `${applied.vertexCount} VERTICES / ${applied.edges.length} EDGES`;
+    ui['degree-body'].replaceChildren();
+    for (const entry of applied.degrees) row(ui['degree-body'], [entry.vertex, entry.degree, entry.degree % 2 ? 'Odd' : 'Even']);
+    ui['component-summary'].textContent =
+      `Edge-bearing components: ${applied.components.length ? applied.components.map(part => '{' + part.join(', ') + '}').join(' · ') : 'none'}. Isolated vertices: ${applied.isolatedVertices.join(', ') || 'none'}. Odd vertices: ${applied.oddVertices.join(', ') || 'none'}.`;
+    ui['input-status'].textContent = 'Applied. Edge IDs follow the nonblank input row order.';
+    renderReplay();
+  } catch (error) {
+    retire();
+    ui['input-status'].dataset.error = 'true';
+    ui['input-status'].textContent = error.message;
+  }
+}
+
+function download(filename, text, type) {
+  try {
+    const url = URL.createObjectURL(new Blob([text], { type }));
+    const link = document.createElement('a');
+    link.href = url; link.download = filename; document.body.append(link); link.click(); link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    ui['download-status'].textContent = `Download requested: ${filename}. Check your browser’s downloads.`;
+  } catch {
+    ui['download-status'].textContent = 'The download could not be prepared. Your applied graph remains available; try again.';
+  }
+}
+
+ui['graph-form'].addEventListener('submit', event => { event.preventDefault(); apply(); });
+for (const id of ['vertex-count', 'edge-input', 'start-vertex']) {
+  ui[id].addEventListener('input', retire);
+  ui[id].addEventListener('change', retire);
+}
+ui['step-back'].addEventListener('click', () => { if (applied?.route && step > 0) { step -= 1; renderReplay(); } });
+ui['step-next'].addEventListener('click', () => { if (applied?.route && step < applied.edges.length) { step += 1; renderReplay(); } });
+ui['replay-step'].addEventListener('input', () => {
+  if (!applied?.route) return;
+  step = Math.max(0, Math.min(applied.edges.length, Number(ui['replay-step'].value)));
+  renderReplay();
+});
+ui['load-example'].addEventListener('click', () => {
+  const example = examples[ui['example-select'].value];
+  ui['vertex-count'].value = String(example.vertexCount);
+  ui['edge-input'].value = example.edges; ui['start-vertex'].value = example.start; apply();
+});
+ui['download-analysis'].addEventListener('click', () => {
+  if (applied) download('euler-trails-analysis.json',
+    JSON.stringify({ format: 'recallweave-euler-analysis/1', analysis: applied }, null, 2) + '\n', 'application/json;charset=utf-8');
+});
+ui['download-course'].addEventListener('click', () => download('euler-trails.json', COURSE_TEXT, 'application/json;charset=utf-8'));
+ui['download-guide'].addEventListener('click', () => download('euler-trails.md', GUIDE_TEXT, 'text/markdown;charset=utf-8'));
+apply();
+
+</script>
+</body>
+</html>
