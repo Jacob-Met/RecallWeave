@@ -1438,7 +1438,7 @@ function renderAnswerFeedback(item, choice, correct) {
     else if (selected === choice) button.classList.add('incorrect');
   });
   const feedback = document.querySelector('#feedback-slot');
-  feedback.innerHTML = `<div class="feedback"><strong>${correct ? 'That connection holds.' : 'Here’s the correction.'}</strong> ${escapeHtml(item.explanation)}<span class="why">Try this transfer: ${escapeHtml(item.transfer)}</span></div><button class="primary-button next-button" id="next-button">${answers.length === deck.items.length ? 'See your learning trace' : 'Follow the next thread'} <span aria-hidden="true">→</span></button>`;
+  feedback.innerHTML = `<div class="feedback"><strong>${correct ? 'That connection holds.' : 'Here’s the correction.'}</strong><p><strong>Your answer:</strong> ${escapeHtml(item.options[choice])}</p><p><strong>Correct answer:</strong> ${escapeHtml(item.options[item.answer])}</p>${escapeHtml(item.explanation)}<span class="why">Try this transfer: ${escapeHtml(item.transfer)}</span></div><button class="primary-button next-button" id="next-button">${answers.length === deck.items.length ? 'See your learning trace' : 'Follow the next thread'} <span aria-hidden="true">→</span></button>`;
   feedback.querySelector('button').addEventListener('click', renderQuestion);
   const state = root.querySelector('.mastery-box');
   state.outerHTML = renderMastery();
