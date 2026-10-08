@@ -1,0 +1,9 @@
+# Recall180 completed renderer/CSS slice — independent custody
+
+This packet preserves the original completed root R2 run, not a new execution. It contains all 19 original source/context/output files byte-for-byte, the 14 embedded R1/R2 source records extracted without execution, this custodian and its bounded receiving record, and an exhaustive member manifest.
+
+The native record reports four 1280/390 observations. R1 collapses the distinct one-space/two-space exact IDs; R2 preserves their different measured widths in both paragraphs and summaries. R2 also uses truthful full-question-record/answer-key wording. Node94488 exited0, Chrome76288 had observed close0/null signal, and its own profile was removed. All13 admitted records and all19 completed-folder files were rehashed unchanged here. The five declared admission/close/cleanup edits reverse exactly to the pinned earlier R1 receiver, without changing renderer oracles.
+
+Scope is only the fixed contract-shaped report renderer/CSS. Owner177 comparator, actual course comparison, full file lifecycle, generated standalone and whole-product acceptance remain pending. No browser, product source, generator or comparator was run during custody. The original four PNGs and two probe HTMLs are preserved, not regenerated. Runtime binaries are not bundled; exact pins remain in the original receipt.
+
+Historical R0/R1 refusals stay separately preserved in immutable83cd3cfe935b67f494f72190c23ec21c1f6ef92a, archive SHA25660698819609899a325cdd1f66eefda495459e028ff7f12c4f5025cecf7cdd99f. This archive does not recreate or repackage that packet. Native own archives/base64 are custody copies only, with no ref/PR/Actions operation. A separate transport verification receipt must bind the whole archive and each member before external acceptance.
