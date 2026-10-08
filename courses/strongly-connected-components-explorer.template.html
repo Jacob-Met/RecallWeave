@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="An offline RecallWeave lesson about directed return paths, two-pass DFS and strongly connected components.">
+<title>Where paths can return · RecallWeave</title>
+<style>
+  :root { color-scheme: light; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #173248; background: #f1f5f7; line-height: 1.55; }
+  * { box-sizing: border-box; }
+  body { margin: 0; }
+  .skip { position: absolute; left: 12px; top: -80px; padding: 10px 14px; background: #fff; color: #155e85; z-index: 2; }
+  .skip:focus { top: 8px; }
+  main { width: min(1260px, 100%); margin: auto; padding: 32px 24px 48px; }
+  header { max-width: 950px; margin-bottom: 26px; }
+  .eyebrow { margin: 0 0 8px; color: #38627b; text-transform: uppercase; letter-spacing: .12em; font-weight: 750; font-size: .76rem; }
+  h1 { margin: 0 0 12px; font-size: clamp(2.05rem, 5vw, 3.3rem); line-height: 1.1; letter-spacing: -.035em; }
+  h2 { margin: 0 0 12px; font-size: 1.2rem; line-height: 1.3; }
+  h3 { margin: 16px 0 6px; font-size: .95rem; }
+  p { margin: 8px 0; }
+  .lead { max-width: 760px; font-size: 1.08rem; color: #425f73; }
+  .workspace { display: grid; grid-template-columns: minmax(245px, 310px) minmax(0, 1fr); align-items: start; gap: 20px; }
+  .panel { background: #fff; border: 1px solid #cbd9e2; border-radius: 14px; padding: 20px; min-width: 0; }
+  .panel + .panel { margin-top: 16px; }
+  label { display: block; margin: 14px 0 5px; font-size: .88rem; font-weight: 700; }
+  label:first-child { margin-top: 0; }
+  input, textarea, select, button { font: inherit; }
+  input, textarea, select { width: 100%; max-width: 100%; color: #173248; border: 1px solid #9fb4c4; border-radius: 7px; padding: 9px 10px; background: #fff; }
+  textarea { display: block; resize: vertical; font: .91rem/1.6 ui-monospace, SFMono-Regular, Consolas, monospace; }
+  button { border: 1px solid #94adc0; border-radius: 7px; padding: 9px 12px; background: #fff; color: #173248; font-weight: 650; cursor: pointer; }
+  button:hover:not(:disabled) { background: #edf4f8; }
+  button.primary { color: #fff; background: #155e85; border-color: #155e85; }
+  button.primary:hover:not(:disabled) { background: #114c6b; }
+  button:disabled, input:disabled { opacity: .52; cursor: default; }
+  :focus-visible { outline: 3px solid #d58c24; outline-offset: 3px; }
+  .wide { width: 100%; margin-top: 14px; }
+  .help, .quiet { font-size: .82rem; color: #526c7f; }
+  .help { margin-top: 5px; }
+  .status { min-height: 1.6em; font-size: .88rem; margin-top: 12px; }
+  #error { color: #a52c25; font-weight: 650; white-space: pre-wrap; }
+  .toolbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 12px 0; }
+  .phase { display: inline-block; border-radius: 20px; background: #e5f0f6; color: #185470; padding: 4px 10px; font-size: .79rem; font-weight: 750; }
+  #event-message { min-height: 3.2em; font-size: 1rem; }
+  .graph { display: block; width: 100%; height: auto; background: #f8fafb; border: 1px solid #e0e8ed; border-radius: 10px; margin: 12px 0 6px; }
+  .graph text { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; }
+  .state-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 16px 0; }
+  .state { padding: 12px; background: #f3f7f9; border-radius: 9px; min-width: 0; }
+  .state h3 { margin: 0 0 5px; font-size: .77rem; color: #49677a; text-transform: uppercase; letter-spacing: .05em; }
+  .mono { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; overflow-wrap: anywhere; }
+  .table-wrap { max-width: 100%; overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: .84rem; }
+  caption { text-align: left; font-weight: 700; margin-bottom: 8px; }
+  th, td { padding: 8px 7px; text-align: left; border-bottom: 1px solid #dce6ec; overflow-wrap: anywhere; }
+  th { color: #49677a; font-size: .77rem; }
+  td:first-child { font-weight: 700; }
+  .prediction-row { display: flex; align-items: center; gap: 8px; }
+  .prediction-row input { width: 76px; }
+  .prediction-row button { flex: 1; }
+  .asset-buttons { display: grid; gap: 8px; }
+  .certificate { margin-top: 18px; padding: 18px; border: 1px solid #91b9a2; border-radius: 11px; background: #f4faf6; }
+  .certificate h2 { color: #245f40; }
+  .components { display: flex; flex-wrap: wrap; list-style: none; gap: 8px; padding: 0; }
+  .components li { border: 1px solid #b9cbd6; border-radius: 7px; padding: 6px 9px; font: .87rem/1.5 ui-monospace, SFMono-Regular, Consolas, monospace; overflow-wrap: anywhere; }
+  .certificate ul:not(.components) { padding-left: 20px; }
+  footer { max-width: 960px; margin-top: 24px; font-size: .86rem; color: #526c7f; }
+  [hidden] { display: none !important; }
+  @media (max-width: 790px) {
+    main { padding: 22px 14px 36px; }
+    .workspace { grid-template-columns: minmax(0, 1fr); }
+    .panel { padding: 16px; }
+    #edge-text { min-height: 120px; }
+    .state-grid { grid-template-columns: minmax(0, 1fr); }
+    th, td { padding: 7px 4px; }
+  }
+  @media print {
+    :root { background: white; }
+    main { width: 100%; padding: 0; }
+    aside, .toolbar, #event-choice-label, #event-choice, footer { display: none; }
+    .workspace { display: block; }
+    .panel { border-color: #aaa; }
+    .graph { max-height: 330px; }
+  }
+</style>
+</head>
+<body>
+<a class="skip" href="#trace-title">Skip to the trace</a>
+<main>
+  <header>
+    <p class="eyebrow">RecallWeave · directed graphs</p>
+    <h1>Where paths can return</h1>
+    <p class="lead">One-way reachability can cross a group’s boundary. Follow two searches to find the groups whose nodes can all reach one another.</p>
+  </header>
+  <div class="workspace">
+    <aside>
+      <section class="panel" aria-labelledby="input-title">
+        <h2 id="input-title">Author a small graph</h2>
+        <label for="example">Worked example</label>
+        <select id="example"></select>
+        <label for="node-text">Node names</label>
+        <textarea id="node-text" rows="2" spellcheck="false" maxlength="512" aria-describedby="node-help"></textarea>
+        <p id="node-help" class="help">1–12 unique names, separated by spaces. Start with a letter; use up to 12 letters, digits or underscores. Names are case-sensitive.</p>
+        <label for="edge-text">Directed edges</label>
+        <textarea id="edge-text" rows="8" spellcheck="false" maxlength="4096" aria-describedby="edge-help"></textarea>
+        <p id="edge-help" class="help">One edge per line: <span class="mono">A B</span> means A → B. Use 0–36 edges. Self-loops are allowed; identical repeated edges are refused.</p>
+        <button class="primary wide" id="build">Build trace</button>
+        <p class="status" id="notice" role="status"></p>
+        <p id="error" role="alert"></p>
+      </section>
+      <section class="panel" aria-labelledby="prediction-title">
+        <h2 id="prediction-title">Predict the groups</h2>
+        <label for="prediction">How many components?</label>
+        <div class="prediction-row">
+          <input id="prediction" type="number" min="1" max="12" step="1" inputmode="numeric">
+          <button id="check-prediction">Check prediction</button>
+        </div>
+        <p id="prediction-feedback" class="status" role="status"></p>
+        <p class="quiet">Checking reveals the computed count. It does not move the trace or record a learner score.</p>
+      </section>
+      <section class="panel" aria-labelledby="downloads-title">
+        <h2 id="downloads-title">Keep and study it</h2>
+        <div class="asset-buttons">
+          <button id="download-trace">Download complete trace</button>
+          <button id="download-course">Download 12-question lesson</button>
+          <button id="download-guide">Download worked guide</button>
+        </div>
+        <p class="help">Open the lesson JSON in RecallWeave under <strong>Bring your own lesson</strong>, review its preview, then select <strong>Start this deck</strong>.</p>
+        <p id="download-status" class="status" role="status"></p>
+      </section>
+    </aside>
+    <section class="panel" id="results" aria-labelledby="trace-title" hidden>
+      <span class="phase" id="phase"></span>
+      <h2 id="trace-title" tabindex="-1" style="margin-top:10px">Inspect the search</h2>
+      <p id="event-message" aria-live="polite"></p>
+      <div class="toolbar" aria-label="Trace navigation">
+        <button id="first">First</button>
+        <button id="previous">Previous</button>
+        <button id="next" class="primary">Next</button>
+        <button id="finish">Finish</button>
+        <span id="step-count" class="quiet"></span>
+      </div>
+      <label id="event-choice-label" for="event-choice">Jump to an event</label>
+      <select id="event-choice"></select>
+      <svg id="network" class="graph" viewBox="0 0 600 390" role="img" aria-label="Current directed graph"></svg>
+      <p class="quiet" id="graph-note"></p>
+      <p class="quiet">The orange outline marks the current node. The table and lists show every state in text; component labels identify groups independently of color.</p>
+      <div class="state-grid">
+        <section class="state"><h3>Active DFS path</h3><div class="mono" id="dfs-path"></div></section>
+        <section class="state"><h3>Finished in pass 1</h3><div class="mono" id="finish-list"></div></section>
+        <section class="state"><h3>Pass 2 root order</h3><div class="mono" id="root-order"></div></section>
+        <section class="state"><h3>Edge inspections</h3><div id="edge-count"></div></section>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <caption>Node state at this event</caption>
+          <thead><tr><th scope="col">Node</th><th scope="col">Pass 1</th><th scope="col">Finish position</th><th scope="col">Pass 2</th><th scope="col">Group</th></tr></thead>
+          <tbody id="node-states"></tbody>
+        </table>
+      </div>
+      <section id="certificate" class="certificate" aria-labelledby="certificate-title" hidden>
+        <h2 id="certificate-title">The graph of components</h2>
+        <p id="component-summary"></p>
+        <ul class="components" id="component-members"></ul>
+        <svg id="condensation" class="graph" viewBox="0 0 600 390" role="img" aria-label="Condensation graph"></svg>
+        <h3>Original edges that connect groups</h3>
+        <ul id="component-edges"></ul>
+        <p class="quiet">Internal edges are omitted and repeated group edges are combined. A cycle between distinct groups would make them mutually reachable, so this graph is acyclic.</p>
+      </section>
+    </section>
+  </div>
+  <footer>
+    <p>Pass 1 follows original arrows; pass 2 follows the transpose in reverse finishing order. Roots begin in declared node order, and neighbors follow original edge-line order. Component numbers belong to this trace and can change when declaration order changes.</p>
+    <p>This file runs offline and keeps the graph in this tab’s memory. The underlying adjacency-list algorithm uses O(V + E) traversal work; copying teaching snapshots, rendering and file export add separate work. The guide gives the original examples, conventions and source credit.</p>
+  </footer>
+</main>
+<!-- STRONG_COMPONENTS_DATA -->
+<!-- STRONG_COMPONENTS_SCRIPT -->
+</body>
+</html>

@@ -317,3 +317,9 @@ The [worked guide](courses/cache-replacement.md) explains the empty-start, equal
 ## Weighted interval scheduling
 
 The [weighted-intervals explorer](courses/weighted-intervals-explorer.html) is a self-contained offline lab for choosing compatible activities by total value. Edit a small schedule, inspect take/skip decisions, reconstruct the chosen prefix, and compare it with earliest finish. Download its [twelve-question course](courses/weighted-interval-scheduling.json) into the existing learner, or use the [course guide](courses/weighted-interval-scheduling.md) for the worked table, answer derivations, assumptions and build/check commands.
+
+## Find directed return paths
+
+Open **[Where paths can return](courses/strongly-connected-components-explorer.html)** directly in a browser to explore strongly connected components. Author up to twelve nodes and thirty-six directed edges, then inspect original-graph DFS finishing order, the transpose search and the final acyclic graph of components. Every event has an exact node table, active DFS path and edge-inspection counts; the component graph retains the original edges connecting each pair of groups.
+
+Graph edits retire the previous trace until a new valid graph is built. The explorer downloads the complete trace with the entered text and chosen inspection event, plus the original [twelve-question lesson](courses/strongly-connected-components.json) and [worked guide](courses/strongly-connected-components.md). Open the lesson JSON through **Bring your own lesson**, inspect its preview, then select **Start this deck**. No server or browser storage is used. Rebuild with `node tools/build-strongly-connected-components.mjs`, or add `--check` to verify the exact source and download bytes.
