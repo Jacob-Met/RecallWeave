@@ -1,0 +1,128 @@
+{
+  "frozenAt": "2026-10-08T18:50:24.022Z",
+  "candidateInspected": false,
+  "sourceSHA256": "08d6d15c6094dd560f0668dcf0bef7412767046e9bf7aa9684d308ecf0346624",
+  "node": "v22.22.1",
+  "reason": "Model API bounds were supplied after initial controls. Retained original. Only domain text, grid wallStiffness .25 to 1, and stationary-state time 123 to 19.7 changed; mathematical controls and tolerances unchanged.",
+  "contract": {
+    "domain": "documented API: mass .1..10, wallStiffness 1..200, coupling 0..200; x in -1..1, v in -2..2; signed time in -20..20",
+    "equations": [
+      "m*x1''=-(k+c)*x1+c*x2",
+      "m*x2''=c*x1-(k+c)*x2"
+    ],
+    "coordinates": [
+      "qPlus=(x1+x2)/2",
+      "qMinus=(x1-x2)/2"
+    ],
+    "frequencies": [
+      "sqrt(k/m)",
+      "sqrt((k+2*c)/m)"
+    ],
+    "physicalEnergy": "0.5*m*(v1*v1+v2*v2)+0.5*k*(x1*x1+x2*x2)+0.5*c*(x1-x2)**2",
+    "modalEnergy": "m*(qPlusDot**2+qMinusDot**2)+k*qPlus**2+(k+2*c)*qMinus**2",
+    "reviewMethod": "Fixed exact fixtures, Cartesian RK4, Cartesian finite-difference Newton residual, conservation, restart reversal, exchange symmetry, negative controls."
+  },
+  "controls": {
+    "positive": {
+      "label": "synthetic analytic positive control",
+      "pass": true,
+      "groups": 9,
+      "results": [
+        {
+          "name": "pure in-phase quarter period with nonzero initial velocity",
+          "pass": true,
+          "maxScaledError": 1.0938157878080359e-16
+        },
+        {
+          "name": "pure out-of-phase quarter period with nonzero initial velocity",
+          "pass": true,
+          "maxScaledError": 4.625929269271486e-17
+        },
+        {
+          "name": "zero coupling degeneracy with unrelated initial states",
+          "pass": true,
+          "maxScaledError": 1.0375916117992118e-16
+        },
+        {
+          "name": "Cartesian Newton integration: 27 parameter sets, 5 signed times",
+          "pass": true,
+          "cases": 135,
+          "maxScaledError": 3.2263670291079288e-12,
+          "tolerance": 2e-9
+        },
+        {
+          "name": "independent differential Newton residual and dx/dt=v",
+          "pass": true,
+          "cases": 81,
+          "maxScaledError": 1.9590055217139622e-11,
+          "tolerance": 2e-8
+        },
+        {
+          "name": "physical energy conservation and modal-energy identity",
+          "pass": true,
+          "cases": 135,
+          "maxScaledError": 2.4531927073612077e-16,
+          "tolerance": 2e-10
+        },
+        {
+          "name": "restart time reversal recovers displacement and reversed initial velocity",
+          "pass": true,
+          "cases": 54,
+          "maxScaledError": 1.3994407873426343e-16,
+          "tolerance": 5e-10
+        },
+        {
+          "name": "exchange symmetry of identical masses",
+          "pass": true,
+          "cases": 54,
+          "maxScaledError": 0,
+          "tolerance": 2e-11
+        },
+        {
+          "name": "zero displacement and velocity remain stationary",
+          "pass": true,
+          "cases": 27,
+          "maxScaledError": 0,
+          "tolerance": 0
+        }
+      ]
+    },
+    "negatives": [
+      {
+        "fault": "coupling-factor",
+        "rejected": true,
+        "failedGroups": [
+          "pure out-of-phase quarter period with nonzero initial velocity",
+          "Cartesian Newton integration: 27 parameter sets, 5 signed times",
+          "independent differential Newton residual and dx/dt=v",
+          "physical energy conservation and modal-energy identity"
+        ]
+      },
+      {
+        "fault": "omit-initial-velocity",
+        "rejected": true,
+        "failedGroups": [
+          "pure in-phase quarter period with nonzero initial velocity",
+          "pure out-of-phase quarter period with nonzero initial velocity",
+          "zero coupling degeneracy with unrelated initial states",
+          "Cartesian Newton integration: 27 parameter sets, 5 signed times",
+          "physical energy conservation and modal-energy identity",
+          "restart time reversal recovers displacement and reversed initial velocity"
+        ]
+      },
+      {
+        "fault": "reconstruction-sign",
+        "rejected": true,
+        "failedGroups": [
+          "pure out-of-phase quarter period with nonzero initial velocity",
+          "zero coupling degeneracy with unrelated initial states",
+          "Cartesian Newton integration: 27 parameter sets, 5 signed times",
+          "independent differential Newton residual and dx/dt=v",
+          "physical energy conservation and modal-energy identity",
+          "restart time reversal recovers displacement and reversed initial velocity",
+          "exchange symmetry of identical masses"
+        ]
+      }
+    ]
+  }
+}

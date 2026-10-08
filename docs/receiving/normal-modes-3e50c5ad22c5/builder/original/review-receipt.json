@@ -1,0 +1,95 @@
+{
+  "startedAt": "2026-10-08T19:20:55.220Z",
+  "completedAt": "2026-10-08T19:20:57.217Z",
+  "node": "v22.22.1",
+  "runName": "original",
+  "builderPath": "/tmp/hamon-normal-modes-3e50c5ad22c5/tools/build-normal-modes.mjs",
+  "builderSHA256": "34764aeb0b8b0eea36cb473ed80c9638ad36d54ff68513a964f23bf1a193b4ce",
+  "builderSHA256After": "34764aeb0b8b0eea36cb473ed80c9638ad36d54ff68513a964f23bf1a193b4ce",
+  "parserPath": "/tmp/hamon-normal-modes-3e50c5ad22c5/src/deck.mjs",
+  "parserSHA256": "621438c166ec4bfafd9d87c698a1d46cb1722f4fb92dcbb8d9f52fce682c338b",
+  "parserSHA256After": "621438c166ec4bfafd9d87c698a1d46cb1722f4fb92dcbb8d9f52fce682c338b",
+  "controlsFrozenAt": "2026-10-08T19:16:16.018Z",
+  "expectedControlsSHA256": "1dba6e68a4dd098b992db09b7846b8b72306206e6dd46f71e04d484c8ab57dc0",
+  "sourceStable": true,
+  "preFrozenGroupsPassed": 7,
+  "preFrozenGroups": 7,
+  "pass": false,
+  "results": [
+    {
+      "name": "frozen: deterministic exact parity and non-mutating check mode",
+      "pass": true,
+      "sourceInputsChecked": 5,
+      "deterministicSHA256": "ccc34cc8f5f3b9f0fac1268628a3aa24d44a67061f34f8fb0779f565651af0db"
+    },
+    {
+      "name": "frozen: missing and duplicate template tokens refuse without replacing prior HTML",
+      "pass": true,
+      "missing": 4,
+      "duplicate": 4,
+      "unknown": 1
+    },
+    {
+      "name": "frozen: checked-deck refusal preserves prior HTML",
+      "pass": true,
+      "refusedDeckCases": 5
+    },
+    {
+      "name": "frozen: literal script HTML and Unicode text survive embedded source downloads exactly",
+      "pass": true,
+      "deckBytes": 5961,
+      "guideBytes": 138,
+      "scriptElements": 1,
+      "decodedSourceExact": true,
+      "htmlSHA256": "90833c545962fe2c3f8569c54d510f4e5ce45674d6815a70f530ad5230063de6"
+    },
+    {
+      "name": "frozen: standalone script executes with no retained module dependencies",
+      "pass": true,
+      "classicScriptExecuted": true,
+      "refusedModuleDependencies": 2
+    },
+    {
+      "name": "frozen: failed rename cleans only its own temporary file and preserves existing directory",
+      "pass": true,
+      "directoryPreserved": true,
+      "sentinelPreserved": true,
+      "unrelatedTemporaryPreserved": true,
+      "ownTemporaryRemoved": true
+    },
+    {
+      "name": "frozen: CLI invocation is independent of caller working directory",
+      "pass": true,
+      "buildExit": 0,
+      "checkExit": 0,
+      "staleCheckExit": 1,
+      "unknownArgumentExit": 2,
+      "callerDirectoryUntouched": true
+    },
+    {
+      "name": "post-inspection: marker-shaped deck and guide text remains literal data",
+      "pass": false,
+      "error": "Template must contain exactly one {{NORMAL_MODES_GUIDE_JSON}}",
+      "stack": [
+        "Error: Template must contain exactly one {{NORMAL_MODES_GUIDE_JSON}}",
+        "    at renderLab (file:///tmp/hamon-normal-modes-builder-review-3e50c5ad22c5/original/implementation/tools/build-normal-modes.mjs:44:13)",
+        "    at async file:///tmp/hamon-normal-modes-builder-review-3e50c5ad22c5/builder-review.mjs:213:22",
+        "    at async test (file:///tmp/hamon-normal-modes-builder-review-3e50c5ad22c5/builder-review.mjs:72:66)",
+        "    at async file:///tmp/hamon-normal-modes-builder-review-3e50c5ad22c5/builder-review.mjs:209:1"
+      ]
+    },
+    {
+      "name": "post-inspection: unknown marker prefixes inside guide prose remain literal data",
+      "pass": false,
+      "error": "Unresolved standalone token.",
+      "stack": [
+        "Error: Unresolved standalone token.",
+        "    at renderLab (file:///tmp/hamon-normal-modes-builder-review-3e50c5ad22c5/original/implementation/tools/build-normal-modes.mjs:47:47)",
+        "    at async file:///tmp/hamon-normal-modes-builder-review-3e50c5ad22c5/builder-review.mjs:219:27",
+        "    at async test (file:///tmp/hamon-normal-modes-builder-review-3e50c5ad22c5/builder-review.mjs:72:66)",
+        "    at async file:///tmp/hamon-normal-modes-builder-review-3e50c5ad22c5/builder-review.mjs:216:1"
+      ]
+    }
+  ],
+  "fixtureScope": "Authored minimal template and sources, real candidate builder and unchanged native deck parser. Production template remains a separate later check."
+}

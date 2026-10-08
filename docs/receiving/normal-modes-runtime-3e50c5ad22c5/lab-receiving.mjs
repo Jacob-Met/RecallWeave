@@ -1,0 +1,173 @@
+import assert from 'node:assert/strict';
+import {pathToFileURL} from 'node:url';
+import {waitFor,pause} from './browser-driver.mjs';
+
+export function analytic(p,t){
+ const wp=Math.sqrt(p.wallStiffness/p.mass),wm=Math.sqrt((p.wallStiffness+2*p.coupling)/p.mass);
+ const qp0=(p.x1+p.x2)/2,qm0=(p.x1-p.x2)/2,up0=(p.v1+p.v2)/2,um0=(p.v1-p.v2)/2;
+ const motion=(q,u,w)=>w===0?{q:q+u*t,u}:{q:q*Math.cos(w*t)+u*Math.sin(w*t)/w,u:-q*w*Math.sin(w*t)+u*Math.cos(w*t)};
+ const plus=motion(qp0,up0,wp),minus=motion(qm0,um0,wm);
+ const x1=plus.q+minus.q,x2=plus.q-minus.q,v1=plus.u+minus.u,v2=plus.u-minus.u;
+ const force1=-p.wallStiffness*x1-p.coupling*(x1-x2),force2=-p.wallStiffness*x2-p.coupling*(x2-x1);
+ const kinetic=p.mass*(v1*v1+v2*v2)/2,wallPotential=p.wallStiffness*(x1*x1+x2*x2)/2,couplingPotential=p.coupling*(x1-x2)**2/2;
+ const ePlus=p.mass*plus.u**2+p.wallStiffness*plus.q**2,eMinus=p.mass*minus.u**2+(p.wallStiffness+2*p.coupling)*minus.q**2;
+ return {t,x1,x2,v1,v2,force1,force2,a1:force1/p.mass,a2:force2/p.mass,qPlus:plus.q,qMinus:minus.q,uPlus:plus.u,uMinus:minus.u,omega:{plus:wp,minus:wm},energies:{kinetic,wallPotential,couplingPotential,total:kinetic+wallPotential+couplingPotential,plus:ePlus,minus:eMinus}};
+}
+const near=(a,e,label,tol=2e-10)=>{assert.ok(Number.isFinite(a),label+' finite');assert.ok(Math.abs(a-e)<=tol*Math.max(1,Math.abs(e)),label+': '+a+' vs '+e);};
+export function checkObservation(raw,p,t){
+ assert.equal(raw.format,'recallweave-normal-modes-observation/1');
+ assert.deepEqual(raw.parameters,p);
+ near(raw.inspectionTime,t,'inspection time');near(raw.state.t,t,'state time');
+ const wanted=analytic(p,t),initial=analytic(p,0);
+ for(const mode of ['plus','minus']){near(raw.omega[mode],wanted.omega[mode],'omega '+mode);near(raw.initialEnergies[mode],initial.energies[mode],'initial energy '+mode);}
+ near(raw.initialEnergies.total,initial.energies.total,'initial total energy');
+ for(const k of ['qPlus','qMinus','uPlus','uMinus'])near(raw.initialModes[k],initial[k],'initial '+k);
+ const checkState=(actual,expected,label)=>{
+  for(const k of ['t','x1','x2','v1','v2','a1','a2','force1','force2','qPlus','qMinus','uPlus','uMinus'])near(actual[k],expected[k],label+' '+k);
+  for(const k of ['kinetic','wallPotential','couplingPotential','total','plus','minus'])near(actual.energies[k],expected.energies[k],label+' energy '+k);
+  near(actual.energies.drift,expected.energies.total-initial.energies.total,label+' energy drift');
+ };
+ checkState(raw.state,wanted,'inspection');
+ assert.equal(raw.trajectory.length,raw.sampling.points);
+ assert.equal(raw.sampling.points,raw.sampling.intervals+1);
+ assert.equal(raw.sampling.start,0);assert.equal(raw.sampling.end,p.duration);
+ const indices=[0,Math.floor((raw.trajectory.length-1)/2),raw.trajectory.length-1];
+ for(const i of indices)checkState(raw.trajectory[i],analytic(p,raw.trajectory[i].t),'trajectory '+i);
+ near(raw.trajectory[0].t,0,'trajectory start');
+ near(raw.trajectory.at(-1).t,p.duration,'trajectory end');
+ return {inspectionTime:t,parameters:p,omega:wanted.omega,expectedState:wanted,trajectoryPoints:raw.trajectory.length,independentTrajectoryIndices:indices};
+}
+export async function receiveLab({b,lab,deck,guideBytes,report,download,capture,geometry,passed}){
+ const fields=['mass','wallStiffness','coupling','x1','x2','v1','v2','duration'];
+ const parameters=()=>b.evaluate(names=>Object.fromEntries(names.map(n=>[n,Number(document.querySelector('#'+n).value)])),fields);
+ const snapshot=()=>b.evaluate(()=>({time:document.querySelector('#state-time').textContent,x1:document.querySelector('#state-x1').textContent,x2:document.querySelector('#state-x2').textContent,v1:document.querySelector('#state-v1').textContent,v2:document.querySelector('#state-v2').textContent,omegaPlus:document.querySelector('#omega-plus').textContent,omegaMinus:document.querySelector('#omega-minus').textContent}));
+ const visibleNumber=s=>Number.parseFloat(s.replace(/−/g,'-'));
+ const checkVisible=async(p,t)=>{
+  const state=await snapshot(),wanted=analytic(p,t);
+  for(const k of ['x1','x2','v1','v2'])near(visibleNumber(state[k]),wanted[k],'visible '+k,6e-8);
+  near(visibleNumber(state.time),t,'visible time',6e-8);
+  near(visibleNumber(state.omegaPlus),wanted.omega.plus,'visible omega plus',6e-8);
+  near(visibleNumber(state.omegaMinus),wanted.omega.minus,'visible omega minus',6e-8);
+  return state;
+ };
+ const observation=async(name,p,t)=>{
+  const file=await download('#download-observation',name);
+  const raw=JSON.parse(file.bytes);
+  const result=checkObservation(raw,p,t);
+  const visible=await checkVisible(p,t);
+  report.observations.push({path:file.path,sha256:file.sha256,...result,visible});
+  return raw;
+ };
+ const setTime=async t=>{await b.fill('#time-input',String(t));await b.activate('#set-time');await waitFor(()=>b.evaluate(()=>!document.querySelector('#download-observation').disabled),'inspection time committed');};
+ const draftSnapshot=()=>b.evaluate(()=>({state:document.querySelector('#state-table').textContent,energy:document.querySelector('#energy-table').textContent,modes:document.querySelector('#mode-summary').textContent}));
+ const rejectDownload=async label=>{
+  assert.equal(await b.evaluate(()=>document.querySelector('#download-observation').disabled),true,label+' disables export');
+  const prior=b.downloads.size;
+  await b.evaluate(()=>document.activeElement?.blur());
+  await b.activate('#download-observation');
+  await pause(400);
+  assert.equal(b.downloads.size,prior,label+' cannot initiate a browser download');
+ };
+ const surface=await b.open(pathToFileURL(lab).href,{width:1280,height:1000,downloadPath:report.downloadStaging,offline:true});
+ report.surfaces.push({name:'normal modes offline desktop',...surface});
+ await waitFor(()=>b.evaluate(()=>!!document.querySelector('#normal-modes-form')&&!document.querySelector('#download-observation').disabled),'offline lab usable');
+ assert.ok((await b.evaluate(()=>document.body.textContent)).toLowerCase().includes('normal modes'));
+ const presets=await b.evaluate(()=>[...document.querySelectorAll('[data-preset]')].map(n=>n.dataset.preset));
+ assert.deepEqual(new Set(presets),new Set(['in-phase','opposite','localized','rest','uncoupled']));
+ await geometry('lab desktop',['#normal-modes-form','#time-scrubber','#apparatus-svg','#physical-trace-svg','#modal-trace-svg']);
+ await capture('lab-desktop.png');
+ passed('NM-B01','standalone lab loads offline and offers all five presets');
+ for(const [name,mode,sign] of [['in-phase','plus',1],['opposite','minus',-1]]){
+  await b.activate('[data-preset="'+name+'"]');
+  const p=await parameters();
+  near(p.x2,sign*p.x1,name+' displacement preset');near(p.v2,sign*p.v1,name+' velocity preset');
+  await observation(name+'-initial.json',p,0);
+  const quarter=Math.PI/(2*analytic(p,0).omega[mode]);
+  assert.ok(quarter<=p.duration,'Quarter period within experiment');
+  await setTime(quarter);
+  const raw=await observation(name+'-quarter-period.json',p,quarter);
+  near(raw.state.x2,sign*raw.state.x1,name+' displacement symmetry');
+  near(raw.state.v2,sign*raw.state.v1,name+' velocity symmetry');
+  await capture('lab-'+name+'-quarter.png');
+ }
+ passed('NM-B02','both pure modes agree with an independent analytic solution at zero and an exact quarter period');
+ const p=await parameters();
+ await b.evaluate(()=>document.querySelector('#time-scrubber').focus());
+ await b.key('Home');
+ assert.equal(await b.evaluate(()=>document.activeElement.id),'time-scrubber');
+ await checkVisible(p,0);
+ await b.key('ArrowRight');
+ const reached=await b.evaluate(()=>Number(document.querySelector('#time-scrubber').value));
+ assert.ok(reached>0&&reached<=p.duration,'Arrow key advances time');
+ await checkVisible(p,reached);
+ assert.equal(await b.evaluate(()=>document.activeElement.id),'time-scrubber');
+ await b.key('End');
+ assert.equal(await b.evaluate(()=>document.activeElement.id),'time-scrubber');
+ near(await b.evaluate(()=>Number(document.querySelector('#time-scrubber').value)),p.duration,'Keyboard End reaches duration');
+ const {root:domRoot}=await b.command('DOM.getDocument');
+ const {nodeId:rangeNodeId}=await b.command('DOM.querySelector',{nodeId:domRoot.nodeId,selector:'#time-scrubber'});
+ const ax=await b.command('Accessibility.getPartialAXTree',{nodeId:rangeNodeId,fetchRelatives:false});
+ const rangeAX=ax.nodes.find(n=>n.role?.value==='slider');
+ assert.ok(rangeAX?.name?.value?.trim(),'Time range has an accessible name and slider role');
+ report.timeAccessibility={role:rangeAX.role.value,name:rangeAX.name.value,value:rangeAX.value?.value};
+ await observation('keyboard-time-end.json',p,p.duration);
+ passed('NM-B03','Home, ArrowRight and End update physical values while range input retains focus',{arrowTime:reached,end:p.duration});
+ const before=await draftSnapshot();
+ const changedMass=p.mass===2?3:2;
+ await b.fill('#mass',String(changedMass));
+ assert.ok(/appl|pending/i.test(await b.evaluate(()=>document.querySelector('#experiment-status').textContent)),'Pending edit has actionable status');
+ assert.deepEqual(await draftSnapshot(),before,'Pending edits retain applied rendered values');
+ await rejectDownload('Valid pending draft');
+ await b.activate('#apply-experiment');
+ const applied={...p,mass:changedMass};
+ await observation('changed-mass-applied.json',applied,0);
+ passed('NM-B04','valid pending edit cannot export; Apply changes visible and exported physics',{previousMass:p.mass,appliedMass:changedMass});
+ const appliedSnapshot=await draftSnapshot();
+ const invalid=[];
+ for(const value of ['','-1','1e309']){
+  await b.fill('#mass',value);await b.activate('#apply-experiment');
+  const state=await b.evaluate(()=>({value:document.querySelector('#mass').value,error:document.querySelector('#input-error').textContent,errorHidden:document.querySelector('#input-error').hidden,status:document.querySelector('#experiment-status').textContent}));
+  assert.ok(state.error.trim(),'Visible validation text for '+JSON.stringify(value));
+  assert.equal(state.errorHidden,false,'Error visible');
+  assert.deepEqual(await draftSnapshot(),appliedSnapshot,'Invalid edit retains applied result');
+  await rejectDownload('Invalid draft '+JSON.stringify(value));invalid.push({entered:value,...state});
+ }
+ await b.fill('#mass',String(applied.mass));
+ assert.equal(await b.evaluate(()=>document.querySelector('#download-observation').disabled),true,'Reverted field still explicitly requires Apply');
+ await b.activate('#apply-experiment');
+ await observation('invalid-edit-recovered.json',applied,0);
+ passed('NM-B05','blank, negative and nonfinite drafts are rejected and a valid Apply recovers',{invalid});
+ const mobile=await b.open(pathToFileURL(lab).href,{width:390,height:844,downloadPath:report.downloadStaging,offline:true});
+ report.surfaces.push({name:'normal modes offline 390px',...mobile});
+ await waitFor(()=>b.evaluate(()=>!!document.querySelector('#normal-modes-form')&&!document.querySelector('#download-observation').disabled),'narrow lab');
+ const mobileParameters=await parameters();
+ await geometry('lab 390',['#normal-modes-form','#time-scrubber','#time-input','#set-time','#apparatus-svg','#physical-trace-svg','#modal-trace-svg','.table-wrap','#download-observation','#download-course','#download-guide']);
+ await capture('lab-390.png');
+ await b.fill('#mass','-1');await b.activate('#apply-experiment');
+ await geometry('lab invalid 390',['#input-error','#experiment-status','#mass','#apply-experiment','#download-course','#download-guide']);
+ await capture('lab-invalid-390.png');
+ await b.command('Emulation.setDeviceMetricsOverride',{width:360,height:800,deviceScaleFactor:1,mobile:false});
+ report.surfaces.push({name:'normal modes offline 360px resize',...mobile,width:360,height:800});
+ await geometry('lab invalid 360',['#normal-modes-form','#time-scrubber','#time-input','#set-time','#apparatus-svg','#physical-trace-svg','#modal-trace-svg','.table-wrap','#input-error','#experiment-status','#mass','#apply-experiment','#download-observation','#download-course','#download-guide']);
+ await capture('lab-invalid-360.png');
+ passed('NM-B07','390px and 360px lab controls fit without document overflow; wider tables remain inside scrollable cards');
+ const course=await download('#download-course','normal-modes-course.json');
+ assert.deepEqual(JSON.parse(course.bytes),deck,'Downloaded canonical course');
+ assert.equal(course.sha256,report.course.canonicalSha256,'Exact canonical course download bytes');
+ report.course.downloadedSha256=course.sha256;report.course.downloadedByteExact=true;
+ const guide=await download('#download-guide','normal-modes-guide.md');
+ assert.deepEqual(guide.bytes,guideBytes,'Downloaded canonical guide bytes');
+ passed('NM-B06','explicit keyboard actions produce observation, canonical course and guide as real browser downloads',{courseSha256:course.sha256,guideSha256:guide.sha256});
+ const tiny={...mobileParameters,x1:1e-320,x2:0,v1:0,v2:0};
+ for(const name of ['mass','x1','x2','v1','v2'])await b.fill('#'+name,String(tiny[name]));
+ await b.activate('#apply-experiment');
+ const tinyObservation=await observation('subnormal-apparatus.json',tiny,0);
+ assert.equal(tinyObservation.parameters.x1,1e-320,'Subnormal parameter is actually applied');
+ const apparatus=await b.evaluate(()=>{const nodes=[...document.querySelector('#apparatus-svg').querySelectorAll('*')];return {elements:nodes.length,invalid:nodes.flatMap(n=>[...n.attributes].filter(a=>/NaN|Infinity/.test(a.value)).map(a=>({element:n.tagName,attribute:a.name,value:a.value})))}});
+ assert.ok(apparatus.elements>0,'Apparatus has rendered elements');
+ assert.deepEqual(apparatus.invalid,[],'Subnormal apparatus coordinates stay finite');
+ await geometry('lab subnormal 360',['#apparatus-svg','.table-wrap','#time-scrubber','#download-observation']);
+ await capture('lab-subnormal-360.png');
+ passed('NM-B10','accepted subnormal displacement produces a finite apparatus and a real observation',{appliedX1:tiny.x1,apparatus});
+ return {coursePath:course.path};
+}
