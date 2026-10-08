@@ -1,0 +1,14 @@
+diff --git a/tools/check_finite_convolution_browser.mjs b/tools/check_finite_convolution_browser.mjs
+index f4c6e89..890262b 100644
+--- a/tools/check_finite_convolution_browser.mjs
++++ b/tools/check_finite_convolution_browser.mjs
+@@ -94,6 +94,9 @@ async function navigate(url, ready, width = 1280, height = 1000) {
+ }
+ async function capture(name, selector) {
+   if (selector) await evaluate('document.querySelector(' + quote(selector) + ').scrollIntoView({block:"start"})');
++  await command('Page.bringToFront');
++  await evaluate('new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))');
++  await sleep(150);
+   const { data } = await command('Page.captureScreenshot', { format: 'png', captureBeyondViewport: false });
+   const bytes = Buffer.from(data, 'base64');
+   await writeFile(join(output, name), bytes);

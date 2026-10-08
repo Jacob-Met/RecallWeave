@@ -1,0 +1,123 @@
+✔ the original twelve-question course satisfies the current public deck contract (4.076709ms)
+✔ course answer identities agree with separately specified arithmetic and conventions (0.595541ms)
+✔ the actual adaptive, review, retry, and study-note consumers receive all course content (15.207333ms)
+✔ the direct-file lab is an exact build with the original downloadable course bytes (2.603125ms)
+✔ full signed convolution retains cancellation and the final product (2.444ms)
+✖ each selected index exposes reversed kernel indices and outside-list zeros (2.511959ms)
+✔ convolution is distinguished from the declared zero-lag correlation (0.138166ms)
+✔ impulses preserve origin, delays, and the declared full zero padding (0.132458ms)
+✔ averaging and differencing include both finite boundaries (0.069041ms)
+✔ fixed-kernel superposition and operand exchange hold on distinct signed cases (0.123375ms)
+✔ four-place inputs preserve eight-place signed products and exact cancellation (0.526166ms)
+✔ the maximum admitted lists retain 47 finite outputs and the exact peak (0.470125ms)
+✔ text admission keeps literal values and refuses ambiguous or out-of-domain input (1.073209ms)
+✖ direct numerical callers cannot admit holes, non-numbers, extra precision, or invalid indices (0.534083ms)
+✖ a recorded calculation owns immutable inputs, outputs, and per-index terms (1.29275ms)
+ℹ tests 15
+ℹ suites 0
+ℹ pass 12
+ℹ fail 3
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 212.693958
+
+✖ failing tests:
+
+test at tests/finite-convolution.test.mjs:13:1
+✖ each selected index exposes reversed kernel indices and outside-list zeros (2.511959ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  ... Skipped lines
+  
+    [
+      [
+        0,
+        2,
+        0,
+  ...
+        0,
+  +     -0,
+  -     0,
+        false
+      ],
+      [
+        2,
+        3,
+  
+      at TestContext.<anonymous> (file:///Users/me/Developer/recallweave-convolution-347f3417824d/tests/finite-convolution.test.mjs:16:10)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ [ 0, 2, 0, 1, 2, true ], [ 1, -1, -1, 0, -0, false ], [ 2, 3, -2, 0, 0, false ] ],
+    expected: [ [ 0, 2, 0, 1, 2, true ], [ 1, -1, -1, 0, 0, false ], [ 2, 3, -2, 0, 0, false ] ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at tests/finite-convolution.test.mjs:87:1
+✖ direct numerical callers cannot admit holes, non-numbers, extra precision, or invalid indices (0.534083ms)
+  AssertionError [ERR_ASSERTION]: Missing expected exception (RangeError).
+      at TestContext.<anonymous> (file:///Users/me/Developer/recallweave-convolution-347f3417824d/tests/finite-convolution.test.mjs:89:12)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    operator: 'throws',
+    diff: 'simple'
+  }
+
+test at tests/finite-convolution.test.mjs:96:1
+✖ a recorded calculation owns immutable inputs, outputs, and per-index terms (1.29275ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  ... Skipped lines
+  
+    {
+      convention: 'y[n] = sum_k x[k] h[n-k]; each list begins at index 0 and is zero elsewhere; full linear output',
+      format: 'recallweave-finite-convolution/1',
+      h: [
+        1,
+  ...
+              kernelIndex: -1,
+  +           product: 0
+  -           product: -0
+            },
+            {
+              inKernel: false,
+              input: 3,
+              k: 2,
+  ...
+              kernelIndex: 2,
+  +           product: 0
+  -           product: -0
+            },
+            {
+              inKernel: true,
+              input: 3,
+              k: 2,
+  
+      at TestContext.<anonymous> (file:///Users/me/Developer/recallweave-convolution-347f3417824d/tests/finite-convolution.test.mjs:107:10)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: { format: 'recallweave-finite-convolution/1', convention: 'y[n] = sum_k x[k] h[n-k]; each list begins at index 0 and is zero elsewhere; full linear output', x: [ 2, -1, 3 ], h: [ 1, 2 ], y: [ 2, 3, 1, 6 ], steps: [ [Object], [Object], [Object], [Object] ] },
+    expected: { format: 'recallweave-finite-convolution/1', convention: 'y[n] = sum_k x[k] h[n-k]; each list begins at index 0 and is zero elsewhere; full linear output', x: [ 2, -1, 3 ], h: [ 1, 2 ], y: [ 2, 3, 1, 6 ], steps: [ [Object], [Object], [Object], [Object] ] },
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
