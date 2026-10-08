@@ -80,6 +80,14 @@ The file also includes the latest question reflections and application response,
 
 The download works offline in both the modular app and `demo.html`. It saves a UTF-8 text file through the browser's normal download flow. It does not upload the session or restore it after a refresh. Model estimates remain labeled as model state rather than grades, and practice never replaces the original answers.
 
+### Save and resume an unfinished lesson
+
+Open **Save or resume an unfinished lesson** to download your current question or feedback, first answers, model estimates, and answer display order. You can save immediately after starting, before answering anything. Saving leaves the lesson open.
+
+On another visit, open the same course and choose the saved lesson file. For a local course, first choose its deck file and select **Start this deck**. Previewing a saved lesson does not load course content or change your current answers; **Resume this lesson** explicitly replaces the current lesson and practice progress. A resumed feedback screen keeps the original answer and estimate, then continues with the next unanswered question. Starting any deck, restarting the current course, answering, or moving to the next question cancels an outdated pending restore.
+
+The bounded JSON file includes course content and a consistent first-answer history. It is not proof of identity, effort, or learning. A changed course or learning model is refused. After the last first answer, use the completed learning trace below, which also preserves practice answers.
+
 ### Save and restore a learning trace
 
 After completing the first session, open **Keep or restore a learning trace** and choose **Download trace (.json)**. This separate file keeps the original answer order, canonical answer choices, full precision first-session model estimates, and any recorded practice progress.
