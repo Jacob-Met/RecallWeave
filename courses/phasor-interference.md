@@ -51,7 +51,7 @@ $$
 
 A common rotation multiplies the whole sum by $e^{i\phi}$, preserving its magnitude. Relative phase controls whether the cross term raises or lowers the combined amplitude. Same-frequency phasor addition and its in-phase and opposite-phase limits also appear in UNSW's teaching material; that resource uses a sine projection, while this lesson consistently uses cosine. [3]
 
-Our four original preset examples make the rule concrete:
+The four presets make the rule concrete:
 
 | Example | Constant phasors at zero common phase | Combined peak | Initial real value | What to notice |
 |---|---|---:|---:|---|
