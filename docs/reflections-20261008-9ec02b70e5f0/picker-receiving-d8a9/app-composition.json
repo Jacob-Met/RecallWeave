@@ -1,0 +1,60 @@
+{
+  "inverse_recovers_complete_published_app": true,
+  "changes": [
+    {
+      "label": "reflection import",
+      "old": "import { orderOptions } from './answer-order.mjs';",
+      "new": "import { APPLICATION_PROMPT, createReflections, itemReflection, updateReflection, updateApplicationReflection } from './reflections.mjs';\nimport { orderOptions } from './answer-order.mjs';"
+    },
+    {
+      "label": "initial notebook",
+      "old": "let deck = bundledDeck;",
+      "new": "let deck = bundledDeck;\nlet reflections = createReflections(deck.items);"
+    },
+    {
+      "label": "fresh notebook on native session reset",
+      "old": "  deck = nextDeck;\n",
+      "new": "  deck = nextDeck;\n  reflections = createReflections(deck.items);\n"
+    },
+    {
+      "label": "shared native application prompt",
+      "old": "function renderResults() {",
+      "new": "function applicationPrompt() {\n  return deck === bundledDeck\n    ? APPLICATION_PROMPT\n    : 'Choose one connection from this deck and explain how it relates to another idea in your own words.';\n}\n\nfunction renderResults() {"
+    },
+    {
+      "label": "render current application prompt",
+      "old": "  const reflection = deck === bundledDeck\n    ? 'Trace energy from sunlight to a cell doing work. Where does the form of energy change, and what molecule transfers it to cellular processes?'\n    : 'Choose one connection from this deck and explain how it relates to another idea in your own words.';",
+      "new": "  const reflection = applicationPrompt();"
+    },
+    {
+      "label": "application reflection field",
+      "old": "<div class=\"reflection\"><strong>Apply it:</strong> ${reflection}</div>",
+      "new": "<section class=\"reflection reflection-field\" aria-labelledby=\"application-label\"><label id=\"application-label\" for=\"application-reflection\">Apply it in your own words</label><p id=\"application-prompt\">${escapeHtml(reflection)}</p><textarea id=\"application-reflection\" rows=\"4\" aria-describedby=\"application-prompt application-hint\"></textarea><p id=\"application-hint\" class=\"reflection-hint\">Your writing is not scored. Download study notes to keep it. Starting a fresh session or another deck clears this writing.</p></section>"
+    },
+    {
+      "label": "native reflection input listeners",
+      "old": "  const resetButton = root.querySelector('#reset-button');",
+      "new": "  root.querySelectorAll('[data-reflection-item]').forEach(field => {\n    field.value = itemReflection(reflections, field.dataset.reflectionItem);\n    field.addEventListener('input', () => {\n      reflections = updateReflection(reflections, field.dataset.reflectionItem, field.value);\n    });\n  });\n  const application = root.querySelector('#application-reflection');\n  application.value = reflections.application;\n  application.addEventListener('input', () => {\n    reflections = updateApplicationReflection(reflections, application.value);\n  });\n  const resetButton = root.querySelector('#reset-button');"
+    },
+    {
+      "label": "review help",
+      "old": "Open a question to see your first answer, the explanation, and an idea to apply.",
+      "new": "Open a question to see your first answer and explanation, then write how you would apply the idea."
+    },
+    {
+      "label": "notes help",
+      "old": "Save your questions, first answers, explanations, and any practice answers as a text file.",
+      "new": "Save your questions, first answers, explanations, reflections, and any practice answers as a text file."
+    },
+    {
+      "label": "export exact notebook and displayed prompt",
+      "old": "createStudyNotes({deck, review, mastery, practice, conceptLabel})",
+      "new": "createStudyNotes({deck, review, mastery, practice, reflections, conceptLabel, applicationPrompt: applicationPrompt()})"
+    },
+    {
+      "label": "question reflection fields",
+      "old": "</p>${practiceAnswer}</div></details>",
+      "new": "</p><div class=\"reflection-field\"><label for=\"reflection-${index}\">Your explanation</label><p id=\"reflection-hint-${index}\" class=\"reflection-hint\">Connect the idea in your own words. These notes are not scored.</p><textarea id=\"reflection-${index}\" rows=\"3\" data-reflection-item=\"${escapeHtml(item.id)}\" aria-describedby=\"reflection-hint-${index}\"></textarea></div>${practiceAnswer}</div></details>"
+    }
+  ]
+}

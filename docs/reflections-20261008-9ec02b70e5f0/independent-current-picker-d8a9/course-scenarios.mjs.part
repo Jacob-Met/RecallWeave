@@ -1,0 +1,162 @@
+  // New landed-course coupling starts only after all six historical scenarios above.
+  report.courseInputs=[];
+  report.courseRecords={};
+  report.courseNotebooks={};
+  const importedCourse={
+    format:'recallweave-deck/1',title:'Observation and decisions — reused IDs, independent content',
+    attribution:'Independent native receiver fixture: original three-question workshop.',
+    license:'Test fixture content only; no provider or learning-benefit claim.',
+    concepts:['observation','decision','communication'],
+    items:[
+      {id:deck.items[2].id,concept:'observation',prerequisites:[],prompt:'Which workshop sentence records an observation?',
+        options:['The meeting should be delayed.','The log records a start at 09:00.'],answer:1,
+        explanation:'The recorded start time is the observed event in this workshop.',transfer:'Separate an observed record from an interpretation.'},
+      {id:deck.items[0].id,concept:'decision',prerequisites:['observation'],prompt:'Which choice keeps this workshop decision traceable?',
+        options:['Keep only the conclusion.','Hide the record.','Change the original event.','Delete the reason.','State the record and the reason for the decision.'],answer:4,
+        explanation:'A traceable choice keeps its observation and reason visible.',transfer:'Explain how a record supports one choice.'},
+      {id:deck.items[1].id,concept:'communication',prerequisites:['decision'],prompt:'Which message distinguishes this workshop record from its interpretation?',
+        options:['Treat an interpretation as the record.','Send only the final action.','Name the observation, interpretation, and chosen action.'],answer:2,
+        explanation:'The three parts remain distinct in the message.',transfer:'Write one example containing each part.'}
+    ]
+  };
+  assert.deepEqual(importedCourse.items.map(item=>item.id).sort(),deck.items.slice(0,3).map(item=>item.id).sort());
+  const importedPath=join(output,'reused-id-local-course.json');
+  const importedBytes=Buffer.from(JSON.stringify(importedCourse,null,2)+'\n');
+  const invalidPath=join(output,'malformed-local-course.json');
+  const invalidBytes=Buffer.from('{"title": "invalid local course",');
+  await writeFile(importedPath,importedBytes);
+  await writeFile(invalidPath,invalidBytes);
+  report.fixtures.push({name:'reused-id-local-course.json',sha256:digest(importedBytes),bytes:importedBytes.length,
+    sameBundledItemIds:importedCourse.items.map(item=>item.id),changedContent:true,privateReceivingFixture:true});
+  report.fixtures.push({name:'malformed-local-course.json',sha256:digest(invalidBytes),bytes:invalidBytes.length,privateNegativeFixture:true});
+
+  const preImportNotes=await fillNotes(target,'bundled-before-course-import');
+  const beforeCourseText=await download(target,'picker-bundled-before-preview.txt',freshRecord,preImportNotes,'No missed connections in the first session.');
+  const refusedCourse=await selectCourse(target,invalidPath);
+  assert.ok(refusedCourse.status.includes('not valid JSON') && refusedCourse.status.includes('current session is unchanged'));
+  assert.deepEqual(refusedCourse.fileNames,[]);
+  assert.deepEqual(await firstState(target),freshRecord.state);
+  assert.deepEqual(await writing(target),preImportNotes);
+  const afterInvalidText=await download(target,'picker-bundled-after-refusal.txt',freshRecord,preImportNotes,'No missed connections in the first session.');
+  assert.equal(withoutSaveTime(afterInvalidText),withoutSaveTime(beforeCourseText));
+  await selectCourse(target,importedPath,importedCourse.title);
+  assert.deepEqual(await firstState(target),freshRecord.state);
+  assert.deepEqual(await writing(target),preImportNotes);
+  preImportNotes.notes[deck.items[0].id]='Late bundled note while imported deck preview is pending.';
+  preImportNotes.application='Late bundled Apply-it entry before Cancel preview.';
+  await editNote(target,deck.items[0].id,preImportNotes.notes[deck.items[0].id]);
+  await replaceWriting(target,'#application-reflection',preImportNotes.application);
+  await activate(target,'#cancel-deck');
+  assert.equal((await pickerView(target)).hidden,true);
+  assert.deepEqual((await pickerView(target)).fileNames,[]);
+  assert.deepEqual(await firstState(target),freshRecord.state);
+  assert.deepEqual(await writing(target),preImportNotes);
+  await download(target,'picker-bundled-after-cancel.txt',freshRecord,preImportNotes,'No missed connections in the first session.');
+  report.courseNotebooks.bundledBeforeStart=structuredClone(preImportNotes);
+  passed('malformed course input and canceled real deck preview preserve first answers and actual notes, including edits made after preview');
+
+  await selectTrace(target,sourceTrace.path,'preview');
+  await selectCourse(target,importedPath,importedCourse.title);
+  assert.equal((await traceView(target)).hidden,false,'Staging a course alone cannot discard a valid current-course answer preview');
+  report.courseRecords.activation=await startCourse(target,importedCourse);
+  const staleTrace=await traceView(target);
+  assert.equal(staleTrace.hidden,true);
+  assert.deepEqual(staleTrace.fileNames,[]);
+  assert.ok(staleTrace.status.startsWith('Your lesson changed.'));
+  assert.equal(await evaluate(target,`document.querySelector('#lesson-description').textContent`),importedCourse.title);
+  const firstImportedPrompt=await evaluate(target,`document.querySelector('.question-card h2').textContent`);
+  await selectTrace(target,sourceTrace.path,'wrong-course-refusal');
+  assert.equal(await evaluate(target,`document.querySelector('.question-card h2').textContent`),firstImportedPrompt);
+  assert.equal(await evaluate(target,`document.querySelector('#step-count').textContent`),'0 / 3');
+  const importedRecord=await completeCourse(target,importedCourse,(_item,ordinal)=>ordinal!==1);
+  assert.equal(importedRecord.trace.filter(row=>row.correct).length,2);
+  const blankImported=emptyCourseWriting(importedCourse);
+  assert.deepEqual(await writing(target),blankImported,'Starting a course clears all reused-ID notes and the Apply-it entry');
+  const startedText=await downloadCourseNotes(target,'picker-imported-after-start.txt',importedCourse,importedRecord,blankImported,
+    'Not started. 1 missed connection is available for practice.',importedPrompt);
+  assert.ok(!startedText.includes('bundled-before-course-import') && !startedText.includes('Late bundled'));
+  report.courseRecords.importedFirst=structuredClone(importedRecord);
+  passed('explicit imported-course Start clears reused-ID writing and answers, invalidates the old trace preview, and exports its own canonical content and Apply-it prompt');
+
+  const importedNotes=await fillCourseWriting(target,importedCourse,'imported-course-notebook');
+  const firstImportedState=await firstState(target);
+  await activate(target,'#practice-button');
+  const missedImported=importedRecord.trace.find(row=>!row.correct);
+  const retryItem=importedCourse.items.find(item=>item.id===missedImported.id);
+  assert.equal(await evaluate(target,`document.querySelector('.practice-card h2').textContent`),retryItem.prompt);
+  await chooseText(target,retryItem,retryItem.answer,true);
+  importedRecord.retries.push({id:retryItem.id,choice:retryItem.answer});
+  await activate(target,'#practice-next');
+  assert.deepEqual(await firstState(target),firstImportedState);
+  assert.deepEqual(await writing(target),importedNotes);
+  const importedText=await downloadCourseNotes(target,'picker-imported-after-practice.txt',importedCourse,importedRecord,importedNotes,
+    'Complete: 1 of 1 practice answers recorded; 1 correct on retry.',importedPrompt);
+  const importedTrace=await downloadCourseTrace(target,'picker-imported-trace.json',importedCourse,importedRecord);
+  await activate(target,'#use-bundled-deck');
+  assert.equal((await pickerView(target)).title,deck.title);
+  assert.deepEqual(await firstState(target),firstImportedState);
+  assert.deepEqual(await writing(target),importedNotes);
+  await activate(target,'#cancel-deck');
+  const afterBundledCancel=await downloadCourseNotes(target,'picker-imported-after-bundled-cancel.txt',importedCourse,importedRecord,importedNotes,
+    'Complete: 1 of 1 practice answers recorded; 1 correct on retry.',importedPrompt);
+  assert.equal(withoutSaveTime(afterBundledCancel),withoutSaveTime(importedText));
+  report.courseRecords.importedAfterPractice=structuredClone(importedRecord);
+  report.courseNotebooks.importedBeforeReset=structuredClone(importedNotes);
+  passed('imported canonical answer identities, separate practice and notebook survive canceled bundled return; actual notes and answer-only trace use the imported course');
+
+  await selectTrace(target,importedTrace.path,'preview');
+  const importedUrl=await evaluate(target,'location.href');
+  await activate(target,'#reset-button');
+  await waitFor(()=>evaluate(target,`!!document.querySelector('#start-button')`),'same imported deck fresh session');
+  assert.equal(await evaluate(target,'location.href'),importedUrl);
+  assert.equal(await evaluate(target,`document.querySelector('#lesson-description').textContent`),importedCourse.title);
+  assert.equal(await evaluate(target,`document.querySelector('#step-count').textContent`),'0 / 3');
+  assert.equal(await evaluate(target,`document.querySelector('.simulation-launch').hidden`),true);
+  assert.equal((await traceView(target)).hidden,true);
+  assert.deepEqual((await traceView(target)).fileNames,[]);
+  await activate(target,'#start-button');
+  const resetImportedRecord=await completeCourse(target,importedCourse,()=>false);
+  assert.equal(resetImportedRecord.trace.filter(row=>row.correct).length,0);
+  assert.deepEqual(await writing(target),blankImported);
+  const resetImportedText=await downloadCourseNotes(target,'picker-imported-after-fresh-reset.txt',importedCourse,resetImportedRecord,blankImported,
+    'Not started. 3 missed connections are available for practice.',importedPrompt);
+  assert.ok(!resetImportedText.includes('imported-course-notebook/'));
+  await selectTrace(target,importedTrace.path,'preview');
+  const afterResetNotes=structuredClone(blankImported);
+  afterResetNotes.notes[importedCourse.items[1].id]='New-session note entered after importing the saved answer preview.';
+  afterResetNotes.application='New-session imported Apply-it reflection after preview.';
+  await editNote(target,importedCourse.items[1].id,afterResetNotes.notes[importedCourse.items[1].id]);
+  await replaceWriting(target,'#application-reflection',afterResetNotes.application);
+  await activate(target,'#restore-trace-confirm');
+  await waitFor(async()=>(await traceView(target)).status.startsWith('Trace restored.'),'native imported-course trace restore');
+  assert.deepEqual(await firstState(target),importedRecord.state);
+  assert.deepEqual(await writing(target),afterResetNotes);
+  const resetRestoredText=await downloadCourseNotes(target,'picker-imported-restored-after-reset.txt',importedCourse,importedRecord,afterResetNotes,
+    'Complete: 1 of 1 practice answers recorded; 1 correct on retry.',importedPrompt);
+  assert.ok(!resetRestoredText.includes('imported-course-notebook/'));
+  const restoredImportedTrace=await downloadCourseTrace(target,'picker-imported-restored-trace.json',importedCourse,importedRecord);
+  for(const key of ['deck','model','firstAnswers','mastery','practice']) assert.deepEqual(restoredImportedTrace.value[key],importedTrace.value[key]);
+  report.courseRecords.importedAfterFreshReset=resetImportedRecord;
+  report.courseNotebooks.importedAfterResetRestore=structuredClone(afterResetNotes);
+  passed('fresh session keeps the imported course but clears its notebook and practice; restoring its real saved trace preserves only the newly written destination reflections');
+
+  await activate(target,'#use-bundled-deck');
+  assert.equal((await pickerView(target)).title,deck.title);
+  assert.deepEqual(await writing(target),afterResetNotes);
+  await startCourse(target,deck);
+  const backToBundled=await completeCourse(target,deck,()=>true);
+  assert.deepEqual(await writing(target),emptyNotes);
+  assert.equal(await evaluate(target,`document.querySelector('#application-prompt').textContent`),bundledPrompt);
+  const bundledAgainText=await download(target,'picker-bundled-after-explicit-return.txt',backToBundled,emptyNotes,'No missed connections in the first session.');
+  assert.ok(bundledAgainText.includes(`\nPrompt: ${bundledPrompt}\n`));
+  assert.ok(!bundledAgainText.includes(importedPrompt) && !bundledAgainText.includes('imported-course-notebook/') && !bundledAgainText.includes('New-session imported'));
+  assert.deepEqual(await writing(sourcePage),sourceNotes);
+  assert.deepEqual(await firstState(sourcePage),sourceRecord.state);
+  assert.deepEqual(await readFile(sourceTrace.path),sourceTrace.bytes);
+  assert.deepEqual(await readFile(importedPath),importedBytes);
+  assert.deepEqual(await readFile(invalidPath),invalidBytes);
+  assert.deepEqual(await readFile(importedTrace.path),importedTrace.bytes);
+  assert.ok(target.requests.every(url=>url.startsWith('file:')),'Import, reset, restore and export must keep the standalone target offline');
+  report.courseRecords.backToBundled=backToBundled;
+  passed('explicit bundled Start clears imported writing even for reused IDs, restores the bundled prompt, and leaves the other tab and all selected files unchanged offline');
+

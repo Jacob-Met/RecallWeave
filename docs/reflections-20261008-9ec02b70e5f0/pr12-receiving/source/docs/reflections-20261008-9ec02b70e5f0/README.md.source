@@ -1,0 +1,156 @@
+# Learner reflections with the published answer-order contribution
+
+This is the receiving successor to the
+[original main qualification](original-main/README.md). It composes the
+reflection notebook with the exact published
+[answer-order PR #12](https://github.com/Jacob-Met/RecallWeave/pull/12), head
+`e68ac2f97fe89f74e7b39256db0778a4b98c6dad` on
+`work/answer-order-a3425ebf9874`. The common original main is
+`3e3217959bdf277ae5ef61a7afe68142e2626486`.
+
+## What the learner can do
+
+After completing the lesson, write and revise an explanation beside each
+question's existing transfer prompt, including questions answered correctly.
+The final Apply-it prompt has its own response field. Writing stays attached
+to canonical question IDs during review and practice navigation and is
+included in the actual study-notes download as unscored learner text. Clearing
+a field clears that note; a fresh local session clears the notebook through
+the existing reload. First answers, practice outcomes and model estimates
+remain separate from the writing.
+
+The change uses the existing native JavaScript modules and standalone builder.
+It adds no account, automatic storage, upload, model call, sync, trace format
+or course content. The application prompt retains the exact original bundled
+course wording. The imported-deck and completed-trace restore owners retain
+their separate receiving responsibilities, described below.
+
+## Exact composition
+
+The reflection module and exporter are byte-identical to their independently
+reviewed original-main source. The only shared merge resolutions keep both
+independent imports in `app.mjs` and include both modules in the existing
+single-file builder. The owner's answer-order helper, tests and browser
+drivers remain exact PR #12 bytes. Its `renderQuestion`, `submitAnswer` and
+`renderPracticeQuestion` functions are also preserved byte for byte.
+
+The owner keeps one per-question permutation for the session and uses original
+option indices for correctness and review. The reflection notebook uses the
+question ID, so changing option presentation does not change note association.
+The source deck, knowledge model and review/practice module retain their
+original bytes.
+
+| Product source | SHA-256 |
+|---|---|
+| `src/app.mjs` | `db3cd3d4ef7f45817cc29e1e40aa3a420586b80f6ca97ce81a32a9d2fe2090d0` |
+| `src/reflections.mjs` | `92354bccb48deb7c3455d4f9d0e922f7b8b5d45d3d7bbf1968d23ad2818fe330` |
+| `src/session-export.mjs` | `1f266a8503a23b52809417fba251225d1805e4d214b61e40dcdfbfca4bb35c13` |
+| `src/answer-order.mjs` | `2344ac31fadadce56d8a054f79057b47a84030b5822ef025d3ad2cafc73b2cef` |
+| `tools/make_demo.py` | `364977dd90ffe74d61263f733ce421a1ea47397a9ae17cec95c57af87d46b0cf` |
+| `demo.html` | `f3d2b45348ecddac494b0877023441443acbdc837db220af7c0834fc25248044` |
+
+`composition/pr12-source.json` records the exact retrieved owner blobs and the
+two shared merge resolutions. `composition/verification.json` records native
+source identity and the one test-driver change after the initial composition
+run. No product source changed during qualification.
+
+## Receiving results and retained failures
+
+- The composed native suite passes **29 tests, zero skips**: 19 original
+  tests, four answer-order tests and six reflection/actual-export tests.
+- The PR #12 owner's unchanged notes browser receiver passes **15 checkpoints**
+  and saves **six real text files**. Its seeded presentation controls retain
+  canonical answer text and the same per-question order during practice.
+- Rebuilding the demo from exact composed source in a separate directory
+  produces the same SHA-256 as the executed standalone file.
+- The original-main reflection source passed ten authored browser checkpoints
+  and an independent five-check, six-download receiver. Those results stay
+  attributed to their original source; they are not relabeled as this merge.
+- The composed product passes **five independent browser checkpoints** and
+  saves **six actual notes files**. Two simultaneous notebooks, completed
+  mixed-outcome practice, edits and clearing, reset isolation and the direct-open
+  demo with HTTP(S) blocked all pass. Every one of the eleven product source
+  pins matches before and after both independent attempts. See
+  [the independent PR #12 review](independent-pr12/README.md).
+
+Three authored composition attempts are retained under
+`composition/author-browser-failures/`. The first completed the native lesson,
+then timed out on a CDP keyboard command. The second stayed on the static
+welcome after keyboard Start and timed out before the first question. The
+third waited for the native initialization marker and foregrounded its own
+page; it completed the lesson, then timed out on a CDP evaluation. No product
+assertion or page exception explained those timeouts, and product source pins
+were unchanged. The shared filesystem was full during the later observations;
+that correlation is not a demonstrated cause. The test-driver readiness
+amendment did not close those author failures, so they are not reported as
+passing composition tests.
+
+The original driver is archived as
+`composition/before-browser-preconditions.mjs.source`; the current driver adds
+an end-of-initialization check and page focus before keyboard actions. The
+native application calls `setProgress` after binding its Start handler, and
+the resulting inline width distinguishes an initialized app from static HTML.
+The independent receiver also preserves its first static-welcome failure: zero
+checks and zero downloads. Its separately pinned successful successor adds only
+two lesson-start waits, with all five behavioral assertions unchanged. The
+exact patch, failed and successful runs, and source parity proof are under
+`independent-pr12/`. Browser profile, temporary directory and output moved to
+the reviewer's authorized private tmpfs for the successful run; product source
+was unchanged. This success does not erase the three authored timeouts.
+
+## Evidence custody and reproduction
+
+Every file in the original 33-file qualification remains available, either as
+unchanged current source, under `original-main/`, or as a `.source` archive.
+`original-main/source-index.json` maps all original hashes, and
+`original-main/original-manifest.json` is the exact original manifest. This
+preserves the successful original source and its original missing-field
+counterexample without treating the successor as having executed that history.
+
+Run the native checks from this composed source:
+
+```sh
+node --test tests/*.test.mjs
+python3 tools/make_demo.py
+node tools/check_notes_browser.mjs --browser /path/to/chromium --output /new/notes-run
+node tools/check_reflections_browser.mjs --browser /path/to/chromium --output /new/reflection-run
+node docs/reflections-20261008-9ec02b70e5f0/independent-pr12/verify_reflections_receiving.mjs \
+  --root "$PWD" \
+  --pins docs/reflections-20261008-9ec02b70e5f0/independent-pr12/source-pins.json \
+  --browser /path/to/chromium --output /new/independent-receiving
+```
+
+The browser drivers require Node 22+ and an existing Chromium/Chrome executable.
+The reflection driver's output directory must be new and its parent must
+exist. Read the actual result; the recorded authored composition attempts above
+did not complete successfully in the observed environment. The independent successful receiver used Node `v24.19.0` and
+`HeadlessChrome/153.0.8010.0`. Its five checkpoints are browser checks, not
+additional unit-test methods. No dependencies were installed for these runs. The app and dependency-free native suite keep
+their existing runtime requirements.
+
+The two original reflection captures were inspected, and all saved-file
+assertions read actual browser-written UTF-8 bytes. The owner's redundant
+screenshots and duplicate GUID-named download copies are omitted; the named
+files and raw reports are retained. These are local Chromium-family source
+and consumer results, not learner-effectiveness, cross-browser, hosted or
+contest-acceptance evidence.
+
+## Upstream and next receiving boundaries
+
+This delta is based on PR #12's exact head. Integrate it after that contribution
+or stack it on that branch, preserving the owner's source history. Recheck
+current heads before writing a shared branch. The reflection claim remains
+[issue #5 comment 6057159375](https://github.com/Jacob-Met/RecallWeave/issues/5#issuecomment-6057159375).
+
+[Issue #7](https://github.com/Jacob-Met/RecallWeave/issues/7) owns local deck
+import and explicit session start. An accepted new course must initialize a
+new notebook with the admitted question IDs and the receiving course's own
+application prompt. Rejected/cancelled import attempts must preserve the
+current session. This packet does not qualify that future importer composition.
+
+[Issue #11](https://github.com/Jacob-Met/RecallWeave/issues/11) owns completed
+trace save/preview/restore. Its initial stated archive scope excludes
+reflection fields and preserves our notebook/export hooks. Explicit restore
+must define whether a current notebook remains, clears, or is restored; old
+writing must not silently attach to a different trace merely because question
+IDs repeat. That receiver and its validation remain with its existing owner.

@@ -8,9 +8,27 @@ Open [sql-query-explorer.html](sql-query-explorer.html) directly in a browser. I
 
 The controls select twenty-two prepared queries. The displayed SQL is read-only. Every saved result is obtained by executing the exact displayed query with SQLite during the build; the browser does not simulate a SQL engine. Use **Download practice · SQL** for the original table setup and all prepared queries if you want to edit queries in an actual SQLite scratch database. The file is intended for a new empty database, for example `sqlite3 :memory: < sql-query-practice.sql`.
 
-**Download course · JSON** saves the exact [sql-query-foundations.json](sql-query-foundations.json) file. It follows the published `recallweave-deck/1` format and can be opened in RecallWeave's separate deck authoring page. The app's final local-picker composition is owned by #7; schema/native-module receiving is distinct from receiving that final importer UI. This course does not modify the app or replace its default biology lesson.
+**Download course · JSON** saves the exact [sql-query-foundations.json](sql-query-foundations.json) file. It follows the published `recallweave-deck/1` format and works with the learner's local deck picker and the separate deck authoring page.
 
 Predictions remain in the current page only. They are not stored, sent, or included in the downloaded course. The page requests a download only after the corresponding button is activated.
+
+## Learn with this course
+
+1. Save the course using the explorer's **Download course · JSON** button, or download [sql-query-foundations.json](sql-query-foundations.json).
+2. Open the learner using the [project README's local-server instructions](../README.md), or open a saved copy of the standalone [demo.html](../demo.html) directly in your browser.
+3. Under **Bring your own lesson**, use **Choose a deck file** to select `sql-query-foundations.json`. Confirm the title **SQL query foundations — rows, NULLs, groups, and joins**, **12 questions**, and **4 concepts**. **Preview question prompts** shows every question before you begin.
+4. Select **Start this deck** to begin the SQL lesson. Previewing the file leaves your current lesson intact; starting it replaces the current first answers and practice progress.
+5. Answer all twelve questions, then open items under **Review the connections** to revisit your first answers, correct answers, explanations, and transfer ideas. If you missed a connection, the practice button offers a second pass. Practice records retries separately and keeps your first answers and model estimates unchanged.
+
+Use **Download study notes (.txt)** on the completed learning trace to keep readable questions, first answers, explanations, and any recorded practice answers.
+
+### Keep and restore your learning trace
+
+After completing the twelve first answers, open **Keep or restore a learning trace** and select **Download trace (.json)**. You can save before practice, during paused practice, or after practice finishes. Keep both this trace file and the unchanged SQL course JSON.
+
+To return in a fresh tab or after a reload, choose the same SQL course file and select **Start this deck**. Open **Keep or restore a learning trace**, use **Choose a saved learning trace (.json, up to 2 MiB)** to select the saved trace, inspect its preview, then select **Restore these answers**. **Resume practice** continues any remaining retries. A trace for another course or a changed course version is refused.
+
+The selected lesson stays in the current tab until you reload or choose another deck. This trace flow requires a completed first session; it preserves any subsequent practice progress. The study-notes text file is a readable record, while the trace JSON is the file used for restoration.
 
 ## Work from these exact rows
 
@@ -85,4 +103,4 @@ For actual browser receiving, use Node 22+ and an already installed Chrome/Chrom
 node tools/check_sql_query_browser.mjs --browser /path/to/chromium --output /path/to/exclusive-receiving-directory
 ```
 
-This runner opens one isolated browser profile and a temporary loopback server, checks the prepared-query controls and actual download bytes, then closes the server and receives a fresh direct-file page. Its output directory must be new. It never opens a personal browser profile. Current receiving limitations and exact source pins belong in the accompanying review receipt rather than being inferred from these commands.
+This runner opens one isolated browser profile and a temporary loopback server, checks the prepared-query controls and actual download bytes, then closes the server and receives a fresh direct-file page. Its output directory must be new. It never opens a personal browser profile. This command receives the separate query explorer. The SQL course was also received through the published learner's actual local file input, preview, explicit start, all twelve questions, review, practice, notes downloads, and fresh-document trace restoration on both modular and standalone surfaces. See the [SQL-through-picker receiving packet](../docs/receiving/sql-picker-3dab0b9d2ce9/README.md) for exact source pins, native results, screenshots, and scope.

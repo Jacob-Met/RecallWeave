@@ -68,6 +68,21 @@ jobs:
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4, inherited project pin
         with:
           node-version: ${{ steps.native.outputs.node }}
+      - name: Install and identify the standard CJK print font
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends fonts-noto-cjk
+          dpkg-query -W -f='${binary:Package} ${Version}\n' fonts-noto-cjk
+          command -v fc-match
+          HANDOUT_JP_FONT_FAMILY="$(fc-match --format='%{family}\n' 'sans-serif:lang=ja')"
+          HANDOUT_JP_FONT_FILE="$(fc-match --format='%{file}\n' 'sans-serif:lang=ja')"
+          printf 'Japanese font family: %s\nJapanese font file: %s\n' "${HANDOUT_JP_FONT_FAMILY}" "${HANDOUT_JP_FONT_FILE}"
+          [[ "${HANDOUT_JP_FONT_FAMILY}" == *"Noto Sans CJK JP"* ]]
+          [[ -f "${HANDOUT_JP_FONT_FILE}" ]]
+          dpkg-query -S -- "${HANDOUT_JP_FONT_FILE}"
+          sha256sum -- "${HANDOUT_JP_FONT_FILE}"
       - name: Receive actual studio, file selection, separate downloads and print artifacts
         run: node tools/check_course_handout_browser.mjs --browser "${{ steps.native.outputs.browser }}" --output "${RUNNER_TEMP}/course-handout-receiving"
       - name: Verify the direct-open teacher page matches its modular sources

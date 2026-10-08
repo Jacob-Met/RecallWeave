@@ -8,7 +8,7 @@ import assert from 'node:assert/strict';
 import {createHash} from 'node:crypto';
 import {spawn} from 'node:child_process';
 import {createServer} from 'node:http';
-import {readFile, writeFile, mkdir, mkdtemp, rm, readdir} from 'node:fs/promises';
+import {readFile, writeFile, mkdir, mkdtemp, rm, readdir, lstat} from 'node:fs/promises';
 import {dirname, extname, join, resolve, basename} from 'node:path';
 import {fileURLToPath, pathToFileURL} from 'node:url';
 
@@ -161,6 +161,68 @@ async function screenshotLastQuestion(name) {
   await evaluate('[...document.querySelectorAll(".handout-question")].at(-1).scrollIntoView({block:"start"})');
   return screenshot(name);
 }
+async function printReceivingBundle() {
+  // Only authored outputs already registered by this receiver may enter the packet.
+  const rendered = [
+    'authored-deck.json', 'downloaded-worksheet.html', 'downloaded-answer-key.html',
+    'teacher-worksheet-print.pdf', 'teacher-answer-key-print.pdf',
+    'reopened-worksheet-1280-print.pdf', 'reopened-worksheet-390-print.pdf',
+    'reopened-answer-key-1280-print.pdf', 'reopened-answer-key-390-print.pdf',
+    'teacher-desktop.png', 'standalone-controls-390.png', 'standalone-worksheet-390.png',
+    'reopened-worksheet-1280-print.png', 'reopened-worksheet-390-print.png',
+    'reopened-answer-key-1280-print.png', 'reopened-answer-key-390-print.png',
+  ];
+  const optional = [
+    'teacher-worksheet-print.txt', 'teacher-answer-key-print.txt',
+    'reopened-worksheet-1280-print.txt', 'reopened-worksheet-390-print.txt',
+    'reopened-answer-key-1280-print.txt', 'reopened-answer-key-390-print.txt',
+    'failed-state.png',
+  ];
+  if (report.status === 'passed') {
+    for (const name of rendered) {
+      assert.ok(report.artifacts.some(item => item.name === name),
+        'A successful run must retain its fixed rendering fixture: ' + name);
+    }
+  }
+  const names = [...rendered, ...optional].filter(name =>
+    report.artifacts.some(item => item.name === name));
+  names.push('receiving-report.json');
+  const files = [];
+  let total = 0;
+  for (const name of names.sort()) {
+    const filename = join(output, name);
+    const info = await lstat(filename);
+    assert.ok(info.isFile() && !info.isSymbolicLink(),
+      'Bundle fixture must be a regular file: ' + name);
+    assert.ok(info.size <= 2 * 1024 * 1024, 'Bundle fixture exceeds 2 MiB: ' + name);
+    const bytes = await readFile(filename);
+    assert.equal(bytes.length, info.size, 'Bundle fixture changed while being read: ' + name);
+    const digest = hash(bytes);
+    const expected = report.artifacts.find(item => item.name === name);
+    if (expected) {
+      assert.equal(bytes.length, expected.bytes, 'Bundle fixture size differs from actual artifact: ' + name);
+      assert.equal(digest, expected.sha256, 'Bundle fixture digest differs from actual artifact: ' + name);
+    }
+    total += bytes.length;
+    assert.ok(total <= 2 * 1024 * 1024, 'Receiving packet exceeds 2 MiB; refusing to truncate evidence.');
+    files.push({path: name, bytes: bytes.length, sha256: digest, base64: bytes.toString('base64')});
+  }
+  const payload = Buffer.from(JSON.stringify({version: 1, files}), 'utf8');
+  assert.ok(payload.length <= 4 * 1024 * 1024, 'Serialized receiving packet exceeds 4 MiB.');
+  const encoded = payload.toString('base64');
+  const chunks = [];
+  for (let offset = 0; offset < encoded.length; offset += 4096) {
+    chunks.push(encoded.slice(offset, offset + 4096));
+  }
+  console.log('HANDOUT_RECEIVING_BUNDLE_BEGIN ' + JSON.stringify({
+    bytes: payload.length, sha256: hash(payload), chunks: chunks.length, files: files.length
+  }));
+  for (let index = 0; index < chunks.length; index++) {
+    console.log('HANDOUT_RECEIVING_BUNDLE_CHUNK ' + index + ' ' + chunks[index]);
+  }
+  console.log('HANDOUT_RECEIVING_BUNDLE_END');
+}
+
 const passed = name => { report.checks.push(name); console.log('PASS ' + name); };
 
 async function downloaded(button, name) {
@@ -650,6 +712,14 @@ try {
     report.status = 'failed'; report.artifactLimitExceeded = true; process.exitCode = 1;
   }
   await writeFile(join(output, 'receiving-report.json'), JSON.stringify(report, null, 2) + '\n');
+  try { await printReceivingBundle(); }
+  catch (error) {
+    report.status = 'failed';
+    report.bundleError = error.stack ?? String(error);
+    process.exitCode = 1;
+    await writeFile(join(output, 'receiving-report.json'), JSON.stringify(report, null, 2) + '\n');
+    console.error(report.bundleError);
+  }
   console.log('HANDOUT_RECEIVING_RESULT ' + report.status.toUpperCase() +
     ' checks=' + report.checks.length + ' artifacts=' + report.artifacts.length +
     ' source_unchanged=' + report.sourceUnchanged);
