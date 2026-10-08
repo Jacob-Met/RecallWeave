@@ -1,0 +1,434 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'">
+<title>Minimum spanning forests · RecallWeave</title>
+<style>
+:root{color-scheme:light;--ink:#182c35;--muted:#48616b;--paper:#f3f6f3;--card:#fff;--line:#c4d1cc;--green:#135d3d;--green-light:#e6f4ea;--amber:#805300;--amber-light:#fff3d0;--reject:#65596b}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:1rem/1.6 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}main{max-width:1160px;margin:auto;padding:32px 24px 64px}header{max-width:850px;margin-bottom:30px}.eyebrow{font-size:.83rem;font-weight:750;letter-spacing:.1em;text-transform:uppercase;color:var(--green);margin:0 0 8px}h1{font-size:clamp(2rem,5vw,3.3rem);line-height:1.13;letter-spacing:-.025em;margin:0 0 18px}h2{font-size:1.35rem;line-height:1.3;margin:0 0 14px}h3{font-size:1.06rem;margin:0 0 8px}p{margin:0 0 14px}.lead{font-size:1.12rem;color:var(--muted)}a{color:var(--green);text-underline-offset:3px}code{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:.93em}button,input,select,textarea{font:inherit}button,select{min-height:44px}button{border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink);font-weight:650;padding:10px 16px;cursor:pointer}button:hover:not(:disabled){background:#edf5ee;border-color:var(--green)}button.primary{background:var(--green);color:#fff;border-color:var(--green)}button.primary:hover{background:#0d462d}button:disabled{opacity:.48;cursor:default}button:focus-visible,select:focus-visible,textarea:focus-visible,a:focus-visible,[tabindex]:focus-visible{outline:3px solid #2368cc;outline-offset:4px}select,textarea{width:100%;border:1px solid #718c82;background:#fff;color:var(--ink);border-radius:7px;padding:9px 11px}textarea{min-height:190px;font:1rem/1.6 ui-monospace,SFMono-Regular,Consolas,monospace;resize:vertical}label{display:block;font-weight:700;margin-bottom:6px}.hint{font-size:.92rem;color:var(--muted);margin:8px 0 0}.panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:24px;margin-bottom:22px;min-width:0}.input-grid{display:grid;grid-template-columns:minmax(180px,.8fr) minmax(0,2fr);gap:24px}.form-actions,.example-controls,.downloads{display:flex;gap:12px;align-items:center;flex-wrap:wrap}.form-actions{margin-top:18px}.example-controls{margin-top:20px;padding-top:18px;border-top:1px solid var(--line)}.example-choice{flex:1 1 300px;min-width:0}.example-controls button{align-self:flex-end}.error{background:#fff0ed;border-left:4px solid #a32923;padding:12px;margin:14px 0 0;color:#7a201b}.empty{padding:32px;border:1px dashed #9eb2a6;border-radius:14px;color:var(--muted);margin-bottom:22px}.trace-title{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;align-items:center}.trace-title h2{margin:0}.nav{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:18px 0}.metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:18px 0 24px}.metric{padding:12px 16px;background:#edf3ef;border-radius:9px;min-width:0}.metric dt{font-size:.84rem;color:var(--muted)}.metric dd{font-size:1.7rem;font-weight:750;margin:0;line-height:1.35}.trace-grid{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:24px;align-items:start}.graph-wrap{max-width:100%;overflow:auto;border:1px solid var(--line);border-radius:10px;background:#fbfdfb}.graph-wrap svg{display:block;width:100%;min-width:330px;aspect-ratio:7/6}.graph-edge{stroke:#a2b1b8;stroke-width:2.8}.graph-edge.accepted{stroke:var(--green);stroke-width:5}.graph-edge.rejected{stroke:var(--reject);stroke-dasharray:7 5;stroke-width:3}.graph-edge.candidate{stroke:#885e04;stroke-width:3.5}.candidate-halo{stroke:#f3cb56;stroke-width:11;opacity:.65}.graph-vertex circle{fill:#fff;stroke:var(--ink);stroke-width:2.5}.graph-vertex text{font-size:18px;font-weight:750;fill:var(--ink)}.edge-label rect{fill:#fff;stroke:#a0b2aa}.edge-label text{font:13px system-ui,sans-serif;fill:var(--ink);font-weight:600}.edge-label.accepted rect{fill:var(--green-light);stroke:var(--green)}.edge-label.candidate rect{fill:var(--amber-light);stroke:var(--amber)}.edge-label.rejected rect{fill:#f3eef4;stroke:var(--reject)}.legend{list-style:none;display:flex;flex-wrap:wrap;gap:6px 18px;padding:0;margin:12px 0}.legend li{font-size:.9rem}.legend-symbol{font-weight:800}.decisions{display:grid;gap:14px}.decision{padding:16px;border:1px solid var(--line);border-radius:10px}.decision.next{background:var(--amber-light);border-color:#d4b666}.decision p:last-child{margin-bottom:0}.components{list-style:none;display:flex;gap:8px;flex-wrap:wrap;padding:0;margin:8px 0 18px}.component{border:1px solid #90b59f;border-radius:7px;padding:5px 10px;background:var(--green-light);font-family:ui-monospace,Consolas,monospace}.result{border-left:5px solid var(--green);padding:18px;background:var(--green-light);border-radius:0 10px 10px 0;margin-top:20px}.result p:last-child{margin-bottom:0}.tables{display:grid;grid-template-columns:minmax(0,1fr);gap:22px;margin-top:26px}.table-wrap{max-width:100%;overflow:auto;border:1px solid var(--line);border-radius:8px}table{border-collapse:collapse;width:100%;font-size:.93rem}th,td{padding:11px 13px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}th{background:#edf3ef;white-space:nowrap;font-weight:700}tr:last-child td{border-bottom:0}.edge-row.accepted{background:#eef8f1}.edge-row.candidate{background:var(--amber-light)}.edge-row.rejected{color:var(--reject)}td:last-child{min-width:100px}#history-table{min-width:730px}#history-table td:nth-child(5){min-width:210px}.instructions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px}.instructions ol{padding-left:22px;margin-top:0}.instructions li{margin-bottom:9px}.downloads{margin:18px 0 8px}.status{min-height:1.6em;color:var(--muted);overflow-wrap:anywhere}.sources{font-size:.91rem;color:var(--muted);margin-top:24px}.sources p{margin-bottom:10px}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}[hidden]{display:none!important}
+@media(max-width:720px){main{padding:22px 16px 40px}.panel{padding:18px}.input-grid,.trace-grid,.instructions{grid-template-columns:minmax(0,1fr);gap:18px}.metrics{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.nav{grid-template-columns:repeat(2,minmax(0,1fr))}.example-controls{align-items:stretch}.example-controls button{align-self:auto;width:100%}.downloads button{flex:1 1 160px}.trace-title{gap:8px}.graph-wrap{margin-inline:0}th,td{padding:10px 11px}.empty{padding:22px}h1{font-size:2.1rem}.lead{font-size:1.04rem}}
+@media(prefers-reduced-motion:no-preference){button{transition:background-color .12s}}
+</style>
+</head>
+<body>
+<main>
+<header>
+<p class="eyebrow">RecallWeave · original graph course</p>
+<h1>Minimum spanning forests,<br>one edge at a time.</h1>
+<p class="lead">Choose the cheapest cycle-free connections that span every original connected component. Follow Kruskal’s choices, keep isolated vertices visible, and see why some links must be rejected.</p>
+<p>A minimum spanning tree minimizes the <strong>total chosen edge weight</strong>. It does not generally preserve every shortest route. If the input is disconnected, the result is a forest.</p>
+</header>
+<noscript><p class="error">Enable JavaScript to build and inspect a trace. The original course JSON and worked guide are also available beside this page.</p></noscript>
+<section class="panel" aria-labelledby="input-heading">
+<h2 id="input-heading">1. Enter your graph</h2>
+<form id="search-form" novalidate>
+<div class="input-grid">
+<div>
+<label for="vertex-count">Number of vertices</label>
+<select id="vertex-count" aria-describedby="vertex-help"><option>1</option><option>2</option><option>3</option><option selected>4</option><option>5</option><option>6</option><option>7</option><option>8</option></select>
+<p id="vertex-help" class="hint">Vertices are named A onward, up to H. A vertex with no edge remains in the graph.</p>
+<p class="hint">Undirected, simple graph: no self-loops and no repeated unordered pair. Negative and zero weights are valid.</p>
+</div>
+<div>
+<label for="edges-input">Edges, one per line</label>
+<textarea id="edges-input" rows="6" spellcheck="false" autocapitalize="characters" aria-describedby="edge-help input-error">A B 4
+A C 1
+B C 2
+B D 5
+C D 3</textarea>
+<p id="edge-help" class="hint">Use <code>A B -3</code>: two vertex letters and an integer from −99 to 99, separated by spaces or tabs. Blank lines are allowed. A–B and B–A are the same unordered pair.</p>
+</div>
+</div>
+<p id="input-error" class="error" role="alert" hidden></p>
+<div class="form-actions"><button id="build-trace" class="primary" type="submit">Build forest trace</button><span class="hint">Editing either input retires the previous trace.</span></div>
+</form>
+<div class="example-controls">
+<div class="example-choice"><label for="example">Or choose a worked example</label><select id="example"><option value="">Choose an example…</option></select></div>
+<button id="apply-example" type="button">Use example</button>
+</div>
+</section>
+<div id="empty-view" class="empty"><h2>Ready to inspect the choices?</h2><p id="empty-message">Build a trace to begin with every vertex in its own component.</p></div>
+<section id="trace-view" class="panel" aria-labelledby="trace-heading" hidden>
+<div class="trace-title"><h2 id="trace-heading" tabindex="-1">Your forest</h2><span class="hint">Ties follow original input order.</span></div>
+<div class="nav" aria-label="Trace steps"><button id="first-step" type="button" disabled>First</button><button id="previous-step" type="button" disabled>Previous</button><button id="next-step" class="primary" type="button" disabled>Next</button><button id="last-step" type="button" disabled>Finish</button></div>
+<dl class="metrics"><div class="metric"><dt>Edge decisions</dt><dd id="step-count">0 / 0</dd></div><div class="metric"><dt>Accepted edges</dt><dd id="accepted-count">0</dd></div><div class="metric"><dt>Components</dt><dd id="component-count">0</dd></div><div class="metric"><dt>Total weight so far</dt><dd id="total-weight">0</dd></div></dl>
+<div class="trace-grid">
+<div>
+<h3 id="graph-heading">The entered graph</h3>
+<div class="graph-wrap" tabindex="0" role="region" aria-label="Graph diagram; scroll horizontally if needed">
+<svg id="graph" viewBox="0 0 420 360" role="img" aria-labelledby="graph-title" aria-describedby="graph-description"><title id="graph-title">Graph diagram</title><desc id="graph-description">Build a trace to inspect the graph.</desc></svg>
+</div>
+<ul class="legend" aria-label="Edge states"><li><span class="legend-symbol">✓</span> Accepted · solid</li><li><span class="legend-symbol">×</span> Cycle rejected · dashed</li><li><span class="legend-symbol">→</span> Next · outlined</li><li>Not decided · thin</li></ul>
+<p class="hint">Lines crossing in the picture do not create vertices. Exact weights and states are also in the edge table.</p>
+<p id="dense-note" class="hint" hidden>For more than 12 edges, labels move to the table to keep the drawing readable.</p>
+</div>
+<div class="decisions">
+<section class="decision"><h3>Last decision</h3><p id="last-decision"></p></section>
+<section class="decision next"><h3>Predict the next choice</h3><p id="next-decision"></p></section>
+<section><h3>Accepted components now</h3><ul id="components" class="components" aria-label="Current connected components"></ul><p class="hint">An acceptance merges exactly two components. A rejection changes neither the forest nor its total.</p></section>
+</div>
+</div>
+<section id="result" class="result" hidden><h3 id="result-heading"></h3><p id="result-summary"></p><p id="result-explanation"></p></section>
+<div class="tables">
+<section aria-labelledby="edge-table-heading"><h3 id="edge-table-heading">Every input edge, in decision order</h3><div class="table-wrap" tabindex="0" role="region" aria-label="Edge order and states"><table id="edge-table"><thead><tr><th scope="col">Order</th><th scope="col">Input identity · edge</th><th scope="col">Weight</th><th scope="col">Current state</th></tr></thead><tbody id="edge-body"></tbody></table></div><p id="no-edges" hidden>No edges were entered. Each vertex is still represented.</p></section>
+<section aria-labelledby="history-heading"><h3 id="history-heading">Decisions already applied</h3><p id="no-history">No edge decisions yet.</p><div class="table-wrap" tabindex="0" role="region" aria-label="Applied decision history"><table id="history-table" hidden><thead><tr><th scope="col">Decision</th><th scope="col">Edge</th><th scope="col">Weight</th><th scope="col">Reason</th><th scope="col">Components afterward</th><th scope="col">Total</th></tr></thead><tbody id="history-body"></tbody></table></div></section>
+</div>
+<p class="hint" style="margin-top:18px">This teaching trace decides every edge, including later cycle rejections. Its count excludes sorting comparisons, component lookups, validation and rendering.</p>
+</section>
+<section class="panel" aria-labelledby="study-heading">
+<h2 id="study-heading">2. Keep the trace, then study the ideas</h2>
+<div class="instructions">
+<div><h3>Save this exact inspection</h3><p>The trace download includes the original entered text, the selected decision and the full sequence of immutable snapshots. It is an algorithm record, separate from learner answers.</p><p>No automatic storage or upload occurs. The page works directly from your files without a server or connection.</p></div>
+<div><h3>Use the original twelve-question course</h3><ol><li>Download the course JSON below.</li><li>Open RecallWeave and choose it under <strong>Bring your own lesson</strong>.</li><li>Inspect the preview, then choose <strong>Start this deck</strong>.</li></ol><p>The worked guide supplies explanations and transfer prompts. The learning estimate is a model state, not a grade.</p></div>
+</div>
+<div class="downloads"><button id="download-trace" type="button" disabled>Download trace</button><button id="download-course" type="button">Download course</button><button id="download-guide" type="button">Download guide</button></div>
+<p id="file-status" class="status" role="status" aria-live="polite"></p>
+</section>
+<footer class="sources"><p>Original questions, examples, guide and diagrams for RecallWeave, 2026. Course content: CC0-1.0. This explorer adds no network request, account or persistent storage.</p><p>Optional algorithm background: <a href="https://algs4.cs.princeton.edu/code/javadoc/edu/princeton/cs/algs4/KruskalMST.html" target="_blank" rel="noopener noreferrer">Princeton Algorithms 4/e: KruskalMST</a> and <a href="https://ocw.mit.edu/courses/6-046j-design-and-analysis-of-algorithms-spring-2015/resources/lecture-12-greedy-algorithms-minimum-spanning-tree/" target="_blank" rel="noopener noreferrer">MIT OpenCourseWare: minimum spanning trees</a>. These external pages open only when selected; their original materials retain their own terms.</p></footer>
+<p id="step-announcement" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></p>
+</main>
+<script type="module">
+const SOURCE_DECK = "{\n  \"format\": \"recallweave-deck/1\",\n  \"title\": \"Minimum spanning forests: connect without cycles\",\n  \"attribution\": \"Original questions, worked examples, guide and diagrams for RecallWeave, 2026. Algorithm background: Robert Sedgewick and Kevin Wayne, Algorithms 4/e, KruskalMST documentation (https://algs4.cs.princeton.edu/code/javadoc/edu/princeton/cs/algs4/KruskalMST.html); MIT OpenCourseWare 6.046J, Lecture 12, Greedy Algorithms: Minimum Spanning Tree, Spring 2015 (https://ocw.mit.edu/courses/6-046j-design-and-analysis-of-algorithms-spring-2015/resources/lecture-12-greedy-algorithms-minimum-spanning-tree/). No source exercises, prose, code or figures are reproduced.\",\n  \"license\": \"CC0-1.0 for this original course content. Referenced materials retain their own terms and are not included in this deck.\",\n  \"concepts\": [\n    \"The spanning objective\",\n    \"Safe edge choices\",\n    \"Components and cycles\",\n    \"Reading the result\"\n  ],\n  \"items\": [\n    {\n      \"id\": \"msf-objective\",\n      \"concept\": \"The spanning objective\",\n      \"prerequisites\": [],\n      \"prompt\": \"A weighted undirected graph represents available links. What does a minimum spanning tree minimize when the graph is connected?\",\n      \"options\": [\n        \"The total weight of the chosen cycle-free links connecting every vertex.\",\n        \"The length of every route between every pair of vertices simultaneously.\",\n        \"The number of vertices that need to be connected.\",\n        \"The weight of the single largest input edge, even if vertices remain disconnected.\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"A spanning tree includes every vertex, stays connected and has no cycle. Among those trees, a minimum spanning tree has the smallest sum of chosen edge weights. There are no directed arrows or chosen start vertex in this problem.\",\n      \"transfer\": \"Suppose a network has four vertices. Every spanning tree has three edges, so counting its edges alone cannot choose the minimum-weight tree. Compare the sums of their edge weights.\"\n    },\n    {\n      \"id\": \"msf-not-shortest\",\n      \"concept\": \"The spanning objective\",\n      \"prerequisites\": [],\n      \"prompt\": \"A triangle has edges A–B weight 2, B–C weight 2 and A–C weight 3. A minimum spanning tree chooses A–B and B–C. Which statement about a trip from A to C is correct?\",\n      \"options\": [\n        \"Its tree route has weight 2, because each chosen edge weighs 2.\",\n        \"Its tree route weighs 4, although the original graph has a direct route weighing 3.\",\n        \"Its tree route weighs 3, because a minimum spanning tree always keeps every shortest route.\",\n        \"The tree cannot contain C because the direct A–C edge was omitted.\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"The tree's A→B→C route uses two weight-2 edges, for a total of 4. The original graph also has a direct A–C edge of weight 3. The tree minimizes the total cost of connecting all vertices: 2 + 2 = 4, rather than either alternative tree's 5. That objective does not minimize every individual route.\",\n      \"transfer\": \"If the task changes to finding the cheapest route from a chosen start vertex, the objective has changed. A shortest-path method addresses that task; selecting a minimum spanning tree first does not generally preserve its answer.\"\n    },\n    {\n      \"id\": \"msf-undirected\",\n      \"concept\": \"The spanning objective\",\n      \"prerequisites\": [],\n      \"prompt\": \"This explorer accepts a simple undirected graph. You enter 'A B 2', then 'B A 5'. Why must it refuse that pair of lines?\",\n      \"options\": [\n        \"Undirected graphs require all weights to be equal.\",\n        \"The letter B must always come after A in every input line.\",\n        \"Both lines name the same unordered vertex pair; this explorer excludes parallel edges.\",\n        \"A graph may contain only one edge in total.\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"In an undirected graph, A–B and B–A connect the same pair. The explorer deliberately permits at most one edge per unordered pair, so these two lines are a duplicate even though their weights differ. A single line may use either endpoint order. This is an input convention for this bounded explorer, not a claim that all graph algorithms exclude parallel edges.\",\n      \"transfer\": \"Entering only 'B A 2' is valid and preserves that orientation in the trace record. The decision still tests whether A and B are already connected; reversing a single edge does not make it directed.\"\n    },\n    {\n      \"id\": \"msf-weight-order\",\n      \"concept\": \"Safe edge choices\",\n      \"prerequisites\": [\n        \"The spanning objective\"\n      ],\n      \"prompt\": \"Input lines are A–B weight 4, A–C weight 1, B–C weight 2, B–D weight 5, C–D weight 3. Kruskal's rule inspects edges from smallest weight to largest. Which sequence is inspected?\",\n      \"options\": [\n        \"A–B, A–C, B–C, B–D, C–D.\",\n        \"A–B, B–C, C–D, A–C, B–D.\",\n        \"B–D, A–B, C–D, B–C, A–C.\",\n        \"A–C, B–C, C–D, A–B, B–D.\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"The weights in inspection order are 1, 2, 3, 4 and 5. Inspection order is a global order over the edges; it is not a walk starting at A. For this graph, the first three edges connect all four vertices without a cycle. The final two edges are inspected and rejected in this explorer's complete trace.\",\n      \"transfer\": \"Change A–B from weight 4 to weight 0 while keeping every other line fixed. A–B becomes the first edge inspected. Rebuild the trace after changing an input; a trace for the old weights is no longer evidence for the new graph.\"\n    },\n    {\n      \"id\": \"msf-cut-choice\",\n      \"concept\": \"Safe edge choices\",\n      \"prerequisites\": [\n        \"The spanning objective\"\n      ],\n      \"prompt\": \"The accepted edges currently connect A and B in one component. No accepted edge leaves that component. Available crossing edges have weights 2, 5 and 7. Why can a lightest crossing edge of weight 2 be a safe next connection in Kruskal's process?\",\n      \"options\": [\n        \"It joins two components, and the cut property allows a lightest edge across this component boundary in some minimum spanning forest extending the accepted forest.\",\n        \"Every edge crossing any component boundary must appear in every minimum spanning tree.\",\n        \"Its weight is positive, which makes cycle checks unnecessary.\",\n        \"It guarantees the shortest route from A to every remaining vertex.\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"The boundary separates {A, B} from the other vertices, and no already accepted edge crosses it. A lightest edge across that boundary is compatible with a minimum spanning forest extending the accepted choices. If it is already in a compatible minimum forest, no exchange is needed. Otherwise add it: inside its original connected component, this creates a cycle. Remove another crossing edge of at least the chosen weight to retain a minimum forest containing the chosen edge. Kruskal combines weight order with the rule that a newly accepted edge must join different components.\",\n      \"transfer\": \"If two crossing edges both have the smallest weight, either may be a safe choice. That does not mean both must be included: adding later edges still needs a cycle check. A tie can produce different minimum spanning forests with the same total weight.\"\n    },\n    {\n      \"id\": \"msf-negative\",\n      \"concept\": \"Safe edge choices\",\n      \"prerequisites\": [\n        \"The spanning objective\"\n      ],\n      \"prompt\": \"Edges are A–B weight −4, B–C weight −2, A–C weight 1, C–D weight 3 and A–D weight 9. Which minimum spanning tree total follows the weight order and cycle rule?\",\n      \"options\": [\n        \"0, because negative weights must be discarded.\",\n        \"−3, from A–B, B–C and C–D.\",\n        \"−6, from A–B and B–C, leaving D out.\",\n        \"7, from A–C, C–D and A–D.\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"Accept A–B (−4), then B–C (−2). A–C would close a cycle, so reject it. Accept C–D (3) to connect D, then reject A–D. The total is −4 − 2 + 3 = −3. Negative and zero weights are valid for this spanning-tree objective; the tree still has to connect every vertex and remain cycle-free.\",\n      \"transfer\": \"Change C–D's weight from 3 to 0. The same three edges are accepted and the total becomes −6. The negative values do not authorize omitting D or adding a cycle.\"\n    },\n    {\n      \"id\": \"msf-cycle\",\n      \"concept\": \"Components and cycles\",\n      \"prerequisites\": [\n        \"Safe edge choices\"\n      ],\n      \"prompt\": \"The accepted edges are A–B and B–C. The next inspected edge is A–C. What should the explorer do?\",\n      \"options\": [\n        \"Accept it, because it names a different pair from either accepted edge.\",\n        \"Accept it whenever its weight is nonnegative.\",\n        \"Reject it, because A and C already have a path through B.\",\n        \"Reject it only if A and C have the same letter.\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"The accepted path A→B→C already joins A to C. Adding A–C would close the cycle A–B–C–A. A cycle check compares connected components, not just whether an identical edge was previously selected. A rejected edge leaves the accepted set, component count and cumulative weight unchanged.\",\n      \"transfer\": \"If the next edge were C–D and D were isolated, it would join different components and be accepted. That acceptance decreases the number of components by exactly one.\"\n    },\n    {\n      \"id\": \"msf-tie-order\",\n      \"concept\": \"Components and cycles\",\n      \"prerequisites\": [\n        \"Safe edge choices\"\n      ],\n      \"prompt\": \"A triangle's three input lines are A–C weight 1, A–B weight 1, B–C weight 1, in that order. This explorer breaks equal-weight ties by original input line order. Which edges are accepted?\",\n      \"options\": [\n        \"All three, because equal weights cannot form a cycle.\",\n        \"Only A–C, because no later edge has a smaller weight.\",\n        \"A–B and B–C, because the letters must be sorted alphabetically.\",\n        \"A–C and A–B; B–C is then rejected.\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"All weights tie, so inspect A–C first and A–B second. Both connect different components. All three vertices are then connected, so B–C would close a cycle and is rejected. The total is 2. Input order makes this trace reproducible; it is not a proof that this is the only minimum tree.\",\n      \"transfer\": \"Put B–C first, then A–B, then A–C. The accepted edges change to B–C and A–B while the total remains 2. A deterministic tie policy chooses one valid answer from potentially several.\"\n    },\n    {\n      \"id\": \"msf-component-snapshot\",\n      \"concept\": \"Components and cycles\",\n      \"prerequisites\": [\n        \"Safe edge choices\"\n      ],\n      \"prompt\": \"There are five vertices A, B, C, D and E. The accepted edges are A–C and B–D. Which connected-component snapshot is correct, including isolated vertices?\",\n      \"options\": [\n        \"{A, C}, {B, D}, {E}.\",\n        \"{A, B, C, D}, {E}.\",\n        \"{A, C}, {B, D}; E does not count.\",\n        \"{A}, {B}, {C}, {D}, {E}, because no cycles have formed.\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"A–C joins A with C, and B–D joins B with D. There is no selected path connecting those two pairs. E is an isolated component and must remain visible. Components describe reachability using the edges accepted so far, not geometric proximity in the drawing.\",\n      \"transfer\": \"Accepting C–E merges {A, C} with {E}, leaving {A, C, E} and {B, D}. A line crossing another line in the drawing does not create a graph vertex or connection unless an endpoint says so.\"\n    },\n    {\n      \"id\": \"msf-disconnected\",\n      \"concept\": \"Reading the result\",\n      \"prerequisites\": [\n        \"Components and cycles\"\n      ],\n      \"prompt\": \"For vertices A through E, the available edges are A–B weight 1, B–C weight 2, A–C weight 4 and D–E weight −2. There is no edge between {A, B, C} and {D, E}. What is the final result?\",\n      \"options\": [\n        \"A spanning tree over all five vertices, with total 1.\",\n        \"A minimum spanning forest with two components, three accepted edges and total 1.\",\n        \"A spanning tree over A, B and C only, with total 3; D and E are discarded.\",\n        \"No valid result, because disconnected graphs cannot have forests.\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"Accept D–E (−2), A–B (1) and B–C (2); reject A–C because it closes a cycle. The total is −2 + 1 + 2 = 1. Each original connected component has its own minimum spanning tree. No available edge can join the two components, so the result is a forest, not a spanning tree over all five vertices.\",\n      \"transfer\": \"Add an isolated F with no new edges. The accepted edges and total stay the same, but there are now three components. For a spanning forest with n vertices and k components, the accepted edge count is n − k: 6 − 3 = 3 here.\"\n    },\n    {\n      \"id\": \"msf-singleton\",\n      \"concept\": \"Reading the result\",\n      \"prerequisites\": [\n        \"Components and cycles\"\n      ],\n      \"prompt\": \"The input has one vertex A and no edges. Which result follows this explorer's conventions?\",\n      \"options\": [\n        \"One rejected edge, total 0 and two components.\",\n        \"No result until a self-loop is added.\",\n        \"A connected one-vertex tree with zero edges, total 0 and zero edge decisions.\",\n        \"A disconnected result because every vertex needs a neighboring vertex.\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"A is already the only connected component. A one-vertex graph is connected, and its empty edge set is a tree with total weight 0. There are no edges to inspect, so there are zero decisions. A self-loop is neither necessary nor accepted by this simple-graph input.\",\n      \"transfer\": \"Choose three vertices with no edges. The result has three isolated components and remains a minimum spanning forest with zero edges and total 0. It is not a connected tree.\"\n    },\n    {\n      \"id\": \"msf-count\",\n      \"concept\": \"Reading the result\",\n      \"prerequisites\": [\n        \"Components and cycles\"\n      ],\n      \"prompt\": \"A connected graph has four vertices and five input edges. This explorer records a decision for every edge, even after a tree has formed. How many accepted edges and total edge decisions does its completed trace contain?\",\n      \"options\": [\n        \"Five accepted edges and five decisions.\",\n        \"Three accepted edges and three decisions.\",\n        \"Four accepted edges and five decisions.\",\n        \"Three accepted edges and five decisions.\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"A tree over four vertices has 4 − 1 = 3 accepted edges. The remaining two input edges are rejected because their endpoints are already connected when they are inspected. This explorer deliberately records all five decisions. That count is not the number of sorting comparisons, component lookups, input-validation operations or rendering operations.\",\n      \"transfer\": \"Some implementations stop once n − 1 edges have been accepted in a connected graph. This explorer continues to show why every remaining edge is excluded. Compare algorithms only after stating exactly what is being counted.\"\n    }\n  ]\n}\n";
+const SOURCE_GUIDE = "# Minimum spanning forests: connect without cycles\n\nThis original twelve-question course teaches a precise objective: choose available undirected links with minimum total weight while connecting every vertex in each original connected component and avoiding cycles.\n\n## Study the course\n\nSave `minimum-spanning-forest.json`. Open RecallWeave's `demo.html`, choose that file under **Bring your own lesson**, inspect its preview, then choose **Start this deck**. The learner records your original chosen answers and provides the authored explanations and transfer prompts. Practice is separate from the first pass; the model's learning estimate is not a grade or evidence that you have mastered graph theory.\n\nOpen `minimum-spanning-forest-explorer.html` directly from your files to inspect the worked graphs. The explorer is an algorithm demonstration, separate from a learner session. It uses no server, account, network request, browser storage or user-data upload. Its optional external references open only when you choose a reference link.\n\n## Input and graph conventions\n\nChoose 1–8 vertices, named A through the selected final letter. Enter one edge per nonblank line, for example:\n\n```text\nA B 4\nA C 1\nB C 2\nB D 5\nC D 3\n```\n\nEach line contains two letters and a whole-number weight from −99 through 99, separated by spaces or tabs. Letters are case-insensitive. Signed decimal integers, including zero, are accepted; decimals, scientific notation and comments are not. Empty lines are ignored. A blank edge list is valid.\n\nThe graph is **undirected**: A–B and B–A name the same pair. The explorer accepts a **simple graph**, so it refuses a self-loop or a second line for an already used unordered pair. These are explicit teaching-interface limits; more general graph representations can permit parallel edges.\n\nThe drawing is a layout of the entered graph. A geometric crossing between two lines is not an extra vertex or connection. Weight labels are costs, not distances in the picture.\n\n## The rule and its invariant\n\n1. Give each entered edge its original line-order identity.\n2. Inspect edges in increasing weight order. For equal weights, use original input order.\n3. Accept an edge exactly when its endpoints are in different currently accepted components.\n4. After an acceptance, merge those two components and add the weight to the running total. After a rejection, leave the accepted set, components and total unchanged.\n\nThe accepted edges always form a forest. If two endpoints already have an accepted path between them, adding their edge creates a cycle; that is why it must be rejected. An accepted edge joins two separate trees and lowers the number of components by one.\n\nThe greedy choice is supported by the cut property: a lightest edge crossing a component boundary that no accepted edge crosses can extend a compatible minimum spanning forest. If a compatible minimum forest already contains the chosen edge, it is immediately a valid extension. Otherwise, within the original connected component, adding that edge to the component's minimum tree creates a cycle containing another edge crossing the same boundary. Removing a suitable crossing edge of at least as much weight restores that component's tree without increasing its total. The trees of other original components remain unchanged. Thus the statement also applies when the whole graph is disconnected. Equal weights can leave several minimum spanning forests available.\n\nThe explorer inspects **every input edge**, including edges that would be unnecessary to examine after a connected tree has already formed. Its decision count therefore equals the number of input edges. It is not a sorting-comparison count, a count of component lookups, or a measurement of runtime. Rendering and input validation are excluded. The trace includes explicit component snapshots for learning, not a claim about the storage cost of an optimized implementation.\n\n## Worked connected graph\n\nFor the five lines above, inspect:\n\n| Decision | Edge | Weight | Result | Accepted components | Running total |\n|---|---|---:|---|---|---:|\n| 1 | A–C | 1 | Accept | {A, C}, {B}, {D} | 1 |\n| 2 | B–C | 2 | Accept | {A, B, C}, {D} | 3 |\n| 3 | C–D | 3 | Accept | {A, B, C, D} | 6 |\n| 4 | A–B | 4 | Reject: cycle | {A, B, C, D} | 6 |\n| 5 | B–D | 5 | Reject: cycle | {A, B, C, D} | 6 |\n\nThe final tree has three edges and total weight 6. There are five edge decisions. The two rejected edges remain in the original input graph; they are simply absent from the chosen tree.\n\n## Ties and negative weights\n\nFor the equal-weight triangle entered as A–C 1, A–B 1, B–C 1, accept the first two lines and reject the third. Reordering those equal-weight lines may select another minimum tree, but each has total 2. A deterministic trace does not prove uniqueness.\n\nNegative weights require no special discard rule. With A–B −4, B–C −2, A–C 1, C–D 3 and A–D 9, accept weights −4, −2 and 3 for total −3. The cycle rule still applies, and D must still be included.\n\n## Disconnected graphs and isolated vertices\n\nFor A–B 1, B–C 2, A–C 4 and D–E −2, no available link joins {A, B, C} to {D, E}. The result is a **minimum spanning forest**: edges D–E, A–B and B–C, total 1, with two components. It does not invent an edge to join them.\n\nAn isolated vertex remains a one-vertex component. For n vertices and k final components, a spanning forest contains n − k accepted edges. With one vertex and no edges, k = 1, so the graph is connected and its empty tree has weight 0. With three vertices and no edges, k = 3: the result is a disconnected forest with weight 0.\n\n## Minimum total connection cost is a distinct objective\n\nA triangle with A–B 2, B–C 2 and A–C 3 has a minimum tree using the two weight-2 edges. Its total is 4. The route from A to C within that tree also costs 4, whereas the original direct A–C route costs 3. Minimum spanning trees minimize the total chosen connection cost; they do not generally preserve every shortest path.\n\n## Inspect and save an exact trace\n\nChoose **Build forest trace**. The initial frame has no accepted edges; isolated vertices appear as their own components. **Next** applies one decision, and **Previous**, **First** and **Finish** revisit stored frames. The highlighted candidate is the next edge to be decided; the last-decision text describes the decision already applied.\n\nEditing either graph input retires the displayed trace until you build again. Preset selection alone changes nothing; **Use example** replaces the inputs and retires an earlier trace. The page labels selected edges, rejected cycles and undecided edges with text as well as visual styling. The edge table supplies the same facts as the drawing.\n\n**Download trace** saves the complete immutable trace, original entered text and selected frame. It is an algorithm inspection record, not a learner-answer archive. **Download course** and **Download guide** save this original lesson content; they do not change any learning session.\n\n## Original question explanations\n\n### 1. msf-objective\n\nA weighted undirected graph represents available links. What does a minimum spanning tree minimize when the graph is connected?\n\n**Correct answer:** The total weight of the chosen cycle-free links connecting every vertex.\n\nA spanning tree includes every vertex, stays connected and has no cycle. Among those trees, a minimum spanning tree has the smallest sum of chosen edge weights. There are no directed arrows or chosen start vertex in this problem.\n\n**Transfer:** Suppose a network has four vertices. Every spanning tree has three edges, so counting its edges alone cannot choose the minimum-weight tree. Compare the sums of their edge weights.\n\n### 2. msf-not-shortest\n\nA triangle has edges A–B weight 2, B–C weight 2 and A–C weight 3. A minimum spanning tree chooses A–B and B–C. Which statement about a trip from A to C is correct?\n\n**Correct answer:** Its tree route weighs 4, although the original graph has a direct route weighing 3.\n\nThe tree's A→B→C route uses two weight-2 edges, for a total of 4. The original graph also has a direct A–C edge of weight 3. The tree minimizes the total cost of connecting all vertices: 2 + 2 = 4, rather than either alternative tree's 5. That objective does not minimize every individual route.\n\n**Transfer:** If the task changes to finding the cheapest route from a chosen start vertex, the objective has changed. A shortest-path method addresses that task; selecting a minimum spanning tree first does not generally preserve its answer.\n\n### 3. msf-undirected\n\nThis explorer accepts a simple undirected graph. You enter 'A B 2', then 'B A 5'. Why must it refuse that pair of lines?\n\n**Correct answer:** Both lines name the same unordered vertex pair; this explorer excludes parallel edges.\n\nIn an undirected graph, A–B and B–A connect the same pair. The explorer deliberately permits at most one edge per unordered pair, so these two lines are a duplicate even though their weights differ. A single line may use either endpoint order. This is an input convention for this bounded explorer, not a claim that all graph algorithms exclude parallel edges.\n\n**Transfer:** Entering only 'B A 2' is valid and preserves that orientation in the trace record. The decision still tests whether A and B are already connected; reversing a single edge does not make it directed.\n\n### 4. msf-weight-order\n\nInput lines are A–B weight 4, A–C weight 1, B–C weight 2, B–D weight 5, C–D weight 3. Kruskal's rule inspects edges from smallest weight to largest. Which sequence is inspected?\n\n**Correct answer:** A–C, B–C, C–D, A–B, B–D.\n\nThe weights in inspection order are 1, 2, 3, 4 and 5. Inspection order is a global order over the edges; it is not a walk starting at A. For this graph, the first three edges connect all four vertices without a cycle. The final two edges are inspected and rejected in this explorer's complete trace.\n\n**Transfer:** Change A–B from weight 4 to weight 0 while keeping every other line fixed. A–B becomes the first edge inspected. Rebuild the trace after changing an input; a trace for the old weights is no longer evidence for the new graph.\n\n### 5. msf-cut-choice\n\nThe accepted edges currently connect A and B in one component. No accepted edge leaves that component. Available crossing edges have weights 2, 5 and 7. Why can a lightest crossing edge of weight 2 be a safe next connection in Kruskal's process?\n\n**Correct answer:** It joins two components, and the cut property allows a lightest edge across this component boundary in some minimum spanning forest extending the accepted forest.\n\nThe boundary separates {A, B} from the other vertices, and no already accepted edge crosses it. A lightest edge across that boundary is compatible with a minimum spanning forest extending the accepted choices. If it is already in a compatible minimum forest, no exchange is needed. Otherwise add it: inside its original connected component, this creates a cycle. Remove another crossing edge of at least the chosen weight to retain a minimum forest containing the chosen edge. Kruskal combines weight order with the rule that a newly accepted edge must join different components.\n\n**Transfer:** If two crossing edges both have the smallest weight, either may be a safe choice. That does not mean both must be included: adding later edges still needs a cycle check. A tie can produce different minimum spanning forests with the same total weight.\n\n### 6. msf-negative\n\nEdges are A–B weight −4, B–C weight −2, A–C weight 1, C–D weight 3 and A–D weight 9. Which minimum spanning tree total follows the weight order and cycle rule?\n\n**Correct answer:** −3, from A–B, B–C and C–D.\n\nAccept A–B (−4), then B–C (−2). A–C would close a cycle, so reject it. Accept C–D (3) to connect D, then reject A–D. The total is −4 − 2 + 3 = −3. Negative and zero weights are valid for this spanning-tree objective; the tree still has to connect every vertex and remain cycle-free.\n\n**Transfer:** Change C–D's weight from 3 to 0. The same three edges are accepted and the total becomes −6. The negative values do not authorize omitting D or adding a cycle.\n\n### 7. msf-cycle\n\nThe accepted edges are A–B and B–C. The next inspected edge is A–C. What should the explorer do?\n\n**Correct answer:** Reject it, because A and C already have a path through B.\n\nThe accepted path A→B→C already joins A to C. Adding A–C would close the cycle A–B–C–A. A cycle check compares connected components, not just whether an identical edge was previously selected. A rejected edge leaves the accepted set, component count and cumulative weight unchanged.\n\n**Transfer:** If the next edge were C–D and D were isolated, it would join different components and be accepted. That acceptance decreases the number of components by exactly one.\n\n### 8. msf-tie-order\n\nA triangle's three input lines are A–C weight 1, A–B weight 1, B–C weight 1, in that order. This explorer breaks equal-weight ties by original input line order. Which edges are accepted?\n\n**Correct answer:** A–C and A–B; B–C is then rejected.\n\nAll weights tie, so inspect A–C first and A–B second. Both connect different components. All three vertices are then connected, so B–C would close a cycle and is rejected. The total is 2. Input order makes this trace reproducible; it is not a proof that this is the only minimum tree.\n\n**Transfer:** Put B–C first, then A–B, then A–C. The accepted edges change to B–C and A–B while the total remains 2. A deterministic tie policy chooses one valid answer from potentially several.\n\n### 9. msf-component-snapshot\n\nThere are five vertices A, B, C, D and E. The accepted edges are A–C and B–D. Which connected-component snapshot is correct, including isolated vertices?\n\n**Correct answer:** {A, C}, {B, D}, {E}.\n\nA–C joins A with C, and B–D joins B with D. There is no selected path connecting those two pairs. E is an isolated component and must remain visible. Components describe reachability using the edges accepted so far, not geometric proximity in the drawing.\n\n**Transfer:** Accepting C–E merges {A, C} with {E}, leaving {A, C, E} and {B, D}. A line crossing another line in the drawing does not create a graph vertex or connection unless an endpoint says so.\n\n### 10. msf-disconnected\n\nFor vertices A through E, the available edges are A–B weight 1, B–C weight 2, A–C weight 4 and D–E weight −2. There is no edge between {A, B, C} and {D, E}. What is the final result?\n\n**Correct answer:** A minimum spanning forest with two components, three accepted edges and total 1.\n\nAccept D–E (−2), A–B (1) and B–C (2); reject A–C because it closes a cycle. The total is −2 + 1 + 2 = 1. Each original connected component has its own minimum spanning tree. No available edge can join the two components, so the result is a forest, not a spanning tree over all five vertices.\n\n**Transfer:** Add an isolated F with no new edges. The accepted edges and total stay the same, but there are now three components. For a spanning forest with n vertices and k components, the accepted edge count is n − k: 6 − 3 = 3 here.\n\n### 11. msf-singleton\n\nThe input has one vertex A and no edges. Which result follows this explorer's conventions?\n\n**Correct answer:** A connected one-vertex tree with zero edges, total 0 and zero edge decisions.\n\nA is already the only connected component. A one-vertex graph is connected, and its empty edge set is a tree with total weight 0. There are no edges to inspect, so there are zero decisions. A self-loop is neither necessary nor accepted by this simple-graph input.\n\n**Transfer:** Choose three vertices with no edges. The result has three isolated components and remains a minimum spanning forest with zero edges and total 0. It is not a connected tree.\n\n### 12. msf-count\n\nA connected graph has four vertices and five input edges. This explorer records a decision for every edge, even after a tree has formed. How many accepted edges and total edge decisions does its completed trace contain?\n\n**Correct answer:** Three accepted edges and five decisions.\n\nA tree over four vertices has 4 − 1 = 3 accepted edges. The remaining two input edges are rejected because their endpoints are already connected when they are inspected. This explorer deliberately records all five decisions. That count is not the number of sorting comparisons, component lookups, input-validation operations or rendering operations.\n\n**Transfer:** Some implementations stop once n − 1 edges have been accepted in a connected graph. This explorer continues to show why every remaining edge is excluded. Compare algorithms only after stating exactly what is being counted.\n\n## Sources and permission\n\nOriginal questions, worked examples, guide and diagrams for RecallWeave, 2026. Algorithm background: Robert Sedgewick and Kevin Wayne, Algorithms 4/e, KruskalMST documentation (https://algs4.cs.princeton.edu/code/javadoc/edu/princeton/cs/algs4/KruskalMST.html); MIT OpenCourseWare 6.046J, Lecture 12, Greedy Algorithms: Minimum Spanning Tree, Spring 2015 (https://ocw.mit.edu/courses/6-046j-design-and-analysis-of-algorithms-spring-2015/resources/lecture-12-greedy-algorithms-minimum-spanning-tree/). No source exercises, prose, code or figures are reproduced.\n\nCC0-1.0 for this original course content. Referenced materials retain their own terms and are not included in this deck.\n\nThe course's specific graphs, numerical solutions, questions, explanations, diagrams and interface are original. The references provide algorithm background; this file does not reproduce their exercises or implementation code.\n";
+const { traceMinimumSpanningForest, parseForestInput } = (() => {
+/** Original bounded Kruskal trace for the standalone course explorer. */
+function integer(value, low, high, label) {
+  if (!Number.isInteger(value) || value < low || value > high) {
+    throw new Error(label + ' must be a whole number from ' + low + ' to ' + high + '.');
+  }
+  return value;
+}
+
+function checkedGraph(vertexCount, edges) {
+  integer(vertexCount, 1, 8, 'Vertex count');
+  if (!Array.isArray(edges) || edges.length > vertexCount * (vertexCount - 1) / 2) {
+    throw new Error('Use a simple undirected graph with at most one edge per vertex pair.');
+  }
+  const pairs = new Set();
+  const copied = [];
+  for (let id = 0; id < edges.length; id++) {
+    if (!Object.hasOwn(edges, id)) throw new Error('The edge list must not contain missing entries.');
+    const edge = edges[id];
+    if (!edge || typeof edge !== 'object' || Array.isArray(edge)) {
+      throw new Error('Edge ' + (id + 1) + ' must have from, to and weight values.');
+    }
+    const from = integer(edge.from, 0, vertexCount - 1, 'Edge ' + (id + 1) + ' start');
+    const to = integer(edge.to, 0, vertexCount - 1, 'Edge ' + (id + 1) + ' end');
+    const weight = integer(edge.weight, -99, 99, 'Edge ' + (id + 1) + ' weight');
+    if (from === to) throw new Error('Edge ' + (id + 1) + ' joins a vertex to itself.');
+    const pair = Math.min(from, to) + ':' + Math.max(from, to);
+    if (pairs.has(pair)) throw new Error('Edge ' + (id + 1) + ' repeats an unordered vertex pair.');
+    pairs.add(pair);
+    copied.push(Object.freeze({ id, from, to, weight }));
+  }
+  return copied;
+}
+
+/** Return a detached, immutable decision trace; never change caller data. */
+function traceMinimumSpanningForest(vertexCount, edges) {
+  const copied = checkedGraph(vertexCount, edges);
+  const ordered = [...copied].sort((a, b) => a.weight - b.weight || a.id - b.id);
+  const parent = Array.from({ length: vertexCount }, (_, vertex) => vertex);
+  const find = vertex => {
+    while (parent[vertex] !== vertex) {
+      parent[vertex] = parent[parent[vertex]];
+      vertex = parent[vertex];
+    }
+    return vertex;
+  };
+  const components = () => {
+    const groups = new Map();
+    for (let vertex = 0; vertex < vertexCount; vertex++) {
+      const root = find(vertex);
+      if (!groups.has(root)) groups.set(root, []);
+      groups.get(root).push(vertex);
+    }
+    return Object.freeze([...groups.values()]
+      .sort((a, b) => a[0] - b[0]).map(group => Object.freeze(group)));
+  };
+  const selected = [];
+  const steps = [];
+  let totalWeight = 0;
+  for (const edge of ordered) {
+    const beforeComponents = components();
+    const left = find(edge.from), right = find(edge.to);
+    const accepted = left !== right;
+    if (accepted) {
+      parent[right] = left;
+      selected.push(edge.id);
+      totalWeight += edge.weight;
+    }
+    steps.push(Object.freeze({
+      number: steps.length + 1,
+      edgeId: edge.id,
+      from: edge.from,
+      to: edge.to,
+      weight: edge.weight,
+      accepted,
+      beforeComponents,
+      afterComponents: components(),
+      acceptedEdgeIds: Object.freeze([...selected]),
+      totalWeight
+    }));
+  }
+  const finalComponents = components();
+  return Object.freeze({
+    format: 'recallweave.minimum-spanning-forest-trace/1',
+    vertexCount,
+    edges: Object.freeze(copied),
+    orderedEdgeIds: Object.freeze(ordered.map(edge => edge.id)),
+    steps: Object.freeze(steps),
+    forestEdgeIds: Object.freeze([...selected]),
+    totalWeight,
+    components: finalComponents,
+    connected: finalComponents.length === 1,
+    decisions: steps.length
+  });
+}
+
+/** Parse the explorer's explicit vertex count and one-edge-per-line notation. */
+function parseForestInput(vertexCountText, edgeText) {
+  if (typeof vertexCountText !== 'string' || !/^[1-8]$/.test(vertexCountText.trim())) {
+    throw new Error('Choose a vertex count from 1 to 8.');
+  }
+  if (typeof edgeText !== 'string') throw new Error('Enter one edge per line, for example A B -3.');
+  const vertexCount = Number(vertexCountText.trim());
+  const edges = [];
+  const lines = edgeText.split(/\r\n|\n|\r/);
+  for (let index = 0; index < lines.length; index++) {
+    const line = lines[index].trim();
+    if (!line) continue;
+    const match = /^([A-Ha-h])[ \t]+([A-Ha-h])[ \t]+([+-]?\d+)$/.exec(line);
+    if (!match) throw new Error('Line ' + (index + 1) + ': use two vertex letters and an integer weight, such as A B -3.');
+    edges.push({
+      from: match[1].toUpperCase().charCodeAt(0) - 65,
+      to: match[2].toUpperCase().charCodeAt(0) - 65,
+      weight: Number(match[3])
+    });
+  }
+  checkedGraph(vertexCount, edges);
+  return { vertexCount, edges };
+}
+
+return { traceMinimumSpanningForest, parseForestInput };
+})();
+
+const get = id => document.getElementById(id);
+const name = vertex => String.fromCharCode(65 + vertex);
+const groupsText = groups => groups.map(group => '{' + group.map(name).join(', ') + '}').join(' · ');
+const edgeText = edge => name(edge.from) + '–' + name(edge.to);
+const examples = [
+  ['Connected graph with two cycle rejections', '4', 'A B 4\nA C 1\nB C 2\nB D 5\nC D 3'],
+  ['Equal weights: input order breaks the tie', '3', 'A C 1\nA B 1\nB C 1'],
+  ['Negative weights still use the cycle rule', '4', 'A B -4\nB C -2\nA C 1\nC D 3\nA D 9'],
+  ['Two groups and an isolated vertex', '6', 'A B 1\nB C 2\nA C 4\nD E -2'],
+  ['One vertex, no edges', '1', '']
+];
+let active = null;
+let frame = 0;
+function node(tag, text, className) {
+  const item = document.createElement(tag);
+  if (text !== undefined) item.textContent = text;
+  if (className) item.className = className;
+  return item;
+}
+function svg(tag, attrs = {}, text) {
+  const item = document.createElementNS('http://www.w3.org/2000/svg', tag);
+  for (const [key, value] of Object.entries(attrs)) item.setAttribute(key, String(value));
+  if (text !== undefined) item.textContent = text;
+  return item;
+}
+function retire(message) {
+  active = null;
+  frame = 0;
+  get('trace-view').hidden = true;
+  get('empty-view').hidden = false;
+  get('empty-message').textContent = message;
+  get('input-error').hidden = true;
+  get('input-error').textContent = '';
+  get('edges-input').removeAttribute('aria-invalid');
+  for (const id of ['first-step', 'previous-step', 'next-step', 'last-step', 'download-trace']) get(id).disabled = true;
+  get('step-announcement').textContent = message;
+}
+function state(id, next, accepted, rejected) {
+  if (accepted.has(id)) return ['accepted', 'Accepted'];
+  if (rejected.has(id)) return ['rejected', 'Cycle rejected'];
+  if (id === next?.edgeId) return ['candidate', 'Next'];
+  return ['undecided', 'Not decided'];
+}
+function draw(trace, snapshot, next, accepted, rejected) {
+  const graph = get('graph');
+  graph.replaceChildren(
+    svg('title', { id: 'graph-title' }, 'Graph after ' + frame + ' of ' + trace.decisions + ' edge decisions'),
+    svg('desc', { id: 'graph-description' }, 'Accepted components: ' + groupsText(snapshot.components) +
+      '. Check-marked solid links are accepted. Cross-marked dashed links are cycle rejections. The next edge is outlined. The table gives every exact weight and state. Crossings between lines are not vertices.'));
+  const points = Array.from({ length: trace.vertexCount }, (_, vertex) => {
+    const angle = -Math.PI / 2 + vertex * 2 * Math.PI / trace.vertexCount;
+    return trace.vertexCount === 1 ? { x: 210, y: 180 }
+      : { x: 210 + 143 * Math.cos(angle), y: 180 + 143 * Math.sin(angle) };
+  });
+  const dense = trace.edges.length > 12;
+  const labels = [], layer = svg('g', { 'aria-hidden': 'true' });
+  for (const edge of trace.edges) {
+    const a = points[edge.from], b = points[edge.to];
+    const [kind] = state(edge.id, next, accepted, rejected);
+    const coords = { x1: a.x, y1: a.y, x2: b.x, y2: b.y };
+    if (kind === 'candidate') graph.append(svg('line', { ...coords, class: 'candidate-halo' }));
+    graph.append(svg('line', { ...coords, class: 'graph-edge ' + kind }));
+    if (dense) continue;
+    const dx = b.x - a.x, dy = b.y - a.y, length = Math.hypot(dx, dy), candidates = [];
+    for (const fraction of [.5, .35, .65, .23, .77]) {
+      for (const shift of [14, -14, 34, -34, 54, -54]) {
+        candidates.push({ x: a.x + dx * fraction - dy / length * shift, y: a.y + dy * fraction + dx / length * shift });
+      }
+    }
+    const clear = p => p.x >= 44 && p.x <= 376 && p.y >= 18 && p.y <= 342
+      && points.every(v => Math.abs(v.x - p.x) > 57 || Math.abs(v.y - p.y) > 34)
+      && labels.every(v => Math.abs(v.x - p.x) > 83 || Math.abs(v.y - p.y) > 27);
+    const point = candidates.find(clear) || candidates[0];
+    labels.push(point);
+    const label = (kind === 'accepted' ? '✓ ' : kind === 'rejected' ? '× ' : kind === 'candidate' ? '→ ' : '') +
+      'E' + (edge.id + 1) + ' · ' + edge.weight;
+    const group = svg('g', { class: 'edge-label ' + kind });
+    group.append(svg('rect', { x: point.x - 40, y: point.y - 12, width: 80, height: 24, rx: 5 }),
+      svg('text', { x: point.x, y: point.y + 5, 'text-anchor': 'middle' }, label));
+    layer.append(group);
+  }
+  graph.append(layer);
+  points.forEach((p, vertex) => {
+    const group = svg('g', { class: 'graph-vertex', 'aria-hidden': 'true' });
+    group.append(svg('circle', { cx: p.x, cy: p.y, r: 19 }),
+      svg('text', { x: p.x, y: p.y + 6, 'text-anchor': 'middle' }, name(vertex)));
+    graph.append(group);
+  });
+  get('dense-note').hidden = !dense;
+}
+function render() {
+  const trace = active.trace, last = trace.steps[frame - 1], next = trace.steps[frame];
+  const snapshot = last ? { components: last.afterComponents, accepted: last.acceptedEdgeIds, total: last.totalWeight }
+    : { components: Array.from({ length: trace.vertexCount }, (_, vertex) => [vertex]), accepted: [], total: 0 };
+  const accepted = new Set(snapshot.accepted);
+  const rejected = new Set(trace.steps.slice(0, frame).filter(step => !step.accepted).map(step => step.edgeId));
+  get('trace-view').hidden = false;
+  get('empty-view').hidden = true;
+  get('trace-heading').textContent = 'Your forest, after ' + frame + ' edge decisions';
+  get('step-count').textContent = frame + ' / ' + trace.decisions;
+  get('accepted-count').textContent = snapshot.accepted.length;
+  get('component-count').textContent = snapshot.components.length;
+  get('total-weight').textContent = snapshot.total;
+  get('components').replaceChildren(...snapshot.components.map(group => node('li', '{' + group.map(name).join(', ') + '}', 'component')));
+  get('last-decision').textContent = last
+    ? (last.accepted ? 'Accept ' : 'Reject ') + 'E' + (last.edgeId + 1) + ' (' + edgeText(last) + ', weight ' + last.weight + '): ' +
+      (last.accepted ? 'its endpoints were in different components. Components decrease from ' + last.beforeComponents.length + ' to ' + last.afterComponents.length + '.'
+        : 'its endpoints were already connected, so it would create a cycle. The forest and total stay unchanged.')
+    : 'None yet. Every vertex starts in its own component, including isolated vertices.';
+  get('next-decision').textContent = next
+    ? 'Next is E' + (next.edgeId + 1) + ' (' + edgeText(next) + ', weight ' + next.weight + '). Predict: does it join two components, or close a cycle?'
+    : 'Every input edge has been decided. Previous and First revisit the exact earlier snapshots.';
+  const complete = frame === trace.decisions;
+  get('result').hidden = !complete;
+  if (complete) {
+    get('result-heading').textContent = trace.connected ? 'A connected minimum spanning tree' : 'A minimum spanning forest';
+    get('result-summary').textContent = trace.forestEdgeIds.length + ' accepted edges · total weight ' + trace.totalWeight + ' · ' +
+      trace.components.length + (trace.connected ? ' component.' : ' components.');
+    get('result-explanation').textContent = trace.connected
+      ? (trace.vertexCount === 1 ? 'A one-vertex graph is connected. Its empty tree needs zero edges and zero decisions.'
+        : 'Every vertex is connected without a cycle. The chosen edges minimize their total weight.')
+      : 'The input is disconnected. Each original connected component has its own minimum tree; isolated vertices remain visible. No missing connection is invented.';
+  }
+  get('edge-body').replaceChildren(...trace.orderedEdgeIds.map((id, index) => {
+    const edge = trace.edges[id], [kind, label] = state(id, next, accepted, rejected);
+    const row = node('tr', undefined, 'edge-row ' + kind);
+    row.dataset.edge = String(id);
+    if (kind === 'candidate') row.setAttribute('aria-current', 'step');
+    for (const text of [index + 1, 'E' + (id + 1) + ' · ' + edgeText(edge), edge.weight, label]) row.append(node('td', String(text)));
+    return row;
+  }));
+  get('edge-table').hidden = trace.edges.length === 0;
+  get('no-edges').hidden = trace.edges.length !== 0;
+  get('history-body').replaceChildren(...trace.steps.slice(0, frame).map(step => {
+    const row = node('tr');
+    for (const text of [step.number, 'E' + (step.edgeId + 1) + ' · ' + edgeText(step), step.weight,
+      step.accepted ? 'Accept: join components' : 'Reject: cycle', groupsText(step.afterComponents), step.totalWeight]) row.append(node('td', String(text)));
+    return row;
+  }));
+  get('history-table').hidden = frame === 0;
+  get('no-history').hidden = frame !== 0;
+  get('first-step').disabled = get('previous-step').disabled = frame === 0;
+  get('next-step').disabled = get('last-step').disabled = complete;
+  get('download-trace').disabled = false;
+  draw(trace, snapshot, next, accepted, rejected);
+  get('step-announcement').textContent = 'Decision ' + frame + ' of ' + trace.decisions + '. ' + get('last-decision').textContent +
+    ' ' + snapshot.components.length + ' components; total weight ' + snapshot.total + '.' +
+    (complete ? ' Complete. ' + get('result-heading').textContent + '.' : '');
+}
+get('search-form').addEventListener('submit', event => {
+  event.preventDefault();
+  const entered = { vertexCount: get('vertex-count').value, edges: get('edges-input').value };
+  retire('Build a trace to inspect this graph.');
+  try {
+    const graph = parseForestInput(entered.vertexCount, entered.edges);
+    active = { entered, trace: traceMinimumSpanningForest(graph.vertexCount, graph.edges) };
+    render();
+    get('trace-heading').focus();
+  } catch (error) {
+    retire('Correct the input, then build a new trace.');
+    get('input-error').textContent = error.message;
+    get('input-error').hidden = false;
+    get('edges-input').setAttribute('aria-invalid', 'true');
+    get('edges-input').focus();
+  }
+});
+for (const id of ['vertex-count', 'edges-input']) get(id).addEventListener('input', () => retire('Inputs changed. Build a new trace to inspect these edges.'));
+for (const [id, choose] of [['first-step', () => 0], ['previous-step', () => frame - 1], ['next-step', () => frame + 1], ['last-step', () => active.trace.steps.length]]) {
+  get(id).addEventListener('click', () => {
+    if (!active) return;
+    frame = Math.max(0, Math.min(active.trace.steps.length, choose()));
+    render();
+  });
+}
+examples.forEach((example, index) => get('example').append(new Option(example[0], String(index))));
+get('apply-example').addEventListener('click', () => {
+  const selected = get('example').value;
+  if (selected === '') { get('file-status').textContent = 'Choose an example, then select Use example.'; return; }
+  const example = examples[Number(selected)];
+  get('vertex-count').value = example[1];
+  get('edges-input').value = example[2];
+  retire('Example loaded. Build its trace when you are ready.');
+  get('edges-input').focus();
+});
+function download(filename, text, type) {
+  let url, link;
+  try {
+    url = URL.createObjectURL(new Blob([text], { type }));
+    link = node('a');
+    link.href = url;
+    link.download = filename;
+    link.hidden = true;
+    document.body.append(link);
+    link.click();
+    get('file-status').textContent = 'Download requested: ' + filename + '.';
+  } catch {
+    get('file-status').textContent = 'The browser could not start the download. Your inputs and trace remain here.';
+  } finally {
+    link?.remove();
+    if (url) setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+}
+get('download-trace').addEventListener('click', () => {
+  if (!active) return;
+  download('minimum-spanning-forest-trace.json', JSON.stringify({
+    format: 'recallweave.minimum-spanning-forest-export/1',
+    entered: active.entered,
+    selectedDecision: frame,
+    trace: active.trace
+  }, null, 2) + '\n', 'application/json;charset=utf-8');
+});
+get('download-course').addEventListener('click', () => download('minimum-spanning-forest.json', SOURCE_DECK, 'application/json;charset=utf-8'));
+get('download-guide').addEventListener('click', () => download('minimum-spanning-forest.md', SOURCE_GUIDE, 'text/markdown;charset=utf-8'));
+
+</script>
+</body>
+</html>

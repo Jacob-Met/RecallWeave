@@ -424,3 +424,12 @@ An exact root, a zero slope away from a root, a repeated cycle, a chosen step li
 Download the **[twelve-question lesson](courses/newton-method.json)** from the explorer or this link, then use the existing learner’s file preview and **Start this deck** controls. The **[worked guide](courses/newton-method.md)** derives the tangent update and the original examples, with exact fractions and explicit limits. The explorer includes the exact lesson and guide download bytes and works as a standalone local file.
 
 Build with node tools/build-newton-method.mjs; add --check to verify its generated page. Run the focused checks with node --test tests/newton-method.test.mjs tests/newton-method-course.test.mjs. The [receiving packet](docs/receiving/newton-method-c77045b4/README.md) contains independent mathematical and actual browser/course evidence.
+
+## Connect a graph with minimum total weight
+
+Open [the minimum-spanning-forest explorer](courses/minimum-spanning-forest-explorer.html) directly in a browser. Enter an undirected graph with up to eight vertices and integer weights, then inspect Kruskal's accepted edges, cycle rejections, component snapshots and running total. Equal weights follow the original input order; negative weights, disconnected graphs, isolated vertices and a single-vertex empty tree are explicit examples.
+
+**Build forest trace**, then use **Next**, **Previous**, **First** or **Finish**. Editing either input retires the old trace. The page records a decision for every edge, including later cycle rejections; this count excludes sorting comparisons, component lookups, validation and rendering. A minimum spanning forest minimizes the total chosen connection weight, not every shortest route.
+
+Download the full trace with its original entered text and selected frame, or save the original [twelve-question course](courses/minimum-spanning-forest.json) and [worked guide](courses/minimum-spanning-forest.md). Open the JSON through the learner's existing **Bring your own lesson** preview and **Start this deck** flow. No network, account, automatic storage or learner-session modification is involved. Rebuild the standalone page with `node tools/build-minimum-spanning-forest.mjs`; add `--check` to verify exact source parity.
+
