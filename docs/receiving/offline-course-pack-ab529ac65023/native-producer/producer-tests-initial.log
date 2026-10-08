@@ -1,0 +1,218 @@
+TAP version 13
+# Subtest: pack preserves exact raw bytes in one deterministic, directly openable folder
+ok 1 - pack preserves exact raw bytes in one deterministic, directly openable folder
+  ---
+  duration_ms: 2922.897384
+  type: 'test'
+  ...
+# Subtest: --check refuses missing and stale artifacts without creating or changing files
+ok 2 - --check refuses missing and stale artifacts without creating or changing files
+  ---
+  duration_ms: 1071.426657
+  type: 'test'
+  ...
+# Subtest: invalid arguments are refused before publication or input access
+    # Subtest: ["--help"]
+    ok 1 - ["--help"]
+      ---
+      duration_ms: 601.691298
+      type: 'test'
+      ...
+    # Subtest: ["extra"]
+    ok 2 - ["extra"]
+      ---
+      duration_ms: 730.465987
+      type: 'test'
+      ...
+    # Subtest: ["--check","extra"]
+    ok 3 - ["--check","extra"]
+      ---
+      duration_ms: 438.938798
+      type: 'test'
+      ...
+    # Subtest: ["--check","--check"]
+    ok 4 - ["--check","--check"]
+      ---
+      duration_ms: 303.79027
+      type: 'test'
+      ...
+    # Subtest: [""]
+    ok 5 - [""]
+      ---
+      duration_ms: 354.979687
+      type: 'test'
+      ...
+    1..5
+ok 3 - invalid arguments are refused before publication or input access
+  ---
+  duration_ms: 2435.124013
+  type: 'test'
+  ...
+# Subtest: invalid registration never replaces a previous archive
+    # Subtest: []
+    ok 1 - []
+      ---
+      duration_ms: 497.93166
+      type: 'test'
+      ...
+    # Subtest: ["courses/z-course.json","courses/z-course.json"]
+    ok 2 - ["courses/z-course.json","courses/z-course.json"]
+      ---
+      duration_ms: 330.253568
+      type: 'test'
+      ...
+    # Subtest: ["../outside.json"]
+    ok 3 - ["../outside.json"]
+      ---
+      duration_ms: 334.455696
+      type: 'test'
+      ...
+    # Subtest: ["/outside.json"]
+    ok 4 - ["/outside.json"]
+      ---
+      duration_ms: 424.424372
+      type: 'test'
+      ...
+    # Subtest: ["courses/sub/file.json"]
+    ok 5 - ["courses/sub/file.json"]
+      ---
+      duration_ms: 455.761799
+      type: 'test'
+      ...
+    # Subtest: ["courses\\\\file.json"]
+    ok 6 - ["courses\\\\file.json"]
+      ---
+      duration_ms: 501.676892
+      type: 'test'
+      ...
+    # Subtest: [null]
+    ok 7 - [null]
+      ---
+      duration_ms: 475.229226
+      type: 'test'
+      ...
+    # Subtest: {"courses":["courses/a-course.json"]}
+    ok 8 - {"courses":["courses/a-course.json"]}
+      ---
+      duration_ms: 662.55971
+      type: 'test'
+      ...
+    # Subtest: ["courses/course-0.json","courses/course-1.json","courses/course-2.json","courses/course-3.json","co
+    ok 9 - ["courses/course-0.json","courses/course-1.json","courses/course-2.json","courses/course-3.json","co
+      ---
+      duration_ms: 445.077679
+      type: 'test'
+      ...
+    1..9
+ok 4 - invalid registration never replaces a previous archive
+  ---
+  duration_ms: 4136.663894
+  type: 'test'
+  ...
+# Subtest: catalog and course mismatches are rejected, then exact updated bytes can be published
+ok 5 - catalog and course mismatches are rejected, then exact updated bytes can be published
+  ---
+  duration_ms: 1157.571791
+  type: 'test'
+  ...
+# Subtest: missing, malformed, oversized and linked inputs are refused before publishing
+    # Subtest: missing learner
+    ok 1 - missing learner
+      ---
+      duration_ms: 312.478626
+      type: 'test'
+      ...
+    # Subtest: invalid UTF-8 learner
+    ok 2 - invalid UTF-8 learner
+      ---
+      duration_ms: 465.823099
+      type: 'test'
+      ...
+    # Subtest: invalid UTF-8 course
+    ok 3 - invalid UTF-8 course
+      ---
+      duration_ms: 1027.991299
+      type: 'test'
+      ...
+    # Subtest: non-JSON course
+    ok 4 - non-JSON course
+      ---
+      duration_ms: 383.282516
+      type: 'test'
+      ...
+    # Subtest: oversized learner
+    ok 5 - oversized learner
+      ---
+      duration_ms: 528.763974
+      type: 'test'
+      ...
+    # Subtest: missing catalog data
+    ok 6 - missing catalog data
+      ---
+      duration_ms: 295.585406
+      type: 'test'
+      ...
+    # Subtest: duplicate catalog data
+    ok 7 - duplicate catalog data
+      ---
+      duration_ms: 272.671107
+      type: 'test'
+      ...
+    # Subtest: wrong catalog data element
+    ok 8 - wrong catalog data element
+      ---
+      duration_ms: 614.596256
+      type: 'test'
+      ...
+    # Subtest: course symlink
+    ok 9 - course symlink
+      ---
+      duration_ms: 396.011241
+      type: 'test'
+      ...
+    # Subtest: output symlink
+    ok 10 - output symlink
+      ---
+      duration_ms: 301.361691
+      type: 'test'
+      ...
+    # Subtest: output directory
+    ok 11 - output directory
+      ---
+      duration_ms: 189.870944
+      type: 'test'
+      ...
+    1..11
+ok 6 - missing, malformed, oversized and linked inputs are refused before publishing
+  ---
+  duration_ms: 4792.447779
+  type: 'test'
+  ...
+# Subtest: write synchronization and atomic replacement failures keep the previous archive and clean temporary files
+    # Subtest: fsync
+    ok 1 - fsync
+      ---
+      duration_ms: 446.333517
+      type: 'test'
+      ...
+    # Subtest: replace
+    ok 2 - replace
+      ---
+      duration_ms: 251.483912
+      type: 'test'
+      ...
+    1..2
+ok 7 - write synchronization and atomic replacement failures keep the previous archive and clean temporary files
+  ---
+  duration_ms: 703.482478
+  type: 'test'
+  ...
+1..7
+# tests 34
+# suites 0
+# pass 34
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 19109.992764
