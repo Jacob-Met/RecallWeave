@@ -1,0 +1,212 @@
+{
+  "format": "recallweave-deck/1",
+  "title": "Shortest paths: from a promising route to a proven distance",
+  "attribution": "Original directed graphs, questions, distractors and worked explanations for RecallWeave. Algorithm background: MIT OpenCourseWare, 6.006 Introduction to Algorithms (Spring 2020), Erik Demaine, Jason Ku and Justin Solomon, Lectures 11 and 13: https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/pages/lecture-notes/. No reference exercise, figure or passage is copied. AI assistance was used in drafting and implementation.",
+  "license": "Original course content authored for Jacob’s RecallWeave project; no additional reuse license is granted here. Linked reference material retains its published terms.",
+  "concepts": [
+    "weighted-paths",
+    "tentative-distances",
+    "settling-vertices",
+    "algorithm-limits"
+  ],
+  "items": [
+    {
+      "id": "sp-cost",
+      "concept": "weighted-paths",
+      "prerequisites": [],
+      "prompt": "A directed graph has exactly these edges: S → A costs 4, A → T costs 3, and S → T costs 9. Which route from S to T has the smallest total weight?",
+      "options": [
+        "The direct route, with total cost 9",
+        "Both routes, because each reaches T",
+        "The route through A, with total cost 7",
+        "The direct route, because it uses one edge"
+      ],
+      "answer": 2,
+      "explanation": "The two possible routes cost 9 and 4 + 3 = 7. A weighted shortest path minimizes the sum of its edge weights, so S → A → T wins despite using more edges. Reaching the same destination does not make the costs equal.",
+      "transfer": "If the direct edge changed to 6, which route would become cheaper? State the new total, not just the number of edges."
+    },
+    {
+      "id": "sp-direction",
+      "concept": "weighted-paths",
+      "prerequisites": [],
+      "prompt": "A graph contains only the directed edges S → A with weight 2 and A → T with weight 2. What can you conclude about a route from T back to S?",
+      "options": [
+        "There is no directed route from T to S",
+        "T → A → S costs 4 because the edges are reversible",
+        "T → S costs 0 because S was the original source",
+        "T → A → S costs 2 because only one edge counts"
+      ],
+      "answer": 0,
+      "explanation": "The arrows permit movement from S to A and then to T. They do not provide either reverse edge. From T there is no outgoing edge at all, so S is unreachable from T. Reversing a route is valid only when the needed reverse edges actually exist.",
+      "transfer": "Add the smallest number of directed edges needed to make T able to reach S. Explain why one direct edge is enough."
+    },
+    {
+      "id": "sp-zero",
+      "concept": "weighted-paths",
+      "prerequisites": [],
+      "prompt": "The only directed edges are S → A with weight 0, A → T with weight 3, and S → T with weight 4. What is the shortest-path cost from S to T?",
+      "options": [
+        "4 along S → T",
+        "0 along S → A",
+        "7 by adding every listed edge",
+        "3 along S → A → T"
+      ],
+      "answer": 3,
+      "explanation": "S → A → T costs 0 + 3 = 3, which is less than 4. A zero-weight edge is allowed by the nonnegative-weight condition. Stopping at A does not reach T, and a route does not include every edge in the graph.",
+      "transfer": "Does adding a zero-weight edge necessarily create a zero-cost route to every vertex? Give a counterexample using this graph."
+    },
+    {
+      "id": "sp-relax",
+      "concept": "tentative-distances",
+      "prerequisites": [
+        "weighted-paths"
+      ],
+      "prompt": "In Dijkstra’s algorithm, S has been settled. A has tentative distance 4 and B has tentative distance 1. The directed edge B → A has weight 2. B is settled next. What should relaxing B → A do?",
+      "options": [
+        "Keep A at 4 because its first route was recorded",
+        "Set A to 3 and record B as its predecessor",
+        "Set A to 2 using only the B → A edge weight",
+        "Set A to 1 by copying B’s tentative distance"
+      ],
+      "answer": 1,
+      "explanation": "The new route to A goes through B, so its cost is distance(B) + weight(B → A) = 1 + 2 = 3. Because 3 is below the old estimate 4, the algorithm replaces A’s distance and predecessor. A discovered distance remains tentative until that vertex is settled.",
+      "transfer": "If B → A instead cost 5, would A’s recorded distance or predecessor change? Compare the complete candidate cost with 4."
+    },
+    {
+      "id": "sp-initialize",
+      "concept": "tentative-distances",
+      "prerequisites": [
+        "weighted-paths"
+      ],
+      "prompt": "A fresh Dijkstra run starts at S. The graph contains S, A and T, with edges S → A of weight 3 and A → T of weight 2. Before settling any vertex or relaxing any edge, how should the distance table be initialized?",
+      "options": [
+        "S, A and T all start at 0",
+        "S is 0; A is 3; T is 5",
+        "S is unreached; A is 3; T is 2",
+        "S is 0; A and T are unreached"
+      ],
+      "answer": 3,
+      "explanation": "The empty route from S to itself costs 0. No other route has been explored yet, so A and T start unreached, conventionally written as infinity. A distance of 3 or 5 can be discovered later; it is not part of initialization.",
+      "transfer": "What should the source-to-source distance be even when S has no outgoing edges? Explain the role of the empty route."
+    },
+    {
+      "id": "sp-no-improvement",
+      "concept": "tentative-distances",
+      "prerequisites": [
+        "weighted-paths"
+      ],
+      "prompt": "C is unsettled with tentative distance 8 and an existing predecessor. B is now settled at distance 3. The directed edge B → C has weight 7. How should this relaxation update C?",
+      "options": [
+        "Replace C by 7, the new edge’s weight",
+        "Keep C at 8 and keep its existing predecessor",
+        "Replace C by 10 and set its predecessor to B",
+        "Add 8 and 7 to record all routes into C"
+      ],
+      "answer": 1,
+      "explanation": "The route through B costs 3 + 7 = 10. It is worse than the existing route of cost 8, so neither the distance nor the predecessor changes. Relaxation compares candidate routes; it does not add competing route costs together.",
+      "transfer": "What is the largest whole-number weight for B → C that would strictly improve the current distance 8? Check the strict inequality."
+    },
+    {
+      "id": "sp-minimum",
+      "concept": "settling-vertices",
+      "prerequisites": [
+        "tentative-distances"
+      ],
+      "prompt": "The unsettled vertices with discovered routes are A at tentative distance 6, B at 2, and C at 4. All edge weights are nonnegative. Which vertex should Dijkstra settle next?",
+      "options": [
+        "B, because its tentative distance of 2 is the minimum",
+        "A, because its label comes first alphabetically",
+        "C, because its value lies between the other two",
+        "No vertex, because every remaining distance must first be equal"
+      ],
+      "answer": 0,
+      "explanation": "Dijkstra selects the unsettled vertex with the smallest current total distance from the source: B at 2. Labels are useful only for breaking equal-distance ties. The rule is not to pick a median value or wait for equal distances.",
+      "transfer": "If A also had tentative distance 2, could settling A before B still be correct? Distinguish a tie policy from the shortest-path guarantee."
+    },
+    {
+      "id": "sp-target",
+      "concept": "settling-vertices",
+      "prerequisites": [
+        "tentative-distances"
+      ],
+      "prompt": "The only directed edges are S → T (9), S → A (2), A → B (1), and B → T (2). Settling S first discovers T at 9. In a target-only Dijkstra search with nonnegative weights, when is it safe to stop with a final distance for T?",
+      "options": [
+        "As soon as the first outgoing edge reaches T",
+        "After visiting the vertex named immediately before T",
+        "When T is selected as the minimum and settled",
+        "When the direct S → T edge has been checked twice"
+      ],
+      "answer": 2,
+      "explanation": "Discovery is not settlement. A is next at 2, then B at 3, which improves T to 5. When T becomes the minimum unsettled discovered vertex and is settled, its distance is final. A target-only search can stop there; solving distances to every reachable vertex may continue.",
+      "transfer": "After settling only S, give the displayed distance for T and say whether it is tentative or final. Then give its eventual final value."
+    },
+    {
+      "id": "sp-tie",
+      "concept": "settling-vertices",
+      "prerequisites": [
+        "tentative-distances"
+      ],
+      "prompt": "The edges are S → A (2), S → B (2), A → T (3), and B → T (3). This trace breaks equal-distance vertex ties alphabetically and keeps the first predecessor when a new route has equal cost. After A sets T to 5, B is settled. What happens to T?",
+      "options": [
+        "T becomes 2 because A and B have equal distances",
+        "T stays at 5; this trace keeps A as its predecessor",
+        "T becomes 10 because two different routes reach it",
+        "T must switch to B because B was processed more recently"
+      ],
+      "answer": 1,
+      "explanation": "B offers another route of cost 2 + 3 = 5. It is equally short, so the stated policy keeps T’s existing predecessor A. Both S → A → T and S → B → T are shortest routes. A reproducible tie choice does not make the other route incorrect.",
+      "transfer": "If a different implementation kept B on equal cost, which result must still agree with this one: the predecessor, the distance, or both? Explain."
+    },
+    {
+      "id": "sp-negative",
+      "concept": "algorithm-limits",
+      "prerequisites": [
+        "settling-vertices"
+      ],
+      "prompt": "Consider a graph with only S → T (2), S → A (5), and A → T (−4). A Dijkstra variant stops when it settles T. Why does allowing this negative edge invalidate that stopping guarantee?",
+      "options": [
+        "It must report 1 because negative edges are always examined first",
+        "It must report −4 because that is the lightest individual edge",
+        "It must declare T unreachable whenever a negative edge exists",
+        "It could report 2 even though S → A → T costs 1"
+      ],
+      "answer": 3,
+      "explanation": "After settling S, T has estimate 2 and A has estimate 5. Settling T next would stop at 2, but the route through A costs 5 − 4 = 1. The graph has no cycle; a negative cycle is not required for this failure. The explorer refuses negative weights instead of presenting Dijkstra’s result as guaranteed.",
+      "transfer": "Why does adding the same positive constant to every edge fail as a general repair? Compare a one-edge route with a two-edge route."
+    },
+    {
+      "id": "sp-unreachable",
+      "concept": "algorithm-limits",
+      "prerequisites": [
+        "settling-vertices"
+      ],
+      "prompt": "A run starts at S in a graph containing only S → A (0) and A → B (2), plus an isolated vertex X. All reachable vertices have been settled and the frontier is empty. X has never received a finite distance. What does this mean?",
+      "options": [
+        "X has cost 0 because no edge was traversed to reach it",
+        "X takes the largest finite distance already in the table",
+        "No directed path from S to X exists; X is unreachable",
+        "X must be removed before any other result can be read"
+      ],
+      "answer": 2,
+      "explanation": "Every discovered reachable vertex has been processed. No directed path from S reaches X, so X remains unreachable rather than receiving cost 0 or a copied finite value. Infinity or an explicit unreachable marker describes absence of a path; it is not an unusually large route cost.",
+      "transfer": "How would the answer change if the edge B → X of weight 0 were added? Calculate X’s new distance."
+    },
+    {
+      "id": "sp-proof",
+      "concept": "algorithm-limits",
+      "prerequisites": [
+        "settling-vertices"
+      ],
+      "prompt": "Assume Dijkstra has correctly settled earlier vertices and every edge weight is nonnegative. U is the minimum unsettled vertex at distance 4. Which argument explains why a still-hidden route cannot later make U cheaper than 4?",
+      "options": [
+        "A cheaper path would already have exposed a frontier estimate below 4 when it first left the settled set",
+        "All other tentative distances must already be final, so no later relaxation can improve any recorded route",
+        "The last edge used to reach U is the cheapest edge in the whole graph, so the complete path must be shortest",
+        "U cannot have an incoming edge from an unsettled vertex, because nonnegative graphs cannot contain cycles"
+      ],
+      "answer": 0,
+      "explanation": "Suppose a cheaper route existed. Follow it from S to the first unsettled vertex Y. Its predecessor X was already settled with a final distance, so processing X offered Y a route costing no more than that prefix. Nonnegative remaining edges make this prefix no greater than the supposedly cheaper full route. Y would therefore have an estimate below 4, contradicting the choice of U as the minimum.",
+      "transfer": "Point to the step in this argument that fails when a remaining edge can have negative weight. Use the three-edge example S → T (2), S → A (5), A → T (−4)."
+    }
+  ]
+}
