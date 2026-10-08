@@ -1,0 +1,216 @@
+{
+  "format": "recallweave-deck/1",
+  "title": "When groups and totals disagree",
+  "attribution": "Original fictional examples and wording by the RecallWeave project. Conceptual references: Judea Pearl, Understanding Simpson's Paradox, UCLA technical report R-414 (2013), https://ftp.cs.ucla.edu/pub/stat_ser/r414.pdf; Penn State STAT 555, Tables and Count Data, https://online.stat.psu.edu/stat555/node/10/.",
+  "license": "Original course wording and fictional examples may be used, copied and adapted with attribution to RecallWeave. Linked reference works retain their own licenses; no source passages, figures or study data are reproduced.",
+  "concepts": [
+    "Denominators",
+    "Group composition",
+    "Reference mix",
+    "Causal questions"
+  ],
+  "items": [
+    {
+      "id": "grouped-denominator",
+      "concept": "Denominators",
+      "prerequisites": [],
+      "prompt": "In a fictional puzzle log, option A records 42 successes in 70 newcomer attempts and 18 successes in 20 experienced-player attempts. Which fraction gives A's success rate among newcomers?",
+      "options": [
+        "42 / 90",
+        "60 / 90",
+        "42 / 70",
+        "70 / 90"
+      ],
+      "answer": 2,
+      "explanation": "The requested group is newcomers using A, so its successes and attempts are the numerator and denominator: 42/70 = 60%. The other group's 20 attempts do not belong in this conditional rate.",
+      "transfer": "For a percentage you encounter, name exactly which records belong in its denominator before comparing it with another percentage."
+    },
+    {
+      "id": "grouped-pooling",
+      "concept": "Denominators",
+      "prerequisites": [],
+      "prompt": "Option A has 42 successes in 70 newcomer attempts and 18 in 20 experienced-player attempts. What is its success rate over all 90 recorded attempts?",
+      "options": [
+        "60 / 90, about 66.67%",
+        "75 / 100, exactly 75%",
+        "42 / 70, exactly 60%",
+        "18 / 20, exactly 90%"
+      ],
+      "answer": 0,
+      "explanation": "Add the successes and add the attempts: (42+18)/(70+20) = 60/90 = 2/3. Averaging 60% and 90% equally would answer a different question because the groups contain 70 and 20 attempts.",
+      "transfer": "Two batches contain 1 success in 2 attempts and 8 in 8. Calculate the pooled rate from counts, then explain why the unweighted average of the two rates differs."
+    },
+    {
+      "id": "grouped-points",
+      "concept": "Denominators",
+      "prerequisites": [],
+      "prompt": "A's pooled rate is exactly 2/3. B's pooled rate is 77/100. By approximately how many percentage points is B higher?",
+      "options": [
+        "15.50 percentage points",
+        "10.33 percentage points",
+        "0.1033 percentage points",
+        "77.00 percentage points"
+      ],
+      "answer": 1,
+      "explanation": "The difference in proportions is 77/100 - 2/3 = 31/300. Multiply by 100 to obtain 10 1/3 percentage points. A relative percentage increase would use a further division by A's rate and is a different quantity.",
+      "transfer": "A rate changes from 40% to 50%. State the change in percentage points and, separately, the relative percentage increase."
+    },
+    {
+      "id": "grouped-weights",
+      "concept": "Group composition",
+      "prerequisites": [
+        "Denominators"
+      ],
+      "prompt": "A has newcomer rate 60% (42/70) and experienced-player rate 90% (18/20). B has newcomer rate 50% (5/10) and experienced-player rate 80% (72/90). Which group-composition statement explains how B can have the higher pooled rate?",
+      "options": [
+        "A gives greater weight to experienced players, its higher-rate group.",
+        "Each pooled rate gives equal weight to the two observed groups.",
+        "Both pooled rates use only the larger of the two group denominators.",
+        "B gives greater weight to experienced players, its higher-rate group."
+      ],
+      "answer": 3,
+      "explanation": "Experienced players account for 20/90 of A's attempts but 90/100 of B's. B therefore places much more of its own sample weight on a group with higher success rates. A's pooled rate is about 66.67%; B's is 77%. All four conditional rates and both pooled rates can be correct.",
+      "transfer": "For either option, keep its within-group rates fixed. How would its pooled rate change if a larger share of its attempts came from its higher-rate group? Explain the weighting without claiming new observations."
+    },
+    {
+      "id": "grouped-reversal",
+      "concept": "Group composition",
+      "prerequisites": [
+        "Denominators"
+      ],
+      "prompt": "The same fictional logs give A versus B rates of 60% versus 50% among newcomers, 90% versus 80% among experienced players, and about 66.67% versus 77% when pooled. Which statement is supported by those recorded counts?",
+      "options": [
+        "B has a higher rate in both groups; A has a higher pooled rate.",
+        "Choosing A causes every player's chance of success to increase.",
+        "At least one of the six descriptive rates is arithmetically impossible.",
+        "A has a higher rate in both groups; B has a higher pooled rate."
+      ],
+      "answer": 3,
+      "explanation": "The association reverses direction between both within-group comparisons and the pooled comparison. This is the strict two-group form of Simpson's reversal used in the explorer. The counts describe recorded outcomes; they do not identify what changing an option would cause for a player.",
+      "transfer": "Describe a reversal using only observed fractions. Then write a separate causal question that those fractions alone do not answer."
+    },
+    {
+      "id": "grouped-opposing",
+      "concept": "Group composition",
+      "prerequisites": [
+        "Denominators"
+      ],
+      "prompt": "In another fictional sample, newcomer rates are A: 8/10 and B: 6/10. Experienced-player rates are A: 4/10 and B: 9/10. Does this show the strict pattern of both within-group comparisons reversing when pooled?",
+      "options": [
+        "Yes, because B has the higher rate after the counts are pooled.",
+        "No, because the two within-group comparisons point opposite ways.",
+        "No, because equally sized groups can never have different rates.",
+        "Yes, because any difference between group rates is a reversal."
+      ],
+      "answer": 1,
+      "explanation": "A is higher among newcomers, while B is higher among experienced players. There is no single strict direction shared by both groups to reverse. B's pooled 15/20 exceeds A's 12/20, but that does not change the conflicting group directions.",
+      "transfer": "Construct a case where one subgroup is tied. Explain why a tie should not be silently labeled as a strict advantage."
+    },
+    {
+      "id": "grouped-common-mix",
+      "concept": "Reference mix",
+      "prerequisites": [
+        "Denominators",
+        "Group composition"
+      ],
+      "prompt": "Keep the first sample's group rates fixed: newcomers A 60%, B 50%; experienced players A 90%, B 80%. What are the reference rates if both options use a 50% newcomer / 50% experienced mix?",
+      "options": [
+        "A 75%; B 65%",
+        "A about 66.67%; B 77%",
+        "A 90%; B 80%",
+        "A 60%; B 50%"
+      ],
+      "answer": 0,
+      "explanation": "Apply the same weights to both options: A = 0.5×0.60 + 0.5×0.90 = 0.75, and B = 0.5×0.50 + 0.5×0.80 = 0.65. These reference rates answer a chosen same-mix question. They do not replace the recorded pooled rates or change the original counts.",
+      "transfer": "Why is selecting a reference population part of defining the comparison, rather than discovering the uniquely correct population from the table?"
+    },
+    {
+      "id": "grouped-reference-change",
+      "concept": "Reference mix",
+      "prerequisites": [
+        "Denominators",
+        "Group composition"
+      ],
+      "prompt": "A's newcomer rate is 60% and experienced-player rate is 90%. Apply a reference mix of 20% newcomers and 80% experienced players. What reference rate results?",
+      "options": [
+        "72%",
+        "75%",
+        "84%",
+        "80%"
+      ],
+      "answer": 2,
+      "explanation": "Use 0.20×0.60 + 0.80×0.90 = 0.84. B's corresponding 50% and 80% group rates would give 74%, retaining A's 10-percentage-point advantage. A weighted average using the same nonnegative weights cannot reverse a strict advantage present in every included group.",
+      "transfer": "Choose another common mix and compute both reference rates. Keep the original sample counts and pooled rates written alongside the new comparison."
+    },
+    {
+      "id": "grouped-empty-support",
+      "concept": "Reference mix",
+      "prerequisites": [
+        "Denominators",
+        "Group composition"
+      ],
+      "prompt": "A has no recorded newcomer attempts (0 successes out of 0) and 9 successes in 10 experienced-player attempts. What can the explorer report for A at a reference mix of 50% newcomers and 50% experienced players?",
+      "options": [
+        "45%: treat unobserved newcomers as having zero successes.",
+        "Unavailable: one positive-weight group has no observed rate.",
+        "90%: apply the observed experienced rate to both groups.",
+        "100%: remove the empty group from every denominator."
+      ],
+      "answer": 1,
+      "explanation": "Zero attempts do not establish a 0% success rate. The newcomer component is needed at this reference mix but unavailable. Assigning it zero or borrowing the other group's rate would add an assumption absent from the data.",
+      "transfer": "Describe the difference between zero successes in ten attempts and zero successes in zero attempts. Which one establishes an observed rate?"
+    },
+    {
+      "id": "grouped-zero-weight",
+      "concept": "Reference mix",
+      "prerequisites": [
+        "Denominators",
+        "Group composition"
+      ],
+      "prompt": "A still has 0/0 newcomer attempts and 9/10 experienced-player attempts. Now the reference mix contains 0% newcomers and 100% experienced players. What reference rate can be computed without filling in a missing rate?",
+      "options": [
+        "90%",
+        "0%",
+        "45%",
+        "Unavailable at every reference mix"
+      ],
+      "answer": 0,
+      "explanation": "Only the experienced-player rate has positive weight, so the reference rate is 9/10 = 90%. The newcomer rate remains unavailable; it has not been inferred. Any mix assigning newcomers positive weight would require information not present in these counts.",
+      "transfer": "Move the reference weight from 100% experienced to 99%. Explain why the missing group's small positive weight still prevents this calculation."
+    },
+    {
+      "id": "grouped-causal-question",
+      "concept": "Causal questions",
+      "prerequisites": [
+        "Group composition"
+      ],
+      "prompt": "The puzzle counts come from observational logs, with no stated assignment procedure. To investigate whether switching a player from B to A would improve success, which next step addresses the missing causal information?",
+      "options": [
+        "Pool all attempts and choose the option with the greater fraction.",
+        "Split on every recorded variable and choose the strongest subgroup.",
+        "Force a fifty-fifty group mix and treat its difference as the effect.",
+        "Specify the intervention and examine assignment, timing and common causes."
+      ],
+      "answer": 3,
+      "explanation": "A causal question needs a defined intervention and justified design or assumptions. Assignment, relevant common causes, and the timing of variables matter. Neither a larger pooled rate nor a standardized descriptive rate alone supplies those assumptions.",
+      "transfer": "For a comparison of two study methods, name one design feature and one pre-method variable you would examine before interpreting a rate difference causally."
+    },
+    {
+      "id": "grouped-post-method",
+      "concept": "Causal questions",
+      "prerequisites": [
+        "Reference mix"
+      ],
+      "prompt": "Suppose the chosen method can change whether a player completes optional practice, and practice can affect final puzzle success. The question concerns the method's total effect, including that practice pathway. Should comparing only within post-method practice groups automatically answer it?",
+      "options": [
+        "Yes; removing any group difference always isolates total effects.",
+        "Yes; equal reference weights make post-method grouping harmless.",
+        "No; such grouping can remove part of the pathway being studied.",
+        "No; every pooled association already equals an intervention effect."
+      ],
+      "answer": 2,
+      "explanation": "A group variable can lie on the pathway from the method to the outcome. Conditioning on it can exclude part of the total effect being asked about. This does not make the raw pooled association automatically causal either; the study design and other causal assumptions still matter.",
+      "transfer": "Before using a variable to form groups, ask when it was measured, whether the method could change it, and which effect or descriptive population you actually want to compare."
+    }
+  ]
+}
