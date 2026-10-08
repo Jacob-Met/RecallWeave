@@ -1,0 +1,157 @@
+RecallWeave — study notes
+Connections and components: union-find
+Saved: 2026-10-08T17:39:38.842Z
+
+FIRST SESSION
+10 of 12 connections correct on the first try.
+This count describes this session; it is not a measure of your ability.
+
+ESTIMATED MASTERY — MODEL STATE, NOT A GRADE
+These estimates come from the demo’s learning model. They are not a validated assessment.
+Practice does not change the first-session estimates.
+connected-paths: 62%
+component-counts: 91%
+representative-trees: 62%
+weighted-union: 91%
+path-compression: 91%
+model-limits: 91%
+
+PRACTICE
+Complete: 2 of 2 practice answers recorded; 2 correct on retry.
+Practice follows the explanations and is recorded separately from the first answers.
+
+REVIEW THE CONNECTIONS
+
+1. A simple undirected graph has edges A–B and B–C. The edge A–C is absent. What happens if that new edge is added?
+Concept: connected-paths
+Your first answer: The existing path from A to C is removed.
+First try: needs review
+Correct answer: A cycle appears and the component count stays the same.
+Explanation: A and C were already connected. Adding the previously absent edge A–C closes the cycle A–B–C–A without joining different components. The assumptions exclude repeated edges and self-loops from this particular example.
+Apply the idea: Compare adding A–C with adding C–D when D was isolated. Which addition changes the number of components, and why?
+Your explanation — reflection, not scored:
+  Not written.
+Practice answer: A cycle appears and the component count stays the same.
+Practice result: correct on retry
+
+2. A union-find display shows D → C → A, where A points to itself. What do these arrows mean?
+Concept: representative-trees
+Your first answer: Every original graph path from D must pass through C.
+First try: needs review
+Correct answer: They encode a parent route to the component representative A.
+Explanation: Parent pointers are the data structure's internal representation. Following them reaches a representative root. A parent link need not be an edge that was added to the original graph, and the forest does not retain every original graph edge.
+Apply the idea: Why should an explorer draw the original connections and the parent forest in separately labeled views?
+Your explanation — reflection, not scored:
+  Not written.
+Practice answer: They encode a parent route to the component representative A.
+Practice result: correct on retry
+
+3. In union by size, root F represents four elements and root B represents two. The lower-label rule is used only for equal sizes. Which link is created when these components join?
+Concept: weighted-union
+Your first answer: B becomes a child of F, whose size becomes six.
+First try: correct
+Correct answer: B becomes a child of F, whose size becomes six.
+Explanation: The smaller component's root attaches to the larger component's root. Four is greater than two, so F remains the representative and B points to F. The equal-size tie rule does not apply.
+Apply the idea: Reverse the command's argument order. Should it change this choice of root under the stated rule?
+Your explanation — reflection, not scored:
+  Not written.
+
+4. An undirected graph contains edges A–B and B–C. There is no edge A–C. Which statement about A and C follows?
+Concept: connected-paths
+Your first answer: They are connected by the path A–B–C.
+First try: correct
+Correct answer: They are connected by the path A–B–C.
+Explanation: Connectivity asks whether a path exists, not whether the two vertices are direct neighbors. A–B–C is a path, and its reverse is also a path because these edges are undirected.
+Apply the idea: Add an isolated vertex D. Explain which extra edge would connect D to all three vertices without adding three new edges.
+Your explanation — reflection, not scored:
+  Not written.
+
+5. Two valid find operations return the same representative for B and F. What can be concluded?
+Concept: representative-trees
+Your first answer: B and F belong to the same component.
+First try: correct
+Correct answer: B and F belong to the same component.
+Explanation: Representative equality identifies a shared set. The representative is an implementation choice: it need not be a minimum label, an original neighbor, or an externally meaningful leader.
+Apply the idea: If a larger component later absorbs this one and changes its representative, have the old members stopped being connected to each other? Explain.
+Your explanation — reflection, not scored:
+  Not written.
+
+6. The explorer joins two different components of size two. Their roots are D and B. Its declared tie rule keeps the lower-index root, with A=0, B=1, and so on. What happens?
+Concept: weighted-union
+Your first answer: D points to B and B's size becomes four.
+First try: correct
+Correct answer: D points to B and B's size becomes four.
+Explanation: The component sizes are equal, so the stated tie rule selects B, whose index is lower than D's. D becomes a nonroot and the surviving root B represents all four elements. Another consistent tie rule could encode the same partition differently.
+Apply the idea: Which observable would remain the same if the tie rule instead chose D: the parent array, the component membership, or both?
+Your explanation — reflection, not scored:
+  Not written.
+
+7. Before find H, the parent paths include H → G → E → A and D → C → A; A is a root. Full path compression is enabled. Which result follows from this find alone?
+Concept: path-compression
+Your first answer: H → A and G → A; D → C remains unchanged.
+First try: correct
+Correct answer: H → A and G → A; D → C remains unchanged.
+Explanation: The find visits H, G, E, and A. Full compression makes visited nonroots point to A; E already does. D and C are not on that path, so find H does not flatten their branch. Component membership and size remain unchanged.
+Apply the idea: Run find H again. Compare the number of parent links followed in the first and second calls without making a wall-clock speed claim.
+Your explanation — reflection, not scored:
+  Not written.
+
+8. join B D finds that B and D already belong to the same component. Full path compression is enabled. Which behavior is valid?
+Concept: path-compression
+Your first answer: Parent paths may shorten while membership and size stay fixed.
+First try: correct
+Correct answer: Parent paths may shorten while membership and size stay fixed.
+Explanation: The two find calls can compress the paths they actually visit. Because their roots match, there is no component merge: the count and all component cardinalities stay the same. Untouched branches need not become flat.
+Apply the idea: Why can 'this join made no merge' and 'the parent array changed' both be true?
+Your explanation — reflection, not scored:
+  Not written.
+
+9. Start with six isolated elements A–F. Apply join A B, join C D, then join B C. How many components remain?
+Concept: component-counts
+Your first answer: 3
+First try: correct
+Correct answer: 3
+Explanation: Each of these three joins connects two previously different components, so the count falls from 6 to 3. The final groups are {A,B,C,D}, {E}, and {F}.
+Apply the idea: Insert join A D after those commands. Predict the new component count before considering any parent-pointer changes.
+Your explanation — reflection, not scored:
+  Not written.
+
+10. Eight isolated elements end in three components after a sequence of joins and finds. How many joins actually merged two different components?
+Concept: component-counts
+Your first answer: 5
+First try: correct
+Correct answer: 5
+Explanation: A successful merge reduces the component count by exactly one. Finds and redundant joins do not change that count. Reducing 8 components to 3 therefore requires exactly 8−3=5 successful merges, regardless of extra commands.
+Apply the idea: Can the total number of join commands be larger than five? Give a sequence fragment that explains your answer.
+Your explanation — reflection, not scored:
+  Not written.
+
+11. The same authored command sequence follows fewer parent links with compression enabled. What does that observation establish?
+Concept: model-limits
+Your first answer: A lower number of recorded link traversals for this sequence.
+First try: correct
+Correct answer: A lower number of recorded link traversals for this sequence.
+Explanation: The explorer counts parent links followed under its explicit model. Those counts describe this input and implementation; they are not elapsed-time measurements or a universal per-operation constant-time guarantee. Both modes must preserve the same connectivity relation.
+Apply the idea: What additional measurement controls would be needed before making an actual runtime comparison? Keep the mathematical trace separate from those measurements.
+Your explanation — reflection, not scored:
+  Not written.
+
+12. A program kept only a standard union-find structure while adding graph edges. Now an arbitrary old edge is removed. Which response is justified?
+Concept: model-limits
+Your first answer: Use the remaining edges to rebuild, or use a structure supporting deletions.
+First try: correct
+Correct answer: Use the remaining edges to rebuild, or use a structure supporting deletions.
+Explanation: This standard structure supports finding and merging sets; it does not retain enough original path information to undo an arbitrary edge deletion. A removed edge may leave alternative paths or may disconnect a component. Rebuilding from known remaining edges or using a suitable dynamic-connectivity structure addresses that different problem.
+Apply the idea: Compare removing one side of a triangle with removing the middle edge of a three-edge chain. Why is one fixed count update insufficient?
+Your explanation — reflection, not scored:
+  Not written.
+
+YOUR APPLICATION REFLECTION — NOT SCORED
+Prompt: Choose one connection from this deck and explain how it relates to another idea in your own words.
+  > A find can shorten its parent path while preserving every connected component.
+
+DECK ATTRIBUTION
+Original questions, examples, distractors and explanations by HAMON contribution 44df5c2e45ae, with AI assistance. Algorithmic background checked against Robert Sedgewick and Kevin Wayne's Princeton Algorithms case study on union-find and MIT OpenCourseWare 6.046J Lecture 16 on disjoint-set data structures. Exact links, assumptions and original answer derivations are in courses/union-find.md. No source exercises, figures or passages are copied.
+Original course wording and examples: CC BY 4.0. Attribute this course and retain its source note when sharing or adapting it. Linked reference materials retain their own terms.
+
+Saved from this browser session. The download does not upload the session or restore it after a refresh.

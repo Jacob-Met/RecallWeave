@@ -339,3 +339,7 @@ Build with `node tools/build_least_squares.mjs`; `--check` verifies the generate
 ## Mathematical induction: a base, a bridge, every integer
 
 [Open the offline proof lab](courses/mathematical-induction-lab.html), download the [twelve-question lesson](courses/mathematical-induction.json), or read the [worked guide](courses/mathematical-induction.md). Compare an arithmetic sum with a proposed formula, inspect the exact base and symbolic successor step, and see why a few matching values do not prove every case. The lab keeps its finite examples separate from the induction argument and saves an explicit proof record. Import its lesson JSON through the existing learner preview and Start this deck controls.
+
+## Explore connectivity with union-find
+
+Open **[Connections and components](courses/union-find-explorer.html)** directly in a browser to step through joins and finds, compare the original connections with the internal parent forest, and inspect exact component sizes and path-compression changes. The offline lab supports 1–8 elements, explicit command sequences, and local trace, guide and course downloads. Open the [RecallWeave learner](demo.html), then import the original [twelve-question course](courses/union-find.json) through **Bring your own lesson**, or read the [worked guide](courses/union-find.md). Rebuild the standalone page with `node tools/build-union-find.mjs`; `--check` verifies its declared source inputs.

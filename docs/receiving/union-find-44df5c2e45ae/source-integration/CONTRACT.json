@@ -1,0 +1,53 @@
+{
+  "owner": "estate-44df5c2e45ae/source_integration",
+  "purpose": "Independent pre-implementation core receiving for the original RecallWeave union-find learning explorer",
+  "frozen_before_candidate_exposure": true,
+  "native_directory": "/home/jacob/recallweave-union-find-independent-44df5c2e45ae",
+  "api": "traceUnionFind(n, operations, {compress: boolean}) -> {snapshots: [initial, ...afterEachOperation]}",
+  "n": {
+    "type": "integer",
+    "minimum": 1,
+    "maximum": 8,
+    "display": "Indices 0..n-1 displayed as A..H"
+  },
+  "operations": {
+    "maximum": 32,
+    "find": {
+      "type": "find",
+      "a": "integer index"
+    },
+    "union": {
+      "type": "union",
+      "a": "integer index",
+      "b": "integer index"
+    }
+  },
+  "compression": {
+    "default": true,
+    "find": "Full compression rewires every encountered nonroot to that find's root; other parent entries and every size entry remain unchanged.",
+    "union": "Call find(a), then find(b), using the same compression setting, before deciding whether to merge."
+  },
+  "union": {
+    "different_components": "Attach smaller component root to larger; equal cardinalities select lower root index regardless of argument order.",
+    "same_component": "May perform the declared find compression, but does not merge or increase a root size."
+  },
+  "snapshots": {
+    "parent": "Exactly n integer indices forming a rooted forest; roots point to themselves.",
+    "size": "Exactly n integers. Each root stores its graph component cardinality; every nonroot stores zero.",
+    "components": "Integer number of connected components. Extra display metadata is outside the core acceptance gate."
+  },
+  "independent_oracle": "Recompute connected components by BFS over the undirected edges authored by union operations; validate each forest against those sets. Root choices use graph component cardinalities. Exact compression/mutation fences are checked per transition, plus independently written literal golden arrays.",
+  "coverage": [
+    "Five literal histories including depth three, descending tie arguments, larger high-index root winning, self/redundant unions, independent path compression and both find calls inside a redundant union.",
+    "Every two-operation program over n=1..4, in both compression modes.",
+    "32 deterministic 32-operation histories for each n=1..8, in both compression modes.",
+    "Omitted-option default, empty histories and inclusive 32-operation boundary.",
+    "Contract-invalid dimensions, operations and compression settings refuse without mutating unfrozen input; the receiver compares exact post-refusal input values.",
+    "Deliberately malformed trace controls prove the receiver detects partition, cycle, range, size, representative, compression and snapshot-count errors."
+  ],
+  "limits": [
+    "This receiver is for the synchronous mathematical trace API; browser interaction, visual design, downloaded files, course answer keys and scientific learning effectiveness require separate receiving.",
+    "No original product implementation is imported for the freeze self-check; the positive self-check uses literal authored expected states.",
+    "This is advisory external source coordination, not a resident native goal or lease."
+  ]
+}
