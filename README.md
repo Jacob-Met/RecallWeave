@@ -42,6 +42,14 @@ The explorer needs no server or account and keeps no automatic browser storage. 
 
 Open **[Coherent waves: from phasors to interference](courses/phasor-interference-lab.html)** for an offline lab that connects two rotating complex amplitudes to their real cosine signals. Predict cancellation, vary relative and common phase, and compare the arrow diagram with the time trace and downloadable values. The [worked guide](courses/phasor-interference.md) explains the assumptions and original examples; save the [sixteen-question course](courses/phasor-interference.json) and open it through **Bring your own lesson** to practice the connections.
 
+## Discrete Fourier: coefficients and reconstruction
+
+Open the **[offline Fourier lab](courses/discrete-fourier-lab.html)** to enter 4, 8 or 16 real samples, inspect every complex coefficient, and reconstruct the finite sample grid from selected conjugate pairs. Compare the original and reconstructed points, residuals and normalization-aware energy values. DC and Nyquist remain single-bin selections; unresolved phase is labeled rather than assigned a confident angle.
+
+The **[worked guide](courses/discrete-fourier.md)** connects the existing sampling and phasor lessons to four experiments. Download the original **[twelve-question course](courses/discrete-fourier.json)** from the lab, then use **Bring your own lesson**, preview it and select **Start this deck** in the unchanged learner. A separate analysis JSON records the numerical inputs, pair selection and raw calculations. The lab runs from a local file with no network requests or automatic saving; it does not infer a continuous signal between samples.
+
+Rebuild only this lab with `node tools/build-discrete-fourier.mjs`, or verify its committed artifact with `--check`. Run its focused regression checks with `node --test tests/discrete-fourier.test.mjs tests/discrete-fourier-course.test.mjs`.
+
 ## Explore rates and accumulation
 
 Open **[Rates become change](courses/rates-accumulation-explorer.html)** for an offline motion explorer. Edit a continuous velocity curve, inspect a moment, and compare signed displacement with total distance. Exact fractions expose a sign crossing between recorded points; the display also distinguishes instantaneous velocity, interval average velocity and an undefined acceleration at a corner.
