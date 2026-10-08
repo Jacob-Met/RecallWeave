@@ -56,6 +56,12 @@ Each saved HTML file opens and prints offline on its own. The worksheet file con
 
 Open the [Boolean explorer](courses/boolean-logic-explorer.html) directly from your files to compare expressions, inspect complete truth tables, and find a counterexample when two expressions differ. Download the current full table as CSV or the original twelve-question course as JSON. Import that course through the learner’s existing preview and explicit start flow, then review, practice and save your notes. The [course guide](courses/boolean-logic.md) explains the supported grammar, worked answers and content sources.
 
+## Explore Euclid's algorithm
+
+Open the **[Euclidean algorithm explorer](courses/euclidean-algorithm-explorer.html)** directly from your files. Enter two nonnegative integers, inspect every exact division and remainder, and see the gcd expressed as an integer combination of the original pair. Previous, Next and Last division controls walk the full trace; an explicit download keeps the computed steps. The page explains zero inputs and distinguishes exact arithmetic from approximate diagram widths.
+
+The **[worked companion](courses/euclidean-algorithm.md)** includes proofs, examples and transfer responses. Download its original **[twelve-question course](courses/euclidean-algorithm.json)** and select it under **Bring your own lesson** to use RecallWeave's existing review, separate practice and saved-note flows. The explorer requires no server, account or dependency.
+
 ## Core and interaction
 
 - `src/knowledge.mjs` implements a transparent BKT update: initial knowledge, learning transition, guess, and slip are explicit probabilities. It also computes binary entropy and expected information gain.

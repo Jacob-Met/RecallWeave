@@ -1,0 +1,218 @@
+{
+  "format": "recallweave-deck/1",
+  "title": "Euclid's algorithm — remainders, gcds, and integer combinations",
+  "attribution": "RecallWeave contributors. Original questions, worked examples, and explanations. Mathematical background: MIT OpenCourseWare, 6.1200J Spring 2024, Lecture 08 Divisibility (https://ocw.mit.edu/courses/6-1200j-mathematics-for-computer-science-spring-2024/mit6_1200j_s24_lec08.pdf), and 6.042J Fall 2010, Recitation 4 notes (https://ocw.mit.edu/courses/6-042j-mathematics-for-computer-science-fall-2010/4f6767747decf6209215cfe789cef5f6_MIT6_042JF10_rec04_sol.pdf). No source exercises, passages, or figures are reproduced.",
+  "license": "Original course material: you may use, adapt, and redistribute it with attribution to RecallWeave contributors. The linked MIT materials retain their own terms and are not reproduced here.",
+  "concepts": [
+    "Division with remainder",
+    "Gcd and common divisors",
+    "Invariant and termination",
+    "Integer combinations"
+  ],
+  "items": [
+    {
+      "id": "euclid-division-1",
+      "concept": "Division with remainder",
+      "prerequisites": [],
+      "prompt": "For division of 87 by 12, which pair (q, r) satisfies 87 = 12q + r with 0 ≤ r < 12?",
+      "options": [
+        "(6, 15)",
+        "(8, −9)",
+        "(7, 3)",
+        "(3, 7)"
+      ],
+      "answer": 2,
+      "explanation": "87 = 7 × 12 + 3, and the remainder 3 lies from 0 through 11. The pair (6, 15) reconstructs 87 but leaves enough for one more full group of 12; (8, −9) also reconstructs it but uses a negative remainder. The pair (3, 7) reconstructs 43. Checking the equation alone is not enough: the remainder bounds matter.",
+      "transfer": "Choose another dividend with divisor 12. Write its quotient and remainder, then check both the equation and the remainder bounds."
+    },
+    {
+      "id": "euclid-division-2",
+      "concept": "Division with remainder",
+      "prerequisites": [],
+      "prompt": "Euclid's algorithm begins with the ordered pair (14, 39). It replaces (x, y) by (y, x mod y) while y > 0. Which pair follows the first division?",
+      "options": [
+        "(39, 14)",
+        "(14, 25)",
+        "(14, 11)",
+        "(39, 0)"
+      ],
+      "answer": 0,
+      "explanation": "Because 14 is smaller than 39, the division is 14 = 0 × 39 + 14. The rule replaces the old pair with its divisor and remainder, giving (39, 14). A zero quotient is valid. This first step exchanges their roles; subsequent divisions reduce the positive second entry.",
+      "transfer": "Start with two other positive numbers whose first entry is smaller. Explain why the first quotient is zero and why the algorithm can still continue."
+    },
+    {
+      "id": "euclid-division-3",
+      "concept": "Division with remainder",
+      "prerequisites": [],
+      "prompt": "When a nonnegative integer a is divided by a positive integer b, which condition gives the full allowed range of the Euclidean remainder r?",
+      "options": [
+        "0 ≤ r ≤ b",
+        "0 ≤ r < b",
+        "1 ≤ r < b",
+        "r = a ÷ b"
+      ],
+      "answer": 1,
+      "explanation": "The remainder must satisfy 0 ≤ r < b. Zero is allowed for exact divisibility, but r = b is excluded because one more full group belongs in the quotient. For example, with divisor 8, 40 = 5 × 8 + 0 and 47 = 5 × 8 + 7. The expression a ÷ b describes division, not the integer remainder.",
+      "transfer": "Give one division with remainder zero and another with the largest possible remainder for the same positive divisor."
+    },
+    {
+      "id": "euclid-invariant-1",
+      "concept": "Invariant and termination",
+      "prerequisites": [
+        "Division with remainder",
+        "Gcd and common divisors"
+      ],
+      "prompt": "The division 161 = 2 × 69 + 23 replaces (161, 69) with (69, 23). Why do the two pairs have exactly the same common divisors?",
+      "options": [
+        "Every remainder is a prime factor of the two original numbers.",
+        "Every divisor of 161 also divides 69.",
+        "Adding the quotient to the divisor leaves all divisors unchanged.",
+        "23 = 161 − 2 × 69 and 161 = 2 × 69 + 23 transfer divisibility in both directions."
+      ],
+      "answer": 3,
+      "explanation": "If d divides 161 and 69, then it divides their integer combination 161 − 2 × 69 = 23. Conversely, if d divides 69 and 23, it divides 2 × 69 + 23 = 161. Thus each common divisor of either pair is a common divisor of the other. This preserves the whole set of common divisors, so its greatest member is preserved.",
+      "transfer": "For a = qb + r, explain both directions: why a common divisor of a and b divides r, and why a common divisor of b and r divides a."
+    },
+    {
+      "id": "euclid-invariant-2",
+      "concept": "Invariant and termination",
+      "prerequisites": [
+        "Division with remainder",
+        "Gcd and common divisors"
+      ],
+      "prompt": "Euclid's divisions are 252 = 1 × 198 + 54; 198 = 3 × 54 + 36; 54 = 1 × 36 + 18; 36 = 2 × 18 + 0. What is gcd(252, 198)?",
+      "options": [
+        "0",
+        "2",
+        "36",
+        "18"
+      ],
+      "answer": 3,
+      "explanation": "The final pair is (18, 0), so the gcd is 18. It divides both 252 and 198, with quotients 14 and 11. The zero remainder signals that the previous divisor is the answer; zero itself is not the answer for these positive inputs. The number 2 is only the last quotient, and 36 does not divide 198.",
+      "transfer": "Continue Euclid's algorithm for (315, 225). Identify the final pair and explain which entry supplies the gcd."
+    },
+    {
+      "id": "euclid-invariant-3",
+      "concept": "Invariant and termination",
+      "prerequisites": [
+        "Division with remainder",
+        "Gcd and common divisors"
+      ],
+      "prompt": "For nonnegative integer inputs, Euclid replaces (x, y) with (y, x mod y) whenever y > 0. Which fact guarantees that there can be only finitely many divisions?",
+      "options": [
+        "The quotient decreases by exactly one at each division.",
+        "The new second entry is a nonnegative integer strictly smaller than y.",
+        "Both entries decrease by exactly one at each division.",
+        "The first entry is halved at every division."
+      ],
+      "answer": 1,
+      "explanation": "Each division with y > 0 produces a remainder r satisfying 0 ≤ r < y. That remainder becomes the next second entry. A strictly decreasing sequence of nonnegative integers must stop, so eventually the second entry is zero. Quotients need not decrease, the amount of decrease varies, and the first entry need not halve—especially when the initial first entry is smaller.",
+      "transfer": "Explain why an endless strictly decreasing sequence of nonnegative integer second entries is impossible. Does the argument require a fixed amount of decrease?"
+    },
+    {
+      "id": "euclid-gcd-1",
+      "concept": "Gcd and common divisors",
+      "prerequisites": [
+        "Division with remainder"
+      ],
+      "prompt": "A teacher has 84 blue cards and 126 gold cards. Every packet must have the same number of blue cards and the same number of gold cards, and all cards must be used. What is the greatest possible number of packets?",
+      "options": [
+        "42 packets, each with 2 blue and 3 gold cards",
+        "21 packets, each with 4 blue and 6 gold cards",
+        "252 packets, each with 1 blue and 1 gold card",
+        "6 packets, each with 14 blue and 21 gold cards"
+      ],
+      "answer": 0,
+      "explanation": "The packet count must divide both card counts. Since 126 = 1 × 84 + 42 and 84 = 2 × 42, their gcd is 42. Each of those packets contains 84/42 = 2 blue cards and 126/42 = 3 gold cards. The 21- and 6-packet arrangements work but use fewer packets. The 252-packet proposal requires more cards than are available.",
+      "transfer": "Use two new positive card counts. Find the greatest packet count and verify the contents of one packet without leaving any cards over."
+    },
+    {
+      "id": "euclid-gcd-2",
+      "concept": "Gcd and common divisors",
+      "prerequisites": [
+        "Division with remainder"
+      ],
+      "prompt": "Use nonnegative inputs and the explicit convention gcd(0, 0) = 0. Which statement is correct?",
+      "options": [
+        "gcd(0, 45) = 0 and gcd(0, 0) = 0",
+        "gcd(0, 45) = 1 and gcd(0, 0) = 0",
+        "gcd(0, 45) = 45 and gcd(0, 0) = 0",
+        "gcd(0, 45) = 45 and gcd(0, 0) = 1"
+      ],
+      "answer": 2,
+      "explanation": "Every divisor of 45 divides zero because 0 = d × 0. The common divisors of 0 and 45 are therefore exactly the divisors of 45, and their greatest positive value is 45. For the pair (0, 0), this course and explorer explicitly use the conventional value 0; there is no greatest positive integer among all divisors of zero.",
+      "transfer": "Explain why every divisor of a positive number n also divides zero, and what Euclid returns from the initial pair (n, 0)."
+    },
+    {
+      "id": "euclid-gcd-3",
+      "concept": "Gcd and common divisors",
+      "prerequisites": [
+        "Division with remainder"
+      ],
+      "prompt": "Two positive integers are coprime when their gcd is 1. Which pair is coprime?",
+      "options": [
+        "(14, 21)",
+        "(25, 35)",
+        "(22, 33)",
+        "(14, 25)"
+      ],
+      "answer": 3,
+      "explanation": "The pair (14, 25) is coprime: 25 = 1 × 14 + 11, 14 = 1 × 11 + 3, 11 = 3 × 3 + 2, and 3 = 1 × 2 + 1. The next remainder is zero, so the gcd is 1. The other pairs share 7, 5 and 11 respectively. Coprime numbers do not have to be prime individually.",
+      "transfer": "Find a different coprime pair in which neither number is prime. Use common divisors or Euclid's algorithm to justify it."
+    },
+    {
+      "id": "euclid-combination-1",
+      "concept": "Integer combinations",
+      "prerequisites": [
+        "Invariant and termination",
+        "Gcd and common divisors"
+      ],
+      "prompt": "Euclid gives 88 = 3 × 26 + 10; 26 = 2 × 10 + 6; 10 = 1 × 6 + 4; 6 = 1 × 4 + 2; 4 = 2 × 2 + 0. Which identity expresses gcd(88, 26) = 2 as an integer combination of 88 and 26?",
+      "options": [
+        "2 = (−5) × 88 + 17 × 26",
+        "2 = 5 × 88 + (−17) × 26",
+        "2 = (−2) × 88 + 7 × 26",
+        "2 = (−1) × 88 + 3 × 26"
+      ],
+      "answer": 0,
+      "explanation": "Back-substitution gives 2 = 6 − 4 = 2 × 6 − 10 = 2 × 26 − 5 × 10 = 17 × 26 − 5 × 88. The check is −440 + 442 = 2. The other displayed right sides are −2, 6 and −10, respectively. Negative coefficients are allowed: they represent integer subtraction, not a negative gcd.",
+      "transfer": "Starting from the division rows, substitute backward to reconstruct the displayed coefficients. Check the final equality by multiplication."
+    },
+    {
+      "id": "euclid-combination-2",
+      "concept": "Integer combinations",
+      "prerequisites": [
+        "Invariant and termination",
+        "Gcd and common divisors"
+      ],
+      "prompt": "For integers x and y, every value 18x + 30y is divisible by 6. Which target is impossible to express in that form?",
+      "options": [
+        "42",
+        "25",
+        "0",
+        "−12"
+      ],
+      "answer": 1,
+      "explanation": "25 is not divisible by 6, so it cannot equal 18x + 30y for integers x and y. The other targets have explicit witnesses: 42 = 4 × 18 − 1 × 30, 0 = 0 × 18 + 0 × 30, and −12 = 1 × 18 − 1 × 30. Negative coefficients do not remove a divisor shared by both original numbers.",
+      "transfer": "Find integer coefficients for two of the possible targets. Explain why allowing negative coefficients still cannot produce a number that is not divisible by 6."
+    },
+    {
+      "id": "euclid-combination-3",
+      "concept": "Integer combinations",
+      "prerequisites": [
+        "Invariant and termination",
+        "Gcd and common divisors"
+      ],
+      "prompt": "You found 6 = (−1) × 24 + 1 × 30. Which other integer pair (x, y) also satisfies 24x + 30y = 6?",
+      "options": [
+        "(4, 5)",
+        "(5, −4)",
+        "(4, −3)",
+        "(−4, 3)"
+      ],
+      "answer": 2,
+      "explanation": "With (x, y) = (4, −3), the value is 4 × 24 − 3 × 30 = 96 − 90 = 6. Starting from (−1, 1), adding 5 to x and subtracting 4 from y leaves the value unchanged because 5 × 24 − 4 × 30 = 0. The other pairs give 246, 0 and −6. The extended algorithm gives one correct representation; it need not be unique.",
+      "transfer": "Find a third coefficient pair for the same identity. Explain why a correct Bézout representation need not be unique."
+    }
+  ]
+}
