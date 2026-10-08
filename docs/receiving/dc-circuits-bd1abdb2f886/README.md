@@ -92,3 +92,24 @@ The author archive retains original/native/current source inventories, receiving
 The guide links the primary OpenStax University Physics Volume 2 sections on [current](https://openstax.org/books/university-physics-volume-2/pages/9-1-electrical-current), [Ohm's law](https://openstax.org/books/university-physics-volume-2/pages/9-4-ohms-law), [series and parallel resistors](https://openstax.org/books/university-physics-volume-2/pages/10-2-resistors-in-series-and-parallel), and [electrical energy and power](https://openstax.org/books/university-physics-volume-2/pages/9-5-electrical-energy-and-power). The presentation review uses [SVG 2 marker-end semantics](https://www.w3.org/TR/SVG2/painting.html#MarkerEndProperty). The questions, explanations, examples and interface are original work.
 
 Qualification covers this ideal two-resistor model, maintained local-file learner and recorded browser surfaces. It does not assert physical hardware behavior, measured learning efficacy, remote deployment, installation on another runtime or a broader textbook license grant.
+
+## Subsequent notebook composition
+
+After the original source packet was published, main advanced to 169b618ce71d2d4702a0d2ef740821df53581ad2, tree 96471ac3db79b3c5329a27837d92d81f34b1f318. A complete tree comparison found 488 added paths and changes to six existing paths: README.md, demo.html, src/app.mjs, src/session-export.mjs, styles.css and tools/make_demo.py. The new reflection/notebook state and notes sections warranted actual receiving at the changed learner interface. The nine DC product files and the three original evidence archives remain unchanged.
+
+The existing hosted Node 20 gate ran the actual combined checkout 4e5b1d4cad47cd0ea8039138ae121ab94479ca73, whose parents are current main 169b618ce71d2d4702a0d2ef740821df53581ad2 and original DC head 8a2183dd98dd9349ef73e7a682158b70e628eaa3. Its tree a7747823100f072f8519d577a69a1f2cbbab059d preserves all 1115 current-parent leaves and all 13 original DC payloads. [Run 37795993199](https://github.com/Jacob-Met/RecallWeave/actions/runs/37795993199), job 113375461757, uses Node 20.20.2 and passes 242/242 tests with no skips, followed by the unchanged full-demo parity gate. This result belongs to that exact tested composition.
+
+A single additional independent Mac learner run used the exact new standalone at main 169b. All six previously frozen behavioral groups pass without an assertion correction or repeated run. Existing-session preview/cancel, explicit Start, all 12 first responses with one intentional miss, separate correct retry, and the actual notes download retain their original meanings. The new notes contain 10,872 bytes and have SHA-256 d3028cf954837fdcd271c1bb31f8ae4fabb03fd0090b37f875ad204945661b8d. Optional reflection entry itself was not separately exercised. All executed source/course snapshots remain unchanged, no page errors or nonlocal requests occur, and the dedicated profile was removed.
+
+The run executed from 2026-10-08 15:12:44.210 to 15:12:56.741 UTC, exit 0 in 12.529285958 seconds, using the installed Mac Node 26.3.0 / Chrome 154.0.8037.98 / darwin arm64. Only declared source-head, provenance and output paths differ from the original successful driver; its six behavioral groups and helper remain unchanged.
+
+| Composition input or receipt | Identity |
+| --- | --- |
+| Exact new standalone, 81,178 bytes | Git blob fc782277cf057899d26036bdd2ecb5ce9328422a; SHA-256 172a0415c717e938fce0fa9e7b94cc1acd502e07f7a193f6b76ff97fbb7e2200 |
+| Composition driver, 20,331 bytes | SHA-256 f785119f4b6ca5fbeffcf23cca45c6cad6c75fde2140592eb99619023a46a6a0 |
+| Native consumer receipt | SHA-256 ec8ebaad386e282ca7491f991b954c564b066033293d50a418c199541766df54 |
+| Native process log | SHA-256 0d340d984bf3e10ce532043dd8a3c8433db785fdc47a37c26f0c16f2c6a64c1c |
+
+[notebook-composition-evidence.tar.gz](notebook-composition-evidence.tar.gz) is 79,360 bytes, with 23 regular members including its manifest. Its SHA-256 is e1e89b3ceec1143363c19fb3ad11c28b9100680f41dd714c8711fae5bb1ae224; Git blob 3891be71c43e3593fbc8e5e530dc22ee3ab63fd4; manifest SHA-256 df7e7bab3e06c92d6d4265d07d2bb48f22a33fc2bb5c8224295323f8d245a621. It preserves the unchanged original contract/helper, original successful driver, exact declared adaptation, five source snapshots, actual downloaded DC JSON, new native logs/receipts and actual notes. Every member and the complete archive were independently reread and verified before the returned published Git identity was accepted.
+
+This added record brings the complete contribution to 14 paths: nine product files, this README and four evidence archives. The original evidence remains intact. Final-head acceptance, later hosted qualification and actual merge/native-source readback are recorded in the PR conversation.
