@@ -26,6 +26,12 @@ The explorer needs no server or account and keeps no automatic browser storage. 
 
 Open **[Coherent waves: from phasors to interference](courses/phasor-interference-lab.html)** for an offline lab that connects two rotating complex amplitudes to their real cosine signals. Predict cancellation, vary relative and common phase, and compare the arrow diagram with the time trace and downloadable values. The [worked guide](courses/phasor-interference.md) explains the assumptions and original examples; save the [sixteen-question course](courses/phasor-interference.json) and open it through **Bring your own lesson** to practice the connections.
 
+## Explore rates and accumulation
+
+Open **[Rates become change](courses/rates-accumulation-explorer.html)** for an offline motion explorer. Edit a continuous velocity curve, inspect a moment, and compare signed displacement with total distance. Exact fractions expose a sign crossing between recorded points; the display also distinguishes instantaneous velocity, interval average velocity and an undefined acceleration at a corner.
+
+The [worked guide](courses/rates-accumulation.md) develops the examples from slopes and signed areas. Download the original [twelve-question course](courses/rates-accumulation.json) from the explorer, then choose it under **Bring your own lesson** in RecallWeave. The lesson, guide and current calculation download without a server or account. Rebuild the standalone explorer with `node tools/build-rates-accumulation.mjs`, or verify the checked-in file with `--check`.
+
 ## Explore grouped rates
 
 Open **[When groups and totals disagree](courses/grouped-data-explorer.html)** for a separate offline lesson about group rates, pooled samples and a chosen common mix. Edit the recorded counts, inspect exact fractions and download the current comparison. The worked examples explain why both groups can favor one option while the pooled sample favors the other, and why this alone does not establish a causal effect.
