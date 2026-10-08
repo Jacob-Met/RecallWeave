@@ -1,0 +1,176 @@
+RecallWeave — study notes
+Floating point: when stored coordinates change the answer
+Saved: 2026-10-08T17:15:13.653Z
+
+FIRST SESSION
+13 of 14 connections correct on the first try.
+This count describes this session; it is not a measure of your ability.
+
+ESTIMATED MASTERY — MODEL STATE, NOT A GRADE
+These estimates come from the demo’s learning model. They are not a validated assessment.
+Practice does not change the first-session estimates.
+Binary representation: 62%
+Spacing and ties: 91%
+Range limits: 91%
+Rounded arithmetic: 91%
+Stored geometry: 91%
+Coordinate choices: 91%
+Sensitivity and scale: 91%
+
+PRACTICE
+Complete: 1 of 1 practice answers recorded; 1 correct on retry.
+Practice follows the explanations and is recorded separately from the first answers.
+
+REVIEW THE CONNECTIONS
+
+1. Which fraction has a finite binary expansion and is represented exactly by binary32?
+Concept: Binary representation
+Your first answer: 1/10
+First try: needs review
+Correct answer: 1/8
+Explanation: 1/8 is 2^-3, so its binary expansion is 0.001. After reducing a fraction, a denominator that is a power of two permits a finite binary expansion. The other denominators contain an odd prime factor. Exact representability also needs enough precision and exponent range; 1/8 fits both.
+Apply the idea: Reduce 6/40 and 6/48. Which reduced denominator is a power of two? Predict the exact one before checking it in the explorer.
+Your explanation — reflection, not scored:
+  > The stored coordinates must be checked after quantization, even when the source triangle has positive area.
+Practice answer: 1/8
+Practice result: correct on retry
+
+2. At translation 2^24, the explorer reports relative stored vertices (0,0), (2,2), (2,4), with positive double area 4. What is justified?
+Concept: Stored geometry
+Your first answer: The winding is preserved, but the stored shape and area have changed.
+First try: correct
+Correct answer: The winding is preserved, but the stored shape and area have changed.
+Explanation: A sign check answers an orientation question. It does not establish accurate positions, lengths, angles, or area. Rounding depends on the individual coordinates and their neighbors; the labels preserved, reversed, and collapsed do not form a monotonic quality scale as the origin increases.
+Apply the idea: Compare the source and stored outlines at translation zero, 10,000,000, and 2^24. State separately what happened to the sign and to the geometry.
+Your explanation — reflection, not scored:
+  Not written.
+
+3. The explorer applies Math.fround to the JavaScript Number written as 0.1. Which statement describes its reference correctly?
+Concept: Binary representation
+Your first answer: The input is already a binary64 approximation; the explorer compares its exact value with the binary32 result.
+First try: correct
+Correct answer: The input is already a binary64 approximation; the explorer compares its exact value with the binary32 result.
+Explanation: JavaScript Number supplies a binary64 value before this conversion. Math.fround produces the nearest binary32 value using ties to even, then returns that value as a Number. The explorer decodes exact fractions from the input and stored bits. Its input-to-storage error is distinct from the decimal author's original representation error.
+Apply the idea: For 0.125 and 0.1, compare the input fraction, stored fraction, and signed error. Explain why two displayed decimals alone can hide the distinction.
+Your explanation — reflection, not scored:
+  Not written.
+
+4. The triangle a=(0,0), b=(1.4,1.6), c=(2.6,3.4) has positive signed double area. After translating by (10,000,000,10,000,000) and storing binary32 coordinates, its relative vertices are (0,0), (1,2), (3,3). What is the stored signed double area?
+Concept: Stored geometry
+Your first answer: -3, so the stored winding is reversed
+First try: correct
+Correct answer: -3, so the stored winding is reversed
+Explanation: The determinant is 1*3 - 2*3 = -3. Exact translation preserves the source area, but rounding the translated vertices is an additional operation. The intended decimal triangle's double area is 0.6; its binary32 source vertices differ slightly and still have positive double area. A test that rejects only zero area would miss this reversal.
+Apply the idea: Explain why a positive determinant for the affine transform alone is insufficient to certify the orientation of the stored output vertices.
+Your explanation — reflection, not scored:
+  Not written.
+
+5. The binary32 value 16,777,216 is 2^24. Its immediate finite neighbors are 16,777,215 and 16,777,218. What follows?
+Concept: Spacing and ties
+Your first answer: The gap below is 1 and the gap above is 2; spacing changes at this power of two.
+First try: correct
+Correct answer: The gap below is 1 and the gap above is 2; spacing changes at this power of two.
+Explanation: Binary32 has 24 bits of precision for normal values, including the leading bit. In the interval starting at 2^24, consecutive values are two units apart. Immediately below that boundary the gap is one. A statement about spacing should identify the relevant side or interval.
+Apply the idea: Inspect -16,777,216. Name its neighbors in increasing numerical order and explain why the gap directions swap.
+Your explanation — reflection, not scored:
+  Not written.
+
+6. Both 16,777,217 and 16,777,219 are halfway between adjacent binary32 values. With ties to even, where do they round?
+Concept: Spacing and ties
+Your first answer: 16,777,216 and 16,777,220
+First try: correct
+Correct answer: 16,777,216 and 16,777,220
+Explanation: The tie chooses the neighbor whose retained significand ends in a zero bit. At this spacing, that selects the lower neighbor for the first input and the upper neighbor for the second. Ties to even is not a rule to always round down, toward zero, or toward the smaller absolute error: the two nearest errors tie.
+Apply the idea: Move the first halfway input just above the midpoint. Which neighbor should win once it is no longer a tie?
+Your explanation — reflection, not scored:
+  Not written.
+
+7. Round to binary32 after each addition. For a=100,000,000, b=-100,000,000, c=1, what are (a+b)+c and a+(b+c)?
+Concept: Rounded arithmetic
+Your first answer: 1 and 0
+First try: correct
+Correct answer: 1 and 0
+Explanation: a+b cancels exactly to zero, so adding c gives 1. In the other order, b+c rounds back to -100,000,000: the contribution of 1 is lost before the outer addition. Adding a then gives zero. The exact sum of the stored inputs is 1, which is computed separately from both rounded paths.
+Apply the idea: Use the 8 + (-8) + 1 control. Why does the same parenthesis change cause no error there?
+Your explanation — reflection, not scored:
+  Not written.
+
+8. An intermediate has already been rounded to binary32 and lost a small contribution. What can copying that result into binary64 do?
+Concept: Rounded arithmetic
+Your first answer: Represent the rounded value exactly; it cannot reconstruct the lost contribution.
+First try: correct
+Correct answer: Represent the rounded value exactly; it cannot reconstruct the lost contribution.
+Explanation: Widening preserves the information that remains. Performing an operation in a wider format before rounding can avoid some additional arithmetic error. Widening an already rounded output has a different starting point and cannot infer which of many original inputs produced it.
+Apply the idea: Sketch two pipelines: widen before addition, and round the sum before widening. Mark the irreversible rounding boundary in each.
+Your explanation — reflection, not scored:
+  Not written.
+
+9. Which change retains the example's local binary32 edges while allowing a large world origin?
+Concept: Coordinate choices
+Your first answer: Keep the local vertices and the origin separate through the operations that need those edges.
+First try: correct
+Correct answer: Keep the local vertices and the origin separate through the operations that need those edges.
+Explanation: Local storage keeps the original nearby vertex differences available. If large global coordinates are rounded first, subtracting the origin later reveals differences between the rounded coordinates, including the wrong ones in this example. The local strategy stops protecting those edges if a later step bakes the same large global binary32 coordinates again.
+Apply the idea: Identify where an application would finally combine local geometry with its world origin. Which output checks would be appropriate at that boundary?
+Your explanation — reflection, not scored:
+  Not written.
+
+10. An exact area calculation on the local binary32 source vertices gives a value slightly different from 3/5. Is the exact calculation necessarily wrong?
+Concept: Coordinate choices
+Your first answer: No. It is exact for the quantized source vertices, which differ from the intended decimal vertices.
+First try: correct
+Correct answer: No. It is exact for the quantized source vertices, which differ from the intended decimal vertices.
+Explanation: A reference must identify its inputs. The intended decimals, the quantized local vertices, and the quantized global vertices are three different data sets. Each finite binary value is an exact rational number. Exact arithmetic on one data set cannot substitute for another without accounting for the input change.
+Apply the idea: In the explorer, name the three double-area values and the precise coordinates each one describes.
+Your explanation — reflection, not scored:
+  Not written.
+
+11. The finite JavaScript Number 2^128 becomes positive infinity in binary32. What does this observation establish?
+Concept: Range limits
+Your first answer: The conversion has exceeded binary32's finite range.
+First try: correct
+Correct answer: The conversion has exceeded binary32's finite range.
+Explanation: The two formats have different exponent ranges. This conversion is a range failure, not by itself a diagnosis of how sensitive a mathematical problem is to perturbations. The explorer reports infinity explicitly and does not manufacture a finite error fraction for it.
+Apply the idea: Describe a case where rescaling an intermediate could avoid overflow. What separate question would you still ask about the problem's sensitivity?
+Your explanation — reflection, not scored:
+  Not written.
+
+12. The smallest positive binary32 subnormal is 2^-149. What does the exactly representable binary64 input 2^-150 become under Math.fround?
+Concept: Range limits
+Your first answer: Positive zero: it is halfway between zero and 2^-149, and the tie selects zero.
+First try: correct
+Correct answer: Positive zero: it is halfway between zero and 2^-149, and the tie selects zero.
+Explanation: Subnormal values provide nonzero values below the smallest normal binary32 value, but the representable set still has a smallest positive member. Half of that member is a tie with zero. A value just above this midpoint rounds to 2^-149 instead. The negative midpoint produces negative zero.
+Apply the idea: Compare the smallest and half-smallest presets. Read the exponent and fraction bits rather than treating all tiny values as zero.
+Your explanation — reflection, not scored:
+  Not written.
+
+13. Why should the explorer's angle measure |sin(theta)| not be presented as a complete condition number for the entire coordinate pipeline?
+Concept: Sensitivity and scale
+Your first answer: It describes the local edges' angle, while sensitivity also depends on the problem, perturbation model, and coordinate representation.
+First try: correct
+Correct answer: It describes the local edges' angle, while sensitivity also depends on the problem, perturbation model, and coordinate representation.
+Explanation: Nearly parallel edges make a signed area small relative to the product of edge lengths, which helps explain sensitivity of orientation to some perturbations. A full conditioning claim must specify what inputs vary, how their changes are measured, and which output is considered. Large-origin quantization, cancellation, and finite range are related practical concerns with distinct mechanisms.
+Apply the idea: For a geometry workflow, state the output you need to trust, the allowed input perturbation, and the storage boundary. Then decide what a useful verification would measure.
+Your explanation — reflection, not scored:
+  Not written.
+
+14. In the bounded unit experiment, all coordinates and the origin are multiplied by 2^k without entering overflow or underflow. The normalized stored shape and reversal remain the same. What does this control show?
+Concept: Sensitivity and scale
+Your first answer: Changing numerical units alone does not diagnose or cure this rounding failure.
+First try: correct
+Correct answer: Changing numerical units alone does not diagnose or cure this rounding failure.
+Explanation: Within this tested range, a power-of-two change of all units shifts exponents while preserving the relevant rounding pattern. Raw double area scales by 2^(2k), while the normalized geometry stays the same. General rescaling can affect range and rounding, so this controlled invariant should not be extended to all scales or all algorithms.
+Apply the idea: Compare k=-2 and k=2. Which displayed quantities change with units, and which dimensionless or normalized quantities stay fixed?
+Your explanation — reflection, not scored:
+  Not written.
+
+YOUR APPLICATION REFLECTION — NOT SCORED
+Prompt: Choose one connection from this deck and explain how it relates to another idea in your own words.
+  > I can retain local coordinates and a separate origin instead of first storing both together at binary32 precision.
+
+DECK ATTRIBUTION
+Original RecallWeave lesson and experiments by the HAMON estate. The triangle is an observed hamon-engine precision regression, preserved here as a teaching example. The guide names the numerical and language specifications used to check the explanations.
+Original teaching text and examples. This contribution makes no additional reuse-license grant. The linked specifications are technical references; no standard prose, exercise or figure is copied.
+
+Saved from this browser session. The download does not upload the session or restore it after a refresh.
