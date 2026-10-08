@@ -1,6 +1,6 @@
 # RecallWeave
 
-**ForgeHacks 2026 · AI + Education** — an original, static, browser-only learning experience about connecting ideas in cellular energy. The official track framing on ForgeHacks is “Reimagining how people learn and teach.” This demo responds to that brief by helping a learner retrieve concepts, see links, and apply them—not by generating chat answers.
+**ForgeHacks 2026 · AI + Education** — an original, static, browser-only learning experience whose bundled lesson connects ideas in cellular energy. Learners can also bring a local JSON lesson deck. The official track framing on ForgeHacks is “Reimagining how people learn and teach.” This demo responds to that brief by helping a learner retrieve concepts, see links, and apply them—not by generating chat answers.
 
 ## Run it
 
@@ -10,14 +10,51 @@ Open `demo.html` directly in a browser—no server, install, build step, interne
 
 - `src/knowledge.mjs` implements a transparent BKT update: initial knowledge, learning transition, guess, and slip are explicit probabilities. It also computes binary entropy and expected information gain.
 - The adaptive selector picks an unanswered item with highest expected information gain, plus a small bonus for weak concepts that unlock unanswered downstream ideas; ties are stable by item ID. There is no LLM or hidden personalization.
-- Answer choices are shuffled once for each question when a local session starts. A question keeps that display order during its practice retry. The visible A–D labels follow the displayed order; correctness, review and study notes use the original option identity. Question content and adaptive item selection remain unchanged.
+- Answer choices are shuffled once for each question when a local session starts. A question keeps that display order during its practice retry. The visible letter labels follow the displayed order; correctness, review and study notes use the original option identity. Question content and adaptive item selection remain unchanged.
 - `src/app.mjs` records the current session only in memory, gives item-level explanations/transfer prompts, and shows estimated mastery as a model state, never a grade or validated diagnosis.
 - The completed learning trace keeps every question, the learner's first answer, its correct answer, explanation, and transfer prompt available in keyboard-operable review panels. `src/review.mjs` takes an immutable snapshot and keeps a bounded practice round separate from the first session.
 - The welcome panel includes a clearly labeled, deterministic synthetic learner simulation comparing adaptive selection with fixed deck order using the same toy learner assumptions and random seed. Its tiny run is demonstrative, not empirical evidence or an efficacy claim. Test coverage separately evaluates model invariants, not learning outcomes.
 
+## Bring your own lesson
+
+Use **Download example deck** to get an editable JSON copy of the bundled lesson,
+including its original attribution. Replace the lesson content using the
+[deck format guide](docs/deck-format.md), then choose the file under **Bring your
+own lesson**. Both the modular app and the double-clickable `demo.html` support
+the same import flow.
+
+The preview shows the title, question and concept counts, attribution, license,
+and an expandable list of question prompts with their prerequisite links.
+**Start this deck** begins a fresh session with that content and clears the previous
+session's first answers and practice. Until then, the current lesson remains
+usable. **Cancel preview**, malformed or unreadable files, and a superseded file
+read preserve the current session. **Use bundled lesson** offers the same explicit
+preview and start flow for returning to the original lesson.
+
+Decks can contain 1–100 questions, 1–32 concepts, and 2–6 answer options per
+question, within a 256 KiB JSON file. Every question supplies its correct answer,
+explanation and transfer prompt. The importer checks complete structure, unique
+identities, valid answer indices, known prerequisites and absence of prerequisite
+cycles before offering a start. Text is displayed literally. An imported lesson
+uses its own concept labels and attribution throughout learning, review, practice
+and downloaded study notes. Its answer options are shuffled for each new session;
+practice keeps that session’s display order and canonical answer identity.
+
+The file and session stay in this tab's memory. Starting a fresh local session
+keeps the selected deck but clears its answers; reloading the page returns to the
+bundled lesson. No file is uploaded or written back, and no browser storage or
+account is used. The downloaded example is a separate file saved by the browser.
+
+The same illustrative model parameters apply to every deck, including decks with
+different numbers of answer options. Imported material and its attribution are
+supplied by the file's author; structural validation does not verify subject
+accuracy, reuse rights or learning efficacy. The bundled synthetic learner
+simulation remains available only with the original lesson because its toy
+profile is specific to that content.
+
 ## Review and practice
 
-After finishing the six challenges, open any question under **Review the connections** to revisit the original answer and explanation. **Practice missed connections** gives each initially missed question one retry in the same order it appeared during the session. A session with every answer correct still offers all six review panels.
+After finishing a deck's challenges, open any question under **Review the connections** to revisit the original answer and explanation. **Practice missed connections** gives each initially missed question one retry in the same order it appeared during the session. A session with every answer correct still offers every review panel.
 
 **Back to learning trace** pauses practice. **Resume practice** returns to the next unanswered prompt, including when the learner left before choosing an answer. The completed review displays first-try and practice answers separately. Correcting a retry does not rewrite the initial trace or update the initial mastery estimates: the explanations have already been shown, so practice is an opportunity for recall, not a new assessment.
 
@@ -35,7 +72,7 @@ After completing the first session, open **Keep or restore a learning trace** an
 
 To return later, open the same course, choose the saved trace, and inspect the preview before selecting **Restore these answers**. Restoration replaces the current first answers and practice progress. Canceling, choosing an invalid file, or continuing the current lesson while a preview is pending leaves the current lesson in place. Resume a restored practice round from the next unanswered item.
 
-A trace must match the exact loaded course content and learning model. The app checks the archived course against the already loaded deck, then reconstructs the trace with the existing review and practice functions. It refuses incomplete first sessions, unknown or duplicate answers, invalid retry order, incompatible versions, and files larger than 2 MiB. First-session estimates are checked at their original precision; practice cannot change them.
+A trace must match the exact loaded course content and learning model. For an imported course, start the same deck before choosing its trace. Traces saved by an earlier app remain compatible when the bundled course content is unchanged. The app checks the archived course against the already loaded deck, then reconstructs the trace with the existing review and practice functions. It refuses incomplete first sessions, unknown or duplicate answers, invalid retry order, incompatible versions, and files larger than 2 MiB. First-session estimates are checked at their original precision; practice cannot change them.
 
 Trace files contain answers and practice progress. They do not include personal reflections or replace reflections already in the tab. The current session supplies the displayed option order; saved answers always identify the original option, regardless of its A–D position. Saving and restoring work offline in the standalone demo. There is no automatic browser persistence, account, or upload.
 
@@ -47,7 +84,7 @@ Select the correct answer explicitly. Moving an option keeps that selection atta
 
 **Check and preview** validates the complete draft and shows its answer key. **Download deck (.json)** saves the exact checked file, including the importer's 256 KiB byte limit. Edits clear the previous preview and require another check. The check verifies the deck's structure and links; the author remains responsible for its course content and attribution.
 
-Choose **Open a deck to edit** to reopen a previously saved JSON file. Review it before **Replace draft**; cancellation or a rejected file preserves the current editor. The draft stays only in this tab, so download it before refreshing or closing the page. The saved JSON uses the shared RecallWeave deck format; the separate local lesson importer is tracked in [issue 7](https://github.com/Jacob-Met/RecallWeave/issues/7).
+Choose **Open a deck to edit** to reopen a previously saved JSON file. Review it before **Replace draft**; cancellation or a rejected file preserves the current editor. The draft stays only in this tab, so download it before refreshing or closing the page. The saved JSON uses the shared RecallWeave deck format. Return to the lesson, choose the downloaded file under **Bring your own lesson**, inspect its preview, and select **Start this deck**.
 
 The separate author page leaves ongoing learning sessions open. It has no account, upload, provider or persistence service. Rebuild its direct-file version with `python3 tools/make_author.py`; `python3 tools/make_author.py --check` verifies that it matches the modular sources. Authoring, reopening and standalone parity tests run with the existing `node --test tests/*.test.mjs` command.
 
@@ -61,6 +98,12 @@ Run the unit/property tests with Node 20+ and Python 3 (`python3` on your PATH):
 
 Review tests also cover immutable first-answer snapshots, missed-question order, separate correct/incorrect retries, resumption, duplicate/out-of-order refusal, and all-correct sessions. Content revisions preserve item identities and the existing model/review contracts.
 
+Deck tests cover the existing unversioned example, immutable content copies,
+malformed and oversized JSON, metadata and collection bounds, duplicate identities,
+unknown or cyclic prerequisites, answer indices, literal text, reserved object-key
+names, complete 100-question selection and interoperability with the existing
+review/practice model.
+
 The optional rendered acceptance runner uses Node 22+ and an already-installed Chrome or Chromium executable:
 
 ```bash
@@ -68,6 +111,21 @@ node tools/check_browser.mjs --browser /path/to/chromium --output /tmp/recallwea
 ```
 
 It starts a temporary localhost server and a separate temporary browser profile, drives the actual page with Enter and Tab, and checks review, practice, resumption, unchanged first-try estimates, a 390px layout, and the standalone file. The report and desktop/phone captures go to the selected output directory. It closes its own browser and removes its temporary profile afterward; it does not use an existing browser session. The runner is an optional system-browser check; the default test command and app require no browser automation package.
+
+If Playwright is already available in the test environment, the additional local-deck
+acceptance runner exercises real file inputs, failed/cancelled and out-of-order reads,
+example downloads, imported learning/review/practice, literal text and 390px layouts
+in both versions:
+
+```bash
+BROWSER_BIN=/path/to/chromium node tests/deck_browser_smoke.cjs
+```
+
+Set `TMPDIR` to an owned writable temporary directory when needed; optionally set
+`RECALLWEAVE_EVIDENCE_DIR` to an existing directory for the receipt and screenshots.
+The runner creates its own subdirectory, closes its browser/server, and makes no
+provider requests. Playwright is only a qualification dependency, not an application
+or default-test requirement.
 
 The trace archive has a separate browser receiver for real downloads, fresh documents, preview/cancel/restore, stale file reads, unchanged first answers, resumed practice, and standalone operation:
 
