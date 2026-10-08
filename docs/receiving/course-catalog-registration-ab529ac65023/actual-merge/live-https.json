@@ -1,0 +1,58 @@
+{
+  "checked_at": "2026-10-08T16:35:26.767159+00:00",
+  "source_merge": "81363271da63c5428fcb4cafba39fc89c3557b82",
+  "rows": [
+    {
+      "url": "https://jacobmetoyer.com/RecallWeave/catalog.html",
+      "final_url": "https://jacobmetoyer.com/RecallWeave/catalog.html",
+      "status": 200,
+      "bytes": 176964,
+      "sha256": "be773e3953eecc72b7dbdf9fc03ae2e9a307d18a0f1b32ea759c84da23b0bc1c",
+      "git_blob": "5374564001035b6fc12f5f4443592a01f6a9ab59",
+      "expected_sha256": "be773e3953eecc72b7dbdf9fc03ae2e9a307d18a0f1b32ea759c84da23b0bc1c",
+      "exact": true,
+      "transport": "/usr/bin/curl with normal TLS verification; HTTPS-only redirects"
+    },
+    {
+      "url": "https://jacobmetoyer.com/RecallWeave/demo.html",
+      "final_url": "https://jacobmetoyer.com/RecallWeave/demo.html",
+      "status": 200,
+      "bytes": 97565,
+      "sha256": "c7f1877facf1c62c741373b6bd03b645ec351af3457da06c45988efde805701a",
+      "git_blob": "cf7eea3792deacc3eb98a22aef539b920fb66746",
+      "expected_sha256": "c7f1877facf1c62c741373b6bd03b645ec351af3457da06c45988efde805701a",
+      "exact": true,
+      "transport": "/usr/bin/curl with normal TLS verification; HTTPS-only redirects"
+    }
+  ],
+  "device": "Mac.lan",
+  "deviceId": "5f462f1b-490d-4a0d-8caa-51742c9d09b4",
+  "commandScript": "import subprocess,json,hashlib,datetime\nrows=[]\nfor name,expected in [(\"catalog.html\",\"be773e3953eecc72b7dbdf9fc03ae2e9a307d18a0f1b32ea759c84da23b0bc1c\"),(\"demo.html\",\"c7f1877facf1c62c741373b6bd03b645ec351af3457da06c45988efde805701a\")]:\n url=\"https://jacobmetoyer.com/RecallWeave/\"+name\n command=[\"/usr/bin/curl\",\"--disable\",\"--fail\",\"--silent\",\"--show-error\",\"--location\",\"--proto\",\"=https\",\"--proto-redir\",\"=https\",\"--max-time\",\"20\",\"--max-filesize\",\"524288\",\"--header\",\"Cache-Control: no-cache\",\"--write-out\",\"\\nCURL_METADATA %{http_code} %{url_effective}\\n\",url]\n result=subprocess.run(command,capture_output=True,timeout=25)\n assert result.returncode==0,result.stderr.decode(errors=\"replace\")[:1000]\n body,metadata=result.stdout.rsplit(b\"\\nCURL_METADATA \",1)\n status,final_url=metadata.decode().strip().split(\" \",1)\n digest=hashlib.sha256(body).hexdigest()\n rows.append({\"url\":url,\"final_url\":final_url,\"status\":int(status),\"bytes\":len(body),\"sha256\":digest,\"git_blob\":hashlib.sha1((\"blob \"+str(len(body))+\"\\0\").encode()+body).hexdigest(),\"expected_sha256\":expected,\"exact\":digest==expected,\"transport\":\"/usr/bin/curl with normal TLS verification; HTTPS-only redirects\"})\nprint(json.dumps({\"checked_at\":datetime.datetime.now(datetime.timezone.utc).isoformat(),\"source_merge\":\"81363271da63c5428fcb4cafba39fc89c3557b82\",\"rows\":rows}))\nassert all(row[\"exact\"] and row[\"status\"]==200 for row in rows),\"Live source differs\"\n",
+  "processStart": {
+    "content": [
+      {
+        "type": "text",
+        "text": "Process started with PID 54663 (shell: /bin/zsh)\nInitial output:\n{\"checked_at\": \"2026-10-08T16:35:26.767159+00:00\", \"source_merge\": \"81363271da63c5428fcb4cafba39fc89c3557b82\", \"rows\": [{\"url\": \"https://jacobmetoyer.com/RecallWeave/catalog.html\", \"final_url\": \"https://jacobmetoyer.com/RecallWeave/catalog.html\", \"status\": 200, \"bytes\": 176964, \"sha256\": \"be773e3953eecc72b7dbdf9fc03ae2e9a307d18a0f1b32ea759c84da23b0bc1c\", \"git_blob\": \"5374564001035b6fc12f5f4443592a01f6a9ab59\", \"expected_sha256\": \"be773e3953eecc72b7dbdf9fc03ae2e9a307d18a0f1b32ea759c84da23b0bc1c\", \"exact\": true, \"transport\": \"/usr/bin/curl with normal TLS verification; HTTPS-only redirects\"}, {\"url\": \"https://jacobmetoyer.com/RecallWeave/demo.html\", \"final_url\": \"https://jacobmetoyer.com/RecallWeave/demo.html\", \"status\": 200, \"bytes\": 97565, \"sha256\": \"c7f1877facf1c62c741373b6bd03b645ec351af3457da06c45988efde805701a\", \"git_blob\": \"cf7eea3792deacc3eb98a22aef539b920fb66746\", \"expected_sha256\": \"c7f1877facf1c62c741373b6bd03b645ec351af3457da06c45988efde805701a\", \"exact\": true, \"transport\": \"/usr/bin/curl with normal TLS verification; HTTPS-only redirects\"}]}\n"
+      },
+      {
+        "type": "text",
+        "text": "\n[executed on device: Mac.lan (5f462f1b-490d-4a0d-8caa-51742c9d09b4)]"
+      }
+    ],
+    "isError": false
+  },
+  "processCompletion": {
+    "content": [
+      {
+        "type": "text",
+        "text": "[Reading 2 new lines (total: 2 lines)]\n\n{\"checked_at\": \"2026-10-08T16:35:26.767159+00:00\", \"source_merge\": \"81363271da63c5428fcb4cafba39fc89c3557b82\", \"rows\": [{\"url\": \"https://jacobmetoyer.com/RecallWeave/catalog.html\", \"final_url\": \"https://jacobmetoyer.com/RecallWeave/catalog.html\", \"status\": 200, \"bytes\": 176964, \"sha256\": \"be773e3953eecc72b7dbdf9fc03ae2e9a307d18a0f1b32ea759c84da23b0bc1c\", \"git_blob\": \"5374564001035b6fc12f5f4443592a01f6a9ab59\", \"expected_sha256\": \"be773e3953eecc72b7dbdf9fc03ae2e9a307d18a0f1b32ea759c84da23b0bc1c\", \"exact\": true, \"transport\": \"/usr/bin/curl with normal TLS verification; HTTPS-only redirects\"}, {\"url\": \"https://jacobmetoyer.com/RecallWeave/demo.html\", \"final_url\": \"https://jacobmetoyer.com/RecallWeave/demo.html\", \"status\": 200, \"bytes\": 97565, \"sha256\": \"c7f1877facf1c62c741373b6bd03b645ec351af3457da06c45988efde805701a\", \"git_blob\": \"cf7eea3792deacc3eb98a22aef539b920fb66746\", \"expected_sha256\": \"c7f1877facf1c62c741373b6bd03b645ec351af3457da06c45988efde805701a\", \"exact\": true, \"transport\": \"/usr/bin/curl with normal TLS verification; HTTPS-only redirects\"}]}\n\n✅ Process completed with exit code 0 (runtime: 0.82s)"
+      },
+      {
+        "type": "text",
+        "text": "\n[executed on device: Mac.lan (5f462f1b-490d-4a0d-8caa-51742c9d09b4)]"
+      }
+    ],
+    "isError": false
+  },
+  "exitCode": 0
+}
