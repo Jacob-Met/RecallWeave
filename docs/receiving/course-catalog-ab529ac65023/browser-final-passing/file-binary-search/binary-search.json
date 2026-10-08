@@ -1,0 +1,174 @@
+{
+  "format": "recallweave-deck/1",
+  "title": "Binary search: precise boundaries",
+  "attribution": "Original worked questions and examples for RecallWeave, 2026. Algorithm background: NIST Dictionary of Algorithms and Data Structures, binary search (https://xlinux.nist.gov/dads/HTML/binarySearch.html); Python documentation, bisect_left partition contract (https://docs.python.org/3/library/bisect.html). No source exercises, prose or figures are reproduced.",
+  "license": "CC0-1.0 for this original course content. Referenced NIST and Python materials retain their own terms; they are not included in this deck.",
+  "concepts": ["Sorted search contract", "Interval decisions", "Boundary results", "Progress and cost"],
+  "items": [
+    {
+      "id": "bs-contract-order",
+      "concept": "Sorted search contract",
+      "prerequisites": [],
+      "prompt": "This course searches for the first array value at least as large as a target. It discards one side after comparing a middle value. Which condition on the input makes that discard valid?",
+      "options": [
+        "The array has no repeated values, in any order.",
+        "The array has an even number of values, in any order.",
+        "The values are in nondecreasing order; repeats are allowed.",
+        "Every value is positive; their order does not matter."
+      ],
+      "answer": 2,
+      "explanation": "Nondecreasing means each value is at least the one before it. If a middle value is below the target, every earlier value is also below it. If a middle value is at least the target, every later value is also at least it. Those implications justify discarding a side. Repeated values, negative values and odd lengths do not break the ordering argument.",
+      "transfer": "Would [-4, -4, 2, 9] satisfy the condition? Yes: equal neighbors are allowed. Would [2, 9, -4, -4]? No. Sorting that array would create a different sequence; applying the discard rule directly to the unsorted sequence is not justified."
+    },
+    {
+      "id": "bs-contract-duplicates",
+      "concept": "Sorted search contract",
+      "prerequisites": [],
+      "prompt": "Use zero-based indices. For [1, 3, 5, 5, 9] and target 5, lower-bound search returns the first index whose value is at least 5. Which index must it return?",
+      "options": ["Index 3", "Index 2", "Index 4", "Index 0"],
+      "answer": 1,
+      "explanation": "Indices 0 and 1 hold 1 and 3, both below 5. Index 2 is the first qualifying index. Index 3 also holds 5, but it is not first. Lower-bound search has a deliberate duplicate policy: it returns the boundary before all existing target-equal values, not an arbitrary match.",
+      "transfer": "Insert one more 5 at boundary 2. The new array is [1, 3, 5, 5, 5, 9] and remains sorted. Searching for 5 still returns 2. This is an insertion-position rule, not a rule for assigning a unique identity to equal values."
+    },
+    {
+      "id": "bs-contract-absent",
+      "concept": "Sorted search contract",
+      "prerequisites": [],
+      "prompt": "For [-3, 1, 4, 8] and target 6, report the lower-bound insertion boundary and whether the target is present. Indices start at 0; boundary 4 would be after the last element.",
+      "options": [
+        "Boundary 4; target absent.",
+        "Boundary 2; target present.",
+        "Boundary 2; target absent.",
+        "Boundary 3; target absent."
+      ],
+      "answer": 3,
+      "explanation": "The first value at least 6 is 8 at index 3. No value equals 6, so the target is absent. Inserting 6 before index 3 gives [-3, 1, 4, 6, 8]. Lower bound still has a useful result when an exact match does not exist; it does not use -1 as its insertion result.",
+      "transfer": "Changing the target to 4 keeps the array fixed and returns boundary 2 with a present result. Changing it to 5 returns boundary 3 with an absent result. An insertion boundary alone does not prove equality."
+    },
+    {
+      "id": "bs-interval-midpoint",
+      "concept": "Interval decisions",
+      "prerequisites": ["Sorted search contract"],
+      "prompt": "The unresolved element interval is [lo, hi): lo is included and hi is excluded. With lo = 2 and hi = 9, compute mid = lo + floor((hi - lo) / 2). Which index is compared next?",
+      "options": ["Index 5", "Index 4", "Index 6", "Index 9"],
+      "answer": 0,
+      "explanation": "The unresolved indices are 2 through 8, so there are 9 - 2 = 7 elements. floor(7 / 2) = 3 and mid = 2 + 3 = 5. Index 9 is a boundary outside the unresolved interval. The formula adds half of the interval's length to lo; it does not treat hi as an included final element.",
+      "transfer": "For [2, 8), the length is 6 and the same formula also gives mid = 5. Both the odd-length and even-length intervals compare a valid unresolved element. Recompute mid from the current bounds after every update."
+    },
+    {
+      "id": "bs-interval-less",
+      "concept": "Interval decisions",
+      "prerequisites": ["Sorted search contract"],
+      "prompt": "Search [-6, -2, 1, 4, 9, 12] for target 8. Initially [lo, hi) = [0, 6), so mid = 3 and a[mid] = 4. Since 4 < 8, what must the next unresolved interval be?",
+      "options": ["[3, 6)", "[0, 3)", "[0, 4)", "[4, 6)"],
+      "answer": 3,
+      "explanation": "The middle value 4 is too small, and sorted order makes every value before it too small as well. Exclude mid itself by setting lo = mid + 1 = 4, while hi stays 6. Keeping lo = 3 would retain a value already known to fail. The answer boundary now lies from 4 through 6, inclusive.",
+      "transfer": "The next middle index is 4 + floor((6 - 4) / 2) = 5. Its value 12 is at least 8, so that later comparison sets hi = 5. A discarded middle element never has to be compared again."
+    },
+    {
+      "id": "bs-interval-equality",
+      "concept": "Interval decisions",
+      "prerequisites": ["Sorted search contract"],
+      "prompt": "Search [1, 3, 5, 5, 9] for target 5. Follow this course's loop: when a[mid] < target, set lo = mid + 1; otherwise set hi = mid. Initially [lo, hi) = [0, 5), mid = 2 and a[mid] = 5. Which next action does that loop require?",
+      "options": [
+        "Set hi = 1, making [0, 1).",
+        "Set hi = 2, making [0, 2).",
+        "Set lo = 3, making [3, 5).",
+        "Stop now and return index 2."
+      ],
+      "answer": 1,
+      "explanation": "Equality belongs to the at-least branch, so hi becomes mid = 2. Index 2 is no longer an unresolved element: it is a known qualifying boundary candidate. The loop continues to inspect earlier elements and eventually returns 2. Setting hi = mid - 1 = 1 would discard the true boundary 2. Stopping on equality is not this loop's rule and would fail to find the first occurrence for some arrays with duplicates.",
+      "transfer": "With [1, 5, 5, 5, 9], the same first comparison also sets hi = 2, but the final result is 1 rather than 2. Continuing left finds that earlier equal value. Although [lo, hi) excludes element hi from further comparisons, the eventual answer boundary may still equal hi."
+    },
+    {
+      "id": "bs-boundary-empty",
+      "concept": "Boundary results",
+      "prerequisites": ["Interval decisions"],
+      "prompt": "For an empty array and target 7, the initial bounds are lo = 0 and hi = 0. The loop runs only while lo < hi. What does lower-bound search return, and how many middle-value comparisons does it make?",
+      "options": [
+        "Boundary 0, with zero comparisons.",
+        "Boundary -1, with zero comparisons.",
+        "Boundary 0, with one comparison.",
+        "Boundary 1, with one comparison."
+      ],
+      "answer": 0,
+      "explanation": "The loop is already finished because 0 < 0 is false. The insertion boundary is lo = 0: the only place to insert into an empty array. No array element is read and the target is absent. This distinguishes an insertion boundary from an existing element index.",
+      "transfer": "After inserting 7, the array [7] has one element but two boundaries, 0 and 1. A new search for 7 returns 0 and reports present; a search for 8 returns 1 and reports absent."
+    },
+    {
+      "id": "bs-boundary-after",
+      "concept": "Boundary results",
+      "prerequisites": ["Interval decisions"],
+      "prompt": "For [-2, 0, 6] and target 8, lower-bound search finishes with p = 3. The array has length 3 and existing indices 0, 1 and 2. Which conclusion is correct?",
+      "options": [
+        "The target is stored at existing index 3.",
+        "There is no position that would keep an insertion sorted.",
+        "The target is absent; boundary 3 is after the final element.",
+        "The target is stored at existing index 2."
+      ],
+      "answer": 2,
+      "explanation": "All three values are below 8, so the first qualifying insertion boundary is the array's length. There is no existing a[3]. Inserting 8 at the end would produce [-2, 0, 6, 8]. To test membership after lower bound, first check p < length, then compare a[p] with the target.",
+      "transfer": "For target 6, p = 2 and a[2] equals the target, so membership is true. For target 7, p = 3 and membership is false. A returned boundary equal to length is a normal absent result, not an overflow or search failure."
+    },
+    {
+      "id": "bs-boundary-before",
+      "concept": "Boundary results",
+      "prerequisites": ["Interval decisions"],
+      "prompt": "Search [-5, 0, 8] for target -9. The first value at least -9 is at index 0. What are the insertion boundary and membership result?",
+      "options": [
+        "Boundary 0; the target is present.",
+        "Boundary 3; the target is absent.",
+        "Boundary 0; the target is absent.",
+        "Boundary -1; the target is present."
+      ],
+      "answer": 2,
+      "explanation": "Boundary 0 places -9 before the current first value -5. The value -5 meets the at-least test but does not equal -9, so membership is false. Neither a nonnegative return value nor p < length is sufficient to prove that the target exists.",
+      "transfer": "Keep the same array and use target -5. The boundary remains 0, but membership changes to true because a[0] now equals the target. The lower-bound partition and the final equality check answer different questions."
+    },
+    {
+      "id": "bs-progress-single",
+      "concept": "Progress and cost",
+      "prerequisites": ["Boundary results"],
+      "prompt": "A lower-bound loop reaches [lo, hi) = [5, 6), so mid = 5. The value a[5] is 4 and the target is 7. Which update both removes this known-too-small value and makes progress toward termination?",
+      "options": [
+        "Set hi = mid + 1, keeping [5, 6).",
+        "Set lo = mid, keeping [5, 6).",
+        "Keep both bounds, so [5, 6) can be checked again.",
+        "Set lo = mid + 1, producing [6, 6)."
+      ],
+      "answer": 3,
+      "explanation": "Since 4 < 7, lo must move past the middle element: lo = 6. The unresolved interval becomes empty and the loop stops. Using lo = mid here leaves lo at 5, repeats the same comparison and can loop forever. Every executed step must strictly shrink hi - lo.",
+      "transfer": "If the same a[5] were instead 9, the at-least branch would set hi = mid = 5 and finish at [5, 5). The two branches end at different boundaries but both remove the last unresolved element."
+    },
+    {
+      "id": "bs-progress-trace",
+      "concept": "Progress and cost",
+      "prerequisites": ["Boundary results"],
+      "prompt": "Search [2, 4, 6, 8, 10, 12, 14, 16] for target 7. Use mid = lo + floor((hi - lo) / 2); set lo = mid + 1 when a[mid] < target, otherwise set hi = mid. Count only middle-value comparisons. Which final pair is correct?",
+      "options": [
+        "Three comparisons; insertion boundary 3.",
+        "Four comparisons; insertion boundary 4.",
+        "Three comparisons; insertion boundary 4.",
+        "Four comparisons; insertion boundary 3."
+      ],
+      "answer": 0,
+      "explanation": "Start at [0, 8). Compare index 4: 10 ≥ 7, so use [0, 4). Compare index 2: 6 < 7, so use [3, 4). Compare index 3: 8 ≥ 7, so use [3, 3). There are three comparisons and the boundary is 3. The target is absent. A final membership check is separate and is not included in this count.",
+      "transfer": "Try the same array with target 2. The middle indices are 4, 2, 1 and 0, so that search needs four comparisons. Equal array length does not force every target to follow a path of equal length."
+    },
+    {
+      "id": "bs-progress-bound",
+      "concept": "Progress and cost",
+      "prerequisites": ["Boundary results"],
+      "prompt": "Use this same lower-bound loop on an already sorted array of 31 elements. Count one a[mid] < target comparison per iteration, excluding any later membership check. What is its maximum number of these comparisons over possible targets?",
+      "options": [
+        "31, because only one element can be excluded per comparison.",
+        "5, because the unresolved length can fall 31 → 15 → 7 → 3 → 1 → 0.",
+        "4, because the array length is below the next power of two.",
+        "1, because sorted input identifies the target without searching."
+      ],
+      "answer": 1,
+      "explanation": "For length 31, either branch leaves at most 15 unresolved elements, then at most 7, 3, 1 and 0. That takes at most five comparisons, and a target below all values attains five. More generally, this loop needs at most ceil(log2(n + 1)) comparisons for n elements. This is search cost on already sorted, directly indexed data; it excludes sorting, input validation, display and insertion work.",
+      "transfer": "For 32 elements, a path can shrink 32 → 16 → 8 → 4 → 2 → 1 → 0 and take six comparisons. The worst-case bound changes at that boundary. Appending a value to an array may also involve moving data; logarithmic search does not make every surrounding operation logarithmic."
+    }
+  ]
+}

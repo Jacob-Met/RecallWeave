@@ -1,0 +1,783 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f4f3ed">
+  <title>RecallWeave — compare learning traces</title>
+  <style>
+    :root{--paper:#f4f3ed;--ink:#202b28;--muted:#5a6b63;--line:#d4dcd3;--green:#245d4c;--mint:#e1ebe2;--orange:#a65331;--white:#fffefa;font-family:system-ui,sans-serif;color:var(--ink);background:var(--paper);font-synthesis:none}
+    *{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 8% 12%,#e8eedf,transparent 36%),var(--paper)}[hidden]{display:none!important}
+    a{color:var(--green)}button,input,select,summary{font:inherit}button,input,select{max-width:100%}button,input,select,a,summary{outline-offset:4px}button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible,summary:focus-visible{outline:3px solid var(--orange)}
+    button{background:var(--white);color:var(--green);border:1px solid #91a698;border-radius:8px;padding:10px 16px;cursor:pointer;min-height:44px}button:hover{background:var(--mint)}button:disabled{color:#718078;background:#edf0ea;cursor:default;border-color:var(--line)}p{line-height:1.65}h1,h2,h3,h4,p,dd{overflow-wrap:anywhere}
+    .skip{position:absolute;left:-999px;top:0;padding:12px;background:var(--white)}.skip:focus{left:12px;z-index:9}
+    header{border-bottom:1px solid var(--line);padding:20px max(24px,calc((100vw - 1140px)/2));display:flex;justify-content:space-between;align-items:center;gap:20px}.brand{font-size:21px;font-weight:750;letter-spacing:-.05em;text-decoration:none}.brand span{font-weight:400;color:var(--muted)}.private{font:11px ui-monospace,monospace;letter-spacing:.07em;color:var(--green)}
+    main{max-width:1140px;margin:auto;padding:52px 24px 72px}.eyebrow{color:var(--orange);font:11px ui-monospace,monospace;letter-spacing:.1em}.intro{max-width:800px}h1{font:normal clamp(39px,5vw,64px)/1.06 Georgia,serif;letter-spacing:-.035em;margin:14px 0 20px}h1 em{color:var(--green)}.intro>p{color:var(--muted);max-width:690px}.how{margin:22px 0 30px;max-width:760px}.how summary,.answer-detail summary{cursor:pointer;color:var(--green);padding:10px 0;min-height:44px}
+    .files{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:28px}.file-card{min-width:0;background:var(--white);border:1px solid var(--line);border-radius:14px;padding:24px}.file-card h2{font:normal 29px Georgia,serif;margin:0 0 6px}.filename{font-size:13px;font-weight:650;color:var(--green);min-height:24px;margin:0 0 18px}.file-card label{display:block;font-size:13px;font-weight:650;margin-bottom:9px}.file-card input{display:block;width:100%;font-size:13px;min-height:44px}.file-card input::file-selector-button{padding:10px;border:1px solid #a6b4a9;border-radius:6px;background:var(--paper);color:var(--ink);margin-right:10px;cursor:pointer}.file-card .clear{font-size:13px;margin-top:10px;padding:8px 13px}.file-status{font-size:12px;color:var(--muted);margin:16px 0 0;min-height:40px}.file-preview h3{font-size:16px;margin:18px 0 12px}.file-preview dl{font-size:12px}.file-preview dt{color:var(--muted);margin-top:10px}.file-preview dd{margin:3px 0 0;font-variant-numeric:tabular-nums}.waiting,.pair-error{margin:22px 0;padding:16px 20px;border-radius:9px;background:var(--mint);font-size:14px}.pair-error{color:#733517;border:1px solid #d3b39d;background:#fbede4}
+    .comparison{margin-top:38px}.comparison-head{display:flex;justify-content:space-between;align-items:start;gap:24px;border-bottom:1px solid var(--line);padding-bottom:24px}.comparison h2{font:normal 34px/1.2 Georgia,serif;margin:8px 0 12px}.counts{color:var(--green);font-weight:650;margin:0}.boundary{max-width:760px;color:var(--muted);font-size:13px}.filters{display:flex;align-items:end;flex-wrap:wrap;gap:16px;margin:24px 0 12px}.filters label{display:block;font-size:12px;font-weight:650;margin-bottom:7px}.filters select{width:100%;min-width:180px;min-height:44px;padding:9px 32px 9px 10px;border:1px solid #99aa9e;border-radius:8px;background:var(--white);color:var(--ink)}.visible-count{font-size:12px;color:var(--muted);margin:14px 0 20px}.no-results{border:1px dashed #9caf9d;border-radius:9px;padding:18px;background:#f9fbf4}
+    .question-card{background:var(--white);border:1px solid var(--line);border-radius:12px;padding:26px;margin:18px 0;break-inside:avoid}.question-meta{margin:0;font:11px ui-monospace,monospace;color:var(--muted)}.question-card h3{font-size:19px;line-height:1.55;margin:12px 0}.difference-note{font-size:12px;color:var(--green);margin:0 0 20px}.answer-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px}.answer-side{min-width:0;border-left:3px solid var(--line);padding-left:16px}.answer-side h4{font-size:12px;letter-spacing:.04em;text-transform:uppercase;margin:0 0 10px;color:var(--green)}.answer-outcome{font-size:12px;font-weight:650;margin:0 0 10px}.answer-side dl{margin:0}.answer-side dt,.answer-detail dt{color:var(--muted);font-size:11px;letter-spacing:.02em;margin:14px 0 6px}.answer-side dd,.answer-detail dd{font-size:14px;line-height:1.65;margin:0}.answer-detail{margin-top:23px;border-top:1px solid var(--line);padding-top:5px}.answer-detail summary{font-size:13px}.source-note{font-size:12px;color:var(--muted);border-top:1px solid var(--line);margin-top:30px;padding-top:22px}.source-note p{margin:8px 0}.source-note strong{color:var(--ink)}footer{max-width:1140px;margin:0 auto;padding:0 24px 30px;font:11px ui-monospace,monospace;color:var(--muted)}
+    @media(max-width:620px){header{padding:18px 20px;align-items:start}.private{max-width:130px;line-height:1.6;text-align:right}main{padding:32px 18px 52px}.files{grid-template-columns:1fr;gap:14px}.file-card{padding:20px}.comparison-head{display:block}.comparison-head button{margin-top:16px}.filters>div{width:100%}.filters select{width:100%}.answer-grid{grid-template-columns:1fr;gap:24px}.question-card{padding:20px}.comparison h2{font-size:29px}.answer-side{padding-left:13px}}
+    @media print{body{background:white;color:black}header{padding:0 0 12px}.private,.skip,.how,.file-card label,.file-card input,.clear,.file-status,.filters,button,.waiting{display:none!important}main{padding:18px 0;max-width:none}.intro h1{font-size:32px}.intro>p{font-size:11px}.files{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:16px}.file-card{padding:14px;border-color:#aaa;break-inside:avoid}.file-card h2{font-size:20px}.file-card .filename{font-size:11px;margin-bottom:5px}.file-preview h3{font-size:13px}.comparison{margin-top:22px}.comparison h2{font-size:24px}.comparison-head{padding-bottom:10px}.question-card{padding:14px;border-color:#aaa;break-inside:avoid}.question-card h3{font-size:15px}.answer-grid{display:grid;grid-template-columns:1fr 1fr}.answer-side dd,.answer-detail dd{font-size:11px}.boundary,.source-note{font-size:10px}footer{padding:10px 0;font-size:9px}}
+  </style>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to trace comparison</a>
+  <header><a class="brand" href="./demo.html">recall<span>weave</span></a><span class="private">LOCAL FILES · NO UPLOAD</span></header>
+  <main id="main">
+    <section class="intro" aria-labelledby="page-title">
+      <p class="eyebrow">FIELD NOTES / SAVED LEARNING</p>
+      <h1 id="page-title">Read two <em>learning traces.</em></h1>
+      <p>Keep both sets of answers in view. Compare completed traces from the exact same course, follow each question’s original answer, and inspect practice as a separate record.</p>
+      <details class="how"><summary>Where do learning-trace files come from?</summary><p>Finish a session in RecallWeave. Under <strong>Keep or restore a learning trace</strong>, choose <strong>Download trace (.json)</strong>. You can save a second completed session or another practice snapshot of the same course. Select those two files here. Course decks, author drafts and unfinished lessons use different formats.</p><p>Both files stay in this tab. This reader does not change a lesson, save browser data, or write back to either file. Each file may contain at most 2 MiB of valid UTF-8 JSON.</p></details>
+    </section>
+    <section class="files" aria-label="Choose two completed traces">
+      <section class="file-card" aria-labelledby="trace-left-heading">
+        <h2 id="trace-left-heading">Trace A</h2><p id="trace-left-name" class="filename">No file selected</p>
+        <label for="trace-left-file">Choose Trace A (.json)</label><input id="trace-left-file" type="file" accept=".json,application/json" aria-describedby="trace-left-status">
+        <button type="button" id="trace-left-clear" class="clear" disabled>Clear Trace A</button>
+        <p id="trace-left-status" class="file-status" role="status"></p><div id="trace-left-preview" class="file-preview"></div>
+      </section>
+      <section class="file-card" aria-labelledby="trace-right-heading">
+        <h2 id="trace-right-heading">Trace B</h2><p id="trace-right-name" class="filename">No file selected</p>
+        <label for="trace-right-file">Choose Trace B (.json)</label><input id="trace-right-file" type="file" accept=".json,application/json" aria-describedby="trace-right-status">
+        <button type="button" id="trace-right-clear" class="clear" disabled>Clear Trace B</button>
+        <p id="trace-right-status" class="file-status" role="status"></p><div id="trace-right-preview" class="file-preview"></div>
+      </section>
+    </section>
+    <p id="trace-waiting" class="waiting">Choose and check both files to view their comparison. Replacing either file clears the old comparison while the new file is read.</p>
+    <p id="trace-pair-error" class="pair-error" role="alert" hidden></p>
+    <section id="trace-comparison" class="comparison" aria-labelledby="trace-course-title" hidden>
+      <div class="comparison-head"><div><p class="eyebrow">ONE COURSE / TWO RECORDS</p><h2 id="trace-course-title"></h2><p id="trace-change-count" class="counts" role="status"></p></div><button type="button" id="trace-print" disabled>Print comparison</button></div>
+      <p class="boundary">A and B are your selected file positions. File save times do not establish when learning occurred. Answer differences and correctness counts do not establish learning improvement or grades. A trace is an editable record; its course content and attribution are supplied by its author.</p>
+      <div class="filters">
+        <div><label for="trace-difference-filter">Show questions</label><select id="trace-difference-filter" disabled><option value="all">All questions</option><option value="first">Different first answers</option><option value="practice">Different practice records</option><option value="either">Any difference</option></select></div>
+        <div><label for="trace-concept-filter">Concept</label><select id="trace-concept-filter" disabled><option value="">All concepts</option></select></div>
+        <button type="button" id="trace-reset-filters">Reset filters</button>
+      </div>
+      <p id="trace-visible-count" class="visible-count" role="status"></p>
+      <p id="trace-no-results" class="no-results" hidden>No questions match these filters. Choose another filter or reset them to see all questions.</p>
+      <div id="trace-question-list"></div>
+      <section class="source-note" aria-label="Course attribution"><strong>Course attribution and permission</strong><p id="trace-course-attribution"></p><p id="trace-course-license"></p><p>Questions follow course order. “Question … in this file” preserves each file’s original first-answer order. First-correct questions have no offered practice; an unstarted round, pending retry and recorded retry remain distinct. No model estimates are compared or updated.</p></section>
+    </section>
+  </main>
+  <footer>RECALLWEAVE / COMPLETED TRACE READER / OFFLINE</footer>
+  <script>
+// Source: src/knowledge.mjs
+/**
+ * Transparent Bayesian Knowledge Tracing and adaptive item selection.
+ * Parameters are pedagogical defaults, not fitted or validated estimates.
+ * @typedef {{id:string, concept:string, prerequisites:string[], options:string[], answer:number, prompt:string, explanation:string, transfer:string}} Item
+ * @typedef {{initial:number, learn:number, guess:number, slip:number}} BktParameters
+ */
+const DEFAULT_BKT = Object.freeze({ initial: 0.22, learn: 0.18, guess: 0.2, slip: 0.1 });
+const clamp = (value, min = 0, max = 1) => Math.min(max, Math.max(min, value));
+
+/** Bernoulli entropy in bits. @param {number} p */
+function entropy(p) {
+  const q = clamp(p);
+  if (q === 0 || q === 1) return 0;
+  return -q * Math.log2(q) - (1 - q) * Math.log2(1 - q);
+}
+
+/**
+ * One BKT update. Correctness is evidence, not certainty; a guess and a slip remain possible.
+ * @param {number} prior
+ * @param {boolean} correct
+ * @param {BktParameters} parameters
+ */
+function updateMastery(prior, correct, parameters = DEFAULT_BKT) {
+  const p = clamp(prior);
+  const { guess, slip, learn } = parameters;
+  for (const [key, value] of Object.entries(parameters)) {
+    if (!Number.isFinite(value) || value < 0 || value > 1) throw new RangeError(`${key} must be in [0,1]`);
+  }
+  const pCorrect = p * (1 - slip) + (1 - p) * guess;
+  const posterior = correct ? p * (1 - slip) / pCorrect : p * slip / (p * slip + (1 - p) * (1 - guess));
+  return clamp(posterior + (1 - posterior) * learn);
+}
+
+/** Expected reduction in uncertainty from an item response under its concept mastery.
+ * @param {number} mastery
+ * @param {BktParameters} parameters
+ */
+function expectedInformationGain(mastery, parameters = DEFAULT_BKT) {
+  const p = clamp(mastery);
+  const { guess, slip } = parameters;
+  const pCorrect = p * (1 - slip) + (1 - p) * guess;
+  const correctPosterior = p * (1 - slip) / pCorrect;
+  const wrongPosterior = p * slip / (p * slip + (1 - p) * (1 - guess));
+  return Math.max(0, entropy(p) - pCorrect * entropy(correctPosterior) - (1 - pCorrect) * entropy(wrongPosterior));
+}
+
+/**
+ * Select an unseen item maximizing uncertainty reduction plus prerequisite repair.
+ * Tie-break is stable by item id, making the choice reproducible.
+ * @param {Item[]} items
+ * @param {Set<string>} asked
+ * @param {Record<string,number>} mastery
+ * @param {BktParameters} parameters
+ * @returns {Item|null}
+ */
+function selectNextItem(items, asked, mastery, parameters = DEFAULT_BKT) {
+  const candidates = items.filter(item => !asked.has(item.id));
+  if (!candidates.length) return null;
+  const score = item => {
+    const m = mastery[item.concept] ?? parameters.initial;
+    // Prefer a weak concept that unlocks several still-unanswered downstream ideas.
+    const downstream = candidates.filter(next => next.id !== item.id && next.prerequisites.includes(item.concept)).length;
+    const prerequisiteRepair = (1 - m) * Math.min(3, downstream) * 0.12;
+    return expectedInformationGain(m, parameters) + prerequisiteRepair;
+  };
+  return candidates.sort((a, b) => score(b) - score(a) || a.id.localeCompare(b.id))[0];
+}
+
+/** Clone session probabilities so learners' local run has no shared state. */
+function initialMastery(concepts, parameters = DEFAULT_BKT) {
+  return Object.fromEntries(concepts.map(concept => [concept, parameters.initial]));
+}
+
+/**
+ * Reproducible toy learner run; simulated evidence is never real learner data.
+ * @param {Item[]} items
+ * @param {string[]} concepts
+ * @param {Record<string,number>} latentKnowledge simulated probability of knowing each concept
+ * @param {boolean} adaptive use the information-gain selector, or fixed deck order
+ * @param {number} seed deterministic pseudo-random seed
+ */
+function runLearnerSimulation(items, concepts, latentKnowledge, adaptive = true, seed = 20261005) {
+  let state = seed >>> 0 || 1;
+  const random = () => {
+    state ^= state << 13; state ^= state >>> 17; state ^= state << 5;
+    return (state >>> 0) / 4294967296;
+  };
+  const stateByConcept = initialMastery(concepts);
+  const asked = new Set();
+  const trace = [];
+  while (asked.size < items.length) {
+    const item = adaptive ? selectNextItem(items, asked, stateByConcept) : items.find(candidate => !asked.has(candidate.id));
+    const knowledge = clamp(latentKnowledge[item.concept] ?? 0.5);
+    const correct = random() < 0.18 + knowledge * 0.72;
+    asked.add(item.id);
+    stateByConcept[item.concept] = updateMastery(stateByConcept[item.concept], correct);
+    trace.push({ item: item.id, concept: item.concept, correct });
+  }
+  const meanEstimatedMastery = concepts.reduce((sum, concept) => sum + stateByConcept[concept], 0) / concepts.length;
+  return { trace, mastery: stateByConcept, meanEstimatedMastery };
+}
+
+
+// Source: src/review.mjs
+/**
+ * A local review snapshot and one bounded practice round.
+ * Practice never updates the original answers or the knowledge model.
+ */
+
+function validChoice(item, choice) {
+  if (!Number.isInteger(choice) || choice < 0 || choice >= item.options.length) {
+    throw new RangeError('Choose one of this question’s answer options.');
+  }
+}
+
+/** Keep the first-attempt order, chosen answer and explanation available for review. */
+function createReview(items, answers) {
+  const byId = new Map(items.map(item => [item.id, item]));
+  const seen = new Set();
+  return Object.freeze(answers.map(answer => {
+    const item = byId.get(answer.item);
+    if (!item || seen.has(item.id)) throw new RangeError('Review needs one first answer per known question.');
+    seen.add(item.id);
+    validChoice(item, answer.choice);
+    return Object.freeze({
+      id: item.id,
+      concept: item.concept,
+      prompt: item.prompt,
+      options: Object.freeze([...item.options]),
+      answer: item.answer,
+      choice: answer.choice,
+      correct: answer.choice === item.answer,
+      explanation: item.explanation,
+      transfer: item.transfer
+    });
+  }));
+}
+
+/** Each initially missed question gets one retry, in its original session order. */
+function beginPractice(review) {
+  return Object.freeze({
+    items: Object.freeze(review.filter(item => !item.correct)),
+    answers: Object.freeze([])
+  });
+}
+
+function currentPracticeItem(round) {
+  return round.items[round.answers.length] ?? null;
+}
+
+/** Return new practice state; both the review and earlier round states stay intact. */
+function answerPractice(round, itemId, choice) {
+  const item = currentPracticeItem(round);
+  if (!item || item.id !== itemId) throw new RangeError('Only the current unanswered practice question can be answered.');
+  validChoice(item, choice);
+  return Object.freeze({
+    items: round.items,
+    answers: Object.freeze([...round.answers, Object.freeze({item: item.id, choice, correct: choice === item.answer})])
+  });
+}
+
+
+// Source: src/deck.mjs
+/** Local lesson content. Imported data cannot replace the model or run code. */
+const DECK_FORMAT = 'recallweave-deck/1';
+const MAX_DECK_BYTES = 262144;
+
+function deckRecord(value, path) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    throw new Error(`${path} must be an object.`);
+  }
+  return value;
+}
+
+function deckText(value, path, limit) {
+  if (typeof value !== 'string' || !value.trim() || value.length > limit) {
+    throw new Error(`${path} must be nonempty text of at most ${limit} characters.`);
+  }
+  return value;
+}
+
+function deckList(value, path, minimum, maximum) {
+  if (!Array.isArray(value) || value.length < minimum || value.length > maximum) {
+    throw new Error(`${path} must contain ${minimum}–${maximum} entries.`);
+  }
+  return value;
+}
+
+/** Validate and copy only the content fields used by the existing lesson runtime. */
+function validateDeck(value) {
+  const input = deckRecord(value, 'Deck');
+  if (input.format !== undefined && input.format !== DECK_FORMAT) {
+    throw new Error(`Unsupported deck format. Use ${DECK_FORMAT}.`);
+  }
+  const title = deckText(input.title, 'title', 160);
+  const attribution = deckText(input.attribution, 'attribution', 2000);
+  const license = deckText(input.license, 'license', 2000);
+  const concepts = deckList(input.concepts, 'concepts', 1, 32).map((concept, index) =>
+    deckText(concept, `concepts[${index}]`, 80));
+  if (new Set(concepts).size !== concepts.length) throw new Error('Concept names must be unique.');
+  const knownConcepts = new Set(concepts);
+  const ids = new Set();
+  const coveredConcepts = new Set();
+  const links = new Map(concepts.map(concept => [concept, new Set()]));
+  const items = deckList(input.items, 'items', 1, 100).map((value, index) => {
+    const path = `items[${index}]`;
+    const item = deckRecord(value, path);
+    const id = deckText(item.id, `${path}.id`, 80);
+    if (ids.has(id)) throw new Error(`${path}.id duplicates another question ID.`);
+    ids.add(id);
+    const concept = deckText(item.concept, `${path}.concept`, 80);
+    if (!knownConcepts.has(concept)) throw new Error(`${path}.concept is not in concepts.`);
+    coveredConcepts.add(concept);
+    const prerequisites = deckList(item.prerequisites, `${path}.prerequisites`, 0, 31).map((name, p) => {
+      deckText(name, `${path}.prerequisites[${p}]`, 80);
+      if (!knownConcepts.has(name)) throw new Error(`${path}.prerequisites contains an unknown concept.`);
+      if (name === concept) throw new Error(`${path} cannot require its own concept.`);
+      links.get(concept).add(name);
+      return name;
+    });
+    if (new Set(prerequisites).size !== prerequisites.length) throw new Error(`${path}.prerequisites contains a duplicate.`);
+    const options = deckList(item.options, `${path}.options`, 2, 6).map((option, o) =>
+      deckText(option, `${path}.options[${o}]`, 1000));
+    if (new Set(options).size !== options.length) throw new Error(`${path}.options must be distinct.`);
+    if (!Number.isInteger(item.answer) || item.answer < 0 || item.answer >= options.length) {
+      throw new Error(`${path}.answer must be a zero-based index of an option.`);
+    }
+    return Object.freeze({
+      id, concept, prerequisites: Object.freeze(prerequisites),
+      prompt: deckText(item.prompt, `${path}.prompt`, 2000),
+      options: Object.freeze(options), answer: item.answer,
+      explanation: deckText(item.explanation, `${path}.explanation`, 4000),
+      transfer: deckText(item.transfer, `${path}.transfer`, 2000)
+    });
+  });
+  if (coveredConcepts.size !== concepts.length) throw new Error('Every concept must have at least one question.');
+  const visiting = new Set();
+  const visited = new Set();
+  const visit = concept => {
+    if (visiting.has(concept)) throw new Error('Prerequisite links must not form a cycle.');
+    if (visited.has(concept)) return;
+    visiting.add(concept);
+    for (const prerequisite of links.get(concept)) visit(prerequisite);
+    visiting.delete(concept);
+    visited.add(concept);
+  };
+  concepts.forEach(visit);
+  return Object.freeze({
+    format: DECK_FORMAT, title, attribution, license,
+    concepts: Object.freeze(concepts), items: Object.freeze(items)
+  });
+}
+
+/** The same size limit applies to a File and to programmatically supplied UTF-8 JSON. */
+function parseDeck(text) {
+  if (typeof text !== 'string' || new TextEncoder().encode(text).length > MAX_DECK_BYTES) {
+    throw new Error('Choose a JSON deck no larger than 256 KiB.');
+  }
+  let value;
+  try { value = JSON.parse(text); }
+  catch { throw new Error('The file is not valid JSON. Check its commas, quotes and brackets.'); }
+  return validateDeck(value);
+}
+
+/** Export the existing bundled lesson as an editable example of the same contract. */
+function serializeDeck(deck) {
+  return JSON.stringify(validateDeck(deck), null, 2) + '\n';
+}
+
+
+// Source: src/trace-archive.mjs
+
+const TRACE_ARCHIVE_MAX_BYTES = 2 * 1024 * 1024;
+const TRACE_ARCHIVE_FORMAT = 'recallweave.learning-trace';
+const TRACE_ARCHIVE_MODEL = Object.freeze({name: 'recallweave-bkt-v1', parameters: DEFAULT_BKT});
+
+function traceRecord(value, keys) {
+  return value !== null && typeof value === 'object' && !Array.isArray(value)
+    && JSON.stringify(Object.keys(value).sort()) === JSON.stringify([...keys].sort());
+}
+
+function traceCanonical(value) {
+  if (Array.isArray(value)) return '[' + value.map(traceCanonical).join(',') + ']';
+  if (value !== null && typeof value === 'object') {
+    return '{' + Object.keys(value).sort().map(key => JSON.stringify(key) + ':' + traceCanonical(value[key])).join(',') + '}';
+  }
+  return JSON.stringify(value);
+}
+
+function traceReplay(document, deck) {
+  if (!traceRecord(document, ['format', 'version', 'savedAt', 'deck', 'model', 'firstAnswers', 'mastery', 'practice'])
+      || document.format !== TRACE_ARCHIVE_FORMAT || document.version !== 1) {
+    throw new RangeError('This learning trace format is not supported.');
+  }
+  if (typeof document.savedAt !== 'string' || document.savedAt.length !== 24
+      || !Number.isFinite(Date.parse(document.savedAt))
+      || new Date(document.savedAt).toISOString() !== document.savedAt) {
+    throw new RangeError('This learning trace has an invalid save time.');
+  }
+  // Archived course content is only compared; restoration always uses the already loaded deck.
+  if (traceCanonical(document.deck) !== traceCanonical(deck)) {
+    throw new RangeError('This trace belongs to a different course or course version. Load its course, then choose this file again.');
+  }
+  if (traceCanonical(document.model) !== traceCanonical(TRACE_ARCHIVE_MODEL)) {
+    throw new RangeError('This trace uses a different learning model.');
+  }
+  if (!Array.isArray(document.firstAnswers) || document.firstAnswers.length === 0
+      || document.firstAnswers.length !== deck.items.length) {
+    throw new RangeError('This file does not contain a complete first session.');
+  }
+  if (!document.firstAnswers.every(answer => traceRecord(answer, ['item', 'choice']))) {
+    throw new RangeError('This trace has invalid first answers.');
+  }
+  let review;
+  try { review = createReview(deck.items, document.firstAnswers); }
+  catch { throw new RangeError('This trace has invalid first answers.'); }
+  const mastery = initialMastery(deck.concepts);
+  const answers = Object.freeze(review.map(item => {
+    mastery[item.concept] = updateMastery(mastery[item.concept], item.correct);
+    return Object.freeze({item: item.id, concept: item.concept, choice: item.choice, correct: item.correct});
+  }));
+  if (!traceRecord(document.mastery, deck.concepts)
+      || deck.concepts.some(concept => !Number.isFinite(document.mastery[concept]) || document.mastery[concept] !== mastery[concept])) {
+    throw new RangeError('This trace does not preserve the original model estimates.');
+  }
+  let practice = null;
+  if (document.practice !== null) {
+    if (!traceRecord(document.practice, ['answers']) || !Array.isArray(document.practice.answers)) {
+      throw new RangeError('This trace has invalid practice progress.');
+    }
+    practice = beginPractice(review);
+    try {
+      for (const answer of document.practice.answers) {
+        if (!traceRecord(answer, ['item', 'choice'])) throw new RangeError();
+        practice = answerPractice(practice, answer.item, answer.choice);
+      }
+    } catch { throw new RangeError('This trace has invalid practice progress.'); }
+  }
+  const missed = review.filter(item => !item.correct).length;
+  return Object.freeze({
+    savedAt: document.savedAt,
+    title: deck.title,
+    answers,
+    mastery: Object.freeze(mastery),
+    review,
+    practice,
+    summary: Object.freeze({
+      firstAnswers: answers.length,
+      correctFirst: answers.length - missed,
+      practiceStarted: practice !== null,
+      practiceAnswers: practice?.answers.length ?? 0,
+      practiceTotal: missed
+    })
+  });
+}
+
+/** Read bounded JSON into immutable state without changing the current lesson. */
+function readTraceArchive(text, deck) {
+  if (typeof text !== 'string' || new TextEncoder().encode(text).byteLength > TRACE_ARCHIVE_MAX_BYTES) {
+    throw new RangeError('Choose a learning trace file no larger than 2 MiB.');
+  }
+  let document;
+  try { document = JSON.parse(text); }
+  catch { throw new RangeError('This file is not valid learning trace JSON.'); }
+  return traceReplay(document, deck);
+}
+
+/** Save completed first answers and one separate practice round, including full precision estimates. */
+function createTraceArchive({deck, answers, mastery, practice = null, savedAt = new Date()}) {
+  if (!Array.isArray(answers)) throw new RangeError('Finish the first session before saving a trace.');
+  const when = new Date(savedAt);
+  if (!Number.isFinite(when.getTime())) throw new RangeError('A learning trace needs a valid save time.');
+  const document = {
+    format: TRACE_ARCHIVE_FORMAT,
+    version: 1,
+    savedAt: when.toISOString(),
+    deck,
+    model: TRACE_ARCHIVE_MODEL,
+    firstAnswers: answers.map(answer => ({item: answer.item, choice: answer.choice})),
+    mastery,
+    practice: practice === null ? null : {
+      answers: practice.answers.map(answer => ({item: answer.item, choice: answer.choice}))
+    }
+  };
+  const text = JSON.stringify(document, null, 2) + '\n';
+  const restored = readTraceArchive(text, deck);
+  if (practice !== null && traceCanonical(practice.items.map(item => item.id))
+      !== traceCanonical(restored.practice.items.map(item => item.id))) {
+    throw new RangeError('This trace has invalid practice progress.');
+  }
+  return Object.freeze({
+    filename: 'recallweave-learning-trace-' + when.toISOString().slice(0, 10) + '.json',
+    mediaType: 'application/json;charset=utf-8',
+    text
+  });
+}
+
+
+// Source: src/trace-comparison.mjs
+
+function traceComparisonInput(text) {
+  if (typeof text !== 'string' || new TextEncoder().encode(text).byteLength > TRACE_ARCHIVE_MAX_BYTES) {
+    throw new RangeError('Choose a completed learning trace no larger than 2 MiB.');
+  }
+  let document;
+  try { document = JSON.parse(text); }
+  catch { throw new RangeError('This file is not valid learning trace JSON.'); }
+  const course = validateDeck(document?.deck);
+  // Validation supplies display content. Keep the original raw deck for the
+  // archive owner's exact identity check, including older bundled-course files.
+  const trace = readTraceArchive(text, document.deck);
+  return { document, course, trace };
+}
+
+function traceComparisonCourse(course) {
+  return Object.freeze({
+    title: course.title, attribution: course.attribution, license: course.license,
+    concepts: course.concepts, questionCount: course.items.length,
+  });
+}
+
+/** Inspect one completed file without accepting another course into a learner. */
+function inspectTraceForComparison(text) {
+  const { course, trace } = traceComparisonInput(text);
+  return Object.freeze({
+    course: traceComparisonCourse(course),
+    savedAt: trace.savedAt,
+    summary: trace.summary,
+  });
+}
+
+function traceComparisonAnswers(trace) {
+  const first = new Map(trace.answers.map((answer, index) => [
+    answer.item, Object.freeze({
+      choice: answer.choice, correct: answer.correct, position: index + 1,
+    }),
+  ]));
+  const practice = new Map((trace.practice?.answers ?? []).map(answer => [answer.item, answer]));
+  return { first, practice, practiceStarted: trace.practice !== null };
+}
+
+function traceComparisonSide(record, id) {
+  const first = record.first.get(id);
+  const retry = record.practice.get(id);
+  let state = 'not-needed';
+  if (!first.correct) state = retry ? 'answered' : record.practiceStarted ? 'pending' : 'unstarted';
+  return Object.freeze({
+    first,
+    practice: Object.freeze({
+      state, choice: retry?.choice ?? null, correct: retry?.correct ?? null,
+    }),
+  });
+}
+
+/**
+ * Join two complete archives by course question identity, never by answer order.
+ * The native archive reader checks the second file against the first raw course
+ * and current model before any paired rows are returned.
+ */
+function compareTraceArchives(leftText, rightText) {
+  const { document, course, trace: left } = traceComparisonInput(leftText);
+  const right = readTraceArchive(rightText, document.deck);
+  const leftAnswers = traceComparisonAnswers(left);
+  const rightAnswers = traceComparisonAnswers(right);
+  const rows = course.items.map(item => {
+    const a = traceComparisonSide(leftAnswers, item.id);
+    const b = traceComparisonSide(rightAnswers, item.id);
+    return Object.freeze({
+      id: item.id, concept: item.concept, prompt: item.prompt,
+      options: item.options, answer: item.answer,
+      explanation: item.explanation, transfer: item.transfer,
+      left: a, right: b,
+      firstChanged: a.first.choice !== b.first.choice,
+      practiceChanged: a.practice.state !== b.practice.state || a.practice.choice !== b.practice.choice,
+    });
+  });
+  return Object.freeze({
+    course: traceComparisonCourse(course),
+    left: Object.freeze({ savedAt: left.savedAt, summary: left.summary }),
+    right: Object.freeze({ savedAt: right.savedAt, summary: right.summary }),
+    rows: Object.freeze(rows),
+    changes: Object.freeze({
+      firstAnswers: rows.filter(row => row.firstChanged).length,
+      practice: rows.filter(row => row.practiceChanged).length,
+    }),
+  });
+}
+
+
+// Source: src/trace-comparison-ui.mjs
+
+/** Two independent file selections; a pending replacement retires the old pair. */
+function createTracePairController({ onChange = () => {} } = {}) {
+  const empty = () => ({ status: 'empty', filename: '', inspection: null, error: '', text: null });
+  const slots = { left: empty(), right: empty() };
+  const tickets = { left: 0, right: 0 };
+  let current;
+
+  function sideName(side) {
+    if (side !== 'left' && side !== 'right') throw new TypeError('Choose the left or right trace.');
+    return side;
+  }
+  function publish() {
+    let comparison = null, error = '';
+    if (slots.left.status === 'ready' && slots.right.status === 'ready') {
+      try { comparison = compareTraceArchives(slots.left.text, slots.right.text); }
+      catch (failure) { error = failure.message || 'These traces could not be compared.'; }
+    }
+    const visible = side => Object.freeze({
+      status: side.status, filename: side.filename,
+      inspection: side.inspection, error: side.error,
+    });
+    current = Object.freeze({
+      left: visible(slots.left), right: visible(slots.right), comparison, error,
+    });
+    onChange(current);
+  }
+  async function select(side, file) {
+    sideName(side);
+    if (!file) return;
+    const ticket = ++tickets[side];
+    slots[side] = { ...empty(), status: 'loading' };
+    publish();
+    try {
+      const filename = typeof file.name === 'string' && file.name ? file.name : 'Unnamed trace';
+      slots[side] = { ...slots[side], filename };
+      publish();
+      if (!Number.isInteger(file.size) || file.size < 0 || file.size > TRACE_ARCHIVE_MAX_BYTES) {
+        throw new RangeError('Choose a completed learning trace no larger than 2 MiB.');
+      }
+      const buffer = await file.arrayBuffer();
+      if (ticket !== tickets[side]) return;
+      if (buffer.byteLength > TRACE_ARCHIVE_MAX_BYTES) {
+        throw new RangeError('Choose a completed learning trace no larger than 2 MiB.');
+      }
+      let text;
+      try { text = new TextDecoder('utf-8', { fatal: true }).decode(buffer); }
+      catch { throw new RangeError('This file is not valid UTF-8 text.'); }
+      const inspection = inspectTraceForComparison(text);
+      if (ticket !== tickets[side]) return;
+      slots[side] = { status: 'ready', filename, inspection, text, error: '' };
+    } catch (failure) {
+      if (ticket !== tickets[side]) return;
+      slots[side] = {
+        ...empty(), status: 'error', filename: slots[side].filename,
+        error: failure.message || 'The selected file could not be read.',
+      };
+    }
+    publish();
+  }
+  function clear(side) {
+    sideName(side);
+    tickets[side]++;
+    slots[side] = empty();
+    publish();
+  }
+  publish();
+  return Object.freeze({ select, clear, getSnapshot: () => current });
+}
+
+function mountTraceComparison(doc = document) {
+  const $ = id => doc.getElementById(id);
+  let pair = null, currentRows = [];
+  const difference = $('trace-difference-filter');
+  const concept = $('trace-concept-filter');
+
+  function element(tag, text, className) {
+    const node = doc.createElement(tag);
+    if (text !== undefined) node.textContent = text;
+    if (className) node.className = className;
+    return node;
+  }
+  function term(list, label, text) {
+    list.append(element('dt', label), element('dd', text));
+  }
+  function practiceText(practice, options) {
+    if (practice.state === 'not-needed') return 'Not offered: the first answer was correct.';
+    if (practice.state === 'unstarted') return 'No retry recorded; practice was not started.';
+    if (practice.state === 'pending') return 'No retry recorded; this question remained pending.';
+    return options[practice.choice] + ' — ' + (practice.correct ? 'correct retry' : 'incorrect retry');
+  }
+  function answerSide(label, side, row) {
+    const section = element('section', undefined, 'answer-side');
+    section.append(element('h4', label));
+    const list = element('dl');
+    term(list, 'First answer · question ' + side.first.position + ' in this file', row.options[side.first.choice]);
+    const outcome = element('p', side.first.correct ? 'First answer correct' : 'First answer incorrect', 'answer-outcome');
+    term(list, 'Separate practice', practiceText(side.practice, row.options));
+    section.append(outcome, list);
+    return section;
+  }
+  function renderRow(row, index) {
+    const article = element('article', undefined, 'question-card');
+    article.dataset.itemId = row.id;
+    const meta = element('p', row.concept + ' · Course question ' + (index + 1), 'question-meta');
+    const heading = element('h3', row.prompt);
+    heading.id = 'trace-question-' + index;
+    article.setAttribute('aria-labelledby', heading.id);
+    const changes = [];
+    if (row.firstChanged) changes.push('Different first answers');
+    if (row.practiceChanged) changes.push('Different practice records');
+    const badge = element('p', changes.join(' · ') || 'Same first answer and practice record', 'difference-note');
+    const answers = element('div', undefined, 'answer-grid');
+    answers.append(answerSide('Trace A', row.left, row), answerSide('Trace B', row.right, row));
+    const details = element('details', undefined, 'answer-detail');
+    details.append(element('summary', 'Answer, explanation and transfer prompt'));
+    const key = element('dl');
+    term(key, 'Course answer', row.options[row.answer]);
+    term(key, 'Explanation', row.explanation);
+    term(key, 'Transfer prompt', row.transfer);
+    details.append(key);
+    article.append(meta, heading, badge, answers, details);
+    return { node: article, row };
+  }
+  function filterRows() {
+    let visible = 0;
+    for (const { node, row } of currentRows) {
+      const matchDifference = difference.value === 'all'
+        || difference.value === 'first' && row.firstChanged
+        || difference.value === 'practice' && row.practiceChanged
+        || difference.value === 'either' && (row.firstChanged || row.practiceChanged);
+      node.hidden = !(matchDifference && (!concept.value || row.concept === concept.value));
+      if (!node.hidden) visible++;
+    }
+    $('trace-visible-count').textContent = 'Showing ' + visible + ' of ' + (pair?.rows.length ?? 0)
+      + ' course questions. Filter: ' + difference.selectedOptions[0].textContent
+      + (concept.value ? '; concept: ' + concept.value : '; all concepts') + '.';
+    $('trace-no-results').hidden = visible !== 0;
+  }
+  function renderFile(side, state) {
+    const label = side === 'left' ? 'A' : 'B';
+    $('trace-' + side + '-name').textContent = state.filename || 'No file selected';
+    $('trace-' + side + '-clear').disabled = state.status === 'empty';
+    const status = $('trace-' + side + '-status');
+    const preview = $('trace-' + side + '-preview');
+    preview.replaceChildren();
+    if (state.status === 'empty') status.textContent = 'Choose a completed learning-trace JSON file for Trace ' + label + '.';
+    if (state.status === 'loading') status.textContent = 'Reading and checking Trace ' + label + '…';
+    if (state.status === 'error') status.textContent = 'Could not use this file: ' + state.error;
+    if (state.status === 'ready') {
+      status.textContent = 'Completed trace checked. File contents are editable records, not authenticated evidence.';
+      const { course, savedAt, summary } = state.inspection;
+      preview.append(element('h3', course.title));
+      const list = element('dl');
+      term(list, 'File save time (UTC)', savedAt);
+      term(list, 'First answers', summary.correctFirst + ' correct of ' + summary.firstAnswers + ' recorded');
+      term(list, 'Separate practice', summary.practiceAnswers + ' recorded retries of ' + summary.practiceTotal
+        + ' initially missed; ' + (summary.practiceStarted ? 'practice started' : 'practice not started'));
+      preview.append(list);
+    }
+  }
+  function render(state) {
+    renderFile('left', state.left);
+    renderFile('right', state.right);
+    const error = $('trace-pair-error');
+    error.textContent = state.error;
+    error.hidden = !state.error;
+    pair = state.comparison;
+    $('trace-comparison').hidden = !pair;
+    $('trace-waiting').hidden = Boolean(pair || state.error);
+    $('trace-print').disabled = !pair;
+    difference.disabled = !pair;
+    concept.disabled = !pair;
+    currentRows = [];
+    $('trace-question-list').replaceChildren();
+    concept.replaceChildren();
+    const all = element('option', 'All concepts');
+    all.value = '';
+    concept.append(all);
+    difference.value = 'all';
+    if (!pair) return;
+    $('trace-course-title').textContent = pair.course.title;
+    $('trace-course-attribution').textContent = pair.course.attribution;
+    $('trace-course-license').textContent = pair.course.license;
+    $('trace-change-count').textContent = pair.changes.firstAnswers + ' of ' + pair.rows.length
+      + ' first answers differ. ' + pair.changes.practice + ' practice records differ.';
+    for (const name of pair.course.concepts) {
+      const option = element('option', name);
+      option.value = name;
+      concept.append(option);
+    }
+    currentRows = pair.rows.map(renderRow);
+    $('trace-question-list').append(...currentRows.map(item => item.node));
+    filterRows();
+  }
+  const controller = createTracePairController({ onChange: render });
+  for (const side of ['left', 'right']) {
+    const input = $('trace-' + side + '-file');
+    input.addEventListener('change', () => {
+      const file = input.files?.[0];
+      input.value = '';
+      if (file) void controller.select(side, file);
+    });
+    $('trace-' + side + '-clear').addEventListener('click', () => {
+      controller.clear(side);
+      input.value = '';
+      input.focus();
+    });
+  }
+  difference.addEventListener('change', filterRows);
+  concept.addEventListener('change', filterRows);
+  $('trace-reset-filters').addEventListener('click', () => {
+    difference.value = 'all';
+    concept.value = '';
+    filterRows();
+    difference.focus();
+  });
+  $('trace-print').addEventListener('click', () => {
+    if (pair) doc.defaultView.print();
+  });
+  return controller;
+}
+
+mountTraceComparison();
+
+  </script>
+</body>
+</html>

@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DC circuits lab · RecallWeave</title>
+<style>
+:root{color-scheme:light;--paper:#f4f3ed;--ink:#202b28;--muted:#64726d;--line:#d9ddd4;--green:#245d4c;--mint:#dbe8df;--lime:#d9ef94;--orange:#bd6846;--white:#fffefa}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.55 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+a{color:var(--green);text-underline-offset:.2em}
+button,input{font:inherit}
+button,a,input{touch-action:manipulation}
+button{border:1px solid var(--green);border-radius:8px;background:var(--green);color:var(--white);padding:.65rem .85rem;cursor:pointer;font-weight:650;line-height:1.35}
+button:hover{filter:brightness(.93)}
+button.secondary{background:var(--white);color:var(--green)}
+button:disabled{cursor:default;opacity:.45;filter:none}
+:focus-visible{outline:3px solid var(--orange);outline-offset:4px}
+.skip{position:absolute;left:1rem;top:-5rem;z-index:5;background:var(--white);padding:.7rem}
+.skip:focus{top:1rem}
+.wrap{width:min(1120px,calc(100% - 48px));margin-inline:auto}
+header{display:flex;justify-content:space-between;align-items:center;gap:1rem;padding:24px 0;border-bottom:1px solid var(--line)}
+.brand{font-weight:750;letter-spacing:-.04em;font-size:1.2rem}
+.brand-mark{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:50%;background:var(--green);color:var(--lime);font:700 20px Georgia,serif;margin-right:8px}
+.header-note{color:var(--muted);font-size:.85rem;text-align:right}
+.hero{padding:40px 0 28px;max-width:760px}
+.eyebrow{font-size:.74rem;letter-spacing:.15em;text-transform:uppercase;font-weight:750;color:var(--green);margin:0 0 10px}
+h1,h2,h3,p{margin-top:0}
+h1{font:400 clamp(2.4rem,6vw,4.3rem)/1.05 Georgia,serif;letter-spacing:-.04em;margin-bottom:18px}
+.hero p:last-child{max-width:640px;font-size:1.08rem;color:var(--muted);margin-bottom:0}
+h2{font:400 1.65rem/1.2 Georgia,serif;letter-spacing:-.025em}
+h3{font-size:1rem;line-height:1.35}
+.workbench{display:grid;grid-template-columns:260px minmax(0,1fr);border:1px solid var(--line);border-radius:16px;background:var(--white);overflow:hidden}
+.controls{padding:24px;border-right:1px solid var(--line);background:#eeefe7}
+.controls h2{font-size:1.45rem;margin-bottom:20px}
+fieldset{border:0;padding:0;margin:0 0 22px;min-width:0}
+legend{font-size:.83rem;font-weight:750;margin-bottom:9px}
+.input-field{margin-bottom:16px}
+.input-field label{display:block;font-weight:650;font-size:.9rem;margin-bottom:5px}
+.input-line{display:flex;align-items:center;gap:8px}
+.input-line input{width:100%;min-width:0;border:1px solid #a6b3a9;background:var(--white);color:var(--ink);border-radius:7px;padding:9px 10px;font-variant-numeric:tabular-nums}
+.input-line span{min-width:20px;color:var(--muted)}
+input[aria-invalid="true"]{border:2px solid var(--orange)}
+.hint{font-size:.76rem;color:var(--muted);margin:5px 0 0}
+.radios{display:flex;gap:8px;flex-wrap:wrap}
+.radio{display:flex;align-items:center;gap:5px;border:1px solid #a6b3a9;border-radius:7px;padding:8px;background:var(--white);font-size:.9rem}
+input[type="radio"]{accent-color:var(--green);width:16px;height:16px;margin:0}
+.preset-list{display:flex;flex-direction:column;gap:8px}
+.preset-list button{font-size:.82rem;font-weight:600;text-align:left}
+.status{font-size:.82rem;color:var(--muted);margin:18px 0 0;min-height:2.8em}
+.status.has-error{color:#8c3e25;font-weight:650}
+.results{min-width:0;padding:25px 28px}
+.figure-head{display:flex;justify-content:space-between;gap:1rem;align-items:baseline}
+.figure-head h2{margin-bottom:2px}
+.tag{font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;border:1px solid var(--line);padding:3px 7px;border-radius:20px;white-space:nowrap;color:var(--muted)}
+figure{margin:0 0 20px}
+svg{width:100%;height:auto;display:block;margin:8px 0 0;overflow:visible}
+svg text{font:24px system-ui,sans-serif;text-anchor:middle;fill:var(--ink)}
+svg .wire{fill:none;stroke:var(--ink);stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+svg .source-symbol{fill:var(--white);stroke:var(--ink);stroke-width:3}
+svg .resistor{fill:var(--mint);stroke:var(--green);stroke-width:3;rx:3}
+svg .node{fill:var(--ink)}
+svg .polarity{font-size:27px;font-weight:600}
+svg .current-arrow{fill:none;stroke:var(--orange);stroke-width:3.5;marker-end:url(#current-tip)}
+svg .current-label{fill:#995034;font-size:23px}
+figcaption{font-size:.8rem;color:var(--muted);max-width:620px}
+.table-scroll{overflow:auto}
+table{border-collapse:collapse;width:100%;font-size:.9rem;font-variant-numeric:tabular-nums}
+caption{text-align:left;font-weight:700;padding:0 0 8px}
+th,td{padding:10px 7px;text-align:right;border-bottom:1px solid var(--line);vertical-align:middle}
+thead th{font-size:.74rem;line-height:1.3;color:var(--muted);font-weight:650}
+th:first-child,td:first-child{text-align:left;padding-left:0}
+tbody th{font-weight:650}
+tbody tr:last-child th,tbody tr:last-child td{border-bottom:0}
+.relationship{background:var(--mint);border-radius:9px;padding:17px 19px;margin-top:20px}
+.relationship h3{color:var(--green);margin-bottom:8px}
+.relationship p{font-size:.87rem;margin-bottom:8px}
+.relationship p:last-child{margin-bottom:0}
+.comparison{margin-top:27px;border-top:1px solid var(--line);padding-top:23px}
+.comparison h3{margin-bottom:16px}
+.rounding{font-size:.75rem;color:var(--muted);margin:10px 0 0}
+.comparison-note{font-size:.86rem;color:var(--green);margin:13px 0 0}
+.invalid{padding:34px;display:flex;align-items:center;min-height:360px}
+.invalid h2{font-size:1.6rem}
+.invalid p{color:var(--muted);max-width:450px}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+.actions button{font-size:.9rem}
+.experiments{padding:35px 0 30px}
+.experiment-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px}
+.experiment{border-top:2px solid var(--green);padding-top:16px}
+.number{color:var(--green);font-size:.75rem;font-weight:750;letter-spacing:.1em}
+.experiment h3{margin:8px 0}
+.experiment p{font-size:.88rem;color:var(--muted);margin-bottom:0}
+.course{display:flex;align-items:center;justify-content:space-between;gap:25px;border:1px solid var(--line);border-radius:12px;padding:25px;background:var(--white)}
+.course h2{margin-bottom:8px}
+.course p{font-size:.9rem;color:var(--muted);max-width:660px;margin-bottom:0}
+.course button{flex-shrink:0}
+.assumptions{padding:30px 0 34px;max-width:940px}
+.assumptions h2{font-size:1.1rem;font-family:inherit;font-weight:700;letter-spacing:0;margin-bottom:9px}
+.assumptions p{font-size:.84rem;color:var(--muted);margin-bottom:10px}
+footer{border-top:1px solid var(--line);padding:18px 0 28px;font-size:.78rem;color:var(--muted)}
+noscript p{padding:20px;background:var(--mint)}
+@media(max-width:760px){.wrap{width:calc(100% - 28px)}header{padding:18px 0}.hero{padding-top:28px}.workbench{grid-template-columns:1fr}.controls{border-right:0;border-bottom:1px solid var(--line);padding:20px}.controls h2{margin-bottom:16px}.fields{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.input-field{margin-bottom:10px}.input-field label{font-size:.8rem}.input-line{gap:4px}.input-line input{padding:9px 7px}.preset-list{flex-direction:row;flex-wrap:wrap}.preset-list button{flex:1;min-width:100px}fieldset{margin-bottom:16px}.status{min-height:0;margin-top:12px}.results{padding:21px 17px}.experiment-grid{grid-template-columns:1fr;gap:20px}.course{align-items:flex-start;flex-direction:column;gap:18px}.figure-head{align-items:center}.figure-head h2{font-size:1.45rem}.tag{font-size:.63rem}.table-scroll table{font-size:.88rem}thead th{font-size:.72rem}th,td{padding:10px 5px}.input-line span{min-width:14px}.header-note{max-width:140px;font-size:.74rem}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to the circuit lab</a>
+<div class="wrap">
+<header><div class="brand"><span class="brand-mark" aria-hidden="true">r</span>RecallWeave</div><div class="header-note">An offline circuit explorer</div></header>
+<main id="main">
+<section class="hero" aria-labelledby="lab-title"><p class="eyebrow">DC circuits lab</p><h1 id="lab-title">Follow the current.</h1><p>Keep the source and resistors the same. Change their connections, then compare where current flows and energy is transferred.</p></section>
+<noscript><p>JavaScript is needed for the calculator and downloads. The companion <a href="dc-circuits.md">course guide</a> and <a href="dc-circuits.json">question file</a> can be read separately.</p></noscript>
+<div class="workbench">
+<form class="controls" id="circuit-controls" aria-label="Circuit values">
+<h2>Set the circuit</h2>
+<div class="fields">
+<div class="input-field"><label for="source-voltage">Source voltage</label><div class="input-line"><input id="source-voltage" type="number" min="0" max="24" step="any" value="12" required aria-describedby="voltage-hint lab-status"><span aria-hidden="true">V</span></div><p id="voltage-hint" class="hint">0–24 volts</p></div>
+<div class="input-field"><label for="resistance-1">R1 resistance</label><div class="input-line"><input id="resistance-1" type="number" min="1" max="1000" step="any" value="4" required aria-describedby="r1-hint lab-status"><span aria-hidden="true">Ω</span></div><p id="r1-hint" class="hint">1–1,000 ohms</p></div>
+<div class="input-field"><label for="resistance-2">R2 resistance</label><div class="input-line"><input id="resistance-2" type="number" min="1" max="1000" step="any" value="8" required aria-describedby="r2-hint lab-status"><span aria-hidden="true">Ω</span></div><p id="r2-hint" class="hint">1–1,000 ohms</p></div>
+</div>
+<fieldset><legend>Show the connection</legend><div class="radios"><label class="radio"><input type="radio" name="connection" value="series" checked>Series</label><label class="radio"><input type="radio" name="connection" value="parallel">Parallel</label></div></fieldset>
+<fieldset><legend>Starting points</legend><div class="preset-list"><button id="preset-unequal" type="button" class="secondary">Unequal resistors · 12 V, 4 Ω, 8 Ω</button><button id="preset-equal" type="button" class="secondary">Equal resistors · 12 V, 6 Ω, 6 Ω</button><button id="preset-zero" type="button" class="secondary">Set source to 0 V</button></div></fieldset>
+<p id="lab-status" class="status" role="status" aria-live="polite" aria-atomic="true">Enter circuit values to begin.</p>
+</form>
+<div id="results" class="results" hidden>
+<figure aria-labelledby="selected-connection"><div class="figure-head"><h2 id="selected-connection">Series connection</h2><span class="tag">Ideal · steady DC</span></div>
+<svg id="circuit-diagram" viewBox="0 0 600 280" role="img" aria-labelledby="circuit-title circuit-description"><title id="circuit-title">A series circuit</title><desc id="circuit-description">An ideal source and two resistors.</desc><defs><marker id="current-tip" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#bd6846"/></marker></defs><g id="circuit-drawing"></g></svg>
+<figcaption id="arrow-note"></figcaption></figure>
+<div class="table-scroll"><table id="resistor-table"><caption id="resistor-caption">Each resistor in the series connection</caption><thead><tr><th scope="col">Part</th><th scope="col">Resistance<br>(Ω)</th><th scope="col">Voltage<br>(V)</th><th scope="col">Current<br>(A)</th><th scope="col">Power<br>(W)</th></tr></thead><tbody>
+<tr data-part="R1"><th scope="row">R1</th><td data-quantity="resistance">—</td><td data-quantity="voltage">—</td><td data-quantity="current">—</td><td data-quantity="power">—</td></tr>
+<tr data-part="R2"><th scope="row">R2</th><td data-quantity="resistance">—</td><td data-quantity="voltage">—</td><td data-quantity="current">—</td><td data-quantity="power">—</td></tr>
+</tbody></table></div>
+<section class="relationship" aria-labelledby="relationship-title"><h3 id="relationship-title"></h3><p id="connection-summary"></p><p id="power-summary"></p></section>
+<section class="comparison" aria-labelledby="comparison-title"><h3 id="comparison-title">Same parts. Compare both connections.</h3><div class="table-scroll"><table id="comparison-table"><caption class="hint">Source values for these same voltage and resistance inputs</caption><thead><tr><th scope="col">Connection</th><th scope="col">Equivalent<br>resistance (Ω)</th><th scope="col">Source<br>current (A)</th><th scope="col">Source<br>power (W)</th></tr></thead><tbody>
+<tr data-connection="series"><th scope="row">Series</th><td data-quantity="equivalentResistance">—</td><td data-quantity="sourceCurrent">—</td><td data-quantity="sourcePower">—</td></tr>
+<tr data-connection="parallel"><th scope="row">Parallel</th><td data-quantity="equivalentResistance">—</td><td data-quantity="sourceCurrent">—</td><td data-quantity="sourcePower">—</td></tr>
+</tbody></table></div><p class="rounding">Displayed values are rounded to six significant figures. The CSV preserves unrounded values.</p><p id="comparison-note" class="comparison-note"></p></section>
+</div>
+<div id="invalid-results" class="invalid" hidden><div><h2>Ready when the values are.</h2><p>Enter a source voltage and two resistances within the shown ranges. Both connections will update together.</p></div></div>
+</div>
+<div class="actions"><button id="download-comparison" type="button" class="secondary" disabled>Download both connections as CSV</button></div>
+<section class="experiments" aria-labelledby="experiments-title"><h2 id="experiments-title">Predict, change, explain.</h2><div class="experiment-grid">
+<article class="experiment"><span class="number">01 / EQUAL PARTS</span><h3>Where does the voltage go?</h3><p>Choose equal resistors and inspect series. Predict each voltage drop before switching to parallel. What stays equal, and what changes?</p></article>
+<article class="experiment"><span class="number">02 / ONE CHANGE</span><h3>Does the other branch notice?</h3><p>Choose unequal resistors, select parallel and double R2. Watch R1’s current and the source current. Explain why they respond differently.</p></article>
+<article class="experiment"><span class="number">03 / ENERGY</span><h3>Account for every watt.</h3><p>Add the two resistor powers in each connection. Compare the sum with source power. Then set the source to zero and describe what remains.</p></article>
+</div></section>
+<section class="course" aria-labelledby="course-title"><div><p class="eyebrow">Take the next step</p><h2 id="course-title">Twelve questions. Four connected ideas.</h2><p>An original course on current, series connections, parallel connections and power, with worked explanations and transfer prompts. <a href="dc-circuits.md">Read the course guide</a>.</p></div><button id="download-course" type="button">Download the question deck</button></section>
+<section class="assumptions" aria-labelledby="assumptions-title"><h2 id="assumptions-title">What this model assumes</h2><p>An ideal source maintains its stated voltage. Wires have zero resistance. Both resistors are ohmic with fixed resistance, and the circuit is in steady state. This model does not calculate switching transients, temperature changes or component ratings.</p><p>Background: OpenStax, <cite>University Physics Volume 2</cite>, <a href="https://openstax.org/books/university-physics-volume-2/pages/9-1-electrical-current">current</a>, <a href="https://openstax.org/books/university-physics-volume-2/pages/9-4-ohms-law">Ohm’s law</a>, <a href="https://openstax.org/books/university-physics-volume-2/pages/9-5-electrical-energy-and-power">power</a> and <a href="https://openstax.org/books/university-physics-volume-2/pages/10-2-resistors-in-series-and-parallel">connections</a>. Questions, explanations and diagrams here are original.</p></section>
+</main>
+<footer>RecallWeave · DC circuits lab · Calculations and downloads work in this file without a connection.</footer>
+</div>
+<script id="dc-course-data" type="application/json">/*__DC_COURSE__*/</script>
+<script>
+(function () {
+'use strict';
+/*__DC_MODEL__*/
+/*__DC_UI__*/
+})();
+</script>
+</body>
+</html>

@@ -1,6 +1,6 @@
-import { readFileSync, writeFileSync } from 'node:fs';
+import { readFileSync, writeFileSync, realpathSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
-import { fileURLToPath, pathToFileURL } from 'node:url';
+import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
 import { parseDeck } from '../src/deck.mjs';
 
@@ -33,7 +33,16 @@ export function buildGroupedExplorer() {
   if (/<\/script/i.test(script)) throw new Error('An inline script close marker must be escaped.');
   return template.replace(marker, '<script>\n' + script + '\n</script>');
 }
-if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
+function isDirectEntry() {
+  if (!process.argv[1]) return false;
+  try {
+    return realpathSync(fileURLToPath(import.meta.url)) === realpathSync(process.argv[1]);
+  } catch {
+    // An importing process may have no resolvable file entry.
+    return false;
+  }
+}
+if (isDirectEntry()) {
   const args = process.argv.slice(2);
   if (args.length > 1 || (args.length === 1 && args[0] !== '--check')) {
     console.error('Usage: node tools/build-grouped-data.mjs [--check]'); process.exitCode = 1;

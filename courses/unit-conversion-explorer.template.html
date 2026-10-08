@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>Unit conversion explorer · RecallWeave</title>
+  <style>
+    :root { font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #173d38; background: #f4f7f3; font-synthesis: none; line-height: 1.5; }
+    * { box-sizing: border-box; }
+    body { margin: 0; }
+    [hidden] { display: none !important; }
+    a { color: #075c73; text-underline-offset: .18em; }
+    button, input { font: inherit; touch-action: manipulation; }
+    button, summary { cursor: pointer; }
+    :focus-visible { outline: 3px solid #a8410f; outline-offset: 4px; }
+    .skip-link { position: absolute; left: 16px; top: -80px; background: white; padding: 12px; z-index: 2; }
+    .skip-link:focus { top: 12px; }
+    header, main, footer { width: min(1200px, 100%); padding: 24px; margin: 0 auto; }
+    header { padding-top: 32px; padding-bottom: 8px; }
+    .brand { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; font-weight: 750; }
+    .badge, .dimension-badge { font-size: .76rem; font-weight: 700; letter-spacing: .04em; background: #e0eee4; border: 1px solid #b5d2c2; padding: 5px 10px; border-radius: 99px; }
+    h1 { max-width: 900px; font-size: clamp(2rem, 5vw, 3.35rem); line-height: 1.12; letter-spacing: -.03em; margin: 24px 0 14px; }
+    .lede { font-size: 1.13rem; color: #426059; max-width: 800px; }
+    h2 { font-size: 1.4rem; line-height: 1.25; margin: 0 0 12px; }
+    h3 { font-size: 1.03rem; line-height: 1.4; margin: 0 0 10px; }
+    h4 { margin: 0 0 8px; font-size: .82rem; color: #426059; }
+    p { margin: 8px 0 16px; }
+    .actions { display: flex; align-items: center; flex-wrap: wrap; gap: 12px 20px; margin: 22px 0 8px; }
+    .workspace { display: grid; grid-template-columns: minmax(280px, 330px) minmax(0, 1fr); gap: 22px; align-items: start; }
+    .panel { min-width: 0; padding: 24px; border: 1px solid #cddbd2; border-radius: 16px; background: #fff; box-shadow: 0 5px 18px #173d3805; }
+    .input-panel { border-top: 5px solid #266653; }
+    .right-column { min-width: 0; display: grid; gap: 18px; }
+    label { font-weight: 700; display: block; margin: 16px 0 6px; }
+    input { width: 100%; min-width: 0; color: #173d38; background: #fff; border: 1px solid #647f70; border-radius: 7px; padding: 11px 12px; }
+    [aria-invalid="true"] { border: 2px solid #a32220; }
+    button { border: 1px solid #a1b9aa; border-radius: 8px; padding: 10px 14px; background: #f7faf6; color: #173d38; min-height: 44px; }
+    button:hover { background: #eaf2e9; }
+    button:disabled { opacity: .5; cursor: default; }
+    .primary { background: #195a49; color: #fff; border-color: #195a49; font-weight: 700; }
+    .primary:hover { background: #124637; }
+    form .primary { width: 100%; margin-top: 12px; }
+    .help { font-size: .86rem; color: #52685e; }
+    .status { font-size: .88rem; color: #52685e; min-height: 1.5em; margin: 16px 0 0; }
+    .error { background: #fff1ed; color: #842b21; border-left: 4px solid #a32220; padding: 12px; overflow-wrap: anywhere; }
+    .presets { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 14px; }
+    .presets button { text-align: left; font-size: .83rem; padding: 10px; }
+    .presets span { display: block; font-size: .74rem; color: #52685e; }
+    .input-panel h3 { margin-top: 24px; }
+    .result-panel { padding: 0; overflow: hidden; }
+    .result-heading { padding: 24px; background: #e9f3eb; border-bottom: 1px solid #cddbd2; }
+    .eyebrow { font-size: .78rem; font-weight: 750; letter-spacing: .05em; text-transform: uppercase; color: #426059; margin-top: 0; }
+    .answer { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: baseline; font-size: clamp(2rem, 4.5vw, 3.1rem); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+    .answer-unit { font-size: .5em; font-weight: 600; max-width: 100%; overflow-wrap: anywhere; }
+    .result-heading .help { margin-bottom: 0; }
+    .calculation { padding: 22px 24px 8px; }
+    .steps { padding-left: 24px; margin: 0; }
+    .steps > li { padding-left: 6px; margin: 0 0 22px; }
+    .steps > li::marker { font-weight: 750; color: #266653; }
+    .scale-pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+    .scale-card { min-width: 0; border: 1px solid #d8e2da; background: #f7faf6; border-radius: 9px; padding: 12px; }
+    .scale-card p { margin: 6px 0; }
+    .formula { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; font-size: .9rem; }
+    .unit-expression { font-weight: 700; }
+    .base-expression { color: #426059; }
+    .dimension-heading { display: flex; gap: 10px; justify-content: space-between; align-items: start; flex-wrap: wrap; }
+    .dimension-heading h2 { font-size: 1.15rem; }
+    .dimension-badge[data-match="false"] { background: #fff1ed; border-color: #dbb5a7; color: #842b21; }
+    table { width: 100%; border-collapse: collapse; font-size: .86rem; font-variant-numeric: tabular-nums; }
+    th, td { text-align: left; padding: 9px 8px; border-bottom: 1px solid #d8e2da; overflow-wrap: anywhere; }
+    #dimension-panel td, #dimension-panel thead th:not(:first-child) { text-align: center; }
+    #dimension-panel table { table-layout: fixed; }
+    #dimension-panel th:first-child { width: 50%; }
+    .dimension-difference { background: #fff1ed; color: #842b21; }
+    caption { text-align: left; padding: 4px 0 10px; font-size: .82rem; color: #52685e; }
+    .download-panel p { margin-bottom: 0; }
+    .next-steps { margin-top: 22px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px; }
+    .next-steps ol, .next-steps ul { padding-left: 22px; }
+    .next-steps li { margin: 9px 0; }
+    details { margin-top: 22px; }
+    summary { font-weight: 700; min-height: 38px; }
+    .table-scroll { max-width: 100%; overflow-x: auto; }
+    .catalog-table { table-layout: fixed; }
+    .catalog-table th:first-child { width: 18%; }
+    footer { color: #52685e; font-size: .84rem; padding-bottom: 36px; }
+    footer ul { display: flex; flex-wrap: wrap; gap: 10px 22px; list-style: none; padding: 0; }
+    @media (max-width: 850px) { .workspace { grid-template-columns: minmax(0, 1fr); } .presets { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+    @media (max-width: 560px) { header, main, footer { padding-left: 16px; padding-right: 16px; } .panel { padding: 18px; } .result-panel { padding: 0; } .result-heading, .calculation { padding: 18px; } .next-steps, .scale-pair { grid-template-columns: minmax(0, 1fr); } .presets { grid-template-columns: repeat(2, minmax(0, 1fr)); } .answer { font-size: 2rem; } }
+    @media print { :root { background: white; } .input-panel, .skip-link, .actions, .download-panel, .status { display: none; } .workspace, .next-steps { display: block; } .panel { border: 0; box-shadow: none; padding: 12px 0; } header, main, footer { width: 100%; } }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to the explorer</a>
+  <header>
+    <div class="brand"><a href="../demo.html">RecallWeave</a><span class="badge">Offline teaching explorer</span></div>
+    <h1>Let the units do the work.</h1>
+    <p class="lede">Changing units changes a number, while the quantity stays the same. Follow the scale factors, inspect the dimension powers, and see why a centimetre squared needs a squared conversion.</p>
+    <div class="actions"><button id="download-unit-deck" class="primary" type="button">Download lesson (.json)</button><a href="units-and-dimensions.md">Worked guide and answers</a><a href="../demo.html">Open the learner</a></div>
+  </header>
+  <main id="main">
+    <div class="workspace">
+      <section class="panel input-panel" aria-labelledby="quantity-heading">
+        <h2 id="quantity-heading">Choose a quantity</h2>
+        <p class="help">Start with a conversion you can predict, then change one part.</p>
+        <form id="conversion-form" novalidate>
+          <label for="quantity">Numerical value</label>
+          <input id="quantity" value="72" type="text" inputmode="decimal" maxlength="64" autocomplete="off" spellcheck="false" aria-describedby="number-help">
+          <p id="number-help" class="help">Decimal or scientific notation, such as 2.5 or 1e-3.</p>
+          <label for="from-unit">From unit</label>
+          <input id="from-unit" value="km/h" type="text" maxlength="128" list="unit-examples" autocomplete="off" spellcheck="false" aria-describedby="syntax-help">
+          <label for="to-unit">To unit</label>
+          <input id="to-unit" value="m/s" type="text" maxlength="128" list="unit-examples" autocomplete="off" spellcheck="false" aria-describedby="syntax-help">
+          <datalist id="unit-examples"></datalist>
+          <p id="syntax-help" class="help">Use * or / between units, ^ for a whole power, and parentheses for a denominator: kg/(m*s^2). Case matters.</p>
+          <button type="submit" class="primary">Show conversion</button>
+        </form>
+        <p id="conversion-status" class="status" role="status" aria-live="polite"></p>
+        <h3>Try a different idea</h3>
+        <div class="presets" aria-label="Conversion examples">
+          <button type="button" data-preset="speed">Speed<span>km/h → m/s</span></button>
+          <button type="button" data-preset="area">Area<span>cm² → mm²</span></button>
+          <button type="button" data-preset="volume">Volume<span>cm³ → L</span></button>
+          <button type="button" data-preset="density">Density<span>g/cm³ → kg/m³</span></button>
+          <button type="button" data-preset="case">Prefix case<span>MJ → mJ</span></button>
+          <button type="button" data-preset="mismatch">A mismatch<span>m → s</span></button>
+        </div>
+      </section>
+      <div class="right-column">
+        <section id="conversion-result" class="panel result-panel" aria-label="Current conversion" hidden></section>
+        <section id="dimension-panel" class="panel" aria-labelledby="dimension-heading" hidden>
+          <div class="dimension-heading"><h2 id="dimension-heading">Compare the dimension powers</h2><span id="dimension-badge" class="dimension-badge"></span></div>
+          <p id="dimension-summary" class="help"></p>
+          <table><caption>Zero means that a base dimension cancels out.</caption><thead><tr><th scope="col">Base dimension</th><th scope="col">From</th><th scope="col">To</th></tr></thead><tbody id="dimension-rows"></tbody></table>
+        </section>
+        <section class="panel download-panel" aria-label="Keep the current conversion">
+          <button id="download-conversion" type="button" disabled>Download current calculation (.json)</button>
+          <p class="help">Keeps the entered expressions, dimension powers, exact fractions and display precision. Download a fresh copy after changing a value.</p>
+          <p id="download-status" class="status" role="status" aria-live="polite"></p>
+        </section>
+      </div>
+    </div>
+    <div class="next-steps">
+      <section class="panel" aria-labelledby="try-heading">
+        <h2 id="try-heading">Predict, change, explain</h2>
+        <ol><li>Choose <strong>Area</strong>. If 1 cm is 10 mm, what must happen to each of two length factors?</li><li>Choose <strong>Speed</strong>. Why does the hour-to-second factor belong in the denominator?</li><li>Choose <strong>Prefix case</strong>. Compare MJ with mJ without changing the underlying energy.</li><li>Choose <strong>A mismatch</strong>. What information besides a scale factor would connect length with time?</li></ol>
+      </section>
+      <section class="panel" aria-labelledby="limits-heading">
+        <h2 id="limits-heading">What this check can tell you</h2>
+        <p>Matching dimensions permit a scale conversion for the listed units. They do not prove that a physical equation is correct, determine a numerical constant, or tell you what kind of quantity is being described.</p>
+        <p class="help">For example, energy and torque share the same base dimensions but describe different quantities. Interpret your calculation in its physical context.</p>
+        <p class="help">Arithmetic treats your entered number as exact. It does not estimate measurement uncertainty or select significant figures from an experiment. Affine temperatures, logarithmic units and arbitrary formulas are outside this explorer.</p>
+      </section>
+    </div>
+    <details class="panel">
+      <summary>Supported symbols and exact scales</summary>
+      <p class="help">Use explicit multiplication: m*s means metre × second; ms means millisecond. Division proceeds from left to right: kg/m*s differs from kg/(m*s). μm also accepts µm or the typed spelling um; ², ³ and · are accepted conveniences. Other symbols are not inferred.</p>
+      <div class="table-scroll"><table class="catalog-table"><caption>Each row gives one listed unit in metre, kilogram and second units.</caption><thead><tr><th scope="col">Symbol</th><th scope="col">Name</th><th scope="col">Exact base-unit scale</th></tr></thead><tbody id="unit-catalog"></tbody></table></div>
+      <p class="help">Expression limits: 128 characters, 24 unit factors, four levels of parentheses, whole powers from −6 to 6, and combined dimension powers from −24 to 24. The numerical value accepts at most 24 decimal digits, including zeros, and a scientific exponent from −24 to 24. The exact-number size is bounded.</p>
+    </details>
+    <section class="panel" style="margin-top:22px" aria-labelledby="lesson-heading">
+      <h2 id="lesson-heading">Continue in the twelve-question lesson</h2>
+      <p>Download the lesson above. Open RecallWeave, choose the JSON under <strong>Bring your own lesson</strong>, inspect the preview, and select <strong>Start this deck</strong>. Explanations, practice retries and downloadable study notes use the existing learner.</p>
+      <p class="help">The explorer and its two downloads work directly from this HTML file, offline. The guide and learner links open separate supplied files; keep the repository folder structure to use those links. Inputs stay in this page and are not saved automatically.</p>
+    </section>
+    <noscript><p class="error">This explorer requires JavaScript for its calculations. The separate worked guide and lesson JSON remain readable as files.</p></noscript>
+  </main>
+  <footer>
+    <p>Original RecallWeave teaching material. Definitions are checked against the primary references below. No textbook exercise or figure is reproduced, and no measured learning-effectiveness claim is made.</p>
+    <ul><li><a href="https://www.bipm.org/en/publications/si-brochure">BIPM SI Brochure · 9th edition, June 2026</a></li><li><a href="https://www.nist.gov/pml/owm/metric-si-prefixes">NIST · SI prefixes</a></li><li><a href="https://www.nist.gov/pml/special-publication-330/sp-330-section-4">NIST · minute, hour and litre</a></li></ul>
+  </footer>
+  <script>
+  (() => {
+    'use strict';
+    const unitCourseText = /* UNIT_COURSE_TEXT */;
+    /* UNIT_CALCULATIONS */
+    /* UNIT_UI */
+  })();
+  </script>
+</body>
+</html>

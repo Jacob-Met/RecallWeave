@@ -14,6 +14,15 @@ prerequisite links form an acyclic graph. Correct positions are balanced across
 the four options; neither option length nor alphabetic order identifies the
 answers consistently.
 
+## Explore the prerequisite decisions
+
+Open the [offline dependency-planning companion](dependency-graphs-explorer.html)
+to edit a small graph, complete ready jobs, undo or reset progress, and distinguish
+cycle members from downstream blocked jobs. Its course examples use the arrow
+convention below. The companion also downloads this original course unchanged
+for the existing learner; its calculations and download work directly from the
+single HTML file.
+
 ## Open and adapt it with the integrated studio
 
 1. Open the repository's existing `author.html` directly in a browser, or serve

@@ -1,0 +1,164 @@
+{
+  "format": "recallweave-deck/1",
+  "title": "Measurement uncertainty: what more readings can tell you",
+  "attribution": "Original AI-assisted questions, fictional measurements and worked explanations by RecallWeave contributors, 2026-10-08. Conceptual references: B. N. Taylor and C. E. Kuyatt, NIST Technical Note 1297 (1994), sections 2–5 and Appendix A. https://www.nist.gov/pml/nist-technical-note-1297/nist-tn-1297-appendix-law-propagation-uncertainty ; https://www.nist.gov/pml/nist-technical-note-1297/nist-tn-1297-4-type-b-evaluation-standard-uncertainty ; https://www.nist.gov/pml/nist-technical-note-1297/nist-tn-1297-5-combined-standard-uncertainty . No NIST question or exercise text is reproduced. This is an introductory two-component measurement model, not a complete uncertainty budget or validated assessment.",
+  "license": "CC BY 4.0 for this original course content; attribute RecallWeave contributors and retain the source acknowledgments. No endorsement by NIST is implied. https://creativecommons.org/licenses/by/4.0/",
+  "concepts": [
+    "Readings and correction",
+    "Scatter and mean",
+    "Shared calibration",
+    "Combining and deciding"
+  ],
+  "items": [
+    {
+      "id": "measurement-mean-correction",
+      "concept": "Readings and correction",
+      "prerequisites": [],
+      "prompt": "A fictional length check gives 9, 11, 10 and 10 mm. The calibration report says to ADD a correction of −0.4 mm to each reading. What is the corrected mean?",
+      "options": ["10.4 mm", "8.4 mm", "9.6 mm", "10.0 mm"],
+      "answer": 2,
+      "explanation": "The raw mean is (9 + 11 + 10 + 10) / 4 = 10 mm. The stated additive correction is −0.4 mm, so the corrected mean is 9.6 mm. A shared correction is applied once to the mean, which gives the same result as applying it once to each reading and then averaging. Applying the −0.4 mm correction four times to the mean would give 8.4 mm and would count the same correction repeatedly.",
+      "transfer": "If a thermometer's stated additive correction were +0.2 °C, write the corrected mean for raw readings 18.0, 18.2 and 18.1 °C."
+    },
+    {
+      "id": "measurement-known-high-reading",
+      "concept": "Readings and correction",
+      "prerequisites": [],
+      "prompt": "A check against a reference shows that an instrument reads 0.30 mm too high over the range used. Treat that correction estimate as given; its uncertainty is considered separately. Which action compensates for this known effect?",
+      "options": [
+        "Add −0.30 mm to the mean reading.",
+        "Add +0.30 mm to the mean reading.",
+        "Divide the mean reading by the count.",
+        "Collect repeats and keep the raw mean."
+      ],
+      "answer": 0,
+      "explanation": "A reading that is high by 0.30 mm is compensated by adding −0.30 mm. Repeating the same measurement does not remove an effect shared by all readings. The correction estimate and the uncertainty of that estimate are different quantities; applying a correction does not make its uncertainty disappear.",
+      "transfer": "Describe one check that could reveal an offset shared by every reading, even when those readings agree closely."
+    },
+    {
+      "id": "measurement-offset-scatter",
+      "concept": "Readings and correction",
+      "prerequisites": [],
+      "prompt": "The same exact additive correction of +2 mm is applied to each reading in 8, 10, 10 and 12 mm. Which statement describes the mean and sample standard deviation after correction?",
+      "options": [
+        "The mean stays fixed; the scatter rises by 2 mm.",
+        "The mean rises by 2 mm; the scatter rises by 2 mm.",
+        "The mean stays fixed; the scatter falls by 2 mm.",
+        "The mean rises by 2 mm; the scatter stays fixed."
+      ],
+      "answer": 3,
+      "explanation": "Every reading and the mean shift by the same 2 mm. Each difference from the mean is unchanged: (x_i + 2) − (mean + 2) = x_i − mean. Sample standard deviation depends on those differences, so the observed scatter stays fixed. This statement treats the shift as exact; uncertainty about a real calibration correction is a separate component.",
+      "transfer": "Try a positive and a negative correction in the measurement lab. Which displayed values should change, and which should stay the same?"
+    },
+    {
+      "id": "measurement-sample-spread",
+      "concept": "Scatter and mean",
+      "prerequisites": ["Readings and correction"],
+      "prompt": "Four independent readings of one stable quantity are 8, 10, 10 and 12 mm. Their mean is 10 mm and their squared deviations sum to 8 mm². Using sample standard deviation s = sqrt(sum of squared deviations / (n − 1)), what is the estimated repeatability standard uncertainty of the mean, s / sqrt(n)?",
+      "options": ["About 1.633 mm", "About 0.816 mm", "About 1.414 mm", "About 0.408 mm"],
+      "answer": 1,
+      "explanation": "With n = 4, s = sqrt(8 / 3) ≈ 1.633 mm. The estimated standard deviation of the mean is s / sqrt(4) = 1.633 / 2 ≈ 0.816 mm. The 1.633 mm value describes the sample scatter of individual readings. Using n instead of n − 1 changes the sample scatter estimate, and dividing by n instead of sqrt(n) would reduce the uncertainty too much.",
+      "transfer": "For independent readings 1, 2 and 3 units, calculate the sample mean, sample standard deviation and repeatability standard uncertainty of the mean separately."
+    },
+    {
+      "id": "measurement-more-independent-readings",
+      "concept": "Scatter and mean",
+      "prerequisites": ["Readings and correction"],
+      "prompt": "For planning, keep the estimated single-reading scatter s fixed and assume future readings will be independent observations of the same stable quantity. If sample size rises from 5 to 20, what happens to the projected repeatability standard uncertainty of the mean?",
+      "options": [
+        "It becomes one quarter of its previous value.",
+        "It remains equal to its previous value.",
+        "It becomes four times its previous value.",
+        "It becomes one half of its previous value."
+      ],
+      "answer": 3,
+      "explanation": "The projected component is s / sqrt(n). Since 20 is four times 5, its denominator becomes twice as large and the component halves. This is a projection at fixed s. The scatter estimated from a future sample can differ, and pasting the same five recorded values four times does not create twenty independent observations.",
+      "transfer": "At fixed estimated scatter, by what factor would the number of independent readings need to grow to reduce this component to one third?"
+    },
+    {
+      "id": "measurement-identical-readings",
+      "concept": "Scatter and mean",
+      "prerequisites": ["Readings and correction"],
+      "prompt": "A display reports 10.00 mm on each of five genuine repeat measurements. The calculated sample scatter is zero. Which conclusion is supported by those displayed values alone?",
+      "options": [
+        "The true length is exactly 10.00 mm.",
+        "The recorded values show no observed scatter.",
+        "The instrument needs no calibration correction.",
+        "All possible uncertainty components are zero."
+      ],
+      "answer": 1,
+      "explanation": "The recorded values are identical, so their computed scatter is zero. That does not establish an exact true value, a perfect calibration or a complete absence of uncertainty. Display resolution, a shared offset and other effects can remain. Genuine repeated equal readings are valid observations; their numerical equality alone neither proves nor disproves independence.",
+      "transfer": "Use the lab's identical-readings preset. Explain why its shared calibration component remains even though the displayed repeatability component is zero."
+    },
+    {
+      "id": "measurement-rectangular-halfwidth",
+      "concept": "Shared calibration",
+      "prerequisites": ["Readings and correction"],
+      "prompt": "The one calibration correction shared by all readings is modeled as equally plausible anywhere from −0.30 to +0.30 mm around its stated center. For this explicitly rectangular model, standard uncertainty is half-width a / sqrt(3). What is that component?",
+      "options": ["About 0.173 mm", "About 0.300 mm", "About 0.600 mm", "About 0.100 mm"],
+      "answer": 0,
+      "explanation": "The interval has full width 0.60 mm and half-width a = 0.30 mm. Its standard uncertainty is 0.30 / sqrt(3) ≈ 0.173 mm. The rectangular distribution is an assumption about the correction, not a property inferred from the repeat readings. A different distribution or interpretation of the stated limits can require a different calculation.",
+      "transfer": "A rectangular correction model has limits −0.12 to +0.12 units about its center. Identify the full width, half-width and standard uncertainty."
+    },
+    {
+      "id": "measurement-shared-component",
+      "concept": "Shared calibration",
+      "prerequisites": ["Readings and correction"],
+      "prompt": "Every reading uses the same uncertain additive calibration correction. Its standard uncertainty is 0.20 mm. No new calibration information is obtained. If you average 100 independent repeat readings, what is this shared calibration contribution to the uncertainty of the mean?",
+      "options": ["0.002 mm", "0.020 mm", "0.200 mm", "2.000 mm"],
+      "answer": 2,
+      "explanation": "The mean of (x_1 + C), ..., (x_100 + C) contains C once: mean(x) + C. The same uncertain C is common to all readings, so its contribution stays 0.20 mm. It is the independent repeat-to-repeat component that can shrink with sample size. Treating the calibration correction as a new independent draw for each reading would describe a different measurement process.",
+      "transfer": "Write the average of three readings that all share correction C, then simplify the terms involving C."
+    },
+    {
+      "id": "measurement-type-a-b",
+      "concept": "Shared calibration",
+      "prerequisites": ["Readings and correction"],
+      "prompt": "An uncertainty component is estimated from a statistical analysis of repeated observations; another is estimated from a stated rectangular range. In NIST's Type A / Type B terminology, what distinguishes these labels?",
+      "options": [
+        "Whether a component must decrease with sample size.",
+        "The method used to evaluate an uncertainty component.",
+        "Whether a component is random or systematic in origin.",
+        "The size of a component compared with the corrected mean."
+      ],
+      "answer": 1,
+      "explanation": "Type A and Type B describe evaluation methods. Here the statistical evaluation is Type A and the assumed-distribution evaluation is Type B. The labels do not by themselves tell you whether an effect is shared across observations, whether averaging reduces it, or how large it is. For example, uncertainty in a shared calibration correction can itself have been estimated statistically.",
+      "transfer": "Suppose a calibration correction is estimated by repeated comparisons against a reference. Could its evaluation be Type A while its uncertainty is still shared by your later readings? Explain."
+    },
+    {
+      "id": "measurement-independent-combination",
+      "concept": "Combining and deciding",
+      "prerequisites": ["Scatter and mean", "Shared calibration"],
+      "prompt": "For a corrected mean, the repeatability standard uncertainty is 0.30 mm and the shared calibration standard uncertainty is 0.40 mm. Assume these two components are independent and the additive model is complete for this exercise. What is their combined standard uncertainty?",
+      "options": ["0.10 mm", "0.35 mm", "0.70 mm", "0.50 mm"],
+      "answer": 3,
+      "explanation": "For independent components in this additive model, variances add: u_c = sqrt(0.30² + 0.40²) = sqrt(0.25) = 0.50 mm. Adding the two standard uncertainties directly gives 0.70 mm and is not this variance calculation. If the components were correlated, covariance would also matter. A standard uncertainty of 0.50 mm alone does not specify a guaranteed interval or a universal coverage percentage.",
+      "transfer": "Combine independent standard uncertainties of 0.06 and 0.08 units. State the independence assumption alongside the result."
+    },
+    {
+      "id": "measurement-calibration-floor",
+      "concept": "Combining and deciding",
+      "prerequisites": ["Scatter and mean", "Shared calibration"],
+      "prompt": "The current repeatability component is 0.30 mm and the shared calibration component is 0.40 mm. Assume these two uncertainty components are independent. Plan four times as many independent readings while holding estimated scatter and calibration information fixed. What is the projected combined standard uncertainty?",
+      "options": ["About 0.125 mm", "About 0.250 mm", "About 0.427 mm", "About 0.850 mm"],
+      "answer": 2,
+      "explanation": "Four times the independent readings halves the projected repeatability component to 0.15 mm. The shared calibration component stays 0.40 mm. Their combination is sqrt(0.15² + 0.40²) = sqrt(0.1825) ≈ 0.427 mm. Under this model, collecting more readings approaches a 0.40 mm floor; improving the calibration information is a different intervention.",
+      "transfer": "Compare collecting more readings with reducing the calibration half-width in the lab. Which intervention changes the limiting floor, and why?"
+    },
+    {
+      "id": "measurement-order-and-assumptions",
+      "concept": "Combining and deciding",
+      "prerequisites": ["Scatter and mean", "Shared calibration"],
+      "prompt": "Readings taken in order are 9.8, 9.9, 10.0, 10.1 and 10.2 mm. A calculation returns a mean and scatter, but the steady rise may reflect drift. What is the most justified next step before relying on an s / sqrt(n) projection for future measurements?",
+      "options": [
+        "Check stability and dependence in the measurement process.",
+        "Shuffle the recorded rows until the trend is no longer visible.",
+        "Copy the rows ten times to reduce the calculated uncertainty.",
+        "Declare a fixed coverage percentage from the standard uncertainty."
+      ],
+      "answer": 0,
+      "explanation": "Computing a mean and scatter does not establish the assumptions behind the projection. A pattern in acquisition order gives a reason to investigate stability, dependence and omitted effects. Reordering the same observations changes neither their mean nor their scatter and cannot remove physical drift. Copying rows is not new evidence, and a standard uncertainty does not automatically supply a coverage probability.",
+      "transfer": "Suggest one change to a measurement procedure that could help distinguish drift from independent repeatability, and identify what new evidence it would provide."
+    }
+  ]
+}

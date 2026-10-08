@@ -6,11 +6,25 @@
 
 Open `demo.html` directly in a browser—no server, install, build step, internet, login, API key, or user data storage is required. It is a single self-contained file with embedded CSS, JavaScript and deck. The modular source is in `index.html`, `src/`, and `data/`; to test that version locally, serve this directory with `python3 -m http.server 8080` and visit `http://localhost:8080`. Rebuild the direct-open demo with `python3 tools/make_demo.py` after source changes. No hosted endpoint is called by either version.
 
+## Follow recursive calls and returns
+
+Open **[Calls go down. Answers come back.](courses/recursion-call-stack-explorer.html)** directly in a browser to step through factorial, Fibonacci, and memoized Fibonacci. Inspect each caller’s suspended calculation, saved child values, actual return order, and a fresh cache. Previous, Next, and the event selector revisit exact snapshots; the completed-run comparison separates total invocations, computed calls, cache hits, and maximum active depth.
+
+Inputs are whole numbers from 0 to 10. Every invocation counts, including base cases and cache hits; factorial uses only the zero base case, and Fibonacci uses F(0) = 0 and F(1) = 1. The memoized algorithm starts with an empty cache and stores base results too. Download the full exact trace with its selected inspection step, or download the original [twelve-question course](courses/recursion-call-stack.json) and open it through **Bring your own lesson**. The [worked guide](courses/recursion-call-stack.md) includes the shared conventions, answer explanations, and transfer prompts.
+
+The explorer needs no server or account and keeps no automatic browser storage. Its trace is an algorithm inspection record, separate from learner-answer archives. Rebuild it with `node tools/build_recursion_call_stack.mjs`; add `--check` to verify that the checked-in page matches its exact sources and validated deck.
+
 ## Explore grouped rates
 
 Open **[When groups and totals disagree](courses/grouped-data-explorer.html)** for a separate offline lesson about group rates, pooled samples and a chosen common mix. Edit the recorded counts, inspect exact fractions and download the current comparison. The worked examples explain why both groups can favor one option while the pooled sample favors the other, and why this alone does not establish a causal effect.
 
 The [worked guide](courses/grouped-data.md) includes the assumptions, missing-rate behavior and derivations. To study its original [twelve-question course](courses/grouped-data.json), save the JSON file and open it through **Bring your own lesson** in RecallWeave. The explorer itself opens directly without a server or account.
+
+### Make a course handout
+
+Open [Course handouts](handout.html), choose a checked local deck JSON, review its title and source credit, then select **Use this deck**. Print or save an unanswered worksheet for learners and an explicitly separate answer key with the correct choices and authored explanations. Both keep the original question and option order, literal wording, attribution and permission; transfer prompts leave room for a written response because the deck supplies no separate transfer answer.
+
+Each saved HTML file opens and prints offline on its own. The worksheet file contains questions only; the teacher’s builder and the separate key receive the full checked deck. Cancelling a selection or choosing an invalid file leaves the current handout in place. This is a separate preparation flow; it does not start or change a learning session. Modular source lives in `handout/` and `src/course-handout*.mjs`; rebuild `handout.html` with `python3 tools/make_handout.py`, or verify it with `--check`.
 
 ## Explore error correction
 
@@ -28,6 +42,12 @@ The [worked guide](courses/hamming-codes.md) develops parity, distance and the a
 - The welcome panel includes a clearly labeled, deterministic synthetic learner simulation comparing adaptive selection with fixed deck order using the same toy learner assumptions and random seed. Its tiny run is demonstrative, not empirical evidence or an efficacy claim. Test coverage separately evaluates model invariants, not learning outcomes.
 
 ## Bring your own lesson
+
+Open the **[Course catalog](catalog.html)** to browse supplied courses, search their
+titles and concepts, read source and permission statements, and download an original
+course file. In the learner, choose that file under **Bring your own lesson**, inspect
+the preview, then select **Start this deck**. The catalog also works directly from
+your files without a server or internet connection.
 
 Use **Download example deck** to get an editable JSON copy of the bundled lesson,
 including its original attribution. Replace the lesson content using the
@@ -104,6 +124,39 @@ A trace must match the exact loaded course content and learning model. For an im
 
 Trace files contain answers and practice progress. They do not include personal reflections or replace reflections already in the tab. The current session supplies the displayed option order; saved answers always identify the original option, regardless of its A–D position. Saving and restoring work offline in the standalone demo. There is no automatic browser persistence, account, or upload.
 
+## Compare two saved learning traces
+
+Open **[Compare learning traces](compare-traces.html)** directly from your files.
+Choose two completed learning-trace JSON files to inspect both sets of answers.
+The reader accepts only the exact same course content and current model, using the
+existing archive checks; it does not replace a learner session or modify the files.
+
+Questions appear in course order and match by canonical question identity, even
+when the two sessions answered them in different orders. Each side keeps its
+original first answer and question position. Practice is separate: initially
+correct questions, an unstarted round, a pending retry and a recorded retry have
+distinct labels. Filter to differing first answers or practice records, filter by
+concept, or print the current filtered comparison. Course answers, explanations,
+transfer prompts, attribution and permission stay available beside the records.
+
+A and B are the selected file positions, not an inferred chronology. Save times
+are file metadata; two files may be different snapshots of the same session.
+Correctness counts and answer differences do not establish learning improvement,
+grades or the validity of the illustrative model. Files are editable records,
+not authenticated observations. The reader does not compare model estimates.
+
+Finish a first session in the learner and choose **Download trace (.json)** under
+**Keep or restore a learning trace** to obtain a compatible file. Completed traces
+with no practice, partial practice or completed practice are supported. Decks,
+author drafts and unfinished-lesson files are separate formats. Each trace must
+be at most 2 MiB of valid UTF-8 JSON. Replacing or clearing either selection
+immediately retires the old paired view; canceled file selection preserves the
+accepted files, and rejected or superseded reads cannot restore a stale pair.
+
+This separate page works offline with no dependencies, upload or browser storage.
+Rebuild it by running: node tools/build-trace-comparison.mjs.
+The existing learner and author builders and generated pages are unchanged.
+
 ## Build a course deck
 
 Open **[Deck studio](author.html)** directly from your files, or visit `author/` when serving the modular app. Write a title, author/source and permission statement; name the concepts; then add questions, answer options, explanations and transfer prompts. A complete lesson needs a question for every concept. Optional prerequisite choices connect an earlier concept to a later one and must not form a loop in the checked lesson.
@@ -117,6 +170,45 @@ Choose **Open draft or deck** to reopen either an editable draft or a checked le
 **Check and preview** validates the complete draft and shows its answer key. **Download checked deck (.json)** saves the exact checked lesson file, including the shared deck format's 256 KiB byte limit. Edits clear the previous lesson preview and require another check. The check verifies the deck's structure and links; the author remains responsible for its course content and attribution. Checked lesson files use the shared RecallWeave deck format. Return to the lesson, choose the downloaded checked deck under **Bring your own lesson**, inspect its preview, and select **Start this deck**. Editable draft files must first be repaired and downloaded as checked decks in the studio.
 
 The separate author page leaves ongoing learning sessions open. It has no account, upload, provider or persistence service. Rebuild its direct-file version with `python3 tools/make_author.py`; `python3 tools/make_author.py --check` verifies that it matches the modular sources. Authoring, reopening and standalone parity tests run with the existing `node --test tests/*.test.mjs` command.
+
+## Focus a lesson
+
+Open **[Lesson focus](focus.html)** directly from your files, or visit `focus/`
+when serving the modular app. Choose a checked lesson JSON file, inspect its
+source/permission preview, and select **Use this deck**. A cancelled, unreadable,
+malformed or oversized file leaves your current source and selection intact.
+Continuing to edit the current selection cancels a pending file read or preview.
+
+Choose one or more **target concepts** and give the focused lesson its own title.
+The preview separates your selected targets from prerequisite concepts that are
+included automatically. It retains every question belonging to those concepts,
+then follows every prerequisite link from those questions until all required
+concepts are present. A link on a concept's second question matters just as much
+as a link on its first. Selecting a required concept explicitly marks it as a
+target too; clearing a target does not remove it while another retained concept
+still requires it.
+
+Inspect the retained questions, including their expandable answer keys, then
+choose **Download focused lesson (.json)**. The file preserves original question
+IDs, question/concept/option order, correct answers, explanations, transfer prompts,
+prerequisite links and the source's attribution and license. Its title is the one
+you entered. The exact downloaded JSON passes the shared 256 KiB lesson limit;
+compact formatting is used when necessary. Empty selections, invalid titles or
+an output over that limit cannot leave an older file ready to download.
+
+In the learning app, choose this checked JSON under **Bring your own lesson**,
+inspect the preview, and select **Start this deck**. It starts a fresh lesson with
+the existing question-selection behavior; no answers or mastery estimates are
+transferred. You can also reopen the checked file in Deck studio. Keep the
+original course file for its full content.
+
+This separate page works offline and keeps everything in the current tab until
+an explicit download. It does not alter the source file or an open learning or
+authoring session. Its prerequisite closure follows the author's links; it does
+not establish subject accuracy, reuse rights, learning efficacy or a required
+teaching order. Rebuild it with `python3 tools/make_focus.py`, or verify its
+standalone parity with `python3 tools/make_focus.py --check`. Its focused native
+and builder tests are included in the existing Node test command.
 
 ## Demo deck provenance
 
@@ -184,3 +276,9 @@ AI assistance was used to develop and test the implementation and to draft origi
 ## Status and unresolved gates
 
 This public source repository supports the ForgeHacks 2026 demo. The Devpost account and join status for jacobsmetoyer@gmail.com are not verified; no contest join, terms acceptance, upload, or submission was made. Before submitting, confirm eligibility and the live entry form’s required fields, disclosure format, and deadline; this offline demo is not evidence of learning efficacy.
+
+## Mendelian inheritance course and gamete-cross lab
+
+[Open the offline lab](courses/mendelian-inheritance-lab.html), [download the original course](courses/mendelian-inheritance.json), or [read the worked guide](courses/mendelian-inheritance.md). Twelve questions connect allele segregation, genotype and phenotype, one-locus crosses and independent two-locus crosses. The explorer follows each parental gamete route and shows exact genotype and phenotype fractions, with explicit complete-dominance and independent-assortment assumptions. Its downloads preserve the checked course and a worked cross record.
+
+Import the course through the existing local-file preview and **Start this deck** flow, then use the learner's review, separate missed-item practice and study-note downloads. All traits are hypothetical plant examples; the model gives probabilities, not guaranteed finite offspring counts. Build and optional browser-receiving commands are in the guide.
