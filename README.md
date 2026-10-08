@@ -26,7 +26,7 @@ the same import flow.
 The preview shows the title, question and concept counts, attribution, license,
 and an expandable list of question prompts with their prerequisite links.
 **Start this deck** begins a fresh session with that content and clears the previous
-session's first answers and practice. Until then, the current lesson remains
+session's first answers, practice and reflections. Until then, the current lesson remains
 usable. **Cancel preview**, malformed or unreadable files, and a superseded file
 read preserve the current session. **Use bundled lesson** offers the same explicit
 preview and start flow for returning to the original lesson.
@@ -41,7 +41,7 @@ and downloaded study notes. Its answer options are shuffled for each new session
 practice keeps that session’s display order and canonical answer identity.
 
 The file and session stay in this tab's memory. Starting a fresh local session
-keeps the selected deck but clears its answers; reloading the page returns to the
+keeps the selected deck but clears its answers and reflections; reloading the page returns to the
 bundled lesson. No file is uploaded or written back, and no browser storage or
 account is used. The downloaded example is a separate file saved by the browser.
 
@@ -60,9 +60,17 @@ After finishing a deck's challenges, open any question under **Review the connec
 
 Review and practice stay in this tab's memory. Refreshing the page or starting a fresh local session clears the active state; an explicitly downloaded learning trace can restore the recorded answers later. The modular app and the direct-open `demo.html` provide the same flow.
 
+### Write your own explanations
+
+Each completed review panel has a **Your explanation** field beside the existing transfer prompt. Write or revise how you would connect the idea, including for questions you answered correctly. **Apply it in your own words** provides a separate place to respond to the current lesson's application prompt: the energy pathway for the bundled example, or a connection between ideas for an imported deck.
+
+Writing stays attached to its question while you open other panels or pause and resume practice. Edits take effect as you type; clearing a field clears that reflection. Your writing is not scored and does not change your first answers, practice results, or model estimates. Starting another deck or a fresh local session clears the writing; a fresh session keeps the selected deck. Reloading also clears writing and returns to the bundled lesson. Download study notes to keep a readable copy.
+
 ### Keep your study notes
 
 After the first session, choose **Download study notes (.txt)** to save a readable copy of the complete learning trace. The file includes the question order, actual first answers, corrections, explanations, transfer prompts, the first-session model estimates, and deck attribution. Any recorded practice answers appear separately; a paused round reports how many questions are still unanswered.
+
+The file also includes the latest question reflections and application response, explicitly labeled as the learner's writing rather than scored answers. Blank fields are marked as unwritten. Multiline writing is indented with `>` so it stays distinguishable from the original questions and explanations.
 
 The download works offline in both the modular app and `demo.html`. It saves a UTF-8 text file through the browser's normal download flow. It does not upload the session or restore it after a refresh. Model estimates remain labeled as model state rather than grades, and practice never replaces the original answers.
 
@@ -136,6 +144,14 @@ node tools/check_trace_browser.mjs --browser /path/to/chromium --output /tmp/rec
 ```
 
 The [trace archive receiving packet](docs/receiving/trace-archive-49f845d0dece/README.md) records the exact source, native results, independent review, and actual saved-file examples.
+
+The reflection receiver also types into the actual fields, navigates practice, resets the session, and reads the files saved by the browser:
+
+```bash
+node tools/check_reflections_browser.mjs --browser /path/to/chromium --output /tmp/recallweave-reflection-check
+```
+
+Its output directory must be new. The receiving evidence and scope are recorded in [the reflection receipt](docs/reflections-20261008-9ec02b70e5f0/README.md).
 
 ## Accessibility and constraints
 

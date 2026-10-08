@@ -1,5 +1,7 @@
+import { APPLICATION_PROMPT, reflectionSnapshot } from './reflections.mjs';
+
 /** Build local, readable study notes from a completed first session and separate practice. */
-export function createStudyNotes({ deck, review, mastery, practice = null, exportedAt = new Date(), conceptLabel = id => id }) {
+export function createStudyNotes({ deck, review, mastery, practice = null, reflections = null, exportedAt = new Date(), conceptLabel = id => id, applicationPrompt = APPLICATION_PROMPT }) {
   if (!Array.isArray(review) || review.length !== deck.items.length || review.length === 0) {
     throw new RangeError('Finish the learning session before saving study notes.');
   }
@@ -25,6 +27,11 @@ export function createStudyNotes({ deck, review, mastery, practice = null, expor
   });
   const savedAt = new Date(exportedAt);
   if (!Number.isFinite(savedAt.getTime())) throw new RangeError('Study notes need a valid save time.');
+  const notebook = reflections === null ? null : reflectionSnapshot(reflections, deck.items);
+  if (notebook && (typeof applicationPrompt !== 'string' || !applicationPrompt.trim())) {
+    throw new TypeError('Study notes need the application prompt shown in this session.');
+  }
+  const reflectionById = new Map(notebook?.notes.map(note => [note.item, note.text]));
   const lines = [
     'RecallWeave — study notes',
     deck.title,
@@ -66,10 +73,20 @@ export function createStudyNotes({ deck, review, mastery, practice = null, expor
       `Explanation: ${item.explanation}`,
       `Apply the idea: ${item.transfer}`
     );
+    if (notebook) {
+      const text = reflectionById.get(item.id);
+      lines.push('Your explanation — reflection, not scored:');
+      lines.push(...(text ? text.split('\n').map(line => `  > ${line}`) : ['  Not written.']));
+    }
     if (retry) {
       lines.push(`Practice answer: ${item.options[retry.choice]}`, `Practice result: ${retry.choice === item.answer ? 'correct on retry' : 'keep reviewing'}`);
     } else if (item.choice !== item.answer) lines.push('Practice answer: not recorded.');
   });
+  if (notebook) {
+    lines.push('', 'YOUR APPLICATION REFLECTION — NOT SCORED');
+    lines.push(`Prompt: ${applicationPrompt}`);
+    lines.push(...(notebook.application ? notebook.application.split('\n').map(line => `  > ${line}`) : ['Not written.']));
+  }
   lines.push('', 'DECK ATTRIBUTION', deck.attribution, deck.license, '', 'Saved from this browser session. The download does not upload the session or restore it after a refresh.');
   return Object.freeze({
     filename: `recallweave-study-notes-${savedAt.toISOString().slice(0, 10)}.txt`,
