@@ -1,0 +1,221 @@
+{
+  "format": "recallweave-deck/1",
+  "title": "Prefix coding — follow the bits, count the cost",
+  "attribution": "Original questions, explanations, transfer prompts and examples for Jacob's RecallWeave project. Background consulted: MIT OpenCourseWare, 6.046J Design and Analysis of Algorithms, Spring 2012, Lecture 19, sections 19.1.6–19.2.2 (prefix codes and Huffman coding): https://ocw.mit.edu/courses/6-046j-design-and-analysis-of-algorithms-spring-2012/388115265a456321c4a5d19dc9e05281_MIT6_046JS12_lec19.pdf . No MIT exercises or figures are reproduced.",
+  "license": "Original course content created for Jacob's RecallWeave project. No additional reuse license is granted by this file. The cited MIT source retains its own terms.",
+  "concepts": [
+    "prefix-and-decoding",
+    "weighted-payload",
+    "huffman-merging",
+    "ties-and-boundaries"
+  ],
+  "items": [
+    {
+      "id": "pc-prefix-1",
+      "concept": "prefix-and-decoding",
+      "prerequisites": [],
+      "prompt": "A binary code is prefix-free when no complete codeword is the beginning of another codeword. Which codebook has that property?",
+      "options": [
+        "{0, 01, 11}",
+        "{00, 01, 10}",
+        "{0, 10, 101}",
+        "{1, 10, 00}"
+      ],
+      "answer": 1,
+      "explanation": "The three different two-bit words 00, 01 and 10 cannot begin one another. In the other sets, 0 begins 01, 10 begins 101, or 1 begins 10. Different codewords alone do not guarantee the prefix property; codewords of unequal lengths can also be prefix-free.",
+      "transfer": "Before using a new codebook, compare every word with the beginnings of the other words. What would go wrong with an immediate left-to-right decoder if one complete word also began another?"
+    },
+    {
+      "id": "pc-prefix-2",
+      "concept": "prefix-and-decoding",
+      "prerequisites": [],
+      "prompt": "Codebook: A=0, B=10, C=110, D=111. Starting at the beginning, decode the complete stream 0101110. Which sequence does it represent?",
+      "options": [
+        "A, B, C, A",
+        "B, A, D, A",
+        "A, B, D, A",
+        "A, D, B, A"
+      ],
+      "answer": 2,
+      "explanation": "The unique split is 0 | 10 | 111 | 0, giving A, B, D, A. After a complete codeword, restart the lookup for the next symbol. The vertical bars explain the split; they are not bits stored in this payload.",
+      "transfer": "Try encoding the decoded sequence again with this same codebook. Why must a receiver know which codebook was used, even when both the sender and receiver use prefix codes?"
+    },
+    {
+      "id": "pc-prefix-3",
+      "concept": "prefix-and-decoding",
+      "prerequisites": [],
+      "prompt": "A code uses A=0 and B=01. The end of the complete encoded message is known. Which statement describes this code?",
+      "options": [
+        "It is prefix-free and uniquely decodable.",
+        "It is prefix-free but not uniquely decodable.",
+        "It is not prefix-free and not uniquely decodable.",
+        "It is not prefix-free but is uniquely decodable."
+      ],
+      "answer": 3,
+      "explanation": "The word 0 begins 01, so this code is not prefix-free. It is nevertheless uniquely decodable: work backward from the known end. A final 1 must finish B=01; a final 0 must be A=0. Remove that word and repeat. This gives one decoding for every valid complete message. Prefix-free coding is sufficient for unique decoding, but it is not necessary.",
+      "transfer": "Separate two questions: can a complete valid message have two interpretations, and can a decoder emit each symbol immediately while scanning left to right? Explain why this example answers those questions differently."
+    },
+    {
+      "id": "pc-cost-1",
+      "concept": "weighted-payload",
+      "prerequisites": [
+        "prefix-and-decoding"
+      ],
+      "prompt": "Counts: A=8, B=3, C=2, D=1. Codebook: A=1, B=00, C=011, D=010. How many payload bits encode these 14 symbol occurrences?",
+      "options": [
+        "23 bits",
+        "14 bits",
+        "9 bits",
+        "28 bits"
+      ],
+      "answer": 0,
+      "explanation": "Multiply each codeword length by its occurrence count: 8×1 + 3×2 + 2×3 + 1×3 = 23 bits. Adding lengths once gives 9, which ignores how often each symbol occurs. Fourteen counts symbols, not bits. No codebook, framing or padding cost is included here.",
+      "transfer": "If A occurred once more and this codebook stayed fixed, how many bits would be added? If D occurred once more instead, what would change?"
+    },
+    {
+      "id": "pc-cost-2",
+      "concept": "weighted-payload",
+      "prerequisites": [
+        "prefix-and-decoding"
+      ],
+      "prompt": "Counts: A=8, B=3, C=2, D=1. A reference code must represent these four known symbols with one fixed number of bits per symbol. Using the smallest such width, how many payload bits encode all 14 occurrences?",
+      "options": [
+        "14 bits",
+        "23 bits",
+        "28 bits",
+        "56 bits"
+      ],
+      "answer": 2,
+      "explanation": "Four distinct symbols require at least two bits each: one bit offers only two words, while two bits offer four. The reference payload is therefore 14×2 = 28 bits. This is a fixed-width symbol-code comparison, not an assumption that a source file uses ASCII, UTF-8 or a particular container.",
+      "transfer": "For five known symbols, what minimum fixed width would be needed? State the number of available binary words at that width before multiplying by any occurrence count."
+    },
+    {
+      "id": "pc-cost-3",
+      "concept": "weighted-payload",
+      "prerequisites": [
+        "prefix-and-decoding"
+      ],
+      "prompt": "An encoded payload contains 23 bits for 14 symbol occurrences drawn from four distinct labels. What is the exact average number of payload bits per occurrence?",
+      "options": [
+        "23/14 bits per symbol",
+        "23/4 bits per symbol",
+        "14/23 bits per symbol",
+        "2 bits per symbol"
+      ],
+      "answer": 0,
+      "explanation": "Average payload cost is total payload bits divided by total occurrences: 23/14 bits per symbol. Dividing by four would average over distinct labels rather than over the message. Two bits is the fixed-width reference for four labels, not this variable-length payload average.",
+      "transfer": "Why can the average be a fraction even though each individual codeword has a whole number of bits? Describe which quantity weights the contribution of each word length."
+    },
+    {
+      "id": "pc-merge-1",
+      "concept": "huffman-merging",
+      "prerequisites": [
+        "prefix-and-decoding",
+        "weighted-payload"
+      ],
+      "prompt": "Counts: A=8, B=3, C=2, D=1. At the first step of Huffman coding, which pair should be combined into a new subtree?",
+      "options": [
+        "A=8 with B=3 → weight 11",
+        "A=8 with D=1 → weight 9",
+        "B=3 with C=2 → weight 5",
+        "D=1 with C=2 → weight 3"
+      ],
+      "answer": 3,
+      "explanation": "Huffman coding combines the two currently smallest weights. Initially these are D=1 and C=2, so the new subtree weighs 3. Put that subtree back into the queue: the remaining weights are B=3, the new 3, and A=8. Future steps compare subtree weights as well as individual symbol counts.",
+      "transfer": "After this merge, which two queue entries are smallest? Explain why repeatedly choosing the two rarest original labels would fail to describe the later steps."
+    },
+    {
+      "id": "pc-merge-2",
+      "concept": "huffman-merging",
+      "prerequisites": [
+        "prefix-and-decoding",
+        "weighted-payload"
+      ],
+      "prompt": "For counts A=8, B=3, C=2, D=1, a Huffman construction creates subtrees of weights 3, 6 and 14. Why does 3+6+14 equal the final weighted payload cost of 23 bits?",
+      "options": [
+        "Only the final merge adds bits; the earlier subtree weights count the same payload a second time.",
+        "Each merge adds one bit to every symbol occurrence represented inside the newly combined subtree.",
+        "Each merge adds one bit to every distinct label in the codebook, including labels outside that subtree.",
+        "Only a merge of two original leaves adds bits; later internal merges merely rearrange existing words."
+      ],
+      "answer": 1,
+      "explanation": "Joining two subtrees beneath a new parent increases every included leaf depth by one. Each occurrence of those symbols therefore gains one bit, for a total equal to the new subtree weight. A symbol contributes its count once for each level on its path. Summing all merge weights is consequently the same calculation as summing count×codeword length.",
+      "transfer": "Use the codeword lengths 1, 2, 3 and 3 for A, B, C and D to obtain 23 independently. What would disagreement between that sum and the merge-weight sum tell you about a proposed construction?"
+    },
+    {
+      "id": "pc-merge-3",
+      "concept": "huffman-merging",
+      "prerequisites": [
+        "prefix-and-decoding",
+        "weighted-payload"
+      ],
+      "prompt": "For known positive symbol counts, which argument explains why repeatedly merging the two smallest weights can minimize weighted length among binary prefix codes?",
+      "options": [
+        "The two least frequent labels must occupy the shallowest leaves; removing them leaves the depth of every other leaf unchanged.",
+        "The globally heaviest subtree must be joined first; that choice fixes a unique codeword for every label in the completed tree.",
+        "Some optimal tree puts the two lightest labels at deepest sibling leaves; contracting that pair gives a smaller optimal problem.",
+        "Every binary tree gives the same weighted leaf depth; joining any available pair therefore yields the same minimum payload cost."
+      ],
+      "answer": 2,
+      "explanation": "There is an optimal full binary tree with the two lightest labels as deepest siblings: moving lighter labels downward need not increase weighted cost. Replace the pair by one label with their combined weight. The reduced tree must also be optimal; a cheaper reduced tree could be expanded to beat the original. Repeating this reduction justifies the greedy merge. It does not establish a unique bit assignment or optimality among every possible file-compression scheme.",
+      "transfer": "Which part of the argument would be missing if someone only showed that the method worked on one example? Identify the role of the exchange step and the role of the smaller optimal problem."
+    },
+    {
+      "id": "pc-limits-1",
+      "concept": "ties-and-boundaries",
+      "prerequisites": [
+        "prefix-and-decoding",
+        "weighted-payload",
+        "huffman-merging"
+      ],
+      "prompt": "Four labels A, B, C and D each occur once. Two implementations use Huffman coding but may choose different ties and left/right branches. Which result must they share?",
+      "options": [
+        "Each label has exactly the same bit string under every possible tie-breaking and branch choice.",
+        "The tied labels can share a bit string because their equal occurrence counts remove ambiguity.",
+        "Some tie choices require a three-bit word and increase this four-symbol payload to nine bits.",
+        "All four codewords have length two, so either construction uses eight bits for the payload."
+      ],
+      "answer": 3,
+      "explanation": "The first two merges each combine two weight-1 leaves into weight-2 subtrees; the last merge combines those subtrees. Every leaf has depth two, so the payload is 4×2 = 8 bits. Ties and branch orientation may change which label gets which two-bit word. Here the fixed-width reference also costs 8 bits, so there is no payload saving.",
+      "transfer": "When comparing two implementations, separate codeword identity, codeword length and weighted cost. Which of those must a decoder agree with its encoder about to recover the intended labels?"
+    },
+    {
+      "id": "pc-limits-2",
+      "concept": "ties-and-boundaries",
+      "prerequisites": [
+        "prefix-and-decoding",
+        "weighted-payload",
+        "huffman-merging"
+      ],
+      "prompt": "Codebook: A=0, B=10, C=110, D=111. The received stream 01011 stops here. With no padding or missing-bit convention, what can the decoder conclude?",
+      "options": [
+        "A and B finish, but the final 11 is incomplete and needs another bit before a third symbol can finish.",
+        "A, B and C finish; the last zero of C can be omitted because the preceding bits already identify it.",
+        "A and B form the complete message; a prefix decoder may discard the final 11 as automatic padding.",
+        "The already completed A and B are ambiguous; adding one bit can change either of those earlier symbols."
+      ],
+      "answer": 0,
+      "explanation": "The scan is 0 | 10 | 11. A and B are complete, but 11 is only a prefix of C=110 or D=111. Ending inside a codeword is incomplete and must not be accepted as a complete stream. A different truncation exactly at a codeword boundary could look like a valid shorter message; prefix coding alone is not an integrity check.",
+      "transfer": "What extra framing, expected symbol count or integrity check would help distinguish an intended short message from a longer message cut off at a codeword boundary? Do not invent padding unless the format defines it."
+    },
+    {
+      "id": "pc-limits-3",
+      "concept": "ties-and-boundaries",
+      "prerequisites": [
+        "prefix-and-decoding",
+        "weighted-payload",
+        "huffman-merging"
+      ],
+      "prompt": "A toy comparison has a variable-code payload of 23 bits and a fixed-code payload of 28 bits. The variable-code container adds 12 bits of overhead; the fixed-code container adds 3 bits. Counting only these stated costs, what are the two totals?",
+      "options": [
+        "Variable: 23 bits; fixed: 28 bits.",
+        "Variable: 35 bits; fixed: 31 bits.",
+        "Variable: 28 bits; fixed: 40 bits.",
+        "Variable: 31 bits; fixed: 35 bits."
+      ],
+      "answer": 1,
+      "explanation": "The stated totals are 23+12 = 35 bits and 28+3 = 31 bits. The variable payload saves 5 bits, yet its toy container is 4 bits larger. These deliberately supplied overhead values are an arithmetic example, not measured file sizes. A real format may also store a dictionary, framing, padding or other metadata.",
+      "transfer": "Before calling a real file smaller, compare the complete encoded outputs, specify which metadata is included, and verify recovery of the original data. Why would downloading the explorer’s example JSON not measure compression of that JSON file?"
+    }
+  ]
+}
