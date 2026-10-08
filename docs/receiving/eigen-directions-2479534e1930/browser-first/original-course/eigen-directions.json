@@ -1,0 +1,253 @@
+{
+  "format": "recallweave-deck/1",
+  "title": "Eigen directions: when a transformation stays on a line",
+  "attribution": "Original teaching text, questions, examples and illustrations prepared for RecallWeave in October 2026. Mathematical references: MIT OpenCourseWare 18.06SC, Eigenvalues and Eigenvectors (Gilbert Strang), https://ocw.mit.edu/courses/18-06sc-linear-algebra-fall-2011/pages/least-squares-determinants-and-eigenvalues/eigenvalues-and-eigenvectors/ ; MIT 18.06 Spring 2025, Lecture 21, https://github.com/mitmath/1806 . References checked 2026-10-08. No source exercise, figure or prose is reproduced.",
+  "license": "Original teaching text and examples. This contribution makes no additional reuse-license grant. The linked references retain their own terms.",
+  "concepts": [
+    "Matrix action",
+    "Eigenvector condition",
+    "Eigenvalue meaning",
+    "Counting real eigenlines"
+  ],
+  "items": [
+    {
+      "id": "ed-01",
+      "concept": "Matrix action",
+      "prerequisites": [],
+      "prompt": "A = [[2, 1], [−1, 3]] and v = (2, 1). Using column vectors, what is Av?",
+      "options": [
+        "(4, 3)",
+        "(5, 1)",
+        "(3, 5)",
+        "(2, 1)"
+      ],
+      "answer": 1,
+      "explanation": "The first output coordinate is 2×2 + 1×1 = 5. The second is (−1)×2 + 3×1 = 1. Each row forms one dot product with the input; multiplying only matching positions would omit the off-diagonal contributions.",
+      "transfer": "For the same matrix, calculate A(1, −2) and explain what each output coordinate uses."
+    },
+    {
+      "id": "ed-02",
+      "concept": "Matrix action",
+      "prerequisites": [],
+      "prompt": "A = [[3, −2], [1, 4]]. Which vector is A(0, 1)?",
+      "options": [
+        "(3, 1)",
+        "(1, 4)",
+        "(−2, 4)",
+        "(0, 4)"
+      ],
+      "answer": 2,
+      "explanation": "Multiplying by the second basis vector selects the second column: 0 times the first column plus 1 times the second column. The image is (−2, 4). Columns show where the coordinate basis vectors go.",
+      "transfer": "What is A(1, 0)? Use both columns to predict A(1, 1)."
+    },
+    {
+      "id": "ed-03",
+      "concept": "Eigenvector condition",
+      "prerequisites": [
+        "Matrix action"
+      ],
+      "prompt": "Which requirement belongs to the definition of a real eigenvector v of a real matrix A?",
+      "options": [
+        "v is nonzero and Av = λv for some real number λ.",
+        "v may be zero, but λ must be positive.",
+        "v must have length 1 and λ must be an integer.",
+        "v must point along a coordinate axis."
+      ],
+      "answer": 0,
+      "explanation": "An eigenvector is nonzero and its image is a scalar multiple of itself. The scale may be negative or zero, and the vector need not have unit length or lie on an axis. Excluding zero prevents 0 = λ0 from making every number an eigenvalue.",
+      "transfer": "Explain why merely checking A0 = λ0 cannot tell you an eigenvalue of A."
+    },
+    {
+      "id": "ed-04",
+      "concept": "Eigenvalue meaning",
+      "prerequisites": [
+        "Eigenvector condition"
+      ],
+      "prompt": "A nonzero vector satisfies Av = −3v. What happens to it under this one application of A?",
+      "options": [
+        "It turns through a right angle.",
+        "Its length becomes negative.",
+        "It cannot be an eigenvector because the scale is negative.",
+        "Its length is multiplied by 3 and its direction reverses on the same line."
+      ],
+      "answer": 3,
+      "explanation": "A negative scale reverses direction while preserving the line through the origin. Length is nonnegative and is multiplied by the magnitude |−3| = 3. Negative eigenvalues are fully compatible with the eigenvector equation.",
+      "transfer": "Compare the geometric effects of eigenvalues −1, −1/2 and +1."
+    },
+    {
+      "id": "ed-05",
+      "concept": "Eigenvalue meaning",
+      "prerequisites": [
+        "Eigenvector condition"
+      ],
+      "prompt": "For A = [[1, 0], [0, 0]], the nonzero vector v = (0, 2) maps to (0, 0). Which statement is correct?",
+      "options": [
+        "v is an eigenvector with eigenvalue 0.",
+        "v is not an eigenvector because its image has no direction.",
+        "The zero output is an eigenvector with every eigenvalue.",
+        "v has eigenvalue 2 because its original length is 2."
+      ],
+      "answer": 0,
+      "explanation": "The input is nonzero and Av = 0v, so v is an eigenvector with eigenvalue zero. An output of zero has no arrow direction, but the equation still holds. The zero output itself does not become an eigenvector.",
+      "transfer": "Find a nonzero eigenvector for the same matrix with eigenvalue 1."
+    },
+    {
+      "id": "ed-06",
+      "concept": "Eigenvector condition",
+      "prerequisites": [
+        "Matrix action"
+      ],
+      "prompt": "Suppose Av = 2v and v is nonzero. What can be concluded about w = −4v?",
+      "options": [
+        "w has eigenvalue −8.",
+        "w is an eigenvector with eigenvalue 2.",
+        "w is an eigenvector only if it is normalized.",
+        "w has eigenvalue −4."
+      ],
+      "answer": 1,
+      "explanation": "Linearity gives A(−4v) = −4Av = −4(2v) = 2(−4v) = 2w. Changing the nonzero representative on one eigenline does not change its eigenvalue. Multiplying by zero would produce an excluded input.",
+      "transfer": "Show the same argument with any nonzero real multiplier c instead of −4."
+    },
+    {
+      "id": "ed-07",
+      "concept": "Eigenvector condition",
+      "prerequisites": [
+        "Matrix action"
+      ],
+      "prompt": "A = [[2, 0], [0, 1]] and v = (1, 1), so Av = (2, 1). Is v an eigenvector?",
+      "options": [
+        "Yes, because A is diagonal.",
+        "Yes, with eigenvalue 3.",
+        "No: no single scalar multiplies both input coordinates to produce the output.",
+        "No: eigenvectors can never have two nonzero coordinates."
+      ],
+      "answer": 2,
+      "explanation": "The first coordinate would require λ = 2 and the second would require λ = 1. There is no common scale, so this probe changes line. The matrix still has eigenvectors along its coordinate axes, and other matrices can have oblique eigenvectors.",
+      "transfer": "Try v = (3, 0) and v = (0, −2) for the same matrix. Find their scales."
+    },
+    {
+      "id": "ed-08",
+      "concept": "Counting real eigenlines",
+      "prerequisites": [
+        "Eigenvector condition",
+        "Eigenvalue meaning"
+      ],
+      "prompt": "For A = [[4, 1], [2, 3]], the trace is 7 and determinant is 10. Which equation and pair give its eigenvalues?",
+      "options": [
+        "λ² + 7λ + 10 = 0; −5 and −2.",
+        "λ² − 7λ + 10 = 0; 5 and 2.",
+        "λ² − 10λ + 7 = 0; 7 and 3.",
+        "λ² − 7λ − 10 = 0; 10 and −1."
+      ],
+      "answer": 1,
+      "explanation": "For a 2×2 matrix, det(A − λI) = λ² − trace(A)λ + det(A). Here (λ−5)(λ−2) = λ²−7λ+10. The roots sum to 7 and multiply to 10. These are scales; their eigenvectors require a separate equation.",
+      "transfer": "For the same A, check whether (1, 1) or (1, −2) is associated with each root."
+    },
+    {
+      "id": "ed-09",
+      "concept": "Counting real eigenlines",
+      "prerequisites": [
+        "Eigenvector condition",
+        "Eigenvalue meaning"
+      ],
+      "prompt": "For A = [[2, 1], [1, 2]], which pairing of eigenvector and eigenvalue is correct?",
+      "options": [
+        "(1, 1) has λ = 1; (1, −1) has λ = 3.",
+        "Both (1, 1) and (1, −1) have λ = 2.",
+        "(1, 0) has λ = 2; (0, 1) has λ = 2.",
+        "(1, 1) has λ = 3; (1, −1) has λ = 1."
+      ],
+      "answer": 3,
+      "explanation": "A(1,1) = (3,3) = 3(1,1), while A(1,−1) = (1,−1). These are two different real eigenlines, neither tied to a coordinate axis. Every nonzero scalar multiple on either line keeps that line's eigenvalue.",
+      "transfer": "Predict A²(1, −1) and A²(1, 1) without multiplying the two matrices."
+    },
+    {
+      "id": "ed-10",
+      "concept": "Counting real eigenlines",
+      "prerequisites": [
+        "Eigenvector condition",
+        "Eigenvalue meaning"
+      ],
+      "prompt": "A = [[1, 2], [0, 1]] has the repeated eigenvalue 1. What are its real eigenvectors?",
+      "options": [
+        "Every nonzero vector in the plane.",
+        "Exactly two vectors, (1, 0) and (0, 1).",
+        "All nonzero vectors on the x-axis only.",
+        "There are none because the root is repeated."
+      ],
+      "answer": 2,
+      "explanation": "Solving (A−I)(x,y) = (2y,0) = (0,0) forces y = 0 while x may be any nonzero real number. The repeated root has a one-dimensional eigenspace. Counting roots with multiplicity does not count independent eigenvectors.",
+      "transfer": "Replace the off-diagonal 2 with 0. What changes about the eigenspace, even though the roots stay the same?"
+    },
+    {
+      "id": "ed-11",
+      "concept": "Counting real eigenlines",
+      "prerequisites": [
+        "Eigenvector condition",
+        "Eigenvalue meaning"
+      ],
+      "prompt": "A = [[2, 0], [0, 2]]. How many lines through the origin consist of nonzero eigenvectors away from the origin?",
+      "options": [
+        "Exactly one.",
+        "Every such line; all nonzero vectors have eigenvalue 2.",
+        "Exactly two, because the matrix is 2×2.",
+        "None, because both roots are equal."
+      ],
+      "answer": 1,
+      "explanation": "A = 2I multiplies every vector by 2. The eigenspace is the whole plane and has dimension 2, but it contains infinitely many lines. Two independent basis vectors can describe that plane without exhausting its eigenvectors.",
+      "transfer": "Does the zero matrix also have every nonzero direction as an eigenvector? Identify its eigenvalue."
+    },
+    {
+      "id": "ed-12",
+      "concept": "Counting real eigenlines",
+      "prerequisites": [
+        "Eigenvector condition",
+        "Eigenvalue meaning"
+      ],
+      "prompt": "A = [[0, −1], [1, 0]] rotates the real plane by 90°. Its characteristic equation is λ² + 1 = 0. What follows?",
+      "options": [
+        "It has no nonzero real eigenvectors; its eigenvalues over the complex numbers are i and −i.",
+        "Its real eigenvectors are the two coordinate axes.",
+        "Its real eigenvalues are 1 and −1.",
+        "The zero vector is its only real eigenvector."
+      ],
+      "answer": 0,
+      "explanation": "No real number squares to −1, so there is no real eigenvalue and no nonzero real eigenvector. Every nonzero real input turns onto a different line. Complex eigenvalues exist when the field is extended, but this explorer draws the real plane. Zero remains excluded from the definition.",
+      "transfer": "Contrast a 180° rotation with this 90° rotation. Which one keeps every line through the origin?"
+    },
+    {
+      "id": "ed-13",
+      "concept": "Eigenvector condition",
+      "prerequisites": [
+        "Matrix action"
+      ],
+      "prompt": "A = [[1, 1], [1, 0]] and v = (2, 1), so Av = (3, 2). The two arrows may look nearly aligned in a small diagram. Which exact conclusion is justified?",
+      "options": [
+        "v is an eigenvector because the arrows are close.",
+        "v has eigenvalue 3/2 because the first coordinates have that ratio.",
+        "v has eigenvalue 2 because the second coordinates have that ratio.",
+        "v is not an eigenvector: 2×2 − 1×3 = 1, so the two vectors are not collinear."
+      ],
+      "answer": 3,
+      "explanation": "For nonzero (x,y), collinearity with (u,w) is equivalent to xw−yu = 0. Here the exact cross-product is 1, not zero. The real eigenlines have irrational slopes; a rounded drawing does not turn this integer probe into an exact eigenvector.",
+      "transfer": "Calculate A(3, 2) and its cross-product with (3, 2). Does a visually closer direction necessarily satisfy exact equality?"
+    },
+    {
+      "id": "ed-14",
+      "concept": "Eigenvalue meaning",
+      "prerequisites": [
+        "Eigenvector condition"
+      ],
+      "prompt": "A nonzero v satisfies Av = −2v. If the same matrix acts twice, what is A²v?",
+      "options": [
+        "−4v",
+        "−2v",
+        "4v",
+        "2v"
+      ],
+      "answer": 2,
+      "explanation": "Linearity gives A²v = A(−2v) = −2Av = (−2)²v = 4v. Each step reverses direction; after two steps the direction is restored and length is multiplied by 4. This shortcut applies because v is an eigenvector of the same matrix at every step.",
+      "transfer": "Predict A³v and A⁴v. Separate direction from length in your explanation."
+    }
+  ]
+}

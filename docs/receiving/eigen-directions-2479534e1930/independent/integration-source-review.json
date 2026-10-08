@@ -1,0 +1,206 @@
+{
+  "estate": "2479534e1930",
+  "recordedAtUTC": "2026-10-08T18:20:19.690Z",
+  "node": "v22.22.1",
+  "sourceHead": "f42ad22e069b5ed3b2d85ea0573b84fef121d254",
+  "verdict": "accept",
+  "blockers": [],
+  "scope": "Bounded source integration review after independently qualified model and content. No model test rerun, browser rerun, source edit, or ref mutation.",
+  "browserReceipt": {
+    "path": "/home/jacob/recallweave-eigen-2479534e1930/docs/receiving/eigen-directions-2479534e1930/browser-final/browser-receipt.json",
+    "sha256": "d456109db5e649dd01300c407171b701397d828ab630079a405cbe10d4b54684",
+    "status": "passed"
+  },
+  "sourceHashComparison": [
+    {
+      "file": "src/eigen-directions.mjs",
+      "expected": "ed0480d65e489b7123ec4a788e6c752e7458a717c2b4567fc1725d3380e08be1",
+      "actual": "ed0480d65e489b7123ec4a788e6c752e7458a717c2b4567fc1725d3380e08be1",
+      "bytes": 7389
+    },
+    {
+      "file": "src/eigen-directions-ui.mjs",
+      "expected": "cc62b703b4120786cf63301fe225699a6f737f516cf81673eb4fdd1daf6b1d6a",
+      "actual": "cc62b703b4120786cf63301fe225699a6f737f516cf81673eb4fdd1daf6b1d6a",
+      "bytes": 12453
+    },
+    {
+      "file": "templates/eigen-directions-explorer.html",
+      "expected": "288fcac1541f2148a5cba3d07ca43733cb6e713395448cf18370f163f5959716",
+      "actual": "288fcac1541f2148a5cba3d07ca43733cb6e713395448cf18370f163f5959716",
+      "bytes": 14745
+    },
+    {
+      "file": "tools/build-eigen-directions.mjs",
+      "expected": "fb23e693822a7ea15f133607a45a10d34b8c9da358657051515d86bfec1200d8",
+      "actual": "fb23e693822a7ea15f133607a45a10d34b8c9da358657051515d86bfec1200d8",
+      "bytes": 2471
+    },
+    {
+      "file": "courses/eigen-directions-explorer.html",
+      "expected": "62abd58df06f7e2eb61f021e4126b8acc03d7937ea00300f4ee7ddf9d771a903",
+      "actual": "62abd58df06f7e2eb61f021e4126b8acc03d7937ea00300f4ee7ddf9d771a903",
+      "bytes": 57655
+    },
+    {
+      "file": "courses/eigen-directions.json",
+      "expected": "9f73ce8a0aaddff83ed0ce8e6aa8dd6b8f3f776c2f087c0fb23053cd80c7952c",
+      "actual": "9f73ce8a0aaddff83ed0ce8e6aa8dd6b8f3f776c2f087c0fb23053cd80c7952c",
+      "bytes": 12738
+    },
+    {
+      "file": "courses/eigen-directions.md",
+      "expected": "6ced0f523629c7c0cd5498dda674adc7ceae8784802dfc1b95300f50d4fcb2c8",
+      "actual": "6ced0f523629c7c0cd5498dda674adc7ceae8784802dfc1b95300f50d4fcb2c8",
+      "bytes": 9377
+    }
+  ],
+  "domTargets": {
+    "uniqueTemplateIds": 44,
+    "requiredUiTargets": 33,
+    "allExist": true
+  },
+  "exactBuildCheck": {
+    "exitCode": 0,
+    "stdout": "Eigen-directions explorer matches its exact source inputs."
+  },
+  "findings": [
+    {
+      "topic": "DOM and export safety",
+      "status": "accept",
+      "pointers": [
+        {
+          "file": "src/eigen-directions-ui.mjs",
+          "line": 23
+        },
+        {
+          "file": "src/eigen-directions-ui.mjs",
+          "line": 29
+        },
+        {
+          "file": "src/eigen-directions-ui.mjs",
+          "line": 111
+        },
+        {
+          "file": "src/eigen-directions-ui.mjs",
+          "line": 195
+        }
+      ],
+      "reason": "User inputs are bounded by the existing model. Rendered prose uses textContent; SVG receives numeric or controlled attributes; filenames are fixed; object URLs are revoked. No source use of HTML insertion, network requests, or browser persistence was found."
+    },
+    {
+      "topic": "Applied result and export consistency",
+      "status": "accept",
+      "pointers": [
+        {
+          "file": "src/eigen-directions-ui.mjs",
+          "line": 176
+        },
+        {
+          "file": "src/eigen-directions-ui.mjs",
+          "line": 212
+        },
+        {
+          "file": "src/eigen-directions-ui.mjs",
+          "line": 218
+        }
+      ],
+      "reason": "Pending/refused form values do not replace accepted state. Plot, text, line toggle and experiment download consume accepted results; serialization recomputes from accepted matrix/probe. Rendering prerequisites exist in the template."
+    },
+    {
+      "topic": "Numeric plot boundary",
+      "status": "accept",
+      "pointers": [
+        {
+          "file": "src/eigen-directions-ui.mjs",
+          "line": 39
+        },
+        {
+          "file": "src/eigen-directions-ui.mjs",
+          "line": 44
+        },
+        {
+          "file": "src/eigen-directions-ui.mjs",
+          "line": 47
+        },
+        {
+          "file": "src/eigen-directions-ui.mjs",
+          "line": 72
+        }
+      ],
+      "reason": "The accepted model bounds keep image entries at most 360 in magnitude. The plot floors range input and viewport size so step, range and scale stay finite and positive. Both axes share one scale. Approximate eigenbasis vectors affect only geometry; exact probe status comes from the frozen-qualified model."
+    },
+    {
+      "topic": "Embedded source safety and reproducibility",
+      "status": "accept",
+      "pointers": [
+        {
+          "file": "tools/build-eigen-directions.mjs",
+          "line": 18
+        },
+        {
+          "file": "tools/build-eigen-directions.mjs",
+          "line": 19
+        },
+        {
+          "file": "tools/build-eigen-directions.mjs",
+          "line": 27
+        },
+        {
+          "file": "tools/build-eigen-directions.mjs",
+          "line": 28
+        },
+        {
+          "file": "tools/build-eigen-directions.mjs",
+          "line": 39
+        }
+      ],
+      "reason": "Builder validates the original deck, pins its UI import boundary, refuses remaining model module boundaries and script-closing source, JSON-quotes deck/guide text and escapes every less-than sign. Template markers occur exactly once. Read-only --check confirms exact generated/source equality."
+    },
+    {
+      "topic": "Template and final layout source",
+      "status": "accept",
+      "pointers": [
+        {
+          "file": "templates/eigen-directions-explorer.html",
+          "line": 17
+        },
+        {
+          "file": "templates/eigen-directions-explorer.html",
+          "line": 23
+        },
+        {
+          "file": "templates/eigen-directions-explorer.html",
+          "line": 57
+        },
+        {
+          "file": "templates/eigen-directions-explorer.html",
+          "line": 91
+        }
+      ],
+      "reason": "Template supplies every UI target uniquely, status announcements and explicit applied-result labels. Reviewed final layout source is identical to the version recorded by the parent 320px/390px browser receiving. No browser rerun was performed."
+    }
+  ],
+  "originalPreservation": [
+    {
+      "file": "blind-contract-freeze.json",
+      "expected": "1edcf003399bb1932aa4ccded4c548b40ee97184eefc41ca663613c8ed88be55",
+      "actual": "1edcf003399bb1932aa4ccded4c548b40ee97184eefc41ca663613c8ed88be55"
+    },
+    {
+      "file": "receiver-model.mjs",
+      "expected": "2e7b99ee763bd912bb337d89c16981b8f22154c995b5041fbcc7d595f41be723",
+      "actual": "2e7b99ee763bd912bb337d89c16981b8f22154c995b5041fbcc7d595f41be723"
+    },
+    {
+      "file": "model-results.json",
+      "expected": "bbd89fe0f5d931bf29a2464aa3aee0a302f9552e198f2c7d2502ebc0108393a9",
+      "actual": "bbd89fe0f5d931bf29a2464aa3aee0a302f9552e198f2c7d2502ebc0108393a9"
+    },
+    {
+      "file": "contract-clarification-receipt.json",
+      "expected": "a3ab96c63e624ed1acae96ab9e7246a09fea07de7aa03eef636e58d5e9478235",
+      "actual": "a3ab96c63e624ed1acae96ab9e7246a09fea07de7aa03eef636e58d5e9478235"
+    }
+  ]
+}
