@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Find and download offline RecallWeave lessons, with concepts, source notes, and course companions.">
+  <title>Lesson catalog · RecallWeave</title>
+  <style>
+    :root { color-scheme: light; --ink: #1d3338; --muted: #4c6468; --accent: #125b54; --paper: #f5f4ee; --line: #cbd6d1; --gold: #efc56c; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    body { margin: 0; color: var(--ink); background: var(--paper); line-height: 1.6; }
+    a { color: var(--accent); text-underline-offset: .2em; }
+    button, input, select { font: inherit; }
+    button, select { cursor: pointer; }
+    button, a, input, select, summary { -webkit-tap-highlight-color: transparent; }
+    :focus-visible { outline: 3px solid #a84b10; outline-offset: 4px; }
+    .skip-link { position: absolute; top: -6rem; left: 1rem; z-index: 2; padding: .65rem 1rem; background: white; }
+    .skip-link:focus { top: .5rem; }
+    .wrap { width: min(1160px, calc(100% - 3rem)); margin-inline: auto; }
+    .masthead { border-bottom: 1px solid var(--line); }
+    .masthead .wrap { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding-block: 1rem; }
+    .brand { font-size: 1.15rem; font-weight: 760; letter-spacing: -.03em; }
+    .brand span { display: inline-block; width: .7rem; height: .7rem; border: 2px solid var(--accent); border-radius: 50%; margin-right: .45rem; }
+    nav { display: flex; flex-wrap: wrap; gap: .45rem 1.25rem; }
+    nav a { font-size: .92rem; font-weight: 600; }
+    .hero { display: grid; grid-template-columns: 1.3fr 1fr; gap: 2.5rem; align-items: center; padding-block: 3.5rem 2.6rem; }
+    .eyebrow { margin: 0 0 .8rem; color: var(--accent); font-size: .77rem; font-weight: 760; letter-spacing: .15em; text-transform: uppercase; }
+    h1 { margin: 0; font-size: clamp(2.5rem, 5.4vw, 4.5rem); line-height: 1.05; letter-spacing: -.055em; font-weight: 720; }
+    .intro { max-width: 37rem; margin: 1.3rem 0 0; color: var(--muted); font-size: 1.06rem; }
+    .how-to { list-style: none; margin: 0; padding: 1.4rem 1.6rem; background: #e9eee6; border: 1px solid #d7dfd2; border-radius: 1rem; counter-reset: steps; }
+    .how-to li { position: relative; padding-left: 2.5rem; counter-increment: steps; }
+    .how-to li + li { margin-top: 1.05rem; }
+    .how-to li::before { content: counter(steps); position: absolute; left: 0; top: .05rem; display: grid; place-items: center; width: 1.65rem; height: 1.65rem; border-radius: 50%; background: var(--accent); color: white; font-size: .83rem; font-weight: 700; }
+    .how-to strong { display: block; font-size: .94rem; }
+    .how-to p { margin: .08rem 0 0; font-size: .86rem; color: var(--muted); }
+    .catalog-heading { display: flex; justify-content: space-between; gap: 1rem; align-items: baseline; margin: 1rem 0; }
+    h2 { margin: 0; font-size: 1.45rem; letter-spacing: -.025em; }
+    #result-count { margin: 0; color: var(--muted); font-size: .9rem; }
+    .filters { display: grid; grid-template-columns: minmax(0, 1fr) 14rem auto; align-items: end; gap: 1rem; padding: 1.15rem; background: #fffef9; border: 1px solid var(--line); border-radius: .8rem; }
+    .field label { display: block; margin-bottom: .35rem; font-weight: 650; font-size: .84rem; }
+    input, select { width: 100%; min-height: 2.85rem; padding: .55rem .75rem; background: white; color: var(--ink); border: 1px solid #8ba19b; border-radius: .4rem; }
+    input::placeholder { color: #59706d; opacity: 1; }
+    button { min-height: 2.85rem; padding: .6rem 1rem; border: 1px solid var(--accent); border-radius: .4rem; font-weight: 650; }
+    #clear-filters { color: var(--accent); background: transparent; }
+    #clear-filters:disabled { cursor: default; color: #536965; border-color: #bdcbc5; }
+    #download-status { margin: 1rem 0; min-height: 3.2rem; max-width: 60rem; color: var(--muted); font-size: .9rem; overflow-wrap: anywhere; }
+    .course-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.2rem; list-style: none; padding: 0; margin: 0 0 2rem; }
+    .course-card { min-width: 0; background: #fffefb; border: 1px solid var(--line); border-radius: .9rem; }
+    .course-card article { display: flex; flex-direction: column; height: 100%; padding: 1.55rem; overflow-wrap: anywhere; }
+    .subject-tag { margin: 0 0 .8rem; align-self: flex-start; background: #e4eee6; color: #234f47; padding: .15rem .65rem; border-radius: 2rem; font-size: .74rem; font-weight: 700; letter-spacing: .045em; }
+    h3 { margin: 0; font-size: 1.45rem; letter-spacing: -.025em; line-height: 1.3; }
+    .course-counts { margin: .6rem 0 0; color: var(--accent); font-size: .84rem; font-weight: 680; }
+    .course-summary { margin: .9rem 0; color: var(--muted); font-size: .94rem; }
+    .concepts { display: flex; flex-wrap: wrap; gap: .4rem; list-style: none; margin: 0 0 1.15rem; padding: 0; }
+    .concepts li { padding: .18rem .55rem; border: 1px solid #dce2db; border-radius: .35rem; color: #3e5856; font-size: .76rem; }
+    .source-details { margin-top: auto; border-top: 1px solid #e0e5dd; padding-top: .9rem; font-size: .83rem; }
+    summary { cursor: pointer; color: var(--accent); font-weight: 600; }
+    dl { margin: .8rem 0 .2rem; }
+    dt { font-weight: 700; }
+    dd { margin: .25rem 0 .85rem; color: var(--muted); white-space: pre-wrap; }
+    .course-actions { display: flex; flex-wrap: wrap; align-items: center; gap: .7rem 1rem; margin-top: 1.1rem; }
+    .download-button { background: var(--accent); color: white; }
+    .download-button:hover { background: #0b4741; }
+    .companion-link { font-size: .82rem; }
+    #no-results { margin: 1rem 0 2rem; border: 1px dashed #96aaa1; border-radius: .8rem; padding: 2rem; text-align: center; }
+    #no-results p { margin: .3rem 0 0; color: var(--muted); }
+    .folder-note { padding: 1.2rem 1.4rem; border-left: 4px solid var(--gold); background: #eeeede; border-radius: 0 .6rem .6rem 0; font-size: .9rem; color: #405753; }
+    .folder-note p { margin: 0; }
+    .folder-note p + p { margin-top: .5rem; }
+    footer { padding-block: 1.6rem 2.5rem; color: var(--muted); font-size: .8rem; }
+    footer p { margin: 0; }
+    noscript p { padding: 1rem; background: #fff1d7; }
+    @media (max-width: 760px) { .hero { grid-template-columns: 1fr; gap: 1.6rem; padding-top: 2rem; } .how-to { padding: 1.2rem; } .filters { grid-template-columns: 1fr 1fr; } .field:first-child { grid-column: 1 / -1; } .course-list { grid-template-columns: 1fr; } }
+    @media (max-width: 430px) { .wrap { width: calc(100% - 2rem); } .masthead .wrap { align-items: flex-start; } nav { justify-content: flex-end; max-width: 10rem; gap: .4rem .8rem; } .brand { font-size: 1.03rem; white-space: nowrap; } h1 { font-size: 2.65rem; } .course-card article { padding: 1.25rem; } .filters { gap: .85rem; padding: 1rem; } .catalog-heading { align-items: flex-start; } h2 { font-size: 1.3rem; } #result-count { white-space: nowrap; padding-top: .08rem; } .course-actions { align-items: flex-start; flex-direction: column; } .download-button { width: 100%; } }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#lessons">Skip to lessons</a>
+  <header class="masthead">
+    <div class="wrap">
+      <div class="brand"><span aria-hidden="true"></span>RecallWeave</div>
+      <nav aria-label="RecallWeave pages">
+        <a href="../demo.html" target="_blank" rel="noopener">Open learner</a>
+        <a href="../author.html" target="_blank" rel="noopener">Deck studio</a>
+      </nav>
+    </div>
+  </header>
+  <main class="wrap">
+    <section class="hero" aria-labelledby="page-title">
+      <div>
+        <p class="eyebrow">Lessons to think with</p>
+        <h1 id="page-title">Find your next<br>connection.</h1>
+        <p class="intro">Short lessons for retrieving ideas, seeing how they connect, and trying them in a new situation. Browse the concepts, keep a lesson, and learn offline.</p>
+      </div>
+      <ol class="how-to" aria-label="How to use a lesson">
+        <li><strong>Choose a lesson</strong><p>Browse its concepts and source notes.</p></li>
+        <li><strong>Download the JSON file</strong><p>The lesson and its attribution travel together.</p></li>
+        <li><strong>Open it in the learner</strong><p>Use <a href="../demo.html" target="_blank" rel="noopener">Open learner</a>, choose <b>Bring your own lesson</b>, preview the file, then select <b>Start this deck</b>.</p></li>
+      </ol>
+    </section>
+    <section id="lessons" aria-labelledby="lessons-heading">
+      <div class="catalog-heading">
+        <h2 id="lessons-heading">Choose a lesson</h2>
+        <p id="result-count" role="status" aria-live="polite"></p>
+      </div>
+      <div class="filters" role="search" aria-label="Filter lessons">
+        <div class="field"><label for="course-search">Search titles and concepts</label><input id="course-search" type="search" placeholder="Try graphs, ATP, or SQL" autocomplete="off"></div>
+        <div class="field"><label for="course-subject">Subject</label><select id="course-subject"><option value="">All subjects</option></select></div>
+        <button id="clear-filters" type="button">Clear filters</button>
+      </div>
+      <p id="download-status" role="status" aria-live="polite">Downloads stay on your device. Each lesson includes its original attribution and permission statement.</p>
+      <noscript><p>Enable JavaScript in your browser to search the catalog and download its embedded lessons. The <a href="../README.md">project README</a> also lists the learning tools.</p></noscript>
+      <ul id="course-list" class="course-list" aria-label="Available lessons"></ul>
+      <div id="no-results" hidden><strong>No lessons match those filters.</strong><p>Try a different concept, choose All subjects, or use Clear filters.</p></div>
+    </section>
+    <aside class="folder-note" aria-label="Using this catalog offline">
+      <p><strong>Keep the RecallWeave folder together.</strong> This catalog and its lesson downloads work on their own, offline. Open learner, Deck studio, and companion links use the other files in the project folder. Those links open a separate tab.</p>
+      <p>Source and permission notes come from each course. The catalog checks the lesson format; it does not verify subject accuracy or learning outcomes.</p>
+    </aside>
+  </main>
+  <footer class="wrap"><p>RecallWeave · No account, upload, or automatic browser storage. This page keeps no learning history.</p></footer>
+  <script id="course-catalog-data" type="application/json">@@CATALOG_DATA@@</script>
+  <script>@@CATALOG_SCRIPT@@</script>
+</body>
+</html>

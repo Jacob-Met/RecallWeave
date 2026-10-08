@@ -18,6 +18,27 @@ Open [Course handouts](handout.html), choose a checked local deck JSON, review i
 
 Each saved HTML file opens and prints offline on its own. The worksheet file contains questions only; the teacher’s builder and the separate key receive the full checked deck. Cancelling a selection or choosing an invalid file leaves the current handout in place. This is a separate preparation flow; it does not start or change a learning session. Modular source lives in `handout/` and `src/course-handout*.mjs`; rebuild `handout.html` with `python3 tools/make_handout.py`, or verify it with `--check`.
 
+## Find a lesson
+
+Open the **[Lesson catalog](courses/catalog.html)** directly in your browser to
+find original lessons in biology, algorithms, data, measurement and signals. Search titles and concepts or filter by
+subject. Each card shows the lesson's question and concept counts, original
+attribution and permission statement, plus available guides and explorers.
+
+Choose **Download lesson (.json)**, open the learner, and select that file under
+**Bring your own lesson**. Review the preview before **Start this deck**. The
+catalog embeds the exact existing lesson bytes; downloads and search work offline
+even when the catalog is opened on its own. Keep the project folder together to
+use its learner, Deck studio, guide and explorer links.
+
+The explicit `courses/catalog-manifest.json` controls which integrated files are
+included. Rebuild after a listed lesson or catalog source changes with
+`node tools/build-course-catalog.mjs`; `node tools/build-course-catalog.mjs --check`
+checks the generated page without writing. The ordinary test command includes
+catalog source parity and admission tests. An optional system-browser receiver
+checks actual offline downloads, importer previews and a 390px layout:
+`node tools/check_course_catalog_browser.mjs --browser /path/to/chromium --output /tmp/recallweave-catalog-check`.
+
 ## Core and interaction
 
 - `src/knowledge.mjs` implements a transparent BKT update: initial knowledge, learning transition, guess, and slip are explicit probabilities. It also computes binary entropy and expected information gain.

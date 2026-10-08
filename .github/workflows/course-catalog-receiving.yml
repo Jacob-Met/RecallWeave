@@ -1,0 +1,74 @@
+name: course catalog receiving
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/course-catalog-receiving.yml'
+      - 'courses/**'
+      - 'data/deck.json'
+      - 'demo.html'
+      - 'author.html'
+      - 'src/deck.mjs'
+      - 'src/course-catalog*.mjs'
+      - 'tests/course-catalog.test.mjs'
+      - 'tools/build-course-catalog.mjs'
+      - 'tools/check_course_catalog_browser.mjs'
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/course-catalog-receiving.yml'
+      - 'courses/**'
+      - 'data/deck.json'
+      - 'demo.html'
+      - 'author.html'
+      - 'src/deck.mjs'
+      - 'src/course-catalog*.mjs'
+      - 'tests/course-catalog.test.mjs'
+      - 'tools/build-course-catalog.mjs'
+      - 'tools/check_course_catalog_browser.mjs'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: course-catalog-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  system-browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    env:
+      CATALOG_EXPECTED_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+      - name: Receive catalog with the installed system browser
+        shell: bash
+        run: |
+          test "$(git rev-parse HEAD)" = "$CATALOG_EXPECTED_HEAD"
+          git rev-parse HEAD
+          catalog_browser="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          "$catalog_browser" --version
+          node tools/check_course_catalog_browser.mjs --root "$GITHUB_WORKSPACE" --browser "$catalog_browser" --output "$RUNNER_TEMP/course-catalog-receiving"
+      - name: Preserve the actual receiving record in job logs
+        if: always()
+        shell: bash
+        run: |
+          if test -f "$RUNNER_TEMP/course-catalog-receiving/receiving.json"; then
+            cat "$RUNNER_TEMP/course-catalog-receiving/receiving.json"
+          else
+            echo 'No receiving record was produced; inspect the prior step for a prelaunch failure.'
+          fi
+      - name: Preserve browser evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: course-catalog-${{ env.CATALOG_EXPECTED_HEAD }}
+          path: ${{ runner.temp }}/course-catalog-receiving/
+          if-no-files-found: warn
+          retention-days: 14
