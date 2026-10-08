@@ -235,3 +235,10 @@ This public source repository supports the ForgeHacks 2026 demo. The Devpost acc
 [Open the offline lab](courses/mendelian-inheritance-lab.html), [download the original course](courses/mendelian-inheritance.json), or [read the worked guide](courses/mendelian-inheritance.md). Twelve questions connect allele segregation, genotype and phenotype, one-locus crosses and independent two-locus crosses. The explorer follows each parental gamete route and shows exact genotype and phenotype fractions, with explicit complete-dominance and independent-assortment assumptions. Its downloads preserve the checked course and a worked cross record.
 
 Import the course through the existing local-file preview and **Start this deck** flow, then use the learner's review, separate missed-item practice and study-note downloads. All traits are hypothetical plant examples; the model gives probabilities, not guaranteed finite offspring counts. Build and optional browser-receiving commands are in the guide.
+
+
+## Rehearse the next question
+
+Open [Question selection lab](selection-lab.html) to inspect the existing native selector on the bundled course or a checked local deck. Set hypothetical starting concept probabilities, compare the correct/incorrect continuations, then step back or restart a deliberately synthetic path. A separate JSON download keeps the exact checked course, assumptions, question identities and full-precision model values.
+
+The published model parameters remain fixed. This separate offline lab records hypothetical evidence and does not change learner progress, estimate real performance or restore a learning trace. See the [lab guide](docs/selection-lab.md) for the native scoring explanation, input behavior and report contract.

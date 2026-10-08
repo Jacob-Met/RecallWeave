@@ -1,0 +1,871 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Question selection lab · RecallWeave</title>
+<style>
+:root{color-scheme:light;--ink:#172d3a;--muted:#536b77;--paper:#f5f4ee;--card:#fffefa;--line:#d6ddd8;--teal:#126858;--tint:#e5f2ec;--blue:#274d8a;--amber:#80551b;--shadow:0 12px 40px #172d3a08;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);line-height:1.55}button,input{font:inherit}a{color:var(--blue);text-underline-offset:.18em}button,a,input,summary,[tabindex]{outline-offset:4px}button:focus-visible,a:focus-visible,input:focus-visible,summary:focus-visible,[tabindex]:focus-visible{outline:3px solid #bc6c27}button{cursor:pointer;border:1px solid var(--teal);border-radius:8px;background:var(--teal);color:white;padding:.68rem .94rem;font-weight:650;line-height:1.25}button.secondary{background:transparent;color:var(--teal)}button.quiet{border-color:var(--line);background:var(--card);color:var(--ink)}button:disabled{cursor:default;opacity:.45}button:not(:disabled):hover{filter:brightness(.95)}[hidden]{display:none!important}
+.shell{width:min(1280px,100%);margin:auto;padding:1.5rem 2rem 3rem}.topline{display:flex;align-items:center;justify-content:space-between;gap:1rem;border-bottom:1px solid var(--line);padding-bottom:1.1rem}.brand{font-size:1.06rem;font-weight:780;letter-spacing:-.02em;text-decoration:none;color:var(--ink)}.brand span{display:inline-grid;place-items:center;background:var(--teal);color:white;width:2rem;height:2rem;border-radius:7px;margin-right:.65rem;font-size:.75rem;letter-spacing:.03em}.toplinks{display:flex;gap:1.1rem;font-size:.9rem}.hero{display:grid;grid-template-columns:1fr 320px;gap:2.6rem;align-items:center;padding:2.1rem 0}.eyebrow{font-size:.74rem;text-transform:uppercase;letter-spacing:.13em;color:var(--teal);font-weight:750;margin:0 0 .6rem}h1{font-size:clamp(2rem,4vw,3.35rem);line-height:1.12;letter-spacing:-.045em;margin:.3rem 0 .8rem}h2{font-size:1.12rem;line-height:1.3;letter-spacing:-.018em;margin:0 0 .85rem}h3{font-size:.95rem;margin:.3rem 0}.intro{font-size:1.02rem;color:var(--muted);max-width:700px;margin:0}.notice{border-left:3px solid var(--teal);padding:.3rem 0 .3rem 1.15rem;color:var(--muted);font-size:.9rem}.notice strong{display:block;color:var(--ink);margin-bottom:.35rem}.notice p{margin:0}.workspace{display:grid;grid-template-columns:330px minmax(0,1fr);gap:1.3rem;align-items:start}.sidebar,.results{display:grid;gap:1.3rem;min-width:0}.card{padding:1.3rem;border:1px solid var(--line);border-radius:13px;background:var(--card);box-shadow:var(--shadow);min-width:0}.card p{margin:.6rem 0}.small{font-size:.85rem;color:var(--muted)}.source-title{font-size:1.1rem;line-height:1.4;overflow-wrap:anywhere;margin:.4rem 0!important}.actions{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:1rem}.actions button{flex:0 1 auto}.file-label{display:block;font-size:.85rem;font-weight:650;margin:.9rem 0 .4rem}input[type=file]{display:block;width:100%;font-size:.82rem;min-width:0}input::file-selector-button{font:inherit;padding:.4rem .55rem;margin-right:.5rem;border:1px solid var(--line);border-radius:5px;background:var(--paper);cursor:pointer}details{margin-top:.9rem}summary{cursor:pointer;font-size:.85rem;color:var(--blue);font-weight:650}details p{overflow-wrap:anywhere}#file-preview{background:#edf3fa;border:1px solid #bfcede;border-radius:8px;padding:1rem;margin-top:1rem}#file-preview h3{overflow-wrap:anywhere}#preview-name{font-size:.8rem;color:var(--muted);overflow-wrap:anywhere}.probabilities{display:grid;gap:.65rem;margin:1rem 0}.probability-field{display:grid;grid-template-columns:minmax(0,1fr) 7rem;gap:.65rem;align-items:center}.probability-field label{font-size:.88rem;overflow-wrap:anywhere}.probability-field input{min-width:0;width:100%;padding:.45rem .55rem;border:1px solid #aebdb6;border-radius:6px;background:white;font-variant-numeric:tabular-nums}.starting-actions{display:grid;gap:.6rem}.starting-actions button{width:100%}#starting-error{color:#9e352f;font-size:.88rem}#starting-warning{grid-column:2;background:#fff1d9;border:1px solid #d9b881;padding:1.4rem;border-radius:10px}#status{min-height:2.5rem;font-size:.88rem;color:var(--teal);padding:.7rem 0;margin:0}#status.error{color:#9e352f}.panel-heading{display:flex;gap:1rem;align-items:start;justify-content:space-between}.chip{font-size:.73rem;text-transform:uppercase;letter-spacing:.05em;border:1px solid #b4c9bd;border-radius:99px;padding:.2rem .55rem;color:var(--teal);white-space:nowrap}.question-meta{display:flex;flex-wrap:wrap;gap:.6rem;align-items:center;margin:.5rem 0}.question-id{font:700 1rem ui-monospace,SFMono-Regular,monospace;background:var(--tint);padding:.2rem .5rem;border-radius:5px;overflow-wrap:anywhere}.concept-tag{font-size:.86rem;color:var(--muted);overflow-wrap:anywhere}.prompt{font-size:1.23rem;font-weight:650;line-height:1.5;letter-spacing:-.015em;overflow-wrap:anywhere}.branches{display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin-top:1.1rem}.branch{background:var(--tint);border:1px solid #c1d9cb;border-radius:9px;padding:1rem;min-width:0}.branch.incorrect{background:#f7f1e7;border-color:#e0d2b6}.branch .label{font-size:.8rem;color:var(--muted);margin:0}.branch output{font-size:1.55rem;font-weight:650;letter-spacing:-.03em;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}.branch .next{font-size:.86rem;overflow-wrap:anywhere}.branch button{width:100%;margin-top:.6rem}.branch.incorrect button{background:#7a5424;border-color:#7a5424}.path-toolbar{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;border-top:1px solid var(--line);margin-top:1.2rem;padding-top:1rem}.path-toolbar .small{flex:1 1 100%;margin:0 0 .2rem}.path-toolbar button{font-size:.85rem}.current-state{margin-top:1.4rem;border-top:1px solid var(--line);padding-top:1.1rem}.current-state h3{margin:0 0 .9rem}.masteries{display:grid;grid-template-columns:1fr 1fr;gap:.8rem 1.2rem;margin:0}.mastery-row{min-width:0}.mastery-row dt{font-size:.81rem;color:var(--muted);overflow-wrap:anywhere}.mastery-row dd{margin:0;font-size:.96rem;font-weight:650}.probability-track{display:block;height:4px;background:#e1e7e2;margin-top:.35rem;border-radius:2px}.probability-track span{display:block;height:4px;background:var(--teal);border-radius:2px}.table-scroll{overflow:auto;max-width:100%;margin-top:.8rem;border:1px solid var(--line);border-radius:8px}table{width:100%;border-collapse:collapse;font-size:.8rem;min-width:690px}th,td{padding:.7rem .65rem;border-bottom:1px solid #e6e9e4;text-align:left;vertical-align:top;overflow-wrap:anywhere;max-width:200px}thead th{background:#eff2ec;color:var(--muted);font-size:.73rem;font-weight:650}tbody th{font:650 .8rem ui-monospace,SFMono-Regular,monospace}tbody tr:last-child>*{border-bottom:0}.native-choice{background:#eaf4ed}.native-choice th{box-shadow:inset 3px 0 var(--teal)}.choice-tag{display:block;font:.64rem system-ui;color:var(--teal);margin-top:.25rem;text-transform:uppercase;letter-spacing:.07em}.number{font-variant-numeric:tabular-nums;white-space:nowrap}code{font-size:.9em;background:#edf0eb;padding:.12rem .3rem;border-radius:4px;overflow-wrap:anywhere}pre{font-size:.76rem;line-height:1.6;white-space:pre-wrap;overflow-wrap:anywhere;max-height:400px;overflow:auto;background:#eff2ec;padding:1rem;border-radius:8px}.wide{margin-top:1.3rem}.footer{display:flex;justify-content:space-between;gap:1rem;font-size:.8rem;color:var(--muted);padding-top:2rem}.footer a{white-space:nowrap}#question-options{padding-left:1.4rem;font-size:.86rem}#question-options li{padding:.15rem 0;overflow-wrap:anywhere}#question-options strong{color:var(--teal);font-weight:600}
+@media(max-width:900px){.workspace{grid-template-columns:290px minmax(0,1fr)}.hero{grid-template-columns:1fr}.notice{max-width:650px}.branches{grid-template-columns:1fr}.shell{padding:1.2rem}.hero{gap:1.2rem;padding:1.7rem 0}.probability-field{grid-template-columns:minmax(0,1fr) 6rem}}
+@media(max-width:680px){.workspace{display:block}.sidebar{margin-bottom:1.2rem}.results{margin-top:1.2rem}.shell{padding:1rem}.hero{padding:1.5rem 0}.card{padding:1.05rem}.toplinks{font-size:.8rem;gap:.75rem}.topline{align-items:flex-start}.brand{font-size:.95rem}.brand span{display:none}.branches{grid-template-columns:1fr 1fr}.branch{padding:.8rem}.branch button{font-size:.8rem;padding:.65rem .45rem}.branch output{font-size:1.3rem}.prompt{font-size:1.1rem}.masteries{grid-template-columns:1fr 1fr}.panel-heading{flex-wrap:wrap;gap:.4rem}.footer{display:block}.footer a{display:inline-block;margin-top:.6rem}#starting-warning{margin:1rem 0}.probability-field{grid-template-columns:minmax(0,1fr) 7rem}}
+@media(max-width:380px){.branches,.masteries{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<div class="shell">
+<header class="topline">
+<a class="brand" href="demo.html"><span>RW</span>RecallWeave</a>
+<nav class="toplinks" aria-label="Related local pages"><a href="author.html">Deck studio</a><a href="docs/selection-lab.md">Lab guide</a></nav>
+</header>
+<section class="hero" aria-labelledby="page-title">
+<div><p class="eyebrow">For course authors & curious learners</p><h1 id="page-title">Question selection lab</h1><p class="intro">See why a question comes next. Set starting assumptions, inspect the existing model, and rehearse how a correct or incorrect response changes the path.</p></div>
+<aside class="notice"><strong>A synthetic experiment</strong><p>You supply hypothetical probabilities and responses. These are model values, never learner progress, grades, or evidence of learning.</p></aside>
+</section>
+<div class="workspace">
+<aside class="sidebar">
+<section class="card" aria-labelledby="course-heading">
+<p class="eyebrow">01 · Checked course</p><h2 id="course-heading">Choose what to rehearse</h2>
+<p id="active-title" class="source-title"></p><p id="active-count" class="small"></p>
+<details><summary>Original attribution & permission</summary><p id="active-attribution" class="small"></p><p id="active-license" class="small"></p></details>
+<label class="file-label" for="deck-file">Preview a local course JSON</label><input id="deck-file" type="file" accept=".json,application/json">
+<p class="small">Uses RecallWeave's existing deck checks. Files stay in this tab.</p>
+<button id="use-bundled" class="quiet" type="button">Preview bundled course</button>
+<section id="file-preview" aria-labelledby="preview-heading" hidden><p id="preview-name"></p><h3 id="preview-heading">Replace with this course?</h3><p id="preview-title"></p><p id="preview-count" class="small"></p><details><summary>Selected course credit</summary><p id="preview-attribution" class="small"></p><p id="preview-license" class="small"></p></details><p class="small">Using it starts a fresh experiment with default probabilities.</p><div class="actions"><button id="use-deck" type="button">Use this deck</button><button id="cancel-deck" class="quiet" type="button">Cancel preview</button></div></section>
+</section>
+<section class="card" aria-labelledby="starting-heading">
+<p class="eyebrow">02 · Starting assumptions</p><h2 id="starting-heading">Try a hypothetical state</h2>
+<p id="starting-help" class="small">Enter a probability from 0 to 1 for each concept. Applying edits starts a new path. These are your assumptions about the model, not observations about a person.</p>
+<form id="starting-form" novalidate><div id="starting-fields" class="probabilities"></div><p id="starting-error" role="alert"></p><div class="starting-actions"><button id="apply-start" type="submit" disabled>Apply & start a new path</button><button id="discard-start" class="quiet" type="button" disabled>Discard starting edits</button><button id="default-start" class="secondary" type="button">Start from defaults</button></div></form>
+<details><summary>Fixed model parameters</summary><p id="model-parameters" class="small"></p><p class="small">The published defaults stay fixed for every course and option count. Editing starting assumptions does not fit or validate this model.</p></details>
+</section>
+<button id="download-experiment" class="secondary" type="button">Download current synthetic experiment</button>
+<p class="small">An inspect-only JSON report of this exact course, assumptions, path and full-precision model values. It does not reopen the lab or restore a learner session.</p>
+</aside>
+<div>
+<p id="status" role="status" aria-live="polite"></p>
+<div id="starting-warning" hidden><strong>Starting assumptions have edits.</strong><p>Apply them to begin a new path, or discard them to return to the current experiment. Stepping and download are paused until you choose.</p></div>
+<main id="experiment-content" class="results">
+<section class="card" aria-labelledby="selected-heading">
+<div class="panel-heading"><div><p class="eyebrow">03 · The next native choice</p><h2 id="selected-heading" tabindex="-1">Inspect two possible continuations</h2></div><span class="chip">Hypothetical</span></div>
+<div class="question-meta"><span id="selected-id" class="question-id"></span><span id="selected-concept" class="concept-tag"></span></div>
+<p id="selected-prompt" class="prompt"></p>
+<details id="question-content"><summary>Inspect the original question & answer key</summary><ol id="question-options"></ol><p id="question-explanation" class="small"></p><p id="question-transfer" class="small"></p><p class="small">Declared prerequisites: <span id="question-prerequisites"></span>. These are preferences in selection, not hard eligibility gates.</p></details>
+<div id="branch-grid" class="branches">
+<section class="branch" aria-labelledby="correct-branch"><h3 id="correct-branch">If correct</h3><p class="label">Updated concept probability</p><output id="correct-after"></output><p class="next">Then choose <strong id="correct-next"></strong></p><button id="simulate-correct" type="button">Simulate correct</button></section>
+<section class="branch incorrect" aria-labelledby="incorrect-branch"><h3 id="incorrect-branch">If incorrect</h3><p class="label">Updated concept probability</p><output id="incorrect-after"></output><p class="next">Then choose <strong id="incorrect-next"></strong></p><button id="simulate-incorrect" type="button">Simulate incorrect</button></section>
+</div>
+<div class="path-toolbar"><p id="path-count" class="small"></p><button id="undo-step" class="quiet" type="button">Back one step</button><button id="restart-experiment" class="quiet" type="button">Restart same assumptions</button></div>
+<div class="current-state"><h3>Current hypothetical probabilities</h3><dl id="current-masteries" class="masteries"></dl></div>
+</section>
+<section class="card" aria-labelledby="candidates-heading">
+<p class="eyebrow">Why this choice?</p><h2 id="candidates-heading">Every unanswered candidate</h2>
+<p class="small">The original selector combines expected information gain with a prerequisite-repair preference. Rows retain course order; the chosen row comes from the native selector. Equal totals use its original ID ordering.</p>
+<div class="table-scroll" tabindex="0" role="region" aria-label="Unanswered candidate scores; scroll horizontally if needed"><table><thead><tr><th>Question ID</th><th>Concept</th><th>Current probability</th><th>Information gain (bits)</th><th>Unanswered direct dependents</th><th>Repair preference</th><th>Total score</th></tr></thead><tbody id="candidates-tbody"></tbody></table></div>
+<p class="small">Repair preference = <code>(1 − probability) × min(3, direct dependents) × 0.12</code>. It counts remaining questions that name this concept as a prerequisite. Prerequisites do not prevent a question from being chosen.</p>
+</section>
+<section class="card" aria-labelledby="history-heading">
+<p class="eyebrow">Your synthetic path</p><h2 id="history-heading">Keep identities and updates together</h2>
+<div class="table-scroll" tabindex="0" role="region" aria-label="Synthetic response path; scroll horizontally if needed"><table><thead><tr><th>Step</th><th>Question ID</th><th>Concept</th><th>Hypothetical evidence</th><th>Before</th><th>After</th><th>Native next ID</th></tr></thead><tbody id="history-tbody"></tbody></table></div>
+<p class="small">Updates include response evidence and the fixed learning transition. An assumed incorrect response can still increase a very low prior. Back removes the last step; a new response replaces that abandoned continuation.</p>
+<details><summary>Full-precision current values and path</summary><pre id="full-precision"></pre></details>
+<p class="small">Compact readouts show six significant digits. The expanded values and downloaded JSON retain full native precision.</p>
+</section>
+</main>
+</div>
+</div>
+<footer class="footer"><span>Offline, in-memory rehearsal through RecallWeave's existing model. No account, upload or saved browser state.</span><a href="demo.html">Open the separate learner →</a></footer>
+</div>
+<script id="bundled-deck" type="application/json">
+{
+  "title": "Energy in cells: from light to ATP",
+  "license": "Original question wording and distractors. Reference textbook content is licensed CC BY-NC-SA 4.0; see the cited OpenStax edition.",
+  "attribution": "Scientific references: OpenStax, Biology 2e, sections 6.4, 7.1, 7.4 and 8.1–8.3, by Mary Ann Clark, Matthew Douglas and Jung Choi (Rice University). Reference textbook content: CC BY-NC-SA 4.0. Access for free at https://openstax.org/books/biology-2e/pages/1-introduction. Questions and distractors are originally authored for RecallWeave.",
+  "concepts": [
+    "photosynthesis",
+    "glucose",
+    "cellular-respiration",
+    "atp"
+  ],
+  "items": [
+    {
+      "id": "p1",
+      "concept": "photosynthesis",
+      "prerequisites": [],
+      "prompt": "A plant has light, water and carbon dioxide, but makes much less chlorophyll. Which direct change is most likely in the light reactions?",
+      "options": [
+        "Less light energy is absorbed to drive electron transfer",
+        "Less carbon dioxide is absorbed directly by chlorophyll",
+        "More glucose is split to replace light absorption in photosystems",
+        "More oxygen is split to replace chlorophyll's supply of electrons"
+      ],
+      "answer": 0,
+      "explanation": "Chlorophyll absorbs light energy that drives electron transfer in photosynthesis. Making much less chlorophyll reduces this light capture; chlorophyll does not absorb carbon dioxide or split oxygen.",
+      "transfer": "This links a visible input (light) to the first energy-conversion step."
+    },
+    {
+      "id": "p2",
+      "concept": "photosynthesis",
+      "prerequisites": [],
+      "prompt": "Which statement best describes the role of the Calvin cycle?",
+      "options": [
+        "It uses ATP and NADPH from light reactions to build carbohydrate from carbon dioxide",
+        "It uses chlorophyll to split water and store light energy as NADPH",
+        "It breaks glucose into pyruvate and captures energy in ATP and NADH",
+        "It transfers electrons to oxygen and uses their energy to generate ATP"
+      ],
+      "answer": 0,
+      "explanation": "The Calvin cycle uses energy carriers produced by the light reactions to fix carbon dioxide into carbohydrate building blocks; it does not capture light directly.",
+      "transfer": "Keep the two linked stages distinct: light capture supplies chemical energy; carbon fixation uses it."
+    },
+    {
+      "id": "g1",
+      "concept": "glucose",
+      "prerequisites": [
+        "photosynthesis"
+      ],
+      "prompt": "A learner says, “Plants get their usable energy from soil.” Which correction best connects photosynthesis to stored chemical energy?",
+      "options": [
+        "Light supplies energy to build sugars; soil minerals supply nutrients for growth",
+        "Soil minerals supply the energy; light supplies the carbon used to build sugars",
+        "Carbon dioxide supplies energy; roots absorb the sugars that store that energy",
+        "Water supplies the energy; chlorophyll converts soil minerals into sugar molecules"
+      ],
+      "answer": 0,
+      "explanation": "Photosynthesis uses light energy to build energy-rich carbohydrates from carbon dioxide (with water involved in the overall process). Soil minerals support growth but are not the energy source for sugar synthesis.",
+      "transfer": "Explain the energy path: light → chemical energy in sugars; nutrients and energy are different things."
+    },
+    {
+      "id": "r1",
+      "concept": "cellular-respiration",
+      "prerequisites": [
+        "glucose"
+      ],
+      "prompt": "A human muscle cell has glucose available, but oxygen becomes limiting. What is the strongest prediction for its mitochondrial electron transport chain?",
+      "options": [
+        "Electron flow slows because oxygen is the chain's final electron acceptor",
+        "Electron flow increases as glucose replaces oxygen as the final electron acceptor",
+        "The chain keeps working normally by passing its electrons to carbon dioxide instead",
+        "The chain stops using electrons and makes ATP directly from glucose instead"
+      ],
+      "answer": 0,
+      "explanation": "In aerobic respiration, oxygen accepts electrons at the end of the mitochondrial electron transport chain. Limited oxygen constrains that pathway; cells may use other processes, but those are not the same as aerobic respiration.",
+      "transfer": "The stored energy in glucose is released through linked pathways; oxygen's role is at the chain's end."
+    },
+    {
+      "id": "a1",
+      "concept": "atp",
+      "prerequisites": [
+        "cellular-respiration"
+      ],
+      "prompt": "Why is ATP useful as an immediate energy carrier even though cells store much more energy in fuel molecules?",
+      "options": [
+        "Its hydrolysis can power cellular work through coupled chemical reactions",
+        "It forms a long-term energy store that a cell can use without regenerating it",
+        "Its formation releases energy whenever ADP gains another phosphate group",
+        "It contains more energy per molecule than glucose and replaces stored fuels"
+      ],
+      "answer": 0,
+      "explanation": "ATP hydrolysis can be coupled to endergonic cellular processes. Cells continually regenerate ATP; it is an immediate transferable energy currency, not a long-term bulk store.",
+      "transfer": "Distinguish the fuel reservoir (for example, glucose) from the frequently regenerated spendable carrier (ATP)."
+    },
+    {
+      "id": "x1",
+      "concept": "atp",
+      "prerequisites": [
+        "photosynthesis",
+        "cellular-respiration"
+      ],
+      "prompt": "Which comparison best connects photosynthesis and cellular respiration?",
+      "options": [
+        "Photosynthesis stores captured light energy in sugars; respiration transfers some of that energy to ATP",
+        "They run the same chemical reactions in opposite directions inside the same cell compartment",
+        "Photosynthesis releases energy from sugars; respiration uses light energy to build those sugars",
+        "Photosynthesis and cellular respiration both store light energy, but in different organisms"
+      ],
+      "answer": 0,
+      "explanation": "Photosynthesis stores captured light energy in organic molecules; cellular respiration transfers energy from organic molecules into ATP. The pathways are connected but are not simply identical reverse reactions.",
+      "transfer": "Use the model to explain why food webs depend on photosynthetic energy capture and why cells need respiration."
+    }
+  ]
+}
+
+</script>
+<script type="module">
+const selectionNative = (() => {
+/**
+ * Transparent Bayesian Knowledge Tracing and adaptive item selection.
+ * Parameters are pedagogical defaults, not fitted or validated estimates.
+ * @typedef {{id:string, concept:string, prerequisites:string[], options:string[], answer:number, prompt:string, explanation:string, transfer:string}} Item
+ * @typedef {{initial:number, learn:number, guess:number, slip:number}} BktParameters
+ */
+const DEFAULT_BKT = Object.freeze({ initial: 0.22, learn: 0.18, guess: 0.2, slip: 0.1 });
+const clamp = (value, min = 0, max = 1) => Math.min(max, Math.max(min, value));
+
+/** Bernoulli entropy in bits. @param {number} p */
+function entropy(p) {
+  const q = clamp(p);
+  if (q === 0 || q === 1) return 0;
+  return -q * Math.log2(q) - (1 - q) * Math.log2(1 - q);
+}
+
+/**
+ * One BKT update. Correctness is evidence, not certainty; a guess and a slip remain possible.
+ * @param {number} prior
+ * @param {boolean} correct
+ * @param {BktParameters} parameters
+ */
+function updateMastery(prior, correct, parameters = DEFAULT_BKT) {
+  const p = clamp(prior);
+  const { guess, slip, learn } = parameters;
+  for (const [key, value] of Object.entries(parameters)) {
+    if (!Number.isFinite(value) || value < 0 || value > 1) throw new RangeError(`${key} must be in [0,1]`);
+  }
+  const pCorrect = p * (1 - slip) + (1 - p) * guess;
+  const posterior = correct ? p * (1 - slip) / pCorrect : p * slip / (p * slip + (1 - p) * (1 - guess));
+  return clamp(posterior + (1 - posterior) * learn);
+}
+
+/** Expected reduction in uncertainty from an item response under its concept mastery.
+ * @param {number} mastery
+ * @param {BktParameters} parameters
+ */
+function expectedInformationGain(mastery, parameters = DEFAULT_BKT) {
+  const p = clamp(mastery);
+  const { guess, slip } = parameters;
+  const pCorrect = p * (1 - slip) + (1 - p) * guess;
+  const correctPosterior = p * (1 - slip) / pCorrect;
+  const wrongPosterior = p * slip / (p * slip + (1 - p) * (1 - guess));
+  return Math.max(0, entropy(p) - pCorrect * entropy(correctPosterior) - (1 - pCorrect) * entropy(wrongPosterior));
+}
+
+/**
+ * Select an unseen item maximizing uncertainty reduction plus prerequisite repair.
+ * Tie-break is stable by item id, making the choice reproducible.
+ * @param {Item[]} items
+ * @param {Set<string>} asked
+ * @param {Record<string,number>} mastery
+ * @param {BktParameters} parameters
+ * @returns {Item|null}
+ */
+function selectNextItem(items, asked, mastery, parameters = DEFAULT_BKT) {
+  const candidates = items.filter(item => !asked.has(item.id));
+  if (!candidates.length) return null;
+  const score = item => {
+    const m = mastery[item.concept] ?? parameters.initial;
+    // Prefer a weak concept that unlocks several still-unanswered downstream ideas.
+    const downstream = candidates.filter(next => next.id !== item.id && next.prerequisites.includes(item.concept)).length;
+    const prerequisiteRepair = (1 - m) * Math.min(3, downstream) * 0.12;
+    return expectedInformationGain(m, parameters) + prerequisiteRepair;
+  };
+  return candidates.sort((a, b) => score(b) - score(a) || a.id.localeCompare(b.id))[0];
+}
+
+/** Clone session probabilities so learners' local run has no shared state. */
+function initialMastery(concepts, parameters = DEFAULT_BKT) {
+  return Object.fromEntries(concepts.map(concept => [concept, parameters.initial]));
+}
+
+/**
+ * Reproducible toy learner run; simulated evidence is never real learner data.
+ * @param {Item[]} items
+ * @param {string[]} concepts
+ * @param {Record<string,number>} latentKnowledge simulated probability of knowing each concept
+ * @param {boolean} adaptive use the information-gain selector, or fixed deck order
+ * @param {number} seed deterministic pseudo-random seed
+ */
+function runLearnerSimulation(items, concepts, latentKnowledge, adaptive = true, seed = 20261005) {
+  let state = seed >>> 0 || 1;
+  const random = () => {
+    state ^= state << 13; state ^= state >>> 17; state ^= state << 5;
+    return (state >>> 0) / 4294967296;
+  };
+  const stateByConcept = initialMastery(concepts);
+  const asked = new Set();
+  const trace = [];
+  while (asked.size < items.length) {
+    const item = adaptive ? selectNextItem(items, asked, stateByConcept) : items.find(candidate => !asked.has(candidate.id));
+    const knowledge = clamp(latentKnowledge[item.concept] ?? 0.5);
+    const correct = random() < 0.18 + knowledge * 0.72;
+    asked.add(item.id);
+    stateByConcept[item.concept] = updateMastery(stateByConcept[item.concept], correct);
+    trace.push({ item: item.id, concept: item.concept, correct });
+  }
+  const meanEstimatedMastery = concepts.reduce((sum, concept) => sum + stateByConcept[concept], 0) / concepts.length;
+  return { trace, mastery: stateByConcept, meanEstimatedMastery };
+}
+
+return { DEFAULT_BKT, entropy, updateMastery, expectedInformationGain, selectNextItem, initialMastery, runLearnerSimulation };
+})();
+
+const selectionDeck = (() => {
+/** Local lesson content. Imported data cannot replace the model or run code. */
+const DECK_FORMAT = 'recallweave-deck/1';
+const MAX_DECK_BYTES = 262144;
+
+function deckRecord(value, path) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    throw new Error(`${path} must be an object.`);
+  }
+  return value;
+}
+
+function deckText(value, path, limit) {
+  if (typeof value !== 'string' || !value.trim() || value.length > limit) {
+    throw new Error(`${path} must be nonempty text of at most ${limit} characters.`);
+  }
+  return value;
+}
+
+function deckList(value, path, minimum, maximum) {
+  if (!Array.isArray(value) || value.length < minimum || value.length > maximum) {
+    throw new Error(`${path} must contain ${minimum}–${maximum} entries.`);
+  }
+  return value;
+}
+
+/** Validate and copy only the content fields used by the existing lesson runtime. */
+function validateDeck(value) {
+  const input = deckRecord(value, 'Deck');
+  if (input.format !== undefined && input.format !== DECK_FORMAT) {
+    throw new Error(`Unsupported deck format. Use ${DECK_FORMAT}.`);
+  }
+  const title = deckText(input.title, 'title', 160);
+  const attribution = deckText(input.attribution, 'attribution', 2000);
+  const license = deckText(input.license, 'license', 2000);
+  const concepts = deckList(input.concepts, 'concepts', 1, 32).map((concept, index) =>
+    deckText(concept, `concepts[${index}]`, 80));
+  if (new Set(concepts).size !== concepts.length) throw new Error('Concept names must be unique.');
+  const knownConcepts = new Set(concepts);
+  const ids = new Set();
+  const coveredConcepts = new Set();
+  const links = new Map(concepts.map(concept => [concept, new Set()]));
+  const items = deckList(input.items, 'items', 1, 100).map((value, index) => {
+    const path = `items[${index}]`;
+    const item = deckRecord(value, path);
+    const id = deckText(item.id, `${path}.id`, 80);
+    if (ids.has(id)) throw new Error(`${path}.id duplicates another question ID.`);
+    ids.add(id);
+    const concept = deckText(item.concept, `${path}.concept`, 80);
+    if (!knownConcepts.has(concept)) throw new Error(`${path}.concept is not in concepts.`);
+    coveredConcepts.add(concept);
+    const prerequisites = deckList(item.prerequisites, `${path}.prerequisites`, 0, 31).map((name, p) => {
+      deckText(name, `${path}.prerequisites[${p}]`, 80);
+      if (!knownConcepts.has(name)) throw new Error(`${path}.prerequisites contains an unknown concept.`);
+      if (name === concept) throw new Error(`${path} cannot require its own concept.`);
+      links.get(concept).add(name);
+      return name;
+    });
+    if (new Set(prerequisites).size !== prerequisites.length) throw new Error(`${path}.prerequisites contains a duplicate.`);
+    const options = deckList(item.options, `${path}.options`, 2, 6).map((option, o) =>
+      deckText(option, `${path}.options[${o}]`, 1000));
+    if (new Set(options).size !== options.length) throw new Error(`${path}.options must be distinct.`);
+    if (!Number.isInteger(item.answer) || item.answer < 0 || item.answer >= options.length) {
+      throw new Error(`${path}.answer must be a zero-based index of an option.`);
+    }
+    return Object.freeze({
+      id, concept, prerequisites: Object.freeze(prerequisites),
+      prompt: deckText(item.prompt, `${path}.prompt`, 2000),
+      options: Object.freeze(options), answer: item.answer,
+      explanation: deckText(item.explanation, `${path}.explanation`, 4000),
+      transfer: deckText(item.transfer, `${path}.transfer`, 2000)
+    });
+  });
+  if (coveredConcepts.size !== concepts.length) throw new Error('Every concept must have at least one question.');
+  const visiting = new Set();
+  const visited = new Set();
+  const visit = concept => {
+    if (visiting.has(concept)) throw new Error('Prerequisite links must not form a cycle.');
+    if (visited.has(concept)) return;
+    visiting.add(concept);
+    for (const prerequisite of links.get(concept)) visit(prerequisite);
+    visiting.delete(concept);
+    visited.add(concept);
+  };
+  concepts.forEach(visit);
+  return Object.freeze({
+    format: DECK_FORMAT, title, attribution, license,
+    concepts: Object.freeze(concepts), items: Object.freeze(items)
+  });
+}
+
+/** The same size limit applies to a File and to programmatically supplied UTF-8 JSON. */
+function parseDeck(text) {
+  if (typeof text !== 'string' || new TextEncoder().encode(text).length > MAX_DECK_BYTES) {
+    throw new Error('Choose a JSON deck no larger than 256 KiB.');
+  }
+  let value;
+  try { value = JSON.parse(text); }
+  catch { throw new Error('The file is not valid JSON. Check its commas, quotes and brackets.'); }
+  return validateDeck(value);
+}
+
+/** Export the existing bundled lesson as an editable example of the same contract. */
+function serializeDeck(deck) {
+  return JSON.stringify(validateDeck(deck), null, 2) + '\n';
+}
+
+return { DECK_FORMAT, MAX_DECK_BYTES, validateDeck, parseDeck, serializeDeck };
+})();
+
+const selectionCore = (() => {
+const { DEFAULT_BKT, expectedInformationGain, initialMastery, selectNextItem, updateMastery } = selectionNative;
+const { validateDeck } = selectionDeck;
+
+/** A rehearsal is deliberately separate from the learner's answers and archives. */
+const SELECTION_EXPERIMENT_FORMAT = 'recallweave-selection-experiment/1';
+const selectionExperiments = new WeakSet();
+
+function checkedStarting(deck, supplied) {
+  if (supplied === undefined) return Object.freeze(initialMastery(deck.concepts, DEFAULT_BKT));
+  if (!supplied || typeof supplied !== 'object' || Array.isArray(supplied)) {
+    throw new TypeError('Starting probabilities must name every course concept.');
+  }
+  const names = Object.keys(supplied);
+  if (names.length !== deck.concepts.length || names.some(name => !deck.concepts.includes(name))) {
+    throw new RangeError('Starting probabilities must name exactly the course concepts.');
+  }
+  return Object.freeze(Object.fromEntries(deck.concepts.map(concept => {
+    const value = supplied[concept];
+    if (!Object.hasOwn(supplied, concept) || typeof value !== 'number' || !Number.isFinite(value) || value < 0 || value > 1) {
+      throw new RangeError('Each starting probability must be a finite number from 0 to 1.');
+    }
+    return [concept, value];
+  })));
+}
+
+function requireExperiment(experiment) {
+  if (!selectionExperiments.has(experiment)) {
+    throw new TypeError('Use a current selection experiment created by this lab.');
+  }
+}
+
+/** Replay only explicit synthetic evidence through the original model. */
+function replaySelection(deck, starting, responses) {
+  let mastery = starting;
+  const asked = new Set();
+  const steps = [];
+  for (const [index, syntheticCorrect] of responses.entries()) {
+    if (typeof syntheticCorrect !== 'boolean') throw new TypeError('Synthetic evidence must be correct or incorrect.');
+    const selected = selectNextItem(deck.items, asked, mastery, DEFAULT_BKT);
+    if (!selected) throw new RangeError('Every question has already been used in this experiment.');
+    const prior = mastery[selected.concept];
+    const after = updateMastery(prior, syntheticCorrect, DEFAULT_BKT);
+    mastery = Object.freeze({ ...mastery, [selected.concept]: after });
+    asked.add(selected.id);
+    const next = selectNextItem(deck.items, asked, mastery, DEFAULT_BKT);
+    steps.push(Object.freeze({
+      number: index + 1, questionId: selected.id, concept: selected.concept,
+      syntheticCorrect, prior, after, nextQuestionId: next?.id ?? null
+    }));
+  }
+  const experiment = Object.freeze({
+    deck, starting, mastery, asked: Object.freeze([...asked]),
+    syntheticResponses: Object.freeze([...responses]), steps: Object.freeze(steps)
+  });
+  selectionExperiments.add(experiment);
+  return experiment;
+}
+
+/** All concept values are hypothetical; published model parameters remain fixed. */
+function createExperiment(sourceDeck, starting) {
+  const deck = validateDeck(sourceDeck);
+  return replaySelection(deck, checkedStarting(deck, starting), []);
+}
+
+function takeSyntheticStep(experiment, syntheticCorrect) {
+  requireExperiment(experiment);
+  if (typeof syntheticCorrect !== 'boolean') throw new TypeError('Choose correct or incorrect synthetic evidence.');
+  return replaySelection(experiment.deck, experiment.starting, [...experiment.syntheticResponses, syntheticCorrect]);
+}
+
+function rewindExperiment(experiment) {
+  requireExperiment(experiment);
+  return replaySelection(experiment.deck, experiment.starting, experiment.syntheticResponses.slice(0, -1));
+}
+
+function restartExperiment(experiment) {
+  requireExperiment(experiment);
+  return replaySelection(experiment.deck, experiment.starting, []);
+}
+
+/**
+ * The native selector is authoritative. Explanatory rows stay in original deck
+ * order; their local score check detects drift instead of replacing selection.
+ */
+function inspectExperiment(experiment) {
+  requireExperiment(experiment);
+  const { deck, mastery } = experiment;
+  const asked = new Set(experiment.asked);
+  const remaining = deck.items.filter(item => !asked.has(item.id));
+  const selected = selectNextItem(deck.items, asked, mastery, DEFAULT_BKT);
+  const candidates = remaining.map(item => {
+    const prior = mastery[item.concept];
+    const downstreamCount = remaining.filter(next => next.id !== item.id && next.prerequisites.includes(item.concept)).length;
+    const informationGainBits = expectedInformationGain(prior, DEFAULT_BKT);
+    const prerequisiteRepair = (1 - prior) * Math.min(3, downstreamCount) * 0.12;
+    return Object.freeze({
+      id: item.id, concept: item.concept, prior, informationGainBits,
+      downstreamCount, prerequisiteRepair,
+      totalScore: informationGainBits + prerequisiteRepair,
+      selected: item.id === selected?.id
+    });
+  });
+  const explanatoryWinner = [...candidates].sort((a, b) =>
+    b.totalScore - a.totalScore || a.id.localeCompare(b.id))[0];
+  if ((explanatoryWinner?.id ?? null) !== (selected?.id ?? null) ||
+      candidates.some(row => !Number.isFinite(row.totalScore))) {
+    throw new Error('The explanation no longer matches native selection. Check the model source before continuing.');
+  }
+  const branches = selected ? [true, false].map(syntheticCorrect => {
+    const prior = mastery[selected.concept];
+    const after = updateMastery(prior, syntheticCorrect, DEFAULT_BKT);
+    const branchMastery = { ...mastery, [selected.concept]: after };
+    const next = selectNextItem(deck.items, new Set([...asked, selected.id]), branchMastery, DEFAULT_BKT);
+    return Object.freeze({ syntheticCorrect, prior, after, nextQuestionId: next?.id ?? null });
+  }) : [];
+  return Object.freeze({
+    mastery, asked: experiment.asked, selectedQuestionId: selected?.id ?? null,
+    remaining: remaining.length, candidates: Object.freeze(candidates), branches: Object.freeze(branches)
+  });
+}
+
+/** Inspect-only JSON: this format is intentionally not a learner trace or resume file. */
+function serializeExperiment(experiment) {
+  requireExperiment(experiment);
+  return JSON.stringify({
+    format: SELECTION_EXPERIMENT_FORMAT,
+    kind: 'synthetic',
+    purpose: 'Hypothetical question-selection rehearsal; not learner answers or evidence of learning.',
+    deck: experiment.deck,
+    model: { source: 'src/knowledge.mjs', parameters: DEFAULT_BKT },
+    starting: experiment.starting,
+    syntheticResponses: experiment.syntheticResponses,
+    steps: experiment.steps,
+    current: inspectExperiment(experiment)
+  }, null, 2) + '\n';
+}
+
+return { SELECTION_EXPERIMENT_FORMAT, createExperiment, takeSyntheticStep, rewindExperiment, restartExperiment, inspectExperiment, serializeExperiment };
+})();
+
+const selectionUI = (() => {
+const { DEFAULT_BKT } = selectionNative;
+const { MAX_DECK_BYTES, parseDeck } = selectionDeck;
+const { createExperiment, inspectExperiment, restartExperiment, rewindExperiment, serializeExperiment, takeSyntheticStep } = selectionCore;
+
+function mountSelectionLab(doc, bundledSource) {
+  const get = id => doc.getElementById(id);
+  const make = (tag, text, className) => {
+    const node = doc.createElement(tag);
+    if (text !== undefined) node.textContent = text;
+    if (className) node.className = className;
+    return node;
+  };
+  const shown = value => Number(value.toPrecision(6)).toString();
+  const courseCount = deck => deck.items.length + (deck.items.length === 1 ? " question" : " questions") +
+    " · " + deck.concepts.length + (deck.concepts.length === 1 ? " concept" : " concepts");
+  const numeric = value => {
+    const node = make('span', shown(value), 'number');
+    node.title = String(value);
+    return node;
+  };
+  let experiment = createExperiment(bundledSource);
+  let pendingDeck = null;
+  let readVersion = 0;
+  let startingDirty = false;
+
+  function announce(message, error = false) {
+    get('status').textContent = message;
+    get('status').classList.toggle('error', error);
+  }
+  function cancelPending() {
+    readVersion += 1;
+    pendingDeck = null;
+    get('file-preview').hidden = true;
+    get('deck-file').value = '';
+  }
+  function fillStarting() {
+    const fields = experiment.deck.concepts.map((concept, index) => {
+      const field = make('div', undefined, 'probability-field');
+      const label = make('label', concept);
+      label.htmlFor = 'starting-' + index;
+      const input = make('input');
+      input.id = label.htmlFor;
+      input.type = 'number';
+      input.min = '0';
+      input.max = '1';
+      input.step = 'any';
+      input.required = true;
+      input.inputMode = 'decimal';
+      input.setAttribute('data-start-concept', concept);
+      input.setAttribute('aria-describedby', 'starting-help');
+      input.value = String(experiment.starting[concept]);
+      field.append(label, input);
+      return field;
+    });
+    get('starting-fields').replaceChildren(...fields);
+  }
+  function showCurrentMastery(view) {
+    get('current-masteries').replaceChildren(...experiment.deck.concepts.map(concept => {
+      const row = make('div', undefined, 'mastery-row');
+      const term = make('dt', concept);
+      const value = make('dd');
+      value.append(numeric(view.mastery[concept]));
+      const track = make('span', undefined, 'probability-track');
+      track.setAttribute('aria-hidden', 'true');
+      const fill = make('span');
+      fill.style.width = String(view.mastery[concept] * 100) + '%';
+      track.append(fill);
+      value.append(track);
+      row.append(term, value);
+      return row;
+    }));
+  }
+  function render() {
+    const view = inspectExperiment(experiment);
+    const selected = experiment.deck.items.find(item => item.id === view.selectedQuestionId);
+    get('active-title').textContent = experiment.deck.title;
+    get('active-attribution').textContent = experiment.deck.attribution;
+    get('active-license').textContent = experiment.deck.license;
+    get('active-count').textContent = courseCount(experiment.deck);
+    get('path-count').textContent = experiment.steps.length + ' of ' + experiment.deck.items.length + ' synthetic responses';
+    get('experiment-content').hidden = startingDirty;
+    get('starting-warning').hidden = !startingDirty;
+    get('apply-start').disabled = !startingDirty;
+    get('discard-start').disabled = !startingDirty;
+    get('download-experiment').disabled = startingDirty;
+    get('undo-step').disabled = startingDirty || experiment.steps.length === 0;
+    get('restart-experiment').disabled = startingDirty;
+    get('simulate-correct').disabled = startingDirty || !selected;
+    get('simulate-incorrect').disabled = startingDirty || !selected;
+    get('selected-id').textContent = selected?.id ?? 'Complete';
+    get('selected-concept').textContent = selected?.concept ?? 'No unanswered questions';
+    get('selected-prompt').textContent = selected?.prompt ?? 'Every question has a hypothetical response. Move back one step or restart from the same starting assumptions.';
+    get('question-content').hidden = !selected;
+    get('branch-grid').hidden = !selected;
+    if (selected) {
+      get('question-options').replaceChildren(...selected.options.map((option, index) => {
+        const row = make('li', option);
+        if (index === selected.answer) {
+          const mark = make('strong', ' — authored correct option');
+          row.append(mark);
+        }
+        return row;
+      }));
+      get('question-explanation').textContent = selected.explanation;
+      get('question-transfer').textContent = selected.transfer;
+      get('question-prerequisites').textContent = selected.prerequisites.length ? selected.prerequisites.join(' · ') : 'None declared';
+      for (const branch of view.branches) {
+        const name = branch.syntheticCorrect ? 'correct' : 'incorrect';
+        get(name + '-after').textContent = shown(branch.after);
+        get(name + '-after').title = String(branch.after);
+        get(name + '-next').textContent = branch.nextQuestionId ?? 'Complete';
+      }
+    }
+    showCurrentMastery(view);
+    const rows = view.candidates.map(candidate => {
+      const row = make('tr');
+      row.setAttribute('data-candidate-id', candidate.id);
+      row.classList.toggle('native-choice', candidate.selected);
+      const id = make('th', candidate.id);
+      id.scope = 'row';
+      if (candidate.selected) id.append(make('span', 'Chosen', 'choice-tag'));
+      row.append(id, make('td', candidate.concept));
+      for (const key of ['prior', 'informationGainBits']) {
+        const cell = make('td');
+        cell.append(numeric(candidate[key]));
+        row.append(cell);
+      }
+      row.append(make('td', String(candidate.downstreamCount)));
+      for (const key of ['prerequisiteRepair', 'totalScore']) {
+        const cell = make('td');
+        cell.append(numeric(candidate[key]));
+        row.append(cell);
+      }
+      return row;
+    });
+    if (!rows.length) {
+      const row = make('tr');
+      const cell = make('td', 'No unanswered candidates remain.');
+      cell.colSpan = 7;
+      row.append(cell);
+      rows.push(row);
+    }
+    get('candidates-tbody').replaceChildren(...rows);
+    const history = experiment.steps.map(step => {
+      const row = make('tr');
+      row.append(make('td', String(step.number)), make('th', step.questionId), make('td', step.concept),
+        make('td', step.syntheticCorrect ? 'Assume correct' : 'Assume incorrect'));
+      for (const key of ['prior', 'after']) {
+        const cell = make('td');
+        cell.append(numeric(step[key]));
+        row.append(cell);
+      }
+      row.append(make('td', step.nextQuestionId ?? 'Complete'));
+      return row;
+    });
+    if (!history.length) {
+      const row = make('tr');
+      const cell = make('td', 'No response has been simulated. Your current report contains only the starting assumptions and next-question inspection.');
+      cell.colSpan = 7;
+      row.append(cell);
+      history.push(row);
+    }
+    get('history-tbody').replaceChildren(...history);
+    get('full-precision').textContent = JSON.stringify({
+      starting: experiment.starting, current: view.mastery,
+      selectedQuestionId: view.selectedQuestionId, branches: view.branches,
+      candidates: view.candidates, steps: experiment.steps
+    }, null, 2);
+  }
+  function replaceExperiment(next, message) {
+    cancelPending();
+    experiment = next;
+    startingDirty = false;
+    get('starting-error').textContent = '';
+    fillStarting();
+    render();
+    announce(message);
+  }
+  function act(operation, message) {
+    if (startingDirty) return;
+    try {
+      const next = operation(experiment);
+      cancelPending();
+      experiment = next;
+      render();
+      announce(message);
+      get('selected-heading').focus();
+    } catch (error) {
+      announce(error.message, true);
+    }
+  }
+
+  get('starting-form').addEventListener('input', event => {
+    if (!event.target.matches('[data-start-concept]')) return;
+    cancelPending();
+    startingDirty = true;
+    get('starting-error').textContent = '';
+    render();
+    announce('Starting assumptions have edits. Apply them to begin a new synthetic path, or discard the edits.');
+  });
+  get('starting-form').addEventListener('submit', event => {
+    event.preventDefault();
+    if (!startingDirty) return;
+    try {
+      const values = Object.fromEntries([...get('starting-fields').querySelectorAll('[data-start-concept]')].map(input => {
+        if (input.value.trim() === '' || !Number.isFinite(input.valueAsNumber)) {
+          throw new RangeError('Enter a number from 0 to 1 for every concept.');
+        }
+        return [input.getAttribute('data-start-concept'), input.valueAsNumber];
+      }));
+      replaceExperiment(createExperiment(experiment.deck, values), 'Applied starting assumptions. A fresh synthetic path is ready.');
+    } catch (error) {
+      get('starting-error').textContent = error.message;
+      announce(error.message, true);
+    }
+  });
+  get('discard-start').addEventListener('click', () => {
+    cancelPending();
+    startingDirty = false;
+    get('starting-error').textContent = '';
+    fillStarting();
+    render();
+    announce('Starting edits discarded. The current synthetic path is unchanged.');
+  });
+  get('default-start').addEventListener('click', () =>
+    replaceExperiment(createExperiment(experiment.deck), 'Started a fresh synthetic path from the published default probabilities.'));
+  get('simulate-correct').addEventListener('click', () =>
+    act(state => takeSyntheticStep(state, true), 'Added one explicitly hypothetical correct response.'));
+  get('simulate-incorrect').addEventListener('click', () =>
+    act(state => takeSyntheticStep(state, false), 'Added one explicitly hypothetical incorrect response.'));
+  get('undo-step').addEventListener('click', () =>
+    act(rewindExperiment, 'Moved back one synthetic step. A different response now starts a different continuation.'));
+  get('restart-experiment').addEventListener('click', () =>
+    act(restartExperiment, 'Restarted with the same checked course and applied starting assumptions.'));
+
+  get('deck-file').addEventListener('change', async () => {
+    const file = get('deck-file').files?.[0];
+    cancelPending();
+    const version = readVersion;
+    if (!file) {
+      announce('File selection cancelled. The current experiment is unchanged.');
+      return;
+    }
+    announce('Reading ' + file.name + ' for preview…');
+    try {
+      if (file.size > MAX_DECK_BYTES) throw new RangeError('Choose a JSON deck no larger than 256 KiB.');
+      const text = await file.text();
+      if (version !== readVersion) return;
+      const deck = parseDeck(text);
+      pendingDeck = { deck, version };
+      get('preview-name').textContent = file.name;
+      get('preview-title').textContent = deck.title;
+      get('preview-count').textContent = courseCount(deck);
+      get('preview-attribution').textContent = deck.attribution;
+      get('preview-license').textContent = deck.license;
+      get('file-preview').hidden = false;
+      announce('Preview ready. Use this deck explicitly to replace the current experiment.');
+    } catch (error) {
+      if (version === readVersion) announce(error.message, true);
+    }
+  });
+  get('deck-file').addEventListener('cancel', () => {
+    cancelPending();
+    announce('File selection cancelled. The current experiment is unchanged.');
+  });
+  get('cancel-deck').addEventListener('click', () => {
+    cancelPending();
+    announce('Preview cancelled. The current experiment is unchanged.');
+  });
+  get('use-deck').addEventListener('click', () => {
+    if (!pendingDeck || pendingDeck.version !== readVersion) return;
+    replaceExperiment(createExperiment(pendingDeck.deck), 'Using the selected checked deck with fresh default starting assumptions.');
+  });
+  get('use-bundled').addEventListener('click', () => {
+    cancelPending();
+    const deck = createExperiment(bundledSource).deck;
+    pendingDeck = { deck, version: readVersion };
+    get('preview-name').textContent = 'Bundled course';
+    get('preview-title').textContent = deck.title;
+    get('preview-count').textContent = courseCount(deck);
+    get('preview-attribution').textContent = deck.attribution;
+    get('preview-license').textContent = deck.license;
+    get('file-preview').hidden = false;
+    announce('Bundled course preview ready. Use this deck explicitly to start a fresh experiment.');
+  });
+  get('download-experiment').addEventListener('click', () => {
+    if (startingDirty) return;
+    try {
+      const text = serializeExperiment(experiment);
+      const url = URL.createObjectURL(new Blob([text], { type: 'application/json;charset=utf-8' }));
+      const link = make('a');
+      link.href = url;
+      link.download = 'recallweave-selection-experiment.json';
+      doc.body.append(link);
+      link.click();
+      link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      announce('Downloaded the current synthetic experiment. This report does not restore learner progress or reopen in the lab.');
+    } catch (error) {
+      announce(error.message, true);
+    }
+  });
+
+  get('model-parameters').textContent = 'Initial ' + DEFAULT_BKT.initial + ' · learning transition ' + DEFAULT_BKT.learn +
+    ' · guess ' + DEFAULT_BKT.guess + ' · slip ' + DEFAULT_BKT.slip;
+  fillStarting();
+  render();
+  announce('Ready with the bundled course. Every response in this lab is hypothetical.');
+}
+
+return { mountSelectionLab };
+})();
+
+selectionUI.mountSelectionLab(document, JSON.parse(document.getElementById("bundled-deck").textContent));
+</script>
+</body>
+</html>
