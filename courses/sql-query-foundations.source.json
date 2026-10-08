@@ -1,0 +1,878 @@
+{
+  "format": "recallweave-sql-source/1",
+  "title": "SQL query foundations — rows, NULLs, groups, and joins",
+  "attribution": "RecallWeave contributors. Original fictional dataset, questions, and explanations; query results checked with SQLite. Primary references: https://sqlite.org/lang_select.html ; https://sqlite.org/lang_expr.html ; https://sqlite.org/lang_aggfunc.html .",
+  "license": "Original course material: you may use, adapt, and redistribute it with attribution to RecallWeave contributors. The linked SQLite documentation retains its own terms and is not reproduced here.",
+  "concepts": [
+    "rows",
+    "nulls",
+    "groups",
+    "joins"
+  ],
+  "setup_sql": "CREATE TABLE stations (id INTEGER PRIMARY KEY, name TEXT NOT NULL);\nCREATE TABLE readings (id INTEGER PRIMARY KEY, station_id INTEGER, value INTEGER);\nINSERT INTO stations (id, name) VALUES (1, 'North'), (2, 'South'), (3, 'East'), (4, 'West');\nINSERT INTO readings (id, station_id, value) VALUES (1, 1, 10), (2, 1, NULL), (3, 2, 20), (4, 2, 20), (5, 2, 0), (6, NULL, 30);\n",
+  "references": [
+    {
+      "id": "select",
+      "title": "SQLite SELECT: filtering, grouping, ordering, and joins",
+      "url": "https://sqlite.org/lang_select.html"
+    },
+    {
+      "id": "null",
+      "title": "SQLite expressions: comparisons and NULL",
+      "url": "https://sqlite.org/lang_expr.html"
+    },
+    {
+      "id": "aggregate",
+      "title": "SQLite built-in aggregate functions",
+      "url": "https://sqlite.org/lang_aggfunc.html"
+    }
+  ],
+  "questions": [
+    {
+      "id": "sql-01-rows",
+      "title": "Keep duplicate result rows",
+      "concept": "rows",
+      "prerequisites": [],
+      "tables": [
+        "readings"
+      ],
+      "question": "Which ordered result rows does this query return?",
+      "sql": "SELECT value FROM readings\nWHERE station_id = 2\nORDER BY id;",
+      "columns": [
+        "value"
+      ],
+      "options": [
+        [
+          [
+            20
+          ],
+          [
+            20
+          ],
+          [
+            0
+          ]
+        ],
+        [
+          [
+            20
+          ],
+          [
+            0
+          ]
+        ],
+        [
+          [
+            20
+          ],
+          [
+            20
+          ]
+        ],
+        [
+          [
+            10
+          ],
+          [
+            20
+          ],
+          [
+            20
+          ],
+          [
+            0
+          ]
+        ]
+      ],
+      "answer": 0,
+      "explanation": "Station 2 has reading IDs 3, 4, and 5. Their values are 20, 20, and 0 in that order. Both rows containing 20 remain; the query does not request DISTINCT. Zero is a recorded value.",
+      "transfer": "Predict SELECT DISTINCT value FROM readings WHERE station_id = 2 ORDER BY value. Which duplicate disappears, and why does 0 still appear?",
+      "distractor_notes": [
+        "Exact three selected rows.",
+        "Silently removes a duplicate without DISTINCT.",
+        "Drops the known zero even though the predicate is about station_id.",
+        "Includes a reading from station 1."
+      ],
+      "references": [
+        "select"
+      ]
+    },
+    {
+      "id": "sql-02-filter",
+      "title": "Filter a measured value",
+      "concept": "rows",
+      "prerequisites": [],
+      "tables": [
+        "readings"
+      ],
+      "question": "Which reading IDs meet the predicate, in the requested order?",
+      "sql": "SELECT id FROM readings\nWHERE value >= 20\nORDER BY id;",
+      "columns": [
+        "id"
+      ],
+      "options": [
+        [
+          [
+            3
+          ],
+          [
+            4
+          ]
+        ],
+        [
+          [
+            3
+          ],
+          [
+            4
+          ],
+          [
+            6
+          ]
+        ],
+        [
+          [
+            1
+          ],
+          [
+            3
+          ],
+          [
+            4
+          ],
+          [
+            6
+          ]
+        ],
+        [
+          [
+            6
+          ]
+        ]
+      ],
+      "answer": 1,
+      "explanation": "Readings 3 and 4 each contain 20; reading 6 contains 30. The predicate checks value, so reading 6 qualifies even though its station_id is NULL. The unknown value in reading 2 does not satisfy the comparison.",
+      "transfer": "Use the explorer's threshold control to compare >= 0, >= 10, >= 20, and >= 30. Check whether the zero and the unknown value behave alike.",
+      "distractor_notes": [
+        "Adds a station-membership requirement that is absent from the query.",
+        "Exact qualifying IDs.",
+        "Uses a threshold of 10 instead of 20.",
+        "Treats >= as strictly greater than."
+      ],
+      "references": [
+        "select",
+        "null"
+      ]
+    },
+    {
+      "id": "sql-03-order",
+      "title": "Break a sorting tie before LIMIT",
+      "concept": "rows",
+      "prerequisites": [],
+      "tables": [
+        "readings"
+      ],
+      "question": "Which three (id, value) rows are returned?",
+      "sql": "SELECT id, value FROM readings\nWHERE value IS NOT NULL\nORDER BY value DESC, id ASC\nLIMIT 3;",
+      "columns": [
+        "id",
+        "value"
+      ],
+      "options": [
+        [
+          [
+            6,
+            30
+          ],
+          [
+            4,
+            20
+          ],
+          [
+            3,
+            20
+          ]
+        ],
+        [
+          [
+            3,
+            20
+          ],
+          [
+            4,
+            20
+          ],
+          [
+            6,
+            30
+          ]
+        ],
+        [
+          [
+            6,
+            30
+          ],
+          [
+            3,
+            20
+          ],
+          [
+            4,
+            20
+          ]
+        ],
+        [
+          [
+            1,
+            10
+          ],
+          [
+            3,
+            20
+          ],
+          [
+            4,
+            20
+          ]
+        ]
+      ],
+      "answer": 2,
+      "explanation": "Value 30 sorts first. Values 20 tie, so id ASC puts reading 3 before reading 4. LIMIT keeps the first three rows after that ordering. The query states the tie-break explicitly rather than relying on storage order.",
+      "transfer": "Change the secondary ordering to id DESC in your own SQLite scratch database. Which two rows swap places?",
+      "distractor_notes": [
+        "Reverses the requested tie-break.",
+        "Places the highest value last.",
+        "Exact sorted prefix.",
+        "Takes earlier IDs before applying the value ordering."
+      ],
+      "references": [
+        "select"
+      ]
+    },
+    {
+      "id": "sql-04-null-equals",
+      "title": "Compare with NULL",
+      "concept": "nulls",
+      "prerequisites": [
+        "rows"
+      ],
+      "tables": [
+        "readings"
+      ],
+      "question": "Which reading IDs does this WHERE clause retain?",
+      "sql": "SELECT id FROM readings\nWHERE value = NULL\nORDER BY id;",
+      "columns": [
+        "id"
+      ],
+      "options": [
+        [
+          [
+            2
+          ]
+        ],
+        [
+          [
+            5
+          ]
+        ],
+        [
+          [
+            1
+          ],
+          [
+            2
+          ],
+          [
+            3
+          ],
+          [
+            4
+          ],
+          [
+            5
+          ],
+          [
+            6
+          ]
+        ],
+        []
+      ],
+      "answer": 3,
+      "explanation": "The ordinary equality comparison with NULL is unknown for every row, including reading 2. WHERE retains rows whose condition is true, so this query returns no rows. It does not test whether a value is missing.",
+      "transfer": "Compare this empty result with the Find the missing measurement example, which uses value IS NULL. Predict the change before revealing it.",
+      "distractor_notes": [
+        "Treats = NULL as the missing-value test IS NULL.",
+        "Treats a known zero as NULL.",
+        "Treats an unknown condition as true for every row.",
+        "No condition evaluates to true."
+      ],
+      "references": [
+        "null",
+        "select"
+      ]
+    },
+    {
+      "id": "sql-05-null-is",
+      "title": "Find the missing measurement",
+      "concept": "nulls",
+      "prerequisites": [
+        "rows"
+      ],
+      "tables": [
+        "readings"
+      ],
+      "question": "Which reading IDs have a NULL value?",
+      "sql": "SELECT id FROM readings\nWHERE value IS NULL\nORDER BY id;",
+      "columns": [
+        "id"
+      ],
+      "options": [
+        [
+          [
+            2
+          ]
+        ],
+        [
+          [
+            6
+          ]
+        ],
+        [
+          [
+            2
+          ],
+          [
+            6
+          ]
+        ],
+        []
+      ],
+      "answer": 0,
+      "explanation": "Only reading 2 has NULL in the value column. Reading 6 has an unknown station_id but a known value of 30. IS NULL tests the named expression; it does not search every column for missing data.",
+      "transfer": "Predict the IDs for WHERE station_id IS NULL, then for WHERE value = 0. These are three different questions about the fixture.",
+      "distractor_notes": [
+        "Exact missing measurement.",
+        "Tests station_id instead of value.",
+        "Searches either column instead of the specified column.",
+        "Carries over the behavior of = NULL to IS NULL."
+      ],
+      "references": [
+        "null"
+      ]
+    },
+    {
+      "id": "sql-06-count-average",
+      "title": "Count rows and known values",
+      "concept": "nulls",
+      "prerequisites": [
+        "rows"
+      ],
+      "tables": [
+        "readings"
+      ],
+      "question": "What single row (all_rows, known_values, mean_value) is returned? Numerically equal forms such as 16 and 16.0 mean the same answer here.",
+      "sql": "SELECT COUNT(*) AS all_rows,\n       COUNT(value) AS known_values,\n       AVG(value) AS mean_value\nFROM readings;",
+      "columns": [
+        "all_rows",
+        "known_values",
+        "mean_value"
+      ],
+      "options": [
+        [
+          [
+            6,
+            6,
+            13.333333333333334
+          ]
+        ],
+        [
+          [
+            6,
+            5,
+            16
+          ]
+        ],
+        [
+          [
+            5,
+            5,
+            16
+          ]
+        ],
+        [
+          [
+            6,
+            4,
+            20
+          ]
+        ]
+      ],
+      "answer": 1,
+      "explanation": "There are six rows and five non-NULL values. Those values sum to 80, giving an average of 80 / 5 = 16. The recorded zero counts in the denominator; the NULL does not. COUNT(*) still includes the row containing NULL.",
+      "transfer": "In SQLite, filter to value IS NULL and repeat the three aggregates. Predict which counts become 1 and 0, and whether AVG can return a known number.",
+      "distractor_notes": [
+        "Turns the unknown value into a sixth known zero.",
+        "Counts six rows, five known values, and averages those five.",
+        "Lets COUNT(*) ignore the row containing NULL.",
+        "Incorrectly excludes the recorded zero from COUNT(value) and AVG(value)."
+      ],
+      "references": [
+        "aggregate"
+      ]
+    },
+    {
+      "id": "sql-07-groups",
+      "title": "Summarize each station_id group",
+      "concept": "groups",
+      "prerequisites": [
+        "rows",
+        "nulls"
+      ],
+      "tables": [
+        "readings"
+      ],
+      "question": "Which ordered (station_id, all_rows, known_values, total_value) rows are returned? This query uses SQLite's ascending NULL-first order.",
+      "sql": "SELECT station_id, COUNT(*) AS all_rows,\n       COUNT(value) AS known_values,\n       SUM(value) AS total_value\nFROM readings\nGROUP BY station_id\nORDER BY station_id ASC;",
+      "columns": [
+        "station_id",
+        "all_rows",
+        "known_values",
+        "total_value"
+      ],
+      "options": [
+        [
+          [
+            1,
+            2,
+            1,
+            10
+          ],
+          [
+            2,
+            3,
+            3,
+            40
+          ]
+        ],
+        [
+          [
+            null,
+            1,
+            1,
+            30
+          ],
+          [
+            1,
+            2,
+            2,
+            10
+          ],
+          [
+            2,
+            3,
+            3,
+            40
+          ]
+        ],
+        [
+          [
+            null,
+            1,
+            1,
+            30
+          ],
+          [
+            1,
+            2,
+            1,
+            10
+          ],
+          [
+            2,
+            3,
+            3,
+            40
+          ]
+        ],
+        [
+          [
+            null,
+            1,
+            1,
+            30
+          ],
+          [
+            1,
+            2,
+            1,
+            10
+          ],
+          [
+            2,
+            2,
+            2,
+            20
+          ]
+        ]
+      ],
+      "answer": 2,
+      "explanation": "The NULL station_id forms a group containing reading 6. Station 1 has two rows but one known value. Station 2 has three known values, including zero, totaling 40. GROUP BY does not remove the repeated value 20.",
+      "transfer": "Compare COUNT(value) with COUNT(DISTINCT value) for station 2. Which count changes when repeated values are deliberately collapsed?",
+      "distractor_notes": [
+        "Drops the NULL-key group.",
+        "Counts station 1's unknown value as known.",
+        "Exact three groups and aggregates.",
+        "Collapses station 2's repeated value without DISTINCT."
+      ],
+      "references": [
+        "select",
+        "aggregate"
+      ]
+    },
+    {
+      "id": "sql-08-having",
+      "title": "Filter rows, then groups",
+      "concept": "groups",
+      "prerequisites": [
+        "rows",
+        "nulls"
+      ],
+      "tables": [
+        "readings"
+      ],
+      "question": "Which (station_id, qualifying_rows, total_value) rows survive both filters?",
+      "sql": "SELECT station_id, COUNT(*) AS qualifying_rows,\n       SUM(value) AS total_value\nFROM readings\nWHERE value >= 10\nGROUP BY station_id\nHAVING COUNT(*) >= 2\nORDER BY station_id;",
+      "columns": [
+        "station_id",
+        "qualifying_rows",
+        "total_value"
+      ],
+      "options": [
+        [
+          [
+            1,
+            2,
+            10
+          ],
+          [
+            2,
+            3,
+            40
+          ]
+        ],
+        [
+          [
+            2,
+            3,
+            40
+          ]
+        ],
+        [
+          [
+            null,
+            1,
+            30
+          ],
+          [
+            1,
+            1,
+            10
+          ],
+          [
+            2,
+            2,
+            40
+          ]
+        ],
+        [
+          [
+            2,
+            2,
+            40
+          ]
+        ]
+      ],
+      "answer": 3,
+      "explanation": "After value >= 10, station 1 and the NULL station group have one row each; station 2 has two. HAVING keeps only the group with at least two remaining rows. Its total is 20 + 20 = 40; the zero was removed by WHERE.",
+      "transfer": "Keep the WHERE filter but change HAVING to COUNT(*) >= 1. Predict all three resulting groups before running it in SQLite.",
+      "distractor_notes": [
+        "Counts group membership before the WHERE filter.",
+        "Keeps the right group but includes its filtered-out zero row in the count.",
+        "Omits the HAVING filter.",
+        "Exact group after both filters."
+      ],
+      "references": [
+        "select",
+        "aggregate"
+      ]
+    },
+    {
+      "id": "sql-09-missing-group",
+      "title": "Find a group with an unknown value",
+      "concept": "groups",
+      "prerequisites": [
+        "rows",
+        "nulls"
+      ],
+      "tables": [
+        "readings"
+      ],
+      "question": "Which station_id groups contain at least one NULL measurement?",
+      "sql": "SELECT station_id FROM readings\nGROUP BY station_id\nHAVING COUNT(value) < COUNT(*)\nORDER BY station_id;",
+      "columns": [
+        "station_id"
+      ],
+      "options": [
+        [
+          [
+            1
+          ]
+        ],
+        [
+          [
+            null
+          ]
+        ],
+        [
+          [
+            1
+          ],
+          [
+            2
+          ]
+        ],
+        [
+          [
+            null
+          ],
+          [
+            1
+          ]
+        ]
+      ],
+      "answer": 0,
+      "explanation": "Station 1 has one known value among two rows, so its two counts differ. Station 2's zero is known, and the NULL station_id group contains a known measurement of 30. A missing group key and a missing measurement are different facts.",
+      "transfer": "For this fixture, compare SUM(value IS NULL) within each station_id group with COUNT(*) - COUNT(value). Explain why both identify station 1.",
+      "distractor_notes": [
+        "Exact group containing an unknown measurement.",
+        "Confuses the NULL key with a NULL measurement.",
+        "Treats station 2's zero as unknown.",
+        "Includes the unknown-key group even though its value is known."
+      ],
+      "references": [
+        "aggregate",
+        "null",
+        "select"
+      ]
+    },
+    {
+      "id": "sql-10-inner",
+      "title": "Count matching reading rows",
+      "concept": "joins",
+      "prerequisites": [
+        "rows",
+        "nulls"
+      ],
+      "tables": [
+        "stations",
+        "readings"
+      ],
+      "question": "What single joined_rows count is returned?",
+      "sql": "SELECT COUNT(*) AS joined_rows\nFROM stations AS s\nINNER JOIN readings AS r ON r.station_id = s.id;",
+      "columns": [
+        "joined_rows"
+      ],
+      "options": [
+        [
+          [
+            6
+          ]
+        ],
+        [
+          [
+            5
+          ]
+        ],
+        [
+          [
+            4
+          ]
+        ],
+        [
+          [
+            7
+          ]
+        ]
+      ],
+      "answer": 1,
+      "explanation": "North matches two readings and South matches three, producing five joined rows. East and West have no match. Reading 6's NULL station_id does not equal a station ID, so that reading is absent from this inner join.",
+      "transfer": "Select s.name and r.id instead of COUNT(*) in your SQLite scratch database. List the five matches rather than assuming one output row per station.",
+      "distractor_notes": [
+        "Includes the reading with no matching station ID.",
+        "Two North matches plus three South matches.",
+        "Assumes one output row per station.",
+        "Adds the placeholders produced only by the corresponding left join."
+      ],
+      "references": [
+        "select",
+        "null"
+      ]
+    },
+    {
+      "id": "sql-11-left-count",
+      "title": "Count left-join placeholders",
+      "concept": "joins",
+      "prerequisites": [
+        "rows",
+        "nulls"
+      ],
+      "tables": [
+        "stations",
+        "readings"
+      ],
+      "question": "What single (joined_rows, matched_readings) row is returned?",
+      "sql": "SELECT COUNT(*) AS joined_rows,\n       COUNT(r.id) AS matched_readings\nFROM stations AS s\nLEFT JOIN readings AS r ON r.station_id = s.id;",
+      "columns": [
+        "joined_rows",
+        "matched_readings"
+      ],
+      "options": [
+        [
+          [
+            5,
+            5
+          ]
+        ],
+        [
+          [
+            4,
+            4
+          ]
+        ],
+        [
+          [
+            7,
+            5
+          ]
+        ],
+        [
+          [
+            7,
+            7
+          ]
+        ]
+      ],
+      "answer": 2,
+      "explanation": "The five matches remain. East and West each add one output row whose reading columns are NULL, giving seven rows. COUNT(r.id) counts only the five actual matches because a reading's primary key is never NULL. Reading 6 is still unmatched.",
+      "transfer": "Compare COUNT(r.id) with COUNT(r.value). The stored NULL value at reading 2 makes those two counts differ even before considering placeholders.",
+      "distractor_notes": [
+        "Uses inner-join row counts.",
+        "Assumes one row per left table row and counts placeholders as readings.",
+        "Seven output rows contain five non-NULL reading IDs.",
+        "Counts each placeholder as an actual reading."
+      ],
+      "references": [
+        "select",
+        "aggregate"
+      ]
+    },
+    {
+      "id": "sql-12-left-where",
+      "title": "Place a filter in ON or WHERE",
+      "concept": "joins",
+      "prerequisites": [
+        "rows",
+        "nulls"
+      ],
+      "tables": [
+        "stations",
+        "readings"
+      ],
+      "question": "Which ordered (station, reading_id, value) rows remain after this WHERE filter?",
+      "sql": "SELECT s.name AS station, r.id AS reading_id, r.value\nFROM stations AS s\nLEFT JOIN readings AS r ON r.station_id = s.id\nWHERE r.value >= 20\nORDER BY s.id, r.id;",
+      "columns": [
+        "station",
+        "reading_id",
+        "value"
+      ],
+      "options": [
+        [
+          [
+            "North",
+            null,
+            null
+          ],
+          [
+            "South",
+            3,
+            20
+          ],
+          [
+            "South",
+            4,
+            20
+          ],
+          [
+            "East",
+            null,
+            null
+          ],
+          [
+            "West",
+            null,
+            null
+          ]
+        ],
+        [
+          [
+            "South",
+            3,
+            20
+          ],
+          [
+            "South",
+            4,
+            20
+          ],
+          [
+            null,
+            6,
+            30
+          ]
+        ],
+        [
+          [
+            "South",
+            3,
+            20
+          ]
+        ],
+        [
+          [
+            "South",
+            3,
+            20
+          ],
+          [
+            "South",
+            4,
+            20
+          ]
+        ]
+      ],
+      "answer": 3,
+      "explanation": "Only South's two readings of 20 pass WHERE. North's lower or unknown values and the East/West placeholders fail that condition. Moving r.value >= 20 into ON instead keeps all four stations, adding a placeholder wherever no reading meets the threshold.",
+      "transfer": "In the explorer, keep threshold 20 and move the predicate from WHERE to ON. Predict both the result row count and which reading_id cells become NULL.",
+      "distractor_notes": [
+        "Shows the ON-filter result instead of the WHERE-filter result.",
+        "Adds a reading that has no matching left-side station.",
+        "Drops one of the two distinct reading matches.",
+        "Exact two rows that satisfy WHERE."
+      ],
+      "references": [
+        "select",
+        "null"
+      ]
+    }
+  ]
+}

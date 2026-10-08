@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="An offline SQL teaching explorer with original fictional tables, prepared SQLite results, and a RecallWeave course.">
+  <title>Follow the rows — RecallWeave SQL explorer</title>
+  <style>
+    :root{color-scheme:light;--paper:#f7f5ee;--card:#fffefa;--ink:#173b3b;--muted:#486363;--line:#c6d3cb;--accent:#09695f;--wash:#e4efe8;--gold:#f3cf73;--focus:#ad461c}
+    *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:1rem/1.55 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+    a{color:var(--accent);text-underline-offset:.2em}button,select{font:inherit}button,select,summary,a{touch-action:manipulation}
+    :focus-visible{outline:3px solid var(--focus);outline-offset:4px}button{border:1px solid var(--accent);border-radius:.5rem;padding:.7rem 1rem;min-height:44px;background:var(--accent);color:white;cursor:pointer;font-weight:650}
+    button:hover{background:#064e47}button.secondary{background:var(--card);color:var(--accent)}button.secondary:hover{background:var(--wash)}
+    select{width:100%;min-height:46px;max-width:100%;padding:.6rem .7rem;color:var(--ink);background:var(--card);border:1px solid #7e9992;border-radius:.4rem}
+    [hidden]{display:none!important}.shell{max-width:1180px;margin:auto;padding:2.3rem 1.6rem 3rem}.eyebrow{text-transform:uppercase;letter-spacing:.15em;font-size:.74rem;font-weight:750;margin:0 0 .8rem}
+    header{border-bottom:1px solid var(--line);padding-bottom:1.65rem;margin-bottom:1.7rem}h1{font:clamp(2.3rem,6vw,4.2rem)/1.03 Georgia,"Times New Roman",serif;letter-spacing:-.035em;margin:.2rem 0 1rem}h2{font-size:1.25rem;line-height:1.25;margin:0 0 .7rem}h3{font-size:1.02rem;margin:0 0 .5rem}
+    .lede{max-width:52rem;font-size:1.08rem;margin:.5rem 0}.meta{display:flex;gap:.55rem;flex-wrap:wrap;margin-top:1.1rem}.tag{background:var(--wash);border:1px solid var(--line);border-radius:2rem;padding:.2rem .7rem;font-size:.78rem;font-weight:650}
+    .workspace{display:grid;grid-template-columns:minmax(16rem,.85fr) minmax(0,1.65fr);gap:1.4rem;align-items:start}.panel{background:var(--card);border:1px solid var(--line);border-radius:.8rem;min-width:0}.data-panel{padding:1.1rem}.data-panel summary{cursor:pointer;font-weight:700;min-height:44px;padding:.3rem 0}
+    .caption{font-size:.87rem;color:var(--muted);margin:.6rem 0 1rem}.table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:.45rem;max-width:100%;margin:.8rem 0 1.1rem}table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums;font-size:.9rem}caption{text-align:left;font-weight:750;padding:.55rem .7rem;background:var(--wash)}th,td{text-align:left;padding:.45rem .65rem;border-bottom:1px solid #dee6df;white-space:nowrap}th{font-size:.78rem;background:#eff4ee;font-weight:750}tr:last-child td{border-bottom:0}.null{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:.82em;color:#70431c;background:#fcf0d7;border-radius:.2rem;padding:.08rem .25rem}
+    .query-panel{padding:1.35rem}.step{display:inline-flex;align-items:center;justify-content:center;width:1.6rem;height:1.6rem;border-radius:50%;background:var(--gold);color:var(--ink);font-size:.8rem;font-weight:800;margin-right:.4rem}.control-grid{display:grid;grid-template-columns:1fr 1fr;gap:.9rem}.field{min-width:0}.field.wide{grid-column:1/-1}label{display:block;font-size:.86rem;font-weight:700;margin-bottom:.35rem}.hint{color:var(--muted);font-size:.86rem;margin:.6rem 0}
+    .query-block{margin:1.1rem 0;background:#173b3b;color:#eff9ee;border-radius:.5rem;padding:1rem;overflow-x:auto;white-space:pre-wrap;overflow-wrap:anywhere;font: .86rem/1.65 ui-monospace,SFMono-Regular,Consolas,monospace}.query-label{display:flex;justify-content:space-between;gap:.5rem;align-items:center;margin:1.1rem 0 -.5rem}.query-label span{font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}
+    .predict{border-top:1px solid var(--line);padding-top:1rem;margin-top:1rem}.predict-controls{display:flex;gap:.75rem;align-items:end}.predict-controls .field{flex:1}.predict-controls button{flex:0 0 auto}.status{font-size:.88rem;min-height:1.5em;margin:.7rem 0;color:var(--muted)}.result-panel{margin-top:1rem;border-top:3px solid var(--accent);padding-top:1rem}.result-title{display:flex;justify-content:space-between;align-items:baseline;gap:.7rem;flex-wrap:wrap}.result-count{font-size:.85rem;font-weight:750;background:var(--wash);padding:.15rem .6rem;border-radius:1rem}.empty{padding:1rem;border:1px dashed #7f9990;border-radius:.5rem;background:#f1f5ed}
+    .explanation{font-size:.96rem}.transfer{padding:.85rem 1rem;border-left:3px solid #b48128;background:#faf0d8;font-size:.9rem}.transfer strong{display:block;margin-bottom:.3rem}.reference-links{font-size:.8rem;padding-left:1.2rem;margin-bottom:0}
+    .takeaway{display:flex;justify-content:space-between;gap:1.3rem;align-items:center;margin-top:1.5rem;padding:1.35rem}.takeaway p{font-size:.9rem;margin:.4rem 0}.downloads{display:flex;gap:.6rem;flex-wrap:wrap}.downloads button{font-size:.87rem}.footnote{font-size:.8rem;color:var(--muted);margin:1.3rem 0 0}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+    @media(max-width:800px){.workspace{grid-template-columns:1fr}.shell{padding:1.4rem 1rem 2rem}.takeaway{display:block}.downloads{margin-top:.9rem}.query-panel{padding:1rem}.data-panel{padding:.85rem 1rem}.table-wrap{margin-bottom:.8rem}}
+    @media(max-width:460px){.control-grid{grid-template-columns:1fr}.predict-controls{display:block}.predict-controls button{width:100%;margin-top:.7rem}.downloads{display:grid}.downloads button{width:100%}.query-block{font-size:.78rem}.lede{font-size:1rem}.meta{gap:.35rem}.tag{font-size:.72rem}}
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header>
+      <p class="eyebrow">RecallWeave · SQL explorer</p>
+      <h1>Follow the rows.</h1>
+      <p class="lede">One small dataset. Twelve ways to question it. Predict what a query returns, then follow the NULLs, counts, and joins into its result.</p>
+      <div class="meta"><span class="tag">12 worked examples</span><span class="tag">Original fictional data</span><span class="tag">Works offline</span></div>
+    </header>
+    <noscript><p>This explorer needs JavaScript to select its embedded examples. The companion course and practice queries are also available in this folder.</p></noscript>
+    <p id="load-state" role="status">Loading prepared examples…</p>
+    <div class="workspace" id="workspace" hidden>
+      <aside class="panel data-panel" aria-label="Fictional source tables">
+        <details id="fixture-panel" open>
+          <summary>The data · 4 stations, 6 readings</summary>
+          <p class="caption">These are all the rows. <span class="null">NULL</span> means unknown; <strong>0</strong> is a known number. No units or real measurements are implied.</p>
+          <div id="input-tables"></div>
+          <p class="caption">Reading 2 has an unknown <strong>value</strong>. Reading 6 has an unknown <strong>station_id</strong>. East and West have no reading rows.</p>
+        </details>
+      </aside>
+      <section class="panel query-panel" aria-labelledby="explore-title">
+        <h2 id="explore-title"><span class="step" aria-hidden="true">1</span>Choose an example</h2>
+        <div class="control-grid">
+          <div class="field wide"><label for="example">SQL idea</label><select id="example"></select></div>
+          <div class="field" id="threshold-field" hidden><label for="threshold">Value threshold (≥)</label><select id="threshold"><option value="0">0</option><option value="10">10</option><option value="20" selected>20</option><option value="30">30</option></select></div>
+          <div class="field" id="placement-field" hidden><label for="placement">Place the value filter</label><select id="placement"><option value="where">WHERE · after the join</option><option value="on">ON · choose matching readings</option></select></div>
+        </div>
+        <p class="hint" id="example-hint"></p>
+        <div class="query-label"><h3>Prepared query</h3><span>Read-only SQL</span></div>
+        <pre class="query-block" tabindex="0" aria-label="Exact prepared SQL query"><code id="query"></code></pre>
+        <p class="hint">These saved results are executed with SQLite when the explorer is built. Controls choose prepared queries. Download the practice SQL to try your own edits in SQLite.</p>
+        <div class="predict">
+          <h2><span class="step" aria-hidden="true">2</span>Predict, then inspect</h2>
+          <p class="hint">Count the rows returned by <em>SELECT</em>. An aggregate such as COUNT(*) can put a large count inside just one result row.</p>
+          <div class="predict-controls">
+            <div class="field"><label for="prediction">How many result rows? (Optional)</label><select id="prediction"><option value="">Choose a prediction</option><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option></select></div>
+            <button type="button" id="reveal-result">Show SQLite result</button>
+          </div>
+          <p class="status" id="feedback" role="status" aria-live="polite">Choose a prediction or reveal the result.</p>
+        </div>
+        <section class="result-panel" id="result-panel" aria-labelledby="result-heading" hidden>
+          <div class="result-title"><h2 id="result-heading">What the query returns</h2><span id="result-count" class="result-count"></span></div>
+          <div id="result-table"></div>
+          <p class="explanation" id="explanation"></p>
+          <div class="transfer"><strong>Try the next connection</strong><span id="transfer"></span></div>
+          <ul class="reference-links" id="references"></ul>
+        </section>
+      </section>
+    </div>
+    <section class="panel takeaway" aria-labelledby="takeaway-title">
+      <div><h2 id="takeaway-title">Keep exploring</h2><p>The 12-question course follows RecallWeave's local deck format.<br>The practice file includes the fictional tables and every prepared query.</p></div>
+      <div><div class="downloads"><button type="button" class="secondary" id="download-course">Download course · JSON</button><button type="button" class="secondary" id="download-sql">Download practice · SQL</button></div><p class="status" id="download-status" role="status" aria-live="polite"></p></div>
+    </section>
+    <p class="footnote">Your predictions stay on this page and reset when you reopen it. Downloads happen only when requested. Original RecallWeave teaching material; SQLite-specific ordering is stated where used. External documentation links open only when you choose them.</p>
+  </main>
+  <script id="sql-catalog" type="application/json">@@SQL_CATALOG@@</script>
+  <script id="sql-course" type="application/json">@@SQL_COURSE@@</script>
+  <script id="sql-practice" type="application/json">@@SQL_PRACTICE@@</script>
+  <script>
+  (() => {
+    'use strict';
+    const $ = id => document.getElementById(id);
+    const catalog = JSON.parse($('sql-catalog').textContent);
+    const course = JSON.parse($('sql-course').textContent);
+    const practice = JSON.parse($('sql-practice').textContent);
+    let lesson;
+    let variant;
+    const concepts = {rows:'Rows stay distinct unless the query says otherwise.', nulls:'An unknown value and a known zero answer different questions.', groups:'Watch which input rows each aggregate receives.', joins:'A station can have several matches, one placeholder, or no result row.'};
+
+    function table(data, title) {
+      const wrap = document.createElement('div'); wrap.className = 'table-wrap'; wrap.tabIndex = 0;
+      wrap.setAttribute('role', 'region'); wrap.setAttribute('aria-label', `${title} table`);
+      const element = document.createElement('table');
+      const caption = document.createElement('caption'); caption.textContent = title; element.append(caption);
+      const head = element.createTHead().insertRow();
+      for (const name of data.columns) { const cell = document.createElement('th'); cell.scope = 'col'; cell.textContent = name; head.append(cell); }
+      const body = element.createTBody();
+      for (const row of data.rows) {
+        const tr = body.insertRow();
+        for (const value of row) {
+          const cell = tr.insertCell();
+          if (value === null) { const mark = document.createElement('span'); mark.className = 'null'; mark.textContent = 'NULL'; cell.append(mark); }
+          else cell.textContent = String(value);
+        }
+      }
+      wrap.append(element); return wrap;
+    }
+    function resetResult() {
+      $('result-panel').hidden = true;
+      $('feedback').textContent = 'Choose a prediction or reveal the result.';
+    }
+    function chooseVariant() {
+      const key = lesson.id === 'sql-02-filter' ? $('threshold').value
+        : lesson.id === 'sql-12-left-where' ? `${$('placement').value}-${$('threshold').value}` : 'default';
+      variant = lesson.variants.find(value => value.key === key);
+      $('query').textContent = variant.sql;
+      $('prediction').value = '';
+      resetResult();
+    }
+    function chooseLesson() {
+      lesson = catalog.lessons.find(value => value.id === $('example').value);
+      const adjustable = lesson.id === 'sql-02-filter' || lesson.id === 'sql-12-left-where';
+      $('threshold-field').hidden = !adjustable; $('threshold').disabled = !adjustable;
+      $('placement-field').hidden = lesson.id !== 'sql-12-left-where'; $('placement').disabled = lesson.id !== 'sql-12-left-where';
+      const selected = lesson.variants.find(value => value.key === lesson.defaultVariant);
+      $('threshold').value = String(selected.threshold ?? 20); $('placement').value = selected.placement ?? 'where';
+      $('example-hint').textContent = concepts[lesson.concept];
+      chooseVariant();
+    }
+    function reveal() {
+      const count = variant.rows.length;
+      const noun = count === 1 ? 'row' : 'rows';
+      $('result-count').textContent = `${count} result ${noun}`;
+      $('result-table').replaceChildren();
+      $('result-table').append(table(variant, 'SQLite result'));
+      if (!count) { const empty = document.createElement('p'); empty.className = 'empty'; empty.textContent = 'No rows satisfy this query.'; $('result-table').append(empty); }
+      $('explanation').textContent = variant.explanation;
+      $('transfer').textContent = lesson.transfer;
+      $('references').replaceChildren();
+      for (const id of lesson.references) {
+        const reference = catalog.references.find(value => value.id === id);
+        const item = document.createElement('li'); const link = document.createElement('a');
+        link.textContent = reference.title; link.href = reference.url; link.target = '_blank'; link.rel = 'noopener noreferrer'; item.append(link); $('references').append(item);
+      }
+      const predicted = $('prediction').value;
+      $('feedback').textContent = predicted === '' ? `SQLite returns ${count} ${noun}. Inspect the column values below.`
+        : Number(predicted) === count ? `Your prediction matches: ${count} result ${noun}. Now check the column values.`
+        : `You predicted ${predicted}; SQLite returns ${count} result ${noun}. Follow the explanation below.`;
+      $('result-panel').hidden = false;
+    }
+    function download(text, name, mediaType) {
+      let url;
+      let link;
+      try {
+        url = URL.createObjectURL(new Blob([text], {type:mediaType}));
+        link = document.createElement('a'); link.href = url; link.download = name; link.hidden = true; document.body.append(link); link.click();
+        $('download-status').textContent = `Download requested: ${name}`;
+      } catch { $('download-status').textContent = 'The download could not be prepared. You can try again.'; }
+      finally { link?.remove(); if (url) setTimeout(() => URL.revokeObjectURL(url), 1000); }
+    }
+    for (const data of catalog.tables) $('input-tables').append(table(data, `${data.name} · ${data.rows.length} rows`));
+    catalog.lessons.forEach((value, index) => { const option = document.createElement('option'); option.value = value.id; option.textContent = `${String(index + 1).padStart(2, '0')} · ${value.title}`; $('example').append(option); });
+    $('example').addEventListener('change', chooseLesson);
+    $('threshold').addEventListener('change', chooseVariant);
+    $('placement').addEventListener('change', chooseVariant);
+    $('prediction').addEventListener('change', resetResult);
+    $('reveal-result').addEventListener('click', reveal);
+    $('download-course').addEventListener('click', () => download(course, 'sql-query-foundations.json', 'application/json;charset=utf-8'));
+    $('download-sql').addEventListener('click', () => download(practice, 'sql-query-practice.sql', 'text/plain;charset=utf-8'));
+    chooseLesson();
+    $('workspace').hidden = false; $('load-state').hidden = true;
+    document.documentElement.dataset.ready = 'true';
+  })();
+  </script>
+</body>
+</html>

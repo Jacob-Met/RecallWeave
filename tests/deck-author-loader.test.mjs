@@ -3,6 +3,8 @@ import assert from 'node:assert/strict';
 import { setImmediate } from 'node:timers/promises';
 import { mountAuthorDeckLoader } from '../src/deck-author-loader.mjs';
 import { MAX_DECK_BYTES, parseDeck } from '../src/deck.mjs';
+import { createDraft, addConcept, addQuestion } from '../src/deck-author.mjs';
+import { DRAFT_FORMAT, MAX_DRAFT_BYTES, parseAuthorDraft, serializeAuthorDraft } from '../src/deck-author-draft.mjs';
 
 const original = () => ({
   format: 'recallweave-deck/1', title: 'Workshop “next steps”',
@@ -28,21 +30,21 @@ const deferred = () => {
 // EventTarget supplies native event delivery; real DOM/focus/file behavior has a
 // separate Chromium receiving suite. This fixture observes the editor boundary.
 function editorFixture() {
-  const root = { activeElement: null, calls: [], draft: { title: 'Unsaved draft', text: 'Keep this writing' } };
+  const root = { activeElement: null, calls: [], kinds: [], draft: { title: 'Unsaved draft', text: 'Keep this writing' } };
   class Control extends EventTarget {
     constructor(id) { super(); this.id = id; this.textContent = ''; this.hidden = false; this.disabled = false; this.value = ''; this.files = []; this.clicks = 0; }
     focus() { root.activeElement = this; }
     click() { this.clicks++; if (!this.disabled) this.dispatchEvent(new Event('click')); }
   }
   const controls = new Map(['open-deck-button', 'open-deck', 'author-status', 'open-preview',
-    'open-preview-title', 'open-preview-summary', 'replace-draft', 'cancel-open'].map(id => [id, new Control(id)]));
+    'open-preview-title', 'open-preview-summary', 'replace-draft', 'cancel-open', 'open-preview-kind'].map(id => [id, new Control(id)]));
   root.querySelector = selector => controls.get(selector.slice(1));
   root.control = id => controls.get(id);
   root.select = selected => {
     root.control('open-deck').files = selected ? [selected] : [];
     root.control('open-deck').dispatchEvent(new Event('change'));
   };
-  mountAuthorDeckLoader(root, deck => { root.calls.push(deck); root.draft = deck; });
+  mountAuthorDeckLoader(root, (content, kind) => { root.calls.push(content); root.kinds.push(kind); root.draft = content; });
   return root;
 }
 
@@ -69,12 +71,12 @@ test('a valid deck stages without touching authored text and commits once with f
 
 test('invalid JSON, invalid answer, oversized file and unreadable file preserve the draft and allow retry', async () => {
   const badAnswer = original(); badAnswer.items[0].answer = 3;
-  const oversized = new File(['x'.repeat(MAX_DECK_BYTES + 1)], 'large.json');
+  const oversized = new File(['x'.repeat(MAX_DRAFT_BYTES + 1)], 'large.json');
   let oversizedRead = false;
   oversized.text = () => { oversizedRead = true; throw new Error('Should not read oversized file'); };
   const unreadable = file(); unreadable.text = () => Promise.reject(new Error('Private implementation detail'));
   for (const [selected, error] of [[new File(['{'], 'broken.json'), /not valid JSON/], [file(badAnswer), /zero-based index/],
-    [oversized, /256 KiB/], [unreadable, /could not be read/]]) {
+    [oversized, /2 MiB/], [unreadable, /could not be read/]]) {
     const root = editorFixture();
     const before = root.draft;
     root.select(selected);
@@ -90,6 +92,82 @@ test('invalid JSON, invalid answer, oversized file and unreadable file preserve 
     assert.equal(root.calls.length, 1);
   }
   assert.equal(oversizedRead, false);
+});
+
+test('unfinished and cyclic draft files stage visibly and replace once with an immutable editable state', async () => {
+  const draft = createDraft();
+  const second = addConcept(draft); second.name = draft.concepts[0].name;
+  const question = addQuestion(draft); question.conceptKey = second.key;
+  draft.questions[0].prerequisiteKeys = [second.key];
+  question.prerequisiteKeys = [draft.concepts[0].key];
+  draft.questions[0].prompt = 'Unfinished <literal> writing\nwith no answer yet';
+  const beforeInput = structuredClone(draft);
+  const text = serializeAuthorDraft(draft);
+  const root = editorFixture(); const before = root.draft;
+  root.select(new File([text], 'unfinished.draft.json'));
+  await settle();
+  assert.equal(root.draft, before);
+  assert.deepEqual(draft, beforeInput);
+  assert.equal(root.control('open-preview-kind').textContent, 'EDITABLE DRAFT · MAY BE UNFINISHED');
+  assert.equal(root.control('open-preview-title').textContent, 'Open draft “Untitled draft”?');
+  assert.match(root.control('open-preview-summary').textContent, /2 questions · 2 concepts/);
+  root.control('replace-draft').click(); root.control('replace-draft').click();
+  assert.deepEqual(root.kinds, ['draft']);
+  assert.deepEqual(root.draft, parseAuthorDraft(text));
+  assert.equal(root.draft.questions[0].answerKey, null);
+  assert.ok(Object.isFrozen(root.draft.questions[0].options));
+  assert.equal(serializeAuthorDraft(root.draft), text);
+});
+
+test('a draft suffix cannot admit an oversized lesson deck through the larger draft-file limit', async () => {
+  const content = original(); content.license = 'x'.repeat(MAX_DECK_BYTES);
+  const selected = new File([JSON.stringify(content)], 'oversized.draft.json');
+  assert.ok(selected.size > MAX_DECK_BYTES && selected.size < MAX_DRAFT_BYTES);
+  const root = editorFixture(); const before = root.draft;
+  root.select(selected); await settle();
+  assert.equal(root.draft, before);
+  assert.equal(root.calls.length, 0);
+  assert.match(root.control('author-status').textContent, /256 KiB/);
+  assert.equal(root.control('open-preview').hidden, true);
+});
+
+test('malformed and unsupported editable drafts preserve the old draft and retire pending previews', async () => {
+  const good = JSON.parse(serializeAuthorDraft(createDraft()));
+  const future = structuredClone(good); future.format = 'recallweave-author-draft/2';
+  const dangling = structuredClone(good); dangling.draft.questions[0].answerKey = 'option-999';
+  const counter = structuredClone(good); counter.draft.nextKey = 0;
+  for (const document of [future, dangling, counter, { format: DRAFT_FORMAT, draft: null }]) {
+    const root = editorFixture(); const before = root.draft;
+    root.select(file()); await settle();
+    root.select(new File([JSON.stringify(document)], 'rejected.json')); await settle();
+    root.control('replace-draft').click();
+    assert.equal(root.draft, before);
+    assert.equal(root.calls.length, 0);
+    assert.equal(root.control('open-preview').hidden, true);
+    assert.equal(root.control('open-preview-kind').textContent, '');
+    assert.match(root.control('author-status').textContent, /current draft is unchanged/);
+    assert.equal(root.activeElement.id, 'open-deck-button');
+  }
+});
+
+test('newest selected format wins across slow draft-to-deck and deck-to-draft reads', async () => {
+  const draft = createDraft(); draft.title = 'Latest editable work';
+  const draftText = serializeAuthorDraft(draft);
+  const deckText = JSON.stringify(original());
+  for (const [first, latest, kind] of [[draftText, deckText, 'deck'], [deckText, draftText, 'draft']]) {
+    const root = editorFixture(); const slow = deferred();
+    const selected = new File([first], 'earlier.json'); selected.text = () => slow.promise;
+    root.select(selected);
+    root.select(new File([latest], 'latest.json')); await settle();
+    const label = root.control('open-preview-kind').textContent;
+    const summary = root.control('open-preview-summary').textContent;
+    slow.resolve(first); await settle();
+    assert.equal(root.control('open-preview-kind').textContent, label);
+    assert.equal(root.control('open-preview-summary').textContent, summary);
+    root.control('replace-draft').click();
+    assert.deepEqual(root.kinds, [kind]);
+    assert.deepEqual(root.draft, kind === 'draft' ? parseAuthorDraft(latest) : parseDeck(latest));
+  }
 });
 
 test('explicit Keep current draft clears staged replacement and restores the open control focus', async () => {

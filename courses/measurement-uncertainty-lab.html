@@ -1,0 +1,531 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>Measurement lab · RecallWeave</title>
+  <style>
+    :root { font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #173d38; background: #f4f7f3; font-synthesis: none; line-height: 1.5; }
+    * { box-sizing: border-box; }
+    body { margin: 0; }
+    a { color: #075c73; text-underline-offset: .15em; }
+    button, input, textarea { font: inherit; }
+    button, input, textarea, summary { touch-action: manipulation; }
+    button, summary { cursor: pointer; }
+    :focus-visible { outline: 3px solid #a8410f; outline-offset: 4px; }
+    [hidden] { display: none !important; }
+    .skip-link { position: absolute; left: 16px; top: -80px; background: white; padding: 12px; z-index: 2; }
+    .skip-link:focus { top: 12px; }
+    header, main, footer { width: min(1200px, 100%); padding: 24px; margin: 0 auto; }
+    header { padding-top: 35px; padding-bottom: 12px; }
+    .brand { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; font-weight: 700; }
+    .badge { font-size: .78rem; text-transform: uppercase; letter-spacing: .08em; background: #e0eee4; border: 1px solid #b5d2c2; padding: 4px 9px; border-radius: 99px; }
+    h1 { max-width: 850px; font-size: clamp(2rem, 5vw, 3.3rem); line-height: 1.12; letter-spacing: -.025em; margin: 24px 0 14px; }
+    .lede { max-width: 800px; font-size: 1.13rem; color: #426059; }
+    h2 { font-size: 1.45rem; line-height: 1.25; margin: 0 0 14px; }
+    h3 { font-size: 1.08rem; margin: 24px 0 8px; }
+    p { margin: 10px 0 16px; }
+    .workspace { display: grid; grid-template-columns: minmax(290px, 350px) minmax(0, 1fr); align-items: start; gap: 22px; }
+    .panel { min-width: 0; padding: 24px; border: 1px solid #cddbd2; border-radius: 16px; background: #fff; box-shadow: 0 5px 18px #173d3805; }
+    .input-panel { border-top: 5px solid #266653; }
+    .input-panel > p { color: #52685e; }
+    label { font-weight: 680; display: block; margin: 20px 0 6px; }
+    input, textarea { width: 100%; min-width: 0; color: #173d38; background: #fff; border: 1px solid #8da89a; border-radius: 7px; padding: 10px 12px; }
+    textarea { resize: vertical; min-height: 106px; }
+    [aria-invalid="true"] { border: 2px solid #a32220; }
+    .help, .small { font-size: .88rem; color: #52685e; }
+    .help { margin: 6px 0 12px; }
+    button { border: 1px solid #a1b9aa; border-radius: 8px; padding: 10px 14px; background: #f7faf6; color: #173d38; min-height: 44px; }
+    button:hover { background: #eaf2e9; }
+    .primary { background: #195a49; color: #fff; border-color: #195a49; font-weight: 700; width: 100%; margin-top: 16px; }
+    .primary:hover { background: #124637; }
+    .presets { display: grid; gap: 8px; }
+    .presets button { text-align: left; font-size: .9rem; }
+    .presets button span { display: block; font-size: .8rem; color: #52685e; }
+    .error { background: #fff1ed; color: #842b21; border-left: 4px solid #a32220; padding: 12px; margin: 16px 0 0; }
+    .status { font-size: .87rem; color: #52685e; min-height: 1.5em; }
+    .results { min-width: 0; }
+    .result-intro { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; align-items: baseline; }
+    .result-intro h2 { margin-bottom: 0; }
+    .result-intro > p { margin: 0; }
+    .metrics { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 20px 0; }
+    .metric { background: #f4f7f3; border: 1px solid #d8e2da; border-radius: 11px; padding: 14px; min-width: 0; }
+    .metric strong { display: block; font-size: 1.35rem; line-height: 1.3; margin: 7px 0; overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }
+    .metric .label { font-size: .87rem; font-weight: 700; }
+    .metric p { font-size: .83rem; color: #52685e; margin: 6px 0 0; }
+    .metric.featured { background: #e9f3eb; border-color: #99bda7; }
+    .calculation-line { font-size: .9rem; color: #52685e; }
+    .notice { border-left: 4px solid #bb7027; background: #fff6e9; padding: 14px 16px; color: #634a29; font-size: .92rem; }
+    figure { margin: 0; }
+    .chart-scroll, .table-scroll { max-width: 100%; overflow-x: auto; overscroll-behavior-x: contain; border-radius: 6px; }
+    .chart-scroll:focus-visible, .table-scroll:focus-visible { outline-offset: -3px; }
+    .chart-scroll svg { width: 100%; min-width: 550px; display: block; }
+    .axis-label { font-size: 13px; fill: #47635a; }
+    .grid-line { stroke: #dbe5dd; stroke-width: 1; }
+    .mean-line { stroke: #6d8379; stroke-dasharray: 4 4; }
+    .reading-line { stroke: #4975a2; stroke-width: 1.8; fill: none; }
+    .reading-point { fill: #275c90; }
+    .series { stroke-width: 3; fill: none; }
+    .series.combined { stroke: #236247; }
+    .point.combined { fill: #236247; }
+    .series.repeatability { stroke: #2f6da4; stroke-dasharray: 8 4; }
+    .point.repeatability { fill: #2f6da4; }
+    .series.calibration { stroke: #aa5b1c; stroke-dasharray: 3 4; }
+    .point.calibration { fill: #aa5b1c; }
+    .legend { display: flex; gap: 8px 20px; flex-wrap: wrap; font-size: .82rem; margin: 12px 0; padding: 0; list-style: none; }
+    .legend li::before { content: ''; display: inline-block; width: 22px; margin-right: 7px; border-top: 3px solid; vertical-align: middle; }
+    .legend .combined { color: #236247; }
+    .legend .repeatability { color: #2f6da4; }
+    .legend .repeatability::before { border-top-style: dashed; }
+    .legend .calibration { color: #aa5b1c; }
+    .legend .calibration::before { border-top-style: dotted; }
+    figcaption { font-size: .87rem; color: #52685e; margin: 8px 0 18px; }
+    details { border-top: 1px solid #d8e2da; padding: 13px 0 0; margin-top: 16px; }
+    summary { font-weight: 650; min-height: 30px; }
+    table { width: 100%; border-collapse: collapse; font-size: .86rem; font-variant-numeric: tabular-nums; }
+    th, td { text-align: right; padding: 10px 8px; border-bottom: 1px solid #d8e2da; overflow-wrap: anywhere; }
+    th:first-child, td:first-child { text-align: left; }
+    th { font-weight: 650; }
+    caption { text-align: left; padding: 12px 0; font-size: .82rem; color: #52685e; }
+    .projection-table { min-width: 440px; }
+    .next-steps { margin-top: 24px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px; }
+    .next-steps ul { padding-left: 22px; }
+    .next-steps li { margin: 10px 0; }
+    .formula { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: .89rem; overflow-wrap: anywhere; }
+    footer { color: #52685e; font-size: .83rem; padding-bottom: 36px; }
+    footer ul { display: flex; flex-wrap: wrap; gap: 10px 24px; padding: 0; list-style: none; }
+    @media (max-width: 880px) { .workspace { grid-template-columns: minmax(0, 1fr); } .input-panel form { max-width: 660px; } .presets { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+    @media (max-width: 600px) { header, main, footer { padding-left: 16px; padding-right: 16px; } .panel { padding: 18px; } .next-steps { grid-template-columns: minmax(0, 1fr); } .presets { grid-template-columns: minmax(0, 1fr); } .metrics { gap: 8px; } .metric { padding: 11px; } .metric strong { font-size: 1.15rem; } }
+    @media print { :root { background: white; } header, main, footer { width: 100%; } .input-panel, .skip-link, #download-measurement-deck, .status { display: none; } .workspace, .next-steps { display: block; } .panel { border: 0; box-shadow: none; padding: 12px 0; } .chart-scroll, .table-scroll { overflow: visible; } .chart-scroll svg { min-width: 0; } }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#measurement-form">Skip to the measurement inputs</a>
+  <header>
+    <div class="brand"><span>RecallWeave · Measurement lab</span><span class="badge">Works offline</span></div>
+    <h1>What do more measurements change?</h1>
+    <p class="lede">Separate the scatter in your readings from the uncertainty in their mean. Then see why a calibration correction shared by every reading leaves a limit that repetition alone cannot remove.</p>
+  </header>
+  <main>
+    <noscript><p class="notice">Enable JavaScript to calculate in this local lab. The companion measurement-uncertainty.md guide explains the model and examples.</p></noscript>
+    <div class="workspace">
+      <section class="panel input-panel" aria-labelledby="inputs-heading">
+        <h2 id="inputs-heading">1. Set up a case</h2>
+        <p>These starting readings are fictional. Use one quantity and the same unit throughout.</p>
+        <form id="measurement-form" novalidate>
+          <label for="readings-input">Readings in acquisition order</label>
+          <textarea id="readings-input" rows="4" aria-describedby="readings-help numeric-help" spellcheck="false">9.8, 10.2, 9.9, 10.1, 10.0</textarea>
+          <p id="readings-help" class="help">Enter 2–100 decimal readings, separated by commas, spaces or newlines. A comma marks a field; don't leave one empty.</p>
+          <label for="unit-input">Unit label</label>
+          <input id="unit-input" value="mm" maxlength="16" aria-describedby="unit-help" autocomplete="off">
+          <p id="unit-help" class="help">For example, mm or ms. This label does not convert values.</p>
+          <label for="correction-input">Additive calibration correction</label>
+          <input id="correction-input" value="-0.04" inputmode="decimal" aria-describedby="correction-help numeric-help" autocomplete="off" spellcheck="false">
+          <p id="correction-help" class="help">Add this signed value to every reading. If readings are 0.04 too high, enter −0.04.</p>
+          <label for="half-width-input">Shared calibration half-width, a</label>
+          <input id="half-width-input" value="0.02" inputmode="decimal" aria-describedby="half-width-help numeric-help" autocomplete="off" spellcheck="false">
+          <p id="half-width-help" class="help">Assume the one shared correction is equally plausible anywhere within ±a of its stated value. Enter zero or a positive half-width, in the same unit.</p>
+          <p id="numeric-help" class="help">Use decimal points, an ordinary minus sign, and optional e notation. For this teaching lab, nonzero magnitudes range from 1e-12 to 1e9; zero is allowed.</p>
+          <button type="submit" class="primary">Calculate this case</button>
+          <p id="lab-error" class="error" role="alert" hidden></p>
+        </form>
+        <p id="calculation-status" class="status" role="status" aria-live="polite"></p>
+        <h3>Try a fictional preset</h3>
+        <div class="presets">
+          <button type="button" data-preset="repeatability">Reading scatter dominates<span>Small shared calibration component</span></button>
+          <button type="button" data-preset="calibration">Calibration dominates<span>Same readings, larger shared component</span></button>
+          <button type="button" data-preset="identical">Identical displayed readings<span>Zero observed scatter still has limits</span></button>
+        </div>
+        <p class="small">A preset replaces all four inputs. Calculations stay in this tab; they are not uploaded or automatically saved.</p>
+      </section>
+      <section id="measurement-results" class="panel results" aria-labelledby="results-heading" hidden>
+        <div class="result-intro"><h2 id="results-heading" tabindex="-1">2. Read the uncertainty budget</h2><p class="small"><span data-value="n">—</span> observations</p></div>
+        <div class="metrics">
+          <div class="metric featured"><span class="label">Corrected mean</span><strong data-value="correctedMean">—</strong><p>Raw mean plus the stated correction.</p></div>
+          <div class="metric featured"><span class="label">Combined standard uncertainty, u<sub>c</sub></span><strong data-value="combinedUncertainty">—</strong><p>Independent repeatability and shared calibration components combined.</p></div>
+          <div class="metric"><span class="label">Repeatability of the mean, u<sub>A</sub></span><strong data-value="meanUncertainty">—</strong><p>Estimated single-reading scatter divided by √n.</p></div>
+          <div class="metric"><span class="label">Shared calibration, u<sub>cal</sub></span><strong data-value="calibrationUncertainty">—</strong><p>Rectangular half-width a divided by √3. Shared across all readings.</p></div>
+        </div>
+        <p class="calculation-line">Raw mean: <strong data-value="rawMean">—</strong> · Applied correction: <strong data-value="correction">—</strong><br>Sample standard deviation of readings, s: <strong data-value="sampleSD">—</strong></p>
+        <p class="small">Budget and projection table values use six significant digits; chart ticks are abbreviated. Standard uncertainty is not a guaranteed bound or an automatic confidence percentage.</p>
+        <p id="zero-scatter-note" class="notice" hidden>These recorded values show zero scatter. Display resolution, shared offsets and other omitted effects can remain. Equal readings do not establish an exact true value.</p>
+        <h3>Look at the acquisition order</h3>
+        <figure>
+          <div id="readings-chart" class="chart-scroll" tabindex="0" aria-label="Readings chart; scroll horizontally on a narrow screen"></div>
+          <figcaption>Each point is a recorded reading minus the raw mean. A shared correction shifts every reading equally, so it does not change this plot. A trend is a reason to investigate stability; the chart does not test independence.</figcaption>
+        </figure>
+        <details><summary>Read every recorded value</summary><div class="table-scroll" tabindex="0" aria-label="Recorded readings table"><table><caption id="readings-table-caption"></caption><thead><tr><th scope="col">Reading</th><th scope="col">Recorded</th><th scope="col">Corrected</th></tr></thead><tbody id="readings-table-body"></tbody></table></div></details>
+        <h3>3. Imagine more independent readings</h3>
+        <p class="small">This projection keeps the estimated single-reading scatter and calibration information fixed. It is a planning comparison, not additional observed data. Copying the existing rows does not create independent evidence.</p>
+        <ul class="legend" aria-label="Chart legend"><li class="combined">Combined</li><li class="repeatability">Repeatability of mean</li><li class="calibration">Shared calibration</li></ul>
+        <figure>
+          <div id="projection-chart" class="chart-scroll" tabindex="0" aria-label="Sample-size projection chart; scroll horizontally on a narrow screen"></div>
+          <figcaption id="projection-floor"></figcaption>
+        </figure>
+        <div class="table-scroll" tabindex="0" aria-label="Projected uncertainty table"><table class="projection-table"><caption id="projection-table-caption"></caption><thead><tr><th scope="col">Sample size</th><th scope="col">Repeatability</th><th scope="col">Calibration</th><th scope="col">Combined</th></tr></thead><tbody id="projection-table-body"></tbody></table></div>
+      </section>
+    </div>
+    <div class="next-steps">
+      <section class="panel" aria-labelledby="assumptions-heading">
+        <h2 id="assumptions-heading">What this model assumes</h2>
+        <ul>
+          <li>Repeat readings are independent observations of one stable quantity. Their scatter estimates repeatability.</li>
+          <li>A recognized additive calibration correction has been applied. Its remaining uncertainty is shared across every reading.</li>
+          <li>The correction's stated ±a range is modeled as rectangular, and its uncertainty is independent of the repeatability component.</li>
+          <li>Other effects are outside this two-component teaching model. A real uncertainty budget may need resolution, drift, correlations and other inputs.</li>
+        </ul>
+        <p class="formula">u<sub>A</sub> = s / √n<br>u<sub>cal</sub> = a / √3<br>u<sub>c</sub> = √(u<sub>A</sub>² + u<sub>cal</sub>²)</p>
+        <p class="small">Type A and Type B describe evaluation methods. They do not mean “random” and “systematic,” and do not by themselves say what averaging will reduce.</p>
+      </section>
+      <section class="panel" aria-labelledby="practice-heading">
+        <h2 id="practice-heading">Try it, then explain it</h2>
+        <ol>
+          <li>Compare the first two presets. Which uncertainty component changes even though every reading stays the same?</li>
+          <li>Change only the additive correction. What moves, and why does the scatter stay fixed?</li>
+          <li>Enter 9.8, 9.9, 10.0, 10.1, 10.2. What could their acquisition order suggest that a mean alone hides?</li>
+        </ol>
+        <details><summary>Check your reasoning</summary><p>The calibration half-width changes the shared component and the combined result. An additive correction shifts the estimate, leaving deviations from the mean unchanged. The ordered readings may suggest drift; more evidence is needed before using an independent-repeatability model.</p></details>
+        <h3>Keep the practice questions</h3>
+        <p class="small">Twelve original questions connect correction signs, sample scatter, shared uncertainty and experimental decisions. Download the JSON deck for a RecallWeave version that supports local course import.</p>
+        <button id="download-measurement-deck" type="button">Download practice deck (.json)</button>
+        <p id="deck-download-status" class="status" role="status" aria-live="polite"></p>
+      </section>
+    </div>
+  </main>
+  <footer>
+    <p>Original AI-assisted educational examples for RecallWeave. This lab illustrates a specified model; it does not certify an instrument, a real measurement or a learning outcome.</p>
+    <p>Primary references: NIST Technical Note 1297, B. N. Taylor and C. E. Kuyatt (1994).</p>
+    <ul><li><a href="https://www.nist.gov/pml/nist-technical-note-1297/nist-tn-1297-appendix-law-propagation-uncertainty" rel="noreferrer">Mean and propagation equations</a></li><li><a href="https://www.nist.gov/pml/nist-technical-note-1297/nist-tn-1297-4-type-b-evaluation-standard-uncertainty" rel="noreferrer">Rectangular uncertainty model</a></li><li><a href="https://www.nist.gov/pml/nist-technical-note-1297/nist-tn-1297-5-combined-standard-uncertainty" rel="noreferrer">Corrections and combined uncertainty</a></li></ul>
+    <p>Reference links require a connection only if you choose to follow them. Calculations, charts and the deck download work offline.</p>
+  </footer>
+  <script id="measurement-deck" type="application/json">"{\n  \"format\": \"recallweave-deck/1\",\n  \"title\": \"Measurement uncertainty: what more readings can tell you\",\n  \"attribution\": \"Original AI-assisted questions, fictional measurements and worked explanations by RecallWeave contributors, 2026-10-08. Conceptual references: B. N. Taylor and C. E. Kuyatt, NIST Technical Note 1297 (1994), sections 2–5 and Appendix A. https://www.nist.gov/pml/nist-technical-note-1297/nist-tn-1297-appendix-law-propagation-uncertainty ; https://www.nist.gov/pml/nist-technical-note-1297/nist-tn-1297-4-type-b-evaluation-standard-uncertainty ; https://www.nist.gov/pml/nist-technical-note-1297/nist-tn-1297-5-combined-standard-uncertainty . No NIST question or exercise text is reproduced. This is an introductory two-component measurement model, not a complete uncertainty budget or validated assessment.\",\n  \"license\": \"CC BY 4.0 for this original course content; attribute RecallWeave contributors and retain the source acknowledgments. No endorsement by NIST is implied. https://creativecommons.org/licenses/by/4.0/\",\n  \"concepts\": [\n    \"Readings and correction\",\n    \"Scatter and mean\",\n    \"Shared calibration\",\n    \"Combining and deciding\"\n  ],\n  \"items\": [\n    {\n      \"id\": \"measurement-mean-correction\",\n      \"concept\": \"Readings and correction\",\n      \"prerequisites\": [],\n      \"prompt\": \"A fictional length check gives 9, 11, 10 and 10 mm. The calibration report says to ADD a correction of −0.4 mm to each reading. What is the corrected mean?\",\n      \"options\": [\"10.4 mm\", \"8.4 mm\", \"9.6 mm\", \"10.0 mm\"],\n      \"answer\": 2,\n      \"explanation\": \"The raw mean is (9 + 11 + 10 + 10) / 4 = 10 mm. The stated additive correction is −0.4 mm, so the corrected mean is 9.6 mm. A shared correction is applied once to the mean, which gives the same result as applying it once to each reading and then averaging. Applying the −0.4 mm correction four times to the mean would give 8.4 mm and would count the same correction repeatedly.\",\n      \"transfer\": \"If a thermometer's stated additive correction were +0.2 °C, write the corrected mean for raw readings 18.0, 18.2 and 18.1 °C.\"\n    },\n    {\n      \"id\": \"measurement-known-high-reading\",\n      \"concept\": \"Readings and correction\",\n      \"prerequisites\": [],\n      \"prompt\": \"A check against a reference shows that an instrument reads 0.30 mm too high over the range used. Treat that correction estimate as given; its uncertainty is considered separately. Which action compensates for this known effect?\",\n      \"options\": [\n        \"Add −0.30 mm to the mean reading.\",\n        \"Add +0.30 mm to the mean reading.\",\n        \"Divide the mean reading by the count.\",\n        \"Collect repeats and keep the raw mean.\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"A reading that is high by 0.30 mm is compensated by adding −0.30 mm. Repeating the same measurement does not remove an effect shared by all readings. The correction estimate and the uncertainty of that estimate are different quantities; applying a correction does not make its uncertainty disappear.\",\n      \"transfer\": \"Describe one check that could reveal an offset shared by every reading, even when those readings agree closely.\"\n    },\n    {\n      \"id\": \"measurement-offset-scatter\",\n      \"concept\": \"Readings and correction\",\n      \"prerequisites\": [],\n      \"prompt\": \"The same exact additive correction of +2 mm is applied to each reading in 8, 10, 10 and 12 mm. Which statement describes the mean and sample standard deviation after correction?\",\n      \"options\": [\n        \"The mean stays fixed; the scatter rises by 2 mm.\",\n        \"The mean rises by 2 mm; the scatter rises by 2 mm.\",\n        \"The mean stays fixed; the scatter falls by 2 mm.\",\n        \"The mean rises by 2 mm; the scatter stays fixed.\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"Every reading and the mean shift by the same 2 mm. Each difference from the mean is unchanged: (x_i + 2) − (mean + 2) = x_i − mean. Sample standard deviation depends on those differences, so the observed scatter stays fixed. This statement treats the shift as exact; uncertainty about a real calibration correction is a separate component.\",\n      \"transfer\": \"Try a positive and a negative correction in the measurement lab. Which displayed values should change, and which should stay the same?\"\n    },\n    {\n      \"id\": \"measurement-sample-spread\",\n      \"concept\": \"Scatter and mean\",\n      \"prerequisites\": [\"Readings and correction\"],\n      \"prompt\": \"Four independent readings of one stable quantity are 8, 10, 10 and 12 mm. Their mean is 10 mm and their squared deviations sum to 8 mm². Using sample standard deviation s = sqrt(sum of squared deviations / (n − 1)), what is the estimated repeatability standard uncertainty of the mean, s / sqrt(n)?\",\n      \"options\": [\"About 1.633 mm\", \"About 0.816 mm\", \"About 1.414 mm\", \"About 0.408 mm\"],\n      \"answer\": 1,\n      \"explanation\": \"With n = 4, s = sqrt(8 / 3) ≈ 1.633 mm. The estimated standard deviation of the mean is s / sqrt(4) = 1.633 / 2 ≈ 0.816 mm. The 1.633 mm value describes the sample scatter of individual readings. Using n instead of n − 1 changes the sample scatter estimate, and dividing by n instead of sqrt(n) would reduce the uncertainty too much.\",\n      \"transfer\": \"For independent readings 1, 2 and 3 units, calculate the sample mean, sample standard deviation and repeatability standard uncertainty of the mean separately.\"\n    },\n    {\n      \"id\": \"measurement-more-independent-readings\",\n      \"concept\": \"Scatter and mean\",\n      \"prerequisites\": [\"Readings and correction\"],\n      \"prompt\": \"For planning, keep the estimated single-reading scatter s fixed and assume future readings will be independent observations of the same stable quantity. If sample size rises from 5 to 20, what happens to the projected repeatability standard uncertainty of the mean?\",\n      \"options\": [\n        \"It becomes one quarter of its previous value.\",\n        \"It remains equal to its previous value.\",\n        \"It becomes four times its previous value.\",\n        \"It becomes one half of its previous value.\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"The projected component is s / sqrt(n). Since 20 is four times 5, its denominator becomes twice as large and the component halves. This is a projection at fixed s. The scatter estimated from a future sample can differ, and pasting the same five recorded values four times does not create twenty independent observations.\",\n      \"transfer\": \"At fixed estimated scatter, by what factor would the number of independent readings need to grow to reduce this component to one third?\"\n    },\n    {\n      \"id\": \"measurement-identical-readings\",\n      \"concept\": \"Scatter and mean\",\n      \"prerequisites\": [\"Readings and correction\"],\n      \"prompt\": \"A display reports 10.00 mm on each of five genuine repeat measurements. The calculated sample scatter is zero. Which conclusion is supported by those displayed values alone?\",\n      \"options\": [\n        \"The true length is exactly 10.00 mm.\",\n        \"The recorded values show no observed scatter.\",\n        \"The instrument needs no calibration correction.\",\n        \"All possible uncertainty components are zero.\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"The recorded values are identical, so their computed scatter is zero. That does not establish an exact true value, a perfect calibration or a complete absence of uncertainty. Display resolution, a shared offset and other effects can remain. Genuine repeated equal readings are valid observations; their numerical equality alone neither proves nor disproves independence.\",\n      \"transfer\": \"Use the lab's identical-readings preset. Explain why its shared calibration component remains even though the displayed repeatability component is zero.\"\n    },\n    {\n      \"id\": \"measurement-rectangular-halfwidth\",\n      \"concept\": \"Shared calibration\",\n      \"prerequisites\": [\"Readings and correction\"],\n      \"prompt\": \"The one calibration correction shared by all readings is modeled as equally plausible anywhere from −0.30 to +0.30 mm around its stated center. For this explicitly rectangular model, standard uncertainty is half-width a / sqrt(3). What is that component?\",\n      \"options\": [\"About 0.173 mm\", \"About 0.300 mm\", \"About 0.600 mm\", \"About 0.100 mm\"],\n      \"answer\": 0,\n      \"explanation\": \"The interval has full width 0.60 mm and half-width a = 0.30 mm. Its standard uncertainty is 0.30 / sqrt(3) ≈ 0.173 mm. The rectangular distribution is an assumption about the correction, not a property inferred from the repeat readings. A different distribution or interpretation of the stated limits can require a different calculation.\",\n      \"transfer\": \"A rectangular correction model has limits −0.12 to +0.12 units about its center. Identify the full width, half-width and standard uncertainty.\"\n    },\n    {\n      \"id\": \"measurement-shared-component\",\n      \"concept\": \"Shared calibration\",\n      \"prerequisites\": [\"Readings and correction\"],\n      \"prompt\": \"Every reading uses the same uncertain additive calibration correction. Its standard uncertainty is 0.20 mm. No new calibration information is obtained. If you average 100 independent repeat readings, what is this shared calibration contribution to the uncertainty of the mean?\",\n      \"options\": [\"0.002 mm\", \"0.020 mm\", \"0.200 mm\", \"2.000 mm\"],\n      \"answer\": 2,\n      \"explanation\": \"The mean of (x_1 + C), ..., (x_100 + C) contains C once: mean(x) + C. The same uncertain C is common to all readings, so its contribution stays 0.20 mm. It is the independent repeat-to-repeat component that can shrink with sample size. Treating the calibration correction as a new independent draw for each reading would describe a different measurement process.\",\n      \"transfer\": \"Write the average of three readings that all share correction C, then simplify the terms involving C.\"\n    },\n    {\n      \"id\": \"measurement-type-a-b\",\n      \"concept\": \"Shared calibration\",\n      \"prerequisites\": [\"Readings and correction\"],\n      \"prompt\": \"An uncertainty component is estimated from a statistical analysis of repeated observations; another is estimated from a stated rectangular range. In NIST's Type A / Type B terminology, what distinguishes these labels?\",\n      \"options\": [\n        \"Whether a component must decrease with sample size.\",\n        \"The method used to evaluate an uncertainty component.\",\n        \"Whether a component is random or systematic in origin.\",\n        \"The size of a component compared with the corrected mean.\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"Type A and Type B describe evaluation methods. Here the statistical evaluation is Type A and the assumed-distribution evaluation is Type B. The labels do not by themselves tell you whether an effect is shared across observations, whether averaging reduces it, or how large it is. For example, uncertainty in a shared calibration correction can itself have been estimated statistically.\",\n      \"transfer\": \"Suppose a calibration correction is estimated by repeated comparisons against a reference. Could its evaluation be Type A while its uncertainty is still shared by your later readings? Explain.\"\n    },\n    {\n      \"id\": \"measurement-independent-combination\",\n      \"concept\": \"Combining and deciding\",\n      \"prerequisites\": [\"Scatter and mean\", \"Shared calibration\"],\n      \"prompt\": \"For a corrected mean, the repeatability standard uncertainty is 0.30 mm and the shared calibration standard uncertainty is 0.40 mm. Assume these two components are independent and the additive model is complete for this exercise. What is their combined standard uncertainty?\",\n      \"options\": [\"0.10 mm\", \"0.35 mm\", \"0.70 mm\", \"0.50 mm\"],\n      \"answer\": 3,\n      \"explanation\": \"For independent components in this additive model, variances add: u_c = sqrt(0.30² + 0.40²) = sqrt(0.25) = 0.50 mm. Adding the two standard uncertainties directly gives 0.70 mm and is not this variance calculation. If the components were correlated, covariance would also matter. A standard uncertainty of 0.50 mm alone does not specify a guaranteed interval or a universal coverage percentage.\",\n      \"transfer\": \"Combine independent standard uncertainties of 0.06 and 0.08 units. State the independence assumption alongside the result.\"\n    },\n    {\n      \"id\": \"measurement-calibration-floor\",\n      \"concept\": \"Combining and deciding\",\n      \"prerequisites\": [\"Scatter and mean\", \"Shared calibration\"],\n      \"prompt\": \"The current repeatability component is 0.30 mm and the shared calibration component is 0.40 mm. Assume these two uncertainty components are independent. Plan four times as many independent readings while holding estimated scatter and calibration information fixed. What is the projected combined standard uncertainty?\",\n      \"options\": [\"About 0.125 mm\", \"About 0.250 mm\", \"About 0.427 mm\", \"About 0.850 mm\"],\n      \"answer\": 2,\n      \"explanation\": \"Four times the independent readings halves the projected repeatability component to 0.15 mm. The shared calibration component stays 0.40 mm. Their combination is sqrt(0.15² + 0.40²) = sqrt(0.1825) ≈ 0.427 mm. Under this model, collecting more readings approaches a 0.40 mm floor; improving the calibration information is a different intervention.\",\n      \"transfer\": \"Compare collecting more readings with reducing the calibration half-width in the lab. Which intervention changes the limiting floor, and why?\"\n    },\n    {\n      \"id\": \"measurement-order-and-assumptions\",\n      \"concept\": \"Combining and deciding\",\n      \"prerequisites\": [\"Scatter and mean\", \"Shared calibration\"],\n      \"prompt\": \"Readings taken in order are 9.8, 9.9, 10.0, 10.1 and 10.2 mm. A calculation returns a mean and scatter, but the steady rise may reflect drift. What is the most justified next step before relying on an s / sqrt(n) projection for future measurements?\",\n      \"options\": [\n        \"Check stability and dependence in the measurement process.\",\n        \"Shuffle the recorded rows until the trend is no longer visible.\",\n        \"Copy the rows ten times to reduce the calculated uncertainty.\",\n        \"Declare a fixed coverage percentage from the standard uncertainty.\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"Computing a mean and scatter does not establish the assumptions behind the projection. A pattern in acquisition order gives a reason to investigate stability, dependence and omitted effects. Reordering the same observations changes neither their mean nor their scatter and cannot remove physical drift. Copying rows is not new evidence, and a standard uncertainty does not automatically supply a coverage probability.\",\n      \"transfer\": \"Suggest one change to a measurement procedure that could help distinguish drift from independent repeatability, and identify what new evidence it would provide.\"\n    }\n  ]\n}\n"</script>
+  <script>
+/**
+ * Educational two-component model for repeated measurements.
+ * The readings estimate repeatability. One additive correction, with a rectangular
+ * uncertainty distribution, is shared by every reading. The two components are
+ * assumed independent; a sample-size projection is not additional observed data.
+ * References and limits: courses/measurement-uncertainty.md.
+ */
+const MEASUREMENT_LIMITS = Object.freeze({
+  minReadings: 2,
+  maxReadings: 100,
+  minNonzeroMagnitude: 1e-12,
+  maxMagnitude: 1e9,
+  maxTextLength: 12000,
+  maxProjectedReadings: 10000,
+});
+
+const decimal = /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$/;
+
+function checkedNumber(value, name, nonnegative = false) {
+  if (typeof value !== 'number' || !Number.isFinite(value)) {
+    throw new Error(`${name} must be a finite number.`);
+  }
+  if (Math.abs(value) > MEASUREMENT_LIMITS.maxMagnitude ||
+      (value !== 0 && Math.abs(value) < MEASUREMENT_LIMITS.minNonzeroMagnitude)) {
+    throw new Error(`${name} must be zero or have magnitude from 1e-12 to 1e9.`);
+  }
+  if (nonnegative && value < 0) throw new Error(`${name} must be zero or positive.`);
+  return value === 0 ? 0 : value;
+}
+
+function parseMeasurementNumber(text, name = 'Value', nonnegative = false) {
+  if (typeof text !== 'string' || !decimal.test(text.trim())) {
+    throw new Error(`${name} must be one decimal number, for example 10.2 or 1.02e1.`);
+  }
+  const value = Number(text.trim());
+  // A nonzero decimal too small for Number must not silently become an exact zero.
+  if (value === 0 && /[1-9]/.test(text.trim().split(/[eE]/)[0])) {
+    throw new Error(`${name} is too small; use zero or a magnitude of at least 1e-12.`);
+  }
+  return checkedNumber(value, name, nonnegative);
+}
+
+function parseReadings(text) {
+  if (typeof text !== 'string' || text.length > MEASUREMENT_LIMITS.maxTextLength) {
+    throw new Error('Readings must be text of at most 12,000 characters.');
+  }
+  const trimmed = text.trim();
+  if (!trimmed) throw new Error('Enter at least two readings.');
+  // Whitespace may separate readings, but an empty comma-separated field is a
+  // missing observation. Never silently discard it and change the sample size.
+  const parts = trimmed.split(',');
+  if (parts.some(part => !part.trim())) {
+    throw new Error('A reading is missing beside a comma. Enter it or remove that comma.');
+  }
+  const tokens = parts.flatMap(part => part.trim().split(/\s+/));
+  if (tokens.length < MEASUREMENT_LIMITS.minReadings || tokens.length > MEASUREMENT_LIMITS.maxReadings) {
+    throw new Error('Enter 2–100 readings of the same quantity.');
+  }
+  return Object.freeze(tokens.map((token, index) => parseMeasurementNumber(token, `Reading ${index + 1}`)));
+}
+
+function compensatedSum(values) {
+  let sum = 0;
+  let correction = 0;
+  for (const value of values) {
+    const next = sum + value;
+    correction += Math.abs(sum) >= Math.abs(value)
+      ? (sum - next) + value
+      : (value - next) + sum;
+    sum = next;
+  }
+  return sum + correction;
+}
+
+function summarizeMeasurements({ readings, correction = 0, calibrationHalfWidth = 0 }) {
+  if (!Array.isArray(readings) || readings.length < MEASUREMENT_LIMITS.minReadings ||
+      readings.length > MEASUREMENT_LIMITS.maxReadings) {
+    throw new Error('Supply 2–100 readings of the same quantity.');
+  }
+  const accepted = Object.freeze(Array.from(readings, (value, index) => checkedNumber(value, `Reading ${index + 1}`)));
+  const appliedCorrection = checkedNumber(correction, 'Additive correction');
+  const halfWidth = checkedNumber(calibrationHalfWidth, 'Calibration half-width', true);
+  const n = accepted.length;
+  // Center on a reading before summation, avoiding subtraction of nearly equal
+  // raw second moments when the readings have a large common offset.
+  const anchor = accepted[0];
+  const deviations = accepted.map(value => value - anchor);
+  const meanDeviation = compensatedSum(deviations) / n;
+  // Use the compensated original sum for the estimate: adding a large anchor
+  // back to its nearly cancelling mean deviation can lose a small true mean.
+  const rawMean = compensatedSum(accepted) / n;
+  const centered = deviations.map(value => value - meanDeviation);
+  const scale = Math.max(...centered.map(Math.abs));
+  const sampleSD = scale === 0 ? 0 : scale * Math.sqrt(
+    compensatedSum(centered.map(value => (value / scale) ** 2)) / (n - 1));
+  const meanUncertainty = sampleSD / Math.sqrt(n);
+  const calibrationUncertainty = halfWidth / Math.sqrt(3);
+  return Object.freeze({
+    readings: accepted,
+    n,
+    rawMean,
+    correction: appliedCorrection,
+    correctedMean: rawMean + appliedCorrection,
+    sampleSD,
+    meanUncertainty,
+    calibrationHalfWidth: halfWidth,
+    calibrationUncertainty,
+    combinedUncertainty: Math.hypot(meanUncertainty, calibrationUncertainty),
+  });
+}
+
+/** Hold the estimated reading scatter and shared calibration information fixed. */
+function projectUncertainty({ sampleSD, calibrationHalfWidth, sampleSizes }) {
+  if (typeof sampleSD !== 'number' || !Number.isFinite(sampleSD) || sampleSD < 0 ||
+      sampleSD > 2 * MEASUREMENT_LIMITS.maxMagnitude) {
+    throw new Error('Projected reading scatter must be finite and between 0 and 2e9.');
+  }
+  const halfWidth = checkedNumber(calibrationHalfWidth, 'Calibration half-width', true);
+  if (!Array.isArray(sampleSizes) || sampleSizes.length < 1 || sampleSizes.length > 100 ||
+      Array.from(sampleSizes).some(n => !Number.isInteger(n) || n < 2 || n > MEASUREMENT_LIMITS.maxProjectedReadings)) {
+    throw new Error('Projected sample sizes must be integers from 2 to 10,000.');
+  }
+  const calibrationUncertainty = halfWidth / Math.sqrt(3);
+  return Object.freeze(sampleSizes.map(n => {
+    const meanUncertainty = sampleSD / Math.sqrt(n);
+    return Object.freeze({
+      n,
+      meanUncertainty,
+      calibrationUncertainty,
+      combinedUncertainty: Math.hypot(meanUncertainty, calibrationUncertainty),
+    });
+  }));
+}
+
+
+/** The standalone builder inlines this module; it makes no network/storage calls. */
+const byId = id => document.getElementById(id);
+const form = byId('measurement-form');
+const results = byId('measurement-results');
+const errorBox = byId('lab-error');
+const status = byId('calculation-status');
+const format = value => value === 0 ? '0' : Number(value.toPrecision(6)).toString();
+const formatTick = value => {
+  if (value === 0) return '0';
+  const magnitude = Math.abs(value);
+  return magnitude >= 1e4 || magnitude < 1e-3
+    ? value.toExponential(2).replace(/\.?0+(?=e)/, '')
+    : Number(value.toPrecision(3)).toString();
+};
+const presets = Object.freeze({
+  repeatability: { readings: '9.8, 10.2, 9.9, 10.1, 10.0', correction: '-0.04', halfWidth: '0.02' },
+  calibration: { readings: '9.8, 10.2, 9.9, 10.1, 10.0', correction: '-0.04', halfWidth: '0.30' },
+  identical: { readings: '10.00, 10.00, 10.00, 10.00, 10.00', correction: '-0.04', halfWidth: '0.10' },
+});
+
+function svgNode(name, attributes = {}, text) {
+  const node = document.createElementNS('http://www.w3.org/2000/svg', name);
+  for (const [key, value] of Object.entries(attributes)) node.setAttribute(key, String(value));
+  if (text !== undefined) node.textContent = text;
+  return node;
+}
+
+function chartBase(id, title, description) {
+  const svg = svgNode('svg', { viewBox: '0 0 720 270', role: 'img', 'aria-labelledby': `${id}-title ${id}-description` });
+  svg.append(svgNode('title', { id: `${id}-title` }, title));
+  svg.append(svgNode('desc', { id: `${id}-description` }, description));
+  return svg;
+}
+
+function horizontalGuide(svg, value, y, label) {
+  svg.append(svgNode('line', { x1: 96, x2: 694, y1: y, y2: y, class: 'grid-line' }));
+  svg.append(svgNode('text', { x: 86, y: y + 4, 'text-anchor': 'end', class: 'axis-label' }, label ?? formatTick(value)));
+}
+
+function readingsChart(model, unit) {
+  const deviations = model.readings.map(value => value - model.rawMean);
+  const magnitude = Math.max(...deviations.map(Math.abs)) || 1;
+  const span = magnitude * 1.18;
+  const y = value => 124 - value / span * 98;
+  const x = index => 108 + index / (model.n - 1) * 574;
+  const svg = chartBase('readings', 'Readings in acquisition order',
+    `${model.n} readings, each shown as its difference from the raw mean. Unit: ${unit}. The table lists every recorded value.`);
+  for (const tick of [-1, -0.5, 0, 0.5, 1]) horizontalGuide(svg, magnitude * tick, y(magnitude * tick));
+  svg.append(svgNode('text', { x: 395, y: 262, 'text-anchor': 'middle', class: 'axis-label' }, 'Reading number (acquisition order)'));
+  svg.append(svgNode('text', { x: 16, y: 124, transform: 'rotate(-90 16 124)', 'text-anchor': 'middle', class: 'axis-label' }, 'Difference from mean'));
+  svg.append(svgNode('text', { x: 96, y: 16, class: 'axis-label' }, `Difference unit: ${unit}`));
+  svg.append(svgNode('line', { x1: 96, x2: 694, y1: y(0), y2: y(0), class: 'mean-line' }));
+  svg.append(svgNode('polyline', { points: deviations.map((value, i) => `${x(i)},${y(value)}`).join(' '), class: 'reading-line' }));
+  deviations.forEach((value, i) => {
+    svg.append(svgNode('circle', { cx: x(i), cy: y(value), r: model.n > 40 ? 2.5 : 4, class: 'reading-point' }));
+    if (model.n <= 10 || i === 0 || i === model.n - 1 || (i + 1) % Math.ceil(model.n / 8) === 0) {
+      svg.append(svgNode('text', { x: x(i), y: 243, 'text-anchor': 'middle', class: 'axis-label' }, i + 1));
+    }
+  });
+  byId('readings-chart').replaceChildren(svg);
+  const rows = model.readings.map((value, index) => {
+    const row = document.createElement('tr');
+    for (const [column, text] of [index + 1, value, value + model.correction].entries()) {
+      const cell = document.createElement(column === 0 ? 'th' : 'td');
+      if (column === 0) cell.scope = 'row';
+      cell.textContent = String(text);
+      row.append(cell);
+    }
+    return row;
+  });
+  byId('readings-table-body').replaceChildren(...rows);
+  byId('readings-table-caption').textContent = `All ${model.n} recorded readings and their corrected values (${unit}).`;
+}
+
+function projectionChart(model, points, unit) {
+  const maximum = points[0].combinedUncertainty || 1;
+  const y = value => 224 - value / maximum * 190;
+  const x = n => 108 + Math.log(n / model.n) / Math.log(100) * 574;
+  const svg = chartBase('projection', 'Projected uncertainty with more independent readings',
+    `At fixed estimated reading scatter, the shared calibration component stays ${format(model.calibrationUncertainty)} ${unit}. The adjacent table gives all projected values.`);
+  for (const fraction of [0, 0.25, 0.5, 0.75, 1]) horizontalGuide(svg, maximum * fraction, y(maximum * fraction));
+  svg.append(svgNode('text', { x: 395, y: 263, 'text-anchor': 'middle', class: 'axis-label' }, 'Hypothetical sample size (log scale)'));
+  svg.append(svgNode('text', { x: 16, y: 128, transform: 'rotate(-90 16 128)', 'text-anchor': 'middle', class: 'axis-label' }, 'Standard uncertainty'));
+  svg.append(svgNode('text', { x: 96, y: 16, class: 'axis-label' }, `Uncertainty unit: ${unit}`));
+  for (const [key, style] of [['combinedUncertainty', 'combined'], ['meanUncertainty', 'repeatability'], ['calibrationUncertainty', 'calibration']]) {
+    svg.append(svgNode('polyline', { points: points.map(point => `${x(point.n)},${y(point[key])}`).join(' '), class: `series ${style}` }));
+    points.forEach(point => svg.append(svgNode('circle', { cx: x(point.n), cy: y(point[key]), r: 3.5, class: `point ${style}` })));
+  }
+  points.forEach(point => svg.append(svgNode('text', { x: x(point.n), y: 243, 'text-anchor': 'middle', class: 'axis-label' }, point.n)));
+  byId('projection-chart').replaceChildren(svg);
+  const rows = points.map((point, index) => {
+    const row = document.createElement('tr');
+    const heading = document.createElement('th');
+    heading.scope = 'row';
+    heading.textContent = `${point.n}${index === 0 ? ' (current n)' : ''}`;
+    row.append(heading);
+    for (const key of ['meanUncertainty', 'calibrationUncertainty', 'combinedUncertainty']) {
+      const cell = document.createElement('td');
+      cell.textContent = format(point[key]);
+      cell.dataset.component = key;
+      row.append(cell);
+    }
+    return row;
+  });
+  byId('projection-table-body').replaceChildren(...rows);
+  byId('projection-table-caption').textContent = `Projected standard uncertainties (${unit}); estimated scatter and calibration information stay fixed.`;
+  byId('projection-floor').textContent = model.calibrationUncertainty === 0
+    ? 'This model includes no shared calibration uncertainty because its half-width is set to zero. That setting is an assumption, not evidence of perfect calibration.'
+    : `With these assumptions, more readings approach a floor of ${format(model.calibrationUncertainty)} ${unit}. Changing the calibration information can change that floor.`;
+}
+
+function retireResults() {
+  results.hidden = true;
+  for (const id of ['readings-chart', 'projection-chart', 'readings-table-body', 'projection-table-body']) byId(id).replaceChildren();
+  for (const node of results.querySelectorAll('[data-value]')) node.textContent = '—';
+  errorBox.hidden = true;
+  for (const input of form.querySelectorAll('[aria-invalid]')) input.removeAttribute('aria-invalid');
+  status.textContent = 'Inputs changed. Calculate to show the new case.';
+}
+
+function calculate(moveFocus = true) {
+  retireResults();
+  let field = byId('readings-input');
+  try {
+    const readings = parseReadings(field.value);
+    field = byId('correction-input');
+    const correction = parseMeasurementNumber(field.value, 'Additive correction');
+    field = byId('half-width-input');
+    const calibrationHalfWidth = parseMeasurementNumber(field.value, 'Calibration half-width', true);
+    field = byId('unit-input');
+    const unit = field.value.trim();
+    const visibleUnit = unit.replace(/[\p{White_Space}\p{Default_Ignorable_Code_Point}\p{Cc}]/gu, '');
+    if (!visibleUnit || unit.length > 16 || /\p{Cc}/u.test(unit)) throw new Error('Use a unit label of 1–16 visible characters, such as mm or ms.');
+    const model = summarizeMeasurements({ readings, correction, calibrationHalfWidth });
+    const points = projectUncertainty({ sampleSD: model.sampleSD, calibrationHalfWidth, sampleSizes: [model.n, model.n * 2, model.n * 4, model.n * 10, model.n * 100] });
+    for (const node of results.querySelectorAll('[data-value]')) {
+      const key = node.dataset.value;
+      node.textContent = key === 'n' ? String(model.n) : `${format(model[key])} ${unit}`;
+    }
+    readingsChart(model, unit);
+    projectionChart(model, points, unit);
+    byId('zero-scatter-note').hidden = model.sampleSD !== 0;
+    results.hidden = false;
+    status.textContent = `Calculated ${model.n} readings. Corrected mean ${format(model.correctedMean)} ${unit}; combined standard uncertainty ${format(model.combinedUncertainty)} ${unit}.`;
+    if (moveFocus) byId('results-heading').focus();
+  } catch (error) {
+    errorBox.textContent = error.message;
+    errorBox.hidden = false;
+    field.setAttribute('aria-invalid', 'true');
+    status.textContent = 'No current result. Correct the indicated input and calculate again.';
+    if (moveFocus) field.focus();
+  }
+}
+
+form.addEventListener('input', retireResults);
+form.addEventListener('submit', event => { event.preventDefault(); calculate(); });
+for (const button of document.querySelectorAll('[data-preset]')) {
+  button.addEventListener('click', () => {
+    const preset = presets[button.dataset.preset];
+    byId('readings-input').value = preset.readings;
+    byId('correction-input').value = preset.correction;
+    byId('half-width-input').value = preset.halfWidth;
+    byId('unit-input').value = 'mm';
+    calculate();
+  });
+}
+
+byId('download-measurement-deck').addEventListener('click', () => {
+  const downloadStatus = byId('deck-download-status');
+  let objectUrl;
+  let link;
+  try {
+    const deckText = JSON.parse(byId('measurement-deck').textContent);
+    objectUrl = URL.createObjectURL(new Blob([deckText], { type: 'application/json;charset=utf-8' }));
+    link = document.createElement('a');
+    link.href = objectUrl;
+    link.download = 'measurement-uncertainty.json';
+    document.body.append(link);
+    link.click();
+    downloadStatus.textContent = 'Practice deck offered to your browser. Check its download list for measurement-uncertainty.json.';
+  } catch {
+    downloadStatus.textContent = 'The browser could not start this download. The separate measurement-uncertainty.json file also contains the practice deck.';
+  } finally {
+    link?.remove();
+    if (objectUrl) setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
+  }
+});
+
+calculate(false);
+
+  </script>
+</body>
+</html>
