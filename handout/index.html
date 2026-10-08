@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>Course handouts · RecallWeave</title>
+  <link rel="stylesheet" href="./handout.css">
+</head>
+<body>
+  <header class="site-header handout-controls">
+    <a class="brand" href="../demo.html"><span class="brand-mark" aria-hidden="true">r</span> RecallWeave</a>
+    <nav aria-label="Related tools"><a href="../author.html">Deck studio <span aria-hidden="true">↗</span></a></nav>
+  </header>
+  <main>
+    <section class="intro handout-controls" aria-labelledby="page-title">
+      <p class="eyebrow">Course handouts</p>
+      <h1 id="page-title">A lesson, ready for paper.</h1>
+      <p class="intro-copy">Turn a checked deck into an unanswered worksheet and a separate answer key. Keep the original questions, option order and source credit.</p>
+    </section>
+    <div class="handout-layout">
+      <aside class="handout-controls" aria-label="Prepare your handout">
+        <section class="control-card file-card">
+          <p class="step-label">01 <span>Choose a deck</span></p>
+          <h2>Start with your lesson.</h2>
+          <p>Choose a local deck JSON, including a checked download from <a href="../author.html">Deck studio</a>.</p>
+          <input id="handout-file" type="file" accept=".json,application/json" hidden>
+          <button id="choose-handout-file" class="button primary" type="button">Choose deck JSON <span aria-hidden="true">↑</span></button>
+          <p class="quiet">No upload. Your file stays in this browser.</p>
+          <p id="handout-status" class="status" role="status" aria-live="polite">Choose a checked deck JSON to begin.</p>
+          <section id="handout-preview" class="pending-deck" aria-label="Check this selection" hidden>
+            <p class="eyebrow">Ready to use</p>
+            <h3 id="pending-handout-title" tabindex="-1"></h3>
+            <p id="pending-handout-summary" class="quiet"></p>
+            <p id="pending-handout-attribution" class="source-text"></p>
+            <p id="pending-handout-license" class="source-text quiet"></p>
+            <div class="pending-actions">
+              <button id="use-handout-deck" class="button primary" type="button">Use this deck</button>
+              <button id="cancel-handout-preview" class="button subtle" type="button">Cancel</button>
+            </div>
+          </section>
+        </section>
+        <section class="control-card">
+          <p class="step-label">02 <span>Prepare your copies</span></p>
+          <div id="selected-handout" hidden>
+            <h2 id="selected-handout-title"></h2>
+            <p id="selected-handout-summary" class="quiet"></p>
+          </div>
+          <fieldset id="selected-handout-controls" disabled>
+            <legend>Preview</legend>
+            <div class="mode-picker">
+              <label><input id="preview-worksheet" name="handout-kind" type="radio" value="worksheet" checked><span>Worksheet<small>Questions only</small></span></label>
+              <label><input id="preview-answer-key" name="handout-kind" type="radio" value="answer-key"><span>Answer key<small>Answers included</small></span></label>
+            </div>
+            <div class="copy-actions">
+              <h3>Student copy</h3>
+              <p class="quiet">Questions, choices and space to respond.</p>
+              <button id="print-worksheet" class="button primary" type="button">Print worksheet</button>
+              <button id="save-worksheet" class="button secondary" type="button">Save worksheet HTML <span aria-hidden="true">↓</span></button>
+            </div>
+            <div class="copy-actions answer-copy">
+              <h3>Answer key</h3>
+              <p class="quiet">Correct choices and the deck’s explanations. Save this copy separately.</p>
+              <button id="print-answer-key" class="button secondary" type="button">Print answer key</button>
+              <button id="save-answer-key" class="button secondary" type="button">Save answer key HTML <span aria-hidden="true">↓</span></button>
+            </div>
+          </fieldset>
+          <p class="quiet offline-note">Saved HTML opens on its own, offline. Your browser’s print dialog can also save a PDF.</p>
+        </section>
+      </aside>
+      <section class="paper-stage" aria-label="Print preview">
+        <div id="handout-empty" class="handout-empty">
+          <div class="empty-sheet" aria-hidden="true"><span></span><span></span><span></span><i></i><i></i><i></i></div>
+          <p class="eyebrow">Your lesson goes here</p>
+          <h2>Make room for thinking.</h2>
+          <p>Choose a deck and confirm it to see the questions-only worksheet. The answer key stays a separate choice.</p>
+          <span class="empty-caption">Local files · Original wording · Ready to print</span>
+        </div>
+        <article id="handout-paper" class="course-paper" hidden></article>
+      </section>
+    </div>
+    <footer class="site-footer handout-controls"><span>RecallWeave / Course handouts</span><span>From checked deck to printed lesson.</span></footer>
+  </main>
+  <script type="module" src="../src/course-handout-ui.mjs"></script>
+</body>
+</html>
