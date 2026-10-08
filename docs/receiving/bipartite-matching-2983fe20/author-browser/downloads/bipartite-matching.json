@@ -1,0 +1,212 @@
+{
+  "format": "recallweave-deck/1",
+  "title": "Make room for one more pair: bipartite matching",
+  "attribution": "Original examples, questions, distractors, worked explanations and implementation for RecallWeave, with AI assistance. Mathematical background: Michel X. Goemans, MIT 18.433, Lecture notes on bipartite matching (2015), https://math.mit.edu/~goemans/18433S15/matching-notes.pdf; Norbert Zeh, Algorithms II, Augmenting Paths, https://web.cs.dal.ca/~nzeh/Teaching/4113/book/matching/bipartite_maximum_matching/augmenting_paths.html. No reference exercise, figure or passage is copied.",
+  "license": "Original course content authored for Jacob’s RecallWeave project; no additional reuse license is granted here. Linked reference material retains its published terms.",
+  "concepts": [
+    "matching-rules",
+    "augmenting-paths",
+    "alternating-search",
+    "maximum-cardinality"
+  ],
+  "items": [
+    {
+      "id": "matching-valid",
+      "concept": "matching-rules",
+      "prerequisites": [],
+      "prompt": "The left vertices are A, B and C. The right vertices are X and Y. All six left–right edges exist. Which pair set is a valid matching?",
+      "options": [
+        "{A–X, B–X}",
+        "{A–X, C–Y}",
+        "{A–X, A–Y}",
+        "{A–X, B–Y, C–X}"
+      ],
+      "answer": 1,
+      "explanation": "A matching uses each vertex at most once. A–X and C–Y have four distinct endpoints. The other sets repeat X, A or X respectively. A vertex may have many available graph edges, but at most one of them may belong to the matching.",
+      "transfer": "List every unmatched vertex after choosing {A–X, C–Y}. Then describe one different valid matching of the same size."
+    },
+    {
+      "id": "matching-greedy-trap",
+      "concept": "matching-rules",
+      "prerequisites": [],
+      "prompt": "The only edges are A–X, A–Y and B–X. The current matching is {A–X}. How should it be classified?",
+      "options": [
+        "Maximum and perfect",
+        "Invalid because B is unmatched",
+        "Neither maximal nor maximum",
+        "Maximal, but not maximum"
+      ],
+      "answer": 3,
+      "explanation": "No single unused edge can be added: A–Y conflicts at A and B–X conflicts at X. The matching is therefore maximal. Replacing A–X with both A–Y and B–X gives a valid matching of size two, so the size-one matching is not maximum.",
+      "transfer": "Load the Greedy trap example. Before moving the trace, identify the free endpoints and explain why simply adding B–X would be invalid."
+    },
+    {
+      "id": "matching-perfect",
+      "concept": "matching-rules",
+      "prerequisites": [],
+      "prompt": "A bipartite graph has left vertices A, B, C and right vertices X, Y. It contains the matching {A–X, B–Y}. Which statement must be true, regardless of its other edges?",
+      "options": [
+        "The matching is maximum, but it is not perfect",
+        "The matching is perfect because every right vertex is matched",
+        "The matching cannot be maximum while any vertex is free",
+        "Its maximum status cannot be known without inspecting every other edge"
+      ],
+      "answer": 0,
+      "explanation": "Every pair needs a distinct right endpoint, and there are only two right vertices. This matching already has two pairs, meeting that upper bound. It is maximum. A perfect matching covers every vertex on both sides; C is free, so this matching is not perfect.",
+      "transfer": "Add a new right vertex Z. Give an added edge that makes a perfect matching possible, and explain why adding Z alone does not guarantee one."
+    },
+    {
+      "id": "matching-free-ends",
+      "concept": "augmenting-paths",
+      "prerequisites": [
+        "matching-rules"
+      ],
+      "prompt": "A simple path alternates between edges outside and inside the current matching. Which extra condition makes it an augmenting path?",
+      "options": [
+        "It starts and ends at vertices already matched",
+        "It contains an equal number of matched and unmatched edges",
+        "Both endpoint vertices are free in the current matching",
+        "Its vertices are all on the same side of the graph"
+      ],
+      "answer": 2,
+      "explanation": "An augmenting path starts and ends at unmatched vertices. Its first and last edges are outside the matching. Between them the path alternates, so there is one more edge to add than to remove. Reversing membership along the whole path then increases the matching size by one.",
+      "transfer": "Explain why an alternating path that begins at a free vertex but ends at a matched vertex does not, by itself, supply the same one-pair increase."
+    },
+    {
+      "id": "matching-exact-flip",
+      "concept": "augmenting-paths",
+      "prerequisites": [
+        "matching-rules"
+      ],
+      "prompt": "The current matching is {A–X}. An augmenting path is B → X → A → Y. What is the matching after flipping this whole path?",
+      "options": [
+        "{B–X, A–Y}",
+        "{A–X, B–X, A–Y}",
+        "{A–X, B–Y}",
+        "{B–Y}"
+      ],
+      "answer": 0,
+      "explanation": "B–X and A–Y were outside the matching and are added. X–A is the same undirected edge as A–X; it was matched and is removed. The result {B–X, A–Y} has no shared endpoint. Keeping A–X as well would make the result invalid, and B–Y need not be an edge at all.",
+      "transfer": "In the lab, stop at Path found, then move exactly one event. Compare the matching before and after the flip and name every removed and added edge."
+    },
+    {
+      "id": "matching-net-change",
+      "concept": "augmenting-paths",
+      "prerequisites": [
+        "matching-rules"
+      ],
+      "prompt": "An augmenting path contains five edges: unmatched, matched, unmatched, matched, unmatched. What happens to the number of matching pairs when the path is flipped?",
+      "options": [
+        "It increases by three because three edges are added",
+        "It increases by one because three edges are added and two removed",
+        "It decreases by two because two edges are removed",
+        "It stays the same because alternating paths preserve size"
+      ],
+      "answer": 1,
+      "explanation": "The whole-path operation adds the three previously unmatched edges and removes the two previously matched edges. Its net change is 3 − 2 = 1. Counting only additions would ignore the replacements that keep every endpoint in at most one pair.",
+      "transfer": "Load A longer rearrangement. Write the six vertices of the path in order, then check which three edge IDs are added and which two are removed."
+    },
+    {
+      "id": "matching-orientation",
+      "concept": "alternating-search",
+      "prerequisites": [
+        "augmenting-paths"
+      ],
+      "prompt": "To search for an augmenting path from the left side, how does this lab orient the edges of the current bipartite graph?",
+      "options": [
+        "Every edge points left to right",
+        "Every edge points right to left",
+        "Matched edges point left to right, unmatched edges right to left",
+        "Unmatched edges point left to right, matched edges right to left"
+      ],
+      "answer": 3,
+      "explanation": "From a left vertex, an unused edge can extend the proposed matching toward a right vertex. If that right vertex is already matched, the search follows its current matched edge backward to the left. These alternating directions reveal which existing pair would need replacement. The underlying graph edges remain undirected.",
+      "transfer": "For matching {A–X} with other edges A–Y and B–X, list all three search arrows. Which arrow changes direction when A–X is removed?"
+    },
+    {
+      "id": "matching-all-roots",
+      "concept": "alternating-search",
+      "prerequisites": [
+        "augmenting-paths"
+      ],
+      "prompt": "A, B and C are left vertices. A is matched, while B and C are free. The search from B alone finds no free right endpoint. What must happen before declaring the matching maximum?",
+      "options": [
+        "Declare maximum immediately because one free root failed",
+        "Remove A’s pair before searching again",
+        "Include C’s possible alternating paths too; all free left roots must be exhausted",
+        "Ignore C because one search root is enough in every bipartite graph"
+      ],
+      "answer": 2,
+      "explanation": "A failed search from one free left vertex does not exclude a path from another. The lab starts each breadth-first search with every free left vertex in declaration order. It can certify that no augmenting path exists only after this combined search is exhausted without reaching any free right endpoint.",
+      "transfer": "Use left {A, B}, right {X}, and only edge B–X, starting empty. Explain what would go wrong if a solver searched only from A and stopped."
+    },
+    {
+      "id": "matching-reset-search",
+      "concept": "alternating-search",
+      "prerequisites": [
+        "augmenting-paths"
+      ],
+      "prompt": "The lab has just flipped an augmenting path. Why does the next search clear its reached vertices and parent links?",
+      "options": [
+        "The matching changed, so some permitted search directions changed too",
+        "A breadth-first search is only allowed to visit one vertex in its lifetime",
+        "Old vertex labels become invalid after a flip",
+        "Clearing reachability reduces the size of the matching"
+      ],
+      "answer": 0,
+      "explanation": "Adding and removing matching edges reverses their permitted search directions. A vertex reached under the previous orientation may need a new parent or a new role in the next search. Fresh search state explores the new matching accurately. The matching itself is retained; only the search state is reset.",
+      "transfer": "Use the greedy trap’s final matching {A–Y, B–X}. Write the new direction of each edge and compare it with the starting orientation."
+    },
+    {
+      "id": "matching-stop",
+      "concept": "maximum-cardinality",
+      "prerequisites": [
+        "alternating-search"
+      ],
+      "prompt": "A complete alternating search from all free left vertices reaches no free right vertex. What conclusion is justified?",
+      "options": [
+        "The graph has no edges",
+        "The current matching is the only possible maximum matching",
+        "No augmenting path exists, so the current matching has maximum cardinality",
+        "Every vertex must be matched"
+      ],
+      "answer": 2,
+      "explanation": "Without an augmenting path, no larger matching exists. This establishes maximum size, not uniqueness and not perfect coverage. Isolated vertices or a shortage of neighbors may leave vertices free even in a maximum matching. Different maximum matchings can also have the same number of pairs.",
+      "transfer": "Give a graph with at least one edge where a maximum matching leaves a vertex free. Identify a valid maximum matching and explain the obstruction to another pair."
+    },
+    {
+      "id": "matching-order",
+      "concept": "maximum-cardinality",
+      "prerequisites": [
+        "alternating-search"
+      ],
+      "prompt": "Left labels are entered A, B and right labels X, Y. Edges are entered A–Y, A–X, B–X, B–Y. Starting empty, the lab uses all free left roots in entered order and eligible edges in entered order. What is the first pair added?",
+      "options": [
+        "B–X, because X is the first right label",
+        "A–Y, because A is explored first and A–Y is its first eligible edge",
+        "A–X, because every maximum algorithm must prefer X",
+        "B–Y, because breadth-first search reverses root order"
+      ],
+      "answer": 1,
+      "explanation": "The initial queue is A, B. A is explored first; among its outgoing edges, A–Y was entered before A–X. Y is free, so the one-edge path A → Y is found first. This deterministic choice makes the trace repeatable. It does not claim that every maximum matching algorithm chooses the same pairs.",
+      "transfer": "Keep the same graph but swap the first two entered edge lines. Predict the first pair. Can both runs still reach the same maximum size?"
+    },
+    {
+      "id": "matching-objective",
+      "concept": "maximum-cardinality",
+      "prerequisites": [
+        "alternating-search"
+      ],
+      "prompt": "A graph has left {A, B, C}, right {X, Y, Z}, and only edges A–X, B–X and C–Y. Which statement correctly describes its maximum matching?",
+      "options": [
+        "It has three pairs because both sides contain three vertices",
+        "It has one pair because X has two possible partners",
+        "It must contain A–X and B–X together",
+        "It has two pairs; A and B compete for X, and Z is isolated"
+      ],
+      "answer": 3,
+      "explanation": "At most one of A–X and B–X can be selected. C–Y supplies one additional independent pair, while no edge reaches Z. Thus {A–X, C–Y} and {B–X, C–Y} are two maximum matchings of size two. Equal side sizes alone do not guarantee a perfect matching.",
+      "transfer": "Add one edge that permits three pairs, and identify the resulting perfect matching. Then give an added edge that changes the graph but still leaves the maximum size at two."
+    }
+  ]
+}
