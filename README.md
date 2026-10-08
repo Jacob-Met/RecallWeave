@@ -48,6 +48,10 @@ Open **[Rates become change](courses/rates-accumulation-explorer.html)** for an 
 
 The [worked guide](courses/rates-accumulation.md) develops the examples from slopes and signed areas. Download the original [twelve-question course](courses/rates-accumulation.json) from the explorer, then choose it under **Bring your own lesson** in RecallWeave. The lesson, guide and current calculation download without a server or account. Rebuild the standalone explorer with `node tools/build-rates-accumulation.mjs`, or verify the checked-in file with `--check`.
 
+## Explore complex multiplication
+
+Open **[Turn, scale, repeat](courses/complex-plane-lab.html)** to multiply a starting complex point by a fixed multiplier, inspect equal-scale coordinates and follow up to eight repeated products. The offline explorer shows the zero cases explicitly and downloads the current experiment with its numeric values and conventions. Its [worked guide](courses/complex-plane.md) connects the algebra and geometry. Download the original [twelve-question lesson](courses/complex-plane.json), then choose it under **Bring your own lesson** in RecallWeave to study it with the existing review, practice and notes flow.
+
 ## Explore grouped rates
 
 Open **[When groups and totals disagree](courses/grouped-data-explorer.html)** for a separate offline lesson about group rates, pooled samples and a chosen common mix. Edit the recorded counts, inspect exact fractions and download the current comparison. The worked examples explain why both groups can favor one option while the pooled sample favors the other, and why this alone does not establish a causal effect.
@@ -69,6 +73,14 @@ Open the [Boolean explorer](courses/boolean-logic-explorer.html) directly from y
 Open the **[Euclidean algorithm explorer](courses/euclidean-algorithm-explorer.html)** directly from your files. Enter two nonnegative integers, inspect every exact division and remainder, and see the gcd expressed as an integer combination of the original pair. Previous, Next and Last division controls walk the full trace; an explicit download keeps the computed steps. The page explains zero inputs and distinguishes exact arithmetic from approximate diagram widths.
 
 The **[worked companion](courses/euclidean-algorithm.md)** includes proofs, examples and transfer responses. Download its original **[twelve-question course](courses/euclidean-algorithm.json)** and select it under **Bring your own lesson** to use RecallWeave's existing review, separate practice and saved-note flows. The explorer requires no server, account or dependency.
+
+## Explore counting principles
+
+Open **[Same labels. Different counts.](courses/counting-principles-explorer.html)** directly in a browser. Choose 0–8 label types and 0–6 items, then compare all four models: order matters or not, with or without reuse. Inspect every outcome through direct page controls; unordered selections appear once in canonical order. Exact counts and ordered-representation multiplicities explain why distinct unordered outcomes need not be equally likely.
+
+The explorer distinguishes one empty selection from an impossible selection. Editing the inputs retires the old result until you apply the new settings. Download the applied page of at most 24 outcomes, or save the original **[twelve-question course](courses/counting-principles.json)** and open it through **Bring your own lesson**, preview and **Start this deck**. The **[worked guide](courses/counting-principles.md)** develops the formulas, examples and transfer answers.
+
+This separate page works offline without dependencies or automatic storage. Rebuild it with `node tools/build-counting-principles.mjs`; `--check` verifies exact generated-source and embedded-course parity.
 
 ## Core and interaction
 
@@ -353,6 +365,12 @@ Build with `node tools/build_least_squares.mjs`; `--check` verifies the generate
 ## Mathematical induction: a base, a bridge, every integer
 
 [Open the offline proof lab](courses/mathematical-induction-lab.html), download the [twelve-question lesson](courses/mathematical-induction.json), or read the [worked guide](courses/mathematical-induction.md). Compare an arithmetic sum with a proposed formula, inspect the exact base and symbolic successor step, and see why a few matching values do not prove every case. The lab keeps its finite examples separate from the induction argument and saves an explicit proof record. Import its lesson JSON through the existing learner preview and Start this deck controls.
+
+## Momentum and collisions
+
+[Open the offline explorer](courses/momentum-collisions-explorer.html) to compare signed momentum and kinetic energy in ideal one-dimensional elastic and completely inelastic encounters. Enter two positive masses and signed incoming velocities, inspect exact fraction results on a shared velocity scale, and download the complete analysis. Equal or growing initial gaps explicitly produce no future collision endpoints.
+
+The [original twelve-question course](courses/momentum-collisions.json) imports through the existing learner's preview and **Start this deck** flow, including feedback, separate missed-item practice and study-note downloads. The [worked guide](courses/momentum-collisions.md) derives the formulas, explains the physical assumptions and provides build/check commands. Open the explorer directly from disk; it requires no server or network and saves nothing automatically.
 
 ## Solve two remainder conditions together
 
