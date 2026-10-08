@@ -1,0 +1,212 @@
+{
+  "format": "recallweave-deck/1",
+  "title": "Cache decisions: FIFO, LRU and capacity",
+  "attribution": "Original RecallWeave question wording, worked traces and explanations, 2026, authored with AI assistance. Algorithm background: Remzi H. Arpaci-Dusseau and Andrea C. Arpaci-Dusseau, Operating Systems: Three Easy Pieces, chapter 22, Beyond Physical Memory: Policies (https://pages.cs.wisc.edu/~remzi/OSTEP/vm-beyondphys-policy.pdf). The classic 1,2,3,4,1,2,5,1,2,3,4,5 FIFO anomaly sequence is credited to L. A. Bélády, R. A. Nelson and G. S. Shedler (1969). No source prose or figures are reproduced.",
+  "license": "CC0-1.0 for the original course wording and worked derivations. Referenced materials retain their own terms and are not included. Educational review guidance remains in RecallWeave's AI-DISCLOSURE.md.",
+  "concepts": [
+    "Requests and cache state",
+    "FIFO and recency",
+    "Capacity and misses",
+    "Reading a trace"
+  ],
+  "items": [
+    {
+      "id": "cache-count-hits",
+      "concept": "Requests and cache state",
+      "prerequisites": [],
+      "prompt": "A cache starts empty and can hold two distinct pages. It receives A, A, B, A, in that order. A hit means the requested page is present immediately before that request. How many hits and misses occur under either FIFO or LRU?",
+      "options": [
+        "Three hits and one miss.",
+        "Two hits and two misses.",
+        "One hit and three misses.",
+        "Zero hits and four misses."
+      ],
+      "answer": 1,
+      "explanation": "The first A is absent, so it misses and is loaded. The next A hits. B is absent, so it misses and fills the second slot. The last A hits because neither policy has had to evict a page. There are two hits and two misses; their sum is the four requests.",
+      "transfer": "Try B, B, B with capacity one. The first B misses and the next two hit. A repeated request is not a new distinct page, and a hit does not consume another slot."
+    },
+    {
+      "id": "cache-resident-not-seen",
+      "concept": "Requests and cache state",
+      "prerequisites": [],
+      "prompt": "An empty two-page FIFO cache receives A, B, C, A. The first three requests miss, and loading C evicts A. What happens on the final A?",
+      "options": [
+        "It hits because A appeared earlier in the sequence.",
+        "It is ignored because repeated page names are duplicates.",
+        "It misses because A is no longer resident.",
+        "It hits because the cache has already made three requests."
+      ],
+      "answer": 2,
+      "explanation": "A hit depends on the current contents, not whether the page has ever been requested. Before the final request the FIFO order is B, C. A is absent, so it misses, evicts B and leaves C, A. This trace has four misses even though only three distinct page names occur.",
+      "transfer": "At capacity three, A, B and C all remain resident before the final A. That last request then hits. Keep the initial state and request sequence fixed when comparing capacities."
+    },
+    {
+      "id": "cache-literal-identity",
+      "concept": "Requests and cache state",
+      "prerequisites": [],
+      "prompt": "In this lab, A and 1 are different literal page IDs. An empty two-page cache receives A, 1, A. What is the result?",
+      "options": [
+        "One miss, because A and 1 refer to the same page.",
+        "Three misses, because every request creates a new page.",
+        "Zero misses, because both IDs fit in the capacity.",
+        "Two misses followed by one hit."
+      ],
+      "answer": 3,
+      "explanation": "The first A and the first 1 are different absent pages, so both miss. They fill the two slots. The final A finds the original A still resident and hits. The letters and digits name pages; they are not page sizes, priorities or values to add.",
+      "transfer": "Changing the final A to B creates a third distinct page. That request misses and requires an eviction at capacity two. Naming a page with a digit does not give it a larger or smaller storage cost in this equal-size model."
+    },
+    {
+      "id": "cache-lru-refresh",
+      "concept": "FIFO and recency",
+      "prerequisites": [
+        "Requests and cache state"
+      ],
+      "prompt": "An empty three-page LRU cache receives A, B, C, A. Its order is displayed least recently used first. What is the order now, and which page will a following request D evict?",
+      "options": [
+        "B, C, A; D evicts B.",
+        "A, B, C; D evicts A.",
+        "C, B, A; D evicts C.",
+        "B, A, C; D evicts B."
+      ],
+      "answer": 0,
+      "explanation": "After A, B, C, the recency order is A, B, C. The hit on A refreshes A's position to most recently used, giving B, C, A. A following absent D finds a full cache, evicts B and leaves C, A, D. LRU changes recency on a hit as well as on loading a missed page.",
+      "transfer": "If the fourth request were B instead, the order would be A, C, B and the next absent D would evict A. Trace the actual last access of each resident page; frequency is a different rule."
+    },
+    {
+      "id": "cache-fifo-hit-order",
+      "concept": "FIFO and recency",
+      "prerequisites": [
+        "Requests and cache state"
+      ],
+      "prompt": "An empty three-page FIFO cache receives A, B, C, A, D. FIFO evicts the page inserted earliest among those still resident. Which page does D evict, and what is the final insertion order, oldest first?",
+      "options": [
+        "B is evicted; the order is C, A, D.",
+        "D is evicted; the order stays A, B, C.",
+        "A is evicted; the order is B, C, D.",
+        "C is evicted; the order is A, B, D."
+      ],
+      "answer": 2,
+      "explanation": "The hit on A does not change FIFO's insertion order. Immediately before D, the queue is still A, B, C, so A is first out. Loading D leaves B, C, D. Refreshing A on its hit would implement a recency rule instead of the FIFO rule used here.",
+      "transfer": "Request B next. It hits and the insertion order stays B, C, D. If the next request after that is an absent E, FIFO still evicts B despite that recent hit."
+    },
+    {
+      "id": "cache-policy-counterexample",
+      "concept": "FIFO and recency",
+      "prerequisites": [
+        "Requests and cache state"
+      ],
+      "prompt": "Start both policies empty at capacity two and request A, B, A, C, B. FIFO leaves insertion order unchanged on a hit; LRU moves the hit to most recent. Which comparison is correct for these five requests?",
+      "options": [
+        "FIFO has four misses and LRU has three, so LRU always wins.",
+        "Both have three misses because they start with the same contents.",
+        "FIFO has three misses and LRU has four; this one trace does not rank every workload.",
+        "FIFO has five misses and LRU has five because three page IDs exceed capacity."
+      ],
+      "answer": 2,
+      "explanation": "Both miss on A and B, then hit on A. FIFO still holds A, B, so C evicts A and the last B hits: three misses. LRU has refreshed A, so C evicts B; the final B then misses: four misses. This is a concrete workload where FIFO has fewer misses. LRU's use of recent history does not make it optimal on every sequence.",
+      "transfer": "Compare A, B, A, C, A at the same capacity. FIFO then misses on the final A while LRU hits, reversing the advantage. A finite request trace is evidence about that trace, not a universal policy ranking."
+    },
+    {
+      "id": "cache-fifo-anomaly",
+      "concept": "Capacity and misses",
+      "prerequisites": [
+        "FIFO and recency"
+      ],
+      "prompt": "Run FIFO from empty on the classic reference sequence 1, 2, 3, 4, 1, 2, 5, 1, 2, 3, 4, 5. Compare capacities three and four with no other change. Which pair of miss counts occurs?",
+      "options": [
+        "Capacity three: 10; capacity four: 9.",
+        "Capacity three: 9; capacity four: 10.",
+        "Capacity three: 9; capacity four: 9.",
+        "Capacity three: 12; capacity four: 5."
+      ],
+      "answer": 1,
+      "explanation": "At capacity three, misses occur at requests 1–7, 10 and 11: nine misses. At capacity four, requests 1–4 and 7–12 miss: ten misses. Increasing FIFO capacity makes this particular trace worse. This classic sequence is credited to Bélády, Nelson and Shedler and is commonly used to demonstrate the FIFO anomaly.",
+      "transfer": "In the explorer, load the anomaly example and compare complete-trace counts rather than only the selected step. Capacity five fits all five distinct pages and misses five times. The anomaly does not mean every capacity increase makes FIFO worse."
+    },
+    {
+      "id": "cache-lru-inclusion",
+      "concept": "Capacity and misses",
+      "prerequisites": [
+        "FIFO and recency"
+      ],
+      "prompt": "Run LRU from empty on the same request prefix at capacities two and three. With equal-size pages and no restriction on their slots, which statement explains why adding LRU capacity cannot increase misses on that fixed sequence?",
+      "options": [
+        "Every hit clears both caches, so their contents are always identical.",
+        "The smaller LRU cache's resident pages are included in the larger cache's most-recent distinct pages.",
+        "LRU knows every future request and always selects the optimal victim.",
+        "The larger cache must have strictly fewer misses, even for an empty sequence."
+      ],
+      "answer": 1,
+      "explanation": "After any prefix, an LRU cache holds up to its capacity of the most recently requested distinct pages. The two-page set is therefore contained in the three-page set for the same prefix. If the smaller cache hits on the next request, the larger one also has that page. Summing over the fixed sequence gives no more misses for larger LRU capacity. Counts may be equal.",
+      "transfer": "After A, B, A, C, the capacity-two LRU order is A, C; capacity three is B, A, C. The first set is contained in the second. This argument compares capacities within LRU; it does not assert that LRU beats FIFO at equal capacity."
+    },
+    {
+      "id": "cache-loop-fits",
+      "concept": "Capacity and misses",
+      "prerequisites": [
+        "FIFO and recency"
+      ],
+      "prompt": "Start empty and request A, B, C, D, A, B, C, D. For both FIFO and LRU, what changes when capacity rises from three pages to four?",
+      "options": [
+        "Misses stay at four for both capacities.",
+        "Misses rise from four to eight because more pages are tracked.",
+        "Misses fall from eight to four; four slots retain the whole four-page loop after its first pass.",
+        "Misses fall from eight to zero because a large cache starts full."
+      ],
+      "answer": 2,
+      "explanation": "At capacity three, each policy evicts the page that is requested again next in this four-page cycle, so all eight requests miss. At capacity four, the first A, B, C and D still miss, but they all remain resident for the second pass, which hits four times. More capacity does not remove the empty cache's first access to each distinct page.",
+      "transfer": "Repeat the four-page cycle again without restarting that same trace. At capacity four the next four requests all hit. Starting a new Run is a different experiment: its initial cache is empty again."
+    },
+    {
+      "id": "cache-prefix-reading",
+      "concept": "Reading a trace",
+      "prerequisites": [
+        "Capacity and misses"
+      ],
+      "prompt": "A retained comparison contains A, B, A, C, B at capacity two. You inspect only the prefix after request three. Which cumulative counts belong on each policy's step card at that point?",
+      "options": [
+        "One hit and two misses, from the first three requests.",
+        "Two hits and three misses, using FIFO's whole-sequence totals on both cards.",
+        "One hit and four misses, using LRU's whole-sequence totals on both cards.",
+        "Zero hits and zero misses, because stepping does not execute real hardware."
+      ],
+      "answer": 0,
+      "explanation": "The inspected prefix is A, B, A: miss, miss, hit for both policies. Each card should show one hit and two misses. Later C and B are outside this prefix. A separate table explicitly labeled for the whole sequence may show different totals. Moving Back and Next inspects retained states; it does not append more requests.",
+      "transfer": "Move back to the state before any request: both counts are zero. Move forward to request three again: the same one hit and two misses return. Repeatedly viewing a state does not warm a new cache or change the experiment."
+    },
+    {
+      "id": "cache-empty-rate",
+      "concept": "Reading a trace",
+      "prerequisites": [
+        "Requests and cache state"
+      ],
+      "prompt": "The request list is empty and both caches start empty. What can this experiment report without inventing a hit rate?",
+      "options": [
+        "A 100% hit rate, because no request missed.",
+        "A 0% hit rate, because no request hit.",
+        "One miss to initialize each empty cache.",
+        "Zero requests, zero hits and zero misses; no hit-rate percentage from a zero denominator."
+      ],
+      "answer": 3,
+      "explanation": "There are no accesses to classify. Both counts are zero, and hits divided by total requests would be 0/0. The empty experiment has a valid empty trace and zero misses at every capacity, but these facts do not determine a percentage. Saying 'No requests' keeps that boundary visible.",
+      "transfer": "Add one A and run again. It misses from empty, making the hit rate 0/1 = 0% if a rate is computed. The denominator has changed from zero to one; that is why the percentage now has a defined value."
+    },
+    {
+      "id": "cache-counts-not-timing",
+      "concept": "Reading a trace",
+      "prerequisites": [
+        "Capacity and misses"
+      ],
+      "prompt": "Two policies are compared on the same finite page sequence, with the same capacity and empty initial state. One has fewer misses in this lab. Which conclusion is supported by those counts alone?",
+      "options": [
+        "It misses fewer times on this modeled sequence; the counts alone do not establish actual program speed or superiority on other workloads.",
+        "It must run faster on every computer, regardless of bookkeeping and miss costs.",
+        "It will have fewer misses on every possible future sequence.",
+        "It proves that a larger cache can never be useful."
+      ],
+      "answer": 0,
+      "explanation": "The experiment counts requests under two specified replacement rules. It does not measure hardware, policy bookkeeping, transfer latency, different page sizes, prefetching or future workloads. Fewer misses is an exact result for this input and model; converting it to timing or a general recommendation requires more evidence.",
+      "transfer": "When comparing two saved experiments, first check their reference lists, capacities and empty initial states. If those differ, the counts mix changes in the workload or setup with the policy difference. Keep such comparisons explicitly labeled."
+    }
+  ]
+}

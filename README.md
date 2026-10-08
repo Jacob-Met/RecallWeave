@@ -276,3 +276,10 @@ This public source repository supports the ForgeHacks 2026 demo. The Devpost acc
 [Open the offline lab](courses/mendelian-inheritance-lab.html), [download the original course](courses/mendelian-inheritance.json), or [read the worked guide](courses/mendelian-inheritance.md). Twelve questions connect allele segregation, genotype and phenotype, one-locus crosses and independent two-locus crosses. The explorer follows each parental gamete route and shows exact genotype and phenotype fractions, with explicit complete-dominance and independent-assortment assumptions. Its downloads preserve the checked course and a worked cross record.
 
 Import the course through the existing local-file preview and **Start this deck** flow, then use the learner's review, separate missed-item practice and study-note downloads. All traits are hypothetical plant examples; the model gives probabilities, not guaranteed finite offspring counts. Build and optional browser-receiving commands are in the guide.
+
+
+## Explore cache decisions
+
+Open **[Cache decisions: FIFO and LRU](courses/cache-replacement.html)** directly in a browser to inspect both policies on the same request sequence. Step through hits and evictions, compare complete-sequence misses across capacities, and download the accepted experiment. The worked examples include a trace where FIFO has fewer misses than LRU and the classic FIFO capacity anomaly; counts describe those inputs, not measured computer performance.
+
+The [worked guide](courses/cache-replacement.md) explains the empty-start, equal-size model and original derivations. Download the [twelve-question course](courses/cache-replacement.json) from the explorer or this link, then use **Bring your own lesson**, preview it, and explicitly start it in the unchanged learner. This separate lab works offline and does not alter learner or archive state. Rebuild only its standalone file with `node tools/build-cache-replacement.mjs`; `--check` verifies the committed artifact. Native controls run with `node --test tests/cache-replacement.test.mjs`.
