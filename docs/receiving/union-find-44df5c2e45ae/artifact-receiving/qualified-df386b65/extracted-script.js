@@ -1,0 +1,325 @@
+
+const COURSE_TEXT = "{\n  \"format\": \"recallweave-deck/1\",\n  \"title\": \"Connections and components: union-find\",\n  \"attribution\": \"Original questions, examples, distractors and explanations by HAMON contribution 44df5c2e45ae, with AI assistance. Algorithmic background checked against Robert Sedgewick and Kevin Wayne's Princeton Algorithms case study on union-find and MIT OpenCourseWare 6.046J Lecture 16 on disjoint-set data structures. Exact links, assumptions and original answer derivations are in courses/union-find.md. No source exercises, figures or passages are copied.\",\n  \"license\": \"Original course wording and examples: CC BY 4.0. Attribute this course and retain its source note when sharing or adapting it. Linked reference materials retain their own terms.\",\n  \"concepts\": [\n    \"connected-paths\",\n    \"component-counts\",\n    \"representative-trees\",\n    \"weighted-union\",\n    \"path-compression\",\n    \"model-limits\"\n  ],\n  \"items\": [\n    {\n      \"id\": \"uf-path\",\n      \"concept\": \"connected-paths\",\n      \"prerequisites\": [],\n      \"prompt\": \"An undirected graph contains edges A–B and B–C. There is no edge A–C. Which statement about A and C follows?\",\n      \"options\": [\n        \"They cannot be connected without an A–C edge.\",\n        \"They are connected by the path A–B–C.\",\n        \"They are connected only if C is the root.\",\n        \"They are connected only in the A-to-C direction.\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"Connectivity asks whether a path exists, not whether the two vertices are direct neighbors. A–B–C is a path, and its reverse is also a path because these edges are undirected.\",\n      \"transfer\": \"Add an isolated vertex D. Explain which extra edge would connect D to all three vertices without adding three new edges.\"\n    },\n    {\n      \"id\": \"uf-cycle\",\n      \"concept\": \"connected-paths\",\n      \"prerequisites\": [],\n      \"prompt\": \"A simple undirected graph has edges A–B and B–C. The edge A–C is absent. What happens if that new edge is added?\",\n      \"options\": [\n        \"The graph must split into two components.\",\n        \"The component gains a fourth vertex.\",\n        \"A cycle appears and the component count stays the same.\",\n        \"The existing path from A to C is removed.\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"A and C were already connected. Adding the previously absent edge A–C closes the cycle A–B–C–A without joining different components. The assumptions exclude repeated edges and self-loops from this particular example.\",\n      \"transfer\": \"Compare adding A–C with adding C–D when D was isolated. Which addition changes the number of components, and why?\"\n    },\n    {\n      \"id\": \"uf-count\",\n      \"concept\": \"component-counts\",\n      \"prerequisites\": [\n        \"connected-paths\"\n      ],\n      \"prompt\": \"Start with six isolated elements A–F. Apply join A B, join C D, then join B C. How many components remain?\",\n      \"options\": [\n        \"2\",\n        \"4\",\n        \"1\",\n        \"3\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"Each of these three joins connects two previously different components, so the count falls from 6 to 3. The final groups are {A,B,C,D}, {E}, and {F}.\",\n      \"transfer\": \"Insert join A D after those commands. Predict the new component count before considering any parent-pointer changes.\"\n    },\n    {\n      \"id\": \"uf-successes\",\n      \"concept\": \"component-counts\",\n      \"prerequisites\": [\n        \"connected-paths\"\n      ],\n      \"prompt\": \"Eight isolated elements end in three components after a sequence of joins and finds. How many joins actually merged two different components?\",\n      \"options\": [\n        \"5\",\n        \"3\",\n        \"8\",\n        \"11\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"A successful merge reduces the component count by exactly one. Finds and redundant joins do not change that count. Reducing 8 components to 3 therefore requires exactly 8−3=5 successful merges, regardless of extra commands.\",\n      \"transfer\": \"Can the total number of join commands be larger than five? Give a sequence fragment that explains your answer.\"\n    },\n    {\n      \"id\": \"uf-pointers\",\n      \"concept\": \"representative-trees\",\n      \"prerequisites\": [\n        \"connected-paths\"\n      ],\n      \"prompt\": \"A union-find display shows D → C → A, where A points to itself. What do these arrows mean?\",\n      \"options\": [\n        \"The original graph must contain exactly edges D–C and C–A.\",\n        \"They encode a parent route to the component representative A.\",\n        \"Every original graph path from D must pass through C.\",\n        \"D and A belong to different graph components.\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"Parent pointers are the data structure's internal representation. Following them reaches a representative root. A parent link need not be an edge that was added to the original graph, and the forest does not retain every original graph edge.\",\n      \"transfer\": \"Why should an explorer draw the original connections and the parent forest in separately labeled views?\"\n    },\n    {\n      \"id\": \"uf-representative\",\n      \"concept\": \"representative-trees\",\n      \"prerequisites\": [\n        \"connected-paths\"\n      ],\n      \"prompt\": \"Two valid find operations return the same representative for B and F. What can be concluded?\",\n      \"options\": [\n        \"B and F must have equal element labels.\",\n        \"There must be a direct original edge B–F.\",\n        \"That representative must be the smallest label.\",\n        \"B and F belong to the same component.\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"Representative equality identifies a shared set. The representative is an implementation choice: it need not be a minimum label, an original neighbor, or an externally meaningful leader.\",\n      \"transfer\": \"If a larger component later absorbs this one and changes its representative, have the old members stopped being connected to each other? Explain.\"\n    },\n    {\n      \"id\": \"uf-size\",\n      \"concept\": \"weighted-union\",\n      \"prerequisites\": [\n        \"representative-trees\",\n        \"component-counts\"\n      ],\n      \"prompt\": \"In union by size, root F represents four elements and root B represents two. The lower-label rule is used only for equal sizes. Which link is created when these components join?\",\n      \"options\": [\n        \"F becomes a child of B because B is alphabetically earlier.\",\n        \"A new seventh element becomes their shared root.\",\n        \"B becomes a child of F, whose size becomes six.\",\n        \"Both B and F remain roots of one component.\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"The smaller component's root attaches to the larger component's root. Four is greater than two, so F remains the representative and B points to F. The equal-size tie rule does not apply.\",\n      \"transfer\": \"Reverse the command's argument order. Should it change this choice of root under the stated rule?\"\n    },\n    {\n      \"id\": \"uf-tie\",\n      \"concept\": \"weighted-union\",\n      \"prerequisites\": [\n        \"representative-trees\",\n        \"component-counts\"\n      ],\n      \"prompt\": \"The explorer joins two different components of size two. Their roots are D and B. Its declared tie rule keeps the lower-index root, with A=0, B=1, and so on. What happens?\",\n      \"options\": [\n        \"B points to D and D's size becomes four.\",\n        \"D points to B and B's size becomes four.\",\n        \"B points to D and both root sizes stay two.\",\n        \"D points to B and B's size stays two.\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"The component sizes are equal, so the stated tie rule selects B, whose index is lower than D's. D becomes a nonroot and the surviving root B represents all four elements. Another consistent tie rule could encode the same partition differently.\",\n      \"transfer\": \"Which observable would remain the same if the tie rule instead chose D: the parent array, the component membership, or both?\"\n    },\n    {\n      \"id\": \"uf-compress-path\",\n      \"concept\": \"path-compression\",\n      \"prerequisites\": [\n        \"representative-trees\",\n        \"weighted-union\"\n      ],\n      \"prompt\": \"Before find H, the parent paths include H → G → E → A and D → C → A; A is a root. Full path compression is enabled. Which result follows from this find alone?\",\n      \"options\": [\n        \"H → A and G → A; D → C remains unchanged.\",\n        \"H → G and G → E; D → A is the only change.\",\n        \"H → A and D → A; G → E remains unchanged.\",\n        \"H becomes a new root; A becomes a child of H.\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"The find visits H, G, E, and A. Full compression makes visited nonroots point to A; E already does. D and C are not on that path, so find H does not flatten their branch. Component membership and size remain unchanged.\",\n      \"transfer\": \"Run find H again. Compare the number of parent links followed in the first and second calls without making a wall-clock speed claim.\"\n    },\n    {\n      \"id\": \"uf-redundant\",\n      \"concept\": \"path-compression\",\n      \"prerequisites\": [\n        \"representative-trees\",\n        \"weighted-union\"\n      ],\n      \"prompt\": \"join B D finds that B and D already belong to the same component. Full path compression is enabled. Which behavior is valid?\",\n      \"options\": [\n        \"The component size must increase by two.\",\n        \"The component count must decrease by one.\",\n        \"Parent paths may shorten while membership and size stay fixed.\",\n        \"Every parent pointer in the component must be rewritten.\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"The two find calls can compress the paths they actually visit. Because their roots match, there is no component merge: the count and all component cardinalities stay the same. Untouched branches need not become flat.\",\n      \"transfer\": \"Why can 'this join made no merge' and 'the parent array changed' both be true?\"\n    },\n    {\n      \"id\": \"uf-removal\",\n      \"concept\": \"model-limits\",\n      \"prerequisites\": [\n        \"connected-paths\",\n        \"weighted-union\"\n      ],\n      \"prompt\": \"A program kept only a standard union-find structure while adding graph edges. Now an arbitrary old edge is removed. Which response is justified?\",\n      \"options\": [\n        \"Delete the root pointer with the same endpoint labels.\",\n        \"Subtract one from the component count for every removed edge.\",\n        \"Treat every removed edge as splitting its old component.\",\n        \"Use the remaining edges to rebuild, or use a structure supporting deletions.\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"This standard structure supports finding and merging sets; it does not retain enough original path information to undo an arbitrary edge deletion. A removed edge may leave alternative paths or may disconnect a component. Rebuilding from known remaining edges or using a suitable dynamic-connectivity structure addresses that different problem.\",\n      \"transfer\": \"Compare removing one side of a triangle with removing the middle edge of a three-edge chain. Why is one fixed count update insufficient?\"\n    },\n    {\n      \"id\": \"uf-evidence\",\n      \"concept\": \"model-limits\",\n      \"prerequisites\": [\n        \"path-compression\"\n      ],\n      \"prompt\": \"The same authored command sequence follows fewer parent links with compression enabled. What does that observation establish?\",\n      \"options\": [\n        \"A lower number of recorded link traversals for this sequence.\",\n        \"A measured reduction in elapsed time on every computer.\",\n        \"A proof that each individual find takes constant time.\",\n        \"A different final connectivity relation is more accurate.\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"The explorer counts parent links followed under its explicit model. Those counts describe this input and implementation; they are not elapsed-time measurements or a universal per-operation constant-time guarantee. Both modes must preserve the same connectivity relation.\",\n      \"transfer\": \"What additional measurement controls would be needed before making an actual runtime comparison? Keep the mathematical trace separate from those measurements.\"\n    }\n  ]\n}\n";
+const GUIDE_TEXT = "# Connections and components: union-find\n\nOpen [the offline explorer](union-find-explorer.html), download [the original course](union-find.json), or use the worked examples below. The explorer is one HTML file: it needs no server, account or installation.\n\n## Start with a question about connections\n\nSuppose A connects to B and B connects to C. A and C are connected even without a direct A–C edge: a path joins them. The connected components of an undirected graph form separate groups. An element belongs to exactly one group; an isolated element is a one-element group.\n\nA union-find structure keeps that grouping as connections arrive. A **find** returns a component representative. A **join** finds two representatives and merges the components when they differ. The structure answers whether two elements belong together; it does not retain every path or original graph edge.\n\nThe explorer deliberately shows two views. **Connections you added** draws the graph edges from accepted join commands. **Parent pointers** shows the implementation's forest after the selected command. A parent pointer is an internal link and need not be an original edge. A double ring marks a root; written groups and the exact table make membership readable without color.\n\n## This explorer's complete rules\n\nChoose 1–8 elements, named A through H, and write up to 32 commands. Use `join A B` or `find A`; blank lines are ignored. The available letters follow the selected count. Uppercase element names and the command spelling are deliberate, explicit input rules.\n\nEvery element starts with itself as parent and size one. A join runs find on its first argument, then on its second argument. When roots differ, the root of the smaller component attaches to the root of the larger component. Equal sizes use the earlier root letter. Reversing the arguments therefore does not reverse the size or tie rule. The surviving root stores the combined cardinality; a nonroot's stored size is zero and displays as a dash.\n\nWhen full compression is enabled, a find first follows its complete current path to the root, then makes its visited nonroots point directly to that root. Unvisited branches stay as they were. Finds run during joins can compress too. A redundant join can therefore change parent pointers while leaving component membership and cardinalities unchanged.\n\nThe default example starts accepted at its initial state. The slider, Previous/Next and initial/final buttons inspect frozen states; inspecting does not run another find. Editing the element count, command text or compression option clears the old result and trace download. Apply the whole edited sequence to calculate again. Selecting **Use example** stages that example for an explicit Apply.\n\n## Worked example: connect three islands\n\nStart with A–F and apply:\n\n```text\njoin A B\njoin C D\njoin E F\njoin A C\nfind D\njoin D F\nfind F\njoin B E\n```\n\nThe component counts, including the initial state, are **6, 5, 4, 3, 2, 2, 1, 1, 1**.\n\nAfter the first three joins, the groups are {A,B}, {C,D}, and {E,F}. The fourth join attaches C to A under the equal-size rule; D still points to C. The fifth command, find D, follows D → C → A. It does not connect a new group. With compression enabled, D now points directly to A.\n\nNext, join D F finds the four-element component at A and the two-element component at E. E attaches to A. F still points to E until find F follows F → E → A and compresses that path. The last command joins members already in the same group.\n\nFor this exact sequence the model follows **8 parent links with compression** and **9 without compression**. These totals count links followed by find calls, including both calls inside each join. Root inspection itself contributes zero links; table rendering contributes no calls. The counts are not timings, and this small example is not a performance benchmark.\n\n## A longer path and an untouched branch\n\nChoose **A path becomes shorter**. Its balanced joins produce H → G → E → A, while D → C → A and F → E → A are other branches.\n\nThe first find H follows three links. Full compression changes H's parent from G to A and G's parent from E to A; E already points to A. D remains a child of C and F remains a child of E. A second find H follows one link. With compression disabled, both find H calls follow three links.\n\nBoth modes still describe one eight-element component. Shape and grouping are different questions. The compression control makes this difference visible without changing the sequence of graph connections.\n\n## Repeated connections and self-joins\n\nChoose **Repeated connections**. A join between already connected elements does not count as another successful merge. Reversing a repeated pair does not add a new group, and a self-join does not connect an isolated element to anyone else.\n\nThe graph view draws a repeated undirected edge only once and draws a self-join as a loop. The accepted command list and downloaded trace retain every command. The interface says **No merge occurs** when roots already match; it does not declare every such command to be a new simple-graph cycle. For a previously absent edge between distinct vertices in a simple undirected graph, equal representatives do show that the new edge closes a cycle.\n\n## Keep an observation and study the course\n\n**Download this trace (.json)** records the applied sequence, the selected state, both compression modes, every parent/size snapshot, each visited path and each actual compression change. Its assumptions travel with the record. It is a worked observation, not a save file for an ongoing learner session.\n\n**Download course (.json)** saves the exact original twelve-question deck. In RecallWeave, choose it under **Bring your own lesson**, inspect the preview, then explicitly select **Start this deck**. Complete the questions, inspect first-answer review, practice missed questions separately, and keep study notes with the existing learner. Nothing in the explorer changes an open learning session.\n\nAll downloads are explicit. The lab does not use browser storage, fetch data, upload files or make provider requests.\n\n## Original answer derivations\n\n| Item | Correct choice | Reason |\n|---|---|---|\n| uf-path | B | A–B–C is an undirected path, so a direct A–C edge is unnecessary. |\n| uf-cycle | C | A previously absent A–C edge completes A–B–C–A inside one component. |\n| uf-count | D | Three joins merge distinct groups: 6−3=3 components. |\n| uf-successes | A | Reducing eight singleton groups to three requires five successful merges. |\n| uf-pointers | B | Parent links encode a route to a representative; they are not an original-edge certificate. |\n| uf-representative | D | Equal representatives identify membership in the same component. |\n| uf-size | C | Root F's four-element group absorbs root B's two-element group. |\n| uf-tie | B | Equal sizes invoke the declared lower-index rule: D attaches to B, size four. |\n| uf-compress-path | A | H and G redirect to A; the unvisited D → C branch remains. |\n| uf-redundant | C | Finds can compress their paths without another component merge. |\n| uf-removal | D | An arbitrary graph-edge deletion requires information and operations beyond this merge-only structure. |\n| uf-evidence | A | The recorded link count describes this sequence; it is not a timing result. |\n\nThe options are original distractors, and the course keeps canonical answers separate from the learner's displayed option order.\n\n## Limits and references\n\nThis model treats connections as undirected, fixes the element set before tracing, and supports insertions and find operations. It does not support arbitrary edge deletion, directed reachability, path reconstruction, shortest paths, minimum spanning trees or a dynamic production graph service. A root is an implementation representative, not a socially or scientifically meaningful leader.\n\nWeighted union and compression are established techniques. This course teaches their observable invariants; it does not derive an amortized complexity theorem, prove a universal per-operation bound, measure runtime, or establish learning efficacy.\n\nPrimary educational references reviewed on 2026-10-08:\n\n- Robert Sedgewick and Kevin Wayne, [Princeton Algorithms, Section 1.5: Case Study—Union-Find](https://algs4.cs.princeton.edu/15uf/): representatives, weighted union by size, and full path compression.\n- MIT OpenCourseWare, [6.046J Lecture 16: Disjoint-Set Data Structures](https://ocw.mit.edu/courses/6-046j-design-and-analysis-of-algorithms-spring-2012/resources/mit6_046js12_lec16/), Spring 2012, [lecture PDF](https://ocw.mit.edu/courses/6-046j-design-and-analysis-of-algorithms-spring-2012/dbbca5218779336114dcd3b3195e7783_MIT6_046JS12_lec16.pdf): set representatives, tree forests and the effect of full path compression. That lecture uses union by rank for its tree analysis; this lab explicitly uses component size.\n\nAll course wording, examples, questions and diagrams were authored for this contribution with AI assistance. No source exercises, figures, passages or implementation code were copied. Original course wording and examples are CC BY 4.0; reference materials retain their own terms.\n\n## Rebuild and verify\n\nFrom the repository root:\n\n```bash\nnode tools/build-union-find.mjs\nnode tools/build-union-find.mjs --check\nnode --test tests/union-find.test.mjs\n```\n\nThe existing deck validator is reused unchanged. The builder embeds only the declared model, UI, course and guide inputs into this standalone page. The default project test command discovers the focused test file. Native source, browser, downloaded-file and independent algorithm receiving are recorded separately under `docs/receiving/union-find-44df5c2e45ae/`.\n";
+const { UNION_FIND_PRESETS, parseUnionFindInput, traceUnionFind } = (() => {
+/** Original bounded teaching model: weighted union and full path compression. */
+const UNION_FIND_PRESETS = Object.freeze([
+  Object.freeze({id: 'bridges', name: 'Connect three islands', count: 6, text: 'join A B\njoin C D\njoin E F\njoin A C\nfind D\njoin D F\nfind F\njoin B E'}),
+  Object.freeze({id: 'compression', name: 'A path becomes shorter', count: 8, text: 'join A B\njoin C D\njoin E F\njoin G H\njoin A C\njoin E G\njoin A E\nfind H\nfind H'}),
+  Object.freeze({id: 'repeated', name: 'Repeated connections', count: 4, text: 'join A B\njoin B C\njoin A C\njoin B A\njoin D D\nfind C'})
+]);
+
+function checkedCount(count) {
+  if (!Number.isInteger(count) || count < 1 || count > 8) throw new Error('Choose 1–8 elements.');
+  return count;
+}
+function record(value, description) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)
+      || ![Object.prototype, null].includes(Object.getPrototypeOf(value))) {
+    throw new Error(description + ' must be an object.');
+  }
+}
+function freeze(value) {
+  if (value && typeof value === 'object' && !Object.isFrozen(value)) {
+    Object.values(value).forEach(freeze);
+    Object.freeze(value);
+  }
+  return value;
+}
+
+/** Parse explicit A–H commands; blank lines are ignored and no operation is guessed. */
+function parseUnionFindInput(count, text) {
+  checkedCount(count);
+  if (typeof text !== 'string' || text.length > 4096) throw new Error('Use at most 4096 characters of commands.');
+  const operations = [];
+  text.split(/\r?\n/).forEach((line, index) => {
+    const trimmed = line.trim();
+    if (!trimmed) return;
+    const fields = trimmed.split(/\s+/);
+    const union = fields[0] === 'join' && fields.length === 3;
+    const find = fields[0] === 'find' && fields.length === 2;
+    if (!union && !find) throw new Error('Line ' + (index + 1) + ': use join A B or find A.');
+    const elements = fields.slice(1).map(label => {
+      if (!/^[A-H]$/.test(label) || label.charCodeAt(0) - 65 >= count) {
+        throw new Error('Line ' + (index + 1) + ': use an element from A to ' + String.fromCharCode(64 + count) + '.');
+      }
+      return label.charCodeAt(0) - 65;
+    });
+    operations.push(union ? {type: 'union', a: elements[0], b: elements[1]} : {type: 'find', a: elements[0]});
+  });
+  if (operations.length > 32) throw new Error('Use at most 32 commands.');
+  return freeze(operations);
+}
+
+/** Return detached immutable states. Inspection never performs an extra find. */
+function traceUnionFind(count, operations, options = {}) {
+  checkedCount(count);
+  record(options, 'Options');
+  if (Object.keys(options).some(key => key !== 'compress')) throw new Error('Unknown trace option.');
+  const compress = Object.hasOwn(options, 'compress') ? options.compress : true;
+  if (typeof compress !== 'boolean') throw new Error('compress must be true or false.');
+  if (!Array.isArray(operations) || operations.length > 32) throw new Error('Use an array of at most 32 operations.');
+  const ops = [];
+  for (let index = 0; index < operations.length; index++) {
+    if (!Object.hasOwn(operations, index)) throw new Error('Operations must not contain gaps.');
+    const op = operations[index];
+    record(op, 'Operation ' + (index + 1));
+    const keys = op.type === 'union' ? ['type', 'a', 'b'] : op.type === 'find' ? ['type', 'a'] : [];
+    if (!keys.length || Object.keys(op).length !== keys.length || Object.keys(op).some(key => !keys.includes(key))) {
+      throw new Error('Use only union {a,b} or find {a} operations.');
+    }
+    for (const key of keys.slice(1)) {
+      if (!Number.isInteger(op[key]) || op[key] < 0 || op[key] >= count) throw new Error('Operation element is outside the selected range.');
+    }
+    ops.push(op.type === 'union' ? {type: 'union', a: op.a, b: op.b} : {type: 'find', a: op.a});
+  }
+  const parent = Array.from({length: count}, (_, index) => index);
+  const size = Array(count).fill(1);
+  const snapshots = [];
+  let components = count;
+  let totalLinks = 0;
+  function inspect(operation, paths, joined) {
+    const groups = new Map();
+    let maxDepth = 0;
+    for (let node = 0; node < count; node++) {
+      let root = node, depth = 0;
+      while (parent[root] !== root) { root = parent[root]; depth++; }
+      maxDepth = Math.max(maxDepth, depth);
+      if (!groups.has(root)) groups.set(root, []);
+      groups.get(root).push(node);
+    }
+    const linksFollowed = paths.reduce((sum, path) => sum + path.path.length - 1, 0);
+    totalLinks += linksFollowed;
+    snapshots.push(freeze({
+      operation, parent: [...parent], size: [...size], components,
+      groups: [...groups].sort(([a], [b]) => a - b).map(([root, members]) => ({root, members})),
+      paths, joined, linksFollowed, totalLinks, maxDepth
+    }));
+  }
+  function find(start) {
+    const path = [start], changes = [];
+    let root = start;
+    while (parent[root] !== root) { root = parent[root]; path.push(root); }
+    if (compress) {
+      for (const node of path.slice(0, -1)) {
+        if (parent[node] !== root) {
+          changes.push({node, from: parent[node], to: root});
+          parent[node] = root;
+        }
+      }
+    }
+    return {start, path, root, changes};
+  }
+  inspect(null, [], null);
+  for (const operation of ops) {
+    const paths = [find(operation.a)];
+    let joined = null;
+    if (operation.type === 'union') {
+      paths.push(find(operation.b));
+      const a = paths[0].root, b = paths[1].root;
+      if (a !== b) {
+        const winner = size[a] === size[b] ? Math.min(a, b) : size[a] > size[b] ? a : b;
+        const child = winner === a ? b : a;
+        joined = {child, parent: winner, childSize: size[child], parentSizeBefore: size[winner]};
+        parent[child] = winner;
+        size[winner] += size[child];
+        size[child] = 0;
+        components--;
+      }
+    }
+    inspect(operation, paths, joined);
+  }
+  return freeze({format: 'recallweave-union-find-trace/1', count, compress, operations: ops, snapshots});
+}
+
+return { UNION_FIND_PRESETS, parseUnionFindInput, traceUnionFind };
+})();
+
+const byId = id => document.getElementById(id);
+const label = node => String.fromCharCode(65 + node);
+const commandName = op => op.type === 'union' ? 'join ' + label(op.a) + ' ' + label(op.b) : 'find ' + label(op.a);
+const palette = ['#17675f', '#8051a5', '#a55b23', '#24648f', '#8d3f61', '#586c25', '#53626e', '#734e32'];
+let trace = null;
+let alternate = null;
+let step = 0;
+
+function element(tag, text, className) {
+  const node = document.createElement(tag);
+  if (text !== undefined) node.textContent = text;
+  if (className) node.className = className;
+  return node;
+}
+function svgElement(tag, attributes, text) {
+  const node = document.createElementNS('http://www.w3.org/2000/svg', tag);
+  for (const [key, value] of Object.entries(attributes)) node.setAttribute(key, String(value));
+  if (text !== undefined) node.textContent = text;
+  return node;
+}
+function download(text, name, type) {
+  const url = URL.createObjectURL(new Blob([text], {type}));
+  const anchor = element('a');
+  anchor.href = url; anchor.download = name; document.body.append(anchor); anchor.click(); anchor.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+function invalidate() {
+  trace = null; alternate = null;
+  byId('result-area').hidden = true;
+  byId('download-trace').disabled = true;
+  byId('input-error').textContent = '';
+  byId('input-status').textContent = 'Inputs changed. Apply the commands to create a new trace.';
+}
+function loadPreset(preset) {
+  byId('element-count').value = String(preset.count);
+  byId('commands').value = preset.text;
+  invalidate();
+}
+function drawGraphs(snapshot) {
+  const graph = byId('connections-graph');
+  const forest = byId('parent-graph');
+  graph.replaceChildren(); forest.replaceChildren();
+  const rootOf = node => snapshot.groups.find(group => group.members.includes(node)).root;
+  const color = node => palette[rootOf(node)];
+  const points = Array.from({length: trace.count}, (_, index) => {
+    const angle = -Math.PI / 2 + index * Math.PI * 2 / trace.count;
+    return trace.count === 1 ? {x: 190, y: 160} : {x: 190 + 118 * Math.cos(angle), y: 160 + 118 * Math.sin(angle)};
+  });
+  const used = new Set();
+  for (const op of trace.operations.slice(0, step)) {
+    if (op.type !== 'union') continue;
+    const key = [op.a, op.b].sort((a, b) => a - b).join(':');
+    if (used.has(key)) continue;
+    used.add(key);
+    const a = points[op.a], b = points[op.b];
+    if (op.a === op.b) {
+      graph.append(svgElement('path', {d: 'M ' + (a.x + 9) + ' ' + (a.y - 9) + ' C ' + (a.x + 60) + ' ' + (a.y - 35) + ', ' + (a.x + 60) + ' ' + (a.y + 35) + ', ' + (a.x + 15) + ' ' + (a.y + 9), fill: 'none', stroke: color(op.a), 'stroke-width': 3}));
+    } else {
+      graph.append(svgElement('line', {x1: a.x, y1: a.y, x2: b.x, y2: b.y, stroke: color(op.a), 'stroke-width': 3}));
+    }
+  }
+  points.forEach((point, node) => {
+    graph.append(svgElement('circle', {cx: point.x, cy: point.y, r: 21, fill: '#fffefa', stroke: color(node), 'stroke-width': 3}));
+    graph.append(svgElement('text', {x: point.x, y: point.y + 6, 'text-anchor': 'middle', fill: '#19363d'}, label(node)));
+  });
+  const defs = svgElement('defs', {});
+  const marker = svgElement('marker', {id: 'parent-arrow', viewBox: '0 0 10 10', refX: 8, refY: 5, markerWidth: 6, markerHeight: 6, orient: 'auto-start-reverse'});
+  marker.append(svgElement('path', {d: 'M 0 0 L 10 5 L 0 10 z', fill: '#667b80'}));
+  defs.append(marker); forest.append(defs);
+  const children = Array.from({length: trace.count}, () => []);
+  snapshot.parent.forEach((parent, node) => { if (parent !== node) children[parent].push(node); });
+  const leaves = node => children[node].length ? children[node].reduce((sum, child) => sum + leaves(child), 0) : 1;
+  const roots = snapshot.groups.map(group => group.root);
+  const width = 336 / roots.reduce((sum, root) => sum + leaves(root), 0);
+  // Reserve four SVG units between adjacent root circles at the narrowest spacing.
+  const rootRadius = Math.min(23, (width - 4) / 2);
+  const nodeRadius = rootRadius - 5;
+  const locations = [];
+  let cursor = 22;
+  function place(node, depth) {
+    const start = cursor;
+    if (!children[node].length) cursor += width;
+    else children[node].forEach(child => place(child, depth + 1));
+    locations[node] = {x: (start + cursor) / 2, y: 46 + 72 * depth};
+  }
+  roots.forEach(root => place(root, 0));
+  snapshot.parent.forEach((parent, node) => {
+    if (parent === node) return;
+    const from = locations[node], to = locations[parent], distance = Math.hypot(to.x - from.x, to.y - from.y);
+    const dx = (to.x - from.x) / distance, dy = (to.y - from.y) / distance;
+    forest.append(svgElement('line', {x1: from.x + dx * 21, y1: from.y + dy * 21, x2: to.x - dx * 24, y2: to.y - dy * 24, stroke: '#667b80', 'stroke-width': 2, 'marker-end': 'url(#parent-arrow)'}));
+  });
+  locations.forEach((point, node) => {
+    forest.append(svgElement('circle', {cx: point.x, cy: point.y, r: nodeRadius, fill: '#fffefa', stroke: color(node), 'stroke-width': 3}));
+    if (snapshot.parent[node] === node) forest.append(svgElement('circle', {cx: point.x, cy: point.y, r: rootRadius, fill: 'none', stroke: color(node), 'stroke-width': 1.5}));
+    forest.append(svgElement('text', {x: point.x, y: point.y + 6, 'text-anchor': 'middle', fill: '#19363d'}, label(node)));
+  });
+  byId('graph-description').textContent = snapshot.groups.map(group => '{' + group.members.map(label).join(', ') + '}').join('  ');
+  byId('parent-description').textContent = snapshot.parent.map((parent, node) => label(node) + ' points to ' + label(parent)).join('; ') + '. A double ring marks a root.';
+}
+function render() {
+  if (!trace) return;
+  const snapshot = trace.snapshots[step], other = alternate.snapshots[step];
+  byId('result-area').hidden = false;
+  byId('step-position').textContent = 'State ' + step + ' of ' + trace.operations.length;
+  byId('step-slider').max = String(trace.operations.length);
+  byId('step-slider').value = String(step);
+  byId('step-slider').disabled = trace.operations.length === 0;
+  byId('previous-step').disabled = step === 0;
+  byId('next-step').disabled = step === trace.operations.length;
+  byId('initial-step').disabled = step === 0;
+  byId('final-step').disabled = step === trace.operations.length;
+  byId('component-count').textContent = String(snapshot.components);
+  byId('link-count').textContent = String(snapshot.linksFollowed);
+  byId('tree-depth').textContent = String(snapshot.maxDepth);
+  const withCompression = trace.compress ? snapshot.totalLinks : other.totalLinks;
+  const withoutCompression = trace.compress ? other.totalLinks : snapshot.totalLinks;
+  byId('comparison').textContent = 'Through this state: ' + withCompression + ' parent links followed with compression; ' + withoutCompression + ' without compression. Both encode the same ' + snapshot.components + ' components.';
+  let description = 'Initial state: every element represents its own one-element component.';
+  if (snapshot.operation) {
+    description = commandName(snapshot.operation) + ': ';
+    if (snapshot.operation.type === 'find') description += 'the representative is ' + label(snapshot.paths[0].root) + '. Component membership is unchanged.';
+    else if (snapshot.joined) description += label(snapshot.joined.child) + ' attaches to ' + label(snapshot.joined.parent) + '; two components become one.';
+    else description += 'both elements were already in the same component. No merge occurs.';
+  }
+  byId('step-description').textContent = description;
+  const pathList = byId('find-paths'); pathList.replaceChildren();
+  for (const path of snapshot.paths) {
+    const changes = path.changes.length ? path.changes.map(change => label(change.node) + ': ' + label(change.from) + ' → ' + label(change.to)).join('; ') : 'none';
+    const item = element('li');
+    item.append(element('strong', 'find ' + label(path.start) + ': '));
+    item.append(document.createTextNode(path.path.map(label).join(' → ') + '. Compression changes: ' + changes + '.'));
+    pathList.append(item);
+  }
+  if (!snapshot.paths.length) pathList.append(element('li', 'No find has run yet.'));
+  byId('mode-label').textContent = trace.compress ? 'Full compression enabled' : 'Compression disabled';
+  const rows = byId('parent-rows'); rows.replaceChildren();
+  for (let node = 0; node < trace.count; node++) {
+    const row = element('tr');
+    const root = snapshot.groups.find(group => group.members.includes(node)).root;
+    [label(node), label(snapshot.parent[node]), label(root), snapshot.size[node] ? String(snapshot.size[node]) : '—'].forEach(text => row.append(element('td', text)));
+    rows.append(row);
+  }
+  byId('processed-commands').textContent = step ? trace.operations.slice(0, step).map(commandName).join('\n') : 'No commands applied.';
+  byId('download-trace').disabled = false;
+  drawGraphs(snapshot);
+}
+function apply() {
+  invalidate();
+  try {
+    const count = Number(byId('element-count').value);
+    const operations = parseUnionFindInput(count, byId('commands').value);
+    const compress = byId('compression').checked;
+    trace = traceUnionFind(count, operations, {compress});
+    alternate = traceUnionFind(count, operations, {compress: !compress});
+    step = 0;
+    byId('input-status').textContent = 'Applied ' + operations.length + ' commands to ' + count + ' elements. Step through the accepted trace.';
+    render();
+  } catch (error) {
+    byId('input-status').textContent = 'The edited commands have not been applied.';
+    byId('input-error').textContent = error.message;
+  }
+}
+UNION_FIND_PRESETS.forEach(preset => {
+  const option = element('option', preset.name); option.value = preset.id; byId('preset').append(option);
+});
+byId('use-example').addEventListener('click', () => loadPreset(UNION_FIND_PRESETS.find(preset => preset.id === byId('preset').value)));
+byId('trace-form').addEventListener('submit', event => { event.preventDefault(); apply(); });
+for (const id of ['element-count', 'commands', 'compression']) byId(id).addEventListener('input', invalidate);
+byId('previous-step').addEventListener('click', () => { if (trace && step > 0) { step--; render(); } });
+byId('next-step').addEventListener('click', () => { if (trace && step < trace.operations.length) { step++; render(); } });
+byId('initial-step').addEventListener('click', () => { if (trace) { step = 0; render(); } });
+byId('final-step').addEventListener('click', () => { if (trace) { step = trace.operations.length; render(); } });
+byId('step-slider').addEventListener('input', event => { if (trace) { step = Number(event.target.value); render(); } });
+byId('download-course').addEventListener('click', () => download(COURSE_TEXT, 'union-find.json', 'application/json;charset=utf-8'));
+byId('download-guide').addEventListener('click', () => download(GUIDE_TEXT, 'union-find.md', 'text/markdown;charset=utf-8'));
+byId('download-trace').addEventListener('click', () => {
+  if (!trace) return;
+  const output = {
+    format: 'recallweave-union-find-observation/1',
+    assumptions: ['Undirected connectivity; no edge deletions.', 'Union by component size; lower-index root breaks equal-size ties.', 'Find(a) runs before find(b) in a join; optional full compression visits only those paths.', 'Nonroot sizes are zero; roots retain exact component cardinalities.', 'Parent pointers represent sets and need not be original graph edges.', 'Link counts are algorithm observations, not elapsed-time measurements.'],
+    selectedState: step, trace, comparisonWithoutChosenCompression: alternate
+  };
+  download(JSON.stringify(output, null, 2) + '\n', 'union-find-trace.json', 'application/json;charset=utf-8');
+});
+loadPreset(UNION_FIND_PRESETS[0]);
+apply();
+
