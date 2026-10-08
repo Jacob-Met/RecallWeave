@@ -78,6 +78,8 @@ The [worked guide](courses/grouped-data.md) includes the assumptions, missing-ra
 
 Open [Course handouts](handout.html), choose a checked local deck JSON, review its title and source credit, then select **Use this deck**. Print or save an unanswered worksheet for learners and an explicitly separate answer key with the correct choices and authored explanations. Both keep the original question and option order, literal wording, attribution and permission; transfer prompts leave room for a written response because the deck supplies no separate transfer answer.
 
+Choose individual questions under **Choose questions**, or use **Select all** and **Clear selection**. Both copies keep the original question numbers, so a shorter worksheet and its key still match the full lesson. Only the included questions' concepts are listed; selecting a question does not add its prerequisites automatically. An empty selection cannot print or save. Cancelled or rejected replacement files preserve your current selection, while changing the selection cancels a pending replacement. Explicitly using a new deck selects all of its questions.
+
 Each saved HTML file opens and prints offline on its own. The worksheet file contains questions only; the teacher’s builder and the separate key receive the full checked deck. Cancelling a selection or choosing an invalid file leaves the current handout in place. This is a separate preparation flow; it does not start or change a learning session. Modular source lives in `handout/` and `src/course-handout*.mjs`; rebuild `handout.html` with `python3 tools/make_handout.py`, or verify it with `--check`.
 
 ## Explore Boolean logic

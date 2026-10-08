@@ -7,11 +7,33 @@ function checkedKind(kind) {
   return kind;
 }
 
+function checkedQuestionSelection(deck, ids) {
+  if (ids === undefined) return null;
+  if (!Array.isArray(ids) || ids.length === 0 || ids.length > deck.items.length) {
+    throw new Error('Choose a nonempty array of existing question IDs.');
+  }
+  const known = new Set(deck.items.map(item => item.id));
+  const selected = new Set();
+  for (let index = 0; index < ids.length; index++) {
+    if (!Object.hasOwn(ids, index) || typeof ids[index] !== 'string' || !known.has(ids[index])) {
+      throw new Error('Each selection entry must be an existing exact question ID.');
+    }
+    if (selected.has(ids[index])) throw new Error('Question selections must not contain duplicate IDs.');
+    selected.add(ids[index]);
+  }
+  return selected;
+}
+
 // The worksheet projection never carries the deck's answer indices or explanations.
-export function createHandout(input, kind = 'worksheet') {
+export function createHandout(input, kind = 'worksheet', selectedQuestionIds) {
   checkedKind(kind);
   const deck = validateDeck(input);
-  const questions = deck.items.map((item, index) => {
+  const selected = checkedQuestionSelection(deck, selectedQuestionIds);
+  const selectedConcepts = new Set();
+  const questions = [];
+  for (const [index, item] of deck.items.entries()) {
+    if (selected && !selected.has(item.id)) continue;
+    selectedConcepts.add(item.concept);
     const question = {
       id: item.id,
       number: index + 1,
@@ -23,14 +45,14 @@ export function createHandout(input, kind = 'worksheet') {
       question.answer = item.answer;
       question.explanation = item.explanation;
     }
-    return Object.freeze(question);
-  });
+    questions.push(Object.freeze(question));
+  }
   return Object.freeze({
     kind,
     title: deck.title,
     attribution: deck.attribution,
     license: deck.license,
-    concepts: Object.freeze([...deck.concepts]),
+    concepts: Object.freeze(deck.concepts.filter(concept => selectedConcepts.has(concept))),
     questions: Object.freeze(questions),
   });
 }
@@ -157,8 +179,8 @@ export function handoutFilename(title, kind = 'worksheet') {
   return stem + '.' + kind + '.html';
 }
 
-export function createHandoutDocument(input, kind = 'worksheet') {
-  const handout = createHandout(input, kind);
+export function createHandoutDocument(input, kind = 'worksheet', selectedQuestionIds) {
+  const handout = createHandout(input, kind, selectedQuestionIds);
   const payload = JSON.stringify(handout)
     .replace(/</g, '\\u003c')
     .replace(/>/g, '\\u003e')
