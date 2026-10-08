@@ -6,6 +6,12 @@
 
 Open `demo.html` directly in a browser—no server, install, build step, internet, login, API key, or user data storage is required. It is a single self-contained file with embedded CSS, JavaScript and deck. The modular source is in `index.html`, `src/`, and `data/`; to test that version locally, serve this directory with `python3 -m http.server 8080` and visit `http://localhost:8080`. Rebuild the direct-open demo with `python3 tools/make_demo.py` after source changes. No hosted endpoint is called by either version.
 
+## Explore rates and accumulation
+
+Open **[Rates become change](courses/rates-accumulation-explorer.html)** for an offline motion explorer. Edit a continuous velocity curve, inspect a moment, and compare signed displacement with total distance. Exact fractions expose a sign crossing between recorded points; the display also distinguishes instantaneous velocity, interval average velocity and an undefined acceleration at a corner.
+
+The [worked guide](courses/rates-accumulation.md) develops the examples from slopes and signed areas. Download the original [twelve-question course](courses/rates-accumulation.json) from the explorer, then choose it under **Bring your own lesson** in RecallWeave. The lesson, guide and current calculation download without a server or account. Rebuild the standalone explorer with `node tools/build-rates-accumulation.mjs`, or verify the checked-in file with `--check`.
+
 ## Explore grouped rates
 
 Open **[When groups and totals disagree](courses/grouped-data-explorer.html)** for a separate offline lesson about group rates, pooled samples and a chosen common mix. Edit the recorded counts, inspect exact fractions and download the current comparison. The worked examples explain why both groups can favor one option while the pooled sample favors the other, and why this alone does not establish a causal effect.
