@@ -1,0 +1,633 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>Course handouts · RecallWeave</title>
+  <style>
+:root {
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #242738;
+  background: #f4f3ef;
+  font-synthesis: none;
+  --purple: #5d3fa8;
+  --muted: #656779;
+  --line: #deded8;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { margin: 0; }
+a { color: var(--purple); text-underline-offset: 3px; }
+button, input { font: inherit; }
+button { cursor: pointer; }
+button:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid #af87ec; outline-offset: 4px; }
+.site-header, .intro, .handout-layout, .site-footer { max-width: 1440px; margin-inline: auto; }
+.site-header { min-height: 88px; padding: 1.5rem 3rem; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--line); }
+.brand { display: inline-flex; align-items: center; gap: .65rem; color: #292b3a; font-size: 1rem; font-weight: 750; text-decoration: none; letter-spacing: -.035em; }
+.brand-mark { display: grid; place-items: center; width: 28px; height: 30px; border-radius: 8px 8px 8px 2px; background: var(--purple); color: white; font: italic 700 1.4rem Georgia, serif; }
+.site-header nav a { font-size: .85rem; font-weight: 650; text-decoration: none; }
+.site-header nav span { margin-left: .4rem; }
+.intro { padding: 3.2rem 3rem 2.5rem; }
+.eyebrow { margin: 0 0 .75rem; color: var(--purple); font-size: .7rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+.intro h1 { margin: 0 0 1rem; font: 500 clamp(2.25rem, 4.5vw, 3.7rem)/1.12 Georgia, "Times New Roman", serif; letter-spacing: -.045em; }
+.intro-copy { max-width: 700px; margin: 0; color: var(--muted); font-size: 1rem; line-height: 1.7; }
+.handout-layout { display: grid; grid-template-columns: minmax(270px, 330px) minmax(0, 1fr); gap: 2rem; padding: 0 3rem 3rem; align-items: start; }
+.handout-layout aside { min-width: 0; }
+.control-card { margin-bottom: 1rem; padding: 1.35rem; background: #fff; border: 1px solid var(--line); border-radius: 12px; }
+.control-card h2 { font-size: 1.1rem; line-height: 1.4; margin: 1.15rem 0 .65rem; overflow-wrap: anywhere; white-space: pre-wrap; }
+.control-card p { font-size: .86rem; line-height: 1.65; }
+.control-card p:not(.step-label):not(.eyebrow) { margin: .65rem 0; }
+.step-label { display: flex; gap: .7rem; margin: 0; font-size: .72rem !important; font-weight: 800; color: var(--purple); }
+.step-label span { color: var(--muted); letter-spacing: .035em; }
+.quiet { color: var(--muted); font-size: .76rem !important; }
+.button { display: flex; align-items: center; justify-content: center; gap: .6rem; width: 100%; min-height: 42px; margin: .6rem 0 0; padding: .7rem .8rem; border: 1px solid transparent; border-radius: 7px; font-size: .8rem; font-weight: 700; line-height: 1.3; text-decoration: none; transition: background-color .15s; }
+.button.primary { background: var(--purple); color: #fff; }
+.button.primary:hover { background: #4a308c; }
+.button.secondary { border-color: #d9d5e3; background: #fff; color: #4e387f; }
+.button.secondary:hover { background: #f6f2fc; }
+.button.subtle { background: transparent; color: var(--muted); }
+.status { padding-top: .7rem; border-top: 1px solid #ecece8; overflow-wrap: anywhere; font-size: .78rem !important; }
+.pending-deck { margin-top: 1rem; padding-top: 1rem; border-top: 2px solid #d6c5f1; }
+.pending-deck h3 { margin: .5rem 0; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 1rem; }
+.source-text { white-space: pre-wrap; overflow-wrap: anywhere; }
+.pending-actions { display: grid; grid-template-columns: 1fr auto; gap: .5rem; }
+.pending-actions .subtle { padding-inline: .6rem; }
+fieldset { min-width: 0; padding: 0; margin: 1.3rem 0 0; border: 0; }
+fieldset:disabled { opacity: .45; }
+fieldset:disabled .button { cursor: default; }
+legend { padding: 0; margin: 0 0 .7rem; color: var(--muted); font-size: .72rem; font-weight: 750; text-transform: uppercase; letter-spacing: .08em; }
+.mode-picker { display: grid; gap: .55rem; }
+.mode-picker label { display: flex; align-items: center; gap: .6rem; padding: .8rem; border: 1px solid #dedbe5; border-radius: 7px; font-size: .83rem; font-weight: 700; cursor: pointer; }
+.mode-picker label:has(input:checked) { background: #f5f0fc; border-color: #bca4de; }
+.mode-picker input { accent-color: var(--purple); width: 16px; height: 16px; margin: 0; flex: 0 0 auto; }
+.mode-picker small { display: block; margin-top: .2rem; font-size: .72rem; font-weight: 450; color: var(--muted); }
+.copy-actions { padding-top: 1.2rem; }
+.copy-actions h3 { margin: 0; font-size: .85rem; }
+.copy-actions .quiet { margin: .35rem 0 .6rem !important; }
+.answer-copy { margin-top: 1.2rem; border-top: 1px solid #e9e7ed; }
+.offline-note { padding-top: 1rem; margin-top: 1rem !important; border-top: 1px solid #ecece8; }
+.paper-stage { min-width: 0; }
+.paper-stage .course-paper { box-shadow: 0 5px 25px #2427380c; border: 1px solid #e1e0d9; min-height: 700px; }
+.handout-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 640px; padding: 3rem; text-align: center; border: 1px dashed #d5d3ce; border-radius: 12px; background: #eeede7; }
+.handout-empty h2 { margin: 0 0 .75rem; font: 500 1.85rem/1.25 Georgia, serif; letter-spacing: -.02em; }
+.handout-empty > p:not(.eyebrow) { max-width: 340px; margin: 0; font-size: .9rem; line-height: 1.75; color: var(--muted); }
+.empty-caption { margin-top: 2rem; font-size: .68rem; color: #787985; letter-spacing: .035em; }
+.empty-sheet { width: 106px; height: 138px; padding: 22px 17px; margin-bottom: 2rem; background: white; border: 1px solid #d9d6cf; border-radius: 3px; box-shadow: 4px 5px 0 #e0ddd5; transform: rotate(-5deg); }
+.empty-sheet span, .empty-sheet i { display: block; height: 3px; background: #ddd8e6; margin-bottom: 8px; border-radius: 1px; }
+.empty-sheet span:first-child { width: 65%; height: 5px; background: #b29cce; margin-bottom: 17px; }
+.empty-sheet i { margin-top: 12px; height: 1px; background: #dddcd6; }
+.site-footer { display: flex; justify-content: space-between; gap: 1rem; padding: 1.5rem 3rem; border-top: 1px solid var(--line); color: #7d7e86; font-size: .68rem; }
+@media (max-width: 1000px) {
+  .site-header, .intro, .site-footer { padding-inline: 1.5rem; }
+  .handout-layout { grid-template-columns: 280px minmax(0, 1fr); padding-inline: 1.5rem; gap: 1rem; }
+}
+@media (max-width: 760px) {
+  .site-header { min-height: 72px; padding: 1rem; }
+  .intro { padding: 2rem 1rem 1.5rem; }
+  .handout-layout { display: block; padding: 0 1rem 2rem; }
+  .control-card { padding: 1.2rem; }
+  .paper-stage { margin-top: 1.5rem; }
+  .handout-empty { min-height: 400px; padding: 2rem 1.25rem; }
+  .site-footer { padding: 1.2rem 1rem; flex-wrap: wrap; }
+}
+
+</style>
+</head>
+<body>
+  <header class="site-header handout-controls">
+    <a class="brand" href="demo.html"><span class="brand-mark" aria-hidden="true">r</span> RecallWeave</a>
+    <nav aria-label="Related tools"><a href="author.html">Deck studio <span aria-hidden="true">↗</span></a></nav>
+  </header>
+  <main>
+    <section class="intro handout-controls" aria-labelledby="page-title">
+      <p class="eyebrow">Course handouts</p>
+      <h1 id="page-title">A lesson, ready for paper.</h1>
+      <p class="intro-copy">Turn a checked deck into an unanswered worksheet and a separate answer key. Keep the original questions, option order and source credit.</p>
+    </section>
+    <div class="handout-layout">
+      <aside class="handout-controls" aria-label="Prepare your handout">
+        <section class="control-card file-card">
+          <p class="step-label">01 <span>Choose a deck</span></p>
+          <h2>Start with your lesson.</h2>
+          <p>Choose a local deck JSON, including a checked download from <a href="author.html">Deck studio</a>.</p>
+          <input id="handout-file" type="file" accept=".json,application/json" hidden>
+          <button id="choose-handout-file" class="button primary" type="button">Choose deck JSON <span aria-hidden="true">↑</span></button>
+          <p class="quiet">No upload. Your file stays in this browser.</p>
+          <p id="handout-status" class="status" role="status" aria-live="polite">Choose a checked deck JSON to begin.</p>
+          <section id="handout-preview" class="pending-deck" aria-label="Check this selection" hidden>
+            <p class="eyebrow">Ready to use</p>
+            <h3 id="pending-handout-title" tabindex="-1"></h3>
+            <p id="pending-handout-summary" class="quiet"></p>
+            <p id="pending-handout-attribution" class="source-text"></p>
+            <p id="pending-handout-license" class="source-text quiet"></p>
+            <div class="pending-actions">
+              <button id="use-handout-deck" class="button primary" type="button">Use this deck</button>
+              <button id="cancel-handout-preview" class="button subtle" type="button">Cancel</button>
+            </div>
+          </section>
+        </section>
+        <section class="control-card">
+          <p class="step-label">02 <span>Prepare your copies</span></p>
+          <div id="selected-handout" hidden>
+            <h2 id="selected-handout-title"></h2>
+            <p id="selected-handout-summary" class="quiet"></p>
+          </div>
+          <fieldset id="selected-handout-controls" disabled>
+            <legend>Preview</legend>
+            <div class="mode-picker">
+              <label><input id="preview-worksheet" name="handout-kind" type="radio" value="worksheet" checked><span>Worksheet<small>Questions only</small></span></label>
+              <label><input id="preview-answer-key" name="handout-kind" type="radio" value="answer-key"><span>Answer key<small>Answers included</small></span></label>
+            </div>
+            <div class="copy-actions">
+              <h3>Student copy</h3>
+              <p class="quiet">Questions, choices and space to respond.</p>
+              <button id="print-worksheet" class="button primary" type="button">Print worksheet</button>
+              <button id="save-worksheet" class="button secondary" type="button">Save worksheet HTML <span aria-hidden="true">↓</span></button>
+            </div>
+            <div class="copy-actions answer-copy">
+              <h3>Answer key</h3>
+              <p class="quiet">Correct choices and the deck’s explanations. Save this copy separately.</p>
+              <button id="print-answer-key" class="button secondary" type="button">Print answer key</button>
+              <button id="save-answer-key" class="button secondary" type="button">Save answer key HTML <span aria-hidden="true">↓</span></button>
+            </div>
+          </fieldset>
+          <p class="quiet offline-note">Saved HTML opens on its own, offline. Your browser’s print dialog can also save a PDF.</p>
+        </section>
+      </aside>
+      <section class="paper-stage" aria-label="Print preview">
+        <div id="handout-empty" class="handout-empty">
+          <div class="empty-sheet" aria-hidden="true"><span></span><span></span><span></span><i></i><i></i><i></i></div>
+          <p class="eyebrow">Your lesson goes here</p>
+          <h2>Make room for thinking.</h2>
+          <p>Choose a deck and confirm it to see the questions-only worksheet. The answer key stays a separate choice.</p>
+          <span class="empty-caption">Local files · Original wording · Ready to print</span>
+        </div>
+        <article id="handout-paper" class="course-paper" hidden></article>
+      </section>
+    </div>
+    <footer class="site-footer handout-controls"><span>RecallWeave / Course handouts</span><span>From checked deck to printed lesson.</span></footer>
+  </main>
+  <script>
+(() => {
+'use strict';
+const __recallweaveHandoutModules = Object.create(null);
+__recallweaveHandoutModules['./deck.mjs'] = (() => {
+/** Local lesson content. Imported data cannot replace the model or run code. */
+const DECK_FORMAT = 'recallweave-deck/1';
+const MAX_DECK_BYTES = 262144;
+
+function deckRecord(value, path) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    throw new Error(`${path} must be an object.`);
+  }
+  return value;
+}
+
+function deckText(value, path, limit) {
+  if (typeof value !== 'string' || !value.trim() || value.length > limit) {
+    throw new Error(`${path} must be nonempty text of at most ${limit} characters.`);
+  }
+  return value;
+}
+
+function deckList(value, path, minimum, maximum) {
+  if (!Array.isArray(value) || value.length < minimum || value.length > maximum) {
+    throw new Error(`${path} must contain ${minimum}–${maximum} entries.`);
+  }
+  return value;
+}
+
+/** Validate and copy only the content fields used by the existing lesson runtime. */
+function validateDeck(value) {
+  const input = deckRecord(value, 'Deck');
+  if (input.format !== undefined && input.format !== DECK_FORMAT) {
+    throw new Error(`Unsupported deck format. Use ${DECK_FORMAT}.`);
+  }
+  const title = deckText(input.title, 'title', 160);
+  const attribution = deckText(input.attribution, 'attribution', 2000);
+  const license = deckText(input.license, 'license', 2000);
+  const concepts = deckList(input.concepts, 'concepts', 1, 32).map((concept, index) =>
+    deckText(concept, `concepts[${index}]`, 80));
+  if (new Set(concepts).size !== concepts.length) throw new Error('Concept names must be unique.');
+  const knownConcepts = new Set(concepts);
+  const ids = new Set();
+  const coveredConcepts = new Set();
+  const links = new Map(concepts.map(concept => [concept, new Set()]));
+  const items = deckList(input.items, 'items', 1, 100).map((value, index) => {
+    const path = `items[${index}]`;
+    const item = deckRecord(value, path);
+    const id = deckText(item.id, `${path}.id`, 80);
+    if (ids.has(id)) throw new Error(`${path}.id duplicates another question ID.`);
+    ids.add(id);
+    const concept = deckText(item.concept, `${path}.concept`, 80);
+    if (!knownConcepts.has(concept)) throw new Error(`${path}.concept is not in concepts.`);
+    coveredConcepts.add(concept);
+    const prerequisites = deckList(item.prerequisites, `${path}.prerequisites`, 0, 31).map((name, p) => {
+      deckText(name, `${path}.prerequisites[${p}]`, 80);
+      if (!knownConcepts.has(name)) throw new Error(`${path}.prerequisites contains an unknown concept.`);
+      if (name === concept) throw new Error(`${path} cannot require its own concept.`);
+      links.get(concept).add(name);
+      return name;
+    });
+    if (new Set(prerequisites).size !== prerequisites.length) throw new Error(`${path}.prerequisites contains a duplicate.`);
+    const options = deckList(item.options, `${path}.options`, 2, 6).map((option, o) =>
+      deckText(option, `${path}.options[${o}]`, 1000));
+    if (new Set(options).size !== options.length) throw new Error(`${path}.options must be distinct.`);
+    if (!Number.isInteger(item.answer) || item.answer < 0 || item.answer >= options.length) {
+      throw new Error(`${path}.answer must be a zero-based index of an option.`);
+    }
+    return Object.freeze({
+      id, concept, prerequisites: Object.freeze(prerequisites),
+      prompt: deckText(item.prompt, `${path}.prompt`, 2000),
+      options: Object.freeze(options), answer: item.answer,
+      explanation: deckText(item.explanation, `${path}.explanation`, 4000),
+      transfer: deckText(item.transfer, `${path}.transfer`, 2000)
+    });
+  });
+  if (coveredConcepts.size !== concepts.length) throw new Error('Every concept must have at least one question.');
+  const visiting = new Set();
+  const visited = new Set();
+  const visit = concept => {
+    if (visiting.has(concept)) throw new Error('Prerequisite links must not form a cycle.');
+    if (visited.has(concept)) return;
+    visiting.add(concept);
+    for (const prerequisite of links.get(concept)) visit(prerequisite);
+    visiting.delete(concept);
+    visited.add(concept);
+  };
+  concepts.forEach(visit);
+  return Object.freeze({
+    format: DECK_FORMAT, title, attribution, license,
+    concepts: Object.freeze(concepts), items: Object.freeze(items)
+  });
+}
+
+/** The same size limit applies to a File and to programmatically supplied UTF-8 JSON. */
+function parseDeck(text) {
+  if (typeof text !== 'string' || new TextEncoder().encode(text).length > MAX_DECK_BYTES) {
+    throw new Error('Choose a JSON deck no larger than 256 KiB.');
+  }
+  let value;
+  try { value = JSON.parse(text); }
+  catch { throw new Error('The file is not valid JSON. Check its commas, quotes and brackets.'); }
+  return validateDeck(value);
+}
+
+/** Export the existing bundled lesson as an editable example of the same contract. */
+function serializeDeck(deck) {
+  return JSON.stringify(validateDeck(deck), null, 2) + '\n';
+}
+
+return { DECK_FORMAT, MAX_DECK_BYTES, validateDeck, parseDeck, serializeDeck };
+})();
+
+__recallweaveHandoutModules['./course-handout.mjs'] = (() => {
+const { validateDeck } = __recallweaveHandoutModules['./deck.mjs'];
+
+const HANDOUT_KINDS = Object.freeze(['worksheet', 'answer-key']);
+
+function checkedKind(kind) {
+  if (!HANDOUT_KINDS.includes(kind)) throw new Error('Choose worksheet or answer-key.');
+  return kind;
+}
+
+// The worksheet projection never carries the deck's answer indices or explanations.
+function createHandout(input, kind = 'worksheet') {
+  checkedKind(kind);
+  const deck = validateDeck(input);
+  const questions = deck.items.map((item, index) => {
+    const question = {
+      id: item.id,
+      number: index + 1,
+      prompt: item.prompt,
+      options: Object.freeze([...item.options]),
+      transfer: item.transfer,
+    };
+    if (kind === 'answer-key') {
+      question.answer = item.answer;
+      question.explanation = item.explanation;
+    }
+    return Object.freeze(question);
+  });
+  return Object.freeze({
+    kind,
+    title: deck.title,
+    attribution: deck.attribution,
+    license: deck.license,
+    concepts: Object.freeze([...deck.concepts]),
+    questions: Object.freeze(questions),
+  });
+}
+
+const HANDOUT_CSS = [
+  '.course-paper { box-sizing: border-box; background: #fff; color: #202338; padding: 3rem; font: 1rem/1.65 system-ui, sans-serif; overflow-wrap: anywhere; }',
+  '.course-paper *, .course-paper *::before, .course-paper *::after { box-sizing: border-box; }',
+  '.paper-header { border-bottom: 2px solid #202338; padding-bottom: 1.5rem; margin-bottom: 2rem; }',
+  '.paper-kind { color: #5d3fa8; font-size: .76rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }',
+  '.paper-title { font: 700 clamp(1.8rem, 5vw, 2.75rem)/1.2 Georgia, serif; margin: .6rem 0 1rem; }',
+  '.paper-title, .paper-attribution, .paper-license, .question-prompt, .question-option, .correct-option, .question-explanation, .question-transfer, .paper-concepts li { white-space: pre-wrap; }',
+  '.paper-instructions { max-width: 65ch; margin: .75rem 0; color: #43475d; }',
+  '.paper-concepts { display: flex; flex-wrap: wrap; gap: .35rem 1.5rem; padding-left: 1.2rem; margin: 1rem 0; font-size: .85rem; }',
+  '.paper-name { margin: 1.75rem 0 0; font-size: .88rem; }',
+  '.handout-question { margin: 0 0 2.5rem; break-inside: avoid-page; page-break-inside: avoid; }',
+  '.question-heading { display: flex; align-items: baseline; gap: .65rem; margin: 0 0 .85rem; font-size: 1.1rem; font-weight: 650; line-height: 1.55; }',
+  '.question-number { flex: 0 0 auto; color: #5d3fa8; font-weight: 800; }',
+  '.question-options { list-style-type: upper-alpha; padding-left: 2.25rem; margin: .75rem 0 1.2rem; }',
+  '.question-option { padding-left: .35rem; margin: .45rem 0; }',
+  '.question-option::marker { font-weight: 700; }',
+  '.transfer-heading { margin: 1.2rem 0 .35rem; font-size: .8rem; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; }',
+  '.question-transfer { margin: 0 0 .75rem; }',
+  '.response-lines span { display: block; min-height: 1.9rem; border-bottom: 1px solid #c1c4cc; }',
+  '.key-answer { border-left: 3px solid #5d3fa8; padding: .25rem 0 .25rem 1rem; margin: 1rem 0; }',
+  '.answer-label { color: #5d3fa8; font-size: .8rem; font-weight: 800; text-transform: uppercase; letter-spacing: .04em; margin: 0 0 .3rem; }',
+  '.correct-option { margin: 0 0 .75rem; font-weight: 700; }',
+  '.question-explanation { margin: 0; }',
+  '.transfer-note { margin: .5rem 0 0; font-size: .8rem; color: #656a7b; }',
+  '.paper-footer { border-top: 1px solid #c1c4cc; padding-top: 1rem; font-size: .78rem; color: #53596c; }',
+  '.paper-footer h2 { font-size: .8rem; margin: 0 0 .5rem; }',
+  '.paper-attribution, .paper-license { margin: .4rem 0; }',
+  '.handout-document { margin: 0; padding: 1.5rem; background: #f1f0ed; color: #202338; font-family: system-ui, sans-serif; }',
+  '.handout-document .course-paper { max-width: 850px; margin: 0 auto 2rem; box-shadow: 0 8px 35px #20233812; }',
+  '.document-toolbar { max-width: 850px; margin: 0 auto 1.25rem; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem; }',
+  '.document-toolbar p { margin: 0; font-size: .88rem; }',
+  '.document-toolbar button { border: 0; border-radius: .5rem; padding: .8rem 1.15rem; background: #5d3fa8; color: white; font: 700 .9rem system-ui, sans-serif; cursor: pointer; }',
+  '.document-toolbar button:focus-visible { outline: 3px solid #c39dff; outline-offset: 3px; }',
+  '@media (max-width: 600px) { .course-paper { padding: 1.35rem; } .handout-document { padding: .65rem; } .paper-name { line-height: 2; } }',
+  '@page { margin: 16mm; }',
+  '@media print {',
+  '  html, body { margin: 0 !important; padding: 0 !important; background: white !important; }',
+  '  .handout-controls, .document-toolbar, .handout-empty { display: none !important; }',
+  '  .handout-layout, .paper-stage { display: block !important; padding: 0 !important; margin: 0 !important; }',
+  '  .course-paper, .handout-document .course-paper { width: auto !important; max-width: none !important; margin: 0 !important; padding: 0 !important; border: 0 !important; box-shadow: none !important; font-size: 10.5pt; }',
+  '  .paper-title { font-size: 23pt; } .question-heading { font-size: 12pt; }',
+  '  .paper-kind, .question-number, .answer-label { color: #202338; }',
+  '}',
+].join('\n');
+
+// Self-contained so the same literal-text renderer can travel in a saved HTML document.
+function renderHandout(root, handout) {
+  const document = root.ownerDocument;
+  const node = (tag, className, text) => {
+    const element = document.createElement(tag);
+    if (className) element.className = className;
+    if (text !== undefined) element.textContent = text;
+    return element;
+  };
+  const isKey = handout.kind === 'answer-key';
+  root.replaceChildren();
+  root.classList.add('course-paper');
+  root.dataset.handoutKind = handout.kind;
+  root.setAttribute('aria-label', isKey ? 'Answer key' : 'Worksheet');
+
+  const header = node('header', 'paper-header');
+  header.append(node('p', 'paper-kind', isKey ? 'Answer key · Contains answers' : 'Worksheet · Questions only'));
+  const title = node('h1', 'paper-title', handout.title);
+  title.tabIndex = -1;
+  header.append(title);
+  header.append(node('p', 'paper-instructions', isKey
+    ? 'Use the original option order below to review each answer and its explanation.'
+    : 'Choose one option for each question, then write a response to apply the idea. Answers are in the separate answer key.'));
+  const concepts = node('ul', 'paper-concepts');
+  for (const concept of handout.concepts) concepts.append(node('li', '', concept));
+  header.append(concepts);
+  if (!isKey) header.append(node('p', 'paper-name', 'Name: ______________________________    Date: __________________'));
+  root.append(header);
+
+  for (const question of handout.questions) {
+    const section = node('section', 'handout-question');
+    section.dataset.questionNumber = String(question.number);
+    const heading = node('h2', 'question-heading');
+    heading.append(node('span', 'question-number', question.number + '.'));
+    heading.append(node('span', 'question-prompt', question.prompt));
+    section.append(heading);
+    const options = node('ol', 'question-options');
+    options.type = 'A';
+    for (const option of question.options) options.append(node('li', 'question-option', option));
+    section.append(options);
+    if (isKey) {
+      const answer = node('div', 'key-answer');
+      answer.append(node('p', 'answer-label', 'Answer ' + String.fromCharCode(65 + question.answer)));
+      answer.append(node('p', 'correct-option', question.options[question.answer]));
+      answer.append(node('p', 'question-explanation', question.explanation));
+      section.append(answer);
+    }
+    section.append(node('h3', 'transfer-heading', 'Apply the idea'));
+    section.append(node('p', 'question-transfer', question.transfer));
+    if (isKey) {
+      section.append(node('p', 'transfer-note', 'No separate transfer answer is provided by the deck.'));
+    } else {
+      const lines = node('div', 'response-lines');
+      lines.setAttribute('aria-label', 'Space for your response');
+      for (let index = 0; index < 3; index++) {
+        const line = node('span');
+        line.setAttribute('aria-hidden', 'true');
+        lines.append(line);
+      }
+      section.append(lines);
+    }
+    root.append(section);
+  }
+  const footer = node('footer', 'paper-footer');
+  footer.append(node('h2', '', 'Source and permission'));
+  footer.append(node('p', 'paper-attribution', handout.attribution));
+  footer.append(node('p', 'paper-license', handout.license));
+  root.append(footer);
+  return root;
+}
+
+function handoutFilename(title, kind = 'worksheet') {
+  checkedKind(kind);
+  const stem = title.normalize('NFKD').replace(/[^A-Za-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 60) || 'course';
+  return stem + '.' + kind + '.html';
+}
+
+function createHandoutDocument(input, kind = 'worksheet') {
+  const handout = createHandout(input, kind);
+  const payload = JSON.stringify(handout)
+    .replace(/</g, '\\u003c')
+    .replace(/>/g, '\\u003e')
+    .replace(/&/g, '\\u0026')
+    .replace(/\u2028/g, '\\u2028')
+    .replace(/\u2029/g, '\\u2029');
+  const label = kind === 'worksheet' ? 'worksheet' : 'answer key';
+  return [
+    '<!doctype html>',
+    '<html lang="en">',
+    '<head>',
+    '<meta charset="utf-8">',
+    '<meta name="viewport" content="width=device-width, initial-scale=1">',
+    '<title>Course ' + label + '</title>',
+    '<style>' + HANDOUT_CSS + '</style>',
+    '</head>',
+    '<body class="handout-document">',
+    '<nav class="document-toolbar handout-controls" aria-label="Document actions">',
+    '<p>' + (kind === 'worksheet' ? 'Questions only · Separate answer key required' : 'Answer key · Contains answers and explanations') + '</p>',
+    '<button id="print-handout" type="button">Print ' + label + '</button>',
+    '</nav>',
+    '<main id="handout-paper" class="course-paper"></main>',
+    '<noscript>This local handout needs JavaScript to display its text. It does not need an internet connection.</noscript>',
+    '<script id="handout-data" type="application/json">' + payload + '<\/script>',
+    '<script>',
+    "'use strict';",
+    "const handout = JSON.parse(document.querySelector('#handout-data').textContent);",
+    '(' + renderHandout.toString() + ")(document.querySelector('#handout-paper'), handout);",
+    "document.title = handout.title + ' — ' + (handout.kind === 'worksheet' ? 'Worksheet' : 'Answer key');",
+    "document.querySelector('#print-handout').addEventListener('click', () => window.print());",
+    '<\/script>',
+    '</body>',
+    '</html>',
+    '',
+  ].join('\n');
+}
+
+return { HANDOUT_KINDS, createHandout, HANDOUT_CSS, renderHandout, handoutFilename, createHandoutDocument };
+})();
+
+__recallweaveHandoutModules['./course-handout-ui.mjs'] = (() => {
+const { MAX_DECK_BYTES, parseDeck } = __recallweaveHandoutModules['./deck.mjs'];
+const { HANDOUT_CSS, createHandout, createHandoutDocument, handoutFilename, renderHandout } = __recallweaveHandoutModules['./course-handout.mjs'];
+
+const byId = id => document.getElementById(id);
+const fileInput = byId('handout-file');
+const status = byId('handout-status');
+const preview = byId('handout-preview');
+const paper = byId('handout-paper');
+const controls = byId('selected-handout-controls');
+let selectedDeck = null;
+let pendingDeck = null;
+let kind = 'worksheet';
+let requestVersion = 0;
+
+const paperStyle = document.createElement('style');
+paperStyle.id = 'handout-paper-style';
+paperStyle.textContent = HANDOUT_CSS;
+document.head.append(paperStyle);
+
+function message(text) {
+  status.textContent = text;
+}
+
+function clearPending() {
+  pendingDeck = null;
+  preview.hidden = true;
+}
+
+function retainedMessage(prefix) {
+  return prefix + (selectedDeck ? ' Your selected handout is unchanged.' : ' Choose a checked deck JSON to begin.');
+}
+
+function cancelPending() {
+  requestVersion++;
+  clearPending();
+  message(retainedMessage('Selection cancelled.'));
+}
+
+function renderSelected() {
+  if (!selectedDeck) return;
+  byId('preview-worksheet').checked = kind === 'worksheet';
+  byId('preview-answer-key').checked = kind === 'answer-key';
+  renderHandout(paper, createHandout(selectedDeck, kind));
+  paper.hidden = false;
+  byId('handout-empty').hidden = true;
+}
+
+byId('choose-handout-file').addEventListener('click', () => {
+  requestVersion++;
+  clearPending();
+  fileInput.value = '';
+  fileInput.click();
+});
+
+fileInput.addEventListener('cancel', cancelPending);
+fileInput.addEventListener('change', async () => {
+  const version = ++requestVersion;
+  clearPending();
+  const file = fileInput.files?.[0];
+  if (!file) {
+    message(retainedMessage('Selection cancelled.'));
+    return;
+  }
+  message('Checking ' + file.name + '…');
+  try {
+    if (file.size > MAX_DECK_BYTES) throw new Error('Choose a JSON deck no larger than 256 KiB.');
+    const text = await file.text();
+    if (version !== requestVersion) return;
+    const deck = parseDeck(text);
+    pendingDeck = deck;
+    byId('pending-handout-title').textContent = deck.title;
+    byId('pending-handout-summary').textContent = deck.items.length + (deck.items.length === 1 ? ' question' : ' questions')
+      + ' · ' + deck.concepts.length + (deck.concepts.length === 1 ? ' concept' : ' concepts');
+    byId('pending-handout-attribution').textContent = deck.attribution;
+    byId('pending-handout-license').textContent = deck.license;
+    preview.hidden = false;
+    message('Deck checked. Choose “Use this deck” to prepare its worksheet and separate answer key.');
+    byId('pending-handout-title').focus();
+  } catch (error) {
+    if (version !== requestVersion) return;
+    clearPending();
+    message(retainedMessage(error instanceof Error ? error.message : 'The file could not be read.'));
+  }
+});
+
+byId('cancel-handout-preview').addEventListener('click', () => {
+  cancelPending();
+  byId('choose-handout-file').focus();
+});
+
+byId('use-handout-deck').addEventListener('click', () => {
+  if (!pendingDeck) return;
+  requestVersion++;
+  selectedDeck = pendingDeck;
+  clearPending();
+  kind = 'worksheet';
+  byId('selected-handout-title').textContent = selectedDeck.title;
+  byId('selected-handout-summary').textContent = selectedDeck.items.length + (selectedDeck.items.length === 1 ? ' question' : ' questions')
+    + ' · Original question and option order';
+  controls.disabled = false;
+  byId('selected-handout').hidden = false;
+  renderSelected();
+  message('Worksheet ready. Print or save the questions-only copy, or choose the separate answer key.');
+  paper.querySelector('.paper-title').focus();
+});
+
+for (const [id, mode] of [['preview-worksheet', 'worksheet'], ['preview-answer-key', 'answer-key']]) {
+  byId(id).addEventListener('change', event => {
+    if (!selectedDeck || !event.target.checked) return;
+    kind = mode;
+    renderSelected();
+  });
+}
+
+for (const [id, mode] of [['print-worksheet', 'worksheet'], ['print-answer-key', 'answer-key']]) {
+  byId(id).addEventListener('click', () => {
+    if (!selectedDeck) return;
+    kind = mode;
+    renderSelected();
+    window.print();
+  });
+}
+
+for (const [id, mode] of [['save-worksheet', 'worksheet'], ['save-answer-key', 'answer-key']]) {
+  byId(id).addEventListener('click', () => {
+    if (!selectedDeck) return;
+    const documentText = createHandoutDocument(selectedDeck, mode);
+    const url = URL.createObjectURL(new Blob([documentText], { type: 'text/html;charset=utf-8' }));
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = handoutFilename(selectedDeck.title, mode);
+    document.body.append(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    message((mode === 'worksheet' ? 'Worksheet' : 'Answer key') + ' download prepared. Open the saved HTML file to read or print it offline.');
+  });
+}
+
+return {  };
+})();
+
+})();
+</script>
+</body>
+</html>
