@@ -1,0 +1,178 @@
+RecallWeave — study notes
+Markov chains: where probability goes next
+Saved: 2026-10-08T15:10:02.628Z
+
+FIRST SESSION
+9 of 14 connections correct on the first try.
+This count describes this session; it is not a measure of your ability.
+
+ESTIMATED MASTERY — MODEL STATE, NOT A GRADE
+These estimates come from the demo’s learning model. They are not a validated assessment.
+Practice does not change the first-session estimates.
+State and transition rules: 90%
+Probability flow: 33%
+Repeated steps and observations: 62%
+Stationary distributions: 91%
+Cycles and closed states: 91%
+
+PRACTICE
+Paused: 1 of 5 practice answers recorded; 1 correct on retry.
+Practice follows the explanations and is recorded separately from the first answers.
+
+REVIEW THE CONNECTIONS
+
+1. A toy model gives the step-2 distribution [52%,24%,24%]. One hundred independent copies use that model and all start in A. Which conclusion is justified?
+Concept: Repeated steps and observations
+Your first answer: Every copy must pass through all three states by step 2.
+First try: needs review
+Correct answer: The expected number in A at step 2 is 52, while the observed number can differ.
+Explanation: For each copy, the probability of being in A at that specified step is 0.52. Summing the 100 indicator expectations gives an expected count of 52. An expectation need not equal a finite experiment's realized count. A distribution at one step is also different from a time fraction along one path.
+Apply the idea: For 25 independent copies, the expected number in A is 25×0.52 = 13. An observed count such as 11 does not by itself contradict the model. The explorer computes distributions directly and does not generate a random sample of paths.
+Your explanation — reflection, not scored:
+  Not written.
+Practice answer: The expected number in A at step 2 is 52, while the observed number can differ.
+Practice result: correct on retry
+
+2. Use the transition rows A:[60%,20%,20%], B:[40%,50%,10%], C:[40%,10%,50%], with columns A,B,C. The current distribution is [50%,50%,0%]. What is the next distribution?
+Concept: Probability flow
+Your first answer: [50%,35%,15%]
+First try: correct
+Correct answer: [50%,35%,15%]
+Explanation: Weight each row by the probability of its current state. A next receives 0.50×0.60 + 0.50×0.40 = 0.50. B receives 0.50×0.20 + 0.50×0.50 = 0.35. C receives 0.50×0.20 + 0.50×0.10 = 0.15. Contributions from current C are zero. The result sums to one.
+Apply the idea: Change the current distribution to [0%,50%,50%]. The next distribution is [40%,30%,30%]: A gets 0.50×0.40 twice; B gets 0.50×0.50 + 0.50×0.10; C gets 0.50×0.10 + 0.50×0.50.
+Your explanation — reflection, not scored:
+  Not written.
+
+3. Use rows A:[0%,50%,50%], B:[100%,0%,0%], C:[100%,0%,0%]. The initial distribution [50%,25%,25%] is stationary. What happens to an individual state on its next transition?
+Concept: Stationary distributions
+Your first answer: It changes state with probability one, even though the overall distribution stays the same.
+First try: correct
+Correct answer: It changes state with probability one, even though the overall distribution stays the same.
+Explanation: Every diagonal entry is zero. From A the next state is B or C, and from B or C it is A, so every path changes state. Meanwhile the mass in B and C totals 50% and flows into A; A's 50% splits into 25% for B and 25% for C. The distribution is unchanged without freezing individuals.
+Apply the idea: Starting from that stationary distribution, the probability of being in A is 50% at every step. Starting certainly in A instead, it is 100% at step 0 and 0% at step 1. Stationarity is a property of a particular distribution together with the transition rule.
+Your explanation — reflection, not scored:
+  Not written.
+
+4. An initial distribution is [20%,30%,50%]. Before applying any transition, what should the explorer display at step 0?
+Concept: Repeated steps and observations
+Your first answer: The first row of the transition matrix.
+First try: needs review
+Correct answer: [20%,30%,50%], the initial distribution itself.
+Explanation: Step 0 describes the initial state uncertainty. Applying zero transitions leaves it unchanged. A transition matrix changes the distribution only when a step is taken; it does not replace the initial condition automatically.
+Apply the idea: If the initial distribution is [0%,100%,0%], the system is certainly in B at step 0. Its step-1 distribution is the B row, not the A row and not an average of all rows.
+Your explanation — reflection, not scored:
+  Not written.
+Practice answer: not recorded.
+
+5. Use the same fixed rows A:[60%,20%,20%], B:[40%,50%,10%], C:[40%,10%,50%]. Start certainly in A at step 0. Step 1 is [60%,20%,20%]. What is the distribution at step 2?
+Concept: Repeated steps and observations
+Your first answer: [52%,24%,24%]
+First try: correct
+Correct answer: [52%,24%,24%]
+Explanation: Apply the full transition rule again. A receives 0.60×0.60 + 0.20×0.40 + 0.20×0.40 = 0.52. B receives 0.60×0.20 + 0.20×0.50 + 0.20×0.10 = 0.24. C receives 0.60×0.20 + 0.20×0.10 + 0.20×0.50 = 0.24. Squaring entries individually drops paths through intermediate states.
+Apply the idea: One more step gives [50.4%,24.8%,24.8%]. For A, calculate 0.52×0.60 + 0.24×0.40 + 0.24×0.40 = 0.504. Repeated multiplication describes repeated use of the same conditional rule.
+Your explanation — reflection, not scored:
+  Not written.
+
+6. A candidate vector π has nonnegative entries summing to one. In the row-vector convention p(next) = p(current)P, what checks whether π is stationary?
+Concept: Stationary distributions
+Your first answer: Multiplying once must give πP = π.
+First try: correct
+Correct answer: Multiplying once must give πP = π.
+Explanation: Stationary means that starting with distribution π produces exactly the same distribution after a transition. Then repeated transitions preserve it as well. The condition concerns the distribution, not whether individual paths move. Uniform probabilities and a visually flat finite plot are not general definitions of stationarity.
+Apply the idea: For rows A:[60%,20%,20%], B:[40%,50%,10%], C:[40%,10%,50%], try π=[50%,25%,25%]. The next A probability is 0.30+0.10+0.10=0.50; B is 0.10+0.125+0.025=0.25; C is 0.10+0.025+0.125=0.25.
+Your explanation — reflection, not scored:
+  Not written.
+
+7. Rows name the current state; columns name the next state in order A, B, C. The row for A is [60%, 20%, 20%]. What does its middle entry mean?
+Concept: State and transition rules
+Your first answer: Given that the next state is B, the chance the current state was A is 20%.
+First try: needs review
+Correct answer: Given that the current state is A, the modeled chance that the next state is B is 20%.
+Explanation: A row gives conditional next-state probabilities for one specified current state. The middle entry is P(next = B | current = A). Reversing the conditioning generally needs the current distribution and other transition probabilities. A probability also does not force exact counts in a finite observed run.
+Apply the idea: If the B row is [40%, 50%, 10%], what is the chance of A next when the current state is B? It is 40%. The A-to-B chance remains 20%; opposite directions need not have equal probabilities.
+Your explanation — reflection, not scored:
+  Not written.
+Practice answer: not recorded.
+
+8. A time-homogeneous Markov model uses states A, B and C. After the current state is known, which information determines its modeled probabilities for the next state?
+Concept: State and transition rules
+Your first answer: Only the current state, through the same transition rule at every step.
+First try: correct
+Correct answer: Only the current state, through the same transition rule at every step.
+Explanation: The Markov assumption says that, conditional on the present state, the earlier path adds no information about the next-state probabilities. Time-homogeneous means that this conditional rule does not change with the step number. It does not make successive states independent, and self-transitions are allowed.
+Apply the idea: A machine's failure chance depends on both its current mode and its age. Would a model using only the mode automatically be Markov? No. Age may contain relevant information not captured by that state. Adding a suitable age category could improve the state description; whether it is adequate still needs evidence.
+Your explanation — reflection, not scored:
+  Not written.
+
+9. A row lists all possible next states A, B and C. Which row is a valid probability row without changing any entry?
+Concept: State and transition rules
+Your first answer: [0%, 35%, 65%]
+First try: correct
+Correct answer: [0%, 35%, 65%]
+Explanation: Every entry must be nonnegative and the complete row must sum to 100%. The last row meets both conditions. The other rows respectively sum to 110%, contain a negative probability, and omit all probability mass. A zero entry is allowed; a row of zeros is not.
+Apply the idea: Does a row [100%, 0%, 0%] need to be smoothed to be valid? No. It describes a certain move to A. Whether that is a useful model is a separate question. In the explorer, invalid rows are reported instead of silently normalized.
+Your explanation — reflection, not scored:
+  Not written.
+
+10. The fixed rows are A:[60%,20%,20%], B:[40%,50%,10%], C:[40%,10%,50%]. Starting in A, what is the probability of the particular two-step path A → B → C?
+Concept: Probability flow
+Your first answer: 10%, because only the last transition matters.
+First try: needs review
+Correct answer: 2%, obtained from 20% × 10%.
+Explanation: The specified path requires both transitions: A to B with probability 0.20, then B to C with probability 0.10. Their conditional product is 0.02. Ending in C after two steps also allows A→A→C and A→C→C; summing all three disjoint paths gives 0.12 + 0.02 + 0.10 = 0.24.
+Apply the idea: What is the probability of A → C → A? It is 0.20×0.40 = 0.08, or 8%. This is only one contribution to the full step-2 probability of A, which is 52%.
+Your explanation — reflection, not scored:
+  Not written.
+Practice answer: not recorded.
+
+11. Rows and columns use order A, B, C. In a toy model, the A row is [100%,0%,0%]. What can you conclude from that row alone?
+Concept: Cycles and closed states
+Your first answer: A is absorbing: once the state is A, all later states remain A under this unchanged rule.
+First try: correct
+Correct answer: A is absorbing: once the state is A, all later states remain A under this unchanged rule.
+Explanation: The row guarantees a self-transition from A with probability one, making A absorbing. It says nothing by itself about whether B or C can reach A. They could have their own closed behavior. The current distribution is an initial or evolved probability vector, not something imposed by the A row alone.
+Apply the idea: If B's row is [0%,100%,0%] too, starting in B never reaches A. In the explorer's absorbing preset, B and C do have routes into A; the gradually increasing A probability illustrates those additional rows, not just the fact that A is absorbing.
+Your explanation — reflection, not scored:
+  Not written.
+
+12. Use A:[0%,50%,50%], B:[100%,0%,0%], C:[100%,0%,0%], and start certainly in A. Which description is correct?
+Concept: Cycles and closed states
+Your first answer: The probability of A is 100% at every even step and 0% at every odd step, so these distributions do not converge.
+First try: correct
+Correct answer: The probability of A is 100% at every even step and 0% at every odd step, so these distributions do not converge.
+Explanation: One step sends all mass from A into B and C equally. The next sends all of it back to A. This repeats forever: [1,0,0], then [0,0.5,0.5], then [1,0,0]. The chain has a stationary distribution [0.5,0.25,0.25], but the distributions from this initial state do not approach it. Stationarity alone does not guarantee convergence.
+Apply the idea: At step 9 the distribution is [0%,50%,50%]; at step 10 it is [100%,0%,0%]. Averaging many steps is a different operation from asking for the distribution at one late step. A longer plot does not change the rule.
+Your explanation — reflection, not scored:
+  Not written.
+
+13. Use A:[100%,0%,0%], B:[0%,100%,0%], C:[40%,60%,0%]. What happens when the system starts certainly in C?
+Concept: Cycles and closed states
+Your first answer: It has no stationary distribution because C is not absorbing.
+First try: needs review
+Correct answer: After one step its distribution is [40%,60%,0%], which stays unchanged; starting certainly in A instead stays [100%,0%,0%].
+Explanation: C sends 40% of its mass into absorbing A and 60% into absorbing B. Thereafter each part stays where it went. Starting in A has a different outcome because there is no route from A to B. The chain has more than one stationary distribution; every distribution supported only on A and B is stationary.
+Apply the idea: Start with [20%,30%,50%]. One step gives A: 0.20 + 0.50×0.40 = 0.40, B: 0.30 + 0.50×0.60 = 0.60, C: 0. These probabilities then stay fixed. This example shows why the initial distribution can keep mattering.
+Your explanation — reflection, not scored:
+  Not written.
+Practice answer: not recorded.
+
+14. Consider a finite, time-homogeneous Markov chain. Every state can reach every other (irreducible), and the chain has period one (aperiodic). What follows?
+Concept: Cycles and closed states
+Your first answer: There is a unique stationary distribution, and distributions from any initial distribution approach it as the number of steps grows.
+First try: correct
+Correct answer: There is a unique stationary distribution, and distributions from any initial distribution approach it as the number of steps grows.
+Explanation: For a finite irreducible aperiodic chain, the convergence theorem gives a unique stationary distribution and convergence to it from any initial distribution. It does not require a uniform stationary distribution or exact agreement after a finite number of steps. Irreducibility alone guarantees uniqueness for a finite chain, but a periodic chain can still fail to converge from some starts.
+Apply the idea: The mixing preset has rows [60%,20%,20%], [40%,50%,10%], [40%,10%,50%]. Every transition is positive, so all states communicate and each has a self-return in one step. Its stationary distribution is [50%,25%,25%], which is not uniform. A rounded chart near that value is an illustration, not a proof.
+Your explanation — reflection, not scored:
+  Not written.
+
+YOUR APPLICATION REFLECTION — NOT SCORED
+Prompt: Choose one connection from this deck and explain how it relates to another idea in your own words.
+Not written.
+
+DECK ATTRIBUTION
+Original questions, numerical examples and worked transfers by RecallWeave contributors with AI assistance, 2026. Mathematical background checked against MIT OpenCourseWare: 6.436J/15.085J, Fall 2018, Lecture 21, Markov Chains (https://ocw.mit.edu/courses/6-436j-fundamentals-of-probability-fall-2018/141423989a49375f14f0a44940d81e67_MIT6_436JF18_lec21.pdf); Hao Wu, 18.445, Spring 2015, Lectures 2 and 4 (https://ocw.mit.edu/courses/18-445-introduction-to-stochastic-processes-spring-2015/pages/lecture-notes/). No source exercises, prose or figures are reproduced. All systems here are hypothetical teaching examples.
+CC0-1.0 for this original course content. Referenced MIT materials retain their own terms and are not included in this deck.
+
+Saved from this browser session. The download does not upload the session or restore it after a refresh.
