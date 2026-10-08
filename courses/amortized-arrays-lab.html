@@ -1,0 +1,365 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="An offline RecallWeave lab for dynamic-array growth, exact copy costs and amortized analysis.">
+<title>Room to grow · RecallWeave</title>
+<style>
+:root{color-scheme:light;--paper:#f8f6ef;--ink:#172c2a;--muted:#526361;--line:#d5dcd4;--card:#fffef9;--double:#1d6755;--fixed:#a24b25;--soft:#e9f1e9;--focus:#8b430f}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.6}button,input,select{font:inherit}button,input,select,summary,a{touch-action:manipulation}button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible,a:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--focus);outline-offset:4px}a{color:var(--double)}button{border:1px solid #9aa9a0;border-radius:8px;background:var(--card);color:var(--ink);padding:.55rem .85rem;min-height:44px;cursor:pointer;font-weight:650}button:hover:not(:disabled){background:var(--soft)}button:disabled{opacity:.5;cursor:default}button.primary{background:var(--double);color:white;border-color:var(--double)}button.primary:hover{background:#154b3e}input,select{border:1px solid #7b9187;border-radius:7px;padding:.5rem .65rem;background:white;color:var(--ink);min-height:44px;max-width:100%}input[aria-invalid=true]{border:2px solid var(--fixed)}h1,h2,h3,p{margin:0}h1{font-family:Georgia,"Times New Roman",serif;font-weight:500;font-size:clamp(2.8rem,7vw,5rem);letter-spacing:-.045em;line-height:1.08;margin:1rem 0}h2{font-size:1.5rem;letter-spacing:-.025em;line-height:1.25}h3{font-size:1.1rem}main{max-width:1160px;margin:auto;padding:28px 28px 64px}.brand{font-size:.78rem;font-weight:750;letter-spacing:.15em;text-transform:uppercase;display:flex;gap:1rem;justify-content:space-between;border-bottom:1px solid var(--line);padding-bottom:16px}.hero{padding:36px 0 28px;display:grid;grid-template-columns:1.6fr 1fr;gap:40px;align-items:center}.eyebrow{font-size:.75rem;letter-spacing:.13em;text-transform:uppercase;color:var(--double);font-weight:800}.lead{font-size:1.15rem;max-width:650px}.muted{color:var(--muted)}.principle{border-left:3px solid var(--double);padding:16px 0 16px 22px}.principle strong{font-family:Georgia,serif;font-size:2rem;font-weight:500;display:block;line-height:1.25;margin:.3rem 0 .7rem}.panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:24px;margin-top:20px}.controls{display:flex;gap:16px;align-items:end;flex-wrap:wrap;margin-top:20px}.field{display:flex;flex-direction:column;gap:5px;font-weight:650}.field small{font-size:.8rem;font-weight:400;color:var(--muted)}.field input{width:150px}.presets,.downloads,.navigator{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:16px}.presets button{font-size:.83rem;padding:.35rem .6rem;min-height:38px}.status{margin-top:16px;min-height:1.6em}.status.error{color:#873919;font-weight:650}.comparison-head{display:flex;justify-content:space-between;gap:16px;align-items:start;margin:30px 0 8px}.step-tag{font-variant-numeric:tabular-nums;font-size:1rem;background:var(--soft);padding:6px 12px;border-radius:30px;white-space:nowrap}.two{display:grid;grid-template-columns:1fr 1fr;gap:18px}.policy{margin-top:16px;border-top:4px solid var(--double)}.policy.fixed{border-top-color:var(--fixed)}.policy-label{color:var(--double);font-weight:800;font-size:.8rem;letter-spacing:.07em;text-transform:uppercase}.fixed .policy-label{color:var(--fixed)}.numbers{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:18px 0}.number{font-size:2rem;line-height:1.15;font-weight:700;display:block;font-variant-numeric:tabular-nums}.numbers small{font-size:.75rem;color:var(--muted)}.detail{font-variant-numeric:tabular-nums;font-size:.9rem;min-height:4.5em}.slots{display:grid;grid-template-columns:repeat(auto-fill,minmax(27px,1fr));gap:4px;margin:14px 0}.slot{display:flex;align-items:center;justify-content:center;aspect-ratio:1;border:1px dashed #8b9f94;border-radius:4px;background:#f7f8f2;font-size:.7rem;font-variant-numeric:tabular-nums;color:var(--muted)}.slot.live{background:var(--soft);border:1px solid var(--double);color:var(--ink)}.slot.copied{border:2px solid var(--double)}.fixed .slot.copied{border-color:var(--fixed)}.slot.new{background:var(--ink);color:white;border:2px solid var(--ink)}.slot-key{font-size:.76rem;color:var(--muted)}.potential{background:var(--soft);border-radius:8px;padding:12px;margin-top:16px;font-variant-numeric:tabular-nums;font-size:.9rem}.potential.na{background:#f4eee5}.plot{display:block;width:100%;height:auto;margin-top:16px}.plot text{fill:var(--muted);font-size:12px}.legend{display:flex;gap:24px;flex-wrap:wrap;font-size:.85rem;margin-top:8px}.legend span:before{content:"";display:inline-block;width:26px;border-top:3px solid var(--double);margin-right:8px;vertical-align:middle}.legend span:last-child:before{border-color:var(--fixed);border-top-style:dashed}.ledger{max-width:100%;overflow:auto;max-height:450px;margin-top:16px;border:1px solid var(--line);border-radius:8px}table{border-collapse:collapse;width:100%;min-width:660px;font-size:.85rem;font-variant-numeric:tabular-nums}caption{text-align:left;font-weight:650;padding:12px}th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}th{position:sticky;top:0;background:#eef1e9;z-index:1}th:first-child,td:first-child{text-align:left}tr.current{background:#e8f2e7}tr.current td:first-child{font-weight:800}details>summary{cursor:pointer;font-weight:700;padding:3px 0}details p{margin-top:12px}.footer{margin-top:28px;font-size:.82rem;color:var(--muted);border-top:1px solid var(--line);padding-top:20px}.footer p+p{margin-top:8px}[hidden]{display:none!important}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}@media(max-width:700px){main{padding:20px 16px 40px}.brand{font-size:.66rem;gap:8px}.hero{grid-template-columns:1fr;gap:22px;padding-top:24px}.principle{padding:8px 0 8px 16px}.principle strong{font-size:1.5rem}.two{grid-template-columns:1fr}.panel{padding:18px}.comparison-head{flex-direction:column}.field{flex:1;min-width:110px}.field input{width:100%}.controls .primary{width:100%}.numbers{gap:8px}.number{font-size:1.8rem}.navigator button{flex:1}.navigator label{width:100%}.navigator select{flex:1}.downloads button{width:100%}.step-tag{white-space:normal}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<main>
+<div class="brand"><span>RecallWeave / Algorithm lab</span><span>Offline · No account</span></div>
+<header class="hero">
+<div><p class="eyebrow">Dynamic arrays & amortized analysis</p><h1>Room to grow.</h1><p class="lead">One append can be expensive. The whole sequence can still be cheap. Follow the copies, then account for the difference.</p></div>
+<aside class="principle"><p class="eyebrow">The question</p><strong>What pays for<br>the next resize?</strong><p class="muted">Compare doubling with fixed-increment growth. Inspect actual work, cumulative totals and the potential that connects them.</p></aside>
+</header>
+<section class="panel" aria-labelledby="setup-heading">
+<h2 id="setup-heading">Choose a sequence</h2><p class="muted">Both arrays begin empty. Every append stores the next numbered element.</p>
+<form id="comparison-form" novalidate>
+<div class="controls">
+<label class="field" for="append-count">Appends<input id="append-count" name="appends" type="text" inputmode="numeric" value="12" maxlength="16" aria-describedby="append-help"><small id="append-help">Whole number · 0 to 128</small></label>
+<label class="field" for="growth-increment">Fixed increment<input id="growth-increment" name="increment" type="text" inputmode="numeric" value="3" maxlength="16" aria-describedby="increment-help"><small id="increment-help">New slots per resize · 1 to 32</small></label>
+<button class="primary" type="submit" id="apply">Apply comparison</button>
+</div></form>
+<div class="presets" aria-label="Worked examples"><span class="muted">Try:</span><button type="button" data-example="9,3">A resize spike</button><button type="button" data-example="8,1">Copy every time</button><button type="button" data-example="64,3">A longer sequence</button><button type="button" data-example="0,3">Start empty</button></div>
+<p id="status" class="status" role="status" aria-live="polite"></p>
+<details><summary>Exactly what counts as one unit?</summary><p>One new-element write costs <strong>1</strong>. Copying one old live element during a resize costs <strong>1</strong>. Allocation, zeroing, bytes, cache behavior and elapsed time are excluded. These are teaching-model counts, not measurements of a language runtime or machine.</p><p>When full, doubling chooses capacity 1 initially and then twice its old capacity. Fixed growth adds the chosen increment. This lab models <strong>appends only</strong>: no removals, shrinking or middle insertion.</p></details>
+</section>
+<section id="results" aria-labelledby="inspection-heading" hidden>
+<div class="comparison-head"><div><p class="eyebrow">One shared inspection cursor</p><h2 id="inspection-heading">Inspect each append</h2></div><p class="step-tag" id="step-label"></p></div>
+<div class="navigator"><button type="button" id="first">First</button><button type="button" id="back">Back</button><label for="step-select">Inspection step</label><select id="step-select"></select><button type="button" id="next">Next</button><button type="button" id="last">Last</button></div>
+<div class="two">
+<article class="panel policy" id="doubling-card" aria-labelledby="doubling-heading"><p class="policy-label">Geometric growth</p><h3 id="doubling-heading">Double when full</h3><div class="numbers"><div><span class="number" data-value="cost"></span><small>This append's actual cost</small></div><div><span class="number" data-value="total"></span><small>Total through this step</small></div><div><span class="number" data-value="spare"></span><small>Spare slots now</small></div></div><p class="detail" data-value="detail"></p><div class="slots" data-value="slots" aria-label="Doubling array slots"></div><p class="slot-key">Numbered: live · Bold outline: copied now · Dark: new · Dash: spare</p><p class="potential" data-value="potential"></p></article>
+<article class="panel policy fixed" id="fixed-card" aria-labelledby="fixed-heading"><p class="policy-label">Arithmetic growth</p><h3 id="fixed-heading">Add fixed slots when full</h3><div class="numbers"><div><span class="number" data-value="cost"></span><small>This append's actual cost</small></div><div><span class="number" data-value="total"></span><small>Total through this step</small></div><div><span class="number" data-value="spare"></span><small>Spare slots now</small></div></div><p class="detail" data-value="detail"></p><div class="slots" data-value="slots" aria-label="Fixed-increment array slots"></div><p class="slot-key">Numbered: live · Bold outline: copied now · Dark: new · Dash: spare</p><p class="potential na" data-value="potential">The doubling potential does not apply to this policy. Compare its actual copies and totals instead.</p></article>
+</div>
+<section class="panel" aria-labelledby="total-heading"><h2 id="total-heading">The whole applied sequence</h2><p id="totals" class="muted"></p><svg class="plot" id="cost-plot" viewBox="0 0 800 250" role="img" aria-labelledby="plot-title plot-description"><title id="plot-title">Cumulative counted work</title><desc id="plot-description">The complete ledgers below contain every plotted value.</desc></svg><div class="legend"><span>Doubling · solid</span><span>Fixed increment · dashed</span></div><p id="proof" class="potential"></p></section>
+<section class="panel" aria-labelledby="ledger-heading"><h2 id="ledger-heading">Keep the accounting visible</h2><p class="muted">All steps of the applied sequence remain in these tables. Highlighting follows the cursor; it does not change the calculation.</p><div class="ledger" tabindex="0" aria-label="Doubling ledger, horizontally scrollable"><table id="doubling-ledger"><caption>Doubling: actual work and potential</caption><thead><tr><th scope="col">Step</th><th scope="col">Size</th><th scope="col">Capacity</th><th scope="col">Copies</th><th scope="col">New writes</th><th scope="col">Cost</th><th scope="col">Total</th><th scope="col">Phi</th><th scope="col">Charge</th></tr></thead><tbody></tbody></table></div><div class="ledger" tabindex="0" aria-label="Fixed-increment ledger, horizontally scrollable"><table id="fixed-ledger"><caption>Fixed increment: actual work</caption><thead><tr><th scope="col">Step</th><th scope="col">Size</th><th scope="col">Capacity</th><th scope="col">Copies</th><th scope="col">New writes</th><th scope="col">Cost</th><th scope="col">Total</th></tr></thead><tbody></tbody></table></div></section>
+</section>
+<section class="panel" aria-labelledby="keep-heading"><p class="eyebrow">From inspection to explanation</p><h2 id="keep-heading">Keep the example. Test the idea.</h2><p class="muted">The observation captures your full applied comparison. The original 16-question course and worked guide are fixed lesson content.</p><div class="downloads"><button type="button" id="download-observation" disabled>Download observation (.json)</button><button type="button" id="download-course">Download course (.json)</button><button type="button" id="download-guide">Download worked guide (.md)</button></div><p style="margin-top:14px">To study the course, open RecallWeave, choose its JSON under <strong>Bring your own lesson</strong>, inspect the preview, then choose <strong>Start this deck</strong>. This lab never changes that session.</p></section>
+<footer class="footer"><p><strong>Scope matters.</strong> A constant amortized bound is a bound over every permitted prefix, not a promise that every operation is quick. No probability model or real-time guarantee is assumed.</p><p>Newly authored for the HAMON estate. Background: Cornell CS3110 amortized analysis and MIT6.006 dynamic arrays. Full references, conventions and worked transfer answers are in the guide. No reference questions or figures are copied. No network, automatic storage, install or external font is needed.</p></footer>
+</main>
+<script id="course-data" type="application/json">"{\n  \"format\": \"recallweave-deck/1\",\n  \"title\": \"Amortized arrays: spikes, totals and stored credit\",\n  \"attribution\": \"Original questions, examples and worked explanations for the HAMON estate / RecallWeave, 2026. Background: Cornell CS3110 Lecture20, Amortized Analysis (https://www.cs.cornell.edu/courses/cs3110/2011sp/Lectures/lec20-amortized/amortized.htm); MIT6.006 Lecture2, Data Structures and Dynamic Arrays (https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/resources/lecture-2-data-structures-and-dynamic-arrays/). No reference exercise, passage or figure is reproduced.\",\n  \"license\": \"CC0-1.0 for this original course content, following the existing original-course convention. Referenced Cornell and MIT materials retain their own terms and are not included.\",\n  \"concepts\": [\n    \"Counted work\",\n    \"Geometric growth\",\n    \"Potential accounting\",\n    \"Guarantees and tradeoffs\"\n  ],\n  \"items\": [\n    {\n      \"id\": \"aa-units\",\n      \"concept\": \"Counted work\",\n      \"prerequisites\": [],\n      \"prompt\": \"The lab counts one unit to store a new element and one unit for each old element copied. What does a reported cost of 9 establish?\",\n      \"options\": [\n        \"The append took exactly 9 milliseconds.\",\n        \"The declared model counted 9 element writes/copies.\",\n        \"The allocation reserved exactly 9 bytes.\",\n        \"Every machine will execute exactly 9 instructions.\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"The count belongs to an explicit abstract model. Allocation, zeroing, element byte sizes, cache behavior and elapsed time are excluded. The number is not a measured duration or instruction count.\",\n      \"transfer\": \"A resize copies six old elements and stores one new element. State its model cost and one excluded cost.\"\n    },\n    {\n      \"id\": \"aa-spare-slot\",\n      \"concept\": \"Counted work\",\n      \"prerequisites\": [],\n      \"prompt\": \"An array contains 3 elements in 4 slots. Under either policy, what does the next append cost?\",\n      \"options\": [\n        \"4 units, because every allocated slot is copied.\",\n        \"3 units, because existing elements are copied.\",\n        \"1 unit, because the new element fits without a resize.\",\n        \"0 units, because capacity is already available.\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"The array is not full, so it keeps its allocation and writes only the new element. Size becomes 4, capacity stays 4, and the cost is 1.\",\n      \"transfer\": \"Repeat the reasoning for size 7 and capacity 10.\"\n    },\n    {\n      \"id\": \"aa-full-array\",\n      \"concept\": \"Counted work\",\n      \"prerequisites\": [],\n      \"prompt\": \"Before an append, a doubling array has size 4 and capacity 4. Which description matches the append?\",\n      \"options\": [\n        \"Copy 4 old elements into capacity 8, then store the new element: cost 5.\",\n        \"Copy 8 old elements into capacity 8, then store the new element: cost 9.\",\n        \"Allocate capacity 5 and perform no copies: cost 1.\",\n        \"Keep capacity 4 and overwrite the last element: cost 1.\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"The full array grows to eight slots. Only the four live elements are copied; unused replacement slots are not counted. Storing element 5 adds one unit, for a total of 5.\",\n      \"transfer\": \"What changes when the full doubling array has size and capacity 8?\"\n    },\n    {\n      \"id\": \"aa-first-append\",\n      \"concept\": \"Counted work\",\n      \"prerequisites\": [],\n      \"prompt\": \"Both policies begin with size 0 and capacity 0. What are the copies and actual cost of the first append?\",\n      \"options\": [\n        \"1 copy and cost 2.\",\n        \"0 copies and cost 0.\",\n        \"The cost is undefined until a second append.\",\n        \"0 copies and cost 1.\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"A replacement allocation is needed, but there is no old element to copy. One new-element write costs 1. Doubling starts with capacity 1; fixed-increment growth starts with its chosen increment.\",\n      \"transfer\": \"For increment 5, state the size, capacity and spare slots after the first append.\"\n    },\n    {\n      \"id\": \"aa-prefix-total\",\n      \"concept\": \"Geometric growth\",\n      \"prerequisites\": [\n        \"Counted work\"\n      ],\n      \"prompt\": \"Starting empty, what is the total actual cost of the first 6 appends under doubling?\",\n      \"options\": [\n        \"6\",\n        \"13\",\n        \"18\",\n        \"21\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"The six costs are 1, 2, 3, 1, 5, 1. Their sum is 13: six new writes and 1 + 2 + 4 = 7 copies. The expensive fifth operation is part of this same sequence.\",\n      \"transfer\": \"Find the total through append 7 without recomputing every step.\"\n    },\n    {\n      \"id\": \"aa-boundary-spike\",\n      \"concept\": \"Geometric growth\",\n      \"prerequisites\": [\n        \"Counted work\"\n      ],\n      \"prompt\": \"After 8 doubling appends, total actual cost is 15. What happens at append 9?\",\n      \"options\": [\n        \"The total becomes 16 because amortized cost bounds every append.\",\n        \"The array cannot grow past capacity 8.\",\n        \"The total becomes 24 because this append copies 8 and writes 1.\",\n        \"The total resets to 9 after the resize.\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"Append 9 is a full-array boundary. Its actual cost is 9, so the cumulative cost becomes 15 + 9 = 24. A constant amortized bound does not remove this spike.\",\n      \"transfer\": \"How much does append 10 add, and why?\"\n    },\n    {\n      \"id\": \"aa-geometric-sum\",\n      \"concept\": \"Geometric growth\",\n      \"prerequisites\": [\n        \"Counted work\"\n      ],\n      \"prompt\": \"A doubling trace ends after 13 appends with capacity 16. Which total follows from the earlier capacities that were copied?\",\n      \"options\": [\n        \"13 + (1 + 2 + 4 + 8) = 28.\",\n        \"13 + 16 = 29.\",\n        \"13 times 16 = 208.\",\n        \"13 squared = 169.\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"Before reaching capacity 16, the trace copies full arrays of sizes 1, 2, 4 and 8. Those copies sum to 15. The 13 new-element writes make the total 28.\",\n      \"transfer\": \"For a nonempty prefix ending at capacity P, express the total in terms of its append count N.\"\n    },\n    {\n      \"id\": \"aa-unit-growth\",\n      \"concept\": \"Geometric growth\",\n      \"prerequisites\": [\n        \"Counted work\"\n      ],\n      \"prompt\": \"If capacity grows by exactly 1 whenever full, what is the total actual cost of the first 6 appends?\",\n      \"options\": [\n        \"11\",\n        \"13\",\n        \"18\",\n        \"21\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"Every append resizes: actual costs are 1, 2, 3, 4, 5 and 6. The total is 21, not the doubling total of 13. More generally this policy costs N(N + 1)/2 for N appends in this model.\",\n      \"transfer\": \"Compare the two policies at 8 appends.\"\n    },\n    {\n      \"id\": \"aa-potential-value\",\n      \"concept\": \"Potential accounting\",\n      \"prerequisites\": [\n        \"Geometric growth\"\n      ],\n      \"prompt\": \"For doubling only, the potential is Phi = 2*size - capacity. What is Phi at size 5 and capacity 8?\",\n      \"options\": [\n        \"13\",\n        \"2\",\n        \"3\",\n        \"-3\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"Phi is 2*5 - 8 = 2. It is an accounting quantity, not unused capacity (which is 3) and not a clock measurement. Reachable append-only doubling states have nonnegative potential.\",\n      \"transfer\": \"Compute potential and spare capacity at size 7 and capacity 8.\"\n    },\n    {\n      \"id\": \"aa-potential-resize\",\n      \"concept\": \"Potential accounting\",\n      \"prerequisites\": [\n        \"Geometric growth\"\n      ],\n      \"prompt\": \"A doubling append changes (size, capacity) from (4,4) to (5,8) and has actual cost 5. What is actual cost plus the change in potential?\",\n      \"options\": [\n        \"7\",\n        \"5\",\n        \"3\",\n        \"-2\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"Potential changes from 2*4 - 4 = 4 to 2*5 - 8 = 2. The amortized charge is 5 + (2 - 4) = 3. A negative potential change accounts for part of the costly resize.\",\n      \"transfer\": \"Find the charge for a non-resizing append from size 5 to 6 at capacity 8.\"\n    },\n    {\n      \"id\": \"aa-initial-charge\",\n      \"concept\": \"Potential accounting\",\n      \"prerequisites\": [\n        \"Geometric growth\"\n      ],\n      \"prompt\": \"The first doubling append goes from (0,0) to (1,1), costs 1, and changes potential from 0 to 1. What is its amortized charge?\",\n      \"options\": [\n        \"2, so the first operation is a small special case.\",\n        \"3, because every charge must be exactly 3.\",\n        \"0, because no old element is copied.\",\n        \"1, because potential is not included.\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"The definition gives actual + change in potential = 1 + 1 = 2. Every later append has charge 3. The bound of at most 3 per append includes this initial exception.\",\n      \"transfer\": \"What is the sum of amortized charges for five appends?\"\n    },\n    {\n      \"id\": \"aa-telescoping\",\n      \"concept\": \"Potential accounting\",\n      \"prerequisites\": [\n        \"Geometric growth\"\n      ],\n      \"prompt\": \"After five doubling appends, the sum of amortized charges is 14 and final potential is 2. Initial potential was 0. What is the total actual cost?\",\n      \"options\": [\n        \"16\",\n        \"14\",\n        \"7\",\n        \"12\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"Summing actual + potential-after - potential-before cancels all intermediate potentials. Thus total actual = total amortized - final potential + initial potential = 14 - 2 + 0 = 12.\",\n      \"transfer\": \"Why does nonnegative final potential make the sum of charges an upper bound here?\"\n    },\n    {\n      \"id\": \"aa-latency-guarantee\",\n      \"concept\": \"Guarantees and tradeoffs\",\n      \"prerequisites\": [\n        \"Potential accounting\"\n      ],\n      \"prompt\": \"Which statement correctly interprets the constant amortized append bound for this doubling policy?\",\n      \"options\": [\n        \"Every append costs at most 3 actual units.\",\n        \"Every prefix of N appends has at most 3N actual units, even though one append can cost much more than 3.\",\n        \"Each append costs 3 units with high probability.\",\n        \"A real-time deadline is guaranteed on any allocator.\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"The guarantee bounds accumulated work across any initially-empty append-only prefix. At full capacity m, the next append still costs m + 1. No probability model, allocation timing or real-time guarantee is part of this argument.\",\n      \"transfer\": \"At capacity 64, what can the next full-array append cost without contradicting the bound?\"\n    },\n    {\n      \"id\": \"aa-probability\",\n      \"concept\": \"Guarantees and tradeoffs\",\n      \"prerequisites\": [\n        \"Potential accounting\"\n      ],\n      \"prompt\": \"Does this amortized analysis assume that append positions or array values are randomly chosen?\",\n      \"options\": [\n        \"Yes; all values must be equally likely.\",\n        \"Yes; resizes must happen at random times.\",\n        \"No; it accounts deterministically for every permitted append-only sequence length.\",\n        \"Only when the increment is 1.\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"The costs depend on sizes and capacities, not the content values or a distribution over input sequences. Amortized analysis here is distinct from expected-case analysis over random inputs.\",\n      \"transfer\": \"All appended values happen to be equal. Does the model change?\"\n    },\n    {\n      \"id\": \"aa-fixed-three\",\n      \"concept\": \"Guarantees and tradeoffs\",\n      \"prerequisites\": [\n        \"Potential accounting\"\n      ],\n      \"prompt\": \"For fixed increment 3, the first 10 appends resize at appends 1, 4, 7 and 10. What is their total actual cost?\",\n      \"options\": [\n        \"10 + (0 + 3 + 6 + 9) = 28.\",\n        \"10 + (1 + 4 + 7 + 10) = 32.\",\n        \"10 + 3 = 13.\",\n        \"Exactly 3 per append, or 30.\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"The copied sizes are the old full capacities: 0, 3, 6 and 9. Eighteen copies plus ten new writes cost 28. For a fixed positive increment, repeated copied capacities form an arithmetic sum, not a geometric sum.\",\n      \"transfer\": \"At the end of this trace, compare spare slots with doubling at 10 appends.\"\n    },\n    {\n      \"id\": \"aa-scope\",\n      \"concept\": \"Guarantees and tradeoffs\",\n      \"prerequisites\": [\n        \"Potential accounting\"\n      ],\n      \"prompt\": \"Why must the lesson not reuse its append-only potential proof unchanged after arbitrary removals without shrinking?\",\n      \"options\": [\n        \"Potential always equals spare capacity.\",\n        \"Removing an element changes its value randomly.\",\n        \"The fixed-increment policy becomes geometric.\",\n        \"Removals can make 2*size - capacity negative, breaking the nonnegative-potential premise used here.\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"For example, size 3 at capacity 8 gives potential -2. The lab does not model removals, shrink rules or their costs. A different operation set needs an appropriate proof rather than an unqualified reuse of this one.\",\n      \"transfer\": \"Name another omitted operation that would require separate cost analysis.\"\n    }\n  ]\n}\n"</script>
+<script id="guide-data" type="application/json">"# Amortized arrays: spikes, totals and stored credit\n\nAn original RecallWeave course and offline lab. Open `amortized-arrays-lab.html` directly in a browser. Its course download imports through RecallWeave's existing **Bring your own lesson → preview → Start this deck** flow. The lab never starts, saves or edits a learner session.\n\n## What to try\n\nStart with 12 appends and fixed increment 3. Select **Apply comparison**, then move to append 9: the doubling policy copies eight old elements in one operation. Step to 10: it now needs only one write. Change the count to 8 and the increment to 1 to compare a geometric copy sum with copying every prior element on every append. Try zero appends, then the maximum of 128.\n\nThe two policies share one inspection step. The slot diagrams show live numbered elements, empty spare slots, copies during this operation and the newly stored element. Full ledgers and an exact downloadable observation make every numeric result inspectable. The cumulative plot's horizontal axis is append count; its vertical axis is counted work, not time.\n\n## The declared model\n\nBegin with no elements and no slots. Each operation appends one distinct displayed identity to the end. One unit stores the new element; one unit copies each live old element during a resize. The model excludes allocation, zeroing, element byte size, cache effects and elapsed time. It demonstrates policies, not the actual growth factor of a particular language, runtime or container implementation.\n\nWhen full, doubling chooses capacity 1 for the first append and twice its old capacity thereafter. Fixed growth adds its chosen integer increment, from 1 to 32, every time it is full. Both preserve all existing elements in order. The lab admits 0–128 appends; this is a teaching-display bound, not a mathematical limit.\n\nStep zero is a genuine empty state: zero cost, zero capacity and no average per append. The display says “not defined,” rather than dividing by zero. Average actual cost for a nonempty prefix is its total divided by its count; decimal display is approximate, and exact totals remain alongside it.\n\n## Derive the totals\n\nLet N be a positive append count and P the least power of two at least N. Doubling copies old capacities 1, 2, 4, …, P/2. Their sum is P−1, so the exact total is **N + P−1**. At N=8 this gives15; at N=9 it gives24. The ninth operation itself costs9.\n\nFor fixed increment k, let r=floor((N−1)/k). The resize copies are 0, k, 2k, …, rk, so the exact total is **N + k*r*(r+1)/2**. Its final capacity is (r+1)k. At N=10,k=3 there are18 copies and10 writes:28 units. For fixed k, the arithmetic copy sum grows quadratically in N; it does not establish constant amortized append cost. Neither formula applies to N=0 without the separate empty case.\n\n## Account with potential\n\nFor reachable append-only doubling states, define Phi=2*size−capacity. Phi starts at zero and stays nonnegative. An amortized charge is actual cost plus Phi-after minus Phi-before. The first append costs1 and increases Phi by1, so its charge is2. A later non-resizing append costs1 and increases Phi by2, making charge3. A resize from full capacity m costs m+1 and changes Phi from m to2, also making charge3.\n\nAcross a prefix, intermediate potential changes cancel. Thus total actual = total amortized − final Phi, since initial Phi is0. For N>0 the charges sum to3N−1, giving exact total3N−1−Phi and the upper bound3N. The charge is an accounting device, not a claim that a resize physically finishes in three units. Fixed growth deliberately has no Phi/charge columns in the comparison: this particular proof is for doubling only.\n\n## Guarantees and limits\n\nThe result is deterministic over permitted prefixes; it assumes no random input distribution. It does not imply every operation is cheap, establish a wall-clock speedup, guarantee a real-time deadline or measure learning effectiveness. Doubling can keep more spare slots than a smaller fixed increment, while avoiding the latter's repeated arithmetic copy sum. Real allocation choices require a fuller model or measurement.\n\nRemoving elements without shrinking can invalidate the nonnegative-potential premise. Insertion in the middle can shift elements even without a resize. Those are different operation sets and need separate analysis.\n\n## Questions and worked transfer responses\n\n### 1. aa-units\n\nThe lab counts one unit to store a new element and one unit for each old element copied. What does a reported cost of 9 establish?\n\nCorrect answer: **The declared model counted 9 element writes/copies.**\n\nThe count belongs to an explicit abstract model. Allocation, zeroing, element byte sizes, cache behavior and elapsed time are excluded. The number is not a measured duration or instruction count.\n\nTransfer: A resize copies six old elements and stores one new element. State its model cost and one excluded cost.\n\nWorked response: The model cost is 6 + 1 = 7. Allocating the replacement block is one excluded cost; its actual time is not given.\n\n### 2. aa-spare-slot\n\nAn array contains 3 elements in 4 slots. Under either policy, what does the next append cost?\n\nCorrect answer: **1 unit, because the new element fits without a resize.**\n\nThe array is not full, so it keeps its allocation and writes only the new element. Size becomes 4, capacity stays 4, and the cost is 1.\n\nTransfer: Repeat the reasoning for size 7 and capacity 10.\n\nWorked response: There are three spare slots before the append. One write costs 1; afterwards size is 8 and capacity is still 10.\n\n### 3. aa-full-array\n\nBefore an append, a doubling array has size 4 and capacity 4. Which description matches the append?\n\nCorrect answer: **Copy 4 old elements into capacity 8, then store the new element: cost 5.**\n\nThe full array grows to eight slots. Only the four live elements are copied; unused replacement slots are not counted. Storing element 5 adds one unit, for a total of 5.\n\nTransfer: What changes when the full doubling array has size and capacity 8?\n\nWorked response: It grows to capacity 16, copies 8 live elements and stores the ninth. Its cost is 9, not 17.\n\n### 4. aa-first-append\n\nBoth policies begin with size 0 and capacity 0. What are the copies and actual cost of the first append?\n\nCorrect answer: **0 copies and cost 1.**\n\nA replacement allocation is needed, but there is no old element to copy. One new-element write costs 1. Doubling starts with capacity 1; fixed-increment growth starts with its chosen increment.\n\nTransfer: For increment 5, state the size, capacity and spare slots after the first append.\n\nWorked response: Size is 1, capacity is 5, and four slots are spare. Copies are 0 and the model cost remains 1.\n\n### 5. aa-prefix-total\n\nStarting empty, what is the total actual cost of the first 6 appends under doubling?\n\nCorrect answer: **13**\n\nThe six costs are 1, 2, 3, 1, 5, 1. Their sum is 13: six new writes and 1 + 2 + 4 = 7 copies. The expensive fifth operation is part of this same sequence.\n\nTransfer: Find the total through append 7 without recomputing every step.\n\nWorked response: After six appends capacity is 8, so append 7 needs one write and no copies. Total cost becomes 14.\n\n### 6. aa-boundary-spike\n\nAfter 8 doubling appends, total actual cost is 15. What happens at append 9?\n\nCorrect answer: **The total becomes 24 because this append copies 8 and writes 1.**\n\nAppend 9 is a full-array boundary. Its actual cost is 9, so the cumulative cost becomes 15 + 9 = 24. A constant amortized bound does not remove this spike.\n\nTransfer: How much does append 10 add, and why?\n\nWorked response: The ninth append made capacity 16. The tenth fits, adds 1, and raises total actual cost to 25.\n\n### 7. aa-geometric-sum\n\nA doubling trace ends after 13 appends with capacity 16. Which total follows from the earlier capacities that were copied?\n\nCorrect answer: **13 + (1 + 2 + 4 + 8) = 28.**\n\nBefore reaching capacity 16, the trace copies full arrays of sizes 1, 2, 4 and 8. Those copies sum to 15. The 13 new-element writes make the total 28.\n\nTransfer: For a nonempty prefix ending at capacity P, express the total in terms of its append count N.\n\nWorked response: The copied geometric sum is P - 1, so total actual cost is N + P - 1. This applies to the declared initially-empty doubling model.\n\n### 8. aa-unit-growth\n\nIf capacity grows by exactly 1 whenever full, what is the total actual cost of the first 6 appends?\n\nCorrect answer: **21**\n\nEvery append resizes: actual costs are 1, 2, 3, 4, 5 and 6. The total is 21, not the doubling total of 13. More generally this policy costs N(N + 1)/2 for N appends in this model.\n\nTransfer: Compare the two policies at 8 appends.\n\nWorked response: Fixed increment 1 costs 8*9/2 = 36. Doubling costs 8 + 8 - 1 = 15. These are model counts, not a measured speed ratio.\n\n### 9. aa-potential-value\n\nFor doubling only, the potential is Phi = 2*size - capacity. What is Phi at size 5 and capacity 8?\n\nCorrect answer: **2**\n\nPhi is 2*5 - 8 = 2. It is an accounting quantity, not unused capacity (which is 3) and not a clock measurement. Reachable append-only doubling states have nonnegative potential.\n\nTransfer: Compute potential and spare capacity at size 7 and capacity 8.\n\nWorked response: Potential is 14 - 8 = 6. Spare capacity is 8 - 7 = 1. They are different quantities.\n\n### 10. aa-potential-resize\n\nA doubling append changes (size, capacity) from (4,4) to (5,8) and has actual cost 5. What is actual cost plus the change in potential?\n\nCorrect answer: **3**\n\nPotential changes from 2*4 - 4 = 4 to 2*5 - 8 = 2. The amortized charge is 5 + (2 - 4) = 3. A negative potential change accounts for part of the costly resize.\n\nTransfer: Find the charge for a non-resizing append from size 5 to 6 at capacity 8.\n\nWorked response: Actual cost is 1. Potential increases from 2 to 4, so the charge is 1 + 2 = 3.\n\n### 11. aa-initial-charge\n\nThe first doubling append goes from (0,0) to (1,1), costs 1, and changes potential from 0 to 1. What is its amortized charge?\n\nCorrect answer: **2, so the first operation is a small special case.**\n\nThe definition gives actual + change in potential = 1 + 1 = 2. Every later append has charge 3. The bound of at most 3 per append includes this initial exception.\n\nTransfer: What is the sum of amortized charges for five appends?\n\nWorked response: The first contributes 2 and the next four each contribute 3: 2 + 4*3 = 14.\n\n### 12. aa-telescoping\n\nAfter five doubling appends, the sum of amortized charges is 14 and final potential is 2. Initial potential was 0. What is the total actual cost?\n\nCorrect answer: **12**\n\nSumming actual + potential-after - potential-before cancels all intermediate potentials. Thus total actual = total amortized - final potential + initial potential = 14 - 2 + 0 = 12.\n\nTransfer: Why does nonnegative final potential make the sum of charges an upper bound here?\n\nWorked response: Initial potential is zero. Subtracting a nonnegative final potential cannot increase the sum of charges, so total actual is at most total amortized, which is at most 3N.\n\n### 13. aa-latency-guarantee\n\nWhich statement correctly interprets the constant amortized append bound for this doubling policy?\n\nCorrect answer: **Every prefix of N appends has at most 3N actual units, even though one append can cost much more than 3.**\n\nThe guarantee bounds accumulated work across any initially-empty append-only prefix. At full capacity m, the next append still costs m + 1. No probability model, allocation timing or real-time guarantee is part of this argument.\n\nTransfer: At capacity 64, what can the next full-array append cost without contradicting the bound?\n\nWorked response: It can cost 65 actual units: 64 copies plus one write. The prefix bound, not a per-operation maximum of 3, is what was proved.\n\n### 14. aa-probability\n\nDoes this amortized analysis assume that append positions or array values are randomly chosen?\n\nCorrect answer: **No; it accounts deterministically for every permitted append-only sequence length.**\n\nThe costs depend on sizes and capacities, not the content values or a distribution over input sequences. Amortized analysis here is distinct from expected-case analysis over random inputs.\n\nTransfer: All appended values happen to be equal. Does the model change?\n\nWorked response: No. Each append still stores an element and each resize still copies the same number of live elements. Equal values are not deduplicated by this array model.\n\n### 15. aa-fixed-three\n\nFor fixed increment 3, the first 10 appends resize at appends 1, 4, 7 and 10. What is their total actual cost?\n\nCorrect answer: **10 + (0 + 3 + 6 + 9) = 28.**\n\nThe copied sizes are the old full capacities: 0, 3, 6 and 9. Eighteen copies plus ten new writes cost 28. For a fixed positive increment, repeated copied capacities form an arithmetic sum, not a geometric sum.\n\nTransfer: At the end of this trace, compare spare slots with doubling at 10 appends.\n\nWorked response: Fixed increment 3 has capacity 12 and 2 spare slots. Doubling has capacity 16 and 6 spare slots. The different copy totals and space usage expose a tradeoff in this declared model.\n\n### 16. aa-scope\n\nWhy must the lesson not reuse its append-only potential proof unchanged after arbitrary removals without shrinking?\n\nCorrect answer: **Removals can make 2*size - capacity negative, breaking the nonnegative-potential premise used here.**\n\nFor example, size 3 at capacity 8 gives potential -2. The lab does not model removals, shrink rules or their costs. A different operation set needs an appropriate proof rather than an unqualified reuse of this one.\n\nTransfer: Name another omitted operation that would require separate cost analysis.\n\nWorked response: Insertion in the middle can shift many elements even when capacity is available. A bound for append alone does not establish a constant bound for that operation.\n\n## Keep or rebuild the materials\n\nEditing either input immediately retires the old calculated result and disables its observation download. Apply validates both fields before rebuilding. A refused input remains available for correction. Inspection never reruns or changes the accepted trace. The fixed course and guide downloads remain available during editing because they are authored content, not the current calculation.\n\n**Download observation** saves the complete accepted trace and the selected inspection step as JSON. It is a computed teaching record, not a timing receipt or a RecallWeave learner-answer archive. The page uses no automatic browser storage, network request, external font or provider. Reloading returns to its initial worked example.\n\nRebuild from the repository root with `node tools/build-amortized-arrays.mjs`; add `--check` to verify exact source/embedded-course/guide parity. Run `node --test tests/amortized-arrays*.test.mjs`. The course-only reuse grant follows the existing CC0-1.0 original-course convention; referenced materials are not relicensed.\n\n## Background references\n\n- Cornell CS3110 Lecture20, Amortized Analysis: https://www.cs.cornell.edu/courses/cs3110/2011sp/Lectures/lec20-amortized/amortized.htm\n- MIT6.006 Lecture2, Data Structures and Dynamic Arrays: https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/resources/lecture-2-data-structures-and-dynamic-arrays/\n\nThe questions, displayed cases, derivations in this guide and implementation are newly authored. These references supply background, not copied questions or a claim of endorsed pedagogy.\n"</script>
+<script type="module">
+/** An append/copy teaching model, not a memory allocator or timing benchmark. */
+const ARRAY_TRACE_FORMAT = 'recallweave-amortized-arrays/1';
+const MAX_APPENDS = 128;
+const MAX_INCREMENT = 32;
+
+function integer(value, minimum, maximum, label) {
+  if (!Number.isInteger(value) || value < minimum || value > maximum) {
+    throw new RangeError(`${label} must be a whole number from ${minimum} to ${maximum}.`);
+  }
+  return value;
+}
+
+/** Admit bounded decimal text. No exponent, hexadecimal or coercion is accepted. */
+function parseArrayInputs(appendsText, incrementText) {
+  function decimal(text, minimum, maximum, label) {
+    if (typeof text !== 'string' || text.length > 16 || !/^\s*[0-9]{1,3}\s*$/.test(text)) {
+      throw new RangeError(`${label} must be entered as decimal digits (${minimum}–${maximum}).`);
+    }
+    return integer(Number(text.trim()), minimum, maximum, label);
+  }
+  return Object.freeze({
+    appends: decimal(appendsText, 0, MAX_APPENDS, 'Appends'),
+    increment: decimal(incrementText, 1, MAX_INCREMENT, 'Fixed increment')
+  });
+}
+
+function freeze(value) {
+  if (value && typeof value === 'object') {
+    for (const child of Object.values(value)) freeze(child);
+    Object.freeze(value);
+  }
+  return value;
+}
+
+function runPolicy(appends, increment, geometric) {
+  let slots = [];
+  let size = 0;
+  let totalCost = 0;
+  let totalCopies = 0;
+  let resizes = 0;
+  let totalAmortized = 0;
+  const steps = [{
+    step: 0, sizeBefore: 0, capacityBefore: 0, size: 0, capacity: 0,
+    resized: false, copies: 0, writes: 0, cost: 0, totalCost: 0,
+    spare: 0, elements: [], copiedElements: [],
+    potentialBefore: geometric ? 0 : null, potential: geometric ? 0 : null,
+    amortizedCost: geometric ? 0 : null, totalAmortized: geometric ? 0 : null
+  }];
+  for (let step = 1; step <= appends; step += 1) {
+    const sizeBefore = size;
+    const capacityBefore = slots.length;
+    const potentialBefore = geometric ? 2 * size - slots.length : null;
+    const copiedElements = [];
+    const resized = size === slots.length;
+    if (resized) {
+      const capacity = geometric ? (slots.length === 0 ? 1 : slots.length * 2) : slots.length + increment;
+      const replacement = new Array(capacity);
+      for (let index = 0; index < size; index += 1) {
+        replacement[index] = slots[index];
+        copiedElements.push(slots[index]);
+      }
+      slots = replacement;
+      resizes += 1;
+    }
+    slots[size] = step;
+    size += 1;
+    const copies = copiedElements.length;
+    const cost = copies + 1;
+    const potential = geometric ? 2 * size - slots.length : null;
+    const amortizedCost = geometric ? cost + potential - potentialBefore : null;
+    totalCost += cost;
+    totalCopies += copies;
+    if (geometric) totalAmortized += amortizedCost;
+    steps.push({
+      step, sizeBefore, capacityBefore, size, capacity: slots.length,
+      resized, copies, writes: 1, cost, totalCost, spare: slots.length - size,
+      elements: slots.slice(0, size), copiedElements,
+      potentialBefore, potential, amortizedCost,
+      totalAmortized: geometric ? totalAmortized : null
+    });
+  }
+  return {
+    policy: geometric ? 'doubling' : 'fixed-increment',
+    increment: geometric ? null : increment,
+    steps,
+    totals: {
+      appends, copies: totalCopies, writes: appends, cost: totalCost,
+      capacity: slots.length, spare: slots.length - size, resizes,
+      averageCost: appends === 0 ? null : totalCost / appends,
+      worstCost: Math.max(...steps.map(step => step.cost)),
+      potential: geometric ? 2 * size - slots.length : null,
+      amortizedCost: geometric ? totalAmortized : null
+    }
+  };
+}
+
+/** Validate the complete input before allocating either private trace. */
+function traceArrays(appends, increment) {
+  integer(appends, 0, MAX_APPENDS, 'Appends');
+  integer(increment, 1, MAX_INCREMENT, 'Fixed increment');
+  return freeze({
+    format: ARRAY_TRACE_FORMAT,
+    input: { appends, increment },
+    costModel: {
+      newElementWrite: 1, existingElementCopy: 1,
+      initialSize: 0, initialCapacity: 0, operations: 'append only',
+      excluded: ['allocation', 'zeroing', 'bytes', 'cache behavior', 'elapsed time'],
+      potential: 'doubling only: 2 * size - capacity'
+    },
+    doubling: runPolicy(appends, increment, true),
+    fixedIncrement: runPolicy(appends, increment, false)
+  });
+}
+
+/** An explicit local mathematical observation; no wall-time or performance claim. */
+function arrayObservation(trace, inspectionStep) {
+  if (!trace || trace.format !== ARRAY_TRACE_FORMAT) throw new TypeError('An applied array trace is required.');
+  integer(inspectionStep, 0, trace.input.appends, 'Inspection step');
+  return { kind: 'computed teaching observation', inspectionStep, trace };
+}
+
+
+/** Install this standalone companion; it has no learner-state or storage access. */
+function mountArrayLab(document, { courseText, guideText }) {
+  const window = document.defaultView;
+  const byId = id => document.getElementById(id);
+  const count = byId('append-count');
+  const increment = byId('growth-increment');
+  const status = byId('status');
+  const results = byId('results');
+  const select = byId('step-select');
+  const observationButton = byId('download-observation');
+  const navigation = ['first', 'back', 'next', 'last'].map(byId);
+  let applied = null;
+  let cursor = 0;
+
+  function message(text, error = false) {
+    status.textContent = text;
+    status.classList.toggle('error', error);
+  }
+  function retire() {
+    applied = null;
+    cursor = 0;
+    results.hidden = true;
+    observationButton.disabled = true;
+    select.disabled = true;
+    navigation.forEach(button => { button.disabled = true; });
+    count.removeAttribute('aria-invalid');
+    increment.removeAttribute('aria-invalid');
+    message('Inputs changed. Apply the comparison to calculate a new result. The previous observation is retired.');
+  }
+  function save(text, name, type) {
+    const blob = new window.Blob([text], { type });
+    const url = window.URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = name;
+    document.body.append(anchor);
+    anchor.click();
+    anchor.remove();
+    window.setTimeout(() => window.URL.revokeObjectURL(url), 1000);
+  }
+  function card(id, row, geometric) {
+    const root = byId(id);
+    const field = name => root.querySelector(`[data-value="${name}"]`);
+    field('cost').textContent = String(row.cost);
+    field('total').textContent = String(row.totalCost);
+    field('spare').textContent = String(row.spare);
+    field('detail').textContent = row.step === 0
+      ? 'Initially empty: size 0, capacity 0. No copies and no new write. Average per append is not defined.'
+      : `${row.resized ? 'Resize' : 'No resize'}: capacity ${row.capacityBefore} → ${row.capacity}; size ${row.sizeBefore} → ${row.size}. ${row.copies} copied + 1 new write = ${row.cost} actual units.`;
+    const slots = field('slots');
+    slots.replaceChildren();
+    if (row.capacity === 0) {
+      const empty = document.createElement('p');
+      empty.textContent = 'No slots allocated.';
+      empty.style.gridColumn = '1 / -1';
+      slots.append(empty);
+    }
+    for (let index = 0; index < row.capacity; index += 1) {
+      const cell = document.createElement('span');
+      const live = index < row.size;
+      const copied = row.resized && index < row.sizeBefore;
+      const fresh = row.step > 0 && index === row.size - 1;
+      cell.className = `slot${live ? ' live' : ''}${copied ? ' copied' : ''}${fresh ? ' new' : ''}`;
+      cell.textContent = live ? String(row.elements[index]) : '·';
+      cell.setAttribute('aria-label', `Slot ${index}: ${live ? `element ${row.elements[index]}${copied ? ', copied now' : ''}${fresh ? ', newly stored' : ''}` : 'spare'}`);
+      slots.append(cell);
+    }
+    if (geometric) {
+      field('potential').textContent = row.step === 0
+        ? 'Initial Phi = 0. No operation and no amortized charge yet.'
+        : `Phi: ${row.potentialBefore} → ${row.potential}. Charge = ${row.cost} + (${row.potential} − ${row.potentialBefore}) = ${row.amortizedCost}. Total charges so far: ${row.totalAmortized}.`;
+    }
+  }
+  function inspect(index) {
+    if (!applied) return;
+    cursor = Math.max(0, Math.min(applied.input.appends, index));
+    select.value = String(cursor);
+    byId('step-label').textContent = `Step ${cursor} of ${applied.input.appends}${cursor === 0 ? ' · initially empty' : ''}`;
+    navigation[0].disabled = navigation[1].disabled = cursor === 0;
+    navigation[2].disabled = navigation[3].disabled = cursor === applied.input.appends;
+    card('doubling-card', applied.doubling.steps[cursor], true);
+    card('fixed-card', applied.fixedIncrement.steps[cursor], false);
+    for (const row of results.querySelectorAll('tbody tr')) {
+      row.classList.toggle('current', row.dataset.step === String(cursor));
+      if (row.dataset.step === String(cursor)) row.setAttribute('aria-current', 'step');
+      else row.removeAttribute('aria-current');
+    }
+  }
+  function ledger(id, steps, geometric) {
+    const body = byId(id).querySelector('tbody');
+    body.replaceChildren();
+    for (const row of steps) {
+      const tr = document.createElement('tr');
+      tr.dataset.step = String(row.step);
+      const values = [row.step, row.size, row.capacity, row.copies, row.writes, row.cost, row.totalCost];
+      if (geometric) values.push(row.potential, row.amortizedCost);
+      for (const value of values) {
+        const td = document.createElement('td');
+        td.textContent = String(value);
+        tr.append(td);
+      }
+      body.append(tr);
+    }
+  }
+  function plot(trace) {
+    const svg = byId('cost-plot');
+    // Keep its accessible title/description; replace only the previous geometry.
+    svg.querySelectorAll('g').forEach(group => group.remove());
+    const ns = 'http://www.w3.org/2000/svg';
+    const group = document.createElementNS(ns, 'g');
+    const maximum = Math.max(1, trace.doubling.totals.cost, trace.fixedIncrement.totals.cost);
+    const countMaximum = Math.max(1, trace.input.appends);
+    function draw(tag, attrs, text) {
+      const node = document.createElementNS(ns, tag);
+      Object.entries(attrs).forEach(([key, value]) => node.setAttribute(key, String(value)));
+      if (text !== undefined) node.textContent = String(text);
+      group.append(node);
+    }
+    for (let part = 0; part <= 4; part += 1) {
+      const y = 206 - part * 43;
+      draw('line', { x1: 62, x2: 774, y1: y, y2: y, stroke: '#d5dcd4' });
+      draw('text', { x: 52, y: y + 4, 'text-anchor': 'end' }, (maximum * part / 4).toLocaleString('en-US', { maximumFractionDigits: 2 }));
+    }
+    draw('text', { x: 62, y: 18 }, 'Total counted units');
+    draw('text', { x: 62, y: 226 }, '0');
+    draw('text', { x: 774, y: 226, 'text-anchor': 'end' }, trace.input.appends);
+    draw('text', { x: 418, y: 245, 'text-anchor': 'middle' }, 'Appends');
+    for (const [policy, color, dash] of [[trace.doubling, '#1d6755', ''], [trace.fixedIncrement, '#a24b25', '7 5']]) {
+      const points = policy.steps.map(row => `${62 + 712 * row.step / countMaximum},${206 - 172 * row.totalCost / maximum}`).join(' ');
+      draw('polyline', { points, fill: 'none', stroke: color, 'stroke-width': 3, 'stroke-dasharray': dash, 'stroke-linejoin': 'round' });
+    }
+    svg.append(group);
+    byId('plot-description').textContent = `Cumulative actual model costs over ${trace.input.appends} appends. Doubling ends at ${trace.doubling.totals.cost}; fixed increment ${trace.input.increment} ends at ${trace.fixedIncrement.totals.cost}. Complete exact values are in the ledgers below.`;
+  }
+  function apply() {
+    retire();
+    let input;
+    try { input = parseArrayInputs(count.value, increment.value); }
+    catch (error) {
+      count.setAttribute('aria-invalid', 'true');
+      increment.setAttribute('aria-invalid', 'true');
+      message(error.message, true);
+      return;
+    }
+    applied = traceArrays(input.appends, input.increment);
+    results.hidden = false;
+    observationButton.disabled = false;
+    select.disabled = false;
+    select.replaceChildren();
+    for (let step = 0; step <= input.appends; step += 1) {
+      const option = document.createElement('option');
+      option.value = String(step);
+      option.textContent = step === 0 ? '0 · empty' : `${step} · append ${step}`;
+      select.append(option);
+    }
+    byId('fixed-heading').textContent = `Add ${input.increment} slot${input.increment === 1 ? '' : 's'} when full`;
+    ledger('doubling-ledger', applied.doubling.steps, true);
+    ledger('fixed-ledger', applied.fixedIncrement.steps, false);
+    const a = applied.doubling.totals;
+    const b = applied.fixedIncrement.totals;
+    const average = value => value === null ? 'not defined' : `approximately ${value.toFixed(2)}`;
+    byId('totals').textContent = `${input.appends} appends. Doubling: ${a.cost} total units, ${a.copies} copies, worst single cost ${a.worstCost}, average ${average(a.averageCost)}. Fixed increment ${input.increment}: ${b.cost} total units, ${b.copies} copies, worst single cost ${b.worstCost}, average ${average(b.averageCost)}.`;
+    byId('proof').textContent = input.appends === 0
+      ? 'Empty-prefix accounting: actual total 0, total charges 0, final Phi 0. Average cost per append is not defined.'
+      : `Doubling check: actual total ${a.cost} = total charges ${a.amortizedCost} − final Phi ${a.potential}. The first charge is 2; the remaining ${input.appends - 1} are 3 each. Total work stays below 3 × ${input.appends} = ${3 * input.appends}, even though individual appends may spike.`;
+    plot(applied);
+    inspect(0);
+    message(`Applied ${input.appends} appends with fixed increment ${input.increment}. Both traces start at the empty state. No elapsed time is measured.`);
+  }
+  count.addEventListener('input', retire);
+  increment.addEventListener('input', retire);
+  byId('comparison-form').addEventListener('submit', event => { event.preventDefault(); apply(); });
+  navigation[0].addEventListener('click', () => inspect(0));
+  navigation[1].addEventListener('click', () => inspect(cursor - 1));
+  navigation[2].addEventListener('click', () => inspect(cursor + 1));
+  navigation[3].addEventListener('click', () => { if (applied) inspect(applied.input.appends); });
+  select.addEventListener('change', () => inspect(Number(select.value)));
+  document.querySelectorAll('[data-example]').forEach(button => {
+    button.addEventListener('click', () => {
+      [count.value, increment.value] = button.dataset.example.split(',');
+      apply();
+    });
+  });
+  observationButton.addEventListener('click', () => {
+    if (applied) save(JSON.stringify(arrayObservation(applied, cursor), null, 2) + '\n', 'amortized-arrays-observation.json', 'application/json;charset=utf-8');
+  });
+  byId('download-course').addEventListener('click', () => save(courseText, 'amortized-arrays.json', 'application/json;charset=utf-8'));
+  byId('download-guide').addEventListener('click', () => save(guideText, 'amortized-arrays.md', 'text/markdown;charset=utf-8'));
+  apply();
+}
+
+mountArrayLab(document, { courseText: JSON.parse(document.getElementById('course-data').textContent), guideText: JSON.parse(document.getElementById('guide-data').textContent) });
+</script>
+</body>
+</html>
