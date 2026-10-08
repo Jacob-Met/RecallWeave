@@ -1,0 +1,404 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Compare exact momentum and kinetic-energy accounting for two ideal one-dimensional collision events.">
+<title>Momentum and collisions — RecallWeave</title>
+<style>
+:root{color-scheme:light;--paper:#f4f1e9;--card:#fffdfa;--ink:#203033;--muted:#586568;--line:#d4d9d3;--a:#086478;--b:#a7482f;--accent:#245d4d;--soft:#e7eee7;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;line-height:1.5}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink)}main{max-width:1220px;margin:auto;padding:36px 28px 28px}.skip{position:absolute;top:-90px;left:16px;background:white;padding:12px;z-index:2}.skip:focus{top:12px}a{color:var(--a)}button,input,select{font:inherit}button{border:1px solid var(--accent);border-radius:7px;padding:10px 16px;min-height:44px;background:var(--accent);color:white;font-weight:650;cursor:pointer}button.secondary{background:transparent;color:var(--accent)}button:disabled{background:#e2e7e1;color:#69756e;border-color:#cbd3cb;cursor:default}button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible,a:focus-visible{outline:3px solid #c98a31;outline-offset:3px}.eyebrow{font-size:.76rem;letter-spacing:.14em;font-weight:750;color:var(--accent);margin:0 0 16px}.hero{display:grid;grid-template-columns:1.7fr 1fr;gap:40px;align-items:end;margin-bottom:28px}h1{font-family:Georgia,serif;font-size:clamp(2.3rem,4vw,3.9rem);font-weight:500;line-height:1.05;letter-spacing:-.045em;margin:0 0 20px;max-width:800px}h2{font-size:1.25rem;line-height:1.25;margin:0 0 10px}h3{font-size:1.05rem;line-height:1.35;margin:0 0 8px}p{margin:0 0 12px}.lead{max-width:740px;font-size:1.03rem;color:var(--muted)}.learn{border-left:3px solid #97afa0;padding-left:22px;font-size:.88rem}.learn h2{font-size:.96rem}.actions{display:flex;gap:9px;flex-wrap:wrap;margin:14px 0 0}.actions button{font-size:.8rem;padding:9px 12px}.panel{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:23px;margin-bottom:22px}.panel-heading{display:flex;justify-content:space-between;align-items:start;gap:20px}.hint{font-size:.82rem;color:var(--muted)}.preset{display:flex;gap:10px;align-items:end;flex-wrap:wrap;margin:18px 0}.preset label{flex:1 1 300px}.preset button{flex:0 0 auto}label{display:flex;flex-direction:column;gap:6px;font-size:.84rem;font-weight:650;min-width:0}input,select{min-width:0;width:100%;border:1px solid #9caeaa;border-radius:6px;min-height:44px;padding:9px 10px;background:white;color:var(--ink)}.inputs{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px}fieldset{border:1px solid var(--line);padding:14px;border-radius:8px;margin:0;min-width:0;display:grid;grid-template-columns:1fr 1fr;gap:14px}legend{padding:0 6px;font-weight:700;font-size:.9rem}.cart-a{color:var(--a)}.cart-b{color:var(--b)}.status{font-size:.9rem;margin:14px 0 0;min-height:1.5em}.error{color:#a22e24}.quiet-status{font-size:.8rem;color:var(--muted);margin-top:10px;min-height:1.5em}.boundary{padding:13px 16px;background:var(--soft);border-radius:7px;font-size:.86rem;margin:0 0 20px}.stat-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin:18px 0 24px}.stat{border-top:2px solid #90a998;padding-top:12px}.stat .label{display:block;font-size:.78rem;color:var(--muted)}.stat .number{display:block;font-family:Georgia,serif;font-size:1.8rem;font-weight:500;line-height:1.2;margin-top:6px;overflow-wrap:anywhere}.stat .unit{font-size:.8rem;color:var(--muted)}.states{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px}.states.single{grid-template-columns:minmax(0,420px)}.state-card{border:1px solid var(--line);border-radius:9px;padding:17px;background:#fff;min-width:0}.state-card .state-note{font-size:.76rem;min-height:2.8em;color:var(--muted)}.state-card svg{width:100%;height:auto;display:block;margin:4px 0 12px}.state-card table{border-collapse:collapse;width:100%;table-layout:fixed;font-size:.78rem}.state-card th,.state-card td{padding:8px 3px;text-align:right;vertical-align:top;border-top:1px solid #e2e6e1;overflow-wrap:anywhere}.state-card th:first-child,.state-card td:first-child{text-align:left;width:22%}.state-card th{font-size:.7rem;font-weight:650}.state-card td strong{font-size:.88rem}.approx{display:block;font-size:.69rem;color:var(--muted);font-weight:400}.unit-label{display:block;font-size:.65rem;font-weight:500;color:var(--muted)}.totals{margin-top:13px;border-top:1px solid var(--line);padding-top:10px;display:grid;gap:5px}.total-row{display:flex;justify-content:space-between;gap:12px;font-size:.8rem}.total-row strong{font-variant-numeric:tabular-nums;text-align:right;overflow-wrap:anywhere}.conversion{font-size:.78rem;margin:12px 0 0;padding:10px;border-radius:6px;background:#f1f4ed}.scale-note{font-size:.76rem;color:var(--muted);margin:14px 0 0}.read-more{margin-top:24px;border-top:1px solid var(--line);padding-top:17px}.read-more summary{font-weight:650;cursor:pointer}.read-more .content{max-width:900px;padding-top:15px;font-size:.88rem}.formula{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;padding:12px;background:#f0f3ef;border-radius:5px;overflow-wrap:anywhere;font-size:.84rem}footer{font-size:.76rem;color:var(--muted);max-width:1100px;margin:18px 0}footer p{margin-bottom:8px}[hidden]{display:none!important}
+@media(max-width:900px){.hero{grid-template-columns:1fr;gap:12px}.learn{max-width:740px}.states{grid-template-columns:1fr}.state-card .state-note{min-height:0}.state-card{max-width:none}.state-card svg{max-width:420px;margin:0 auto 12px}.state-card table{font-size:.9rem}.state-card td strong{font-size:1rem}.state-card th{font-size:.8rem}.approx{font-size:.76rem}.total-row{font-size:.9rem}}
+@media(max-width:540px){main{padding:23px 14px}.hero{margin-bottom:20px}.panel{padding:17px}.panel-heading{display:block}.inputs{grid-template-columns:1fr;gap:12px}fieldset{gap:10px}.preset{display:block}.preset button{width:100%;margin-top:10px}.stat-grid{grid-template-columns:1fr;gap:13px}.stat .number{font-size:1.5rem}.actions button{flex:1 1 140px}.state-card{padding:13px}.state-card td strong{font-size:.89rem}.state-card th{font-size:.69rem}.total-row{font-size:.83rem}.boundary{font-size:.81rem}.learn{padding-left:15px}.states.single{grid-template-columns:1fr}}
+@media print{body{background:white}main{max-width:none;padding:0}.inputs-panel,.actions,.quiet-status,.skip{display:none}.panel{box-shadow:none;break-inside:avoid}.hero{display:block}.learn{margin-top:15px}.states{grid-template-columns:1fr}.state-card{break-inside:avoid}.read-more .content{display:block}}
+</style>
+</head>
+<body>
+<a class="skip" href="#mc-controls">Skip to cart inputs</a>
+<main>
+<header class="hero">
+<div><p class="eyebrow">RECALLWEAVE / MECHANICS</p><h1>Track what a<br>collision changes.</h1><p class="lead">Compare two ideal encounters between the same carts. Follow signed momentum, see where translational kinetic energy changes, and check whether the carts approach at all.</p></div>
+<aside class="learn"><h2>Keep exploring, then practice.</h2><p>Download the original twelve-question course. Open it in your RecallWeave learner, inspect the preview, and choose <strong>Start this deck</strong>.</p><div class="actions"><button type="button" class="secondary" id="mc-download-course">Download course</button><button type="button" class="secondary" id="mc-download-guide">Download worked guide</button></div><p class="quiet-status" id="mc-download-status" role="status">This file works offline. Nothing is saved automatically.</p></aside>
+</header>
+<section class="panel inputs-panel" id="mc-controls" aria-labelledby="mc-input-title">
+<div class="panel-heading"><div><h2 id="mc-input-title">Set the incoming motion</h2><p class="hint">A starts left of B, with a positive gap. Right is positive. Incoming velocities are constant until contact.</p></div><span class="hint">Whole-number inputs · exact fraction results</span></div>
+<div class="preset"><label for="mc-preset">Choose a worked example<select id="mc-preset"></select></label><button type="button" class="secondary" id="mc-load-example">Load example</button></div>
+<form id="mc-form" novalidate>
+<div class="inputs">
+<fieldset><legend class="cart-a">Cart A · initially on the left</legend><label for="mc-mA">Mass (kg)<input id="mc-mA" name="mA" type="text" inputmode="numeric" maxlength="32" autocomplete="off" aria-describedby="mc-limits"></label><label for="mc-uA">Velocity (m/s)<input id="mc-uA" name="uA" type="text" inputmode="text" maxlength="32" autocomplete="off" aria-describedby="mc-limits"></label></fieldset>
+<fieldset><legend class="cart-b">Cart B · initially on the right</legend><label for="mc-mB">Mass (kg)<input id="mc-mB" name="mB" type="text" inputmode="numeric" maxlength="32" autocomplete="off" aria-describedby="mc-limits"></label><label for="mc-uB">Velocity (m/s)<input id="mc-uB" name="uB" type="text" inputmode="text" maxlength="32" autocomplete="off" aria-describedby="mc-limits"></label></fieldset>
+</div><p class="hint" id="mc-limits">Use masses from 1 to 100 kg and velocities from -20 to +20 m/s. Decimals and exponents are outside this explorer's input range.</p><div class="actions"><button type="submit" id="mc-compare">Compare models</button><button type="button" class="secondary" id="mc-download-record" disabled>Download this analysis</button></div>
+</form><p class="status" id="mc-status" role="status" tabindex="-1">Preparing the worked example…</p>
+</section>
+<section class="panel" id="mc-results" aria-labelledby="mc-results-title" hidden>
+<h2 id="mc-results-title">One incoming state, two ideal outcomes</h2>
+<p class="boundary" id="mc-event-boundary"></p>
+<div class="stat-grid">
+<div class="stat"><span class="label">Center-of-mass velocity</span><span class="number" id="mc-center-velocity"></span><span class="unit">m/s</span></div>
+<div class="stat"><span class="label">Initial energy of center-of-mass motion</span><span class="number" id="mc-center-energy"></span><span class="unit">J</span></div>
+<div class="stat"><span class="label">Initial energy of relative motion</span><span class="number" id="mc-relative-energy"></span><span class="unit">J</span></div>
+</div><div class="states" id="mc-states"></div><p class="scale-note" id="mc-scale-note"></p>
+<details class="read-more"><summary>Why the two outcomes differ</summary><div class="content"><p>For each cart, <strong>p = m × v</strong> is signed, while <strong>K = m × v² / 2</strong> is nonnegative. Zero net external impulse conserves the combined momentum. It does not require each cart's momentum or the combined translational kinetic energy to stay unchanged.</p><p>An elastic encounter also conserves translational kinetic energy and reverses the relative velocity so the carts separate. A completely inelastic encounter makes them stick at the center-of-mass velocity.</p><p class="formula">V = (mA × uA + mB × uB) / (mA + mB)<br>K = P² / (2M) + μ × (uA − uB)² / 2<br>M = mA + mB · μ = mA × mB / M</p><p>At fixed masses and total momentum, relative motion adds nonnegative kinetic energy above the center-of-mass motion. Sticking removes that relative-motion term from translational kinetic energy. The converted energy is not destroyed; this endpoint model does not resolve its other forms.</p><p>Momentum and energy equations alone also admit unchanged incoming velocities. For approaching carts, that branch is still approaching and does not describe the separating elastic event.</p></div></details>
+</section>
+<footer><p>Model limits: two positive fixed masses, classical one-dimensional translation, zero net external impulse during a calculated collision. The page does not model force, contact time, deformation, rotation or friction. Its arrows compare velocities; they are not a motion timeline.</p><p>Original lesson and diagrams · CC0-1.0. Conceptual references and worked derivations are in the guide. Scripted calculations and learner checks do not establish experimental accuracy or learning effectiveness.</p></footer>
+</main>
+<script type="module">
+const COURSE_TEXT = "{\n  \"format\": \"recallweave-deck/1\",\n  \"title\": \"Momentum and collisions: what stays, what changes\",\n  \"attribution\": \"Original lesson by HAMON contributors, 2026. Conceptual references: OpenStax, University Physics Volume 1, sections 9.2–9.4 (https://openstax.org/books/university-physics-volume-1/pages/9-2-impulse-and-collisions); MIT OpenCourseWare 8.01SC, Chapter 15: Collision Theory (https://ocw.mit.edu/courses/8-01sc-classical-mechanics-fall-2016/mit8_01scs22_chapter15.pdf). Numerical examples, wording and transfer prompts are original.\",\n  \"license\": \"Original question wording, explanations and transfer prompts: CC0-1.0. Referenced sources retain their own terms; no textbook figures or passages are reproduced.\",\n  \"concepts\": [\n    \"Signed momentum\",\n    \"System momentum\",\n    \"Collision models\",\n    \"Energy accounting\",\n    \"Model boundaries\"\n  ],\n  \"items\": [\n    {\n      \"id\": \"momentum-sign\",\n      \"prompt\": \"Cart A has mass 2 kg and velocity -3 m/s, where right is positive. What is its signed momentum?\",\n      \"options\": [\n        \"+6 kg m/s\",\n        \"-6 kg m/s\",\n        \"+9 kg m/s\",\n        \"-9 kg m/s\"\n      ],\n      \"concept\": \"Signed momentum\",\n      \"prerequisites\": [],\n      \"answer\": 1,\n      \"explanation\": \"Momentum is mass times signed velocity: p = 2 × (-3) = -6 kg m/s. The minus sign describes leftward momentum under the stated direction convention. Squaring the velocity belongs in kinetic energy, not momentum.\",\n      \"transfer\": \"Reverse the chosen positive direction without changing the cart's physical motion. Explain what changes in its momentum and what stays the same in its kinetic energy.\"\n    },\n    {\n      \"id\": \"zero-total-moving\",\n      \"prompt\": \"A 1 kg cart moves at +4 m/s and a 2 kg cart moves at -2 m/s. What are their total signed momentum p and total translational kinetic energy K?\",\n      \"options\": [\n        \"p = 0 kg m/s; K = 0 J\",\n        \"p = +8 kg m/s; K = 12 J\",\n        \"p = 0 kg m/s; K = 12 J\",\n        \"p = 0 kg m/s; K = 8 J\"\n      ],\n      \"concept\": \"Signed momentum\",\n      \"prerequisites\": [],\n      \"answer\": 2,\n      \"explanation\": \"The momenta are +4 and -4 kg m/s, so their sum is zero. Their kinetic energies are (1/2) × 1 × 4² = 8 J and (1/2) × 2 × (-2)² = 4 J. Kinetic energy is nonnegative for each positive mass, so the total is 12 J even though the total momentum is zero.\",\n      \"transfer\": \"Invent a different pair of moving carts with zero total momentum. Check whether their total kinetic energy can be zero.\"\n    },\n    {\n      \"id\": \"system-boundary\",\n      \"prompt\": \"Treat both carts together as one fixed-mass system. The net external impulse during their interaction is zero. Which statement must hold?\",\n      \"options\": [\n        \"Each cart keeps its individual momentum.\",\n        \"The sum of the carts' signed momenta is unchanged.\",\n        \"The sum of their translational kinetic energies is unchanged.\",\n        \"Both carts must be stationary afterward.\"\n      ],\n      \"concept\": \"System momentum\",\n      \"prerequisites\": [\n        \"Signed momentum\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"Internal interaction forces transfer momentum between the carts. With zero net external impulse on the combined fixed-mass system, those internal transfers do not change the total momentum between the initial and final states. Individual momenta can change, and translational kinetic energy need not be conserved.\",\n      \"transfer\": \"Choose a system boundary for a cart striking a wall. Which interaction becomes external if the wall is left outside the system?\"\n    },\n    {\n      \"id\": \"stick-weighted-velocity\",\n      \"prompt\": \"Cart A (2 kg, +3 m/s) approaches cart B (1 kg, 0 m/s) from the left. They undergo a completely inelastic collision with zero net external impulse. What common velocity do they have afterward?\",\n      \"options\": [\n        \"+1 m/s\",\n        \"+1.5 m/s\",\n        \"+3 m/s\",\n        \"+2 m/s\"\n      ],\n      \"concept\": \"Collision models\",\n      \"prerequisites\": [\n        \"System momentum\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"The total initial momentum is 2 × 3 + 1 × 0 = 6 kg m/s. Sticking requires one shared final velocity, so (2 + 1)v = 6 and v = +2 m/s. The ordinary average +1.5 m/s ignores the different masses.\",\n      \"transfer\": \"Predict how the shared velocity changes if the initially stationary cart's mass increases while the incoming cart stays the same.\"\n    },\n    {\n      \"id\": \"elastic-unequal\",\n      \"prompt\": \"Cart A (2 kg, +3 m/s) approaches cart B (1 kg, 0 m/s) from the left. An ideal elastic collision conserves momentum and translational kinetic energy, and the carts separate afterward. Which pair of final velocities (vA, vB) is consistent with this event?\",\n      \"options\": [\n        \"(+1, +4) m/s\",\n        \"(+2, +2) m/s\",\n        \"(-1, +8) m/s\",\n        \"(+3, 0) m/s\"\n      ],\n      \"concept\": \"Collision models\",\n      \"prerequisites\": [\n        \"System momentum\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"For (+1, +4), the final momentum is 2 × 1 + 1 × 4 = 6 kg m/s and the kinetic energy is (1/2) × 2 × 1² + (1/2) × 1 × 4² = 9 J, matching the initial values. The relative velocity changes from +3 to -3 m/s, so the carts separate. The unchanged (+3, 0) pair also satisfies the two conservation equations, but it is still approaching and does not describe the stated separating collision event.\",\n      \"transfer\": \"Why do two conservation equations still need an event/separation condition in this example? Explain the unchanged algebraic branch.\"\n    },\n    {\n      \"id\": \"elastic-equal-masses\",\n      \"prompt\": \"Two 1 kg carts approach each other: A, initially on the left, has uA = +4 m/s; B has uB = -2 m/s. After an ideal one-dimensional elastic collision, what are (vA, vB)?\",\n      \"options\": [\n        \"(-4, +2) m/s\",\n        \"(+1, +1) m/s\",\n        \"(-2, +4) m/s\",\n        \"(+4, -2) m/s\"\n      ],\n      \"concept\": \"Collision models\",\n      \"prerequisites\": [\n        \"System momentum\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"In an ideal one-dimensional elastic collision of equal masses, the velocities exchange. The final pair (-2, +4) retains momentum +2 kg m/s and kinetic energy 10 J. The relative velocity changes from +6 to -6 m/s. Simply negating both incoming velocities would reverse the total momentum here.\",\n      \"transfer\": \"Choose two equal-mass incoming velocities whose sum is not zero. Show why swapping them preserves momentum but negating them does not.\"\n    },\n    {\n      \"id\": \"inelastic-energy\",\n      \"prompt\": \"Cart A (2 kg, +3 m/s) meets cart B (1 kg, 0 m/s). They stick and move together at +2 m/s with no net external impulse. How much translational kinetic energy is converted to other forms during this idealized event?\",\n      \"options\": [\n        \"0 J\",\n        \"6 J\",\n        \"9 J\",\n        \"3 J\"\n      ],\n      \"concept\": \"Energy accounting\",\n      \"prerequisites\": [\n        \"Collision models\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"The initial translational kinetic energy is (1/2) × 2 × 3² = 9 J. The combined 3 kg mass moving at +2 m/s has (1/2) × 3 × 2² = 6 J. The difference is 3 J. Total momentum remains +6 kg m/s, while that 3 J is converted to energy forms outside this endpoint model's translational accounting.\",\n      \"transfer\": \"Repeat the initial and final kinetic-energy calculation for a different pair that sticks. State separately what momentum conservation tells you.\"\n    },\n    {\n      \"id\": \"energy-not-destroyed\",\n      \"prompt\": \"Two 1 kg carts approach at +3 m/s and -3 m/s. They stick and stop, reducing their total translational kinetic energy from 9 J to 0 J. Which interpretation is justified?\",\n      \"options\": [\n        \"The 9 J of energy has been destroyed.\",\n        \"Momentum conservation has failed because the carts stopped.\",\n        \"The 9 J has changed into other energy forms; this endpoint model does not resolve their distribution.\",\n        \"Exactly 9 J must have become sound, with no other energy change.\"\n      ],\n      \"concept\": \"Energy accounting\",\n      \"prerequisites\": [\n        \"Collision models\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"The initial momenta +3 and -3 kg m/s cancel, so stopping together preserves their total momentum. Translational kinetic energy can change into internal motion, deformation and other energy forms without destroying total energy. The endpoint calculation alone cannot say how the 9 J is divided among those forms.\",\n      \"transfer\": \"What extra observations would be needed to estimate how kinetic energy was distributed into deformation, internal energy or sound?\"\n    },\n    {\n      \"id\": \"approach-ordering\",\n      \"prompt\": \"A begins to the left of B with a positive gap. Both keep their incoming velocities until contact. Which pair (uA, uB) makes the gap shrink so a future encounter is possible?\",\n      \"options\": [\n        \"(0, 0) m/s\",\n        \"(-3, -1) m/s\",\n        \"(+1, +3) m/s\",\n        \"(-1, -3) m/s\"\n      ],\n      \"concept\": \"Model boundaries\",\n      \"prerequisites\": [\n        \"Signed momentum\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"Let the positive gap be xB - xA. Its rate of change before contact is uB - uA. For (-1, -3), this is -3 - (-1) = -2 m/s, so the gap shrinks. B moves left faster than A and can catch it. Motion in the same direction does not by itself rule out a collision.\",\n      \"transfer\": \"Choose two positive velocities and then two negative velocities that make the gap shrink. Use uB - uA to justify both.\"\n    },\n    {\n      \"id\": \"equal-velocity-gap\",\n      \"prompt\": \"A begins to the left of B with a positive gap. Both move at +2 m/s and have no acceleration before contact. What should a collision explorer report?\",\n      \"options\": [\n        \"Their gap stays constant, so these inputs do not produce a future collision.\",\n        \"They must immediately stick because their velocities are equal.\",\n        \"They undergo an elastic collision that exchanges their masses.\",\n        \"A collision occurs after one second for every positive gap.\"\n      ],\n      \"concept\": \"Model boundaries\",\n      \"prerequisites\": [\n        \"Signed momentum\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"Equal incoming velocities give a zero gap-change rate. Starting from a positive gap, the carts remain separated under constant velocities. A completely inelastic formula describes what follows an encounter; it cannot create an encounter when these motion assumptions provide none.\",\n      \"transfer\": \"Give one additional physical condition that could create a later encounter despite initially equal velocities. Explain which current assumption it would change.\"\n    },\n    {\n      \"id\": \"external-impulse\",\n      \"prompt\": \"The two-cart system initially has total momentum +6 kg m/s. During an interaction it receives a known net external impulse of +2 kg m/s. What follows?\",\n      \"options\": [\n        \"Its final momentum is +6 kg m/s because internal forces cancel.\",\n        \"Its final momentum is +4 kg m/s.\",\n        \"Its final momentum is +8 kg m/s; the zero-external-impulse collision formulas do not apply unchanged.\",\n        \"No final total momentum can be inferred even though the net impulse is given.\"\n      ],\n      \"concept\": \"System momentum\",\n      \"prerequisites\": [\n        \"Signed momentum\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"The change in total momentum equals the net external impulse. Therefore Pfinal = +6 + (+2) = +8 kg m/s. Internal transfers still cancel in the combined accounting, but the external impulse changes the total. The zero-external-impulse formulas are not an unchanged solution to this different problem.\",\n      \"transfer\": \"State what the known net impulse determines about the combined system and what additional information you would need for the two individual final velocities.\"\n    },\n    {\n      \"id\": \"minimum-kinetic-energy\",\n      \"prompt\": \"For two fixed positive masses and a fixed total momentum, why is the shared velocity of a completely inelastic endpoint the state with the least translational kinetic energy?\",\n      \"options\": [\n        \"Any relative motion adds nonnegative kinetic energy above the center-of-mass motion, and this extra term is zero only at a shared velocity.\",\n        \"A shared velocity always means both carts have zero velocity.\",\n        \"Momentum conservation permits only one possible pair of final velocities.\",\n        \"Kinetic energy is signed, so positive and negative contributions cancel at a shared velocity.\"\n      ],\n      \"concept\": \"Energy accounting\",\n      \"prerequisites\": [\n        \"Collision models\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"Write M = mA + mB, P for the fixed total momentum, and μ = mA mB / M. The total translational kinetic energy is P²/(2M) + (μ/2)(vA - vB)². The first term is fixed. Because both masses are positive, the second is nonnegative and vanishes exactly when vA = vB = P/M. A shared velocity need not be zero.\",\n      \"transfer\": \"Use the energy decomposition to explain why nonzero total momentum prevents the two-cart system from having zero total translational kinetic energy.\"\n    }\n  ]\n}\n";
+const GUIDE_TEXT = "# Momentum and collisions: what stays, what changes\n\nOpen [the offline explorer](momentum-collisions-explorer.html), or download [the original twelve-question lesson](momentum-collisions.json) and choose it through RecallWeave's **Bring your own lesson** flow. Inspect the preview and explicitly choose **Start this deck**. The learner's ordinary review, separate missed-item practice and study-note downloads remain available.\n\n## Begin with the system and direction\n\nThis is an idealized classical model of two positive, fixed masses translating along one line. Right is positive. Cart A starts strictly to the left of cart B with a positive gap, and both incoming velocities stay constant until contact. The explorer accepts whole-number masses from 1 through 100 kg and whole-number incoming velocities from -20 through +20 m/s. Those limits keep this teaching calculation small and its displayed fractions exact; they are not material or experimental limits.\n\nThe separation is xB - xA, so its rate of change is uB - uA. A future encounter is possible for this ordering only when uA > uB. Equal incoming velocities leave the gap constant; uA \u003c uB makes it grow. The explorer displays the initial state but supplies no collision endpoints in either case. Two carts can move in the same direction and still approach: for uA = -1 and uB = -3, B catches A from the right.\n\nCalculated collision endpoints assume zero net external impulse on the two-cart system. They describe two different ideal events; they do not classify a measured interaction. Contact force, duration, deformation history, rotation, friction and relativistic effects are outside this model. The arrows compare velocities before and after an event; their spacing and length are not a position or time simulation.\n\n## Three quantities to keep separate\n\nFor each cart, signed momentum is p = m v and translational kinetic energy is K = m v² / 2. Negative velocity gives negative momentum under the chosen direction convention, but a positive mass always has nonnegative kinetic energy.\n\nThe combined momentum P = mA uA + mB uB is unchanged by an event with zero net external impulse. That does not mean either cart keeps its own momentum. It also does not require the total translational kinetic energy to stay the same. A known nonzero net external impulse J instead gives Pfinal = Pinitial + J.\n\nThe center-of-mass velocity is V = P / (mA + mB). With M = mA + mB and reduced mass μ = mA mB / M, direct expansion gives the energy identity\n\nK = P² / (2M) + (μ / 2)(uA - uB)².\n\nThe first term belongs to the motion of the center of mass. The second belongs to relative motion. Both terms are nonnegative. At fixed positive masses and total momentum, the smallest possible translational kinetic energy occurs when both final velocities equal V; the relative-motion term is then zero. This shared velocity may be nonzero.\n\n## Compare the two ideal events\n\nAn **elastic** event conserves translational kinetic energy as well as momentum. The separating solution reverses the relative velocity: vA - vB = -(uA - uB). Solving that relation together with momentum conservation gives\n\n- vA = ((mA - mB)uA + 2 mB uB) / (mA + mB).\n- vB = ((mB - mA)uB + 2 mA uA) / (mA + mB).\n\nConservation of momentum and kinetic energy alone also admits the unchanged incoming velocity pair. For approaching carts that pair is still approaching; it is not the separating outcome of the stated collision. The relative-velocity condition selects the event being modeled.\n\nIn a **completely inelastic** event, the carts stick and share vA = vB = V. Momentum still balances. The reduction in translational kinetic energy is\n\nKinitial - Kfinal = mA mB (uA - uB)² / (2(mA + mB)).\n\nThis is conversion to other energy forms, not destruction of total energy. The endpoint model does not identify how the converted amount is distributed among internal motion, deformation or other forms. It does not infer a coefficient of restitution or a material property from the inputs.\n\n## Worked comparisons\n\nFor mA = 2 kg, mB = 1 kg, uA = +3 m/s and uB = 0 m/s, the total momentum is +6 kg m/s and the initial kinetic energy is 9 J. The elastic endpoint is (+1, +4) m/s, retaining 9 J. The completely inelastic endpoint is (+2, +2) m/s, with 6 J of translational kinetic energy and 3 J converted to other forms.\n\nFor mA = 1 kg, mB = 2 kg, uA = +3 m/s and uB = -1 m/s, P = +1 kg m/s and Kinitial = 11/2 J. The elastic velocities are (-7/3, +5/3) m/s. The shared completely inelastic velocity is +1/3 m/s, its final kinetic energy is 1/6 J, and the converted amount is 16/3 J. The displayed fractions are exact; any decimal companion is explicitly an approximation.\n\nFor two 1 kg carts approaching at +3 and -3 m/s, total momentum is zero while initial kinetic energy is 9 J. The elastic event exchanges their velocities. The completely inelastic event stops them together. Zero total momentum does not imply that the initial carts were stationary or had no kinetic energy.\n\n## Use and keep an exploration\n\nChoose an example and select **Load example**, or enter both masses and incoming velocities. **Compare models** calculates the initial state and, when the carts approach, both ideal endpoints. All three velocity diagrams share the same scale. Cart letters, exact tables and direction signs carry the information alongside color.\n\nEditing a field clears the displayed calculation and disables its download until it is compared again. An invalid mass, velocity, decimal, exponent or missing field cannot leave an earlier accepted result ready to save. A valid equal-velocity or separating case may be downloaded as a **no-collision** analysis: it retains the initial state and explicit null endpoint fields, not invented collision values.\n\n**Download this analysis** saves the entered text, admitted integer inputs, assumptions, units, event status and complete exact calculation as JSON. Every rational quantity has a signed numerator string and a positive denominator string in lowest terms. Its format is `recallweave.momentum-collisions/1`. It is an inspectable calculation record, separate from a learner-answer archive; this explorer does not reopen records. The original course and this guide can be downloaded even before a calculation. Files are saved through the browser; nothing is uploaded or written automatically to browser storage.\n\n## Original question explanations\n\n### 1. momentum-sign\n\nCart A has mass 2 kg and velocity -3 m/s, where right is positive. What is its signed momentum?\n\n**Correct response:** -6 kg m/s\n\nMomentum is mass times signed velocity: p = 2 × (-3) = -6 kg m/s. The minus sign describes leftward momentum under the stated direction convention. Squaring the velocity belongs in kinetic energy, not momentum.\n\n**Apply the idea:** Reverse the chosen positive direction without changing the cart's physical motion. Explain what changes in its momentum and what stays the same in its kinetic energy.\n\n### 2. zero-total-moving\n\nA 1 kg cart moves at +4 m/s and a 2 kg cart moves at -2 m/s. What are their total signed momentum p and total translational kinetic energy K?\n\n**Correct response:** p = 0 kg m/s; K = 12 J\n\nThe momenta are +4 and -4 kg m/s, so their sum is zero. Their kinetic energies are (1/2) × 1 × 4² = 8 J and (1/2) × 2 × (-2)² = 4 J. Kinetic energy is nonnegative for each positive mass, so the total is 12 J even though the total momentum is zero.\n\n**Apply the idea:** Invent a different pair of moving carts with zero total momentum. Check whether their total kinetic energy can be zero.\n\n### 3. system-boundary\n\nTreat both carts together as one fixed-mass system. The net external impulse during their interaction is zero. Which statement must hold?\n\n**Correct response:** The sum of the carts' signed momenta is unchanged.\n\nInternal interaction forces transfer momentum between the carts. With zero net external impulse on the combined fixed-mass system, those internal transfers do not change the total momentum between the initial and final states. Individual momenta can change, and translational kinetic energy need not be conserved.\n\n**Apply the idea:** Choose a system boundary for a cart striking a wall. Which interaction becomes external if the wall is left outside the system?\n\n### 4. stick-weighted-velocity\n\nCart A (2 kg, +3 m/s) approaches cart B (1 kg, 0 m/s) from the left. They undergo a completely inelastic collision with zero net external impulse. What common velocity do they have afterward?\n\n**Correct response:** +2 m/s\n\nThe total initial momentum is 2 × 3 + 1 × 0 = 6 kg m/s. Sticking requires one shared final velocity, so (2 + 1)v = 6 and v = +2 m/s. The ordinary average +1.5 m/s ignores the different masses.\n\n**Apply the idea:** Predict how the shared velocity changes if the initially stationary cart's mass increases while the incoming cart stays the same.\n\n### 5. elastic-unequal\n\nCart A (2 kg, +3 m/s) approaches cart B (1 kg, 0 m/s) from the left. An ideal elastic collision conserves momentum and translational kinetic energy, and the carts separate afterward. Which pair of final velocities (vA, vB) is consistent with this event?\n\n**Correct response:** (+1, +4) m/s\n\nFor (+1, +4), the final momentum is 2 × 1 + 1 × 4 = 6 kg m/s and the kinetic energy is (1/2) × 2 × 1² + (1/2) × 1 × 4² = 9 J, matching the initial values. The relative velocity changes from +3 to -3 m/s, so the carts separate. The unchanged (+3, 0) pair also satisfies the two conservation equations, but it is still approaching and does not describe the stated separating collision event.\n\n**Apply the idea:** Why do two conservation equations still need an event/separation condition in this example? Explain the unchanged algebraic branch.\n\n### 6. elastic-equal-masses\n\nTwo 1 kg carts approach each other: A, initially on the left, has uA = +4 m/s; B has uB = -2 m/s. After an ideal one-dimensional elastic collision, what are (vA, vB)?\n\n**Correct response:** (-2, +4) m/s\n\nIn an ideal one-dimensional elastic collision of equal masses, the velocities exchange. The final pair (-2, +4) retains momentum +2 kg m/s and kinetic energy 10 J. The relative velocity changes from +6 to -6 m/s. Simply negating both incoming velocities would reverse the total momentum here.\n\n**Apply the idea:** Choose two equal-mass incoming velocities whose sum is not zero. Show why swapping them preserves momentum but negating them does not.\n\n### 7. inelastic-energy\n\nCart A (2 kg, +3 m/s) meets cart B (1 kg, 0 m/s). They stick and move together at +2 m/s with no net external impulse. How much translational kinetic energy is converted to other forms during this idealized event?\n\n**Correct response:** 3 J\n\nThe initial translational kinetic energy is (1/2) × 2 × 3² = 9 J. The combined 3 kg mass moving at +2 m/s has (1/2) × 3 × 2² = 6 J. The difference is 3 J. Total momentum remains +6 kg m/s, while that 3 J is converted to energy forms outside this endpoint model's translational accounting.\n\n**Apply the idea:** Repeat the initial and final kinetic-energy calculation for a different pair that sticks. State separately what momentum conservation tells you.\n\n### 8. energy-not-destroyed\n\nTwo 1 kg carts approach at +3 m/s and -3 m/s. They stick and stop, reducing their total translational kinetic energy from 9 J to 0 J. Which interpretation is justified?\n\n**Correct response:** The 9 J has changed into other energy forms; this endpoint model does not resolve their distribution.\n\nThe initial momenta +3 and -3 kg m/s cancel, so stopping together preserves their total momentum. Translational kinetic energy can change into internal motion, deformation and other energy forms without destroying total energy. The endpoint calculation alone cannot say how the 9 J is divided among those forms.\n\n**Apply the idea:** What extra observations would be needed to estimate how kinetic energy was distributed into deformation, internal energy or sound?\n\n### 9. approach-ordering\n\nA begins to the left of B with a positive gap. Both keep their incoming velocities until contact. Which pair (uA, uB) makes the gap shrink so a future encounter is possible?\n\n**Correct response:** (-1, -3) m/s\n\nLet the positive gap be xB - xA. Its rate of change before contact is uB - uA. For (-1, -3), this is -3 - (-1) = -2 m/s, so the gap shrinks. B moves left faster than A and can catch it. Motion in the same direction does not by itself rule out a collision.\n\n**Apply the idea:** Choose two positive velocities and then two negative velocities that make the gap shrink. Use uB - uA to justify both.\n\n### 10. equal-velocity-gap\n\nA begins to the left of B with a positive gap. Both move at +2 m/s and have no acceleration before contact. What should a collision explorer report?\n\n**Correct response:** Their gap stays constant, so these inputs do not produce a future collision.\n\nEqual incoming velocities give a zero gap-change rate. Starting from a positive gap, the carts remain separated under constant velocities. A completely inelastic formula describes what follows an encounter; it cannot create an encounter when these motion assumptions provide none.\n\n**Apply the idea:** Give one additional physical condition that could create a later encounter despite initially equal velocities. Explain which current assumption it would change.\n\n### 11. external-impulse\n\nThe two-cart system initially has total momentum +6 kg m/s. During an interaction it receives a known net external impulse of +2 kg m/s. What follows?\n\n**Correct response:** Its final momentum is +8 kg m/s; the zero-external-impulse collision formulas do not apply unchanged.\n\nThe change in total momentum equals the net external impulse. Therefore Pfinal = +6 + (+2) = +8 kg m/s. Internal transfers still cancel in the combined accounting, but the external impulse changes the total. The zero-external-impulse formulas are not an unchanged solution to this different problem.\n\n**Apply the idea:** State what the known net impulse determines about the combined system and what additional information you would need for the two individual final velocities.\n\n### 12. minimum-kinetic-energy\n\nFor two fixed positive masses and a fixed total momentum, why is the shared velocity of a completely inelastic endpoint the state with the least translational kinetic energy?\n\n**Correct response:** Any relative motion adds nonnegative kinetic energy above the center-of-mass motion, and this extra term is zero only at a shared velocity.\n\nWrite M = mA + mB, P for the fixed total momentum, and μ = mA mB / M. The total translational kinetic energy is P²/(2M) + (μ/2)(vA - vB)². The first term is fixed. Because both masses are positive, the second is nonnegative and vanishes exactly when vA = vB = P/M. A shared velocity need not be zero.\n\n**Apply the idea:** Use the energy decomposition to explain why nonzero total momentum prevents the two-cart system from having zero total translational kinetic energy.\n\n## Sources, authorship and reproduction\n\nThe conceptual definitions and physical limits were checked against [OpenStax, University Physics Volume 1, 9.2: Impulse and Collisions](https://openstax.org/books/university-physics-volume-1/pages/9-2-impulse-and-collisions), [9.3: Conservation of Linear Momentum](https://openstax.org/books/university-physics-volume-1/pages/9-3-conservation-of-linear-momentum), [9.4: Types of Collisions](https://openstax.org/books/university-physics-volume-1/pages/9-4-types-of-collisions), and [MIT OpenCourseWare 8.01SC, Chapter 15: Collision Theory](https://ocw.mit.edu/courses/8-01sc-classical-mechanics-fall-2016/mit8_01scs22_chapter15.pdf). The examples, questions, explanations, transfer prompts and diagrams are original. They are dedicated under CC0-1.0; references retain their own terms. No textbook passages or figures are reproduced.\n\nThe lesson's structural checks and scripted learner receiving establish compatibility with the existing product. They do not establish learning effectiveness or assessment validity. The existing model's estimates remain illustrative model state.\n\nBuild the standalone explorer with `node tools/build-momentum-collisions.mjs`; add `--check` to require byte-identical source/deck/guide parity. Native checks run with `node --test tests/momentum-collisions*.test.mjs`. The optional actual-browser receiver is `tools/check_momentum_collisions_browser.mjs`; it uses an existing Chromium executable and a separate receiving directory. Product execution requires no server, dependency installation or network connection.\n";
+const {COLLISION_PRESETS, analyzeCollision, formatFraction, serializeCollision} = (() => {
+// Ideal classical one-dimensional collision endpoints, evaluated as exact fractions.
+const COLLISION_PRESETS = Object.freeze([
+  {id:'unequal',label:'A heavier cart meets a stationary cart',mA:'2',mB:'1',uA:'3',uB:'0'},
+  {id:'zero-momentum',label:'Moving carts with zero total momentum',mA:'1',mB:'1',uA:'3',uB:'-3'},
+  {id:'fractions',label:'Fractional answers with opposite directions',mA:'1',mB:'2',uA:'3',uB:'-1'},
+  {id:'both-left',label:'Both move left, but the gap shrinks',mA:'2',mB:'1',uA:'-1',uB:'-3'},
+  {id:'equal-speed',label:'Equal velocities: no future collision',mA:'2',mB:'1',uA:'2',uB:'2'},
+  {id:'separating',label:'The gap grows: no future collision',mA:'1',mB:'2',uA:'-3',uB:'1'}
+].map(value=>Object.freeze(value)));
+
+const fields = ['mA','mB','uA','uB'];
+function integer(value,label,min,max) {
+  let number;
+  if(typeof value==='number') {
+    if(!Number.isSafeInteger(value)) throw new Error(label+' must be a whole number.');
+    number=value;
+  } else if(typeof value==='string'&&value.length<=32&&/^[+-]?\d+$/.test(value.trim())) {
+    const exact=BigInt(value.trim());
+    if(exact<BigInt(min)||exact>BigInt(max)) throw new Error(label+' must be from '+min+' to '+max+'.');
+    number=Number(exact);
+  } else throw new Error(label+' must be a whole number; decimals and exponents are not accepted.');
+  if(number<min||number>max) throw new Error(label+' must be from '+min+' to '+max+'.');
+  return number===0?0:number;
+}
+function gcd(a,b) {
+  a=a<0n?-a:a;b=b<0n?-b:b;
+  while(b){const next=a%b;a=b;b=next;}
+  return a;
+}
+function q(n,d=1n) {
+  if(d===0n)throw new Error('A fraction cannot have a zero denominator.');
+  if(d<0n){n=-n;d=-d;}
+  const factor=gcd(n,d);
+  return {n:n/factor,d:d/factor};
+}
+const add=(a,b)=>q(a.n*b.d+b.n*a.d,a.d*b.d);
+const sub=(a,b)=>q(a.n*b.d-b.n*a.d,a.d*b.d);
+const mul=(a,b)=>q(a.n*b.n,a.d*b.d);
+const div=(a,b)=>q(a.n*b.d,a.d*b.n);
+const asQ=value=>q(BigInt(value));
+const publicQ=value=>({numerator:String(value.n),denominator:String(value.d)});
+function body(mass,velocity) {
+  const m=asQ(mass);
+  return {mass,velocity,momentum:mul(m,velocity),kineticEnergy:div(mul(m,mul(velocity,velocity)),q(2n))};
+}
+function state(mA,mB,vA,vB) {
+  const a=body(mA,vA),b=body(mB,vB);
+  return {a,b,totalMomentum:add(a.momentum,b.momentum),
+    totalKineticEnergy:add(a.kineticEnergy,b.kineticEnergy),relativeVelocity:sub(vA,vB)};
+}
+function publicBody(value) {
+  return {mass:value.mass,velocity:publicQ(value.velocity),momentum:publicQ(value.momentum),
+    kineticEnergy:publicQ(value.kineticEnergy)};
+}
+function publicState(value) {
+  return {a:publicBody(value.a),b:publicBody(value.b),
+    totalMomentum:publicQ(value.totalMomentum),totalKineticEnergy:publicQ(value.totalKineticEnergy),
+    relativeVelocity:publicQ(value.relativeVelocity)};
+}
+function freeze(value) {
+  if(value&&typeof value==='object'){Object.values(value).forEach(freeze);Object.freeze(value);}
+  return value;
+}
+
+// A starts strictly left of B with a positive gap. Only uA > uB reaches contact.
+function analyzeCollision(input) {
+  if(!input||typeof input!=='object'||Array.isArray(input)||
+    Object.keys(input).length!==fields.length||!fields.every(key=>Object.hasOwn(input,key)))
+    throw new Error('Supply exactly mA, mB, uA and uB; this model assumes zero net external impulse.');
+  const inputs={
+    mA:integer(input.mA,'Cart A mass (kg)',1,100),
+    mB:integer(input.mB,'Cart B mass (kg)',1,100),
+    uA:integer(input.uA,'Cart A velocity (m/s)',-20,20),
+    uB:integer(input.uB,'Cart B velocity (m/s)',-20,20)
+  };
+  const {mA,mB,uA,uB}=inputs;
+  const a=asQ(mA),b=asQ(mB),M=add(a,b),ua=asQ(uA),ub=asQ(uB);
+  const initial=state(mA,mB,ua,ub);
+  const V=div(initial.totalMomentum,M);
+  const centerEnergy=div(mul(initial.totalMomentum,initial.totalMomentum),mul(q(2n),M));
+  const relativeEnergy=sub(initial.totalKineticEnergy,centerEnergy);
+  let elastic=null,completelyInelastic=null;
+  if(uA>uB) {
+    // Momentum plus reversed relative velocity selects the separating collision branch.
+    const va=div(add(mul(sub(a,b),ua),mul(mul(q(2n),b),ub)),M);
+    const vb=div(add(mul(sub(b,a),ub),mul(mul(q(2n),a),ua)),M);
+    const elasticState=state(mA,mB,va,vb),stuckState=state(mA,mB,V,V);
+    elastic={...publicState(elasticState),kineticConverted:publicQ(sub(initial.totalKineticEnergy,elasticState.totalKineticEnergy))};
+    completelyInelastic={...publicState(stuckState),kineticConverted:publicQ(sub(initial.totalKineticEnergy,stuckState.totalKineticEnergy))};
+  }
+  return freeze({
+    format:'recallweave.momentum-collisions/1',
+    entered:Object.fromEntries(fields.map(key=>[key,String(input[key])])),
+    inputs,
+    units:{mass:'kg',velocity:'m/s',momentum:'kg m/s',kineticEnergy:'J'},
+    assumptions:[
+      'Classical one-dimensional translation of two fixed positive masses; right is positive.',
+      'A initially lies strictly left of B with a positive gap; incoming velocities remain constant until contact.',
+      'Calculated collision endpoints assume zero net external impulse on the two-cart system.',
+      'Elastic and completely inelastic are alternative idealized event models, not classifications of measurements.',
+      'No impact force, contact duration, deformation, rotation, friction or experimental outcome is modeled.'
+    ],
+    status:uA>uB?'collision':'no-collision',
+    reason:uA>uB?'approaching':uA===uB?'equal-velocity':'separating',
+    closingVelocity:publicQ(sub(ua,ub)),
+    centerOfMassVelocity:publicQ(V),
+    centerOfMassKineticEnergy:publicQ(centerEnergy),
+    relativeKineticEnergy:publicQ(relativeEnergy),
+    initial:publicState(initial),elastic,completelyInelastic
+  });
+}
+
+function formatFraction(value) {
+  return value.denominator==='1'?value.numerator:value.numerator+'/'+value.denominator;
+}
+
+// Recompute from the explicit inputs; a caller cannot pass an edited result as an accepted record.
+function serializeCollision(input) {
+  return JSON.stringify(analyzeCollision(input),null,2)+'\n';
+}
+
+return {COLLISION_PRESETS, analyzeCollision, formatFraction, serializeCollision};
+})();
+
+(() => {
+  const byId = id => document.getElementById(id);
+  const inputNames = ['mA','mB','uA','uB'];
+  const form = byId('mc-form'), results = byId('mc-results'), status = byId('mc-status');
+  const recordButton = byId('mc-download-record'), states = byId('mc-states');
+  const preset = byId('mc-preset'), downloadStatus = byId('mc-download-status');
+  const svgNamespace = 'http://www.w3.org/2000/svg';
+  let acceptedInputs = null;
+
+  function element(tag, text, className) {
+    const node = document.createElement(tag);
+    if (text !== undefined) node.textContent = text;
+    if (className) node.className = className;
+    return node;
+  }
+  function svgElement(tag, attributes) {
+    const node = document.createElementNS(svgNamespace, tag);
+    for (const [name, value] of Object.entries(attributes)) node.setAttribute(name, String(value));
+    return node;
+  }
+  function readInputs() {
+    return Object.fromEntries(inputNames.map(name => [name, byId('mc-' + name).value]));
+  }
+  function numberOf(fraction) {
+    return Number(fraction.numerator) / Number(fraction.denominator);
+  }
+  function exactValue(fraction) {
+    const wrapper = element('span');
+    wrapper.append(element('strong', formatFraction(fraction)));
+    if (fraction.denominator !== '1') {
+      wrapper.append(element('span', '≈ ' + numberOf(fraction).toLocaleString('en-US', {maximumFractionDigits: 3}), 'approx'));
+    }
+    return wrapper;
+  }
+  function setFraction(id, fraction) {
+    const target = byId(id);
+    target.textContent = formatFraction(fraction);
+  }
+  function clearAnalysis(message, isError = false) {
+    acceptedInputs = null;
+    results.hidden = true;
+    states.replaceChildren();
+    recordButton.disabled = true;
+    status.classList.toggle('error', isError);
+    status.textContent = message;
+  }
+  function velocityDiagram(state, key, maximum) {
+    const svg = svgElement('svg', {viewBox:'0 0 300 125', role:'img', 'aria-labelledby':key + '-velocity-title'});
+    const title = svgElement('title', {id:key + '-velocity-title'});
+    title.textContent = 'Velocity comparison. Cart A: ' + formatFraction(state.a.velocity) +
+      ' m/s. Cart B: ' + formatFraction(state.b.velocity) + ' m/s. Right is positive; arrows share one scale.';
+    svg.append(title);
+    svg.append(svgElement('line', {x1:42, y1:106, x2:258, y2:106, stroke:'#a8b4af', 'stroke-width':1}));
+    svg.append(svgElement('line', {x1:150, y1:23, x2:150, y2:109, stroke:'#bfc9c4', 'stroke-width':1, 'stroke-dasharray':'3 4'}));
+    for (const [label, x, anchor] of [['left (−)',42,'start'],['0',150,'middle'],['right (+)',258,'end']]) {
+      const text = svgElement('text', {x, y:121, 'text-anchor':anchor, 'font-size':10, fill:'#586568'});
+      text.textContent = label;
+      svg.append(text);
+    }
+    for (const [cart, y, color] of [['a',43,'#086478'],['b',80,'#a7482f']]) {
+      const velocity = numberOf(state[cart].velocity);
+      const endpoint = 150 + velocity / maximum * 108;
+      const label = svgElement('text', {x:14, y:y+4, 'font-size':13, 'font-weight':700, fill:color});
+      label.textContent = cart.toUpperCase();
+      svg.append(label);
+      const group = svgElement('g', {'data-velocity':key + '-' + cart, 'data-exact':formatFraction(state[cart].velocity)});
+      if (velocity === 0) {
+        group.append(svgElement('circle', {cx:150, cy:y, r:4, fill:color}));
+      } else {
+        group.append(svgElement('line', {x1:150, y1:y, x2:endpoint, y2:y, stroke:color, 'stroke-width':3}));
+        const direction = Math.sign(velocity);
+        group.append(svgElement('path', {d:'M ' + (endpoint-direction*7) + ' ' + (y-5) + ' L ' + endpoint + ' ' + y + ' L ' + (endpoint-direction*7) + ' ' + (y+5), fill:'none', stroke:color, 'stroke-width':2}));
+      }
+      svg.append(group);
+    }
+    return svg;
+  }
+  function totalRow(label, fraction, unit, key, field) {
+    const row = element('div', undefined, 'total-row');
+    const value = element('strong', formatFraction(fraction) + ' ' + unit);
+    value.dataset.field = field;
+    row.append(element('span', label), value);
+    return row;
+  }
+  function stateCard(state, key, title, note, maximum) {
+    const card = element('article', undefined, 'state-card');
+    card.dataset.state = key;
+    const heading = element('h3', title);
+    heading.id = 'mc-card-' + key;
+    card.setAttribute('aria-labelledby', heading.id);
+    card.append(heading, element('p', note, 'state-note'), velocityDiagram(state, key, maximum));
+    const table = element('table');
+    table.setAttribute('aria-label', title + ': exact cart quantities');
+    const header = element('thead'), headerRow = element('tr');
+    for (const [label, unit] of [['Cart','mass'],['Velocity','m/s'],['Momentum','kg m/s'],['Kinetic energy','J']]) {
+      const cell = element('th', label);
+      cell.scope = 'col';
+      cell.append(element('span', unit, 'unit-label'));
+      headerRow.append(cell);
+    }
+    header.append(headerRow);
+    const body = element('tbody');
+    for (const cart of ['a','b']) {
+      const row = element('tr'), label = element('th', undefined, 'cart-' + cart);
+      label.scope = 'row';
+      label.append(element('strong', cart.toUpperCase()), element('span', state[cart].mass + ' kg', 'unit-label'));
+      row.append(label);
+      for (const field of ['velocity','momentum','kineticEnergy']) {
+        const cell = element('td');
+        cell.dataset.field = cart + '.' + field;
+        cell.append(exactValue(state[cart][field]));
+        row.append(cell);
+      }
+      body.append(row);
+    }
+    table.append(header, body);
+    const totals = element('div', undefined, 'totals');
+    totals.append(totalRow('Total momentum', state.totalMomentum, 'kg m/s', key, 'totalMomentum'));
+    totals.append(totalRow('Total kinetic energy', state.totalKineticEnergy, 'J', key, 'totalKineticEnergy'));
+    totals.append(totalRow('A − B velocity', state.relativeVelocity, 'm/s', key, 'relativeVelocity'));
+    card.append(table, totals);
+    if (state.kineticConverted) {
+      const converted = element('p', formatFraction(state.kineticConverted) +
+        ' J converted from translational kinetic energy to other forms.', 'conversion');
+      converted.dataset.field = 'kineticConverted';
+      card.append(converted);
+    }
+    return card;
+  }
+  function render(analysis) {
+    const contact = analysis.status === 'collision';
+    const presented = contact ? [
+      ['initial',analysis.initial,'Incoming state','The same starting motion for either ideal encounter.'],
+      ['elastic',analysis.elastic,'Elastic encounter','Momentum and kinetic energy stay constant; relative velocity reverses.'],
+      ['completely-inelastic',analysis.completelyInelastic,'Stick together','Completely inelastic: both carts leave with one shared velocity.']
+    ] : [['initial',analysis.initial,'Current motion','The initial quantities are valid; no future encounter occurs under the stated ordering.']];
+    const maximum = Math.max(1, ...presented.flatMap(([,state]) =>
+      [Math.abs(numberOf(state.a.velocity)), Math.abs(numberOf(state.b.velocity))]));
+    byId('mc-results-title').textContent = contact ? 'One incoming state, two ideal outcomes' : 'No future collision under these inputs';
+    byId('mc-event-boundary').textContent = contact ?
+      'The gap closes because uA − uB = ' + formatFraction(analysis.closingVelocity) +
+      ' m/s is positive. The two endpoint models below describe alternative ideal events with zero net external impulse.' :
+      (analysis.reason === 'equal-velocity' ?
+        'The velocities are equal, so the positive gap stays constant.' :
+        'A is slower in the signed coordinate, so the positive gap grows.') +
+      ' No future contact occurs with constant incoming velocities. Collision endpoints are not calculated.';
+    setFraction('mc-center-velocity', analysis.centerOfMassVelocity);
+    setFraction('mc-center-energy', analysis.centerOfMassKineticEnergy);
+    setFraction('mc-relative-energy', analysis.relativeKineticEnergy);
+    states.classList.toggle('single', !contact);
+    states.replaceChildren(...presented.map(([key,state,title,note]) => stateCard(state,key,title,note,maximum)));
+    byId('mc-scale-note').textContent =
+      'All visible arrows share a velocity scale (outer endpoint, approximately: ' +
+      maximum.toLocaleString('en-US', {maximumFractionDigits:3}) +
+      ' m/s in either direction). Positions and encounter times are not drawn. Fractions are exact; values marked ≈ are rounded to at most three decimal places.';
+    results.hidden = false;
+    status.classList.remove('error');
+    status.textContent = contact ? 'Comparison ready. Change an input to start a new comparison.' :
+      'Initial analysis ready. No future collision; the downloadable record has no collision endpoints.';
+  }
+  function compare() {
+    clearAnalysis('Checking the cart inputs…');
+    try {
+      const inputs = readInputs(), analysis = analyzeCollision(inputs);
+      render(analysis);
+      acceptedInputs = Object.freeze({...inputs});
+      recordButton.disabled = false;
+    } catch (error) {
+      clearAnalysis(error.message, true);
+      status.focus();
+    }
+  }
+  function download(text, filename, mime, message) {
+    let url = null;
+    try {
+      url = URL.createObjectURL(new Blob([text], {type:mime}));
+      const anchor = element('a');
+      anchor.href = url;
+      anchor.download = filename;
+      document.body.append(anchor);
+      try { anchor.click(); } finally { anchor.remove(); }
+      downloadStatus.classList.remove('error');
+      downloadStatus.textContent = message + ' Your browser chooses where to save the file.';
+    } catch (error) {
+      downloadStatus.classList.add('error');
+      downloadStatus.textContent = 'The download could not be prepared: ' + error.message;
+    } finally {
+      if (url) setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+  }
+  for (const example of COLLISION_PRESETS) {
+    const option = element('option', example.label);
+    option.value = example.id;
+    preset.append(option);
+  }
+  function loadExample() {
+    const example = COLLISION_PRESETS.find(value => value.id === preset.value);
+    if (!example) {
+      clearAnalysis('Choose one of the listed examples.', true);
+      return;
+    }
+    for (const name of inputNames) byId('mc-' + name).value = example[name];
+    compare();
+  }
+  byId('mc-load-example').addEventListener('click', loadExample);
+  form.addEventListener('submit', event => {event.preventDefault(); compare();});
+  for (const name of inputNames) {
+    byId('mc-' + name).addEventListener('input', () => clearAnalysis('Inputs changed. Choose Compare models to calculate the new analysis.'));
+  }
+  recordButton.addEventListener('click', () => {
+    if (!acceptedInputs) return;
+    const current = readInputs();
+    if (!inputNames.every(name => current[name] === acceptedInputs[name])) {
+      clearAnalysis('Inputs changed. Choose Compare models before downloading a new analysis.', true);
+      return;
+    }
+    try {
+      download(serializeCollision(acceptedInputs), 'momentum-collisions-analysis.json', 'application/json;charset=utf-8', 'Analysis download prepared.');
+    } catch (error) {
+      clearAnalysis(error.message, true);
+    }
+  });
+  byId('mc-download-course').addEventListener('click', () =>
+    download(COURSE_TEXT, 'momentum-collisions.json', 'application/json;charset=utf-8', 'Course download prepared. Import it in your RecallWeave learner.'));
+  byId('mc-download-guide').addEventListener('click', () =>
+    download(GUIDE_TEXT, 'momentum-collisions.md', 'text/markdown;charset=utf-8', 'Worked guide download prepared.'));
+  loadExample();
+})();
+
+</script>
+</body>
+</html>
