@@ -1,0 +1,221 @@
+{
+  "format": "recallweave-deck/1",
+  "title": "Hamming codes: when a repair can be wrong",
+  "attribution": "Original questions, examples and explanations by RecallWeave contributors with AI assistance (2026). Mathematical foundation: R. W. Hamming, Error Detecting and Error Correcting Codes, Bell System Technical Journal 29(2), 147–160 (1950), DOI:10.1002/j.1538-7305.1950.tb00463.x. The worked examples use displayed position 1 at the left, even parity at 1/2/4 and data at 3/5/6/7.",
+  "license": "The original lesson text, worked examples and explorer in this contribution are offered under CC BY 4.0. Attribute RecallWeave contributors and identify changes. The cited historical paper retains its own rights; no paper text or figures are reproduced.",
+  "concepts": [
+    "parity-and-redundancy",
+    "syndrome-reasoning",
+    "distance-and-recovery",
+    "decoder-assumptions"
+  ],
+  "items": [
+    {
+      "id": "hamming-parity-even",
+      "concept": "parity-and-redundancy",
+      "prerequisites": [],
+      "prompt": "An even-parity group already contains data bits 1, 0 and 1. Which check bit makes the total number of 1s even?",
+      "options": [
+        "0",
+        "1",
+        "Either value",
+        "There is no valid check bit"
+      ],
+      "answer": 0,
+      "explanation": "The existing data contain two 1s. Adding check bit 0 leaves the total at two, which is even; adding 1 makes it odd. Even parity constrains the total count, not the value of every bit.",
+      "transfer": "Try the group 1, 1, 1. Which check bit gives even parity? Explain the change by counting 1s."
+    },
+    {
+      "id": "hamming-parity-budget",
+      "concept": "parity-and-redundancy",
+      "prerequisites": [],
+      "prompt": "This Hamming(7,4) code carries four data bits in seven transmitted positions. What fraction of the transmitted positions are data positions?",
+      "options": [
+        "3/7",
+        "4/7",
+        "4/3",
+        "7/4"
+      ],
+      "answer": 1,
+      "explanation": "Four of the seven transmitted positions carry data, so the fraction is 4/7. The remaining 3/7 are parity positions. The reciprocal 7/4 measures transmitted bits per data bit, a different quantity.",
+      "transfer": "For a hypothetical code carrying eight data bits in twelve positions, write both the data fraction and transmitted bits per data bit."
+    },
+    {
+      "id": "hamming-parity-group",
+      "concept": "parity-and-redundancy",
+      "prerequisites": [],
+      "prompt": "Positions are numbered 1 through 7 from left to right. The parity check at position 2 covers every position whose binary position number has its 2s bit set. Which group is checked?",
+      "options": [
+        "1, 3, 5, 7",
+        "2, 3, 6, 7",
+        "4, 5, 6, 7",
+        "1, 2, 4"
+      ],
+      "answer": 1,
+      "explanation": "The binary position labels 010, 011, 110 and 111 have the 2s bit set. They represent positions 2, 3, 6 and 7. Overlapping groups give different single-error positions different patterns of failed checks.",
+      "transfer": "List the positions whose binary labels have the 4s bit set, then compare that group with the check at position 1."
+    },
+    {
+      "id": "hamming-syndrome-value",
+      "concept": "syndrome-reasoning",
+      "prerequisites": [
+        "parity-and-redundancy"
+      ],
+      "prompt": "The received-word checks give s1 = 1, s2 = 0 and s4 = 1, where 1 means a failed even-parity check. Under the at-most-one-error assumption, which position should the decoder flip?",
+      "options": [
+        "1",
+        "4",
+        "5",
+        "6"
+      ],
+      "answer": 2,
+      "explanation": "The syndrome value is 1 + 2×0 + 4×1 = 5. With at most one error, failed checks s1 and s4 identify position 5. Without that error-count assumption, the same syndrome can have other explanations.",
+      "transfer": "Which two distinct flipped positions could also give syndrome 5? Explain why the syndrome alone does not reveal how many errors happened."
+    },
+    {
+      "id": "hamming-syndrome-checkbit",
+      "concept": "syndrome-reasoning",
+      "prerequisites": [
+        "parity-and-redundancy"
+      ],
+      "prompt": "A valid Hamming(7,4) word suffers exactly one error, at parity position 2. What do the checks and standard one-error decoder do?",
+      "options": [
+        "All checks pass because data bits are unchanged.",
+        "Only s2 fails, and the decoder flips position 2.",
+        "All three checks fail, and the decoder flips position 7.",
+        "Only s1 fails, and the decoder flips position 1."
+      ],
+      "answer": 1,
+      "explanation": "Position 2 participates in the check at 2 but not the checks at 1 or 4. Flipping it makes s2 = 1 and the other checks 0, so the syndrome is 2. Parity-bit errors are included in the one-error correction guarantee.",
+      "transfer": "What would happen if only position 4 were flipped? Separate the received data bits from the checks that locate the changed parity bit."
+    },
+    {
+      "id": "hamming-syndrome-worked",
+      "concept": "syndrome-reasoning",
+      "prerequisites": [
+        "parity-and-redundancy"
+      ],
+      "prompt": "Use left-to-right positions 1–7, even parity at 1/2/4, and data at 3/5/6/7. The received word is 1011010. What is the syndrome value s1 + 2s2 + 4s4?",
+      "options": [
+        "0",
+        "3",
+        "5",
+        "7"
+      ],
+      "answer": 0,
+      "explanation": "For 1011010, check s1 sees positions 1/3/5/7 as 1/1/0/0: two 1s. Check s2 sees 0/1/1/0: two. Check s4 sees 1/0/1/0: two. All three groups have even parity, so the syndrome is 0. This establishes consistency with the code, not an error-free history.",
+      "transfer": "Flip its sixth position on paper, recompute the three groups and explain the new syndrome."
+    },
+    {
+      "id": "hamming-distance-count",
+      "concept": "distance-and-recovery",
+      "prerequisites": [
+        "parity-and-redundancy",
+        "syndrome-reasoning"
+      ],
+      "prompt": "What is the Hamming distance between the equal-length words 0110011 and 0101010?",
+      "options": [
+        "1",
+        "2",
+        "3",
+        "4"
+      ],
+      "answer": 2,
+      "explanation": "The words differ at positions 3, 4 and 7, giving distance 3. Hamming distance counts unequal positions of equal-length words; it does not subtract their numerical values.",
+      "transfer": "Invent a third seven-bit word one change away from 0110011. Count its distance from each of the original two words."
+    },
+    {
+      "id": "hamming-distance-guarantee",
+      "concept": "distance-and-recovery",
+      "prerequisites": [
+        "parity-and-redundancy",
+        "syndrome-reasoning"
+      ],
+      "prompt": "A code has minimum distance 3 between distinct valid words. Why can nearest-word decoding recover every single-bit error?",
+      "options": [
+        "The original is distance 1 away, while every other valid word is at least distance 2 away.",
+        "All received words are valid codewords.",
+        "The receiver knows which physical bit failed.",
+        "A second error always cancels the first."
+      ],
+      "answer": 0,
+      "explanation": "A one-bit error places the received word at distance 1 from the original. For any other valid word, the triangle inequality gives distance at least 3−1 = 2 from the received word. Thus the original is the unique nearest valid word under this assumption.",
+      "transfer": "What minimum-distance bound would make every two-bit error uniquely correctable by nearest-word decoding? Derive it with the same distance argument."
+    },
+    {
+      "id": "hamming-distance-neighborhood",
+      "concept": "distance-and-recovery",
+      "prerequisites": [
+        "parity-and-redundancy",
+        "syndrome-reasoning"
+      ],
+      "prompt": "Each valid seven-bit word has itself plus seven one-bit neighbors. The 16 Hamming(7,4) codewords have disjoint such neighborhoods. How many distinct seven-bit received words do they cover?",
+      "options": [
+        "16",
+        "112",
+        "128",
+        "256"
+      ],
+      "answer": 2,
+      "explanation": "Each neighborhood contains 1 + 7 = 8 words, so 16 disjoint neighborhoods cover 16×8 = 128 words. That is every possible seven-bit received word. A nearest valid word is always available, even when the actual channel introduced too many errors for the guarantee.",
+      "transfer": "Explain why complete coverage is useful for one-error decoding but does not let the decoder certify that its chosen word was actually sent."
+    },
+    {
+      "id": "hamming-limit-two",
+      "concept": "decoder-assumptions",
+      "prerequisites": [
+        "parity-and-redundancy",
+        "syndrome-reasoning",
+        "distance-and-recovery"
+      ],
+      "prompt": "Start with valid word 0000000 and flip positions 1 and 2, receiving 1100000. The one-error decoder sees syndrome 3 and flips position 3. Which interpretation is correct?",
+      "options": [
+        "It recovers the original word because the syndrome is nonzero.",
+        "It produces 1110000, a different valid word; passing checks do not prove that the original was recovered.",
+        "It identifies both actual errors and leaves the word unchanged.",
+        "It proves that exactly three errors occurred in the channel."
+      ],
+      "answer": 1,
+      "explanation": "The decoder turns 1100000 into 1110000. Its parity groups each contain two 1s, so that candidate passes all checks, but it differs from the transmitted 0000000 at positions 1, 2 and 3. The actual two-error scenario violates the decoder's one-error assumption.",
+      "transfer": "Compare the same received word with a different history: 1110000 was sent and only position 3 flipped. What can a receiver observing only 1100000 distinguish?"
+    },
+    {
+      "id": "hamming-limit-three",
+      "concept": "decoder-assumptions",
+      "prerequisites": [
+        "parity-and-redundancy",
+        "syndrome-reasoning",
+        "distance-and-recovery"
+      ],
+      "prompt": "Start with valid word 0000000 and flip positions 1, 2 and 3, receiving 1110000. All three even-parity checks pass. What can the seven-bit decoder establish from those checks alone?",
+      "options": [
+        "No bits changed during transmission.",
+        "The sender must have chosen data bits 0000.",
+        "The received word is consistent with the checks; these checks cannot identify this nonzero error pattern.",
+        "Exactly one error occurred and was corrected."
+      ],
+      "answer": 2,
+      "explanation": "The flipped positions 1, 2 and 3 change each involved check twice, leaving even parity. The decoder sees a valid word and has no evidence in these checks that it differs from the original. The explorer can reveal the error because it separately retains the authored sender and error mask.",
+      "transfer": "Find another nonzero set of three flipped positions whose binary position labels combine to zero, then check all three parity groups."
+    },
+    {
+      "id": "hamming-limit-policy",
+      "concept": "decoder-assumptions",
+      "prerequisites": [
+        "parity-and-redundancy",
+        "syndrome-reasoning",
+        "distance-and-recovery"
+      ],
+      "prompt": "For a minimum-distance-3 code, two distinct flipped positions always produce a nonzero syndrome. Why does the ordinary Hamming(7,4) one-error correction rule still fail to reliably flag a two-error message as uncorrectable?",
+      "options": [
+        "Two-bit errors always produce syndrome 0.",
+        "The same nonzero syndrome can represent a one-bit error, so the rule flips a third position and can return a different valid word.",
+        "Parity checks are not evaluated by the decoder.",
+        "The number of data bits changes after an error."
+      ],
+      "answer": 1,
+      "explanation": "Two distinct position labels combine to a nonzero syndrome. That alerts a check-only detector, but the ordinary one-error correction rule interprets the same value as one erroneous position and flips it. The resulting valid word can be wrong. Detecting a nonzero error and deciding that it is safely correctable are different decisions.",
+      "transfer": "Why can the histories 'one error from one valid word' and 'two errors from another valid word' lead to the same received word? What extra information would be needed to distinguish them?"
+    }
+  ]
+}
