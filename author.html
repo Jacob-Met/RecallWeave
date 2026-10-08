@@ -234,6 +234,20 @@ main {
 .workspace-bar button {
   flex:none;
 }
+.file-actions {
+  flex:none;
+}
+.draft-file-note {
+  margin:-.5rem 0 0;
+}
+.draft-file-status {
+  margin:.5rem 0 1.2rem;
+  overflow-wrap:anywhere;
+}
+.draft-file-status[data-error=true] {
+  color:#782d2e;
+  font-weight:650;
+}
 .card {
   border:1px solid var(--line);
   border-radius:15px;
@@ -594,16 +608,18 @@ footer p {
     <section class="intro" aria-labelledby="page-title">
       <div><p class="eyebrow">AUTHOR A LOCAL LESSON</p><h1 id="page-title">Build a course deck.</h1>
       <p class="lead">Write questions, connect concepts, and give each answer an explanation. Save a reusable local deck.</p></div>
-      <div class="draft-note"><strong>Your ideas, in your browser.</strong><p>This draft stays in this tab. Download it to keep your work, then reopen the file here whenever you want to edit it.</p></div>
+      <div class="draft-note"><strong>Keep writing, even before it is ready.</strong><p>This draft stays in this tab. Use Save draft to keep unfinished work in a local file, then reopen it here when you want to continue.</p></div>
     </section>
     <div class="workspace-bar">
-      <p id="author-status" role="status" aria-live="polite">Start with your deck title, or open a deck you already have.</p>
-      <button type="button" id="open-deck-button" class="secondary">Open a deck to edit</button>
+      <p id="author-status" role="status" aria-live="polite">Start with your deck title, or open a saved draft or deck.</p>
+      <div class="button-row file-actions" role="group" aria-label="Draft files"><button type="button" id="save-draft" class="secondary" aria-describedby="draft-save-help draft-save-status">Save draft (.json)</button><button type="button" id="open-deck-button" class="secondary">Open draft or deck</button></div>
       <input type="file" id="open-deck" accept=".json,application/json" hidden>
     </div>
+    <p id="draft-save-help" class="small-note draft-file-note">Draft files (up to 2 MiB) keep unfinished content. Check and download a deck below when your lesson is ready to share.</p>
+    <p id="draft-save-status" class="small-note draft-file-status" role="status" aria-live="polite"></p>
     <section id="open-preview" class="card incoming" aria-labelledby="open-preview-title" hidden>
-      <h2 id="open-preview-title" tabindex="-1">Open this deck?</h2><p id="open-preview-summary"></p>
-      <p>Replacing the draft changes this editor. Download your current draft first if you want to keep it.</p>
+      <p id="open-preview-kind" class="step"></p><h2 id="open-preview-title" tabindex="-1">Open this file?</h2><p id="open-preview-summary"></p>
+      <p>Replacing discards this editor's current draft. Use Save draft first if you want to keep it.</p>
       <div class="button-row"><button type="button" id="replace-draft" class="primary">Replace draft</button><button type="button" id="cancel-open" class="secondary">Keep current draft</button></div>
     </section>
     <form id="author-form" novalidate>
@@ -629,15 +645,15 @@ footer p {
       </section>
       <section class="card check-card" aria-labelledby="check-heading">
         <div><p class="step">04 · READY TO SHARE</p><h2 id="check-heading">Check the complete deck</h2><p id="check-help" class="hint">Preview checks your answer choices, concept links and the file's size. It does not check the accuracy of your course content.</p></div>
-        <div class="button-row"><button type="submit" id="check-draft" class="primary">Check and preview</button><button type="button" id="download-deck" class="secondary" disabled aria-describedby="download-help">Download deck (.json)</button></div>
-        <p id="download-help" class="small-note">Check and preview before downloading. Edits require a fresh check.</p>
+        <div class="button-row"><button type="submit" id="check-draft" class="primary">Check and preview</button><button type="button" id="download-deck" class="secondary" disabled aria-describedby="download-help">Download checked deck (.json)</button></div>
+        <p id="download-help" class="small-note">Check and preview before downloading a checked deck. Save draft keeps unfinished work.</p>
         <div id="author-error" class="error" role="alert" hidden><h3>Check this part of your deck</h3><p id="author-error-message"></p><button type="button" id="go-to-error" class="secondary">Go to field</button></div>
       </section>
     </form>
     <section id="author-preview" class="card author-preview" aria-labelledby="preview-heading" hidden>
       <p class="step">YOUR LESSON · ANSWER KEY</p><h2 id="preview-heading" tabindex="-1">Preview your deck</h2><div id="preview-content"></div>
     </section>
-    <footer><p>Download the JSON file to save or share your lesson. Reopen it here whenever you want to edit it. Opening the learning demo keeps this editor open.</p><p>No upload or account is needed. Refreshing this page clears an unsaved draft.</p></footer>
+    <footer><p>Save a draft to continue later. Check and download a deck when the lesson is ready to share. Reopen either file here whenever you want to edit it. Opening the learning demo keeps this editor open.</p><p>No upload or account is needed. Refreshing this page clears an unsaved draft.</p></footer>
   </main>
   <script>
 (() => {
@@ -823,6 +839,9 @@ function restoreQuestion(draft, removal) {
   if (draft.questions.some(item => item.key === removal.item.key || item.id === removal.item.id)) {
     throw new Error('That question is already present.');
   }
+  const knownConcepts = new Set(draft.concepts.map(concept => concept.key));
+  if (!knownConcepts.has(removal.item.conceptKey)) removal.item.conceptKey = null;
+  removal.item.prerequisiteKeys = removal.item.prerequisiteKeys.filter(key => knownConcepts.has(key));
   draft.questions.splice(Math.min(removal.index, draft.questions.length), 0, removal.item);
   return removal.item;
 }
@@ -959,19 +978,196 @@ function downloadName(title) {
 return { AUTHOR_LIMITS, createDraft, addConcept, removeConcept, addQuestion, removeQuestion, moveQuestion, restoreQuestion, addOption, removeOption, moveOption, setQuestionConcept, draftFromDeck, checkDraft, downloadName };
 })();
 
-__recallweaveAuthorModules['./deck-author-loader.mjs'] = (() => {
-const { MAX_DECK_BYTES, parseDeck } = __recallweaveAuthorModules['./deck.mjs'];
+__recallweaveAuthorModules['./deck-author-draft.mjs'] = (() => {
+const { AUTHOR_LIMITS } = __recallweaveAuthorModules['./deck-author.mjs'];
 
-/** Stage a local deck; the editor changes only after explicit replacement. */
+/** Editable drafts are distinct from checked lesson decks. */
+const DRAFT_FORMAT = 'recallweave-author-draft/1';
+const MAX_DRAFT_BYTES = 2 * 1024 * 1024;
+
+const encoder = new TextEncoder();
+
+function invalid(message = 'This draft has invalid editing data. Choose an original file saved by Deck Studio.') {
+  throw new Error(message);
+}
+
+function record(value) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) invalid();
+  return value;
+}
+
+function field(value, name) {
+  if (!Object.hasOwn(value, name)) invalid();
+  return value[name];
+}
+
+function text(value, maximum, required = false) {
+  if (typeof value !== 'string' || value.length > maximum || (required && !value.trim())) invalid();
+  return value;
+}
+
+function list(value, minimum, maximum) {
+  if (!Array.isArray(value) || value.length < minimum || value.length > maximum) invalid();
+  // Array.from also visits holes in a programmatically supplied draft.
+  return Array.from(value);
+}
+
+function withinFileLimit(value) {
+  if (typeof value !== 'string' || encoder.encode(value).length > MAX_DRAFT_BYTES) {
+    invalid('Choose a draft file no larger than 2 MiB.');
+  }
+  return value;
+}
+
+/** Copy only bounded editor state; lesson correctness is intentionally not checked. */
+function copyEditorState(input) {
+  const draft = record(input);
+  const usedKeys = new Set();
+  let largestKey = 0;
+  const editingKey = (value, prefix) => {
+    if (typeof value !== 'string' || value.length > 32) invalid();
+    const match = /^(concept|question|option)-([1-9][0-9]*)$/.exec(value);
+    if (!match || match[1] !== prefix) invalid();
+    const number = Number(match[2]);
+    if (!Number.isSafeInteger(number) || usedKeys.has(value)) invalid();
+    usedKeys.add(value);
+    largestKey = Math.max(largestKey, number);
+    return value;
+  };
+
+  const title = text(field(draft, 'title'), 160);
+  const attribution = text(field(draft, 'attribution'), 2000);
+  const license = text(field(draft, 'license'), 2000);
+  const concepts = list(field(draft, 'concepts'), 0, AUTHOR_LIMITS.concepts).map(value => {
+    const concept = record(value);
+    return { key: editingKey(field(concept, 'key'), 'concept'), name: text(field(concept, 'name'), 80) };
+  });
+  const conceptKeys = new Set(concepts.map(concept => concept.key));
+  const questionIds = new Set();
+  const questions = list(field(draft, 'questions'), 0, AUTHOR_LIMITS.questions).map(value => {
+    const question = record(value);
+    const key = editingKey(field(question, 'key'), 'question');
+    const id = text(field(question, 'id'), 80, true);
+    if (questionIds.has(id)) invalid();
+    questionIds.add(id);
+    const conceptKey = field(question, 'conceptKey');
+    if (conceptKey !== null && !conceptKeys.has(conceptKey)) {
+      invalid('This draft refers to a concept that is missing from the saved file.');
+    }
+    const prerequisiteKeys = list(field(question, 'prerequisiteKeys'), 0, AUTHOR_LIMITS.concepts);
+    if (new Set(prerequisiteKeys).size !== prerequisiteKeys.length
+        || prerequisiteKeys.some(key => !conceptKeys.has(key))) {
+      invalid('This draft has inconsistent saved prerequisite links.');
+    }
+    // The editor always keeps at least two option controls, even when both are blank.
+    const options = list(field(question, 'options'), 2, AUTHOR_LIMITS.options).map(value => {
+      const option = record(value);
+      return { key: editingKey(field(option, 'key'), 'option'), text: text(field(option, 'text'), 1000) };
+    });
+    const answerKey = field(question, 'answerKey');
+    if (answerKey !== null && !options.some(option => option.key === answerKey)) {
+      invalid('This draft refers to an answer option that is missing from the saved file.');
+    }
+    return {
+      key, id, conceptKey, prerequisiteKeys,
+      prompt: text(field(question, 'prompt'), 2000), options, answerKey,
+      explanation: text(field(question, 'explanation'), 4000),
+      transfer: text(field(question, 'transfer'), 2000),
+    };
+  });
+  const nextKey = field(draft, 'nextKey');
+  if (!Number.isSafeInteger(nextKey) || nextKey <= largestKey || nextKey < 1) invalid();
+  return { nextKey, title, attribution, license, concepts, questions };
+}
+
+/** Rebuild private identities without changing content, public IDs, or relationships. */
+function canonicalState(input) {
+  const draft = copyEditorState(input);
+  let nextKey = 1;
+  const conceptKeys = new Map();
+  const concepts = draft.concepts.map(concept => {
+    const key = `concept-${nextKey++}`;
+    conceptKeys.set(concept.key, key);
+    return { key, name: concept.name };
+  });
+  const questions = draft.questions.map(question => {
+    const key = `question-${nextKey++}`;
+    const optionKeys = new Map();
+    const options = question.options.map(option => {
+      const key = `option-${nextKey++}`;
+      optionKeys.set(option.key, key);
+      return { key, text: option.text };
+    });
+    return {
+      key, id: question.id,
+      conceptKey: question.conceptKey === null ? null : conceptKeys.get(question.conceptKey),
+      prerequisiteKeys: question.prerequisiteKeys.map(key => conceptKeys.get(key)),
+      prompt: question.prompt, options,
+      answerKey: question.answerKey === null ? null : optionKeys.get(question.answerKey),
+      explanation: question.explanation, transfer: question.transfer,
+    };
+  });
+  return { nextKey, title: draft.title, attribution: draft.attribution, license: draft.license, concepts, questions };
+}
+
+function freeze(value) {
+  if (value && typeof value === 'object') {
+    Object.values(value).forEach(freeze);
+    Object.freeze(value);
+  }
+  return value;
+}
+
+/** Formatting is optional; every admitted draft must fit when saved again. */
+function savedState(draft) {
+  const envelope = { format: DRAFT_FORMAT, draft };
+  const pretty = JSON.stringify(envelope, null, 2) + '\n';
+  if (encoder.encode(pretty).length <= MAX_DRAFT_BYTES) return pretty;
+  const compact = JSON.stringify(envelope);
+  if (encoder.encode(compact).length > MAX_DRAFT_BYTES) {
+    invalid('This draft exceeds the 2 MiB saved-file limit.');
+  }
+  return compact;
+}
+
+/** Saving never changes the live editor or promotes an unfinished draft to a lesson. */
+function serializeAuthorDraft(draft) {
+  return savedState(canonicalState(draft));
+}
+
+/** Stage a frozen copy; the caller explicitly replaces the editor with a mutable clone. */
+function parseAuthorDraft(source) {
+  withinFileLimit(source);
+  let value;
+  try { value = JSON.parse(source); }
+  catch { invalid('This draft is not valid JSON. Choose the original saved file.'); }
+  const envelope = record(value);
+  if (!Object.hasOwn(envelope, 'format') || envelope.format !== DRAFT_FORMAT) {
+    invalid('This file is not a supported Deck Studio draft.');
+  }
+  const draft = canonicalState(field(envelope, 'draft'));
+  // Private-key canonicalization can add bytes even to compact incoming JSON.
+  savedState(draft);
+  return freeze(draft);
+}
+
+return { DRAFT_FORMAT, MAX_DRAFT_BYTES, serializeAuthorDraft, parseAuthorDraft };
+})();
+
+__recallweaveAuthorModules['./deck-author-loader.mjs'] = (() => {
+const { parseDeck } = __recallweaveAuthorModules['./deck.mjs'];
+const { DRAFT_FORMAT, MAX_DRAFT_BYTES, parseAuthorDraft } = __recallweaveAuthorModules['./deck-author-draft.mjs'];
+
+/** Stage a local draft or deck; the editor changes only after explicit replacement. */
 function mountAuthorDeckLoader(root, onReplace) {
   const ids = ['open-deck-button', 'open-deck', 'author-status', 'open-preview',
-    'open-preview-title', 'open-preview-summary', 'replace-draft', 'cancel-open'];
+    'open-preview-title', 'open-preview-summary', 'replace-draft', 'cancel-open', 'open-preview-kind'];
   const elements = ids.map(id => {
     const element = root.querySelector(`#${id}`);
     if (!element) throw new Error(`The deck loader needs #${id}.`);
     return element;
   });
-  const [open, input, status, preview, title, summary, replace, cancel] = elements;
+  const [open, input, status, preview, title, summary, replace, cancel, kindLabel] = elements;
   let revision = 0;
   let pending = null;
 
@@ -979,8 +1175,9 @@ function mountAuthorDeckLoader(root, onReplace) {
     pending = null;
     preview.hidden = true;
     replace.disabled = true;
-    title.textContent = 'Open this deck?';
+    title.textContent = 'Open this file?';
     summary.textContent = '';
+    kindLabel.textContent = '';
   }
 
   function keepDraft(message) {
@@ -996,12 +1193,12 @@ function mountAuthorDeckLoader(root, onReplace) {
     revision++;
     clearPreview();
     input.value = '';
-    status.textContent = 'Choose a local deck to preview. Your current draft is unchanged.';
+    status.textContent = 'Choose a local draft or deck to preview. Your current draft is unchanged.';
     input.click();
   });
 
   input.addEventListener('cancel', () => keepDraft('No new file was chosen.'));
-  cancel.addEventListener('click', () => keepDraft('The deck preview was cancelled.'));
+  cancel.addEventListener('click', () => keepDraft('The file preview was cancelled.'));
 
   input.addEventListener('change', async () => {
     const file = input.files?.[0];
@@ -1011,20 +1208,32 @@ function mountAuthorDeckLoader(root, onReplace) {
     }
     const request = ++revision;
     clearPreview();
-    status.textContent = 'Reading the local deck… Your current draft is unchanged.';
+    status.textContent = 'Reading the local file… Your current draft is unchanged.';
     try {
-      if (file.size > MAX_DECK_BYTES) throw new Error('Choose a JSON deck no larger than 256 KiB.');
+      if (file.size > MAX_DRAFT_BYTES) throw new Error('Choose a JSON draft or deck no larger than 2 MiB.');
       let text;
       try { text = await file.text(); }
       catch { throw new Error('The file could not be read. Choose it again.'); }
       if (request !== revision) return;
-      const deck = parseDeck(text);
-      pending = deck;
-      title.textContent = `Open “${deck.title}”?`;
-      summary.textContent = `${file.name} · ${deck.items.length} ${deck.items.length === 1 ? 'question' : 'questions'} · ${deck.concepts.length} ${deck.concepts.length === 1 ? 'concept' : 'concepts'}`;
+      if (text.length > MAX_DRAFT_BYTES || new TextEncoder().encode(text).byteLength > MAX_DRAFT_BYTES) {
+        throw new Error('Choose a JSON draft or deck no larger than 2 MiB.');
+      }
+      let format;
+      try { format = JSON.parse(text)?.format; }
+      catch { throw new Error('This file is not valid JSON.'); }
+      const isDraft = typeof format === 'string' && (format === DRAFT_FORMAT || format.startsWith('recallweave-author-draft/'));
+      const content = isDraft ? parseAuthorDraft(text) : parseDeck(text);
+      pending = { content, kind: isDraft ? 'draft' : 'deck' };
+      const label = content.title.trim() ? content.title : 'Untitled draft';
+      const questionCount = isDraft ? content.questions.length : content.items.length;
+      title.textContent = isDraft ? `Open draft “${label}”?` : `Open “${content.title}”?`;
+      kindLabel.textContent = isDraft ? 'EDITABLE DRAFT · MAY BE UNFINISHED' : 'LESSON DECK · FORMAT CHECKED';
+      summary.textContent = `${file.name} · ${questionCount} ${questionCount === 1 ? 'question' : 'questions'} · ${content.concepts.length} ${content.concepts.length === 1 ? 'concept' : 'concepts'}`;
       preview.hidden = false;
       replace.disabled = false;
-      status.textContent = 'Deck ready to preview. Choose Replace draft to open it, or Keep current draft to cancel.';
+      status.textContent = isDraft
+        ? 'Editable draft ready to preview. Its lesson may still need repairs. Choose Replace draft to open it, or Keep current draft to cancel.'
+        : 'Deck ready to preview. Choose Replace draft to open it, or Keep current draft to cancel.';
       title.focus();
     } catch (error) {
       if (request !== revision) return;
@@ -1034,12 +1243,12 @@ function mountAuthorDeckLoader(root, onReplace) {
 
   replace.addEventListener('click', () => {
     if (!pending) return;
-    const deck = pending;
+    const { content, kind } = pending;
     revision++;
     clearPreview();
     input.value = '';
     // The caller owns draft conversion, rendering, and focus after replacement.
-    onReplace(deck);
+    onReplace(content, kind);
   });
 
   clearPreview();
@@ -1051,6 +1260,7 @@ return { mountAuthorDeckLoader };
 __recallweaveAuthorModules['./deck-author-ui.mjs'] = (() => {
 const { AUTHOR_LIMITS, createDraft, draftFromDeck, addConcept, removeConcept, addQuestion, removeQuestion, restoreQuestion, moveQuestion, addOption, removeOption, moveOption, setQuestionConcept, checkDraft, downloadName } = __recallweaveAuthorModules['./deck-author.mjs'];
 const { mountAuthorDeckLoader } = __recallweaveAuthorModules['./deck-author-loader.mjs'];
+const { serializeAuthorDraft } = __recallweaveAuthorModules['./deck-author-draft.mjs'];
 
 const byId = id => document.getElementById(id);
 const node = (tag, attributes = {}, text = null) => {
@@ -1087,10 +1297,11 @@ function changed(message = '') {
   byId('download-deck').disabled = true;
   byId('author-preview').hidden = true;
   byId('preview-content').replaceChildren();
-  byId('download-help').textContent = 'Check and preview before downloading. Edits require a fresh check.';
+  byId('download-help').textContent = 'Check and preview before downloading a checked deck. Save draft keeps unfinished work.';
+  byId('draft-save-status').textContent = '';
   clearError();
   if (message) status(message);
-  else if (hadPreview) status('Draft changed. Check and preview again before downloading.');
+  else if (hadPreview) status('Draft changed. Save draft to keep writing, or check again for a lesson file.');
 }
 function showError(message, target) {
   issue = target;
@@ -1159,9 +1370,10 @@ function renderConceptChoices() {
   draft.concepts.forEach((concept, index) => select.append(node('option', { value: concept.key }, concept.name || `Unnamed concept ${index + 1}`)));
   select.value = item.conceptKey ?? '';
   prerequisites.replaceChildren();
-  const choices = draft.concepts.filter(concept => concept.key !== item.conceptKey);
+  const choices = draft.concepts.filter(concept => concept.key !== item.conceptKey || item.prerequisiteKeys.includes(concept.key));
   if (!choices.length) prerequisites.append(node('p', { class: 'hint' }, 'Add another concept if this question needs an earlier idea.'));
   choices.forEach(concept => {
+    const selfLink = concept.key === item.conceptKey;
     const id = `prerequisite-${concept.key}`;
     const label = node('label', { for: id, class: 'check-label' });
     const input = node('input', { id, type: 'checkbox' });
@@ -1169,9 +1381,11 @@ function renderConceptChoices() {
     input.addEventListener('change', () => {
       item.prerequisiteKeys = item.prerequisiteKeys.filter(value => value !== concept.key);
       if (input.checked) item.prerequisiteKeys.push(concept.key);
-      changed();
+      changed(selfLink ? 'Self prerequisite removed. The question text is unchanged.' : '');
+      if (selfLink) { renderConceptChoices(); focus('question-concept'); }
     });
-    label.append(input, node('span', {}, concept.name || 'Unnamed concept'));
+    const name = concept.name || 'Unnamed concept';
+    label.append(input, node('span', {}, selfLink ? `${name} (same concept; remove this prerequisite)` : name));
     prerequisites.append(label);
   });
 }
@@ -1355,9 +1569,17 @@ byId('remove-question').addEventListener('click', () => {
 });
 byId('undo-question').addEventListener('click', () => {
   if (!removedQuestion) return;
+  const previousConcept = removedQuestion.item.conceptKey;
+  const previousLinks = removedQuestion.item.prerequisiteKeys.length;
   try { currentKey = restoreQuestion(draft, removedQuestion).key; }
   catch (error) { status(error.message); return; }
-  removedQuestion = null; changed('Removed question restored.'); renderNavigation(); renderQuestion(); focus('question-prompt');
+  const restored = currentQuestion();
+  const changes = [];
+  if (previousConcept !== null && restored.conceptKey === null) changes.push('Its deleted concept was cleared; choose a concept.');
+  if (restored.prerequisiteKeys.length < previousLinks) changes.push('Deleted prerequisite links were removed.');
+  removedQuestion = null;
+  changed(['Removed question restored.', ...changes, 'All question text and answer choices are kept.'].join(' '));
+  renderNavigation(); renderQuestion(); focus('question-prompt');
 });
 for (const [id, offset] of [['move-question-up', -1], ['move-question-down', 1]]) byId(id).addEventListener('click', () => {
   moveQuestion(draft, currentKey, offset); changed('Question order updated.'); renderNavigation(); renderQuestion(); focus(id);
@@ -1384,7 +1606,28 @@ byId('download-deck').addEventListener('click', () => {
     document.body.append(link); link.click();
     clearError(); status('Deck download started. Keep the JSON file to share or reopen it here.');
   } catch {
-    showError('The download could not be prepared. Your checked draft is still here; try Download deck again.', { field: 'download' });
+    showError('The download could not be prepared. Your checked draft is still here; try Download checked deck again.', { field: 'download' });
+  } finally {
+    link?.remove();
+    if (url) setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+});
+
+byId('save-draft').addEventListener('click', () => {
+  let url = null;
+  let link = null;
+  const output = byId('draft-save-status');
+  try {
+    const json = serializeAuthorDraft(draft);
+    const name = draft.title.trim() ? downloadName(draft.title).replace(/\.json$/, '.draft.json') : 'recallweave.draft.json';
+    url = URL.createObjectURL(new Blob([json], { type: 'application/json;charset=utf-8' }));
+    link = node('a', { href: url, download: name });
+    document.body.append(link); link.click();
+    output.textContent = 'Draft download started. Reopen this editable file here to continue; check the deck separately when the lesson is complete.';
+    output.removeAttribute('data-error');
+  } catch (error) {
+    output.textContent = `The draft download could not be prepared. ${error.message} Your writing and any checked preview are still here. Try Save draft again after resolving the problem.`;
+    output.setAttribute('data-error', 'true');
   } finally {
     link?.remove();
     if (url) setTimeout(() => URL.revokeObjectURL(url), 1000);
@@ -1392,9 +1635,11 @@ byId('download-deck').addEventListener('click', () => {
 });
 
 renderAll();
-mountAuthorDeckLoader(document, deck => {
-  draft = draftFromDeck(deck); currentKey = draft.questions[0].key; removedQuestion = null;
-  changed('Deck opened for editing. Check it again after your changes.'); renderAll(); focus('deck-title');
+mountAuthorDeckLoader(document, (content, kind) => {
+  draft = kind === 'draft' ? structuredClone(content) : draftFromDeck(content);
+  currentKey = draft.questions[0]?.key ?? null; removedQuestion = null;
+  changed(kind === 'draft' ? 'Editable draft opened. Its unfinished content is preserved. Check it when the lesson is complete.' : 'Deck opened for editing. Check it again after your changes.');
+  renderAll(); focus('deck-title');
 });
 
 return {  };
