@@ -6,14 +6,6 @@
 
 Open `demo.html` directly in a browser—no server, install, build step, internet, login, API key, or user data storage is required. It is a single self-contained file with embedded CSS, JavaScript and deck. The modular source is in `index.html`, `src/`, and `data/`; to test that version locally, serve this directory with `python3 -m http.server 8080` and visit `http://localhost:8080`. Rebuild the direct-open demo with `python3 tools/make_demo.py` after source changes. No hosted endpoint is called by either version.
 
-## Explore RC transients
-
-Open **[RC transients: where the energy goes](courses/rc-transients-lab.html)** directly in a browser to follow the response of one resistor and capacitor after an ideal source step. Compare charging, discharge, reversed polarity, a precharged capacitor returning energy to the source, resistance scaling and equilibrium. Voltage, signed current, charge, stored energy, resistor heat and source work share the same applied circuit and time cursor.
-
-Edit the resistance, capacitance, source voltage and initial capacitor voltage, then select **Apply circuit**. Draft edits retire the previous result. Inspect 161 samples from 0 to 8 time constants and download the full observation with physical units and assumptions. The finite horizon is not an exact steady-state endpoint.
-
-The original [sixteen-question course](courses/rc-transients.json) and [worked guide](courses/rc-transients.md) connect the lab to voltage continuity, time constants and energy balance. Download the course and choose it under **Bring your own lesson** for the existing preview, review, practice and notes flow. The standalone lab needs no server or connection and uses no automatic browser storage. Rebuild it with `node tools/build-rc-transients.mjs`, or verify exact source and embedded-download parity with `--check`.
-
 ## Trace a maximum flow
 
 Open **[More flow needs a way through](courses/network-flow-explorer.html)** directly in a browser to follow a small directed capacity network from zero assignment to a matching flow-and-cut certificate. Inspect each breadth-first residual path, including cancellation of an earlier edge assignment, and keep independently supplied opposite edges distinct. The original-edge, residual and conservation tables expose every integer value.
@@ -38,35 +30,15 @@ Inputs are whole numbers from 0 to 10. Every invocation counts, including base c
 
 The explorer needs no server or account and keeps no automatic browser storage. Its trace is an algorithm inspection record, separate from learner-answer archives. Rebuild it with `node tools/build_recursion_call_stack.mjs`; add `--check` to verify that the checked-in page matches its exact sources and validated deck.
 
-## Explore coupled motion
-
-Open **[Coupled motion: two patterns inside one system](courses/normal-modes-lab.html)** directly in a browser. Set the masses, spring stiffnesses and initial motion, then inspect how two independent normal modes combine into the motion of two coupled masses. Compare in-phase, opposite, localized and uncoupled motion; the exact values and energy decomposition accompany the schematic and time traces.
-
-The original **[sixteen-question course](courses/normal-modes.json)** and **[worked guide](courses/normal-modes.md)** develop the force balance, initial-value solution, conserved modal energies and zero-coupling limit. Download the course from the lab and open it through **Bring your own lesson**, preview it and choose **Start this deck** in RecallWeave. The separate observation download retains the applied parameters, inspection time and full analytical trajectory.
-
-The lab works offline and saves only explicit downloads. Rebuild with `node tools/build-normal-modes.mjs`; `--check` verifies exact source, course and guide parity. Run its focused native controls with `node --test tests/normal-modes.test.mjs`.
-
 ## Explore coherent waves
 
 Open **[Coherent waves: from phasors to interference](courses/phasor-interference-lab.html)** for an offline lab that connects two rotating complex amplitudes to their real cosine signals. Predict cancellation, vary relative and common phase, and compare the arrow diagram with the time trace and downloadable values. The [worked guide](courses/phasor-interference.md) explains the assumptions and original examples; save the [sixteen-question course](courses/phasor-interference.json) and open it through **Bring your own lesson** to practice the connections.
-
-## Discrete Fourier: coefficients and reconstruction
-
-Open the **[offline Fourier lab](courses/discrete-fourier-lab.html)** to enter 4, 8 or 16 real samples, inspect every complex coefficient, and reconstruct the finite sample grid from selected conjugate pairs. Compare the original and reconstructed points, residuals and normalization-aware energy values. DC and Nyquist remain single-bin selections; unresolved phase is labeled rather than assigned a confident angle.
-
-The **[worked guide](courses/discrete-fourier.md)** connects the existing sampling and phasor lessons to four experiments. Download the original **[twelve-question course](courses/discrete-fourier.json)** from the lab, then use **Bring your own lesson**, preview it and select **Start this deck** in the unchanged learner. A separate analysis JSON records the numerical inputs, pair selection and raw calculations. The lab runs from a local file with no network requests or automatic saving; it does not infer a continuous signal between samples.
-
-Rebuild only this lab with `node tools/build-discrete-fourier.mjs`, or verify its committed artifact with `--check`. Run its focused regression checks with `node --test tests/discrete-fourier.test.mjs tests/discrete-fourier-course.test.mjs`.
 
 ## Explore rates and accumulation
 
 Open **[Rates become change](courses/rates-accumulation-explorer.html)** for an offline motion explorer. Edit a continuous velocity curve, inspect a moment, and compare signed displacement with total distance. Exact fractions expose a sign crossing between recorded points; the display also distinguishes instantaneous velocity, interval average velocity and an undefined acceleration at a corner.
 
 The [worked guide](courses/rates-accumulation.md) develops the examples from slopes and signed areas. Download the original [twelve-question course](courses/rates-accumulation.json) from the explorer, then choose it under **Bring your own lesson** in RecallWeave. The lesson, guide and current calculation download without a server or account. Rebuild the standalone explorer with `node tools/build-rates-accumulation.mjs`, or verify the checked-in file with `--check`.
-
-## Explore complex multiplication
-
-Open **[Turn, scale, repeat](courses/complex-plane-lab.html)** to multiply a starting complex point by a fixed multiplier, inspect equal-scale coordinates and follow up to eight repeated products. The offline explorer shows the zero cases explicitly and downloads the current experiment with its numeric values and conventions. Its [worked guide](courses/complex-plane.md) connects the algebra and geometry. Download the original [twelve-question lesson](courses/complex-plane.json), then choose it under **Bring your own lesson** in RecallWeave to study it with the existing review, practice and notes flow.
 
 ## Explore grouped rates
 
@@ -89,14 +61,6 @@ Open the [Boolean explorer](courses/boolean-logic-explorer.html) directly from y
 Open the **[Euclidean algorithm explorer](courses/euclidean-algorithm-explorer.html)** directly from your files. Enter two nonnegative integers, inspect every exact division and remainder, and see the gcd expressed as an integer combination of the original pair. Previous, Next and Last division controls walk the full trace; an explicit download keeps the computed steps. The page explains zero inputs and distinguishes exact arithmetic from approximate diagram widths.
 
 The **[worked companion](courses/euclidean-algorithm.md)** includes proofs, examples and transfer responses. Download its original **[twelve-question course](courses/euclidean-algorithm.json)** and select it under **Bring your own lesson** to use RecallWeave's existing review, separate practice and saved-note flows. The explorer requires no server, account or dependency.
-
-## Explore counting principles
-
-Open **[Same labels. Different counts.](courses/counting-principles-explorer.html)** directly in a browser. Choose 0–8 label types and 0–6 items, then compare all four models: order matters or not, with or without reuse. Inspect every outcome through direct page controls; unordered selections appear once in canonical order. Exact counts and ordered-representation multiplicities explain why distinct unordered outcomes need not be equally likely.
-
-The explorer distinguishes one empty selection from an impossible selection. Editing the inputs retires the old result until you apply the new settings. Download the applied page of at most 24 outcomes, or save the original **[twelve-question course](courses/counting-principles.json)** and open it through **Bring your own lesson**, preview and **Start this deck**. The **[worked guide](courses/counting-principles.md)** develops the formulas, examples and transfer answers.
-
-This separate page works offline without dependencies or automatic storage. Rebuild it with `node tools/build-counting-principles.mjs`; `--check` verifies exact generated-source and embedded-course parity.
 
 ## Core and interaction
 
@@ -381,15 +345,3 @@ Build with `node tools/build_least_squares.mjs`; `--check` verifies the generate
 ## Mathematical induction: a base, a bridge, every integer
 
 [Open the offline proof lab](courses/mathematical-induction-lab.html), download the [twelve-question lesson](courses/mathematical-induction.json), or read the [worked guide](courses/mathematical-induction.md). Compare an arithmetic sum with a proposed formula, inspect the exact base and symbolic successor step, and see why a few matching values do not prove every case. The lab keeps its finite examples separate from the induction argument and saves an explicit proof record. Import its lesson JSON through the existing learner preview and Start this deck controls.
-
-## Momentum and collisions
-
-[Open the offline explorer](courses/momentum-collisions-explorer.html) to compare signed momentum and kinetic energy in ideal one-dimensional elastic and completely inelastic encounters. Enter two positive masses and signed incoming velocities, inspect exact fraction results on a shared velocity scale, and download the complete analysis. Equal or growing initial gaps explicitly produce no future collision endpoints.
-
-The [original twelve-question course](courses/momentum-collisions.json) imports through the existing learner's preview and **Start this deck** flow, including feedback, separate missed-item practice and study-note downloads. The [worked guide](courses/momentum-collisions.md) derives the formulas, explains the physical assumptions and provides build/check commands. Open the explorer directly from disk; it requires no server or network and saves nothing automatically.
-
-## Build a curve from repeated interpolation
-
-Open **[Straight steps. Curved paths.](courses/bezier-curves-explorer.html)** directly in a browser to construct a linear, quadratic or cubic Bézier curve from exact fractions. Inspect each interpolation level, split the curve into two exact subcurves, and compare derivatives with parameter-dependent travel. The tables preserve signed rational coordinates, including stationary and coincident-control cases.
-
-Download the original [sixteen-question lesson](courses/bezier-curves.json) and [worked guide](courses/bezier-curves.md), then use **Bring your own lesson** for the existing learner, review, practice and study-notes flow. The standalone page works offline without installation or automatic storage. Rebuild it with `node tools/build-bezier-curves.mjs`; use `--check` to verify parity with its exact sources and validated course.
