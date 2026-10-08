@@ -1,0 +1,94 @@
+name: finite-automata
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'courses/finite-automata*'
+      - 'src/finite-automata*.mjs'
+      - 'tests/finite-automata*.test.mjs'
+      - 'tools/build-finite-automata.mjs'
+      - 'tools/check_finite_automata_browser.mjs'
+      - 'src/deck.mjs'
+      - 'src/deck-picker.mjs'
+      - 'src/app.mjs'
+      - 'src/lesson-archive*.mjs'
+      - 'index.html'
+      - 'demo.html'
+      - 'styles.css'
+      - '.github/workflows/finite-automata.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'courses/finite-automata*'
+      - 'src/finite-automata*.mjs'
+      - 'tests/finite-automata*.test.mjs'
+      - 'tools/build-finite-automata.mjs'
+      - 'tools/check_finite_automata_browser.mjs'
+      - 'src/deck.mjs'
+      - 'src/deck-picker.mjs'
+      - 'src/app.mjs'
+      - 'src/lesson-archive*.mjs'
+      - 'index.html'
+      - 'demo.html'
+      - 'styles.css'
+      - '.github/workflows/finite-automata.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  receive-finite-automata:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      # Reuse the exact action pins already accepted by this repository.
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22.20.0'
+      - name: Identify the exact checkout and existing native browser
+        id: native
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "${RUNNER_TEMP}/finite-automata-environment"
+          FINITE_AUTOMATA_BROWSER=
+          for FINITE_AUTOMATA_NAME in google-chrome google-chrome-stable chromium chromium-browser; do
+            if command -v "${FINITE_AUTOMATA_NAME}" >/dev/null 2>&1; then
+              FINITE_AUTOMATA_BROWSER="$(command -v "${FINITE_AUTOMATA_NAME}")"
+              break
+            fi
+          done
+          [[ -n "${FINITE_AUTOMATA_BROWSER}" ]] || { echo 'An installed Chrome/Chromium is required; no browser will be installed.'; exit 1; }
+          printf 'browser=%s\n' "${FINITE_AUTOMATA_BROWSER}" >> "${GITHUB_OUTPUT}"
+          {
+            git rev-parse HEAD
+            git rev-parse 'HEAD^{tree}'
+            node --version
+            "${FINITE_AUTOMATA_BROWSER}" --version
+            printf 'Runner image: %s %s\n' "${ImageOS:-unknown}" "${ImageVersion:-unknown}"
+            sha256sum -- "$(readlink -f "${FINITE_AUTOMATA_BROWSER}")"
+          } | tee "${RUNNER_TEMP}/finite-automata-environment/native.txt"
+      - name: Check complete-machine mathematics, course interoperability and standalone parity
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --test tests/finite-automata.test.mjs tests/finite-automata-course.test.mjs | tee "${RUNNER_TEMP}/finite-automata-environment/tests.txt"
+          node tools/build-finite-automata.mjs --check | tee "${RUNNER_TEMP}/finite-automata-environment/build.txt"
+      - name: Receive real word traces, comparison downloads and both current learner routes
+        shell: bash
+        run: |
+          set -euo pipefail
+          node tools/check_finite_automata_browser.mjs --browser "${{ steps.native.outputs.browser }}" --output "${RUNNER_TEMP}/finite-automata-receiving" | tee "${RUNNER_TEMP}/finite-automata-environment/browser.txt"
+      - name: Preserve original browser receipts and native source binding
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: finite-automata-receiving-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ runner.temp }}/finite-automata-receiving
+            ${{ runner.temp }}/finite-automata-environment
+          if-no-files-found: warn
+          retention-days: 14
+          compression-level: 6

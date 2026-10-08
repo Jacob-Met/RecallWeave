@@ -18,6 +18,12 @@ Open [Course handouts](handout.html), choose a checked local deck JSON, review i
 
 Each saved HTML file opens and prints offline on its own. The worksheet file contains questions only; the teacher’s builder and the separate key receive the full checked deck. Cancelling a selection or choosing an invalid file leaves the current handout in place. This is a separate preparation flow; it does not start or change a learning session. Modular source lives in `handout/` and `src/course-handout*.mjs`; rebuild `handout.html` with `python3 tools/make_handout.py`, or verify it with `--check`.
 
+## Explore finite automata
+
+Open **[Small memory, exact recognition](courses/finite-automata-explorer.html)** for a separate offline lesson about complete binary machines. Edit a transition table, trace a word (including the empty word), and compare the edited machine with a reference. An exact product-state search either proves equivalence for all finite binary words or gives a shortest distinguishing word.
+
+The [worked guide](courses/finite-automata.md) explains the examples and finite search bound. Download the original [twelve-question course](courses/finite-automata.json) from the explorer and open it through **Bring your own lesson** in RecallWeave. Trace and comparison downloads preserve their exact machine inputs separately from the course.
+
 ## Core and interaction
 
 - `src/knowledge.mjs` implements a transparent BKT update: initial knowledge, learning transition, guess, and slip are explicit probabilities. It also computes binary entropy and expected information gain.

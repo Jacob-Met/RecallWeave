@@ -1,0 +1,455 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>Small memory, exact recognition — RecallWeave</title>
+  <style>
+    :root{--paper:#f4f1e9;--card:#fffdf8;--ink:#17353a;--muted:#52686b;--line:#cbd4c9;--green:#12634f;--pale:#e7efe4;--orange:#a5442c;--warm:#f7e8de;--focus:#8a3ba6;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--ink);background:var(--paper);line-height:1.55}
+    *{box-sizing:border-box}body{margin:0}a{color:var(--green);text-underline-offset:.2em}button,input,select{font:inherit}button,select,input[type=text]{min-height:44px}button{border:1px solid var(--ink);border-radius:7px;padding:.58rem .92rem;background:var(--ink);color:white;cursor:pointer;font-weight:650}button.secondary{background:var(--card);color:var(--ink)}button:disabled{opacity:.45;cursor:default}input[type=text],select{border:1px solid #718784;border-radius:6px;padding:.45rem .62rem;background:white;color:var(--ink);max-width:100%}input[type=checkbox]{width:20px;height:20px;accent-color:var(--green)}:focus-visible{outline:3px solid var(--focus);outline-offset:3px}h1,h2,h3,p{margin-top:0}h1,h2{font-family:Georgia,"Times New Roman",serif;line-height:1.12;letter-spacing:-.03em}h1{font-size:clamp(2.6rem,5.4vw,4.8rem);font-weight:500;max-width:16ch;margin-bottom:1.1rem}h2{font-size:1.9rem;font-weight:500;margin-bottom:.8rem}h3{font-size:1.1rem}p{margin-bottom:1rem}.muted,.hint{color:var(--muted)}.hint{font-size:.86rem}.eyebrow{font-size:.76rem;letter-spacing:.16em;font-weight:750;text-transform:uppercase;margin-bottom:.8rem}.skip{position:absolute;left:1rem;top:-6rem;background:white;padding:.8rem;z-index:3}.skip:focus{top:1rem}.shell{max-width:1260px;margin:auto;padding:0 2rem}header{border-bottom:1px solid var(--line)}.masthead{display:flex;justify-content:space-between;gap:1rem;align-items:center;padding-top:1rem;padding-bottom:1rem}.brand{font-family:Georgia,serif;font-size:1.6rem;letter-spacing:-.04em;color:var(--ink);text-decoration:none}.brand small{font:600 .65rem system-ui;letter-spacing:.12em;display:block;margin-top:.15rem}.masthead nav{display:flex;gap:1rem;flex-wrap:wrap;font-size:.86rem}.hero{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(240px,1fr);gap:3rem;padding-top:3.5rem;padding-bottom:2.5rem}.intro{font-size:1.1rem;max-width:59ch}.hero-note{align-self:center;border-left:2px solid var(--green);padding:1.2rem 0 1.2rem 1.5rem}.hero-note strong{display:block;font-size:2rem;font-weight:500;font-family:Georgia,serif}.hero-note p{font-size:.94rem}.actions{display:flex;gap:.65rem;flex-wrap:wrap;align-items:center}.actions label{display:flex;flex-direction:column;gap:.3rem;font-size:.83rem;font-weight:650}.grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:1.2rem;align-items:start}.panel{min-width:0;background:var(--card);border:1px solid var(--line);border-radius:13px;padding:1.4rem}.panel-number{display:inline-block;font-size:.72rem;font-weight:750;letter-spacing:.12em;color:var(--green);margin-bottom:.65rem}.panel-head{border-bottom:1px solid var(--line);padding-bottom:.5rem;margin-bottom:1rem}.preset-tools{display:grid;gap:1rem;margin-bottom:1rem}.tool-row{display:flex;gap:.65rem;align-items:end;flex-wrap:wrap}.tool-row label{flex:1;min-width:145px;display:flex;flex-direction:column;gap:.35rem;font-size:.85rem;font-weight:650}.tool-row select{width:100%}.blank-row{border-top:1px dashed var(--line);padding-top:.9rem}.fields{display:grid;grid-template-columns:minmax(0,2fr) minmax(105px,1fr);gap:.7rem;margin:1rem 0}.fields label{font-size:.84rem;font-weight:650;display:flex;flex-direction:column;gap:.3rem}.fields input,.fields select{width:100%}.table-wrap{overflow-x:auto;max-width:100%}table{width:100%;border-collapse:collapse;font-size:.88rem}th,td{text-align:left;padding:.6rem .35rem;border-bottom:1px solid var(--line)}thead th{font-size:.75rem;color:var(--muted);font-weight:650}td select{min-width:64px;width:100%}th[scope=row]{font-family:ui-monospace,SFMono-Regular,Consolas,monospace}.accept-label{display:flex;gap:.3rem;align-items:center;font-size:.8rem}.status{font-size:.87rem;color:var(--muted);margin:.8rem 0 0;min-height:1.4em;overflow-wrap:anywhere}.status.error{color:var(--orange);font-weight:650}.result{background:var(--pale);padding:1.05rem;border-radius:9px;margin:1rem 0;overflow-wrap:anywhere}.result[data-outcome=rejected],.result[data-outcome=different]{background:var(--warm)}.result h3{font-family:Georgia,serif;font-size:1.55rem;font-weight:500;margin-bottom:.5rem}.result p:last-child{margin-bottom:0}.word-row{display:flex;gap:.6rem;align-items:center;flex-wrap:wrap}.word-row input{width:100%;font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:1.18rem;letter-spacing:.12em}.word-label{display:block;font-weight:650;font-size:.88rem;margin-bottom:.4rem}.path{display:flex;gap:.45rem;list-style:none;padding:0;margin:1rem 0;flex-wrap:wrap}.state-step{display:flex;flex-direction:column;align-items:center;border:1px solid var(--line);border-radius:7px;padding:.35rem .6rem;background:var(--card);min-width:58px}.state-step small{font-size:.64rem;color:var(--muted)}.state-step strong{font-family:ui-monospace,monospace;font-weight:550}.state-step.final-state{border:2px solid var(--green)}details{margin-top:.9rem}summary{cursor:pointer;font-size:.85rem;font-weight:650;padding:.35rem 0}details[open] summary{margin-bottom:.4rem}.compare-panel{grid-column:1/-1;margin-bottom:1.6rem}.comparison-grid{display:grid;grid-template-columns:minmax(240px,.8fr) minmax(0,1.3fr);gap:1.6rem}.reference-box{border-right:1px solid var(--line);padding-right:1.4rem}.reference-box select{width:100%;margin:.4rem 0 .8rem}.witness{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:1.8rem;display:block;overflow-wrap:anywhere}.witness-meta{font-size:.8rem;color:var(--muted)}.reading{max-width:78ch;padding:1.2rem 0 2.5rem}.reading ol{padding-left:1.3rem}.reading li{padding-left:.3rem;margin:.6rem 0}footer{border-top:1px solid var(--line);padding-top:1.4rem;padding-bottom:2rem;font-size:.8rem;color:var(--muted)}[hidden]{display:none!important}
+    @media(max-width:760px){.shell{padding-left:1rem;padding-right:1rem}.hero{grid-template-columns:1fr;gap:.6rem;padding-top:2rem}.hero-note{padding:.8rem 0 .8rem 1rem}.hero-note strong{font-size:1.5rem}.grid,.comparison-grid{grid-template-columns:1fr}.compare-panel{grid-column:auto}.reference-box{border-right:0;padding-right:0;border-bottom:1px solid var(--line);padding-bottom:1rem}.panel{padding:1.05rem}.masthead{align-items:start}.masthead nav{max-width:160px;justify-content:flex-end;gap:.3rem .8rem}.accept-label span{font-size:.7rem}h2{font-size:1.65rem}.fields{grid-template-columns:minmax(0,1.6fr) minmax(95px,1fr)}th,td{padding:.5rem .25rem}table{font-size:.81rem}}
+  </style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to the explorer</a>
+<header><div class="shell masthead"><a class="brand" href="../demo.html">RecallWeave<small>FIELD NOTES · COMPUTATION</small></a><nav aria-label="Course"><a href="finite-automata.md">Worked guide</a><a href="../demo.html">Open learner</a></nav></div></header>
+<div class="shell hero">
+  <div><p class="eyebrow">Finite automata / an interactive field note</p><h1>A small memory.<br>Every possible word.</h1><p class="intro">A state remembers just enough of the past to decide what comes next. Edit a binary machine, follow a word, then find out whether two machines recognize exactly the same language.</p>
+    <div class="actions"><button id="download-course" type="button">Download the 12-question course</button><a href="#reading">How to use this lesson</a></div><p id="course-status" class="status" role="status">Open the downloaded JSON under “Bring your own lesson” in RecallWeave.</p>
+  </div>
+  <aside class="hero-note" aria-label="Explorer boundaries"><strong>1–6 states. Two symbols.</strong><p>Each state has one destination for <b>0</b> and one for <b>1</b>. No guessing, missing rules, or hidden transitions.</p><p><b>ε means no symbols.</b> Start there, then keep reading until the word ends. Only the final state decides acceptance.</p></aside>
+</div>
+<main id="main" class="shell" tabindex="-1">
+  <div class="grid">
+    <section class="panel" aria-labelledby="machine-heading">
+      <div class="panel-head"><span class="panel-number">01 / BUILD THE MEMORY</span><h2 id="machine-heading">Your machine</h2><p class="hint">Load a worked example or replace it with a blank table. Then edit the rules.</p></div>
+      <div class="preset-tools">
+        <div class="tool-row"><label for="machine-preset">Preset to load<select id="machine-preset"></select></label><button id="load-preset" class="secondary" type="button">Load preset</button></div>
+        <div class="tool-row blank-row"><label for="state-count">States in a new blank machine<select id="state-count"></select></label><button id="new-machine" class="secondary" type="button">Replace with blank</button></div>
+      </div>
+      <p id="machine-description" class="hint"></p>
+      <div id="machine-editor">
+        <div class="fields"><label for="machine-name">Machine name<input id="machine-name" type="text" maxlength="80" autocomplete="off"></label><label for="initial-state">Initial state<select id="initial-state"></select></label></div>
+        <div class="table-wrap"><table aria-label="Editable complete transition table"><thead><tr><th scope="col">State</th><th scope="col">Accepting?</th><th scope="col">On 0</th><th scope="col">On 1</th></tr></thead><tbody id="machine-rows"></tbody></table></div>
+      </div>
+      <p id="machine-status" class="status" role="status"></p>
+    </section>
+    <section class="panel" aria-labelledby="trace-panel-heading">
+      <div class="panel-head"><span class="panel-number">02 / FOLLOW ONE WORD</span><h2 id="trace-panel-heading">Watch the state change</h2><p class="hint">Trace up to <span id="word-limit">64</span> symbols. Leave the field blank for ε; do not type the ε glyph.</p></div>
+      <form id="word-form"><label class="word-label" for="word">Binary word</label><div class="word-row"><input id="word" type="text" value="1011" autocomplete="off" autocapitalize="off" spellcheck="false" aria-describedby="trace-status"><button id="trace-word" type="button">Trace word</button><button id="empty-word" class="secondary" type="button">Try empty word ε</button></div></form>
+      <p id="trace-status" class="status" role="status"></p>
+      <div id="trace-result" class="result" hidden><h3 id="trace-heading" tabindex="-1"></h3><p id="trace-summary"></p><ol id="trace-path" class="path" aria-label="State after each consumed symbol"></ol><details><summary>Inspect every transition</summary><div class="table-wrap"><table aria-label="Word trace"><thead><tr><th scope="col">Read</th><th scope="col">Symbol</th><th scope="col">From</th><th scope="col">To</th><th scope="col">Accepting state?</th></tr></thead><tbody id="trace-rows"></tbody></table></div></details></div>
+      <button id="download-trace" type="button" class="secondary" disabled>Download current trace (.json)</button>
+      <p class="hint" style="margin-top:.8rem">An accepting state can lead to a nonaccepting state. An earlier accepting visit does not end the run.</p>
+    </section>
+    <section class="panel compare-panel" aria-labelledby="comparison-panel-heading">
+      <div class="panel-head"><span class="panel-number">03 / ASK ABOUT EVERY WORD</span><h2 id="comparison-panel-heading">Same language, or a counterexample?</h2><p class="hint">The search advances both machines on the same symbol. At most 36 pairs exist. Exhausting their reachable pairs gives an exact answer, without a chosen word-length cutoff.</p></div>
+      <div class="comparison-grid">
+        <div class="reference-box"><label for="reference-preset"><b>Reference machine</b></label><select id="reference-preset"></select><p id="reference-description" class="hint"></p><p id="reference-initial" class="hint"></p><details><summary>Inspect the reference table</summary><table aria-label="Reference transition table"><thead><tr><th scope="col">State</th><th scope="col">Accepts?</th><th scope="col">On 0</th><th scope="col">On 1</th></tr></thead><tbody id="reference-rows"></tbody></table></details></div>
+        <div><button id="compare-machines" type="button">Compare the two machines</button><p id="comparison-status" class="status" role="status"></p><div id="comparison-result" class="result" hidden><h3 id="comparison-heading"></h3><p id="witness-line">A shortest distinguishing word:<output id="witness" class="witness"></output><span class="witness-meta"><span id="witness-length"></span> symbols · ε is the empty word</span></p><p id="comparison-summary"></p><button id="use-witness" class="secondary" type="button" hidden>Trace this witness</button><details><summary id="pair-count"></summary><div class="table-wrap"><table aria-label="Checked product-state pairs"><thead><tr><th scope="col">Word reaching pair</th><th scope="col">Yours</th><th scope="col">Reference</th><th scope="col">Acceptance</th></tr></thead><tbody id="pair-rows"></tbody></table></div></details></div><button id="download-comparison" class="secondary" type="button" disabled>Download current comparison (.json)</button></div>
+      </div>
+    </section>
+  </div>
+  <section class="reading" id="reading" aria-labelledby="reading-heading"><p class="eyebrow">From experiment to explanation</p><h2 id="reading-heading">Three things to try</h2><ol><li>Keep <b>Even number of 1s</b>. Trace 1011, then the empty word. Explain why they have different outcomes.</li><li>Compare it with <b>Every binary word</b>. Before pressing Compare, predict the shortest word that separates them.</li><li>Load <b>Ends with 01</b> and trace 010. An accepting prefix is not enough. Try appending one more symbol.</li></ol><p>Use the <a href="finite-automata.md">worked guide</a> for the derivations. Download the original twelve-question course above, open <a href="../demo.html">RecallWeave</a>, and choose that JSON under <b>Bring your own lesson</b>. Preview it, then select <b>Start this deck</b>.</p><p class="hint">Edits clear affected results. Nothing is saved automatically: download a trace or comparison before refreshing. The course is a separate fixed lesson, not a serialization of your edited machine. This file runs offline with no account, service, or browser storage.</p></section>
+</main>
+<footer class="shell">Original lesson and explorer by the HAMON cohort, with AI assistance · <a href="finite-automata.md#references-and-attribution">References and attribution</a> · A learning tool, with exact finite-machine calculations.</footer>
+<script>
+'use strict';
+(() => {
+/** Complete deterministic finite automata over the fixed alphabet {0, 1}.
+ * A machine uses integer state indices; every transition must name an existing state.
+ * No mutation, random sampling, epsilon transitions, or partial-machine completion.
+ */
+const ALPHABET = Object.freeze(['0', '1']);
+const MAX_STATES = 6;
+const MAX_WORD_LENGTH = 64;
+
+function validateMachine(value) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    throw new TypeError('Provide a machine object.');
+  }
+  if (typeof value.name !== 'string' || !value.name.trim() || value.name.length > 80) {
+    throw new TypeError('Give the machine a name of 1–80 characters.');
+  }
+  if (!Array.isArray(value.transitions) || value.transitions.length < 1 || value.transitions.length > MAX_STATES) {
+    throw new RangeError('A machine needs 1–6 states.');
+  }
+  const count = value.transitions.length;
+  const state = index => Number.isInteger(index) && index >= 0 && index < count;
+  if (!state(value.initial)) throw new RangeError('Choose an existing initial state.');
+  if (!Array.isArray(value.accepting) || value.accepting.length !== count ||
+      Array.from(value.accepting).some(flag => typeof flag !== 'boolean')) {
+    throw new TypeError('Mark every state explicitly as accepting or nonaccepting.');
+  }
+  const transitions = Array.from(value.transitions, (row, index) => {
+    if (!Array.isArray(row) || row.length !== 2 || !state(row[0]) || !state(row[1])) {
+      throw new RangeError('State q' + index + ' needs one existing destination for 0 and one for 1.');
+    }
+    return Object.freeze([row[0], row[1]]);
+  });
+  return Object.freeze({
+    name: value.name,
+    initial: value.initial,
+    accepting: Object.freeze(Array.from(value.accepting)),
+    transitions: Object.freeze(transitions)
+  });
+}
+
+function validateWord(word) {
+  if (typeof word !== 'string') throw new TypeError('The word must be text.');
+  if (word.length > MAX_WORD_LENGTH) throw new RangeError('Trace at most 64 binary symbols.');
+  if (!/^[01]*$/.test(word)) {
+    throw new TypeError('Use only 0 and 1. Leave the field blank for the empty word; spaces and ε are not input symbols.');
+  }
+  return word;
+}
+
+function traceWord(machine, word) {
+  const admitted = validateMachine(machine);
+  validateWord(word);
+  let current = admitted.initial;
+  const states = [current];
+  const steps = [];
+  for (let index = 0; index < word.length; index++) {
+    const symbol = word[index];
+    const next = admitted.transitions[current][Number(symbol)];
+    steps.push(Object.freeze({
+      position: index + 1, symbol, from: current, to: next,
+      accepting: admitted.accepting[next]
+    }));
+    current = next;
+    states.push(current);
+  }
+  return Object.freeze({
+    machine: admitted, word, accepted: admitted.accepting[current],
+    finalState: current, states: Object.freeze(states), steps: Object.freeze(steps)
+  });
+}
+
+/** Breadth-first search in the product graph. Every edge consumes one symbol.
+ * The first disagreeing pair yields a shortest word; 0-before-1 makes ties stable.
+ * At most |left| * |right| pairs enter the queue. Exhaustion proves equivalence.
+ */
+function compareMachines(left, right) {
+  const a = validateMachine(left);
+  const b = validateMachine(right);
+  const queue = [{left: a.initial, right: b.initial, word: ''}];
+  const seen = new Set([a.initial + ',' + b.initial]);
+  const pairs = [];
+  for (let head = 0; head < queue.length; head++) {
+    const pair = queue[head];
+    const leftAccepting = a.accepting[pair.left];
+    const rightAccepting = b.accepting[pair.right];
+    pairs.push(Object.freeze({...pair, leftAccepting, rightAccepting}));
+    if (leftAccepting !== rightAccepting) {
+      return Object.freeze({
+        left: a, right: b, equivalent: false, witness: pair.word,
+        witnessTraces: Object.freeze({left: traceWord(a, pair.word), right: traceWord(b, pair.word)}),
+        pairs: Object.freeze(pairs), discoveredPairs: queue.length,
+        maxPairs: a.transitions.length * b.transitions.length
+      });
+    }
+    for (const symbol of ALPHABET) {
+      const nextLeft = a.transitions[pair.left][Number(symbol)];
+      const nextRight = b.transitions[pair.right][Number(symbol)];
+      const key = nextLeft + ',' + nextRight;
+      if (!seen.has(key)) {
+        seen.add(key);
+        queue.push({left: nextLeft, right: nextRight, word: pair.word + symbol});
+      }
+    }
+  }
+  return Object.freeze({
+    left: a, right: b, equivalent: true, witness: null, witnessTraces: null,
+    pairs: Object.freeze(pairs), discoveredPairs: queue.length,
+    maxPairs: a.transitions.length * b.transitions.length
+  });
+}
+
+const PRESETS = Object.freeze([
+  Object.freeze({
+    id: 'even-ones', title: 'Even number of 1s',
+    description: 'q0 remembers an even count of 1s; q1 remembers an odd count. A 0 leaves that memory unchanged.',
+    machine: validateMachine({name: 'Even number of 1s', initial: 0, accepting: [true, false], transitions: [[0, 1], [1, 0]]})
+  }),
+  Object.freeze({
+    id: 'ends-01', title: 'Ends with 01',
+    description: 'q0 has no useful suffix; q1 ends in 0; q2 ends in 01. Only the suffix at the end of the whole word matters.',
+    machine: validateMachine({name: 'Ends with 01', initial: 0, accepting: [false, false, true], transitions: [[1, 0], [1, 2], [1, 0]]})
+  }),
+  Object.freeze({
+    id: 'no-11', title: 'Never contains 11',
+    description: 'q0 has no trailing 1; q1 has one trailing 1; q2 records a violation that later symbols cannot undo.',
+    machine: validateMachine({name: 'Never contains 11', initial: 0, accepting: [true, true, false], transitions: [[0, 1], [0, 2], [2, 2]]})
+  }),
+  Object.freeze({
+    id: 'all-words', title: 'Every binary word',
+    description: 'The single accepting state loops on both symbols. It also accepts the empty word.',
+    machine: validateMachine({name: 'Every binary word', initial: 0, accepting: [true], transitions: [[0, 0]]})
+  })
+]);
+
+function getPreset(id) {
+  const preset = PRESETS.find(entry => entry.id === id);
+  if (!preset) throw new RangeError('Choose a listed machine preset.');
+  return preset;
+}
+
+
+function mountFiniteAutomata(document, {courseText}) {
+  const byId = id => document.getElementById(id);
+  let trace = null;
+  let comparison = null;
+  const wordLabel = word => word === '' ? 'ε' : word;
+  const outcome = accepted => accepted ? 'accepts' : 'rejects';
+  const node = (tag, text, className) => {
+    const element = document.createElement(tag);
+    if (text !== undefined) element.textContent = text;
+    if (className) element.className = className;
+    return element;
+  };
+  function status(id, text, error = false) {
+    byId(id).textContent = text;
+    byId(id).classList.toggle('error', error);
+  }
+  function clearTrace(text = 'Trace the current word to see each transition.') {
+    trace = null;
+    byId('trace-result').hidden = true;
+    byId('trace-path').replaceChildren();
+    byId('trace-rows').replaceChildren();
+    byId('download-trace').disabled = true;
+    status('trace-status', text);
+  }
+  function clearComparison(text = 'Compare every reachable pair of states, including the initial pair.') {
+    comparison = null;
+    byId('comparison-result').hidden = true;
+    byId('pair-rows').replaceChildren();
+    byId('download-comparison').disabled = true;
+    byId('use-witness').hidden = true;
+    status('comparison-status', text);
+  }
+  function machineChanged() {
+    clearTrace('Machine changed. Trace the current word again.');
+    clearComparison('Machine changed. Compare the current tables again.');
+    byId('machine-description').textContent = 'Your edited machine. The transition table and acceptance flags below define its behavior.';
+  }
+  function options(select, count, selected) {
+    select.replaceChildren(...Array.from({length: count}, (_, index) => {
+      const option = node('option', 'q' + index);
+      option.value = String(index);
+      option.selected = index === selected;
+      return option;
+    }));
+  }
+  function showMachine(machine, description) {
+    const value = validateMachine(machine);
+    const count = value.transitions.length;
+    byId('machine-name').value = value.name;
+    byId('state-count').value = String(count);
+    options(byId('initial-state'), count, value.initial);
+    byId('machine-description').textContent = description;
+    byId('machine-rows').replaceChildren(...value.transitions.map((row, index) => {
+      const tr = node('tr');
+      const label = node('th', 'q' + index);
+      label.scope = 'row';
+      const acceptCell = node('td');
+      const acceptLabel = node('label', undefined, 'accept-label');
+      const check = node('input');
+      check.type = 'checkbox';
+      check.id = 'accept-' + index;
+      check.checked = value.accepting[index];
+      check.setAttribute('aria-label', 'q' + index + ' accepting');
+      acceptLabel.append(check, node('span', 'Accepting'));
+      acceptCell.append(acceptLabel);
+      tr.append(label, acceptCell);
+      for (let symbol = 0; symbol < 2; symbol++) {
+        const cell = node('td');
+        const select = node('select');
+        select.id = 'transition-' + index + '-' + symbol;
+        select.setAttribute('aria-label', 'From q' + index + ' on ' + symbol);
+        options(select, count, row[symbol]);
+        cell.append(select);
+        tr.append(cell);
+      }
+      return tr;
+    }));
+    clearTrace();
+    clearComparison();
+    status('machine-status', count + ' states. Every row has one destination for each binary symbol.');
+  }
+  function readIndex(id) {
+    const value = byId(id).value;
+    if (!/^[0-5]$/.test(value)) throw new Error('Choose an existing state in every table cell.');
+    return Number(value);
+  }
+  function readMachine() {
+    const count = byId('machine-rows').children.length;
+    return validateMachine({
+      name: byId('machine-name').value,
+      initial: readIndex('initial-state'),
+      accepting: Array.from({length: count}, (_, index) => byId('accept-' + index).checked),
+      transitions: Array.from({length: count}, (_, index) => [
+        readIndex('transition-' + index + '-0'), readIndex('transition-' + index + '-1')
+      ])
+    });
+  }
+  function showReference() {
+    const preset = getPreset(byId('reference-preset').value);
+    byId('reference-description').textContent = preset.description;
+    byId('reference-initial').textContent = 'Starts in q' + preset.machine.initial + '.';
+    byId('reference-rows').replaceChildren(...preset.machine.transitions.map((row, index) => {
+      const tr = node('tr');
+      const th = node('th', 'q' + index);
+      th.scope = 'row';
+      tr.append(th, node('td', preset.machine.accepting[index] ? 'Yes' : 'No'), node('td', 'q' + row[0]), node('td', 'q' + row[1]));
+      return tr;
+    }));
+    clearComparison('Reference changed. Compare it with the current edited machine.');
+  }
+  function runTrace() {
+    clearTrace();
+    try {
+      trace = traceWord(readMachine(), byId('word').value);
+      const display = wordLabel(trace.word);
+      byId('trace-heading').textContent = trace.accepted ? 'Accepted' : 'Rejected';
+      byId('trace-result').dataset.outcome = trace.accepted ? 'accepted' : 'rejected';
+      byId('trace-summary').textContent = trace.machine.name + ' ' + outcome(trace.accepted) + ' ' + display +
+        '. After ' + trace.word.length + ' symbols, the run ends in q' + trace.finalState + '.';
+      byId('trace-path').replaceChildren(...trace.states.map((state, index) => {
+        const part = node('li', undefined, 'state-step');
+        part.append(node('small', index ? 'read ' + trace.word[index - 1] : 'start · ε'), node('strong', 'q' + state));
+        if (index === trace.states.length - 1) part.classList.add('final-state');
+        return part;
+      }));
+      const initial = node('tr');
+      initial.append(node('td', '0'), node('td', 'ε · no symbol'), node('td', '—'), node('td', 'q' + trace.machine.initial),
+        node('td', trace.machine.accepting[trace.machine.initial] ? 'Yes' : 'No'));
+      byId('trace-rows').append(initial, ...trace.steps.map(step => {
+        const row = node('tr');
+        row.append(node('td', String(step.position)), node('td', step.symbol), node('td', 'q' + step.from),
+          node('td', 'q' + step.to), node('td', step.accepting ? 'Yes' : 'No'));
+        return row;
+      }));
+      byId('trace-result').hidden = false;
+      byId('download-trace').disabled = false;
+      status('trace-status', 'Current word traced. Only the final state decides acceptance.');
+    } catch (error) {
+      clearTrace();
+      status('trace-status', error.message, true);
+    }
+  }
+  function runComparison() {
+    clearComparison();
+    try {
+      comparison = compareMachines(readMachine(), getPreset(byId('reference-preset').value).machine);
+      byId('comparison-heading').textContent = comparison.equivalent ? 'Equivalent for every binary word' : 'Different languages';
+      byId('comparison-result').dataset.outcome = comparison.equivalent ? 'equivalent' : 'different';
+      const checked = comparison.pairs.length;
+      if (comparison.equivalent) {
+        byId('comparison-summary').textContent = 'All ' + checked + ' reachable state pairs agree on acceptance. Every finite binary word reaches one of these pairs.';
+        byId('witness-line').hidden = true;
+      } else {
+        byId('witness-line').hidden = false;
+        byId('witness').textContent = wordLabel(comparison.witness);
+        byId('witness-length').textContent = String(comparison.witness.length);
+        byId('comparison-summary').textContent = comparison.left.name + ' ' + outcome(comparison.witnessTraces.left.accepted) +
+          ' this word; ' + comparison.right.name + ' ' + outcome(comparison.witnessTraces.right.accepted) +
+          ' it. Breadth-first order rules out a shorter witness; 0 comes before 1 when shortest words tie.';
+        byId('use-witness').hidden = false;
+      }
+      byId('pair-count').textContent = 'Inspect ' + checked + ' checked pairs (at most ' + comparison.maxPairs + ' possible)';
+      byId('pair-rows').replaceChildren(...comparison.pairs.map(pair => {
+        const row = node('tr');
+        row.append(node('td', wordLabel(pair.word)), node('td', 'q' + pair.left), node('td', 'q' + pair.right),
+          node('td', pair.leftAccepting === pair.rightAccepting ? 'Agree' : 'Disagree'));
+        return row;
+      }));
+      byId('comparison-result').hidden = false;
+      byId('download-comparison').disabled = false;
+      status('comparison-status', comparison.equivalent ? 'Exact search complete; no distinguishing word exists.' : 'Exact search found a shortest distinguishing word.');
+    } catch (error) {
+      clearComparison();
+      status('comparison-status', error.message, true);
+    }
+  }
+  function download(filename, text, statusId) {
+    let url;
+    try {
+      url = URL.createObjectURL(new Blob([text], {type: 'application/json;charset=utf-8'}));
+      const link = node('a');
+      link.href = url;
+      link.download = filename;
+      document.body.append(link);
+      try { link.click(); } finally { link.remove(); }
+      status(statusId, 'Download requested. Check your browser’s downloads for ' + filename + '.');
+    } catch {
+      status(statusId, 'The download could not be prepared. Your current setup is still here; try again.', true);
+    } finally {
+      if (url) setTimeout(() => URL.revokeObjectURL(url), 10000);
+    }
+  }
+  for (const id of ['machine-preset', 'reference-preset']) {
+    byId(id).replaceChildren(...PRESETS.map(preset => {
+      const option = node('option', preset.title);
+      option.value = preset.id;
+      return option;
+    }));
+  }
+  byId('state-count').replaceChildren(...Array.from({length: MAX_STATES}, (_, index) => {
+    const option = node('option', String(index + 1));
+    option.value = String(index + 1);
+    return option;
+  }));
+  byId('load-preset').addEventListener('click', () => {
+    const preset = getPreset(byId('machine-preset').value);
+    showMachine(preset.machine, preset.description);
+  });
+  byId('new-machine').addEventListener('click', () => {
+    const count = Number(byId('state-count').value);
+    if (!Number.isInteger(count) || count < 1 || count > MAX_STATES) {
+      status('machine-status', 'Choose 1–6 states for a blank machine.', true);
+      return;
+    }
+    showMachine({name: 'My ' + count + '-state machine', initial: 0,
+      accepting: Array(count).fill(false),
+      transitions: Array.from({length: count}, (_, index) => [index, index])
+    }, 'Blank machine: no states accept; both symbols loop at each state. Edit the table to give it a language.');
+  });
+  byId('machine-editor').addEventListener('input', machineChanged);
+  byId('machine-editor').addEventListener('change', machineChanged);
+  byId('word').addEventListener('input', () => clearTrace('Word changed. Trace this input again.'));
+  byId('empty-word').addEventListener('click', () => {
+    byId('word').value = '';
+    runTrace();
+  });
+  byId('trace-word').addEventListener('click', runTrace);
+  byId('word-form').addEventListener('submit', event => {event.preventDefault(); runTrace();});
+  byId('reference-preset').addEventListener('change', showReference);
+  byId('compare-machines').addEventListener('click', runComparison);
+  byId('use-witness').addEventListener('click', () => {
+    if (!comparison || comparison.equivalent) return;
+    byId('word').value = comparison.witness;
+    runTrace();
+    byId('trace-heading').focus();
+  });
+  byId('download-trace').addEventListener('click', () => {
+    if (trace) download('recallweave-finite-automata-trace.json',
+      JSON.stringify({format: 'recallweave-finite-automata-trace/1', alphabet: ALPHABET, trace}, null, 2) + '\n', 'trace-status');
+  });
+  byId('download-comparison').addEventListener('click', () => {
+    if (comparison) download('recallweave-finite-automata-comparison.json',
+      JSON.stringify({format: 'recallweave-finite-automata-comparison/1', alphabet: ALPHABET, comparison}, null, 2) + '\n', 'comparison-status');
+  });
+  byId('download-course').addEventListener('click', () =>
+    download('recallweave-finite-automata-course.json', courseText, 'course-status'));
+  byId('word-limit').textContent = String(MAX_WORD_LENGTH);
+  showMachine(PRESETS[0].machine, PRESETS[0].description);
+  showReference();
+}
+
+mountFiniteAutomata(document, {courseText:"{\n  \"format\": \"recallweave-deck/1\",\n  \"title\": \"Finite automata: small memory, exact recognition\",\n  \"attribution\": \"Original questions, distractors, worked explanations and transfer prompts by the HAMON autonomous cohort (52e56ea8fcca), with AI assistance, 2026-10-08. Standard DFA definitions and decision procedures were checked against the primary course references linked in courses/finite-automata.md. No source exercises, figures or passages are reproduced.\",\n  \"license\": \"Original lesson text: Creative Commons Attribution 4.0 International (CC BY 4.0). Reference links retain their own terms; they are not included in this license.\",\n  \"concepts\": [\n    \"Complete transition rules\",\n    \"Tracing a word\",\n    \"Recognizing a language\",\n    \"Proving equivalence\"\n  ],\n  \"items\": [\n    {\n      \"id\": \"dfa-complete-rules\",\n      \"concept\": \"Complete transition rules\",\n      \"prerequisites\": [],\n      \"prompt\": \"A binary scanner has three states. What makes its transition table a complete deterministic machine over {0, 1}?\",\n      \"options\": [\n        \"Each state has exactly one destination for 0 and exactly one destination for 1.\",\n        \"Every state must be accepting.\",\n        \"Each symbol must lead to a different state.\",\n        \"The table may leave a cell blank when that input seems unlikely.\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"Determinism gives one next state for a state and symbol. Completeness supplies that choice for both symbols in every state, including states a chosen example never visits. Self-loops and shared destinations are allowed.\",\n      \"transfer\": \"Sketch a two-state machine in which all four table cells point to the same state. Explain why it is still deterministic and complete.\"\n    },\n    {\n      \"id\": \"dfa-empty-word\",\n      \"concept\": \"Complete transition rules\",\n      \"prerequisites\": [],\n      \"prompt\": \"A complete machine starts in q2, and q2 is accepting. No symbols arrive. What happens on the empty word ε?\",\n      \"options\": [\n        \"It is rejected because every run must take an edge.\",\n        \"It is accepted because the final state is still the accepting initial state q2.\",\n        \"The machine follows the transition labeled 0.\",\n        \"The machine searches for an accepting state elsewhere.\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"The empty word has length zero. The run begins and ends in q2 without using a transition. Acceptance depends on that final state, so an accepting initial state accepts ε. The glyph ε denotes no input; it is not an extra alphabet symbol.\",\n      \"transfer\": \"Change only the initial state to a nonaccepting one. Which empty-word outcome changes, even if every transition stays the same?\"\n    },\n    {\n      \"id\": \"dfa-alphabet-boundary\",\n      \"concept\": \"Complete transition rules\",\n      \"prerequisites\": [],\n      \"prompt\": \"An explorer admits only complete machines over {0, 1}. A learner enters 102. Which response preserves that stated contract?\",\n      \"options\": [\n        \"Skip the 2 and run 10.\",\n        \"Interpret 2 as two copies of 1.\",\n        \"Refuse the word and explain that 2 is outside the alphabet.\",\n        \"Try both transitions at 2 and accept if either works.\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"A deterministic run applies a transition for each symbol in the declared alphabet. There is no transition rule for 2 here. Deleting or reinterpreting it would silently change the supplied word; trying alternatives would change the model.\",\n      \"transfer\": \"How would the table and validator need to change if 2 became a genuine third alphabet symbol?\"\n    },\n    {\n      \"id\": \"dfa-parity-trace\",\n      \"concept\": \"Tracing a word\",\n      \"prerequisites\": [\n        \"Complete transition rules\"\n      ],\n      \"prompt\": \"Start in accepting q0. On 0, either state stays put; on 1, q0 and q1 swap. Only q0 accepts. Where does the word 1011 end?\",\n      \"options\": [\n        \"In q0, accepted, because its first and last symbols are 1.\",\n        \"In q0, accepted, because it contains a 0.\",\n        \"In q1, accepted, because q1 was visited.\",\n        \"In q1, rejected, because it contains three 1s.\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"The states after each consumed symbol are q1, q1, q0, q1. Each 1 flips parity and each 0 preserves it. Three flips leave the run in nonaccepting q1. Acceptance is checked after the complete word.\",\n      \"transfer\": \"Insert any number of 0s into 1011. Predict whether the final state can change, and justify it using the transition rules.\"\n    },\n    {\n      \"id\": \"dfa-suffix-trace\",\n      \"concept\": \"Tracing a word\",\n      \"prerequisites\": [\n        \"Complete transition rules\"\n      ],\n      \"prompt\": \"A machine starts in q0. Its 0/1 destinations are q0→(q1,q0), q1→(q1,q2), q2→(q1,q0); only q2 accepts. What is the result for 010?\",\n      \"options\": [\n        \"q0→q1→q2→q1, rejected: the whole word ends in 10.\",\n        \"q0→q1→q2, accepted: stop as soon as q2 is reached.\",\n        \"q0→q0→q1→q2, accepted: read the word from right to left.\",\n        \"q0→q1→q2→q2, accepted: accepting states must absorb later symbols.\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"All three symbols must be consumed in order. The prefix 01 reaches accepting q2, but the final 0 follows q2’s 0-transition to q1. This machine recognizes words ending in 01; containing that suffix earlier is insufficient.\",\n      \"transfer\": \"Append 1 to 010 and trace only the new transition. Why can the earlier trace be reused?\"\n    },\n    {\n      \"id\": \"dfa-accepting-prefix\",\n      \"concept\": \"Tracing a word\",\n      \"prerequisites\": [\n        \"Complete transition rules\"\n      ],\n      \"prompt\": \"The even-1s machine starts in accepting q0, flips between q0 and q1 on 1, and stays put on 0. A learner says every word is accepted because every run visits q0 at the start. What fixes the reasoning?\",\n      \"options\": [\n        \"Acceptance is decided by the most frequently visited state.\",\n        \"Acceptance is decided by the state after the entire word, so the word 1 is rejected.\",\n        \"The initial state cannot be accepting.\",\n        \"A visit to q0 accepts only if it happens after a 0.\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"Visiting an accepting state is not an instruction to stop a DFA run. For the word 1, the accepting start q0 moves to nonaccepting q1, where the input ends. The empty word is accepted, but that says nothing by itself about every nonempty word.\",\n      \"transfer\": \"Find one accepted and one rejected word that both start with 1. Explain the distinction without listing all their intermediate states.\"\n    },\n    {\n      \"id\": \"dfa-redundant-state\",\n      \"concept\": \"Recognizing a language\",\n      \"prerequisites\": [\n        \"Tracing a word\"\n      ],\n      \"prompt\": \"Machine A has one nonaccepting state looping on 0 and 1. Machine B has two nonaccepting states with complete transitions between them. Can their recognized languages differ?\",\n      \"options\": [\n        \"Yes: two states always recognize more words than one.\",\n        \"Yes: taking a transition itself counts as acceptance.\",\n        \"No: neither machine can finish in an accepting state, so both recognize the empty language.\",\n        \"No: both recognize every binary word.\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"With no accepting states, every possible final state is nonaccepting. Both languages contain no words, regardless of B’s transition pattern. The empty language ∅ is different from the language {ε}, which contains one word of length zero.\",\n      \"transfer\": \"Build a complete one-state machine for every binary word. Which single acceptance flag differs from Machine A?\"\n    },\n    {\n      \"id\": \"dfa-permanent-violation\",\n      \"concept\": \"Recognizing a language\",\n      \"prerequisites\": [\n        \"Tracing a word\"\n      ],\n      \"prompt\": \"To reject words containing 11, use accepting q0 (no trailing 1), accepting q1 (one trailing 1), and nonaccepting q2 (violation). The 0/1 rows are q0→(q0,q1), q1→(q0,q2), q2→(q2,q2). What does the final 0 in 10110 do?\",\n      \"options\": [\n        \"It repairs the earlier 11 and returns to q0.\",\n        \"It makes the word empty, so the initial state decides.\",\n        \"It returns to q1 because 0 always changes the state.\",\n        \"It leaves the run in q2: a later symbol cannot erase the earlier violation.\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"The run is q0→q1→q0→q1→q2→q2. The adjacent 11 has already occurred when q2 is reached. Both transitions from q2 loop there, retaining exactly the memory needed to reject any continuation.\",\n      \"transfer\": \"Compare “contains no 11” with “does not end in 11.” Why does the second language need to allow recovery after some later symbols?\"\n    },\n    {\n      \"id\": \"dfa-short-witness\",\n      \"concept\": \"Recognizing a language\",\n      \"prerequisites\": [\n        \"Tracing a word\"\n      ],\n      \"prompt\": \"Compare the even-number-of-1s machine with a one-state machine that accepts every binary word. What is a shortest word on which they disagree?\",\n      \"options\": [\n        \"1\",\n        \"ε\",\n        \"0\",\n        \"11\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"Both accept ε. Both accept the one-symbol word 0. On 1, the parity machine ends in its odd, nonaccepting state while the all-words machine accepts. Thus 1 is a witness of length one, and no shorter witness exists.\",\n      \"transfer\": \"What is the shortest distinguishing word if the parity machine’s accepting flags are reversed, while the other machine still accepts every word?\"\n    },\n    {\n      \"id\": \"dfa-empty-witness\",\n      \"concept\": \"Proving equivalence\",\n      \"prerequisites\": [\n        \"Recognizing a language\"\n      ],\n      \"prompt\": \"Two complete binary machines have different acceptance flags at their initial states. Before following any product-graph edge, what can a comparison conclude?\",\n      \"options\": [\n        \"They are equivalent if their first transitions match.\",\n        \"They differ on ε, which is already a shortest distinguishing word.\",\n        \"It must test all words of length one before reaching a conclusion.\",\n        \"They differ only if they have the same number of states.\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"The start pair describes both runs after zero consumed symbols. If exactly one state accepts, ε belongs to exactly one language. A word cannot have negative length, so this witness is shortest.\",\n      \"transfer\": \"Choose two presets with different empty-word outcomes. Verify the result before tracing a nonempty word.\"\n    },\n    {\n      \"id\": \"dfa-product-proof\",\n      \"concept\": \"Proving equivalence\",\n      \"prerequisites\": [\n        \"Recognizing a language\"\n      ],\n      \"prompt\": \"An exact comparison follows paired states: (state of A, state of B) after the same word. It has exhausted every reachable pair, and both states agree on acceptance in every pair. What follows?\",\n      \"options\": [\n        \"Only the empty word has been checked.\",\n        \"The machines are equivalent only for words shorter than the longest displayed trace.\",\n        \"The machines recognize the same language for every finite binary word.\",\n        \"The machines must have identical tables and state names.\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"Every word traces a path from the start pair using the two product transitions. Exhausting reachable pairs therefore covers every possible joint final state, including those reached by arbitrarily long words. If all those pairs agree, no distinguishing word exists. Table identity is unnecessary.\",\n      \"transfer\": \"Add an unreachable state with different transitions to one machine. Explain why it need not change the language or the set of reachable product pairs.\"\n    },\n    {\n      \"id\": \"dfa-witness-bound\",\n      \"concept\": \"Proving equivalence\",\n      \"prerequisites\": [\n        \"Recognizing a language\"\n      ],\n      \"prompt\": \"Machine A has 2 states and B has 3. They are complete over the same binary alphabet and are not equivalent. What upper bound is guaranteed for the length of a shortest distinguishing word?\",\n      \"options\": [\n        \"Exactly 6 symbols: every product pair must be visited.\",\n        \"At most 2 symbols, because the smaller machine has 2 states.\",\n        \"There is no finite bound unless a word length is chosen in advance.\",\n        \"At most 5 symbols: a shortest path to a disagreeing pair need not repeat any of the 6 product pairs.\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"There are at most 2×3=6 pairs. If a shortest path repeated a pair, the loop between those visits could be removed and the same suffix would still reach a disagreement. A simple path through at most 6 vertices has at most 5 edges. The witness may be shorter, including ε.\",\n      \"transfer\": \"For two six-state machines, derive the corresponding bound. Why is an exact reachable-pair search stronger than merely trying a few favorite examples?\"\n    }\n  ]\n}\n"});
+})();
+</script>
+</body>
+</html>
