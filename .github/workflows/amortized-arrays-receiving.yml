@@ -1,0 +1,93 @@
+name: amortized-arrays-receiving
+
+# Temporary, exact-branch bootstrap. Replace with read-only PR receiving after
+# the deterministic HTML is preserved. This cannot publish to main or a fork.
+on:
+  push:
+    branches: ['astra-cinder/amortized-arrays-0a55dfe9']
+
+permissions:
+  contents: write
+
+concurrency:
+  group: amortized-arrays-bootstrap-0a55dfe9
+  cancel-in-progress: false
+
+jobs:
+  receive:
+    if: github.repository == 'Jacob-Met/RecallWeave' && github.ref == 'refs/heads/astra-cinder/amortized-arrays-0a55dfe9'
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # inherited v4 pin
+        with:
+          ref: ${{ github.sha }}
+      - name: Require cached Node 22 and installed Chrome
+        id: native
+        shell: bash
+        run: |
+          set -euo pipefail
+          node_version=
+          for directory in "${RUNNER_TOOL_CACHE}/node"/22.*; do
+            if [[ -x "$directory/x64/bin/node" && -f "$directory/x64.complete" ]]; then
+              node_version="${directory##*/}"
+            fi
+          done
+          [[ -n "$node_version" ]] || { echo 'No complete cached Node22; no runtime will be installed.'; exit 1; }
+          echo "node=$node_version" >> "$GITHUB_OUTPUT"
+          chrome_bin="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || true)"
+          [[ -n "$chrome_bin" ]] || { echo 'No installed Chrome; no browser will be installed.'; exit 1; }
+          "$chrome_bin" --version
+          echo "CHROME_BIN=$chrome_bin" >> "$GITHUB_ENV"
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # inherited v4 pin
+        with:
+          node-version: ${{ steps.native.outputs.node }}
+      - name: Reproduce frozen local standalone and receive native components
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/amortized-arrays-receiving"
+          node tools/build-amortized-arrays.mjs
+          printf '%s  %s\n' '1bf335295241669f38b950caa09092dacceab7c55e85216b6067a260cfed6ef7' 'courses/amortized-arrays-lab.html' | sha256sum -c -
+          node tools/build-amortized-arrays.mjs --check
+          node --check tools/check-amortized-arrays-browser.mjs
+          node --test tests/amortized-arrays*.test.mjs | tee "$RUNNER_TEMP/amortized-arrays-receiving/node-tests.tap"
+      - name: Preserve only the verified derived HTML on this exact branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$(git rev-parse HEAD)" == "$GITHUB_SHA" ]]
+          git add -- courses/amortized-arrays-lab.html
+          [[ "$(git diff --cached --name-only)" == 'courses/amortized-arrays-lab.html' ]]
+          git diff --exit-code
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'build(amortized-arrays): preserve exact standalone candidate'
+          # A concurrent branch update is rejected by this ordinary fast-forward push.
+          git push origin HEAD:refs/heads/astra-cinder/amortized-arrays-0a55dfe9
+          echo "ARRAY_SOURCE_COMMIT=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
+          git rev-parse HEAD | tee "$RUNNER_TEMP/amortized-arrays-receiving/source-commit.txt"
+      - name: Receive real controls, downloads and the unchanged learner
+        env:
+          ARRAY_EVIDENCE_DIR: ${{ runner.temp }}/amortized-arrays-receiving/browser
+        run: node tools/check-amortized-arrays-browser.mjs
+      - name: Preserve bounded reproducible source and product
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          destination="$RUNNER_TEMP/amortized-arrays-receiving/source"
+          mkdir -p "$destination"
+          for path in src/deck.mjs src/amortized-arrays*.mjs courses/amortized-arrays* templates/amortized-arrays-lab.html tools/build-amortized-arrays.mjs tools/check-amortized-arrays-browser.mjs tests/amortized-arrays*.test.mjs docs/receiving/amortized-arrays-0a55dfe9/preimplementation.json; do
+            [[ -f "$path" ]] && cp --parents "$path" "$destination/"
+          done
+          (cd "$destination"; find . -type f -print0 | sort -z | xargs -0 sha256sum) > "$RUNNER_TEMP/amortized-arrays-receiving/source.sha256"
+      - name: Retain source-bound receiving evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # inherited v4 pin
+        with:
+          name: amortized-arrays-receiving-${{ github.run_id }}
+          path: ${{ runner.temp }}/amortized-arrays-receiving
+          if-no-files-found: error
+          retention-days: 14
+          compression-level: 6

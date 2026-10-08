@@ -1,0 +1,278 @@
+{
+  "format": "recallweave-deck/1",
+  "title": "Amortized arrays: spikes, totals and stored credit",
+  "attribution": "Original questions, examples and worked explanations for the HAMON estate / RecallWeave, 2026. Background: Cornell CS3110 Lecture20, Amortized Analysis (https://www.cs.cornell.edu/courses/cs3110/2011sp/Lectures/lec20-amortized/amortized.htm); MIT6.006 Lecture2, Data Structures and Dynamic Arrays (https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/resources/lecture-2-data-structures-and-dynamic-arrays/). No reference exercise, passage or figure is reproduced.",
+  "license": "CC0-1.0 for this original course content, following the existing original-course convention. Referenced Cornell and MIT materials retain their own terms and are not included.",
+  "concepts": [
+    "Counted work",
+    "Geometric growth",
+    "Potential accounting",
+    "Guarantees and tradeoffs"
+  ],
+  "items": [
+    {
+      "id": "aa-units",
+      "concept": "Counted work",
+      "prerequisites": [],
+      "prompt": "The lab counts one unit to store a new element and one unit for each old element copied. What does a reported cost of 9 establish?",
+      "options": [
+        "The append took exactly 9 milliseconds.",
+        "The declared model counted 9 element writes/copies.",
+        "The allocation reserved exactly 9 bytes.",
+        "Every machine will execute exactly 9 instructions."
+      ],
+      "answer": 1,
+      "explanation": "The count belongs to an explicit abstract model. Allocation, zeroing, element byte sizes, cache behavior and elapsed time are excluded. The number is not a measured duration or instruction count.",
+      "transfer": "A resize copies six old elements and stores one new element. State its model cost and one excluded cost."
+    },
+    {
+      "id": "aa-spare-slot",
+      "concept": "Counted work",
+      "prerequisites": [],
+      "prompt": "An array contains 3 elements in 4 slots. Under either policy, what does the next append cost?",
+      "options": [
+        "4 units, because every allocated slot is copied.",
+        "3 units, because existing elements are copied.",
+        "1 unit, because the new element fits without a resize.",
+        "0 units, because capacity is already available."
+      ],
+      "answer": 2,
+      "explanation": "The array is not full, so it keeps its allocation and writes only the new element. Size becomes 4, capacity stays 4, and the cost is 1.",
+      "transfer": "Repeat the reasoning for size 7 and capacity 10."
+    },
+    {
+      "id": "aa-full-array",
+      "concept": "Counted work",
+      "prerequisites": [],
+      "prompt": "Before an append, a doubling array has size 4 and capacity 4. Which description matches the append?",
+      "options": [
+        "Copy 4 old elements into capacity 8, then store the new element: cost 5.",
+        "Copy 8 old elements into capacity 8, then store the new element: cost 9.",
+        "Allocate capacity 5 and perform no copies: cost 1.",
+        "Keep capacity 4 and overwrite the last element: cost 1."
+      ],
+      "answer": 0,
+      "explanation": "The full array grows to eight slots. Only the four live elements are copied; unused replacement slots are not counted. Storing element 5 adds one unit, for a total of 5.",
+      "transfer": "What changes when the full doubling array has size and capacity 8?"
+    },
+    {
+      "id": "aa-first-append",
+      "concept": "Counted work",
+      "prerequisites": [],
+      "prompt": "Both policies begin with size 0 and capacity 0. What are the copies and actual cost of the first append?",
+      "options": [
+        "1 copy and cost 2.",
+        "0 copies and cost 0.",
+        "The cost is undefined until a second append.",
+        "0 copies and cost 1."
+      ],
+      "answer": 3,
+      "explanation": "A replacement allocation is needed, but there is no old element to copy. One new-element write costs 1. Doubling starts with capacity 1; fixed-increment growth starts with its chosen increment.",
+      "transfer": "For increment 5, state the size, capacity and spare slots after the first append."
+    },
+    {
+      "id": "aa-prefix-total",
+      "concept": "Geometric growth",
+      "prerequisites": [
+        "Counted work"
+      ],
+      "prompt": "Starting empty, what is the total actual cost of the first 6 appends under doubling?",
+      "options": [
+        "6",
+        "13",
+        "18",
+        "21"
+      ],
+      "answer": 1,
+      "explanation": "The six costs are 1, 2, 3, 1, 5, 1. Their sum is 13: six new writes and 1 + 2 + 4 = 7 copies. The expensive fifth operation is part of this same sequence.",
+      "transfer": "Find the total through append 7 without recomputing every step."
+    },
+    {
+      "id": "aa-boundary-spike",
+      "concept": "Geometric growth",
+      "prerequisites": [
+        "Counted work"
+      ],
+      "prompt": "After 8 doubling appends, total actual cost is 15. What happens at append 9?",
+      "options": [
+        "The total becomes 16 because amortized cost bounds every append.",
+        "The array cannot grow past capacity 8.",
+        "The total becomes 24 because this append copies 8 and writes 1.",
+        "The total resets to 9 after the resize."
+      ],
+      "answer": 2,
+      "explanation": "Append 9 is a full-array boundary. Its actual cost is 9, so the cumulative cost becomes 15 + 9 = 24. A constant amortized bound does not remove this spike.",
+      "transfer": "How much does append 10 add, and why?"
+    },
+    {
+      "id": "aa-geometric-sum",
+      "concept": "Geometric growth",
+      "prerequisites": [
+        "Counted work"
+      ],
+      "prompt": "A doubling trace ends after 13 appends with capacity 16. Which total follows from the earlier capacities that were copied?",
+      "options": [
+        "13 + (1 + 2 + 4 + 8) = 28.",
+        "13 + 16 = 29.",
+        "13 times 16 = 208.",
+        "13 squared = 169."
+      ],
+      "answer": 0,
+      "explanation": "Before reaching capacity 16, the trace copies full arrays of sizes 1, 2, 4 and 8. Those copies sum to 15. The 13 new-element writes make the total 28.",
+      "transfer": "For a nonempty prefix ending at capacity P, express the total in terms of its append count N."
+    },
+    {
+      "id": "aa-unit-growth",
+      "concept": "Geometric growth",
+      "prerequisites": [
+        "Counted work"
+      ],
+      "prompt": "If capacity grows by exactly 1 whenever full, what is the total actual cost of the first 6 appends?",
+      "options": [
+        "11",
+        "13",
+        "18",
+        "21"
+      ],
+      "answer": 3,
+      "explanation": "Every append resizes: actual costs are 1, 2, 3, 4, 5 and 6. The total is 21, not the doubling total of 13. More generally this policy costs N(N + 1)/2 for N appends in this model.",
+      "transfer": "Compare the two policies at 8 appends."
+    },
+    {
+      "id": "aa-potential-value",
+      "concept": "Potential accounting",
+      "prerequisites": [
+        "Geometric growth"
+      ],
+      "prompt": "For doubling only, the potential is Phi = 2*size - capacity. What is Phi at size 5 and capacity 8?",
+      "options": [
+        "13",
+        "2",
+        "3",
+        "-3"
+      ],
+      "answer": 1,
+      "explanation": "Phi is 2*5 - 8 = 2. It is an accounting quantity, not unused capacity (which is 3) and not a clock measurement. Reachable append-only doubling states have nonnegative potential.",
+      "transfer": "Compute potential and spare capacity at size 7 and capacity 8."
+    },
+    {
+      "id": "aa-potential-resize",
+      "concept": "Potential accounting",
+      "prerequisites": [
+        "Geometric growth"
+      ],
+      "prompt": "A doubling append changes (size, capacity) from (4,4) to (5,8) and has actual cost 5. What is actual cost plus the change in potential?",
+      "options": [
+        "7",
+        "5",
+        "3",
+        "-2"
+      ],
+      "answer": 2,
+      "explanation": "Potential changes from 2*4 - 4 = 4 to 2*5 - 8 = 2. The amortized charge is 5 + (2 - 4) = 3. A negative potential change accounts for part of the costly resize.",
+      "transfer": "Find the charge for a non-resizing append from size 5 to 6 at capacity 8."
+    },
+    {
+      "id": "aa-initial-charge",
+      "concept": "Potential accounting",
+      "prerequisites": [
+        "Geometric growth"
+      ],
+      "prompt": "The first doubling append goes from (0,0) to (1,1), costs 1, and changes potential from 0 to 1. What is its amortized charge?",
+      "options": [
+        "2, so the first operation is a small special case.",
+        "3, because every charge must be exactly 3.",
+        "0, because no old element is copied.",
+        "1, because potential is not included."
+      ],
+      "answer": 0,
+      "explanation": "The definition gives actual + change in potential = 1 + 1 = 2. Every later append has charge 3. The bound of at most 3 per append includes this initial exception.",
+      "transfer": "What is the sum of amortized charges for five appends?"
+    },
+    {
+      "id": "aa-telescoping",
+      "concept": "Potential accounting",
+      "prerequisites": [
+        "Geometric growth"
+      ],
+      "prompt": "After five doubling appends, the sum of amortized charges is 14 and final potential is 2. Initial potential was 0. What is the total actual cost?",
+      "options": [
+        "16",
+        "14",
+        "7",
+        "12"
+      ],
+      "answer": 3,
+      "explanation": "Summing actual + potential-after - potential-before cancels all intermediate potentials. Thus total actual = total amortized - final potential + initial potential = 14 - 2 + 0 = 12.",
+      "transfer": "Why does nonnegative final potential make the sum of charges an upper bound here?"
+    },
+    {
+      "id": "aa-latency-guarantee",
+      "concept": "Guarantees and tradeoffs",
+      "prerequisites": [
+        "Potential accounting"
+      ],
+      "prompt": "Which statement correctly interprets the constant amortized append bound for this doubling policy?",
+      "options": [
+        "Every append costs at most 3 actual units.",
+        "Every prefix of N appends has at most 3N actual units, even though one append can cost much more than 3.",
+        "Each append costs 3 units with high probability.",
+        "A real-time deadline is guaranteed on any allocator."
+      ],
+      "answer": 1,
+      "explanation": "The guarantee bounds accumulated work across any initially-empty append-only prefix. At full capacity m, the next append still costs m + 1. No probability model, allocation timing or real-time guarantee is part of this argument.",
+      "transfer": "At capacity 64, what can the next full-array append cost without contradicting the bound?"
+    },
+    {
+      "id": "aa-probability",
+      "concept": "Guarantees and tradeoffs",
+      "prerequisites": [
+        "Potential accounting"
+      ],
+      "prompt": "Does this amortized analysis assume that append positions or array values are randomly chosen?",
+      "options": [
+        "Yes; all values must be equally likely.",
+        "Yes; resizes must happen at random times.",
+        "No; it accounts deterministically for every permitted append-only sequence length.",
+        "Only when the increment is 1."
+      ],
+      "answer": 2,
+      "explanation": "The costs depend on sizes and capacities, not the content values or a distribution over input sequences. Amortized analysis here is distinct from expected-case analysis over random inputs.",
+      "transfer": "All appended values happen to be equal. Does the model change?"
+    },
+    {
+      "id": "aa-fixed-three",
+      "concept": "Guarantees and tradeoffs",
+      "prerequisites": [
+        "Potential accounting"
+      ],
+      "prompt": "For fixed increment 3, the first 10 appends resize at appends 1, 4, 7 and 10. What is their total actual cost?",
+      "options": [
+        "10 + (0 + 3 + 6 + 9) = 28.",
+        "10 + (1 + 4 + 7 + 10) = 32.",
+        "10 + 3 = 13.",
+        "Exactly 3 per append, or 30."
+      ],
+      "answer": 0,
+      "explanation": "The copied sizes are the old full capacities: 0, 3, 6 and 9. Eighteen copies plus ten new writes cost 28. For a fixed positive increment, repeated copied capacities form an arithmetic sum, not a geometric sum.",
+      "transfer": "At the end of this trace, compare spare slots with doubling at 10 appends."
+    },
+    {
+      "id": "aa-scope",
+      "concept": "Guarantees and tradeoffs",
+      "prerequisites": [
+        "Potential accounting"
+      ],
+      "prompt": "Why must the lesson not reuse its append-only potential proof unchanged after arbitrary removals without shrinking?",
+      "options": [
+        "Potential always equals spare capacity.",
+        "Removing an element changes its value randomly.",
+        "The fixed-increment policy becomes geometric.",
+        "Removals can make 2*size - capacity negative, breaking the nonnegative-potential premise used here."
+      ],
+      "answer": 3,
+      "explanation": "For example, size 3 at capacity 8 gives potential -2. The lab does not model removals, shrink rules or their costs. A different operation set needs an appropriate proof rather than an unqualified reuse of this one.",
+      "transfer": "Name another omitted operation that would require separate cost analysis."
+    }
+  ]
+}

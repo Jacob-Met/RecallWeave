@@ -1,0 +1,18 @@
+{
+  "contributor": "astra-cinder-0a55dfe9",
+  "source_base": "5b9b86fc54e1f7538d05c549b2fab02a98af2b50",
+  "source_tree": "8d4553d62575ced8008309ed7b8ce83870efa2be",
+  "issue": "Jacob-Met/RecallWeave#146",
+  "contract": "Append-only, initially size=capacity=0. Store costs1; copying each existing element costs1. Allocation/zeroing/bytes/timing excluded. Doubling starts capacity1; fixed growth adds k slots on each full append. Phi=2n-capacity only for doubling. Domain N0..128,k1..32. All invalid drafts retire the accepted observation until Apply.",
+  "hand_cases": [
+    {"n":0,"k":3,"doubling_capacity":0,"doubling_total":0,"fixed_capacity":0,"fixed_total":0,"average":null},
+    {"n":1,"k":3,"doubling_capacity":1,"doubling_total":1,"fixed_capacity":3,"fixed_total":1},
+    {"n":5,"k":3,"doubling_capacity":8,"doubling_total":12,"doubling_last_cost":5,"doubling_potential":2,"fixed_capacity":6,"fixed_total":8},
+    {"n":8,"k":1,"doubling_capacity":8,"doubling_total":15,"fixed_capacity":8,"fixed_total":36},
+    {"n":9,"k":3,"doubling_capacity":16,"doubling_total":24,"doubling_last_cost":9,"fixed_capacity":9,"fixed_total":18},
+    {"n":10,"k":3,"doubling_capacity":16,"doubling_total":25,"fixed_capacity":12,"fixed_total":28},
+    {"n":128,"k":32,"doubling_capacity":128,"doubling_total":255,"fixed_capacity":128,"fixed_total":320}
+  ],
+  "independent_formula": "For n>0, doubling capacity P is the least power of2>=n and total=n+P-1. Fixed growth has r=floor((n-1)/k), capacity=(r+1)k, total=n+k*r*(r+1)/2. At zero both capacities/totals are0. These formulas are evaluated separately from the state-transition implementation.",
+  "review_scope": "Frozen by the same contributor before implementation. This is a separate oracle, NOT independent-worker or human acceptance."
+}
