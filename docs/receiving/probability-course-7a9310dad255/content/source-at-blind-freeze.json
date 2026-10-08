@@ -1,0 +1,218 @@
+{
+  "format": "recallweave-deck/1",
+  "title": "Probability foundations: count, condition, and update",
+  "attribution": "Original questions, explanations and transfer prompts authored for RecallWeave by estate-7a9310dad255 with AI assistance. All scenarios and numerical data are fictional. Mathematical background: Jeremy Orloff and Jonathan Bloom, MIT 18.05 (Spring 2022), Readings 2 and 3; source links and worked derivations are in courses/probability-foundations.md. No source exercises or illustrations are reproduced.",
+  "license": "CC0-1.0 for this original course content. Referenced MIT materials retain their own terms; they are not included in this deck.",
+  "concepts": [
+    "Sample spaces",
+    "Conditional probability",
+    "Independence",
+    "Bayes' rule"
+  ],
+  "items": [
+    {
+      "id": "pf-s1",
+      "concept": "Sample spaces",
+      "prerequisites": [],
+      "prompt": "A spinner produces one of the integers 1 through 8, with all eight outcomes equally likely. What is the probability that the result is at least 6?",
+      "options": [
+        "1/8",
+        "3/8",
+        "3/5",
+        "5/8"
+      ],
+      "answer": 1,
+      "explanation": "The event contains three outcomes: 6, 7 and 8. Each has probability 1/8, so their probabilities add to 3/8. The denominator counts all eight possible outcomes. Using 5 counts the excluded outcomes instead; 5/8 is the probability of a result below 6.",
+      "transfer": "If the eight outcomes were not equally likely, what information would you need before adding the probabilities of 6, 7 and 8?"
+    },
+    {
+      "id": "pf-s2",
+      "concept": "Sample spaces",
+      "prerequisites": [],
+      "prompt": "In a fictional model, every manufactured part either needs rework or does not need rework. The probability that a randomly selected part needs rework is 0.27. What is the probability that it does not?",
+      "options": [
+        "0.27",
+        "0.37",
+        "0.63",
+        "0.73"
+      ],
+      "answer": 3,
+      "explanation": "These two events cover every outcome and cannot both happen, so their probabilities sum to 1. The complement therefore has probability 1 - 0.27 = 0.73. This conclusion uses the stated two-way classification; it does not require independence or a count of actual parts.",
+      "transfer": "A service reports a 0.08 probability of missing its deadline. State the complementary event and its probability."
+    },
+    {
+      "id": "pf-s3",
+      "concept": "Sample spaces",
+      "prerequisites": [],
+      "prompt": "In a fictional group of 60 learners, 30 joined a drawing club, 24 joined a coding club, and 12 joined both. A learner is selected uniformly at random from the 60. What is the probability that they joined at least one of the two clubs?",
+      "options": [
+        "0.70",
+        "0.90",
+        "0.50",
+        "0.20"
+      ],
+      "answer": 0,
+      "explanation": "Adding the club counts counts the 12 shared members twice. There are 30 + 24 - 12 = 42 members in at least one club, so the probability is 42/60 = 0.70. The answer 0.90 double-counts the overlap, 0.50 counts only the drawing club, and 0.20 counts only those in both.",
+      "transfer": "How many learners joined neither club? Explain how the complement and the corrected club count give the same result."
+    },
+    {
+      "id": "pf-c1",
+      "concept": "Conditional probability",
+      "prerequisites": [
+        "Sample spaces"
+      ],
+      "prompt": "A fictional log contains 100 builds: 30 ran on Windows and 70 on Linux. Of the Windows builds, 6 failed; of the Linux builds, 4 failed. A build is selected uniformly at random from the log. Given that it ran on Windows, what is the probability that it failed?",
+      "options": [
+        "0.06",
+        "0.60",
+        "0.20",
+        "0.80"
+      ],
+      "answer": 2,
+      "explanation": "The condition restricts the relevant group to the 30 Windows builds. Six of those failed, so P(failed given Windows) = 6/30 = 0.20. Dividing by 100 gives the joint probability of Windows and failure (0.06). Dividing by all 10 failures answers the reverse question, P(Windows given failed) = 0.60.",
+      "transfer": "Using the same log, compute P(failed given Linux). Name the group that supplies the denominator before calculating."
+    },
+    {
+      "id": "pf-c2",
+      "concept": "Conditional probability",
+      "prerequisites": [
+        "Sample spaces"
+      ],
+      "prompt": "A fictional delivery list has 240 parcels. Exactly 60 were priority parcels. Of the 30 parcels that arrived late, 18 were priority parcels. A parcel is selected uniformly at random from this list. Given that it arrived late, what is the probability that it was a priority parcel?",
+      "options": [
+        "0.60",
+        "0.30",
+        "0.075",
+        "0.25"
+      ],
+      "answer": 0,
+      "explanation": "Conditioning on late delivery leaves 30 possible parcels, including 18 priority parcels. The probability is 18/30 = 0.60. The ratio 18/60 = 0.30 instead means late given priority. The ratio 18/240 = 0.075 is the joint probability, and 60/240 = 0.25 is the unconditional priority probability.",
+      "transfer": "Write the numerator and denominator for P(late given priority). Explain why reversing the words after 'given' changes the denominator."
+    },
+    {
+      "id": "pf-c3",
+      "concept": "Conditional probability",
+      "prerequisites": [
+        "Sample spaces"
+      ],
+      "prompt": "A bag contains 3 red tokens and 2 blue tokens. Two tokens are drawn uniformly at random, one at a time, without replacement. Given that the first token was red, what is the probability that the second token is red?",
+      "options": [
+        "3/5",
+        "1/2",
+        "2/5",
+        "3/4"
+      ],
+      "answer": 1,
+      "explanation": "After a red token is removed, 2 red and 2 blue tokens remain. The second draw is uniform over those four tokens, so its conditional probability of red is 2/4 = 1/2. Keeping 3/5 assumes the original bag is unchanged; 2/5 removes a red token from the numerator but not from the total.",
+      "transfer": "If the first token were returned and the bag mixed before the second draw, what would the conditional probability become?"
+    },
+    {
+      "id": "pf-i1",
+      "concept": "Independence",
+      "prerequisites": [
+        "Sample spaces",
+        "Conditional probability"
+      ],
+      "prompt": "A fully specified probability model gives P(A) = 0.4, P(B) = 0.5, and P(A and B) = 0.2. Are the two events independent in this model, and which calculation establishes your answer?",
+      "options": [
+        "No: 0.4 and 0.5 are different probabilities.",
+        "No: 0.2 is smaller than either event's probability.",
+        "Yes: 0.4 and 0.5 add to a number below 1.",
+        "Yes: 0.2 equals the product 0.4 × 0.5."
+      ],
+      "answer": 3,
+      "explanation": "Two events are independent when P(A and B) = P(A) × P(B). Here 0.4 × 0.5 = 0.2, which matches the stated joint probability. Equivalently, P(A given B) = 0.2/0.5 = 0.4. Different event probabilities do not imply dependence. This checks an exact model, not evidence that a finite sample proves real-world independence.",
+      "transfer": "Keep P(A) = 0.4 and P(B) = 0.5, but change P(A and B) to 0.3. Compute P(A given B) and decide whether independence remains."
+    },
+    {
+      "id": "pf-i2",
+      "concept": "Independence",
+      "prerequisites": [
+        "Sample spaces",
+        "Conditional probability"
+      ],
+      "prompt": "Events A and B are mutually exclusive: they cannot occur together. Their probabilities are P(A) = 0.3 and P(B) = 0.2. Are they independent?",
+      "options": [
+        "Yes: never occurring together means observing either tells us nothing.",
+        "No: if B occurs, A has probability 0 instead of its original 0.3.",
+        "Yes: adding 0.3 and 0.2 gives 0.5, which is a valid probability.",
+        "No: every pair of different events must change each other's probability."
+      ],
+      "answer": 1,
+      "explanation": "Because the events cannot occur together, P(A and B) = 0 and P(A given B) = 0/0.2 = 0. That differs from P(A) = 0.3, so knowing B occurred changes A's probability. Equivalently, 0 is not 0.3 × 0.2 = 0.06. Mutually exclusive events with positive probabilities are dependent; merely being different events is not enough.",
+      "transfer": "When selecting one integer uniformly from 1 through 10, let A mean 'at most 3' and B mean 'at least 9'. Identify their overlap and test independence."
+    },
+    {
+      "id": "pf-i3",
+      "concept": "Independence",
+      "prerequisites": [
+        "Sample spaces",
+        "Conditional probability"
+      ],
+      "prompt": "In a fictional system model, module A fails during a run with probability 0.10 and module B fails with probability 0.20. The two failure events are explicitly assumed independent. What is the probability that at least one module fails during a run?",
+      "options": [
+        "0.02",
+        "0.30",
+        "0.28",
+        "0.70"
+      ],
+      "answer": 2,
+      "explanation": "Independence gives P(both fail) = 0.10 × 0.20 = 0.02. Correcting the overlap gives P(at least one fails) = 0.10 + 0.20 - 0.02 = 0.28. The complement agrees: P(neither fails) = 0.90 × 0.80 = 0.72, so 1 - 0.72 = 0.28. Adding without subtracting the overlap gives 0.30; 0.02 answers the different question 'both'.",
+      "transfer": "If the failure events were dependent, which additional joint or conditional probability would let you compute the probability of at least one failure?"
+    },
+    {
+      "id": "pf-b1",
+      "concept": "Bayes' rule",
+      "prerequisites": [
+        "Sample spaces",
+        "Conditional probability"
+      ],
+      "prompt": "In a fictional supply model, workshop A makes 60% of the sensors and workshop B makes 40%. A sensor from A is defective with probability 2%; one from B is defective with probability 6%. A sensor is selected at random from the combined supply. Given that it is defective, what is the probability it came from B?",
+      "options": [
+        "1/3",
+        "2/5",
+        "2/3",
+        "3/4"
+      ],
+      "answer": 2,
+      "explanation": "The probability of B and defective is 0.40 × 0.06 = 0.024. The total defective probability is 0.60 × 0.02 + 0.40 × 0.06 = 0.036. Therefore P(B given defective) = 0.024/0.036 = 2/3. The value 2/5 ignores the new information; 3/4 compares defect rates without weighting each workshop's share. No independence assumption between workshop and defect is used.",
+      "transfer": "If both workshops supplied equal shares while their defect probabilities stayed 2% and 6%, what would P(B given defective) become?"
+    },
+    {
+      "id": "pf-b2",
+      "concept": "Bayes' rule",
+      "prerequisites": [
+        "Sample spaces",
+        "Conditional probability"
+      ],
+      "prompt": "In a fictional collection, 1% of files are defective. A checker flags 90% of defective files and also flags 10% of nondefective files. A file is selected uniformly at random. Given that the checker flags it, what is the probability that it is defective?",
+      "options": [
+        "9/10",
+        "1/10",
+        "1/100",
+        "1/12"
+      ],
+      "answer": 3,
+      "explanation": "Use 1,000 equally likely files with the stated proportions: 10 are defective and 990 are not. The checker flags 9 defective files and 99 nondefective files. Among the 108 flagged files, 9 are defective, giving 9/108 = 1/12, about 8.33%. The 90% rate is P(flagged given defective), not its reverse. The much larger nondefective group contributes most flags.",
+      "transfer": "Using the same counts, what is the probability that a randomly selected file is both defective and flagged? Explain why its denominator differs from the question's."
+    },
+    {
+      "id": "pf-b3",
+      "concept": "Bayes' rule",
+      "prerequisites": [
+        "Sample spaces",
+        "Conditional probability"
+      ],
+      "prompt": "A fictional checker flags 90% of defective files and 10% of nondefective files. Compare two collections where the defective share is 1% and 10%, respectively. The checker's conditional flagging rates stay the same. How does P(defective given flagged) change as the defective share rises?",
+      "options": [
+        "It rises from 1/12 to 1/2.",
+        "It stays at 9/10 in both collections.",
+        "It falls from 1/12 to 1/100.",
+        "It stays at 1/10 in both collections."
+      ],
+      "answer": 0,
+      "explanation": "For a defective share p, the probability is (0.90 × p) / (0.90 × p + 0.10 × (1 - p)). At p = 0.01 this is 0.009/0.108 = 1/12. At p = 0.10 it is 0.09/0.18 = 1/2. The same conditional flagging rates can produce different probabilities among flagged files because the underlying group sizes changed.",
+      "transfer": "With the same checker but a defective share of 50%, compute the defective probability among flagged files. Which part of Bayes' rule accounts for the change?"
+    }
+  ]
+}

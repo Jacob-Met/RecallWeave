@@ -1,0 +1,30 @@
+# Probability foundations: course receiving record
+
+This contribution adds an optional original twelve-question probability course and a worked companion guide. It leaves the bundled biology deck, learning model, importer schema and application source unchanged. The course covers sample spaces, conditional probability, independence and Bayes’ rule using fully specified fictional examples. The course text is CC0-1.0; the cited MIT readings are mathematical background, with no source exercises or prose reproduced.
+
+## Contribution and acceptance
+
+- [Course JSON](../../../courses/probability-foundations.json): twelve items, four concepts, three questions per concept.
+- [Companion guide](../../../courses/probability-foundations.md): complete worked answers and transfer responses, a Bayes count table, assumptions and primary references.
+- [Independent content review](content/content-review.md): the reviewer froze answers derived from prompts and options before seeing the author’s key, explanations or transfers. All twelve keys matched. Four wording clarifications were accepted; keys, options and mathematical conclusions were unchanged.
+- [Content manifest](content/content-review-manifest.json), original draft, frozen answers and wording revisions preserve that sequence. A later Markdown table-display correction affected only the review’s presentation; its separate receipt retains the old and corrected hashes.
+
+The accepted course SHA-256 is `17a35b359ab5c1f097931bba29dcf7deddc75c98accbf1cced8ae5eca9e9ad01` (13,164 bytes). The companion guide SHA-256 is `870ed70b7574c1709a6adfecd0c179fe2382c8dcb6e2a41c4b3a156ba9a88ae4`. The actual importer validator admits the final JSON and preserves it through serialization and parsing. These are content and software-receiving results, not evidence of measured educational effectiveness.
+
+## Receiving systems are identified separately
+
+The importer remains owned by [issue #7](https://github.com/Jacob-Met/RecallWeave/issues/7); this course is coordinated in [issue #13](https://github.com/Jacob-Met/RecallWeave/issues/13). No importer-owner checkout, branch or production module is changed by this contribution.
+
+**Original importer snapshot.** The twelve-file snapshot manifest `37eac06e7ffdbeb96e3448e6b9198ecb87aaaede680580ac26108dbaef13a955` records stable pre/post-copy source at 2026-10-08 10:33:32 UTC. Its declared base is `262bf32aa09bcc62fb5a29c3b97d26bcdc31b27d`; that declaration is not a verified checkout Git head. This snapshot has neither current-main answer shuffling nor study-note export. [The independent receiver](browser/candidate-review.md) passed thirteen groups in actual Chromium 153 through desktop HTTP and a 390px direct-file demo: import preview, all twelve questions, exact feedback and transfer text, a 10/12 first trace, two corrected retries with pause/resume, and preservation of original answers and model state. Absent features are not counted as passing.
+
+**Isolated composition with a pinned main revision.** A separate receiving copy combines the exact importer snapshot with main `a64369f84fae4cfd0b81aa3878cc11e2fa8d298c`. It is a compatibility handoff, not an alternative importer publication. Seventeen of twenty source files remain byte-exact current-main/importer files. The app and standalone builder resolve four and two textual conflicts, and the demo is regenerated. A necessary semantic resolution regenerates option-order maps on a new session/deck while preserving them during review and practice. Imported text escaping, supplied attribution/license, current canonical answer indices and study-note export are retained. The independent [source review](browser/composition-source-review.json) records all seven decisions. The existing 23 Node tests pass, and the embedded standalone script passes syntax inspection. The [unchanged independent browser receiver](browser/composed-review.md) then passed seventeen groups through both entries, including four actual study-note downloads before and after practice. The first composed launch had stopped before file admission with a CDP node-handle error; that zero-group failure is retained separately. The one fresh-profile rerun changed no source, course, contract, oracle or runner byte.
+
+The original and composed runs use the same frozen [browser contract](browser/browser-contract.json), [course oracle](browser/course-oracle.json) and [runner](browser/course-receiver.mjs). The run receipts identify the actual entry points, source hashes, displayed option orders and downloaded files. Snapshot receiving and an isolated composition do not establish adoption into the importer owner’s published source or current main. The course should be integrated when that actual receiving source is available and qualified.
+
+## Reproducibility and negative evidence
+
+The [evidence archive](receiving-evidence.tar.gz) and [index](receiving-evidence-index.json) preserve raw browser receipts, exact unpublished snapshot source, the composed receiving source, conflict resolutions, source pins, frozen inputs and failures. Archive SHA-256: `6391119144c5a7b5ea2192ddf242e90c5254f05c0fe1f2f7ea7bc40b19d29d9d` (4,825,505 bytes; 137 files including its manifest). The archive’s manifest identifies every included file by size and SHA-256. The archived source is supporting evidence; its presence does not extend the course’s CC0 grant to the application or reference materials.
+
+Root’s local setup failures are retained: an oversized shell payload was rejected before execution; an unsupported merge-file label option was corrected; and a missing return in the local conflict resolver initially produced an incomplete standalone builder. The latter was caught from generated size and source readback before browser receiving, corrected and rebuilt. The passed unit tests are not represented as qualifying that failed standalone output.
+
+No hosting, deployment, default-deck replacement, automatic session storage or validated assessment claim is made.
