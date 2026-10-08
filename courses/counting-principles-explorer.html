@@ -1,0 +1,596 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Counting principles · RecallWeave</title>
+<style>
+:root{color-scheme:light;--paper:#f6f3eb;--card:#fffdf8;--ink:#173039;--muted:#4c6268;--line:#c9d3cd;--accent:#a9421b;--teal:#12696b;--soft:#e6eeea;--focus:#074db7;font:16px/1.5 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink)}button,input{font:inherit}button,a,input{touch-action:manipulation}button{cursor:pointer}button:disabled{cursor:default;opacity:.5}button,input{min-height:44px;border:1px solid var(--line);border-radius:8px}button{background:var(--card);color:var(--ink);padding:.6rem .9rem}button:hover:not(:disabled){border-color:var(--teal);background:var(--soft)}button:focus-visible,input:focus-visible,a:focus-visible{outline:3px solid var(--focus);outline-offset:3px}a{color:var(--teal);text-underline-offset:3px}h1,h2,h3,p{margin-top:0}h1{font-size:clamp(2rem,4.3vw,3.3rem);line-height:1.08;letter-spacing:-.04em;margin-bottom:1rem}h2{font-size:1.5rem;line-height:1.25}h3{font-size:1rem}.eyebrow{font-size:.76rem;font-weight:800;letter-spacing:.13em;color:var(--teal);margin-bottom:.8rem}header,main,footer{max-width:1240px;margin:auto;padding:1.5rem}header{padding-top:2.5rem;padding-bottom:1rem;display:grid;grid-template-columns:1fr auto;gap:2rem;align-items:start}.intro{max-width:760px;color:var(--muted);font-size:1.08rem}.header-actions{display:flex;flex-direction:column;gap:.65rem;padding-top:.2rem}.primary{background:var(--teal);color:white;border-color:var(--teal);font-weight:750}.primary:hover:not(:disabled){background:#0b5355;color:white}.layout{display:grid;grid-template-columns:310px minmax(0,1fr);gap:1.4rem;align-items:start}.panel{background:var(--card);border:1px solid var(--line);border-radius:15px;padding:1.25rem;box-shadow:0 2px 0 #dfe5dc}.controls{position:sticky;top:1rem}.controls h2{font-size:1.2rem}.field-row{display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin-bottom:1rem}.field-row label{font-size:.88rem;font-weight:700;display:flex;flex-direction:column;gap:.35rem}input[type=text]{width:100%;background:white;color:var(--ink);padding:.6rem .7rem}.help{font-size:.8rem;color:var(--muted);font-weight:400}fieldset{border:0;padding:0;margin:0 0 1rem;min-width:0}legend{font-weight:750;font-size:.9rem;margin-bottom:.45rem}.radio-row{display:grid;grid-template-columns:1fr 1fr;gap:.5rem}.radio-row label{position:relative;display:flex;gap:.4rem;align-items:center;padding:.65rem .55rem;border:1px solid var(--line);border-radius:8px;font-size:.85rem;line-height:1.3;cursor:pointer;min-height:48px}.radio-row label:has(input:checked){background:var(--soft);border-color:var(--teal);font-weight:750}.radio-row input{width:17px;height:17px;min-height:0;accent-color:var(--teal);flex-shrink:0}.count-button{width:100%}.examples{margin-top:1.3rem;padding-top:1.1rem;border-top:1px solid var(--line)}.examples h3{margin-bottom:.5rem}.example-buttons{display:flex;flex-wrap:wrap;gap:.4rem}.example-buttons button{font-size:.78rem;padding:.4rem .55rem;min-height:38px}.status{border-left:4px solid var(--teal);padding:.75rem 1rem;background:var(--soft);border-radius:0 8px 8px 0;margin-bottom:1rem;overflow-wrap:anywhere}.status.error{border-color:#a02921;background:#ffebe5;color:#7a211b}.workspace{min-width:0}.comparison{overflow-x:auto;margin-bottom:1.2rem}.comparison table{border-collapse:separate;border-spacing:0;width:100%;table-layout:fixed}.comparison th,.comparison td{border-bottom:1px solid var(--line);padding:.65rem .4rem;text-align:center;vertical-align:middle}.comparison th{font-size:.8rem;font-weight:700}.comparison th:first-child{text-align:left;width:28%}.comparison td{font-size:1.45rem;font-weight:750;position:relative}.comparison td.selected{background:#fff0e7;outline:2px solid var(--accent);outline-offset:-2px;border-radius:6px}.selected-label{display:block;font-size:.64rem;color:var(--accent);text-transform:uppercase;letter-spacing:.05em;margin-top:.1rem}.comparison caption{text-align:left;font-weight:800;margin-bottom:.45rem}.result-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem}.result-heading h2{margin-bottom:.25rem}.muted{color:var(--muted)}.small{font-size:.86rem}.model-tag{font-size:.78rem;color:var(--teal);font-weight:750;margin-bottom:.35rem}.formula{padding:1rem;background:var(--soft);border-radius:10px;margin:.9rem 0}.formula-rule{font-size:.84rem;font-weight:750;color:var(--teal);margin:0 0 .25rem}.formula-calculation{font-size:1.25rem;font-weight:800;overflow-wrap:anywhere;margin:0 0 .3rem}.formula p:last-child{margin-bottom:0}.labels{display:flex;gap:.35rem;align-items:center;flex-wrap:wrap;margin-bottom:.8rem}.labels .caption{font-size:.78rem;color:var(--muted);margin-right:.25rem}.token{display:inline-flex;align-items:center;justify-content:center;width:31px;height:31px;border:1px solid #729b92;background:#e5f0e8;border-radius:7px;font-weight:800;font-size:.9rem}.token[data-label=B],.token[data-label=F]{background:#f8e3cf;border-color:#b78962}.token[data-label=C],.token[data-label=G]{background:#dceaf8;border-color:#809dbd}.token[data-label=D],.token[data-label=H]{background:#eee0f4;border-color:#b795c4}.page-bar{display:flex;align-items:center;justify-content:space-between;gap:.8rem;flex-wrap:wrap;padding-top:.5rem;margin:1rem 0}.nav-buttons{display:flex;gap:.4rem;flex-wrap:wrap}.nav-buttons button{font-size:.85rem}.jump{display:flex;gap:.4rem;align-items:center}.jump label{font-size:.8rem}.jump input{max-width:80px;padding:.4rem .55rem;min-height:42px}.jump button{font-size:.85rem;min-height:42px}.page-caption{font-size:.82rem;color:var(--muted);margin-bottom:.6rem}.outcomes{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:.7rem}.outcome{border:1px solid var(--line);border-radius:10px;padding:.7rem .8rem;min-width:0}.ordinal{font-size:.68rem;color:var(--muted);display:block;margin-bottom:.4rem}.outcome-tokens{display:flex;gap:.25rem;flex-wrap:wrap;min-height:31px;align-items:center}.outcome .token{width:27px;height:29px;font-size:.83rem}.representations{display:block;margin-top:.45rem;font-size:.74rem;color:var(--muted)}.empty-message{padding:1.3rem;border:1px dashed var(--line);border-radius:10px}.empty-message strong{display:block}.notice{margin-top:1.15rem;padding:1rem;border-left:3px solid var(--accent);background:#fff1e7;border-radius:0 8px 8px 0}.notice h3{margin-bottom:.35rem}.notice p{margin:0;font-size:.86rem}.export-row{display:flex;gap:.8rem;align-items:center;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:1rem;margin-top:1rem}.export-row p{margin:0;font-size:.78rem;color:var(--muted);max-width:380px}.reading{margin-top:1.3rem}.reading summary{font-weight:750;cursor:pointer;min-height:44px;padding:.4rem 0}.reading p,.reading li{font-size:.9rem}.reading ul{padding-left:1.1rem}.reading li{margin-bottom:.5rem}footer{font-size:.82rem;color:var(--muted);padding-bottom:2rem}footer p{max-width:950px}[hidden]{display:none!important}
+@media(max-width:880px){header{grid-template-columns:1fr;gap:.5rem}.header-actions{flex-direction:row;flex-wrap:wrap}.layout{grid-template-columns:1fr}.controls{position:static}.controls-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}.controls .field-row{margin:0}.examples{margin-top:1rem}.count-button{margin-top:.5rem}}
+@media(max-width:520px){header,main,footer{padding:1rem}header{padding-top:1.6rem}.panel{padding:1rem}.controls-grid{display:block}.controls .field-row{margin-bottom:1rem}.result-heading{display:block}.comparison th:first-child{width:31%}.comparison th{font-size:.72rem}.comparison td{font-size:1.15rem}.page-bar{align-items:flex-start}.outcomes{grid-template-columns:1fr}.formula-calculation{font-size:1.08rem}.header-actions button{width:100%}.nav-buttons{display:grid;grid-template-columns:repeat(4,1fr);width:100%}.nav-buttons button{padding:.5rem .4rem}.jump{width:100%}.jump input{flex:1;max-width:120px}.token{width:29px}.intro{font-size:1rem}}
+</style>
+</head>
+<body>
+<header>
+<div><p class="eyebrow">RECALLWEAVE / COUNTING LAB</p><h1>Same labels.<br>Different counts.</h1><p class="intro">Does changing the order make a new outcome? Can a label appear again? Set the rules, compare all four counts, then inspect every outcome page by page.</p></div>
+<div class="header-actions"><button id="download-course" class="primary" type="button">Download lesson · 12 questions</button><a href="../demo.html">Open the standalone learner</a></div>
+</header>
+<main class="layout">
+<section class="panel controls" aria-labelledby="controls-title">
+<h2 id="controls-title">Define a complete choice</h2>
+<form id="count-form" novalidate>
+<div class="controls-grid"><div class="field-row">
+<label>Label types <span class="help">n · from 0 to 8</span><input id="n" type="text" inputmode="numeric" maxlength="16" value="3" autocomplete="off" aria-label="Available label types n"></label>
+<label>Items selected <span class="help">k · from 0 to 6</span><input id="k" type="text" inputmode="numeric" maxlength="16" value="2" autocomplete="off" aria-label="Items selected k"></label>
+</div><div>
+<fieldset><legend>Does order matter?</legend><div class="radio-row"><label><input type="radio" name="order" value="ordered" checked>Yes · positions</label><label><input type="radio" name="order" value="unordered">No · contents</label></div></fieldset>
+<fieldset><legend>Can a label be reused?</legend><div class="radio-row"><label><input type="radio" name="reuse" value="reuse">Yes</label><label><input type="radio" name="reuse" value="distinct" checked>No · at most once</label></div></fieldset>
+</div></div>
+<button type="submit" class="primary count-button">Count outcomes</button>
+</form>
+<div class="examples"><h3>Try a useful case</h3><div class="example-buttons">
+<button type="button" data-example="pairs">Distinct pairs</button><button type="button" data-example="bags">Repeated pairs</button><button type="button" data-example="empty">Select nothing</button><button type="button" data-example="impossible">Too few labels</button><button type="button" data-example="large">Many pages</button>
+</div></div>
+<details class="reading"><summary>What do these rules mean?</summary><p>The available labels are distinct types, named A–H. When reuse is allowed, each type has an unlimited supply. When reuse is forbidden, each type can appear at most once.</p><p>With order ignored, a sorted list is a <strong>multiset</strong>: repeated labels still count. AAB and ABA describe the same multiset; AAB and ABB do not.</p><p>This lab counts fixed-size choices. It does not model circular arrangements, finite inventories with several copies, or additional restrictions.</p></details>
+</section>
+<section class="workspace" aria-label="Counting results">
+<div id="status" class="status" role="status" aria-live="polite">Ready to count.</div>
+<div id="results" class="panel" hidden>
+<div class="comparison"><table><caption>Same n and k, four different rules</caption><thead><tr><th scope="col">Outcome model</th><th scope="col">Reuse allowed</th><th scope="col">No reuse</th></tr></thead><tbody><tr><th scope="row">Order matters</th><td data-count="ordered-reuse"></td><td data-count="ordered-distinct"></td></tr><tr><th scope="row">Order ignored</th><td data-count="unordered-reuse"></td><td data-count="unordered-distinct"></td></tr></tbody></table></div>
+<div class="result-heading"><div><p id="model-tag" class="model-tag"></p><h2 id="result-title" tabindex="-1"></h2><p id="result-meaning" class="small muted"></p></div></div>
+<div id="available-labels" class="labels"></div>
+<div class="formula"><p id="formula-rule" class="formula-rule"></p><p id="formula-calculation" class="formula-calculation"></p><p id="formula-reason" class="small"></p></div>
+<div class="page-bar"><div class="nav-buttons" aria-label="Outcome pages"><button type="button" id="first-page">First</button><button type="button" id="previous-page">Previous</button><button type="button" id="next-page">Next</button><button type="button" id="last-page">Last</button></div><form id="jump-form" class="jump" novalidate><label for="page-number">Page</label><input id="page-number" type="text" inputmode="numeric" maxlength="12" value="1" autocomplete="off"><span id="page-total" class="small"></span><button type="submit">Go</button></form></div>
+<p id="page-caption" class="page-caption"></p>
+<div id="outcomes" class="outcomes"></div>
+<div id="impossible-message" class="empty-message" hidden><strong>No valid outcomes.</strong>The requested selection cannot be filled under these rules. This is different from selecting zero items, which gives one empty outcome.</div>
+<aside class="notice"><h3>A count is not a probability model</h3><p>Two independent, equally likely A/B draws give AA, AB, BA and BB. Ignoring order gives three multisets, but AB has two ordered representations and each other multiset has one. Their probabilities are 1/4, 1/2 and 1/4.</p></aside>
+<div class="export-row"><button id="download-page" type="button">Download this page · JSON</button><p>The file includes the applied rules, exact count and every row on this page. Other pages are not included.</p></div>
+<details class="reading"><summary>Read the count before reaching for a formula</summary><ul><li><strong>Ordered, reuse:</strong> each of the k positions has n choices, so multiply n by itself k times.</li><li><strong>Ordered, no reuse:</strong> each position removes one available label.</li><li><strong>Unordered, no reuse:</strong> every group of k distinct labels has k! orders, so divide the ordered count by k!.</li><li><strong>Unordered, reuse:</strong> count how many of each type are selected. Item marks separated into n groups give C(n + k − 1, k), for n &gt; 0.</li></ul><p>Selecting zero items always gives one empty outcome. With no available labels, selecting a positive number of items is impossible.</p></details>
+</div>
+</section>
+</main>
+<footer><p>Original RecallWeave lesson and explorer. Download the lesson, then select that JSON with the learner’s course file picker. The explorer runs locally and does not change a learner session.</p><p>Background: <a href="https://openstax.org/books/precalculus-2e/pages/11-5-counting-principles">OpenStax, Counting Principles</a> and <a href="https://ocw.mit.edu/courses/6-042j-mathematics-for-computer-science-spring-2015/mit6_042js15_textbook.pdf">MIT Mathematics for Computer Science, chapter 14</a>. All scenarios and practice questions are original.</p></footer>
+<script id="counting-course-data" type="application/json">{
+  "format": "recallweave-deck/1",
+  "title": "Counting principles: order and reuse",
+  "attribution": "Original questions, explanations and transfer prompts authored for RecallWeave by estate-3dab0b9d2ce9 / optimizer_recovery with AI assistance. Scenarios are fictional. Mathematical background: OpenStax Precalculus 2e §11.5 and MIT Mathematics for Computer Science (2015), §§14.3–14.6. Source links and original worked transfer answers are in courses/counting-principles.md. No source exercises or illustrations are reproduced.",
+  "license": "CC0-1.0 for this original course content. Referenced works retain their own terms and are not included in the deck.",
+  "concepts": [
+    "Counting a complete choice",
+    "Order and distinct roles",
+    "Unordered selections",
+    "Boundary and model checks"
+  ],
+  "items": [
+    {
+      "id": "counting-product-1",
+      "concept": "Counting a complete choice",
+      "prerequisites": [],
+      "prompt": "A badge uses exactly one of 4 backgrounds and exactly one of 3 symbols. Every background can be paired with every symbol. How many different badges can be made?",
+      "options": [
+        "7",
+        "12",
+        "24",
+        "64"
+      ],
+      "answer": 1,
+      "explanation": "For each of the 4 backgrounds there are 3 permitted symbols, giving 4 × 3 = 12 complete choices. Adding 4 + 3 counts individual options, not background–symbol pairs. No extra position or ordering is specified.",
+      "transfer": "A tag has 3 possible backgrounds. The first permits 2 symbols; each of the other two permits 4. How many tags are possible, and why is 3 × 4 incorrect?"
+    },
+    {
+      "id": "counting-product-2",
+      "concept": "Counting a complete choice",
+      "prerequisites": [],
+      "prompt": "A display has 3 labeled positions: left, middle and right. Each position receives one of 4 icon types, and an icon type may be reused. How many different displays are possible?",
+      "options": [
+        "12",
+        "24",
+        "81",
+        "64"
+      ],
+      "answer": 3,
+      "explanation": "Each position has 4 choices even after the earlier positions are filled, so the total is 4 × 4 × 4 = 4³ = 64. Reuse keeps the choices from decreasing. Changing the order can change which icon occupies a labeled position.",
+      "transfer": "Change to 3 icon types and 4 labeled positions, still allowing reuse. Give the product and exact count."
+    },
+    {
+      "id": "counting-product-3",
+      "concept": "Counting a complete choice",
+      "prerequisites": [],
+      "prompt": "Two labeled positions are filled with A or B, allowing reuse. AB means A in the first position and B in the second. Which list contains every ordered outcome exactly once?",
+      "options": [
+        "AA, AB, BA, BB",
+        "AA, AB, BB",
+        "AB, BA",
+        "AA, AB, BA, BB, AB"
+      ],
+      "answer": 0,
+      "explanation": "AA, AB, BA and BB are the four complete outcomes. AB and BA differ because the positions are labeled. Removing repeated labels would wrongly exclude AA and BB; removing the reversed pair would wrongly ignore order.",
+      "transfer": "Add a third labeled position. Write every ordered outcome and use the list to check the product count."
+    },
+    {
+      "id": "counting-order-1",
+      "concept": "Order and distinct roles",
+      "prerequisites": [
+        "Counting a complete choice"
+      ],
+      "prompt": "Six distinct volunteers are available. Assign one facilitator and one recorder; a person cannot hold both roles. How many assignments are possible?",
+      "options": [
+        "12",
+        "15",
+        "30",
+        "36"
+      ],
+      "answer": 2,
+      "explanation": "There are 6 choices for facilitator and then 5 remaining choices for recorder, giving 6 × 5 = 30. The roles are distinct: swapping the same two people creates a different assignment. The count 15 would discard that distinction; 36 would allow a person to hold both roles.",
+      "transfer": "If one named volunteer must be the facilitator, how many assignments remain? Explain which choice has become fixed."
+    },
+    {
+      "id": "counting-order-2",
+      "concept": "Order and distinct roles",
+      "prerequisites": [
+        "Counting a complete choice"
+      ],
+      "prompt": "Seven distinct illustrations are available. Fill the first, second and third positions of a straight display with different illustrations. How many displays are possible?",
+      "options": [
+        "35",
+        "210",
+        "343",
+        "5040"
+      ],
+      "answer": 1,
+      "explanation": "The available choices are 7, then 6, then 5, so there are 210 displays. This is P(7,3). The count 35 ignores display order, 343 allows reuse, and 5040 arranges all seven illustrations instead of selecting three.",
+      "transfer": "Keep the same seven illustrations but fill four labeled positions without reuse. Explain the extra factor and find the new total."
+    },
+    {
+      "id": "counting-order-3",
+      "concept": "Order and distinct roles",
+      "prerequisites": [
+        "Counting a complete choice"
+      ],
+      "prompt": "Choosing two different labels from A, B, C and D produces 12 ordered pairs. If order is ignored, which statement correctly counts the resulting two-label selections?",
+      "options": [
+        "Each selection has exactly 2 ordered representations, so there are 12 ÷ 2 = 6 selections.",
+        "Each selection has exactly 4 ordered representations, so there are 12 ÷ 4 = 3 selections.",
+        "Ignoring order does not change the count, so there are 12 selections.",
+        "Each selection can use either order, so there are 12 × 2 = 24 selections."
+      ],
+      "answer": 0,
+      "explanation": "For a pair of distinct labels, AB and BA represent the same unordered selection, and those are its only two orders. Every selection is represented exactly twice, so dividing by 2 is justified. A division rule needs a uniform number of representations.",
+      "transfer": "Choose three different labels from A, B, C and D. How many orders represent each unordered selection, and how does that convert 24 ordered outcomes into the unordered count?"
+    },
+    {
+      "id": "counting-unordered-1",
+      "concept": "Unordered selections",
+      "prerequisites": [
+        "Order and distinct roles"
+      ],
+      "prompt": "Choose exactly 3 different badge designs from 5 available designs. Only which designs are chosen matters; their order does not. How many selections are possible?",
+      "options": [
+        "60",
+        "15",
+        "125",
+        "10"
+      ],
+      "answer": 3,
+      "explanation": "The 5 × 4 × 3 = 60 ordered choices represent each unordered selection 3! = 6 times. Therefore C(5,3) = 60 ÷ 6 = 10. This question asks for exactly three designs, with no reuse and no roles assigned to them.",
+      "transfer": "Choose exactly 2 different designs from 6. Find the count, then explain why choosing the 4 designs to leave out gives the same count."
+    },
+    {
+      "id": "counting-unordered-2",
+      "concept": "Unordered selections",
+      "prerequisites": [
+        "Order and distinct roles"
+      ],
+      "prompt": "A box holds exactly 4 tokens. Each token has one of 3 types, and each type is available in unlimited quantity. Only the number of tokens of each type matters, not their positions. How many different box contents are possible?",
+      "options": [
+        "81",
+        "12",
+        "15",
+        "4"
+      ],
+      "answer": 2,
+      "explanation": "This is an unordered selection with reuse: the nonnegative counts of the three types must sum to 4. Four item marks and two dividers encode each possibility once, so the count is C(4 + 3 − 1, 4) = C(6,4) = 15. Counting 3⁴ would distinguish positions that the question explicitly ignores.",
+      "transfer": "Use 4 token types and exactly 3 tokens, with the same unlimited supply and ignored positions. How many contents are possible? State what the item marks and dividers represent."
+    },
+    {
+      "id": "counting-unordered-3",
+      "concept": "Unordered selections",
+      "prerequisites": [
+        "Order and distinct roles"
+      ],
+      "prompt": "Select exactly 3 labels from A and B, allowing reuse and ignoring order. A sorted string represents one multiset: AAB means two A labels and one B label. Which list represents every possible multiset exactly once?",
+      "options": [
+        "AAA, AAB, ABB, BBB",
+        "AAA, AAB, ABA, ABB, BAA, BAB, BBA, BBB",
+        "AAA, BBB",
+        "AAB, ABB"
+      ],
+      "answer": 0,
+      "explanation": "The number of A labels can be 3, 2, 1 or 0, which produces four multisets. Different arrangements of AAB do not create new multisets. Both all-A and all-B contents are allowed because a type may be reused and no type is required to appear.",
+      "transfer": "Increase the selection size to 4 while keeping types A and B. List the possible multisets in sorted form and check their count."
+    },
+    {
+      "id": "counting-boundary-1",
+      "concept": "Boundary and model checks",
+      "prerequisites": [
+        "Unordered selections"
+      ],
+      "prompt": "Select zero items from zero available label types. What is the number of outcomes in each of the four models: ordered with reuse, ordered without reuse, unordered with reuse, and unordered without reuse?",
+      "options": [
+        "0 in all four models",
+        "1 in all four models",
+        "Undefined in all four models",
+        "1 when reuse is allowed and 0 when reuse is forbidden"
+      ],
+      "answer": 1,
+      "explanation": "All four models contain exactly one empty outcome: selecting nothing. No label needs to be available or reused. In this counting setting the empty product is 1, including the length-zero sequence over an empty alphabet; the result does not require filling any position.",
+      "transfer": "Compare selecting zero items from five label types with selecting one item from zero types. Explain why one case has an empty outcome while the other is impossible."
+    },
+    {
+      "id": "counting-boundary-2",
+      "concept": "Boundary and model checks",
+      "prerequisites": [
+        "Unordered selections"
+      ],
+      "prompt": "There are only 2 distinct label types. Select exactly 3 labels without reusing either type and ignore order. How many valid selections exist?",
+      "options": [
+        "1",
+        "2",
+        "3",
+        "0"
+      ],
+      "answer": 3,
+      "explanation": "At most two labels can be selected when neither of the two types may be reused. Selecting three is impossible, so the count is 0. It is a valid input with no outcomes, not the one empty outcome of selecting zero items.",
+      "transfer": "Now allow reuse while keeping 2 label types and 3 selected labels. Find the ordered count and the unordered count, and explain why both become nonzero."
+    },
+    {
+      "id": "counting-boundary-3",
+      "concept": "Boundary and model checks",
+      "prerequisites": [
+        "Unordered selections"
+      ],
+      "prompt": "Two independent draws each return A or B with equal probability, and reuse is allowed. After drawing, ignore order, giving the three multisets AA, AB and BB. Which probabilities are correct?",
+      "options": [
+        "AA: 1/3, AB: 1/3, BB: 1/3",
+        "AA: 1/2, AB: 0, BB: 1/2",
+        "AA: 1/4, AB: 1/2, BB: 1/4",
+        "AA: 1/2, AB: 1/4, BB: 1/4"
+      ],
+      "answer": 2,
+      "explanation": "The four equally likely ordered outcomes are AA, AB, BA and BB. The multiset AB has two ordered representations, while AA and BB each have one. Ignoring order groups outcomes but does not make the groups equally likely. A count of three groups alone cannot justify probability 1/3 for each.",
+      "transfer": "Use three equally likely label types A, B and C for two independent draws with reuse. Compare the probabilities of multiset AA and multiset AB. Explain how their numbers of ordered representations determine the difference."
+    }
+  ]
+}
+</script>
+<script type="module">
+/** Exact bounded counting and lexicographic outcomes; no browser dependencies. */
+const COUNTING_FORMAT = 'recallweave-counting-page/1';
+const PAGE_SIZE = 24;
+const MODELS = Object.freeze([
+  Object.freeze({ id: 'ordered-reuse', ordered: true, reuse: true, label: 'Order matters · reuse allowed' }),
+  Object.freeze({ id: 'ordered-distinct', ordered: true, reuse: false, label: 'Order matters · no reuse' }),
+  Object.freeze({ id: 'unordered-distinct', ordered: false, reuse: false, label: 'Order ignored · no reuse' }),
+  Object.freeze({ id: 'unordered-reuse', ordered: false, reuse: true, label: 'Order ignored · reuse allowed' })
+]);
+const LABELS = Object.freeze('ABCDEFGH'.split(''));
+
+function modelFor(id) {
+  const model = MODELS.find(item => item.id === id);
+  if (!model) throw new RangeError('Choose one of the four counting models.');
+  return model;
+}
+function checkedInput(input) {
+  if (!input || typeof input !== 'object' || Array.isArray(input)) throw new TypeError('Counting input must be an object.');
+  if (!Number.isInteger(input.n) || input.n < 0 || input.n > 8) throw new RangeError('Use 0–8 label types.');
+  if (!Number.isInteger(input.k) || input.k < 0 || input.k > 6) throw new RangeError('Select 0–6 items.');
+  modelFor(input.model);
+  return Object.freeze({ n: input.n, k: input.k, model: input.model });
+}
+function wholeText(value, max, label) {
+  if (typeof value !== 'string' || value.length > 16 || !/^\s*[0-9]+\s*$/.test(value)) {
+    throw new RangeError(`${label} must be a whole decimal number from 0 to ${max}.`);
+  }
+  const number = Number(value.trim());
+  if (!Number.isInteger(number) || number < 0 || number > max) {
+    throw new RangeError(`${label} must be a whole decimal number from 0 to ${max}.`);
+  }
+  return number;
+}
+function parseCountingInput(nText, kText, model) {
+  return checkedInput({ n: wholeText(nText, 8, 'Label types'), k: wholeText(kText, 6, 'Items selected'), model });
+}
+function choose(n, k) {
+  if (n < 0 || k < 0 || k > n) return 0n;
+  k = Math.min(k, n - k);
+  let total = 1n;
+  for (let i = 1; i <= k; i++) total = total * BigInt(n - k + i) / BigInt(i);
+  return total;
+}
+function falling(n, k) {
+  if (k > n) return 0n;
+  let total = 1n;
+  for (let i = 0; i < k; i++) total *= BigInt(n - i);
+  return total;
+}
+function factorial(k) { return falling(k, k); }
+function rawCount(n, k, model) {
+  if (k === 0) return 1n;
+  if (n === 0 || (!model.reuse && k > n)) return 0n;
+  if (model.ordered) return model.reuse ? BigInt(n) ** BigInt(k) : falling(n, k);
+  return model.reuse ? choose(n + k - 1, k) : choose(n, k);
+}
+function countOutcomes(input) {
+  const checked = checkedInput(input);
+  return rawCount(checked.n, checked.k, modelFor(checked.model));
+}
+function formula(input, model, total) {
+  const { n, k } = input;
+  if (k === 0) return Object.freeze({ rule: 'One empty outcome', calculation: 'Select 0 items → 1 outcome', reason: 'Nothing needs to be filled or chosen. This includes selecting zero items from zero types.' });
+  if (n === 0) return Object.freeze({ rule: 'No available label', calculation: `Select ${k} items from 0 types → 0 outcomes`, reason: 'At least one item is required, but no label is available.' });
+  if (!model.reuse && k > n) return Object.freeze({ rule: 'Too few distinct labels', calculation: `${k} items > ${n} available types → 0 outcomes`, reason: 'Without reuse, each type can appear at most once.' });
+  if (model.ordered && model.reuse) return Object.freeze({ rule: 'n^k', calculation: Array(k).fill(String(n)).join(' × ') + ' = ' + total, reason: 'Each labeled position has the same choices, including labels used earlier.' });
+  if (model.ordered) return Object.freeze({ rule: 'P(n, k) = n! / (n − k)!', calculation: Array.from({ length: k }, (_, i) => String(n - i)).join(' × ') + ' = ' + total, reason: 'Each new position has one fewer available label. Swapping distinct positions changes the outcome.' });
+  if (!model.reuse) return Object.freeze({ rule: 'C(n, k) = n! / (k! (n − k)!)', calculation: falling(n, k) + ' ÷ ' + factorial(k) + ' = ' + total, reason: 'Each unordered selection of distinct labels has exactly k! ordered representations.' });
+  return Object.freeze({ rule: 'C(n + k − 1, k)', calculation: `C(${n + k - 1}, ${k}) = ${total}`, reason: `${k} item marks and ${n - 1} dividers encode the counts of the ${n} label types. A type may have count zero.` });
+}
+function outcome(input, model, index) {
+  let remainingIndex = index;
+  const picked = [];
+  let minimum = 0;
+  for (let position = 0; position < input.k; position++) {
+    const remaining = input.k - position - 1;
+    let found = false;
+    for (let label = model.ordered ? 0 : minimum; label < input.n; label++) {
+      if (!model.reuse && picked.includes(label)) continue;
+      let block;
+      if (model.ordered) block = model.reuse ? BigInt(input.n) ** BigInt(remaining) : falling(input.n - position - 1, remaining);
+      else block = model.reuse ? choose(input.n - label + remaining - 1, remaining) : choose(input.n - label - 1, remaining);
+      if (remainingIndex >= block) { remainingIndex -= block; continue; }
+      picked.push(label);
+      minimum = label + (model.reuse ? 0 : 1);
+      found = true;
+      break;
+    }
+    if (!found) throw new Error('Outcome index could not be resolved.');
+  }
+  if (remainingIndex !== 0n) throw new Error('Outcome index was not fully resolved.');
+  const counts = Array(input.n).fill(0);
+  for (const label of picked) counts[label]++;
+  let representations = 1n;
+  if (!model.ordered) {
+    representations = factorial(input.k);
+    for (const count of counts) representations /= factorial(count);
+  }
+  return Object.freeze({
+    ordinal: (index + 1n).toString(),
+    labels: Object.freeze(picked.map(label => LABELS[label])),
+    typeCounts: Object.freeze(counts),
+    orderedRepresentations: representations.toString()
+  });
+}
+function outcomeAt(input, index) {
+  const checked = checkedInput(input);
+  const model = modelFor(checked.model);
+  const total = rawCount(checked.n, checked.k, model);
+  if (typeof index !== 'bigint' || index < 0n || index >= total) throw new RangeError('Outcome index is outside this model.');
+  return outcome(checked, model, index);
+}
+function countingPage(input, pageIndex = 0n) {
+  const checked = checkedInput(input);
+  const model = modelFor(checked.model);
+  const total = rawCount(checked.n, checked.k, model);
+  const pageCount = total === 0n ? 1n : (total + BigInt(PAGE_SIZE) - 1n) / BigInt(PAGE_SIZE);
+  if (typeof pageIndex !== 'bigint' || pageIndex < 0n || pageIndex >= pageCount) throw new RangeError('Page is outside this model.');
+  const start = pageIndex * BigInt(PAGE_SIZE);
+  const end = start + BigInt(PAGE_SIZE) < total ? start + BigInt(PAGE_SIZE) : total;
+  const rows = [];
+  for (let index = start; index < end; index++) rows.push(outcome(checked, model, index));
+  return Object.freeze({
+    format: COUNTING_FORMAT,
+    input: checked,
+    model: model.label,
+    ordered: model.ordered,
+    reuse: model.reuse,
+    availableLabels: Object.freeze(LABELS.slice(0, checked.n)),
+    total: total.toString(),
+    formula: formula(checked, model, total.toString()),
+    emptySelection: checked.k === 0,
+    impossible: total === 0n,
+    comparison: Object.freeze(MODELS.map(other => Object.freeze({ id: other.id, label: other.label, total: rawCount(checked.n, checked.k, other).toString() }))),
+    page: (pageIndex + 1n).toString(),
+    pageCount: pageCount.toString(),
+    pageSize: PAGE_SIZE,
+    firstOrdinal: rows.length ? rows[0].ordinal : null,
+    lastOrdinal: rows.length ? rows[rows.length - 1].ordinal : null,
+    rows: Object.freeze(rows),
+    exportScope: 'This page only. Other pages are generated from the same input and model.',
+    ordering: 'Lexicographic by A–H; unordered selections use sorted labels, keeping every repeated label.',
+    probabilityNote: 'Counting outcomes does not make them equally likely. For n > 0, under uniform independent draws with reuse, an unordered multiset has probability equal to its ordered representations divided by n^k.'
+  });
+}
+
+
+const byId = id => document.getElementById(id);
+const form = byId('count-form');
+const results = byId('results');
+const statusBox = byId('status');
+const nField = byId('n');
+const kField = byId('k');
+const jump = byId('page-number');
+const pageDownload = byId('download-page');
+const pageButtons = ['first-page', 'previous-page', 'next-page', 'last-page'].map(byId);
+let currentInput = null;
+let currentPage = null;
+
+function countText(value) { return BigInt(value).toLocaleString('en-US'); }
+function message(text, error = false) {
+  statusBox.textContent = text;
+  statusBox.classList.toggle('error', error);
+}
+function retire(text = 'Settings changed. Count outcomes to apply them.', error = false) {
+  currentInput = null;
+  currentPage = null;
+  results.hidden = true;
+  for (const key of ['model', 'n', 'k', 'total', 'page']) delete results.dataset[key];
+  pageDownload.disabled = true;
+  message(text, error);
+}
+function selectedModel() {
+  const order = form.querySelector('input[name=order]:checked').value;
+  const reuse = form.querySelector('input[name=reuse]:checked').value;
+  return order + '-' + reuse;
+}
+function token(label) {
+  const span = document.createElement('span');
+  span.className = 'token';
+  span.dataset.label = label;
+  span.textContent = label;
+  return span;
+}
+function render(input, pageIndex = 0n, focusHeading = false) {
+  const page = countingPage(input, pageIndex);
+  currentInput = page.input;
+  currentPage = page;
+  results.hidden = false;
+  Object.assign(results.dataset, { model: page.input.model, n: String(page.input.n), k: String(page.input.k), total: page.total, page: page.page });
+  pageDownload.disabled = false;
+  nField.removeAttribute('aria-invalid');
+  kField.removeAttribute('aria-invalid');
+  for (const item of page.comparison) {
+    const cell = document.querySelector('[data-count="' + item.id + '"]');
+    cell.replaceChildren(document.createTextNode(countText(item.total)));
+    cell.dataset.total = item.total;
+    cell.classList.toggle('selected', item.id === page.input.model);
+    if (item.id === page.input.model) {
+      const selected = document.createElement('span');
+      selected.className = 'selected-label';
+      selected.textContent = 'Selected';
+      cell.append(selected);
+    }
+  }
+  byId('model-tag').textContent = page.model;
+  byId('result-title').textContent = countText(page.total) + (page.total === '1' ? ' outcome' : ' outcomes');
+  byId('result-meaning').textContent = page.ordered
+    ? 'Positions are labeled. A different order is a different outcome.'
+    : 'Only the contents matter. Each sorted multiset appears once.';
+  const labels = byId('available-labels');
+  const labelCaption = document.createElement('span');
+  labelCaption.className = 'caption';
+  labelCaption.textContent = page.availableLabels.length ? 'Available types:' : 'No label types are available.';
+  labels.replaceChildren(labelCaption);
+  for (const label of page.availableLabels) labels.append(token(label));
+  byId('formula-rule').textContent = page.formula.rule;
+  byId('formula-calculation').textContent = page.formula.calculation;
+  byId('formula-reason').textContent = page.formula.reason;
+  const rows = byId('outcomes');
+  rows.replaceChildren();
+  rows.setAttribute('role', 'list');
+  rows.setAttribute('aria-label', 'Outcomes on this page');
+  for (const row of page.rows) {
+    const card = document.createElement('div');
+    card.className = 'outcome';
+    card.setAttribute('role', 'listitem');
+    card.dataset.ordinal = row.ordinal;
+    card.dataset.labels = row.labels.join('');
+    card.dataset.orderedRepresentations = row.orderedRepresentations;
+    const ordinal = document.createElement('span');
+    ordinal.className = 'ordinal';
+    ordinal.textContent = 'OUTCOME ' + countText(row.ordinal);
+    const tokens = document.createElement('div');
+    tokens.className = 'outcome-tokens';
+    if (!row.labels.length) tokens.textContent = 'Empty selection';
+    else for (const label of row.labels) tokens.append(token(label));
+    const representations = document.createElement('span');
+    representations.className = 'representations';
+    representations.textContent = page.ordered ? 'One distinct ordered outcome' : countText(row.orderedRepresentations) + (row.orderedRepresentations === '1' ? ' ordered representation' : ' ordered representations');
+    card.append(ordinal, tokens, representations);
+    rows.append(card);
+  }
+  byId('impossible-message').hidden = !page.impossible;
+  jump.value = page.page;
+  jump.removeAttribute('aria-invalid');
+  byId('page-total').textContent = 'of ' + countText(page.pageCount);
+  byId('page-caption').textContent = page.rows.length
+    ? 'Showing outcomes ' + countText(page.firstOrdinal) + '–' + countText(page.lastOrdinal) + ' of ' + countText(page.total) + '. Lexicographic order; up to 24 rows per page.'
+    : 'No outcomes to list. Page 1 of 1.';
+  pageButtons[0].disabled = pageIndex === 0n;
+  pageButtons[1].disabled = pageIndex === 0n;
+  pageButtons[2].disabled = page.page === page.pageCount;
+  pageButtons[3].disabled = page.page === page.pageCount;
+  message('Applied ' + page.input.n + ' label types and ' + page.input.k + ' selected items. ' + page.model + '. Page ' + page.page + ' of ' + page.pageCount + '.');
+  if (focusHeading) byId('result-title').focus();
+}
+function applyDraft(focusHeading = true) {
+  try {
+    const input = parseCountingInput(nField.value, kField.value, selectedModel());
+    render(input, 0n, focusHeading);
+  } catch (error) {
+    nField.setAttribute('aria-invalid', 'true');
+    kField.setAttribute('aria-invalid', 'true');
+    retire(error.message, true);
+  }
+}
+form.addEventListener('submit', event => { event.preventDefault(); applyDraft(); });
+for (const field of [nField, kField]) field.addEventListener('input', () => retire());
+for (const field of form.querySelectorAll('input[type=radio]')) field.addEventListener('change', () => retire());
+const examples = {
+  pairs: { n: 3, k: 2, model: 'ordered-distinct' },
+  bags: { n: 2, k: 2, model: 'unordered-reuse' },
+  empty: { n: 0, k: 0, model: 'unordered-distinct' },
+  impossible: { n: 2, k: 3, model: 'unordered-distinct' },
+  large: { n: 8, k: 6, model: 'ordered-reuse' }
+};
+for (const button of document.querySelectorAll('[data-example]')) button.addEventListener('click', () => {
+  const example = examples[button.dataset.example];
+  nField.value = String(example.n);
+  kField.value = String(example.k);
+  const [order, reuse] = example.model.split('-');
+  form.querySelector('input[name=order][value="' + order + '"]').checked = true;
+  form.querySelector('input[name=reuse][value="' + reuse + '"]').checked = true;
+  applyDraft();
+});
+function movePage(kind) {
+  if (!currentPage || !currentInput) return;
+  let target = BigInt(currentPage.page) - 1n;
+  if (kind === 'first') target = 0n;
+  if (kind === 'previous') target -= 1n;
+  if (kind === 'next') target += 1n;
+  if (kind === 'last') target = BigInt(currentPage.pageCount) - 1n;
+  render(currentInput, target);
+}
+for (const kind of ['first', 'previous', 'next', 'last']) byId(kind + '-page').addEventListener('click', () => movePage(kind));
+byId('jump-form').addEventListener('submit', event => {
+  event.preventDefault();
+  if (!currentInput || !currentPage) return;
+  const text = jump.value.trim();
+  if (!/^[0-9]{1,12}$/.test(text) || BigInt(text) < 1n || BigInt(text) > BigInt(currentPage.pageCount)) {
+    jump.setAttribute('aria-invalid', 'true');
+    message('Choose a whole page number from 1 to ' + currentPage.pageCount + '. Still showing page ' + currentPage.page + '.', true);
+    return;
+  }
+  render(currentInput, BigInt(text) - 1n);
+});
+function download(name, text) {
+  const url = URL.createObjectURL(new Blob([text], { type: 'application/json;charset=utf-8' }));
+  const anchor = document.createElement('a');
+  anchor.href = url;
+  anchor.download = name;
+  document.body.append(anchor);
+  anchor.click();
+  anchor.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+byId('download-course').addEventListener('click', () => download('counting-principles.json', byId('counting-course-data').textContent));
+pageDownload.addEventListener('click', () => {
+  if (!currentPage) return;
+  const page = currentPage;
+  download('counting-' + page.input.model + '-n' + page.input.n + '-k' + page.input.k + '-page' + page.page + '.json', JSON.stringify(page, null, 2) + '\n');
+});
+applyDraft(false);
+
+</script>
+</body>
+</html>
