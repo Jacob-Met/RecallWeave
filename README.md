@@ -22,6 +22,12 @@ After finishing the six challenges, open any question under **Review the connect
 
 Review and practice stay in this tab's memory. Refreshing the page or starting a fresh local session clears them. The modular app and the direct-open `demo.html` provide the same flow.
 
+### Keep your study notes
+
+After the first session, choose **Download study notes (.txt)** to save a readable copy of the complete learning trace. The file includes the question order, actual first answers, corrections, explanations, transfer prompts, the first-session model estimates, and deck attribution. Any recorded practice answers appear separately; a paused round reports how many questions are still unanswered.
+
+The download works offline in both the modular app and `demo.html`. It saves a UTF-8 text file through the browser's normal download flow. It does not upload the session or restore it after a refresh. Model estimates remain labeled as model state rather than grades, and practice never replaces the original answers.
+
 ## Demo deck provenance
 
 Question text and distractors are newly authored for this demo. Scientific concepts are adapted from OpenStax, *Biology 2e*, Chapters 7–8, Rice University, CC BY 4.0: <https://openstax.org/details/books/biology-2e>. Deck attribution and license are also embedded in `data/deck.json` and shown at completion. This work does not copy an existing hackathon entry or project.
