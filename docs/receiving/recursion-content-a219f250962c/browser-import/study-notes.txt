@@ -1,0 +1,159 @@
+RecallWeave — study notes
+Recursion and the call stack: waiting, returning, reusing
+Saved: 2026-10-08T15:16:44.059Z
+
+FIRST SESSION
+8 of 12 connections correct on the first try.
+This count describes this session; it is not a measure of your ability.
+
+ESTIMATED MASTERY — MODEL STATE, NOT A GRADE
+These estimates come from the demo’s learning model. They are not a validated assessment.
+Practice does not change the first-session estimates.
+Base cases and progress: 32%
+Suspended calls and returns: 74%
+Calls and active depth: 98%
+Memoized reuse: 74%
+
+PRACTICE
+Complete: 4 of 4 practice answers recorded; 4 correct on retry.
+Practice follows the explanations and is recorded separately from the first answers.
+
+REVIEW THE CONNECTIONS
+
+1. Define factorial(n) for nonnegative integers: if n = 0, return 1; otherwise return n × factorial(n − 1). Count every invocation, including the root and base cases. Maximum stack depth counts simultaneously active invocations, including the root. What happens when the initial call is factorial(0)?
+Concept: Base cases and progress
+Your first answer: It must call factorial(−1) before it can return.
+First try: needs review
+Correct answer: It returns 1 after one call, at maximum depth 1.
+Explanation: The initial invocation is already a call. Its input is 0, so it returns 1 directly and makes no child call. Its one active frame gives maximum depth 1. The base value 1 is the multiplicative identity: it lets a waiting factorial(1) return 1 × 1.
+Apply the idea: Trace factorial(1) under exactly this base rule. Which two inputs are called, what does each return, and what are the total call count and maximum active depth?
+Your explanation — reflection, not scored:
+  > The parent keeps 3 times the child result while a deeper frame runs.
+Practice answer: It returns 1 after one call, at maximum depth 1.
+Practice result: correct on retry
+
+2. Define factorial(0) = 1 and factorial(n) = n × factorial(n − 1) for n > 0, with no n = 1 shortcut. In factorial(5), count every invocation including the root and base case. Maximum stack depth includes every simultaneously active invocation. Which pair of counts is correct?
+Concept: Calls and active depth
+Your first answer: 6 total calls and maximum depth 6.
+First try: correct
+Correct answer: 6 total calls and maximum depth 6.
+Explanation: The inputs are 5, 4, 3, 2, 1, 0: six invocations. Before the base returns, all six are active because each parent is waiting for its only child. The numerical result is 120, which is a returned value rather than a number of calls. There are five parent-to-child edges but six frames.
+Apply the idea: For factorial(6), calculate the result, total invocations, and maximum active depth. Explain why the result grows much faster than either count.
+Your explanation — reflection, not scored:
+  Not written.
+
+3. Use F(0) = 0 and F(1) = 1. For n ≥ 2, a naive recursive function returns F(n − 1) + F(n − 2), evaluating the left child completely before the right child. Which trace correctly describes F(2)?
+Concept: Base cases and progress
+Your first answer: It calls F(1), then F(0), and returns 1 + 0 = 1.
+First try: correct
+Correct answer: It calls F(1), then F(0), and returns 1 + 0 = 1.
+Explanation: The two base cases have different values. The F(2) invocation first receives 1 from F(1), then receives 0 from F(0), and adds them. Its three invocations are F(2), F(1), and F(0). A zero contribution does not erase the other term of an addition.
+Apply the idea: Use the same rules for F(3). List the inputs in call-entry order and explain how the root combines its two returned values.
+Your explanation — reflection, not scored:
+  Not written.
+
+4. A proposed countdown is walk(n): if n = 0, return "done"; otherwise call walk(n − 2). Starting at n = 5, does repeatedly taking the recursive branch reach its stated base case? Ignore finite machine resource limits when reasoning about the input sequence.
+Concept: Base cases and progress
+Your first answer: Yes. Any decreasing integer sequence must eventually equal 0.
+First try: needs review
+Correct answer: No. The inputs stay odd: 5, 3, 1, −1, …, so the equality test never sees 0.
+Explanation: A base case helps only when the recursive inputs can reach it. Subtracting 2 preserves odd parity, and the sequence passes from 1 to −1 without an invocation at 0. Once below 0, it keeps decreasing away from the only stopping input. A real implementation will encounter its resource limits; that is not successful termination at the specified base case.
+Apply the idea: Change only the decrement so the countdown reaches 0 from every nonnegative integer. For input 5, list the resulting inputs and count the invocations.
+Your explanation — reflection, not scored:
+  Not written.
+Practice answer: No. The inputs stay odd: 5, 3, 1, −1, …, so the equality test never sees 0.
+Practice result: correct on retry
+
+5. Naive Fibonacci uses F(0) = 0, F(1) = 1, and F(n) = F(n − 1) + F(n − 2), with no cache and left child first. How many distinct invocations with input 2 occur during F(4)? Count invocations even when their inputs match.
+Concept: Calls and active depth
+Your first answer: Two: one lies inside the F(3) branch, and the other is the root's right child.
+First try: correct
+Correct answer: Two: one lies inside the F(3) branch, and the other is the root's right child.
+Explanation: F(4) calls F(3) and F(2). The F(3) branch itself calls another F(2), followed by F(1). Thus input 2 occurs in two separate invocations. They return the same mathematical value, 1, but this naive algorithm recomputes that value twice.
+Apply the idea: During naive F(5), how many invocations have input 2? Split the count between the root's F(4) and F(3) branches.
+Your explanation — reflection, not scored:
+  Not written.
+
+6. A factorial function returns 1 only when n = 0; otherwise it returns n × factorial(n − 1). The initial call is factorial(3). In what order do these invocations finish, and what values do they return?
+Concept: Suspended calls and returns
+Your first answer: factorial(0), factorial(1), factorial(2), factorial(3), returning 1, 1, 2, 6.
+First try: correct
+Correct answer: factorial(0), factorial(1), factorial(2), factorial(3), returning 1, 1, 2, 6.
+Explanation: The first child that can finish is the base invocation factorial(0). Its return lets factorial(1) compute 1 × 1; that return lets factorial(2) compute 2 × 1; the last return lets factorial(3) compute 3 × 2. The call-entry order was 3, 2, 1, 0, while the completion order is 0, 1, 2, 3.
+Apply the idea: The first two returns both carry the value 1. Explain why they still belong to two different invocations, and identify the work performed by each.
+Your explanation — reflection, not scored:
+  Not written.
+
+7. For naive Fibonacci, F(0) = 0, F(1) = 1, and F(n) = F(n − 1) + F(n − 2). The left child finishes before the right child starts. The initial call is F(3). Its frame has just received 1 from its left child F(2), and it has not started its right child. What must it do next?
+Concept: Suspended calls and returns
+Your first answer: Return 1 immediately, because the left child already finished.
+First try: needs review
+Correct answer: Keep the left result 1, call F(1), and then add that child's return.
+Explanation: F(3) needs two child results. It retains the left result 1 while its right child F(1) runs. The right child returns 1, so the parent then returns 1 + 1 = 2. These children run in sequence; the completed left child's frame is no longer active while the right child executes.
+Apply the idea: At the instant that right-hand F(1) is active, which two invocations remain on the active stack? What value is saved in the waiting parent?
+Your explanation — reflection, not scored:
+  Not written.
+Practice answer: Keep the left result 1, call F(1), and then add that child's return.
+Practice result: correct on retry
+
+8. Define factorial(0) = 1 and factorial(n) = n × factorial(n − 1) for positive integers. During factorial(4), the active child is factorial(2), which has not yet called factorial(1). The factorial(4) and factorial(3) invocations are waiting. What work do those two waiting invocations retain?
+Concept: Suspended calls and returns
+Your first answer: factorial(3) must multiply its child's result by 3, then factorial(4) must multiply that result by 4.
+First try: correct
+Correct answer: factorial(3) must multiply its child's result by 3, then factorial(4) must multiply that result by 4.
+Explanation: Each invocation retains its own input and continuation. The factorial(3) frame waits for factorial(2), then multiplies the returned value by 3. The factorial(4) frame waits for factorial(3), then multiplies by 4. Calling a child suspends that parent work; it does not replace every parent's n.
+Apply the idea: Suppose factorial(2) now returns 2. What value does factorial(3) return next, and what does factorial(4) finally return?
+Your explanation — reflection, not scored:
+  Not written.
+
+9. Memoized Fibonacci uses F(0) = 0 and F(1) = 1, a fresh empty cache, and left child before right. Every invocation first checks for its input in the cache; a miss computes and stores its result, including base values. During F(4), its left child F(3) has finished. The root now invokes F(2), whose value 1 is already stored. How is this request handled?
+Concept: Memoized reuse
+Your first answer: It counts as one call and one cache hit, returns 1, and makes no child calls.
+First try: correct
+Correct answer: It counts as one call and one cache hit, returns 1, and makes no child calls.
+Explanation: The request for F(2) is an invocation even though its value is already available. It is served by one cache hit, so it contributes no newly computed call and creates no recursive children. The key identifies the input 2; the stored answer is F(2) = 1. The cached invocation has its own active frame until it returns.
+Apply the idea: If a later request finds a stored entry F(0) = 0, is that a valid hit? Explain why cache membership must distinguish an absent entry from a stored zero.
+Your explanation — reflection, not scored:
+  Not written.
+
+10. A completed memoized F(5) run produced result 5 using 9 total calls, 6 computed calls, 3 hits and maximum depth 5. The explorer starts every new run with an empty cache. You start F(5) again with the same left-first algorithm. What should the completed counts be?
+Concept: Memoized reuse
+Your first answer: 1 total call, 0 computed calls, 1 hit and maximum depth 1, because the old cache is retained.
+First try: needs review
+Correct answer: Again 9 total calls, 6 computed calls, 3 hits and maximum depth 5; the result is again 5.
+Explanation: The second run starts from the same empty-cache state and follows the same deterministic order, so it repeats the same work and counts. Empty at the start still allows this run to store values and reuse them later. A one-call hit would describe deliberately reusing the previous completed cache, which is a different experiment.
+Apply the idea: Suppose a separate program deliberately retained the completed cache and then invoked F(5) once more. What would that invocation return, and what would its calls, computed calls, hits and maximum active depth be?
+Your explanation — reflection, not scored:
+  Not written.
+Practice answer: Again 9 total calls, 6 computed calls, 3 hits and maximum depth 5; the result is again 5.
+Practice result: correct on retry
+
+11. Run memoized F(5) with F(0) = 0 and F(1) = 1. Start with an empty cache, check it before each base test, store every completed result including bases, and finish F(n − 1) before F(n − 2). Total calls include hits; computed calls exclude hits; maximum depth counts active frames including root and bases. Which completed-run counts are correct?
+Concept: Memoized reuse
+Your first answer: 9 total calls, 6 computed calls, 3 hits, maximum depth 5.
+First try: correct
+Correct answer: 9 total calls, 6 computed calls, 3 hits, maximum depth 5.
+Explanation: Inputs 5, 4, 3, 2, 1, 0 are first encountered as misses, giving six computed calls. The later requests for 1, 2, and 3 find stored values, giving three hits and nine total invocations. The deepest chain still contains inputs 5, 4, 3, 2, 1, so maximum depth is five. The result is 5. Memoization removes repeated work without shortening this first descent.
+Apply the idea: For a fresh memoized F(6), find total calls, computed calls, hits, maximum depth, and result. Compare its total calls with naive F(6), while keeping the depth definition fixed.
+Your explanation — reflection, not scored:
+  Not written.
+
+12. Compute naive F(5), where F(0) = 0, F(1) = 1, and F(n) = F(n − 1) + F(n − 2). Evaluate the left child fully before the right and use no cache. Count every invocation, including root, bases and repeated arguments; maximum stack depth counts simultaneous active invocations including the root. Which pair is correct?
+Concept: Calls and active depth
+Your first answer: 15 total calls and maximum depth 5.
+First try: correct
+Correct answer: 15 total calls and maximum depth 5.
+Explanation: Let C(0) = C(1) = 1 and C(n) = 1 + C(n − 1) + C(n − 2). This gives C(2) = 3, C(3) = 5, C(4) = 9, and C(5) = 15. The deepest active path is 5 → 4 → 3 → 2 → 1, containing five frames. Later branches add calls after earlier frames have returned, so total calls and maximum active depth measure different things.
+Apply the idea: Use those call-count values to calculate naive F(6)'s total invocations. Separately find its maximum active depth and its returned value.
+Your explanation — reflection, not scored:
+  Not written.
+
+YOUR APPLICATION REFLECTION — NOT SCORED
+Prompt: Choose one connection from this deck and explain how it relates to another idea in your own words.
+  > Calls count history; depth counts the live path.
+
+DECK ATTRIBUTION
+Original questions, distractors, worked examples and transfer explanations authored for Jacob’s RecallWeave project with AI assistance. Background definitions: NIST Dictionary of Algorithms and Data Structures, recursion (https://xlinux.nist.gov/dads/HTML/recursion.html) and memoization (https://xlinux.nist.gov/dads/HTML/memoize.html). This course explicitly uses F(0)=0, F(1)=1 and an initially empty cache that stores base values; its examples and wording are newly authored, not copied reference exercises.
+Original course content authored for Jacob’s RecallWeave project; no additional reuse license is granted in this file. Linked reference material retains its published terms.
+
+Saved from this browser session. The download does not upload the session or restore it after a refresh.
