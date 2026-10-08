@@ -6,6 +6,14 @@
 
 Open `demo.html` directly in a browser—no server, install, build step, internet, login, API key, or user data storage is required. It is a single self-contained file with embedded CSS, JavaScript and deck. The modular source is in `index.html`, `src/`, and `data/`; to test that version locally, serve this directory with `python3 -m http.server 8080` and visit `http://localhost:8080`. Rebuild the direct-open demo with `python3 tools/make_demo.py` after source changes. No hosted endpoint is called by either version.
 
+## Trace a maximum flow
+
+Open **[More flow needs a way through](courses/network-flow-explorer.html)** directly in a browser to follow a small directed capacity network from zero assignment to a matching flow-and-cut certificate. Inspect each breadth-first residual path, including cancellation of an earlier edge assignment, and keep independently supplied opposite edges distinct. The original-edge, residual and conservation tables expose every integer value.
+
+Load a worked example or enter 2–8 named vertices and capacities from 0 to 99, then select **Build the trace**. Back, Next and the step selector inspect retained snapshots. Editing retires the displayed result until another successful build. Download the exact applied observation, the original [fourteen-question course](courses/network-flow.json) or its [worked guide](courses/network-flow.md). Import the course through **Bring your own lesson** to use the existing feedback, review, practice and notes flow.
+
+The self-contained page needs no server, account, connection or automatic browser storage. Its observation is a mathematical teaching trace, separate from learner-answer archives. Rebuild with `node tools/build-network-flow.mjs`; add `--check` to verify exact model, UI, template, course and guide parity.
+
 ## Interactive binary-search companion
 
 Open [the binary-search explorer](courses/binary-search-explorer.html) to step through the exact lower-bound loop from the existing **Binary search: precise boundaries** course. The file works directly in a browser without a server or connection. Enter up to 32 sorted integers, choose a target, and inspect each comparison, the classified prefix/suffix, unresolved element indices `[lo, hi)`, and possible answer boundaries `[lo, hi]`. Repeated values, absent targets, empty arrays and the boundary after the last element have explicit examples.
@@ -323,3 +331,17 @@ The [worked guide](courses/cache-replacement.md) explains the empty-start, equal
 ## Weighted interval scheduling
 
 The [weighted-intervals explorer](courses/weighted-intervals-explorer.html) is a self-contained offline lab for choosing compatible activities by total value. Edit a small schedule, inspect take/skip decisions, reconstruct the chosen prefix, and compare it with earliest finish. Download its [twelve-question course](courses/weighted-interval-scheduling.json) into the existing learner, or use the [course guide](courses/weighted-interval-scheduling.md) for the worked table, answer derivations, assumptions and build/check commands.
+
+## Fit a line and inspect its residuals
+
+Open the **[least-squares lab](courses/least-squares-lab.html)** directly in a browser. Edit paired points, try a line, and compare exact fitted coefficients, signed vertical residuals, every squared residual, the mean point and total squared error. Six original fictional examples cover a noisy trend, a perfect line, a curved pattern, ordinary repeated x, all-equal x and an influential distant row.
+
+The fit minimizes equal-weight squared vertical errors for the entered rows. Repeated rows count separately. If all x values are equal, the lab shows the family of minimizing lines and the one observed fitted value; it does not invent unique coefficients or a prediction elsewhere. Query values distinguish the observed x range from extrapolation. A minimum SSE does not establish linearity, predictive accuracy or causation.
+
+Download the fixed **[sixteen-question course](courses/least-squares.json)** from the lab or this link, then use **Bring your own lesson**, preview it and choose **Start this deck** in the existing learner. The **[worked guide](courses/least-squares.md)** derives the six examples, the minimum identity and all sixteen transfer answers. Editing the lab never changes the course download; tab changes are not automatically saved or uploaded.
+
+Build with `node tools/build_least_squares.mjs`; `--check` verifies the generated standalone file. Run the focused native tests with `node --test tests/least-squares.test.mjs`. The [receiving packet](docs/receiving/least-squares-db371a37f4c8/README.md) records the separate independent mathematical review, actual course download/import/review flow and responsive browser checks. The shared learner, importer and catalog are unchanged.
+
+## Mathematical induction: a base, a bridge, every integer
+
+[Open the offline proof lab](courses/mathematical-induction-lab.html), download the [twelve-question lesson](courses/mathematical-induction.json), or read the [worked guide](courses/mathematical-induction.md). Compare an arithmetic sum with a proposed formula, inspect the exact base and symbolic successor step, and see why a few matching values do not prove every case. The lab keeps its finite examples separate from the induction argument and saves an explicit proof record. Import its lesson JSON through the existing learner preview and Start this deck controls.

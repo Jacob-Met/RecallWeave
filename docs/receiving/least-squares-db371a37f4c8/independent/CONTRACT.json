@@ -1,0 +1,413 @@
+{
+  "format": "independent-least-squares-analytical-contract-v1",
+  "frozen_at": "2026-10-08 16:59:47 UTC",
+  "reviewer": "estate-db371a37f4c8/product_execution",
+  "source_before_inspection": "Issue103 and capability's declared numeric API only; no candidate source or tests inspected",
+  "cases": [
+    {
+      "id": "noisy_four",
+      "points": [
+        {
+          "x": -2,
+          "y": 1
+        },
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 1,
+          "y": 2
+        },
+        {
+          "x": 3,
+          "y": 4
+        }
+      ],
+      "intercept": "0",
+      "slope": "1",
+      "query": "2",
+      "expected": {
+        "meanX": "1/2",
+        "meanY": "7/4",
+        "sxx": "13",
+        "intercept": "37/26",
+        "slope": "17/26",
+        "residuals": [
+          "23/26",
+          "-37/26",
+          "-1/13",
+          "8/13"
+        ],
+        "sse": "83/26",
+        "trialSse": "11",
+        "excess": "203/26",
+        "meanTerm": "25/4",
+        "slopeTerm": "81/52",
+        "query": "71/26"
+      },
+      "derivation": "n=4, sum x=2, sum y=7, sum x²=14, sum xy=12. D=52, slope numerator=34. The trial deltas are -37/26 and 9/26, whose centered intercept shift is -5/4."
+    },
+    {
+      "id": "ordinary_repeated_x",
+      "points": [
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 2
+        },
+        {
+          "x": 2,
+          "y": 2
+        }
+      ],
+      "intercept": "1",
+      "slope": "1/2",
+      "query": "1",
+      "expected": {
+        "meanX": "2/3",
+        "meanY": "4/3",
+        "sxx": "8/3",
+        "intercept": "1",
+        "slope": "1/2",
+        "residuals": [
+          "-1",
+          "1",
+          "0"
+        ],
+        "sse": "2",
+        "trialSse": "2",
+        "excess": "0",
+        "meanTerm": "0",
+        "slopeTerm": "0",
+        "query": "3/2"
+      },
+      "derivation": "D=3*4-2²=8 and slope numerator=3*4-2*4=4. Both x=0 observations remain separate rows."
+    },
+    {
+      "id": "duplicate_row_weight",
+      "points": [
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 1,
+          "y": 2
+        },
+        {
+          "x": 2,
+          "y": 1
+        }
+      ],
+      "intercept": "3/11",
+      "slope": "7/11",
+      "query": "0",
+      "expected": {
+        "meanX": "3/4",
+        "meanY": "3/4",
+        "sxx": "11/4",
+        "intercept": "3/11",
+        "slope": "7/11",
+        "residuals": [
+          "-3/11",
+          "-3/11",
+          "12/11",
+          "-6/11"
+        ],
+        "sse": "18/11",
+        "trialSse": "18/11",
+        "excess": "0",
+        "meanTerm": "0",
+        "slopeTerm": "0",
+        "query": "3/11"
+      },
+      "derivation": "n=4, sum x=sum y=3, sum x²=5, sum xy=4, hence D=11 and numerator=7. Removing one duplicated (0,0) changes the fit to a=b=1/2; a duplicate is an additional equally weighted observation."
+    },
+    {
+      "id": "all_equal_x",
+      "points": [
+        {
+          "x": 3,
+          "y": -2
+        },
+        {
+          "x": 3,
+          "y": 1
+        },
+        {
+          "x": 3,
+          "y": 4
+        }
+      ],
+      "intercept": "0",
+      "slope": "0",
+      "query": "3",
+      "expected": {
+        "meanX": "3",
+        "meanY": "1",
+        "sxx": "0",
+        "intercept": null,
+        "slope": null,
+        "residuals": [
+          "-3",
+          "0",
+          "3"
+        ],
+        "sse": "18",
+        "trialSse": "21",
+        "excess": "3",
+        "meanTerm": "3",
+        "slopeTerm": "0",
+        "query": "1"
+      },
+      "derivation": "Every minimizing line satisfies a+3b=1. Their shared residuals are -3,0,3; they determine only x=3. Trial a=b=0 raises SSE by 3*(0-1)²=3. Trial a=-5,b=2 is another minimizer."
+    },
+    {
+      "id": "all_equal_zero",
+      "points": [
+        {
+          "x": 0,
+          "y": -2
+        },
+        {
+          "x": 0,
+          "y": 2
+        }
+      ],
+      "intercept": "0",
+      "slope": "999/7",
+      "query": "1",
+      "expected": {
+        "meanX": "0",
+        "meanY": "0",
+        "sxx": "0",
+        "intercept": null,
+        "slope": null,
+        "residuals": [
+          "-2",
+          "2"
+        ],
+        "sse": "8",
+        "trialSse": "8",
+        "excess": "0",
+        "meanTerm": "0",
+        "slopeTerm": "0",
+        "query": null
+      },
+      "derivation": "The minimizing family has a=0 and arbitrary b. At x=0 its determined prediction is exactly zero; at query x=1 no unique prediction exists."
+    },
+    {
+      "id": "constant_y_unique",
+      "points": [
+        {
+          "x": -3,
+          "y": 5
+        },
+        {
+          "x": 0,
+          "y": 5
+        },
+        {
+          "x": 2,
+          "y": 5
+        }
+      ],
+      "intercept": "5",
+      "slope": "1",
+      "query": "0",
+      "expected": {
+        "meanX": "-1/3",
+        "meanY": "5",
+        "sxx": "38/3",
+        "intercept": "5",
+        "slope": "0",
+        "residuals": [
+          "0",
+          "0",
+          "0"
+        ],
+        "sse": "0",
+        "trialSse": "13",
+        "excess": "13",
+        "meanTerm": "1/3",
+        "slopeTerm": "38/3",
+        "query": "5"
+      },
+      "derivation": "Distinct x values give Sxx=13-1/3=38/3 and Sxy=0, so the horizontal fit is unique. The trial residuals are 3,0,-2."
+    },
+    {
+      "id": "boundary_two_points",
+      "points": [
+        {
+          "x": -20,
+          "y": 20
+        },
+        {
+          "x": 20,
+          "y": -20
+        }
+      ],
+      "intercept": "1/3",
+      "slope": "-2/3",
+      "query": "40",
+      "expected": {
+        "meanX": "0",
+        "meanY": "0",
+        "sxx": "800",
+        "intercept": "0",
+        "slope": "-1",
+        "residuals": [
+          "0",
+          "0"
+        ],
+        "sse": "0",
+        "trialSse": "802/9",
+        "excess": "802/9",
+        "meanTerm": "2/9",
+        "slopeTerm": "800/9",
+        "query": "-40"
+      },
+      "derivation": "Two distinct points determine y=-x. Trial residuals are 19/3 and -7, giving (361+441)/9=802/9; query 40 is extrapolation beyond [-20,20]."
+    },
+    {
+      "id": "curved_zero_orthogonality",
+      "points": [
+        {
+          "x": -2,
+          "y": 4
+        },
+        {
+          "x": -1,
+          "y": 1
+        },
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 1,
+          "y": 1
+        },
+        {
+          "x": 2,
+          "y": 4
+        }
+      ],
+      "intercept": "2",
+      "slope": "0",
+      "query": "0",
+      "expected": {
+        "meanX": "0",
+        "meanY": "2",
+        "sxx": "10",
+        "intercept": "2",
+        "slope": "0",
+        "residuals": [
+          "2",
+          "-1",
+          "-2",
+          "-1",
+          "2"
+        ],
+        "sse": "14",
+        "trialSse": "14",
+        "excess": "0",
+        "meanTerm": "0",
+        "slopeTerm": "0",
+        "query": "2"
+      },
+      "derivation": "Symmetry makes sum(x*y)=0. Both normal-equation sums vanish although the observations form y=x². An optimal line is not evidence that the shape is linear."
+    },
+    {
+      "id": "affine_unit_change",
+      "points": [
+        {
+          "x": -3,
+          "y": 1
+        },
+        {
+          "x": 1,
+          "y": -2
+        },
+        {
+          "x": 3,
+          "y": 4
+        },
+        {
+          "x": 7,
+          "y": 10
+        }
+      ],
+      "intercept": "67/52",
+      "slope": "51/52",
+      "query": "5",
+      "expected": {
+        "meanX": "2",
+        "meanY": "13/4",
+        "sxx": "52",
+        "intercept": "67/52",
+        "slope": "51/52",
+        "residuals": [
+          "69/26",
+          "-111/26",
+          "-3/13",
+          "24/13"
+        ],
+        "sse": "747/26",
+        "trialSse": "747/26",
+        "excess": "0",
+        "meanTerm": "0",
+        "slopeTerm": "0",
+        "query": "161/26"
+      },
+      "derivation": "Transform noisy_four by x'=2x+1,y'=3y-2. New slope=3b/2=51/52 and intercept=3a-2-3b/2=67/52. Every residual triples and SSE multiplies by nine. Query x'=5 corresponds to old x=2."
+    }
+  ],
+  "additionalControls": {
+    "all_equal_x_query_away": "At shared x=3, a=-5,b=2 is a second SSE=18 minimizer. Query x=2 has no identified optimum prediction.",
+    "duplicate_dedup_control": "The three distinct rows (0,0),(1,2),(2,1) have a=b=1/2 and SSE=3/2; deduplication of duplicate_row_weight would be wrong.",
+    "scalar_valid": [
+      "1/2",
+      "3/6",
+      "-0.000",
+      "1000",
+      "-1000"
+    ],
+    "scalar_invalid": [
+      ".5",
+      "1.0000",
+      "1/0",
+      "NaN",
+      "Infinity",
+      "1e2",
+      "1001",
+      "1000000000/1000000000"
+    ],
+    "query_invalid": [
+      "40.001",
+      "-40.001"
+    ],
+    "point_invalid": [
+      "fewer than two rows",
+      "more than twelve rows",
+      "fractional x or y",
+      "numeric string instead of numeric point",
+      "NaN or Infinity",
+      "coordinate outside [-20,20]"
+    ],
+    "invariants": [
+      "Every result rational has BigInt numerator/denominator, positive denominator and gcd1.",
+      "Accepted unique fits have exact zero residual sum and x-residual sum, mean-point passage and exact nonnegative minimum decomposition.",
+      "Input rows and options remain unchanged on acceptance/refusal; returned structures are deeply frozen.",
+      "Sixteen course questions will be blind-extracted without answer indices/explanations, solved independently, then compared against the guide and declared key."
+    ]
+  }
+}

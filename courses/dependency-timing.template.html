@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <link rel="icon" href="data:,">
+  <title>Critical-path timing · RecallWeave</title>
+  <style>
+    :root { color: #193f36; background: #f3f6f0; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-synthesis: none; line-height: 1.5; }
+    * { box-sizing: border-box; }
+    body { margin: 0; }
+    [hidden] { display: none !important; }
+    a { color: #075b71; text-underline-offset: .17em; }
+    button, input, textarea { font: inherit; }
+    button { min-height: 44px; cursor: pointer; touch-action: manipulation; padding: 10px 14px; border: 1px solid #8ca998; border-radius: 8px; color: #193f36; background: #f4f8ef; }
+    button:hover:not(:disabled) { background: #e5eee1; }
+    button:disabled { opacity: .5; cursor: default; }
+    :focus-visible { outline: 3px solid #a44716; outline-offset: 4px; }
+    .skip-link { position: absolute; top: -90px; left: 16px; z-index: 2; background: #fff; padding: 12px; }
+    .skip-link:focus { top: 12px; }
+    header, main, footer { width: min(1320px, 100%); padding: 24px; margin: 0 auto; }
+    header { padding-top: 35px; padding-bottom: 10px; }
+    .brand { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; font-weight: 750; }
+    .badge { border: 1px solid #b4cebc; background: #e4eee1; border-radius: 999px; padding: 3px 10px; font-size: .74rem; text-transform: uppercase; letter-spacing: .06em; }
+    h1 { max-width: 1000px; font-size: clamp(2rem, 4.5vw, 3.1rem); line-height: 1.14; letter-spacing: -.025em; margin: 21px 0 15px; }
+    h2 { margin: 0 0 12px; font-size: 1.36rem; line-height: 1.3; }
+    h3 { font-size: 1.07rem; margin: 24px 0 10px; }
+    p { margin: 10px 0 16px; }
+    .lede { max-width: 890px; font-size: 1.12rem; color: #46665a; }
+    .legend { border-left: 4px solid #2d6b50; background: #e4eee1; border-radius: 0 8px 8px 0; padding: 12px 16px; max-width: 950px; }
+    nav { display: flex; flex-wrap: wrap; gap: 10px 23px; font-size: .9rem; margin-top: 17px; }
+    .workspace { display: grid; grid-template-columns: minmax(290px, 345px) minmax(0, 1fr); align-items: start; gap: 22px; }
+    .panel { min-width: 0; background: #fff; border: 1px solid #cbdacf; border-radius: 14px; padding: 23px; box-shadow: 0 4px 14px #203d3305; }
+    .input-panel { border-top: 5px solid #2e6a50; }
+    .eyebrow { color: #52735f; text-transform: uppercase; font-size: .75rem; letter-spacing: .08em; font-weight: 750; margin-top: 0; }
+    .small, .help, .muted { font-size: .86rem; color: #506b5e; }
+    .help { margin: 6px 0 14px; }
+    label { display: block; font-weight: 680; margin: 17px 0 6px; overflow-wrap: anywhere; }
+    textarea, input { max-width: 100%; min-width: 0; width: 100%; background: #fff; color: #193f36; border: 1px solid #8ea897; border-radius: 7px; padding: 10px 11px; }
+    textarea { display: block; resize: vertical; min-height: 120px; font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: .9rem; }
+    input { min-height: 44px; font-variant-numeric: tabular-nums; }
+    [aria-invalid="true"] { border: 2px solid #a12b27; }
+    fieldset { min-width: 0; border: 0; margin: 21px 0 15px; padding: 0; }
+    legend { padding: 0; font-weight: 720; }
+    .duration-row { display: grid; grid-template-columns: minmax(0, 1fr) 84px 32px; align-items: center; gap: 8px; padding: 8px 0; border-bottom: 1px solid #e3eae1; }
+    .duration-row label { margin: 0; font-size: .84rem; font-weight: 620; }
+    .duration-row input { padding: 9px 8px; }
+    .duration-unit { font-size: .75rem; color: #506b5e; }
+    .primary { width: 100%; background: #205e46; color: #fff; font-weight: 700; border-color: #205e46; }
+    .primary:hover:not(:disabled) { background: #154b37; }
+    .secondary { width: 100%; margin-top: 9px; }
+    .error { padding: 12px; border-left: 4px solid #a12b27; background: #fff1ec; color: #812e28; overflow-wrap: anywhere; }
+    .status { color: #426456; font-size: .86rem; min-height: 1.5em; overflow-wrap: anywhere; }
+    .examples { display: grid; gap: 9px; }
+    .examples button { text-align: left; }
+    .examples span { display: block; font-size: .8rem; color: #526d60; margin-top: 3px; }
+    .empty { min-height: 390px; display: grid; align-content: center; background: #f8faf5; border-style: dashed; }
+    .empty p { max-width: 540px; }
+    .summary-grid { display: grid; grid-template-columns: 1.7fr 1fr 1fr; gap: 12px; margin: 21px 0; }
+    .summary-card { min-width: 0; border: 1px solid #c5d6c5; border-radius: 10px; padding: 15px; background: #f4f8ef; }
+    .summary-card strong { display: block; font-size: clamp(1.5rem, 2.7vw, 2.2rem); line-height: 1.2; overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }
+    .summary-card span { display: block; margin-top: 6px; font-size: .8rem; color: #4d695b; }
+    .summary-card.finish { background: #e8f1e2; border-color: #afc8a6; }
+    .assumption-note { border-left: 3px solid #427961; padding: 1px 0 1px 13px; font-size: .87rem; }
+    figure { margin: 0; }
+    .timeline-legend { display: flex; flex-wrap: wrap; gap: 7px 18px; font-size: .8rem; color: #4a6759; }
+    .key { display: inline-block; width: 18px; height: 10px; border-radius: 2px; vertical-align: middle; margin-right: 5px; }
+    .key.earliest { background: #2b725b; }
+    .key.latest { border: 2px solid #5d8172; background: #fff; }
+    .key.critical { background: #a34927; }
+    .timeline-axis { display: flex; justify-content: space-between; font-size: .75rem; color: #587165; margin: 14px 6px 0; }
+    #timeline-rows { list-style: none; padding: 0; margin: 0; }
+    .timeline-row { padding: 14px 0 4px; border-bottom: 1px solid #e1e9de; min-width: 0; }
+    .timeline-heading { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; }
+    .timeline-heading strong { overflow-wrap: anywhere; min-width: 0; font-size: .93rem; }
+    .timeline-state { font-size: .76rem; flex-shrink: 0; color: #496d5c; }
+    .timeline-detail { margin: 3px 0; font-size: .77rem; color: #506b5e; font-variant-numeric: tabular-nums; }
+    .timeline-track { position: relative; height: 40px; margin: 3px 6px 0; border-bottom: 1px solid #a4bba9; background: linear-gradient(to right, transparent 24.8%, #e6ede4 25%, transparent 25.2%, transparent 49.8%, #e6ede4 50%, transparent 50.2%, transparent 74.8%, #e6ede4 75%, transparent 75.2%); }
+    .timing-bar { position: absolute; display: block; min-width: 2px; height: 9px; border-radius: 2px; }
+    .earliest-bar { top: 7px; background: #2b725b; }
+    .latest-bar { top: 23px; border: 2px solid #5d8172; background: #f7faf5; }
+    .is-critical .earliest-bar { background: #a34927; }
+    .is-critical .latest-bar { border-color: #a34927; }
+    .is-critical .timeline-state { color: #8d3b1e; font-weight: 700; }
+    .milestone { position: absolute; width: 9px; height: 9px; margin-left: -4px; transform: rotate(45deg); }
+    .earliest-milestone { top: 7px; background: #2b725b; }
+    .latest-milestone { top: 23px; border: 2px solid #5d8172; background: #fff; }
+    .is-critical .earliest-milestone { background: #a34927; }
+    .is-critical .latest-milestone { border-color: #a34927; }
+    figcaption { margin-top: 12px; font-size: .8rem; color: #526d60; }
+    .zero-note { background: #eef4e8; border-radius: 8px; padding: 12px; font-size: .86rem; }
+    .table-scroll { width: 100%; max-width: 100%; overflow-x: auto; overscroll-behavior-x: contain; border: 1px solid #dce6d8; border-radius: 9px; }
+    .table-scroll:focus-visible { outline-offset: -3px; }
+    table { width: 100%; min-width: 960px; border-collapse: collapse; font-size: .81rem; }
+    caption { text-align: left; padding: 12px; color: #4c6b5b; font-size: .79rem; }
+    th, td { padding: 10px; text-align: left; vertical-align: top; border-bottom: 1px solid #dce5da; overflow-wrap: anywhere; }
+    thead th { background: #f5f8f0; color: #4c6758; font-size: .75rem; }
+    tbody th { min-width: 120px; max-width: 170px; font-weight: 650; }
+    tbody tr:last-child th, tbody tr:last-child td { border-bottom: 0; }
+    .numeric { font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .job-name { display: block; }
+    .milestone-label { display: block; margin-top: 5px; color: #627557; font-size: .71rem; font-weight: 500; }
+    .chip { display: inline-block; padding: 4px 7px; background: #edf3e8; border: 1px solid #c7d7be; border-radius: 6px; font-size: .72rem; }
+    .critical-chip { color: #8c3c21; background: #fff0e8; border-color: #d8ad93; }
+    .name-list, #critical-jobs { list-style: none; display: flex; flex-wrap: wrap; gap: 5px; padding: 0; margin: 0; }
+    .name-list li, #critical-jobs li { border: 1px solid #cbd9c4; border-radius: 5px; background: #f6f9f1; padding: 3px 7px; font-size: .79rem; overflow-wrap: anywhere; min-width: 0; }
+    #critical-jobs li { border-color: #d8ad93; background: #fff3eb; color: #8c3c21; }
+    #critical-edges { list-style: none; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; padding: 0; }
+    #critical-edges li { border-left: 3px solid #a34927; background: #fff7ef; padding: 9px 12px; font-size: .87rem; min-width: 0; }
+    .arrow-label { display: flex; gap: 7px; align-items: baseline; }
+    .arrow-label span { overflow-wrap: anywhere; min-width: 0; }
+    .arrow-label .arrow-symbol { flex-shrink: 0; color: #6e7865; }
+    #dependency-table { min-width: 620px; }
+    details { border-top: 1px solid #d9e3d5; margin-top: 20px; padding-top: 17px; }
+    summary { min-height: 36px; font-weight: 680; cursor: pointer; }
+    .definitions { display: grid; grid-template-columns: 1fr 1fr; gap: 11px 22px; font-size: .86rem; }
+    .definitions div { min-width: 0; }
+    dt { font-weight: 700; }
+    dd { margin: 4px 0 0; color: #506b5e; }
+    .download-panel { border-top: 1px solid #d9e3d5; margin-top: 25px; padding-top: 20px; }
+    .download-panel h3 { margin-top: 0; }
+    .cycle-panel { margin-top: 20px; background: #fff7ed; border-left: 4px solid #a86529; border-radius: 0 9px 9px 0; padding: 18px; }
+    .cycle-panel h3 { margin-top: 0; }
+    #cycle-groups { padding-left: 20px; }
+    #cycle-groups > li { margin-bottom: 14px; }
+    #cycle-groups .name-list { margin-top: 7px; }
+    footer { color: #536e60; font-size: .81rem; padding-bottom: 35px; }
+    footer p { max-width: 1000px; }
+    code { overflow-wrap: anywhere; }
+    @media (max-width: 980px) { .workspace { grid-template-columns: minmax(0, 1fr); } .input-panel { max-width: none; } .examples { grid-template-columns: repeat(3, minmax(0, 1fr)); } .duration-row { grid-template-columns: minmax(0, 1fr) 105px 35px; } }
+    @media (max-width: 600px) { header, main, footer { padding-left: 16px; padding-right: 16px; } .panel { padding: 18px; } .examples, .definitions, #critical-edges { grid-template-columns: minmax(0, 1fr); } .summary-grid { grid-template-columns: 1fr 1fr; } .summary-card.finish { grid-column: 1 / -1; } .summary-card strong { font-size: 1.7rem; } .duration-row { grid-template-columns: minmax(0, 1fr) 88px 30px; } .legend { font-size: .91rem; } .timeline-heading { gap: 8px; } }
+    @media print { :root { background: white; } .input-panel, .skip-link, .download-panel { display: none; } .workspace { display: block; } .panel { border: 0; box-shadow: none; padding: 12px 0; } .table-scroll { overflow: visible; border: 0; } table { min-width: 0; font-size: .65rem; } th, td { padding: 5px; } }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#timing-form">Skip to the timing inputs</a>
+  <header>
+    <div class="brand"><span>RecallWeave · Dependency timing</span><span class="badge">Works offline</span></div>
+    <h1>See what sets the finish time.</h1>
+    <p class="lede">Give each job a duration. Follow parallel prerequisites, compare earliest and latest times, and find every critical branch that leaves no total slack.</p>
+    <p class="legend"><strong>X → Y</strong> means <strong>X must finish before Y can start</strong>. Durations use abstract time units. Jobs may run in parallel without a worker limit.</p>
+    <nav aria-label="Related graph lesson"><a href="dependency-graphs-explorer.html">Explore prerequisite order</a><a href="dependency-graphs.md">Read the original graph course guide</a></nav>
+  </header>
+  <main>
+    <noscript><p class="error">Enable JavaScript to calculate locally. The graph course guide remains available from the link above.</p></noscript>
+    <div class="workspace">
+      <section class="panel input-panel" aria-labelledby="input-heading">
+        <p class="eyebrow">1 · State the plan</p>
+        <h2 id="input-heading">Jobs, arrows and durations</h2>
+        <form id="timing-form" novalidate>
+          <label for="jobs-input">Job names</label>
+          <textarea id="jobs-input" rows="5" maxlength="8192" spellcheck="false" autocomplete="off" aria-describedby="jobs-help graph-help"></textarea>
+          <p id="jobs-help" class="help">1–8 unique, case-sensitive names, one per line. Each name may contain 1–32 Unicode characters, without arrows or control characters.</p>
+          <label for="edges-input">Prerequisite arrows</label>
+          <textarea id="edges-input" rows="5" maxlength="8192" spellcheck="false" autocomplete="off" aria-describedby="edges-help graph-help"></textarea>
+          <p id="edges-help" class="help">Use exact names: <code>A -&gt; B</code> or <code>A → B</code>, one arrow per line. At most 64 distinct arrows. Blank means no dependencies.</p>
+          <p id="graph-help" class="help">Blank lines and outer spaces are ignored. Tabs and control characters are refused. The combined graph draft may contain at most 8 KiB of UTF-8 text.</p>
+          <fieldset>
+            <legend>Duration of each job</legend>
+            <p id="duration-help" class="help">Enter digits for a whole number from <strong>0 to 1,000,000</strong> in the same abstract time unit. Zero means a milestone. Blank values, fractions, signs, exponents and commas are refused; outer spaces and leading zeroes are accepted.</p>
+            <div id="duration-inputs"></div>
+            <p id="duration-draft-note" class="help"></p>
+          </fieldset>
+          <button id="calculate-timing" class="primary" type="submit">Calculate timing</button>
+          <button id="reset-example" class="secondary" type="button">Reset to two-branch example</button>
+          <p id="timing-error" class="error" role="alert" tabindex="-1" hidden></p>
+        </form>
+        <p id="timing-status" class="status" role="status" aria-live="polite"></p>
+        <h3>Try a different shape</h3>
+        <div class="examples">
+          <button type="button" data-example="branches">Two critical branches<span>A tie, a milestone and a non-tight arrow</span></button>
+          <button type="button" data-example="milestones">Only milestones<span>Zero durations still have prerequisites</span></button>
+          <button type="button" data-example="cycle">Cycle and downstream<span>Why timing needs an acyclic graph</span></button>
+        </div>
+        <p id="example-note" class="small"></p>
+        <p class="small">Examples replace the draft. Every edit clears the calculation and its download. Choose Calculate timing to calculate again.</p>
+      </section>
+      <section id="timing-empty" class="panel empty" aria-labelledby="empty-heading">
+        <p class="eyebrow">2 · Compare what can overlap</p>
+        <h2 id="empty-heading">Calculate this draft when you are ready</h2>
+        <p>The result will show each job’s earliest and latest times, its total slack, and all critical links. The starting example has two equal branches and a zero-duration finish milestone.</p>
+        <p class="small">An edited graph has no retained calculation. Your inputs stay only in this tab; reloading starts the example again.</p>
+      </section>
+      <section id="timing-results" class="panel" aria-labelledby="results-heading" hidden>
+        <p class="eyebrow">2 · Read the timing</p>
+        <h2 id="results-heading" tabindex="-1">Timing for these inputs</h2>
+        <p id="result-summary" class="small"></p>
+        <div id="acyclic-results" hidden>
+          <div class="summary-grid">
+            <div class="summary-card finish"><strong id="project-duration"></strong><span>Earliest finish · time units from 0</span></div>
+            <div class="summary-card"><strong id="critical-count"></strong><span>Critical jobs · zero total slack</span></div>
+            <div class="summary-card"><strong id="job-count"></strong><span>Jobs in this plan</span></div>
+          </div>
+          <p class="assumption-note"><strong>Unlimited parallelism:</strong> independent ready jobs may run together. Durations are fixed integers, dependencies have zero lag, and latest times use this earliest project finish as their deadline.</p>
+          <h3 id="timeline-heading">Parallel earliest and latest schedules</h3>
+          <figure aria-labelledby="timeline-heading">
+            <div class="timeline-legend"><span><i class="key earliest" aria-hidden="true"></i>Solid: earliest</span><span><i class="key latest" aria-hidden="true"></i>Outline: latest</span><span><i class="key critical" aria-hidden="true"></i>Rust: critical</span></div>
+            <div class="timeline-axis" aria-hidden="true"><span>0</span><span id="timeline-end"></span></div>
+            <ol id="timeline-rows"></ol>
+            <figcaption>All rows share the same time scale. Diamonds mark zero-duration milestones. Short intervals may appear as thin bars; the times below each name and in the table remain exact.</figcaption>
+          </figure>
+          <p id="zero-duration-note" class="zero-note" hidden>All jobs are milestones at time 0. The arrows still determine which prerequisite must finish before a dependent job starts.</p>
+          <h3 id="table-heading">Exact times and total slack</h3>
+          <p class="help">Scroll the table horizontally if needed. Its scroll area is keyboard-focusable.</p>
+          <div class="table-scroll" tabindex="0" aria-labelledby="table-heading">
+            <table id="timing-table">
+              <caption>Every value uses the same abstract time unit. ES/EF are earliest start/finish; LS/LF are latest start/finish.</caption>
+              <thead><tr><th scope="col">Job</th><th scope="col">Direct prerequisites</th><th scope="col">Duration</th><th scope="col">ES</th><th scope="col">EF</th><th scope="col">LS</th><th scope="col">LF</th><th scope="col">Total slack</th><th scope="col">Role</th></tr></thead>
+              <tbody id="timing-rows"></tbody>
+            </table>
+          </div>
+          <details>
+            <summary>How to read these times</summary>
+            <dl class="definitions">
+              <div><dt>Earliest start and finish</dt><dd>A job starts after all its prerequisites finish. Its finish is its start plus its duration.</dd></div>
+              <div><dt>Latest start and finish</dt><dd>The latest schedule keeps the whole plan’s earliest finish unchanged, including every terminal job.</dd></div>
+              <div><dt>Total slack</dt><dd>Latest start minus earliest start. It measures this job’s allowable delay while preserving the project finish; connected jobs cannot always spend their slack independently.</dd></div>
+              <div><dt>Critical job</dt><dd>A job with zero total slack. More than one branch may be critical, and a zero-duration milestone can be critical too.</dd></div>
+            </dl>
+          </details>
+          <h3>Critical jobs</h3>
+          <ul id="critical-jobs" aria-label="All jobs with zero total slack"></ul>
+          <h3>Every critical branch</h3>
+          <p class="small">These are all <strong>tight critical arrows</strong>: both jobs have zero total slack, and the first job’s earliest finish equals the next job’s earliest start. A shortcut arrow can join critical jobs without itself being critical.</p>
+          <ul id="critical-edges" aria-label="All tight critical arrows"></ul>
+          <p id="no-critical-edges" class="small" hidden>This graph has no tight critical arrows. Its critical jobs are still listed above.</p>
+          <details id="all-dependencies">
+            <summary>Inspect every prerequisite arrow</summary>
+            <p class="small">The source must finish before the target starts. A gap between these earliest times makes an arrow non-tight.</p>
+            <p id="no-dependencies" class="small" hidden>No arrows were entered. Every job is independent.</p>
+            <div id="dependency-table-wrap" class="table-scroll" tabindex="0" aria-label="Every prerequisite arrow and its timing">
+              <table id="dependency-table"><thead><tr><th scope="col">Arrow</th><th scope="col">Source earliest finish</th><th scope="col">Target earliest start</th><th scope="col">Critical branch?</th></tr></thead><tbody id="dependency-rows"></tbody></table>
+            </div>
+          </details>
+        </div>
+        <section id="cycle-results" class="cycle-panel" aria-labelledby="cycle-heading" hidden>
+          <h3 id="cycle-heading">Fix the cycle before calculating timing</h3>
+          <p>Timing requires an acyclic prerequisite graph, including when durations are zero. No partial project finish or critical path is reported for this input.</p>
+          <h3>Jobs on a cycle</h3>
+          <ul id="cycle-groups"></ul>
+          <h3>Downstream, but not cycle members</h3>
+          <div id="blocked-jobs"></div>
+          <p class="small">An independent job may still be ready in the prerequisite lesson. That does not give this complete graph a valid timing plan.</p>
+        </section>
+        <section class="download-panel" aria-labelledby="download-heading">
+          <h3 id="download-heading">Keep this exact calculation</h3>
+          <p class="small">Download a local JSON trace with the arrow convention, assumptions, accepted graph, durations and complete calculated results. It contains no timestamp or calendar estimate.</p>
+          <button id="download-trace" type="button" disabled>Download timing trace (.json)</button>
+          <p id="download-status" class="status" role="status" aria-live="polite"></p>
+        </section>
+      </section>
+    </div>
+  </main>
+  <footer>
+    <p>This optional timing extension goes beyond the original twelve graph questions. It models deterministic durations and unlimited parallelism; it does not estimate staffing, resource contention or calendars. It makes no claim about measured learning gains.</p>
+    <p>The timing page and trace download work offline as one HTML file. The lesson links use the repository folder layout. No account, provider request or automatic storage is used. This interface is an AI-assisted HAMON contribution, 60b2c08feb01; original course content and attribution remain unchanged.</p>
+  </footer>
+  <script>
+@@TIMING_SCRIPT@@
+  </script>
+</body>
+</html>
