@@ -1,0 +1,31 @@
+--- a/courses/minimum-spanning-forest.json
++++ b/courses/minimum-spanning-forest.json
+@@ -86,7 +86,7 @@
+         "It guarantees the shortest route from A to every remaining vertex."
+       ],
+       "answer": 0,
+-      "explanation": "The boundary separates {A, B} from the other vertices, and no already accepted edge crosses it. A lightest edge across that boundary is compatible with a minimum spanning forest extending the accepted choices. If it is already in a compatible minimum forest, no exchange is needed. Otherwise add it: inside its original connected component, this creates a cycle. Remove another crossing edge of at least the chosen weight to retain a minimum forest containing the chosen edge. Kruskal combines weight order with the rule that a newly accepted edge must join different components.",
++      "explanation": "The boundary separates {A, B} from the other vertices, and no already accepted edge crosses it. A lightest edge across that boundary is compatible with a minimum spanning forest extending the accepted choices. If a compatible minimum spanning forest uses a heavier crossing edge, exchanging along the resulting cycle cannot increase its weight. Kruskal combines the weight order with the rule that a newly accepted edge must join different components.",
+       "transfer": "If two crossing edges both have the smallest weight, either may be a safe choice. That does not mean both must be included: adding later edges still needs a cycle check. A tie can produce different minimum spanning forests with the same total weight."
+     },
+     {
+--- a/courses/minimum-spanning-forest.md
++++ b/courses/minimum-spanning-forest.md
+@@ -35,7 +35,7 @@
+ 
+ The accepted edges always form a forest. If two endpoints already have an accepted path between them, adding their edge creates a cycle; that is why it must be rejected. An accepted edge joins two separate trees and lowers the number of components by one.
+ 
+-The greedy choice is supported by the cut property: a lightest edge crossing a component boundary that no accepted edge crosses can extend a compatible minimum spanning forest. If a compatible minimum forest already contains the chosen edge, it is immediately a valid extension. Otherwise, within the original connected component, adding that edge to the component's minimum tree creates a cycle containing another edge crossing the same boundary. Removing a suitable crossing edge of at least as much weight restores that component's tree without increasing its total. The trees of other original components remain unchanged. Thus the statement also applies when the whole graph is disconnected. Equal weights can leave several minimum spanning forests available.
++The greedy choice is supported by the cut property: a lightest edge crossing a component boundary that no accepted edge crosses can extend a compatible minimum spanning forest. Within the original connected component, adding that edge to a compatible minimum tree creates a cycle containing another edge crossing the same boundary. Removing a suitable crossing edge of at least as much weight restores that component's tree without increasing its total. The trees of other original components remain unchanged. Thus the statement also applies when the whole graph is disconnected. Equal weights can leave several minimum spanning forests available.
+ 
+ The explorer inspects **every input edge**, including edges that would be unnecessary to examine after a connected tree has already formed. Its decision count therefore equals the number of input edges. It is not a sorting-comparison count, a count of component lookups, or a measurement of runtime. Rendering and input validation are excluded. The trace includes explicit component snapshots for learning, not a claim about the storage cost of an optimized implementation.
+ 
+@@ -125,7 +125,7 @@
+ 
+ **Correct answer:** It joins two components, and the cut property allows a lightest edge across this component boundary in some minimum spanning forest extending the accepted forest.
+ 
+-The boundary separates {A, B} from the other vertices, and no already accepted edge crosses it. A lightest edge across that boundary is compatible with a minimum spanning forest extending the accepted choices. If it is already in a compatible minimum forest, no exchange is needed. Otherwise add it: inside its original connected component, this creates a cycle. Remove another crossing edge of at least the chosen weight to retain a minimum forest containing the chosen edge. Kruskal combines weight order with the rule that a newly accepted edge must join different components.
++The boundary separates {A, B} from the other vertices, and no already accepted edge crosses it. A lightest edge across that boundary is compatible with a minimum spanning forest extending the accepted choices. If a compatible minimum spanning forest uses a heavier crossing edge, exchanging along the resulting cycle cannot increase its weight. Kruskal combines the weight order with the rule that a newly accepted edge must join different components.
+ 
+ **Transfer:** If two crossing edges both have the smallest weight, either may be a safe choice. That does not mean both must be included: adding later edges still needs a cycle check. A tie can produce different minimum spanning forests with the same total weight.
+ 

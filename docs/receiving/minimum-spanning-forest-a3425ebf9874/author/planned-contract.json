@@ -1,0 +1,43 @@
+{
+  "format": "recallweave.minimum-spanning-forest-contract/1",
+  "created_at": "2026-10-08T17:27:00Z",
+  "pureHelper": "traceMinimumSpanningForest(vertexCount, edges)",
+  "parser": "parseForestInput(vertexCountText, edgeText)",
+  "vertices": "integer 1–8; endpoint integer indices 0…n−1",
+  "edges": "dense array; simple undirected graph, no self-loop or repeated unordered pair; weight integer −99…99; ignore extra record keys; copy from/to orientation exactly",
+  "ordering": "ascending weight then original input array index",
+  "resultFields": [
+    "format",
+    "vertexCount",
+    "edges",
+    "orderedEdgeIds",
+    "steps",
+    "forestEdgeIds",
+    "totalWeight",
+    "components",
+    "connected",
+    "decisions"
+  ],
+  "edgeFields": [
+    "id",
+    "from",
+    "to",
+    "weight"
+  ],
+  "stepFields": [
+    "number",
+    "edgeId",
+    "from",
+    "to",
+    "weight",
+    "accepted",
+    "beforeComponents",
+    "afterComponents",
+    "acceptedEdgeIds",
+    "totalWeight"
+  ],
+  "trace": "one 1-based step for every sorted edge; accept iff separate before components; all snapshots detached and deeply frozen; sorted vertex groups ordered by smallest vertex; isolates included; decisions=edges.length",
+  "completion": "minimum spanning tree when final components.length===1, otherwise one minimum tree per original component; n=1 empty graph is connected",
+  "parserGrammar": "count trimmed single digit1–8; one nonblank line per edge, single case-insensitive ASCII endpoint letters and signed decimal integer weight separated by spaces/tabs; optional+/- and leading zeros; blank lines ignored; no commas/comments/exponents/decimals",
+  "inputImmutability": "never mutate caller arrays or records, including additional record fields"
+}
