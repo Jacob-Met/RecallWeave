@@ -1,0 +1,725 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f4f3ed">
+  <meta name="description" content="Explore how hypothetical responses change RecallWeave's illustrative model estimate, one calculation at a time.">
+  <title>How an estimate changes · RecallWeave</title>
+  <style>
+:root {
+  color-scheme: light;
+  --paper: #f4f3ed; --ink: #202b28; --muted: #53645c; --line: #d5dcd3;
+  --green: #245d4c; --mint: #e3ece3; --lime: #d9ef94; --orange: #8d4c32; --white: #fffefa;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--paper); color: var(--ink); font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+button, input, select { font: inherit; }
+button, a, input, select, summary { -webkit-tap-highlight-color: transparent; }
+button, select, summary { cursor: pointer; }
+button { line-height: 1.35; }
+button:disabled, select:disabled { cursor: default; opacity: .48; }
+a { color: var(--green); text-underline-offset: 4px; }
+:focus-visible { outline: 3px solid var(--orange); outline-offset: 4px; }
+[hidden] { display: none !important; }
+.skip-link { position: fixed; top: -80px; left: 20px; z-index: 3; background: var(--white); padding: 10px 18px; border: 1px solid var(--green); }
+.skip-link:focus { top: 12px; }
+.topbar { max-width: 1256px; margin: auto; min-height: 99px; padding: 20px 36px; display: flex; align-items: center; justify-content: space-between; gap: 20px; border-bottom: 1px solid var(--line); }
+.brand { display: inline-flex; align-items: center; color: var(--ink); text-decoration: none; font-size: 22px; font-weight: 700; letter-spacing: -.9px; }
+.brand > span:last-child { font-weight: 400; }
+.brand-mark { background: var(--green); color: var(--paper); width: 31px; height: 34px; display: inline-grid; place-items: center; margin-right: 11px; border-radius: 12px 4px 12px 4px; font: italic 29px Georgia, serif; }
+.local-badge, .eyebrow, .step-label, .tag, footer { font: 10px/1.5 ui-monospace, "SFMono-Regular", Menlo, monospace; letter-spacing: 1.1px; }
+.local-badge { color: var(--muted); }
+main { max-width: 1256px; margin: auto; padding: 0 36px; }
+.intro { max-width: 810px; padding: 56px 0 39px; }
+.eyebrow { color: var(--green); margin-bottom: 18px; }
+h1, h2, h3 { margin: 0; font-weight: 400; }
+h1 { font: 52px/1.07 Georgia, "Times New Roman", serif; letter-spacing: -1.8px; }
+h1 em { color: var(--green); }
+.lede { max-width: 690px; font-size: 18px; line-height: 1.6; margin: 23px 0 15px; }
+.scope-note { max-width: 690px; color: var(--muted); font-size: 13px; line-height: 1.65; border-left: 2px solid #a3b49e; padding-left: 15px; margin: 0; }
+.workspace { display: grid; grid-template-columns: minmax(260px, 340px) minmax(0, 1fr); align-items: start; gap: 24px; }
+.panel { background: var(--white); border: 1px solid var(--line); border-radius: 12px; padding: 27px; }
+.section-heading { display: flex; gap: 12px; align-items: center; justify-content: space-between; margin-bottom: 17px; }
+.step-label { color: var(--green); }
+.tag { color: var(--muted); font-size: 9px; letter-spacing: .6px; white-space: nowrap; }
+h2 { font: 25px/1.2 Georgia, "Times New Roman", serif; letter-spacing: -.5px; }
+.panel > p, .assumptions > p { font-size: 13px; color: var(--muted); margin: 12px 0 20px; }
+.parameter { display: grid; grid-template-columns: minmax(0, 1fr) 71px; gap: 7px 12px; padding: 17px 0; border-bottom: 1px solid var(--line); }
+.parameter label { font-size: 13px; line-height: 1.4; font-weight: 600; }
+.parameter label span { display: block; font-size: 11px; font-weight: 400; color: var(--muted); padding-top: 3px; }
+.parameter input { align-self: start; min-width: 0; width: 100%; padding: 8px 5px 8px 9px; border: 1px solid #9baea2; border-radius: 5px; color: var(--green); background: #f8faf5; font: 14px/1.4 ui-monospace, Menlo, monospace; }
+.parameter p { grid-column: 1 / -1; margin: 0; color: var(--muted); font-size: 11px; line-height: 1.5; }
+.form-actions { margin-top: 20px; display: flex; flex-direction: column; gap: 10px; align-items: stretch; }
+.primary, .secondary { background: var(--green); color: var(--white); border: 1px solid var(--green); border-radius: 5px; padding: 12px 15px; font-size: 12px; font-weight: 600; }
+.primary:hover:not(:disabled), .secondary:hover:not(:disabled) { background: #194638; }
+.text-button { border: 0; background: transparent; color: var(--green); padding: 8px 0; font-size: 11px; text-decoration: underline; text-underline-offset: 4px; }
+.small-note { font-size: 11px; line-height: 1.6; color: var(--muted); }
+#draft-status { min-height: 35px; margin-bottom: 0; }
+.notice { border-left: 3px solid var(--orange); padding: 9px 0 9px 12px; }
+.main-column { display: grid; gap: 24px; min-width: 0; }
+.response-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.response-button { flex: 1; min-width: 180px; border: 1px solid #98af9d; border-radius: 5px; background: var(--mint); color: var(--green); padding: 12px 14px; font-size: 12px; font-weight: 600; }
+.response-button span { margin-right: 5px; }
+.response-button.incorrect { background: #f7eee6; color: var(--orange); border-color: #d9bca9; }
+.response-button:hover:not(:disabled) { filter: brightness(.96); }
+.history-actions { display: flex; flex-wrap: wrap; gap: 22px; margin-top: 4px; }
+.status { min-height: 18px; margin: 9px 0 16px !important; font-size: 12px !important; }
+.status.error { color: #973b23; }
+.empty-state { padding: 20px; border: 1px dashed #b6c2b5; border-radius: 5px; }
+.history { list-style: none; padding: 0; margin: 0; display: grid; gap: 7px; max-height: 292px; overflow-y: auto; }
+.history li { display: flex; gap: 8px; align-items: stretch; padding: 4px; border: 1px solid var(--line); border-radius: 5px; }
+.history li.selected { border-color: var(--green); background: #f0f5e8; }
+.history-inspect { flex: 1; min-width: 0; display: flex; align-items: center; gap: 9px; text-align: left; padding: 7px 8px; border: 0; border-radius: 3px; background: transparent; color: var(--ink); font-size: 12px; }
+.history-number { display: inline-grid; place-items: center; width: 23px; height: 23px; border-radius: 50%; background: #e1e9db; color: var(--green); font: 10px ui-monospace, monospace; flex-shrink: 0; }
+.history-change { color: var(--muted); margin-left: auto; font: 11px ui-monospace, monospace; white-space: nowrap; }
+.history select { width: 108px; max-width: 35%; border: 1px solid var(--line); border-radius: 4px; background: var(--white); color: var(--ink); padding: 5px; font-size: 11px; }
+.calculation > p { max-width: 590px; }
+.stages { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin: 22px 0 26px; }
+.stage { border-top: 2px solid #b4c1af; padding: 16px 10px 14px; background: #f4f5ee; border-radius: 0 0 5px 5px; }
+.stage.evidence { background: #eaf1e8; border-color: var(--green); }
+.stage.learning { background: #edf5d9; border-color: #7a9b32; }
+.stage-title { display: block; font-size: 10px; font-weight: 600; }
+.stage output { display: block; margin: 7px 0; font: 32px/1.1 Georgia, "Times New Roman", serif; letter-spacing: -1px; color: var(--green); }
+.stage-detail { display: block; font-size: 10px; color: var(--muted); line-height: 1.5; }
+h3 { font-size: 14px; font-weight: 600; margin-top: 22px; }
+#calculation-detail > p { color: var(--muted); font-size: 12px; margin: 9px 0 15px; }
+.arithmetic { margin: 18px 0 28px; font-size: 11px; }
+.arithmetic div { display: flex; justify-content: space-between; align-items: baseline; gap: 15px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+.arithmetic dt { color: var(--muted); }
+.arithmetic dd { margin: 0; text-align: right; font-family: ui-monospace, "SFMono-Regular", Menlo, monospace; overflow-wrap: anywhere; }
+.arithmetic .result-line { color: var(--green); font-weight: 600; }
+.equation { background: #f1f5e8; padding: 13px; border-radius: 5px; font-family: ui-monospace, Menlo, monospace; overflow-wrap: anywhere; }
+.precision { border-top: 1px solid var(--line); padding-top: 15px; }
+.precision summary { color: var(--green); font-size: 11px; }
+.precision pre { white-space: pre-wrap; overflow-wrap: anywhere; font: 10px/1.7 ui-monospace, Menlo, monospace; padding: 12px; background: #f4f5ee; border-radius: 5px; }
+.takeaway { display: flex; gap: 24px; align-items: center; justify-content: space-between; background: #e6edde; }
+.takeaway h2 { margin-top: 11px; }
+.takeaway output { font-size: 36px; color: var(--green); margin-right: 10px; }
+.takeaway h2 span { display: inline-block; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 11px; letter-spacing: 0; color: var(--muted); }
+.takeaway p { font-size: 11px; margin: 9px 0 0; color: var(--muted); }
+.takeaway button { max-width: 190px; flex-shrink: 0; }
+.reading-note { margin: 46px 0; padding-top: 30px; border-top: 1px solid var(--line); max-width: 990px; }
+.reading-note h2 { font-size: 24px; }
+.reading-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; font-size: 12px; color: var(--muted); }
+.reading-note > .small-note { max-width: 830px; }
+footer { max-width: 1256px; margin: auto; padding: 24px 36px 35px; border-top: 1px solid var(--line); display: flex; justify-content: space-between; gap: 20px; color: var(--muted); font-size: 9px; }
+@media (min-width: 1050px) { .assumptions { position: sticky; top: 20px; } }
+@media (max-width: 900px) {
+  .workspace { grid-template-columns: minmax(235px, 285px) minmax(0, 1fr); gap: 18px; }
+  .panel { padding: 21px; }
+  .history-inspect { flex-wrap: wrap; gap: 5px; }
+  .history-change { width: 100%; margin-left: 28px; }
+  .stage output { font-size: 26px; }
+  .stage { padding: 12px 7px; }
+  .arithmetic div { flex-direction: column; gap: 5px; }
+  .arithmetic dd { text-align: left; }
+  .takeaway { align-items: flex-start; flex-direction: column; gap: 18px; }
+}
+@media (max-width: 690px) {
+  .topbar { padding: 17px 22px; min-height: 78px; }
+  .local-badge { font-size: 8px; max-width: 130px; text-align: right; }
+  main { padding: 0 22px; }
+  .intro { padding: 35px 0 28px; }
+  h1 { font-size: 40px; letter-spacing: -1.3px; }
+  .lede { font-size: 15px; margin-top: 20px; }
+  .scope-note { font-size: 11px; }
+  .workspace { grid-template-columns: 1fr; gap: 20px; }
+  .panel { padding: 21px; border-radius: 9px; }
+  .parameter { grid-template-columns: minmax(0, 1fr) 82px; }
+  .parameter p { grid-column: 1; }
+  .history-inspect { flex-wrap: nowrap; }
+  .history-change { width: auto; margin-left: auto; font-size: 9px; }
+  .stage output { font-size: 27px; }
+  .stage-title { font-size: 9px; }
+  .stage-detail { font-size: 9px; }
+  .stages { gap: 7px; }
+  .history select { width: 97px; }
+  .reading-columns { grid-template-columns: 1fr; gap: 0; }
+  .reading-note { margin: 32px 0; padding-top: 25px; }
+  footer { padding: 22px; flex-direction: column; gap: 12px; }
+}
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+
+</style>
+  <script>
+(() => {
+'use strict';
+const __recallweaveWalkthroughModules = Object.create(null);
+__recallweaveWalkthroughModules['./knowledge.mjs'] = (() => {
+/**
+ * Transparent Bayesian Knowledge Tracing and adaptive item selection.
+ * Parameters are pedagogical defaults, not fitted or validated estimates.
+ * @typedef {{id:string, concept:string, prerequisites:string[], options:string[], answer:number, prompt:string, explanation:string, transfer:string}} Item
+ * @typedef {{initial:number, learn:number, guess:number, slip:number}} BktParameters
+ */
+const DEFAULT_BKT = Object.freeze({ initial: 0.22, learn: 0.18, guess: 0.2, slip: 0.1 });
+const clamp = (value, min = 0, max = 1) => Math.min(max, Math.max(min, value));
+
+/** Bernoulli entropy in bits. @param {number} p */
+function entropy(p) {
+  const q = clamp(p);
+  if (q === 0 || q === 1) return 0;
+  return -q * Math.log2(q) - (1 - q) * Math.log2(1 - q);
+}
+
+/**
+ * One BKT update. Correctness is evidence, not certainty; a guess and a slip remain possible.
+ * @param {number} prior
+ * @param {boolean} correct
+ * @param {BktParameters} parameters
+ */
+function updateMastery(prior, correct, parameters = DEFAULT_BKT) {
+  const p = clamp(prior);
+  const { guess, slip, learn } = parameters;
+  for (const [key, value] of Object.entries(parameters)) {
+    if (!Number.isFinite(value) || value < 0 || value > 1) throw new RangeError(`${key} must be in [0,1]`);
+  }
+  const pCorrect = p * (1 - slip) + (1 - p) * guess;
+  const posterior = correct ? p * (1 - slip) / pCorrect : p * slip / (p * slip + (1 - p) * (1 - guess));
+  return clamp(posterior + (1 - posterior) * learn);
+}
+
+/** Expected reduction in uncertainty from an item response under its concept mastery.
+ * @param {number} mastery
+ * @param {BktParameters} parameters
+ */
+function expectedInformationGain(mastery, parameters = DEFAULT_BKT) {
+  const p = clamp(mastery);
+  const { guess, slip } = parameters;
+  const pCorrect = p * (1 - slip) + (1 - p) * guess;
+  const correctPosterior = p * (1 - slip) / pCorrect;
+  const wrongPosterior = p * slip / (p * slip + (1 - p) * (1 - guess));
+  return Math.max(0, entropy(p) - pCorrect * entropy(correctPosterior) - (1 - pCorrect) * entropy(wrongPosterior));
+}
+
+/**
+ * Select an unseen item maximizing uncertainty reduction plus prerequisite repair.
+ * Tie-break is stable by item id, making the choice reproducible.
+ * @param {Item[]} items
+ * @param {Set<string>} asked
+ * @param {Record<string,number>} mastery
+ * @param {BktParameters} parameters
+ * @returns {Item|null}
+ */
+function selectNextItem(items, asked, mastery, parameters = DEFAULT_BKT) {
+  const candidates = items.filter(item => !asked.has(item.id));
+  if (!candidates.length) return null;
+  const score = item => {
+    const m = mastery[item.concept] ?? parameters.initial;
+    // Prefer a weak concept that unlocks several still-unanswered downstream ideas.
+    const downstream = candidates.filter(next => next.id !== item.id && next.prerequisites.includes(item.concept)).length;
+    const prerequisiteRepair = (1 - m) * Math.min(3, downstream) * 0.12;
+    return expectedInformationGain(m, parameters) + prerequisiteRepair;
+  };
+  return candidates.sort((a, b) => score(b) - score(a) || a.id.localeCompare(b.id))[0];
+}
+
+/** Clone session probabilities so learners' local run has no shared state. */
+function initialMastery(concepts, parameters = DEFAULT_BKT) {
+  return Object.fromEntries(concepts.map(concept => [concept, parameters.initial]));
+}
+
+/**
+ * Reproducible toy learner run; simulated evidence is never real learner data.
+ * @param {Item[]} items
+ * @param {string[]} concepts
+ * @param {Record<string,number>} latentKnowledge simulated probability of knowing each concept
+ * @param {boolean} adaptive use the information-gain selector, or fixed deck order
+ * @param {number} seed deterministic pseudo-random seed
+ */
+function runLearnerSimulation(items, concepts, latentKnowledge, adaptive = true, seed = 20261005) {
+  let state = seed >>> 0 || 1;
+  const random = () => {
+    state ^= state << 13; state ^= state >>> 17; state ^= state << 5;
+    return (state >>> 0) / 4294967296;
+  };
+  const stateByConcept = initialMastery(concepts);
+  const asked = new Set();
+  const trace = [];
+  while (asked.size < items.length) {
+    const item = adaptive ? selectNextItem(items, asked, stateByConcept) : items.find(candidate => !asked.has(candidate.id));
+    const knowledge = clamp(latentKnowledge[item.concept] ?? 0.5);
+    const correct = random() < 0.18 + knowledge * 0.72;
+    asked.add(item.id);
+    stateByConcept[item.concept] = updateMastery(stateByConcept[item.concept], correct);
+    trace.push({ item: item.id, concept: item.concept, correct });
+  }
+  const meanEstimatedMastery = concepts.reduce((sum, concept) => sum + stateByConcept[concept], 0) / concepts.length;
+  return { trace, mastery: stateByConcept, meanEstimatedMastery };
+}
+
+return { DEFAULT_BKT, entropy, updateMastery, expectedInformationGain, selectNextItem, initialMastery, runLearnerSimulation };
+})();
+
+__recallweaveWalkthroughModules['./model-walkthrough.mjs'] = (() => {
+const { DEFAULT_BKT, updateMastery } = __recallweaveWalkthroughModules['./knowledge.mjs'];
+
+const MAX_WALKTHROUGH_RESPONSES = 24;
+const parameterNames = ['initial', 'guess', 'slip', 'learn'];
+
+/** Copy a complete set of explicit probabilities; never coerce text or change defaults. */
+function walkthroughParameters(input = DEFAULT_BKT) {
+  if (!input || typeof input !== 'object' || Array.isArray(input)) {
+    throw new TypeError('Supply initial, guess, slip, and learn probabilities.');
+  }
+  if (Object.keys(input).some(key => !parameterNames.includes(key))) {
+    throw new TypeError('Only initial, guess, slip, and learn are supported.');
+  }
+  const result = {};
+  for (const key of parameterNames) {
+    const value = input[key];
+    if (typeof value !== 'number' || !Number.isFinite(value) || value < 0 || value > 1) {
+      throw new RangeError(`${key} must be a finite number from 0 to 1.`);
+    }
+    result[key] = value;
+  }
+  return Object.freeze(result);
+}
+
+/**
+ * Explain one finite update using the shipped model's operation order.
+ * The displayed next value is the actual updateMastery return, not a second model.
+ * A zero likelihood has no conditional estimate; refuse it before a 0/0 result.
+ */
+function explainMasteryUpdate(priorInput, correct, input = DEFAULT_BKT) {
+  const parameters = walkthroughParameters(input);
+  if (typeof priorInput !== 'number' || !Number.isFinite(priorInput)) {
+    throw new RangeError('The prior must be a finite number.');
+  }
+  if (typeof correct !== 'boolean') throw new TypeError('A response must be correct or incorrect.');
+  const prior = Math.min(1, Math.max(0, priorInput));
+  const knownLikelihood = correct ? 1 - parameters.slip : parameters.slip;
+  const unknownLikelihood = correct ? parameters.guess : 1 - parameters.guess;
+  const knownContribution = prior * knownLikelihood;
+  const unknownContribution = (1 - prior) * unknownLikelihood;
+  const responseLikelihood = knownContribution + unknownContribution;
+  if (responseLikelihood === 0) {
+    throw new RangeError(`This ${correct ? 'correct' : 'incorrect'} response has zero probability under these assumptions at JavaScript precision. There is no conditional estimate; change the assumptions or the response.`);
+  }
+  const posterior = knownContribution / responseLikelihood;
+  const learningContribution = (1 - posterior) * parameters.learn;
+  const beforeFinalClipping = posterior + learningContribution;
+  const next = updateMastery(priorInput, correct, parameters);
+  if (!Number.isFinite(next)) throw new RangeError('The model did not return a finite estimate.');
+  return Object.freeze({
+    correct, priorInput, prior, priorClipped: prior !== priorInput,
+    knownLikelihood, unknownLikelihood, knownContribution, unknownContribution,
+    responseLikelihood, posterior, evidenceChange: posterior - prior,
+    learningContribution, beforeFinalClipping, clippingChange: next - beforeFinalClipping,
+    next, totalChange: next - prior
+  });
+}
+
+/** Build a new immutable trace atomically; no input array or parameter object is changed. */
+function createWalkthrough(responses = [], input = DEFAULT_BKT) {
+  const parameters = walkthroughParameters(input);
+  if (!Array.isArray(responses) || responses.length > MAX_WALKTHROUGH_RESPONSES) {
+    throw new RangeError(`Use an array of at most ${MAX_WALKTHROUGH_RESPONSES} hypothetical responses.`);
+  }
+  const steps = [];
+  let prior = parameters.initial;
+  for (let index = 0; index < responses.length; index++) {
+    // An indexed loop also refuses sparse arrays rather than silently skipping holes.
+    try {
+      const step = explainMasteryUpdate(prior, responses[index], parameters);
+      steps.push(step);
+      prior = step.next;
+    } catch (error) {
+      throw new RangeError(`Response ${index + 1}: ${error.message}`);
+    }
+  }
+  return Object.freeze({
+    parameters, responses: Object.freeze([...responses]),
+    steps: Object.freeze(steps), finalMastery: prior
+  });
+}
+
+/** Readable, full JavaScript precision export of the applied hypothetical trace. */
+function walkthroughText(trace) {
+  const verified = createWalkthrough(trace.responses, trace.parameters);
+  const lines = [
+    'RecallWeave — model walkthrough',
+    'Hypothetical responses for one concept. No learner session was read or changed.',
+    'Model state, not a grade or a calibrated guarantee of knowledge.',
+    'The defaults are illustrative. Arithmetic below uses full JavaScript number precision.',
+    '',
+    'Applied assumptions',
+    ...parameterNames.map(key => `${key}: ${verified.parameters[key]}`),
+    ''
+  ];
+  if (!verified.steps.length) lines.push('No responses. The estimate is the initial assumption.');
+  verified.steps.forEach((step, index) => {
+    lines.push(
+      `Response ${index + 1}: ${step.correct ? 'correct' : 'incorrect'}`,
+      `  prior: ${step.prior}`,
+      `  known contribution: ${step.prior} × ${step.knownLikelihood} = ${step.knownContribution}`,
+      `  not-yet-known contribution: ${1 - step.prior} × ${step.unknownLikelihood} = ${step.unknownContribution}`,
+      `  response likelihood: ${step.responseLikelihood}`,
+      `  posterior: ${step.knownContribution} / ${step.responseLikelihood} = ${step.posterior}`,
+      `  evidence change: ${step.evidenceChange}`,
+      `  learning contribution: ${1 - step.posterior} × ${verified.parameters.learn} = ${step.learningContribution}`,
+      `  before final clipping: ${step.beforeFinalClipping}`,
+      `  clipping change: ${step.clippingChange}`,
+      `  updateMastery return: ${step.next}`,
+      ''
+    );
+  });
+  lines.push(`Final model estimate: ${verified.finalMastery}`, '', 'All values refer only to this hypothetical sequence.');
+  return lines.join('\n') + '\n';
+}
+
+return { MAX_WALKTHROUGH_RESPONSES, walkthroughParameters, explainMasteryUpdate, createWalkthrough, walkthroughText };
+})();
+
+__recallweaveWalkthroughModules['./model-walkthrough-ui.mjs'] = (() => {
+const { DEFAULT_BKT } = __recallweaveWalkthroughModules['./knowledge.mjs'];
+const { MAX_WALKTHROUGH_RESPONSES, walkthroughParameters, createWalkthrough, walkthroughText } = __recallweaveWalkthroughModules['./model-walkthrough.mjs'];
+
+function initializeWalkthrough() {
+  const byId = id => document.getElementById(id);
+  const names = ['initial', 'guess', 'slip', 'learn'];
+  const percent = value => `${(value * 100).toFixed(2)}%`;
+  const decimal = value => {
+    if (value !== 0 && Math.abs(value) < 1e-6) return value.toExponential(6);
+    if (value > 1 - 1e-6 && value < 1) return String(value);
+    return value.toFixed(6);
+  };
+  const points = value => `${value >= 0 ? '+' : '−'}${Math.abs(value * 100).toFixed(2)} percentage points`;
+  let trace = createWalkthrough([true, false]);
+  let selected = 1;
+  let draftChanged = false;
+
+  function announce(message, error = false) {
+    byId('action-status').textContent = message;
+    byId('action-status').classList.toggle('error', error);
+  }
+
+  function readDraft() {
+    const values = {};
+    for (const name of names) {
+      if (byId(name).value.trim() === '') throw new RangeError(`Enter a value for ${name}; blank does not mean zero.`);
+      values[name] = byId(name).valueAsNumber;
+    }
+    return walkthroughParameters(values);
+  }
+
+  function writeDraft() {
+    for (const name of names) byId(name).value = String(trace.parameters[name]);
+    updateDraft();
+  }
+
+  function updateDraft() {
+    try {
+      const values = readDraft();
+      draftChanged = names.some(name => values[name] !== trace.parameters[name]);
+    } catch {
+      draftChanged = true;
+    }
+    byId('draft-status').textContent = draftChanged
+      ? 'Unapplied assumptions. Apply them before adding or editing responses. The displayed trace still uses the previous values.'
+      : 'The displayed trace uses these applied assumptions.';
+    byId('add-correct').disabled = draftChanged || trace.steps.length >= MAX_WALKTHROUGH_RESPONSES;
+    byId('add-incorrect').disabled = draftChanged || trace.steps.length >= MAX_WALKTHROUGH_RESPONSES;
+    for (const control of byId('response-history').querySelectorAll('select')) control.disabled = draftChanged;
+  }
+
+  function renderHistory() {
+    const list = byId('response-history');
+    list.replaceChildren();
+    trace.steps.forEach((step, index) => {
+      const item = document.createElement('li');
+      item.classList.toggle('selected', index === selected);
+      const inspect = document.createElement('button');
+      inspect.type = 'button';
+      inspect.className = 'history-inspect';
+      inspect.dataset.inspect = String(index);
+      inspect.setAttribute('aria-pressed', String(index === selected));
+      inspect.setAttribute('aria-label', `Inspect response ${index + 1}, ${step.correct ? 'correct' : 'incorrect'}, from ${percent(step.prior)} to ${percent(step.next)}`);
+      for (const [className, text] of [
+        ['history-number', String(index + 1)],
+        ['history-outcome', step.correct ? 'Correct' : 'Incorrect'],
+        ['history-change', `${percent(step.prior)} → ${percent(step.next)}`]
+      ]) {
+        const span = document.createElement('span');
+        span.className = className;
+        span.textContent = text;
+        inspect.append(span);
+      }
+      inspect.addEventListener('click', () => {
+        selected = index;
+        renderHistory();
+        renderCalculation();
+        byId('calculation-title').focus();
+      });
+      const edit = document.createElement('select');
+      edit.dataset.edit = String(index);
+      edit.setAttribute('aria-label', `Change response ${index + 1}`);
+      for (const [value, label] of [['true', 'Correct'], ['false', 'Incorrect']]) {
+        const option = document.createElement('option');
+        option.value = value;
+        option.textContent = label;
+        edit.append(option);
+      }
+      edit.value = String(step.correct);
+      edit.disabled = draftChanged;
+      edit.addEventListener('change', () => {
+        const responses = [...trace.responses];
+        responses[index] = edit.value === 'true';
+        if (replaceTrace(responses, trace.parameters, index, `Response ${index + 1} changed. Later estimates were recomputed.`)) {
+          list.querySelector(`[data-edit="${index}"]`).focus();
+        } else {
+          edit.value = String(step.correct);
+        }
+      });
+      item.append(inspect, edit);
+      list.append(item);
+    });
+    byId('empty-history').hidden = trace.steps.length !== 0;
+    byId('undo-response').disabled = trace.steps.length === 0;
+    byId('clear-responses').disabled = trace.steps.length === 0;
+    byId('response-count').textContent = `${trace.steps.length} / ${MAX_WALKTHROUGH_RESPONSES}`;
+    updateDraft();
+  }
+
+  function renderCalculation() {
+    const step = trace.steps[selected];
+    byId('calculation-detail').hidden = !step;
+    byId('selected-response').textContent = step ? `RESPONSE ${selected + 1}` : 'AWAITING A RESPONSE';
+    byId('calculation-context').textContent = step
+      ? `Response ${selected + 1} is hypothetical and ${step.correct ? 'correct' : 'incorrect'}. The after-learning value becomes the prior for the next response.`
+      : 'With no response, there is no evidence update or learning transition to apply.';
+    byId('prior-value').textContent = percent(step?.prior ?? trace.parameters.initial);
+    byId('posterior-value').textContent = step ? percent(step.posterior) : '—';
+    byId('next-value').textContent = step ? percent(step.next) : '—';
+    byId('evidence-change').textContent = step ? points(step.evidenceChange) : 'waiting for evidence';
+    byId('learning-change').textContent = step ? points(step.learningContribution + step.clippingChange) : 'waiting for a response';
+    if (!step) return;
+    byId('evidence-explanation').textContent = step.correct
+      ? 'A correct response can come from the known state without a slip, or from the not-yet-known state through a guess. Compare their two weights.'
+      : 'An incorrect response can come from the known state through a slip, or from the not-yet-known state without a successful guess. Compare their two weights.';
+    byId('known-weight').textContent = `${decimal(step.prior)} × ${decimal(step.knownLikelihood)} ≈ ${decimal(step.knownContribution)}`;
+    byId('unknown-weight').textContent = `${decimal(1 - step.prior)} × ${decimal(step.unknownLikelihood)} ≈ ${decimal(step.unknownContribution)}`;
+    byId('response-likelihood').textContent = `${decimal(step.knownContribution)} + ${decimal(step.unknownContribution)} ≈ ${decimal(step.responseLikelihood)}`;
+    byId('posterior-calculation').textContent = `${decimal(step.knownContribution)} / ${decimal(step.responseLikelihood)} ≈ ${decimal(step.posterior)}`;
+    byId('learning-calculation').textContent = `${decimal(step.posterior)} + (1 − ${decimal(step.posterior)}) × ${decimal(trace.parameters.learn)} ≈ ${decimal(step.next)}`;
+    byId('change-explanation').textContent = `Evidence changes the estimate by ${points(step.evidenceChange)}. The learning transition adds ${points(step.learningContribution)}${step.clippingChange ? `, then final clipping changes it by ${points(step.clippingChange)}` : ''}. The final value is the lesson model's returned estimate.`;
+    byId('precision-values').textContent = [
+      `Prior supplied: ${step.priorInput}`,
+      `Prior after clipping to [0, 1]: ${step.prior}`,
+      `Known-state weight: ${step.knownContribution}`,
+      `Not-yet-known weight: ${step.unknownContribution}`,
+      `Response likelihood: ${step.responseLikelihood}`,
+      `Posterior: ${step.posterior}`,
+      `Evidence change: ${step.evidenceChange}`,
+      `Learning contribution: ${step.learningContribution}`,
+      `Before final clipping: ${step.beforeFinalClipping}`,
+      `Final clipping change: ${step.clippingChange}`,
+      `updateMastery return: ${step.next}`
+    ].join('\n');
+  }
+
+  function render() {
+    renderHistory();
+    renderCalculation();
+    byId('final-estimate').textContent = percent(trace.finalMastery);
+    byId('final-context').textContent = trace.steps.length
+      ? `After all ${trace.steps.length} hypothetical ${trace.steps.length === 1 ? 'response' : 'responses'}, using the applied assumptions.`
+      : 'With no responses, this is the initial assumption.';
+    const sum = trace.parameters.guess + trace.parameters.slip;
+    byId('assumption-warning').hidden = sum < 1;
+    byId('assumption-warning').textContent = sum === 1
+      ? 'With guess + slip = 1, responses do not distinguish the two states, apart from floating-point rounding. The learning transition can still change the estimate.'
+      : 'With guess + slip greater than 1, a correct response favors the not-yet-known state and an incorrect response favors the known state. The reversed evidence follows from these assumptions.';
+  }
+
+  function replaceTrace(responses, parameters, inspectIndex, message) {
+    try {
+      const candidate = createWalkthrough(responses, parameters);
+      trace = candidate;
+      selected = candidate.steps.length ? Math.max(0, Math.min(inspectIndex, candidate.steps.length - 1)) : -1;
+      render();
+      announce(message);
+      return true;
+    } catch (error) {
+      announce(`${error.message} The displayed trace was kept.`, true);
+      return false;
+    }
+  }
+
+  byId('assumptions-form').addEventListener('submit', event => {
+    event.preventDefault();
+    try {
+      const parameters = readDraft();
+      if (replaceTrace(trace.responses, parameters, selected, 'Assumptions applied to the whole hypothetical sequence.')) writeDraft();
+    } catch (error) {
+      announce(`${error.message} The displayed trace was kept.`, true);
+    }
+  });
+  for (const name of names) byId(name).addEventListener('input', updateDraft);
+  byId('restore-defaults').addEventListener('click', () => {
+    replaceTrace(trace.responses, DEFAULT_BKT, selected, 'Illustrative defaults restored. Responses were kept and recomputed.');
+    writeDraft();
+  });
+  for (const [id, correct] of [['add-correct', true], ['add-incorrect', false]]) {
+    byId(id).addEventListener('click', () => {
+      if (draftChanged) return;
+      replaceTrace([...trace.responses, correct], trace.parameters, trace.steps.length,
+        `Hypothetical ${correct ? 'correct' : 'incorrect'} response added.${trace.steps.length + 1 === MAX_WALKTHROUGH_RESPONSES ? ' The 24-response limit is reached; edit, undo or clear to continue.' : ''}`);
+    });
+  }
+  byId('undo-response').addEventListener('click', () => {
+    replaceTrace(trace.responses.slice(0, -1), trace.parameters, trace.steps.length - 2, 'Last response removed.');
+  });
+  byId('clear-responses').addEventListener('click', () => {
+    replaceTrace([], trace.parameters, -1, 'Responses cleared. Applied assumptions were kept.');
+  });
+  byId('download-walkthrough').addEventListener('click', () => {
+    const url = URL.createObjectURL(new Blob([walkthroughText(trace)], { type: 'text/plain;charset=utf-8' }));
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'recallweave-model-walkthrough.txt';
+    document.body.append(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    announce('Downloaded the applied hypothetical walkthrough at full JavaScript precision.');
+  });
+  writeDraft();
+  render();
+  announce('Opening example: one correct response, then one incorrect response. Both are hypothetical.');
+
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initializeWalkthrough, { once: true });
+} else {
+  initializeWalkthrough();
+}
+
+return {  };
+})();
+
+})();
+</script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to walkthrough</a>
+  <header class="topbar">
+    <a class="brand" href="demo.html" aria-label="RecallWeave lesson"><span class="brand-mark" aria-hidden="true">r</span> recall<span>weave</span></a>
+    <span class="local-badge">ON THIS DEVICE · NO SESSION DATA</span>
+  </header>
+  <main id="main">
+    <section class="intro" aria-labelledby="page-title">
+      <div class="eyebrow">A CLOSER LOOK / THE LEARNING MODEL</div>
+      <h1 id="page-title">How does a response<br>change an <em>estimate?</em></h1>
+      <p class="lede">A correct answer can be a guess. An incorrect answer can be a slip. Explore how those assumptions change the calculation, then see the separate learning step.</p>
+      <p class="scope-note">This is a hypothetical sequence for <strong>one concept</strong>. It never reads or changes your lesson. The percentage is model state, not a grade or a calibrated guarantee of knowledge.</p>
+    </section>
+
+    <div class="workspace">
+      <aside class="assumptions panel" aria-labelledby="assumptions-title">
+        <div class="section-heading"><span class="step-label">01 / ASSUMPTIONS</span><span class="tag">ILLUSTRATIVE</span></div>
+        <h2 id="assumptions-title">Set the starting story.</h2>
+        <p>Use probabilities from 0 to 1. Changing them recomputes the same hypothetical responses.</p>
+        <form id="assumptions-form" novalidate>
+          <div class="parameter">
+            <label for="initial">Initial knowledge <span>before any response</span></label>
+            <input id="initial" name="initial" type="number" min="0" max="1" step="any" value="0.22" required aria-describedby="initial-help">
+            <p id="initial-help">The model's starting probability for this concept.</p>
+          </div>
+          <div class="parameter">
+            <label for="guess">Guess <span>correct without knowing</span></label>
+            <input id="guess" name="guess" type="number" min="0" max="1" step="any" value="0.2" required aria-describedby="guess-help">
+            <p id="guess-help">A correct response is still possible in the not-yet-known state.</p>
+          </div>
+          <div class="parameter">
+            <label for="slip">Slip <span>incorrect despite knowing</span></label>
+            <input id="slip" name="slip" type="number" min="0" max="1" step="any" value="0.1" required aria-describedby="slip-help">
+            <p id="slip-help">Knowing does not force every response to be correct.</p>
+          </div>
+          <div class="parameter">
+            <label for="learn">Learning transition <span>after each response</span></label>
+            <input id="learn" name="learn" type="number" min="0" max="1" step="any" value="0.18" required aria-describedby="learn-help">
+            <p id="learn-help">The assumed chance of moving from not-yet-known to known.</p>
+          </div>
+          <div class="form-actions">
+            <button class="primary" type="submit" id="apply-assumptions">Apply assumptions</button>
+            <button class="text-button" type="button" id="restore-defaults">Restore illustrative defaults</button>
+          </div>
+          <p id="draft-status" class="small-note"></p>
+        </form>
+        <p id="assumption-warning" class="notice" hidden></p>
+      </aside>
+
+      <div class="main-column">
+        <section class="responses panel" aria-labelledby="responses-title">
+          <div class="section-heading"><span class="step-label">02 / HYPOTHETICAL RESPONSES</span><span id="response-count" class="tag"></span></div>
+          <h2 id="responses-title">Try a different sequence.</h2>
+          <p>The opening example is correct, then incorrect. Add, edit or remove responses to explore what follows.</p>
+          <div class="response-actions">
+            <button type="button" class="response-button correct" id="add-correct"><span aria-hidden="true">+</span> Correct response</button>
+            <button type="button" class="response-button incorrect" id="add-incorrect"><span aria-hidden="true">+</span> Incorrect response</button>
+          </div>
+          <div class="history-actions">
+            <button type="button" class="text-button" id="undo-response">Undo last response</button>
+            <button type="button" class="text-button" id="clear-responses">Clear responses</button>
+          </div>
+          <p id="action-status" role="status" aria-live="polite" aria-atomic="true" class="status"></p>
+          <p id="empty-history" class="empty-state" hidden>No responses yet. The estimate stays at the initial assumption. Add a response to see the calculation.</p>
+          <ol id="response-history" class="history" aria-label="Hypothetical response history"></ol>
+        </section>
+
+        <section class="calculation panel" aria-labelledby="calculation-title">
+          <div class="section-heading"><span class="step-label">03 / FOLLOW THE UPDATE</span><span id="selected-response" class="tag"></span></div>
+          <h2 id="calculation-title" tabindex="-1">One response, two changes.</h2>
+          <p id="calculation-context"></p>
+          <div class="stages" aria-label="Selected response calculation stages">
+            <div class="stage"><span class="stage-title">Before response</span><output id="prior-value"></output><span class="stage-detail">the previous model state</span></div>
+            <div class="stage evidence"><span class="stage-title">After evidence</span><output id="posterior-value"></output><span class="stage-detail" id="evidence-change"></span></div>
+            <div class="stage learning"><span class="stage-title">After learning</span><output id="next-value"></output><span class="stage-detail" id="learning-change"></span></div>
+          </div>
+          <div id="calculation-detail">
+            <h3>First, weigh the response.</h3>
+            <p id="evidence-explanation"></p>
+            <dl class="arithmetic">
+              <div><dt>Known-state weight</dt><dd id="known-weight"></dd></div>
+              <div><dt>Not-yet-known weight</dt><dd id="unknown-weight"></dd></div>
+              <div><dt>Probability of this response</dt><dd id="response-likelihood"></dd></div>
+              <div class="result-line"><dt>After evidence</dt><dd id="posterior-calculation"></dd></div>
+            </dl>
+            <h3>Then, allow for learning.</h3>
+            <p>This model adds a learning transition after either response. Only the remaining not-yet-known share can move into the known state.</p>
+            <p id="learning-calculation" class="equation"></p>
+            <p id="change-explanation"></p>
+            <p class="small-note">Percentages and calculations above are rounded. For tiny probabilities, 1e-8 means 0.00000001. Percentage points describe a change between percentages.</p>
+            <details class="precision">
+              <summary>See full precision and clipping</summary>
+              <pre id="precision-values"></pre>
+            </details>
+          </div>
+        </section>
+
+        <section class="takeaway panel" aria-labelledby="takeaway-title">
+          <div>
+            <span class="step-label">THE CURRENT HYPOTHETICAL RESULT</span>
+            <h2 id="takeaway-title"><output id="final-estimate"></output><span>model estimate</span></h2>
+            <p id="final-context"></p>
+          </div>
+          <button type="button" class="secondary" id="download-walkthrough">Download this walkthrough (.txt)</button>
+        </section>
+      </div>
+    </div>
+
+    <section class="reading-note" aria-labelledby="limits-title">
+      <h2 id="limits-title">What this can tell you.</h2>
+      <div class="reading-columns">
+        <p>You can inspect how explicit assumptions and hypothetical responses produce an estimate. The same update function powers the lesson; this walkthrough does not reproduce the adaptive question selector or infer anything about a person.</p>
+        <p>The defaults are illustrative, not fitted to you or validated as an assessment. The model treats knowledge as two hidden states, allows a learning transition and has no forgetting term. A high estimate does not establish understanding, retention or transfer.</p>
+      </div>
+      <p class="small-note">Background: Corbett &amp; Anderson, <a href="https://doi.org/10.1007/BF01099821" target="_blank" rel="noopener noreferrer">Knowledge tracing: Modeling the acquisition of procedural knowledge</a> (1994). The paper's findings do not validate this demo's defaults. The walkthrough itself works offline; opening the reference is optional.</p>
+    </section>
+  </main>
+  <footer><a href="demo.html">← Return to the lesson</a><span>RECALLWEAVE · MODEL WALKTHROUGH</span></footer>
+</body>
+</html>
