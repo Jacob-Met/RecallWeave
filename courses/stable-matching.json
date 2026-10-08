@@ -1,0 +1,220 @@
+{
+  "format": "recallweave-deck/1",
+  "title": "Stable matching: proposals, blocking pairs and stable outcomes",
+  "attribution": "Original RecallWeave lesson and examples by HAMON estate contributor estate-81ba1ed0179c. Mathematical background: D. Gale and L. S. Shapley (1962), College Admissions and the Stability of Marriage, https://www.rand.org/content/dam/rand/pubs/papers/2012/P2240.pdf ; Princeton Algorithm Design stable-matching lecture, https://www.cs.princeton.edu/courses/archive/spring18/cos423/lectures/01StableMatching-2x2.pdf . No source exercises or diagrams reproduced.",
+  "license": "Original lesson text and examples: CC0-1.0. Referenced works retain their own rights.",
+  "concepts": [
+    "Preference order",
+    "Blocking pairs",
+    "Deferred acceptance",
+    "Stable outcomes"
+  ],
+  "items": [
+    {
+      "id": "sm-01",
+      "concept": "Preference order",
+      "prerequisites": [],
+      "prompt": "A’s best-first preference row is X W Y. What does this row say?",
+      "options": [
+        "A ranks X first, W second and Y third.",
+        "A assigns X a numerical utility of 3.",
+        "X also ranks A first.",
+        "A can match only with X."
+      ],
+      "answer": 0,
+      "explanation": "The row is an ordering of all three possible partners. X has ordinal rank 1, W rank 2 and Y rank 3 for A. It says nothing about the opposite side’s preferences or about how much A prefers one option.",
+      "transfer": "Write one best-first row for three labels, then identify what information the ordering does not provide."
+    },
+    {
+      "id": "sm-02",
+      "concept": "Preference order",
+      "prerequisites": [],
+      "prompt": "The right-side labels are W, X and Y. Which proposed row for A must this strict complete explorer refuse?",
+      "options": [
+        "Y X W",
+        "W X W",
+        "X Y W",
+        "W Y X"
+      ],
+      "answer": 1,
+      "explanation": "W X W repeats W and omits Y. A strict complete row contains each available opposite-side participant exactly once. The explorer refuses this draft; it does not guess a missing label or repair the order.",
+      "transfer": "Explain why silently replacing a duplicate could change the problem the learner intended to investigate."
+    },
+    {
+      "id": "sm-03",
+      "concept": "Preference order",
+      "prerequisites": [],
+      "prompt": "A ranks W first and X second; B ranks X first and W second. Which conclusion follows from those rank positions alone?",
+      "options": [
+        "A values W exactly twice as much as X.",
+        "A and B experience equal happiness at rank 1.",
+        "Each person’s first option is preferred to that person’s second option.",
+        "The sum of the ranks measures total welfare."
+      ],
+      "answer": 2,
+      "explanation": "Ordinal ranks establish each person’s order. They do not measure preference intensity or make one person’s satisfaction numerically comparable with another’s. Adding ranks is possible arithmetic, but a welfare interpretation would need assumptions absent from this model.",
+      "transfer": "Give an example of two different preference intensities that could produce the same best-first row."
+    },
+    {
+      "id": "sm-04",
+      "concept": "Blocking pairs",
+      "prerequisites": [
+        "Preference order"
+      ],
+      "prompt": "For a complete matching, when do an unmatched-to-each-other left participant and right participant form a blocking pair?",
+      "options": [
+        "Whenever the left participant prefers the alternative.",
+        "Whenever they have the same numerical rank.",
+        "Whenever either participant has a second-choice partner.",
+        "When both strictly prefer each other to their current partners."
+      ],
+      "answer": 3,
+      "explanation": "Both comparisons must favor the alternative pair. If only one participant wants to switch, the pair does not block. With strict complete preferences, the explorer can list the two current ranks and the two alternative ranks as a concrete witness.",
+      "transfer": "Describe a pair where one participant wants to switch but the other prefers the current partner."
+    },
+    {
+      "id": "sm-05",
+      "concept": "Blocking pairs",
+      "prerequisites": [
+        "Preference order"
+      ],
+      "prompt": "Preferences are A: W X; B: W X; W: B A; X: A B. In the matching A–W and B–X, which pair blocks?",
+      "options": [
+        "B–W: both would improve from rank 2 to rank 1.",
+        "A–X: both would improve from rank 2 to rank 1.",
+        "A–W: an existing pair always blocks.",
+        "No pair blocks because everyone has a partner."
+      ],
+      "answer": 0,
+      "explanation": "B currently has X, B’s second choice, and prefers W. W currently has A, W’s second choice, and prefers B. Therefore B–W is a blocking pair. Being complete does not make a matching stable.",
+      "transfer": "List the current and alternative partner for each member of the blocking pair before comparing ranks."
+    },
+    {
+      "id": "sm-06",
+      "concept": "Blocking pairs",
+      "prerequisites": [
+        "Preference order"
+      ],
+      "prompt": "Keep A: W X; B: W X; W: B A; X: A B. Now inspect A–X and B–W. Is it stable?",
+      "options": [
+        "No, because A has a second-choice partner.",
+        "Yes: A wants W, but W prefers the current partner B; B already has the first choice.",
+        "No, because the participants have different ranks.",
+        "Yes, because every complete matching is stable."
+      ],
+      "answer": 1,
+      "explanation": "A prefers W to X, but W ranks B above A and will not jointly improve by switching. B already has W, the first choice. The remaining unmatched pair B–X cannot block either. There is no blocking pair, so this complete matching is stable.",
+      "transfer": "Explain why inspecting only the less satisfied participant would produce the wrong stability judgment."
+    },
+    {
+      "id": "sm-07",
+      "concept": "Deferred acceptance",
+      "prerequisites": [
+        "Preference order",
+        "Blocking pairs"
+      ],
+      "prompt": "A is provisionally held by W. B next proposes to W, and W’s order puts B above A. What is the atomic decision?",
+      "options": [
+        "W keeps both A and B until the next round.",
+        "W must keep A because A proposed first.",
+        "W holds B, releases A and leaves A free to propose again.",
+        "A and B are permanently rejected by W."
+      ],
+      "answer": 2,
+      "explanation": "A receiver keeps the best proposal received so far. W replaces the inferior incumbent A with B. A becomes free and later continues down A’s own list from the next untried receiver. A held pair is provisional until the procedure finishes.",
+      "transfer": "Track which next-choice cursor changes during B’s proposal and which cursor remains unchanged."
+    },
+    {
+      "id": "sm-08",
+      "concept": "Deferred acceptance",
+      "prerequisites": [
+        "Preference order",
+        "Blocking pairs"
+      ],
+      "prompt": "Left proposes. A: W X Y; B: W X Y; C: X W Y. W: B A C; X: A C B; Y: A B C. After A→W is held and B→W replaces A, which proposal comes next under the lowest-index free-proposer rule?",
+      "options": [
+        "C→X, because C has not proposed yet.",
+        "B→X, because B must try every receiver.",
+        "A→W again, because A was released.",
+        "A→X, because A is the lowest-index free proposer and W was already tried."
+      ],
+      "answer": 3,
+      "explanation": "Both A and C are free after the replacement. The deterministic rule selects A, the lower-index participant. A already proposed to W, so A’s next untried choice is X. This makes the visible trace reproducible without changing the preference model.",
+      "transfer": "Continue this profile through C’s proposals and record each hold, replacement or rejection."
+    },
+    {
+      "id": "sm-09",
+      "concept": "Deferred acceptance",
+      "prerequisites": [
+        "Preference order",
+        "Blocking pairs"
+      ],
+      "prompt": "W’s best-first order is B A C. W currently holds B and receives a proposal from C. What happens?",
+      "options": [
+        "W rejects C and continues holding B.",
+        "W replaces B because C proposed more recently.",
+        "W releases B and waits for A.",
+        "C is removed from the whole problem."
+      ],
+      "answer": 0,
+      "explanation": "W prefers the incumbent B (rank 1) to C (rank 3), so this proposal is rejected. C remains free and may propose to C’s next untried receiver. A rejection concerns this pair; it does not remove C from the problem.",
+      "transfer": "Why can a receiver’s held-partner rank improve or stay the same over the trace, but never worsen?"
+    },
+    {
+      "id": "sm-10",
+      "concept": "Stable outcomes",
+      "prerequisites": [
+        "Preference order",
+        "Blocking pairs",
+        "Deferred acceptance"
+      ],
+      "prompt": "In this strict complete equal-size model, what does proposer optimality mean for the completed deferred-acceptance result?",
+      "options": [
+        "Every proposer gets the first choice in the original list.",
+        "Each proposer gets the best partner that proposer can have in any stable matching of these preferences.",
+        "The result maximizes a measured total happiness score.",
+        "The stable matching is necessarily unique."
+      ],
+      "answer": 1,
+      "explanation": "The comparison is with other stable matchings for the same full preference profile. A proposer’s best stable partner may still have rank 2 or lower in the original list. The theorem does not supply a welfare score or require a unique stable outcome.",
+      "transfer": "If a proposer ends at rank 2, what would you have to establish before calling that partner the proposer’s best stable option?"
+    },
+    {
+      "id": "sm-11",
+      "concept": "Stable outcomes",
+      "prerequisites": [
+        "Preference order",
+        "Blocking pairs",
+        "Deferred acceptance"
+      ],
+      "prompt": "Preferences are A: W X; B: X W; W: B A; X: A B. Left-proposing gives A–W/B–X; right-proposing gives A–X/B–W. The explorer finds no blocking pair in either. What does this establish?",
+      "options": [
+        "One of the two stable results must be a software error.",
+        "Stability chooses the objectively fairest result.",
+        "These preferences have at least two stable outcomes, and the proposing side can select a different one.",
+        "Every possible preference profile has exactly two stable outcomes."
+      ],
+      "answer": 2,
+      "explanation": "There are only two complete matchings for two participants per side, and both are stable in this profile. Left participants obtain their first choices in the first matching; right participants obtain their first choices in the second. Stability alone does not choose a fairness criterion.",
+      "transfer": "Compare the rank arrays for both sides in these two outcomes without treating the ranks as numerical utilities."
+    },
+    {
+      "id": "sm-12",
+      "concept": "Deferred acceptance",
+      "prerequisites": [
+        "Preference order",
+        "Blocking pairs"
+      ],
+      "prompt": "With four participants on each side, why is 16 a valid upper bound on the number of proposals in this explorer?",
+      "options": [
+        "Every execution must contain exactly 16 proposals.",
+        "There are 16 complete matchings.",
+        "A receiver can hold four proposers at once.",
+        "There are 4 × 4 proposer–receiver pairs, and a proposer never repeats a receiver."
+      ],
+      "answer": 3,
+      "explanation": "Each proposer moves forward through a list of four receivers and never repeats a proposal to the same receiver. This gives at most 4 × 4 = 16 proposals, often fewer. The number of complete matchings is 4! = 24, a different count.",
+      "transfer": "For the four-person shared-first-choice preset, count actual proposals and compare that count with both 16 and 24."
+    }
+  ]
+}

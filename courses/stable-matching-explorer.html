@@ -1,0 +1,574 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stable matching · RecallWeave</title>
+<style>
+:root{color-scheme:light;--ink:#153b3b;--muted:#4c6868;--paper:#f7f6ef;--white:#fff;--line:#cbd8d2;--teal:#08675c;--soft:#e4f2ea;--coral:#b6482d;--warm:#fff0e6;--focus:#0b6bd1}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.5 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+a{color:var(--teal)}button,input,select{font:inherit}button,select,input{max-width:100%}button,a,input,select{touch-action:manipulation}
+button{border:1px solid var(--teal);border-radius:8px;background:var(--white);color:var(--teal);padding:.62rem .86rem;font-weight:650;cursor:pointer;min-height:44px}
+button.primary{background:var(--teal);color:white}button:disabled{opacity:.48;cursor:default}button:hover:not(:disabled){filter:brightness(.96)}
+:focus-visible{outline:3px solid var(--focus);outline-offset:3px}input,select{border:1px solid #819a90;border-radius:6px;background:white;color:var(--ink);padding:.58rem;min-height:44px;width:100%}
+header{max-width:1320px;margin:auto;padding:2.25rem 2rem 1.6rem}.eyebrow{font-size:.78rem;letter-spacing:.16em;text-transform:uppercase;color:var(--teal);font-weight:800;margin:0 0 .5rem}
+h1{font-family:Georgia,serif;font-weight:500;font-size:clamp(2.45rem,5vw,4rem);line-height:1.06;letter-spacing:-.03em;margin:0 0 1rem}
+header .intro{font-size:1.08rem;max-width:780px;margin:.5rem 0 1.2rem;color:var(--muted)}
+.pills,.toolbar{display:flex;gap:.55rem;flex-wrap:wrap;align-items:center}.pill{border:1px solid var(--line);border-radius:99px;padding:.2rem .7rem;font-size:.82rem;background:#fff9}
+main{max-width:1320px;margin:0 auto;padding:0 2rem 3rem}.workspace{display:grid;grid-template-columns:minmax(290px,.83fr) minmax(0,1.6fr);gap:1.3rem;align-items:start}
+.card{background:var(--white);border:1px solid var(--line);border-radius:16px;padding:1.35rem;box-shadow:0 4px 16px #123e3e05;min-width:0}
+h2{font-size:1.22rem;line-height:1.25;margin:0 0 .65rem}h3{font-size:1rem;margin:1.1rem 0 .45rem}p{margin:.55rem 0 .85rem}.subtle{color:var(--muted);font-size:.9rem}.small{font-size:.82rem}
+label{display:block;font-weight:650;font-size:.9rem;margin-bottom:.35rem}.form-row{display:grid;grid-template-columns:1fr 1fr;gap:.7rem;margin:.85rem 0}
+.preset{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:.5rem;align-items:end}.preset label{grid-column:1/-1;margin-bottom:-.15rem}
+fieldset{padding:0;margin:1rem 0;border:0;min-width:0}legend{font-size:.88rem;font-weight:800;color:var(--teal);padding:0;margin-bottom:.45rem}
+.preference-row{display:grid;grid-template-columns:1.6rem 1fr;gap:.5rem;align-items:center;margin:.45rem 0}.preference-row label{margin:0;text-align:center;font-size:1rem}.preference-row input{font-family:ui-monospace,SFMono-Regular,monospace;letter-spacing:.12em}
+.input-hint{margin:.35rem 0 .65rem;font-size:.82rem;color:var(--muted)}.status{border-left:3px solid #71a793;padding:.4rem .65rem;background:#f1f7f2;font-size:.87rem;min-height:2.6rem}
+.error{border-left-color:var(--coral);background:var(--warm);color:#87341e}.full{width:100%}.downloads{border-top:1px solid var(--line);padding-top:1rem;margin-top:1rem}.downloads .toolbar>*{font-size:.85rem}
+.empty{padding:4rem 2rem;text-align:center;min-height:390px;display:grid;place-content:center}.empty .mark{font-family:Georgia,serif;font-size:3rem;color:#8ea99b}
+[hidden]{display:none!important}.result-stack{display:grid;gap:1.15rem}.result-summary{background:var(--ink);color:white;border:0}.result-summary .subtle{color:#cce1d6}
+.completed-label{font-size:.73rem;letter-spacing:.14em;text-transform:uppercase;color:#b8dec8;font-weight:750}.final-pairs{font-family:Georgia,serif;font-size:1.7rem;margin:.3rem 0 .55rem}
+.stat-line{display:flex;gap:.6rem;flex-wrap:wrap;font-size:.85rem}.stat-line span{background:#ffffff14;border-radius:7px;padding:.3rem .55rem}
+.step-heading{display:flex;gap:.8rem;align-items:baseline;justify-content:space-between;flex-wrap:wrap}.step-heading h2{margin:0}.step-heading span{font-size:.8rem;color:var(--muted)}
+.step-controls{display:flex;gap:.45rem;flex-wrap:wrap;margin:1rem 0 .65rem}.step-controls button{flex:1;padding:.5rem .65rem}
+.decision{padding:.8rem 1rem;border-radius:9px;background:var(--soft);font-size:.94rem;margin:.85rem 0}.decision.reject{background:var(--warm)}.decision.replace{background:#eaf0fa}
+.diagram{margin:.7rem 0 0}.diagram svg{width:100%;height:auto;max-height:350px;display:block}.diagram figcaption{font-size:.8rem;text-align:center;color:var(--muted);margin:.3rem 0 .65rem}
+.table-wrap{overflow-x:auto;max-width:100%;border:1px solid var(--line);border-radius:8px;margin:.7rem 0}table{border-collapse:collapse;width:100%;font-size:.85rem}th,td{padding:.55rem .6rem;text-align:left;vertical-align:top;border-bottom:1px solid #e1e8e3}th{background:#f0f5f1;font-weight:700}tbody tr:last-child td{border-bottom:0}.pair-cell{white-space:nowrap}
+details{margin:.8rem 0 .2rem}summary{cursor:pointer;font-weight:650;font-size:.9rem;padding:.4rem 0}.stable-badge{display:inline-block;background:var(--soft);padding:.3rem .6rem;border-radius:6px;font-weight:750;font-size:.9rem}.stable-badge.blocked{background:var(--warm);color:#87341e}
+#inspection-status{margin:.8rem 0 .5rem}.limits{margin-top:1.3rem;background:#edf2ec}.limits h2{font-size:1rem}.limits p{margin:.3rem 0;font-size:.85rem}
+footer{max-width:1320px;padding:0 2rem 2rem;margin:auto;color:var(--muted);font-size:.8rem}
+@media(max-width:850px){.workspace{grid-template-columns:1fr}header{padding:1.7rem 1rem 1.3rem}main{padding:0 1rem 2rem}.card{padding:1.05rem}.empty{min-height:220px;padding:2rem 1rem}footer{padding:0 1rem 1.5rem}}
+@media(max-width:420px){.form-row{grid-template-columns:1fr}.preset{grid-template-columns:minmax(0,1fr)}.preset label{grid-column:auto}.preset button{width:100%}.toolbar>*{flex:1}.final-pairs{font-size:1.4rem}.step-controls{gap:.35rem}.step-controls button{padding:.48rem .32rem}.card{border-radius:12px}th,td{padding:.5rem .4rem}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<header>
+<p class="eyebrow">RecallWeave · explore, then explain</p>
+<h1>Stable matching</h1>
+<p class="intro">Follow a proposal as it is held, replaced or rejected. Find the two people who would both prefer to switch—and see why changing the proposing side can change the outcome.</p>
+<div class="pills"><span class="pill">1–4 participants per side</span><span class="pill">Every complete matching</span><span class="pill">Works offline</span></div>
+</header>
+<main>
+<div class="workspace">
+<section class="card" aria-labelledby="preferences-title">
+<h2 id="preferences-title">1. Set the preferences</h2>
+<p class="subtle">Enter each opposite-side label once, best first. A rank describes an order, not how much someone values a partner.</p>
+<form id="preference-form" autocomplete="off">
+<div class="preset"><label for="preset">Start from an example</label><select id="preset"><option value="provisional">Provisional holds · 3 per side</option><option value="two">Two stable outcomes · 2 per side</option><option value="shared">Shared first choice · 4 per side</option><option value="aligned">Aligned first choices · 3 per side</option><option value="single">One possible pair · 1 per side</option></select><button id="load-preset" type="button">Load preset</button></div>
+<div class="form-row"><div><label for="group-size">Participants per side</label><select id="group-size"><option>1</option><option>2</option><option selected>3</option><option>4</option></select></div><div><label for="proposing-side">Proposing side</label><select id="proposing-side"><option value="left">Left proposes</option><option value="right">Right proposes</option></select></div></div>
+<p class="input-hint">Changing the group size resets every row to the displayed label order.</p>
+<fieldset><legend>Left preferences · choose right labels</legend><div id="left-rows"></div></fieldset>
+<fieldset><legend>Right preferences · choose left labels</legend><div id="right-rows"></div></fieldset>
+<p class="input-hint">Separate labels with spaces, for example <strong>W X Y</strong>. Uppercase labels are required.</p>
+<p id="draft-status" class="status" role="status">Ready to apply the displayed preferences.</p>
+<p id="preference-error" class="status error" role="alert" tabindex="-1" hidden></p>
+<button class="primary full" type="submit" id="apply">Apply preferences</button>
+</form>
+<div class="downloads">
+<h3>Take the lesson with you</h3>
+<p class="subtle">Download the original 12-question course, then import it through the learner’s file preview and Start flow.</p>
+<div class="toolbar"><button id="download-course" type="button">Course JSON</button><button id="download-guide" type="button">Worked guide</button></div>
+<p class="small"><a id="learner-link" href="../demo.html" target="_blank" rel="noopener">Open the RecallWeave learner</a></p>
+<button id="download-observation" class="full" type="button" disabled>Download this observation</button>
+<p class="small subtle">Includes applied preferences, the full trace, every matching and your current selections. Edits retire this download until Apply.</p>
+</div>
+</section>
+<div>
+<section id="empty-state" class="card empty"><div class="mark" aria-hidden="true">A ↔ W</div><h2>Your proposal trace starts here</h2><p class="subtle">Apply the displayed preferences to inspect every decision<br>and compare the complete matchings.</p></section>
+<div id="results" class="result-stack" hidden>
+<section class="card result-summary" aria-labelledby="completed-heading">
+<div id="completed-heading" class="completed-label">Completed result · separate from the selected step</div>
+<p id="final-pairs" class="final-pairs"></p>
+<div class="stat-line"><span id="total-proposals"></span><span id="stable-count"></span><span id="proposer-summary"></span></div>
+<p id="optimal-summary" class="subtle small"></p>
+</section>
+<section class="card" aria-labelledby="trace-title">
+<div class="step-heading"><h2 id="trace-title">2. Follow the proposals</h2><span id="current-step"></span></div>
+<p class="subtle">Held pairs are provisional. The lowest-index free proposer goes next.</p>
+<div class="step-controls"><button type="button" id="first-step">First</button><button type="button" id="back-step">Back</button><button type="button" id="next-step">Next</button><button type="button" id="finish-step">Finish</button></div>
+<label for="step-select">Inspect an exact step</label><select id="step-select"></select>
+<p id="decision" class="decision" role="status"></p>
+<figure class="diagram"><svg id="held-diagram" role="img" aria-label="Held pairs"></svg><figcaption>Lines show pairs held after the selected decision.</figcaption></figure>
+<p id="free-proposers" class="subtle small"></p>
+<div class="table-wrap"><table id="held-table"><thead><tr><th>Left</th><th>Held right</th><th>Left rank</th><th>Right rank</th></tr></thead><tbody></tbody></table></div>
+<details><summary>Each proposer’s next untried choice</summary><div class="table-wrap"><table id="cursor-table"><thead><tr><th>Proposer</th><th>State</th><th>Next untried choice</th></tr></thead><tbody></tbody></table></div></details>
+</section>
+<section class="card" aria-labelledby="matching-title">
+<h2 id="matching-title">3. Look for a blocking pair</h2>
+<p class="subtle">Choose any complete matching. A pair blocks only when both participants prefer each other to their current partners. This selection is independent of the trace step.</p>
+<label for="matching-select">Complete matching to inspect</label><select id="matching-select"></select>
+<p id="inspection-status" role="status"></p>
+<div class="table-wrap"><table id="matching-table"><thead><tr><th>Pair</th><th>Left’s rank</th><th>Right’s rank</th></tr></thead><tbody></tbody></table></div>
+<div id="blocking-witnesses"></div>
+</section>
+</div>
+</div>
+</div>
+<aside class="card limits"><h2>What this model can establish</h2><p>Strict, complete, equal-size one-to-one preferences only. The completed result has no blocking pair, and every proposer gets the best partner available to that proposer in a stable matching. Stability does not promise uniqueness or fairness; ordinal ranks are not utilities. No ties, incomplete lists, capacities, strategic behavior or real allocations are modeled. The worked guide includes original examples and mathematical references.</p></aside>
+</main>
+<footer>Original RecallWeave lesson and explorer. Direct-file operation; no network requests, accounts or saved browser state.</footer>
+<script type="application/json" id="stable-matching-payload">{"courseText":"{\n  \"format\": \"recallweave-deck/1\",\n  \"title\": \"Stable matching: proposals, blocking pairs and stable outcomes\",\n  \"attribution\": \"Original RecallWeave lesson and examples by HAMON estate contributor estate-81ba1ed0179c. Mathematical background: D. Gale and L. S. Shapley (1962), College Admissions and the Stability of Marriage, https://www.rand.org/content/dam/rand/pubs/papers/2012/P2240.pdf ; Princeton Algorithm Design stable-matching lecture, https://www.cs.princeton.edu/courses/archive/spring18/cos423/lectures/01StableMatching-2x2.pdf . No source exercises or diagrams reproduced.\",\n  \"license\": \"Original lesson text and examples: CC0-1.0. Referenced works retain their own rights.\",\n  \"concepts\": [\n    \"Preference order\",\n    \"Blocking pairs\",\n    \"Deferred acceptance\",\n    \"Stable outcomes\"\n  ],\n  \"items\": [\n    {\n      \"id\": \"sm-01\",\n      \"concept\": \"Preference order\",\n      \"prerequisites\": [],\n      \"prompt\": \"A’s best-first preference row is X W Y. What does this row say?\",\n      \"options\": [\n        \"A ranks X first, W second and Y third.\",\n        \"A assigns X a numerical utility of 3.\",\n        \"X also ranks A first.\",\n        \"A can match only with X.\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"The row is an ordering of all three possible partners. X has ordinal rank 1, W rank 2 and Y rank 3 for A. It says nothing about the opposite side’s preferences or about how much A prefers one option.\",\n      \"transfer\": \"Write one best-first row for three labels, then identify what information the ordering does not provide.\"\n    },\n    {\n      \"id\": \"sm-02\",\n      \"concept\": \"Preference order\",\n      \"prerequisites\": [],\n      \"prompt\": \"The right-side labels are W, X and Y. Which proposed row for A must this strict complete explorer refuse?\",\n      \"options\": [\n        \"Y X W\",\n        \"W X W\",\n        \"X Y W\",\n        \"W Y X\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"W X W repeats W and omits Y. A strict complete row contains each available opposite-side participant exactly once. The explorer refuses this draft; it does not guess a missing label or repair the order.\",\n      \"transfer\": \"Explain why silently replacing a duplicate could change the problem the learner intended to investigate.\"\n    },\n    {\n      \"id\": \"sm-03\",\n      \"concept\": \"Preference order\",\n      \"prerequisites\": [],\n      \"prompt\": \"A ranks W first and X second; B ranks X first and W second. Which conclusion follows from those rank positions alone?\",\n      \"options\": [\n        \"A values W exactly twice as much as X.\",\n        \"A and B experience equal happiness at rank 1.\",\n        \"Each person’s first option is preferred to that person’s second option.\",\n        \"The sum of the ranks measures total welfare.\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"Ordinal ranks establish each person’s order. They do not measure preference intensity or make one person’s satisfaction numerically comparable with another’s. Adding ranks is possible arithmetic, but a welfare interpretation would need assumptions absent from this model.\",\n      \"transfer\": \"Give an example of two different preference intensities that could produce the same best-first row.\"\n    },\n    {\n      \"id\": \"sm-04\",\n      \"concept\": \"Blocking pairs\",\n      \"prerequisites\": [\n        \"Preference order\"\n      ],\n      \"prompt\": \"For a complete matching, when do an unmatched-to-each-other left participant and right participant form a blocking pair?\",\n      \"options\": [\n        \"Whenever the left participant prefers the alternative.\",\n        \"Whenever they have the same numerical rank.\",\n        \"Whenever either participant has a second-choice partner.\",\n        \"When both strictly prefer each other to their current partners.\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"Both comparisons must favor the alternative pair. If only one participant wants to switch, the pair does not block. With strict complete preferences, the explorer can list the two current ranks and the two alternative ranks as a concrete witness.\",\n      \"transfer\": \"Describe a pair where one participant wants to switch but the other prefers the current partner.\"\n    },\n    {\n      \"id\": \"sm-05\",\n      \"concept\": \"Blocking pairs\",\n      \"prerequisites\": [\n        \"Preference order\"\n      ],\n      \"prompt\": \"Preferences are A: W X; B: W X; W: B A; X: A B. In the matching A–W and B–X, which pair blocks?\",\n      \"options\": [\n        \"B–W: both would improve from rank 2 to rank 1.\",\n        \"A–X: both would improve from rank 2 to rank 1.\",\n        \"A–W: an existing pair always blocks.\",\n        \"No pair blocks because everyone has a partner.\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"B currently has X, B’s second choice, and prefers W. W currently has A, W’s second choice, and prefers B. Therefore B–W is a blocking pair. Being complete does not make a matching stable.\",\n      \"transfer\": \"List the current and alternative partner for each member of the blocking pair before comparing ranks.\"\n    },\n    {\n      \"id\": \"sm-06\",\n      \"concept\": \"Blocking pairs\",\n      \"prerequisites\": [\n        \"Preference order\"\n      ],\n      \"prompt\": \"Keep A: W X; B: W X; W: B A; X: A B. Now inspect A–X and B–W. Is it stable?\",\n      \"options\": [\n        \"No, because A has a second-choice partner.\",\n        \"Yes: A wants W, but W prefers the current partner B; B already has the first choice.\",\n        \"No, because the participants have different ranks.\",\n        \"Yes, because every complete matching is stable.\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"A prefers W to X, but W ranks B above A and will not jointly improve by switching. B already has W, the first choice. The remaining unmatched pair B–X cannot block either. There is no blocking pair, so this complete matching is stable.\",\n      \"transfer\": \"Explain why inspecting only the less satisfied participant would produce the wrong stability judgment.\"\n    },\n    {\n      \"id\": \"sm-07\",\n      \"concept\": \"Deferred acceptance\",\n      \"prerequisites\": [\n        \"Preference order\",\n        \"Blocking pairs\"\n      ],\n      \"prompt\": \"A is provisionally held by W. B next proposes to W, and W’s order puts B above A. What is the atomic decision?\",\n      \"options\": [\n        \"W keeps both A and B until the next round.\",\n        \"W must keep A because A proposed first.\",\n        \"W holds B, releases A and leaves A free to propose again.\",\n        \"A and B are permanently rejected by W.\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"A receiver keeps the best proposal received so far. W replaces the inferior incumbent A with B. A becomes free and later continues down A’s own list from the next untried receiver. A held pair is provisional until the procedure finishes.\",\n      \"transfer\": \"Track which next-choice cursor changes during B’s proposal and which cursor remains unchanged.\"\n    },\n    {\n      \"id\": \"sm-08\",\n      \"concept\": \"Deferred acceptance\",\n      \"prerequisites\": [\n        \"Preference order\",\n        \"Blocking pairs\"\n      ],\n      \"prompt\": \"Left proposes. A: W X Y; B: W X Y; C: X W Y. W: B A C; X: A C B; Y: A B C. After A→W is held and B→W replaces A, which proposal comes next under the lowest-index free-proposer rule?\",\n      \"options\": [\n        \"C→X, because C has not proposed yet.\",\n        \"B→X, because B must try every receiver.\",\n        \"A→W again, because A was released.\",\n        \"A→X, because A is the lowest-index free proposer and W was already tried.\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"Both A and C are free after the replacement. The deterministic rule selects A, the lower-index participant. A already proposed to W, so A’s next untried choice is X. This makes the visible trace reproducible without changing the preference model.\",\n      \"transfer\": \"Continue this profile through C’s proposals and record each hold, replacement or rejection.\"\n    },\n    {\n      \"id\": \"sm-09\",\n      \"concept\": \"Deferred acceptance\",\n      \"prerequisites\": [\n        \"Preference order\",\n        \"Blocking pairs\"\n      ],\n      \"prompt\": \"W’s best-first order is B A C. W currently holds B and receives a proposal from C. What happens?\",\n      \"options\": [\n        \"W rejects C and continues holding B.\",\n        \"W replaces B because C proposed more recently.\",\n        \"W releases B and waits for A.\",\n        \"C is removed from the whole problem.\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"W prefers the incumbent B (rank 1) to C (rank 3), so this proposal is rejected. C remains free and may propose to C’s next untried receiver. A rejection concerns this pair; it does not remove C from the problem.\",\n      \"transfer\": \"Why can a receiver’s held-partner rank improve or stay the same over the trace, but never worsen?\"\n    },\n    {\n      \"id\": \"sm-10\",\n      \"concept\": \"Stable outcomes\",\n      \"prerequisites\": [\n        \"Preference order\",\n        \"Blocking pairs\",\n        \"Deferred acceptance\"\n      ],\n      \"prompt\": \"In this strict complete equal-size model, what does proposer optimality mean for the completed deferred-acceptance result?\",\n      \"options\": [\n        \"Every proposer gets the first choice in the original list.\",\n        \"Each proposer gets the best partner that proposer can have in any stable matching of these preferences.\",\n        \"The result maximizes a measured total happiness score.\",\n        \"The stable matching is necessarily unique.\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"The comparison is with other stable matchings for the same full preference profile. A proposer’s best stable partner may still have rank 2 or lower in the original list. The theorem does not supply a welfare score or require a unique stable outcome.\",\n      \"transfer\": \"If a proposer ends at rank 2, what would you have to establish before calling that partner the proposer’s best stable option?\"\n    },\n    {\n      \"id\": \"sm-11\",\n      \"concept\": \"Stable outcomes\",\n      \"prerequisites\": [\n        \"Preference order\",\n        \"Blocking pairs\",\n        \"Deferred acceptance\"\n      ],\n      \"prompt\": \"Preferences are A: W X; B: X W; W: B A; X: A B. Left-proposing gives A–W/B–X; right-proposing gives A–X/B–W. The explorer finds no blocking pair in either. What does this establish?\",\n      \"options\": [\n        \"One of the two stable results must be a software error.\",\n        \"Stability chooses the objectively fairest result.\",\n        \"These preferences have at least two stable outcomes, and the proposing side can select a different one.\",\n        \"Every possible preference profile has exactly two stable outcomes.\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"There are only two complete matchings for two participants per side, and both are stable in this profile. Left participants obtain their first choices in the first matching; right participants obtain their first choices in the second. Stability alone does not choose a fairness criterion.\",\n      \"transfer\": \"Compare the rank arrays for both sides in these two outcomes without treating the ranks as numerical utilities.\"\n    },\n    {\n      \"id\": \"sm-12\",\n      \"concept\": \"Deferred acceptance\",\n      \"prerequisites\": [\n        \"Preference order\",\n        \"Blocking pairs\"\n      ],\n      \"prompt\": \"With four participants on each side, why is 16 a valid upper bound on the number of proposals in this explorer?\",\n      \"options\": [\n        \"Every execution must contain exactly 16 proposals.\",\n        \"There are 16 complete matchings.\",\n        \"A receiver can hold four proposers at once.\",\n        \"There are 4 × 4 proposer–receiver pairs, and a proposer never repeats a receiver.\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"Each proposer moves forward through a list of four receivers and never repeats a proposal to the same receiver. This gives at most 4 × 4 = 16 proposals, often fewer. The number of complete matchings is 4! = 24, a different count.\",\n      \"transfer\": \"For the four-person shared-first-choice preset, count actual proposals and compare that count with both 16 and 24.\"\n    }\n  ]\n}\n","guideText":"# Stable matching: a worked field guide\n\nThis lesson asks three concrete questions: Why can a held proposal change? What makes a pair block a complete matching? How can the proposing side affect a stable outcome?\n\n## Open and use\n\nOpen **stable-matching-explorer.html** directly in a browser. Choose a preset or enter complete best-first preference rows, choose the proposing side, and press **Apply preferences**. Use **First**, **Back**, **Next** and **Finish**, or select an exact step. The completed result is shown separately from the currently inspected partial state.\n\nEvery edit retires the applied result and observation download until you apply again. Changing the group size explicitly resets all rows to the displayed label order. An invalid row stays visible and is refused; no missing or repeated label is repaired.\n\nDownload **stable-matching.json**, open RecallWeave's unchanged **demo.html** learner, choose the course file, inspect its preview, and explicitly start the lesson. The course has 12 original questions. Answers, worked explanations, review, retry and practice use the learner's existing behavior; this lesson makes no learning-efficacy claim.\n\n## The model\n\nThere are equally many participants on each side, from one to four. Left labels are A, B, C, D; right labels are W, X, Y, Z. Each participant lists every participant on the opposite side exactly once, best first. There are no ties or unacceptable partners.\n\nA matching pairs each left participant with one right participant and vice versa. A complete matching has no unpaired participant. A partial trace state can have free participants, shown explicitly.\n\nA rank is an ordinal position: 1 means first choice for that participant. Rank differences and sums do not, by themselves, measure satisfaction or welfare.\n\n## A blocking pair is a two-sided witness\n\nFor a complete matching, an unmatched-to-each-other pair blocks if **both** participants strictly prefer each other to their current partners.\n\nUse these preferences:\n\n| Participant | Best → worst |\n| --- | --- |\n| A | W X |\n| B | W X |\n| W | B A |\n| X | A B |\n\nIn A–W / B–X, B has rank 2 and would prefer W at rank 1. W has A at rank 2 and would prefer B at rank 1. B–W blocks.\n\nIn A–X / B–W, A would prefer W, but W prefers the current partner B. One participant's wish is insufficient. B already has the first choice. No pair blocks, so this matching is stable.\n\nThe explorer enumerates **every** complete matching in lexicographic left-to-right order: 1, 2, 6 or 24 possibilities for group sizes 1, 2, 3 or 4. Select any matching to inspect its partner ranks and all blocking witnesses. The absence of a witness is checked against every possible left/right pair.\n\n## Deferred acceptance, one proposal at a time\n\nA free proposer goes to the next untried receiver in that proposer's row.\n\n- A receiver with no held proposal holds the new proposer.\n- A receiver replaces the incumbent if the new proposer ranks higher in the receiver's own row. The displaced proposer becomes free.\n- Otherwise the receiver rejects the new proposal and keeps the incumbent.\n\nHeld pairs are provisional until the process completes. A receiver always holds the best proposer received so far. A proposer never repeats a receiver. This explorer chooses the lowest-index free proposer to make each trace deterministic.\n\n### Worked three-person trace\n\n| Left | Best → worst | Right | Best → worst |\n| --- | --- | --- | --- |\n| A | W X Y | W | B A C |\n| B | W X Y | X | A C B |\n| C | X W Y | Y | A B C |\n\nWith left proposing:\n\n| Proposal | Decision | Held pairs after the decision |\n| --- | --- | --- |\n| A → W | Hold A | A–W |\n| B → W | Replace A with B | B–W |\n| A → X | Hold A | A–X, B–W |\n| C → X | Reject C; X prefers A | A–X, B–W |\n| C → W | Reject C; W prefers B | A–X, B–W |\n| C → Y | Hold C | A–X, B–W, C–Y |\n\nThe result has six proposals. Left ranks are [2, 1, 3]; right ranks, in W/X/Y order, are [1, 1, 3]. A lower rank number is a more preferred position for that participant. Check the result in the complete-matching inspector: no pair blocks.\n\nThe trace retains every next-choice cursor and the complete list of free proposers at each step. Replacement changes who is free; rejection consumes a choice without adding a pair.\n\n## The proposing side can matter\n\nConsider:\n\n| Participant | Best → worst |\n| --- | --- |\n| A | W X |\n| B | X W |\n| W | B A |\n| X | A B |\n\nLeft proposing finishes at A–W / B–X, with left ranks [1, 1] and right ranks [2, 2]. Right proposing finishes at A–X / B–W, with left ranks [2, 2] and right ranks [1, 1]. Both complete matchings have no blocking pair.\n\nIn the strict complete equal-size model, deferred acceptance produces a stable matching. Each proposer obtains the best partner that proposer can have in any stable matching for the same preferences. This is **proposer optimality**. It does not say every proposer gets the first choice, every receiver does well, the stable matching is unique, or the outcome is fair.\n\nThe explorer compares each final proposer rank with the best rank available to that proposer among all enumerated stable matchings. Changing which side proposes creates a newly applied problem observation; it does not silently rewrite the previous result.\n\n## Counts that answer different questions\n\nAt size four there are at most 4 × 4 = 16 proposals because there are 16 possible proposer–receiver pairs and none repeats. There are 4! = 24 complete matchings.\n\nIn **Shared first choice**, every left participant prefers W X Y Z and every right participant prefers D C B A. Left proposing makes ten proposals and finishes A–Z, B–Y, C–X, D–W. This is one concrete trace, not a claim that all four-person profiles take ten proposals.\n\n## Downloads and reproducibility\n\nThe course and this guide are fixed original UTF-8 files. Their buttons remain available while a preference draft is invalid.\n\nAn observation JSON contains the full applied profile, every atomic trace state, every complete-matching inspection, the selected step, the inspected matching, and SHA-256 identities for the embedded source inputs. The full completed trace remains distinct from the selected visible step. Labels are display names for the stored numeric indices.\n\nThe observation is an export, not an import format for trusted derived results. The explorer has no network calls, account, persistence or storage writes. Keep the downloaded JSON if you need to retain an observation.\n\n## Limits and references\n\nThis is a bounded educational model. It excludes ties, incomplete lists, unequal group sizes, capacities, strategic reporting, policy constraints and real allocations. It does not compute a maximum-weight matching or claim a fairness measure.\n\nMathematical background:\n\n1. D. Gale and L. S. Shapley, “College Admissions and the Stability of Marriage,” *The American Mathematical Monthly* 69(1), 9–15 (1962). [Original RAND paper](https://www.rand.org/content/dam/rand/pubs/papers/2012/P2240.pdf).\n2. Princeton University, *Algorithm Design: Stable Matching*. [Official lecture](https://www.cs.princeton.edu/courses/archive/spring18/cos423/lectures/01StableMatching-2x2.pdf).\n\nAll examples, questions, explanations and diagrams in this contribution are original. References establish the mathematical background; no source exercises or figures are reproduced.\n","sourceHashes":{"src/stable-matching.mjs":"551a9b9532c5cf47a8b996d54ab70361bb1f8a2a90b00ec3f399598aa6d96517","src/stable-matching-ui.mjs":"7cdbfe8205acdabfcd24fbc976be23071d7a1280f7de1a7e7764b6d1097c01b6","templates/stable-matching-explorer.html":"efa93d8123ad5432ad1556e98ad3f8b8cc5383e8d58ebd5b45bcf6ca67edf87a","courses/stable-matching.json":"7148811acb67d6fc1c7c7452e3e8a99e783d09e3da29e1a0d5c7a6959aca753e","courses/stable-matching.md":"0d1aa6629f302b1e7d1aa80af1441f694ca7925b54f9cfdd72c3fe69186c172a","tools/build-stable-matching.mjs":"f3cd61fe407fc30d60029118a63df9703203a2d51a1e72703ef01a2af6decfcd"}}</script>
+<script type="module">
+/**
+ * Strict complete one-to-one stable matching for 1–4 participants per side.
+ * Pure, dependency-free and deterministic. Indices identify participants;
+ * ranks are ordinal positions, never numerical utilities.
+ */
+const MAX_GROUP_SIZE = 4;
+
+function freeze(value) {
+  if (value && typeof value === 'object') {
+    for (const child of Object.values(value)) freeze(child);
+    Object.freeze(value);
+  }
+  return value;
+}
+
+function denseArray(value, length, name) {
+  if (!Array.isArray(value) || value.length !== length ||
+      Reflect.ownKeys(value).length !== length + 1) {
+    throw new TypeError(name + ' must be a dense array of exactly ' + length + ' entries.');
+  }
+  for (let i = 0; i < length; i++) {
+    const descriptor = Object.getOwnPropertyDescriptor(value, String(i));
+    if (!descriptor || !Object.hasOwn(descriptor, 'value')) {
+      throw new TypeError(name + ' must contain ordinary entries without holes or accessors.');
+    }
+  }
+}
+
+function permutation(value, size, name) {
+  denseArray(value, size, name);
+  const used = new Set();
+  const result = [];
+  for (let i = 0; i < size; i++) {
+    const index = value[i];
+    if (!Number.isInteger(index) || Object.is(index, -0) || index < 0 || index >= size || used.has(index)) {
+      throw new TypeError(name + ' must list every index 0–' + (size - 1) + ' exactly once.');
+    }
+    used.add(index);
+    result.push(index);
+  }
+  return result;
+}
+
+function admit(profile) {
+  const keys = ['leftPreferences', 'rightPreferences', 'proposingSide'];
+  if (!profile || typeof profile !== 'object' || Array.isArray(profile) ||
+      ![Object.prototype, null].includes(Object.getPrototypeOf(profile)) ||
+      Reflect.ownKeys(profile).length !== keys.length ||
+      keys.some(key => !Object.hasOwn(profile, key) ||
+        !Object.hasOwn(Object.getOwnPropertyDescriptor(profile, key), 'value'))) {
+    throw new TypeError('A profile must contain exactly leftPreferences, rightPreferences and proposingSide.');
+  }
+  if (profile.proposingSide !== 'left' && profile.proposingSide !== 'right') {
+    throw new TypeError('proposingSide must be left or right.');
+  }
+  const size = profile.leftPreferences?.length;
+  if (!Number.isInteger(size) || size < 1 || size > MAX_GROUP_SIZE) {
+    throw new RangeError('Each side must have 1–4 participants.');
+  }
+  denseArray(profile.leftPreferences, size, 'leftPreferences');
+  denseArray(profile.rightPreferences, size, 'rightPreferences');
+  return {
+    leftPreferences: profile.leftPreferences.map((row, i) => permutation(row, size, 'Left row ' + i)),
+    rightPreferences: profile.rightPreferences.map((row, i) => permutation(row, size, 'Right row ' + i)),
+    proposingSide: profile.proposingSide
+  };
+}
+
+function ranks(preferences) {
+  return preferences.map(row => {
+    const rank = Array(row.length);
+    row.forEach((partner, position) => { rank[partner] = position + 1; });
+    return rank;
+  });
+}
+
+function inspect(profile, leftMatching, leftRank, rightRank) {
+  const size = leftMatching.length;
+  const rightMatching = Array(size);
+  leftMatching.forEach((right, left) => { rightMatching[right] = left; });
+  const leftRanks = leftMatching.map((right, left) => leftRank[left][right]);
+  const rightRanks = rightMatching.map((left, right) => rightRank[right][left]);
+  const blockingPairs = [];
+  for (let left = 0; left < size; left++) {
+    for (let right = 0; right < size; right++) {
+      if (leftRank[left][right] < leftRanks[left] && rightRank[right][left] < rightRanks[right]) {
+        blockingPairs.push({
+          left, right,
+          leftCurrentPartner: leftMatching[left],
+          rightCurrentPartner: rightMatching[right],
+          leftCurrentRank: leftRanks[left],
+          leftAlternativeRank: leftRank[left][right],
+          rightCurrentRank: rightRanks[right],
+          rightAlternativeRank: rightRank[right][left]
+        });
+      }
+    }
+  }
+  return {
+    leftMatching: [...leftMatching], rightMatching, leftRanks, rightRanks,
+    blockingPairs, stable: blockingPairs.length === 0
+  };
+}
+
+function enumerate(profile, leftRank, rightRank) {
+  const size = profile.leftPreferences.length;
+  const complete = [], row = [], used = Array(size).fill(false);
+  function visit() {
+    if (row.length === size) {
+      complete.push(inspect(profile, row, leftRank, rightRank));
+      return;
+    }
+    for (let right = 0; right < size; right++) {
+      if (used[right]) continue;
+      used[right] = true;
+      row.push(right);
+      visit();
+      row.pop();
+      used[right] = false;
+    }
+  }
+  visit();
+  return complete;
+}
+
+/** Inspect a complete left-to-right permutation and every blocking pair. */
+function inspectMatching(profile, leftMatching) {
+  const admitted = admit(profile);
+  const matching = permutation(leftMatching, admitted.leftPreferences.length, 'leftMatching');
+  return freeze(inspect(admitted, matching, ranks(admitted.leftPreferences), ranks(admitted.rightPreferences)));
+}
+
+/** All complete matchings, ordered lexicographically by left-to-right indices. */
+function listCompleteMatchings(profile) {
+  const admitted = admit(profile);
+  return freeze(enumerate(admitted, ranks(admitted.leftPreferences), ranks(admitted.rightPreferences)));
+}
+
+/** Initial state and every atomic proposal; lowest-index free proposer goes next. */
+function traceStableMatching(profile) {
+  const admitted = admit(profile), size = admitted.leftPreferences.length;
+  const leftRank = ranks(admitted.leftPreferences), rightRank = ranks(admitted.rightPreferences);
+  const leftMatching = Array(size).fill(null), rightMatching = Array(size).fill(null);
+  const leftProposes = admitted.proposingSide === 'left';
+  const proposerMatching = leftProposes ? leftMatching : rightMatching;
+  const receiverMatching = leftProposes ? rightMatching : leftMatching;
+  const preferences = leftProposes ? admitted.leftPreferences : admitted.rightPreferences;
+  const receiverRank = leftProposes ? rightRank : leftRank;
+  const nextChoiceIndices = Array(size).fill(0);
+  const states = [];
+  function record(action) {
+    states.push({
+      step: states.length,
+      leftMatching: [...leftMatching], rightMatching: [...rightMatching],
+      freeProposers: proposerMatching.flatMap((partner, i) => partner === null ? [i] : []),
+      nextChoiceIndices: [...nextChoiceIndices],
+      action
+    });
+  }
+  record(null);
+  while (proposerMatching.some(partner => partner === null)) {
+    const proposerIndex = proposerMatching.indexOf(null);
+    const cursor = nextChoiceIndices[proposerIndex];
+    if (cursor >= size || states.length > size * size) {
+      throw new Error('Internal proposal invariant failed.');
+    }
+    const receiverIndex = preferences[proposerIndex][cursor];
+    nextChoiceIndices[proposerIndex]++;
+    const previousProposerIndex = receiverMatching[receiverIndex];
+    let decision = 'reject', displacedProposerIndex = null;
+    if (previousProposerIndex === null) {
+      decision = 'hold';
+    } else if (receiverRank[receiverIndex][proposerIndex] < receiverRank[receiverIndex][previousProposerIndex]) {
+      decision = 'replace';
+      displacedProposerIndex = previousProposerIndex;
+      proposerMatching[previousProposerIndex] = null;
+    }
+    if (decision !== 'reject') {
+      proposerMatching[proposerIndex] = receiverIndex;
+      receiverMatching[receiverIndex] = proposerIndex;
+    }
+    record({
+      proposerIndex, receiverIndex, decision, previousProposerIndex, displacedProposerIndex,
+      proposerChoiceRank: cursor + 1,
+      receiverRankOfProposal: receiverRank[receiverIndex][proposerIndex],
+      receiverRankOfPrevious: previousProposerIndex === null ? null : receiverRank[receiverIndex][previousProposerIndex]
+    });
+  }
+  const final = inspect(admitted, leftMatching, leftRank, rightRank);
+  const matchings = enumerate(admitted, leftRank, rightRank);
+  const stableMatchingIndices = matchings.flatMap((matching, i) => matching.stable ? [i] : []);
+  const proposerBestRanks = Array.from({ length: size }, (_, proposer) =>
+    Math.min(...stableMatchingIndices.map(i =>
+      (leftProposes ? matchings[i].leftRanks : matchings[i].rightRanks)[proposer])));
+  const finalRanks = leftProposes ? final.leftRanks : final.rightRanks;
+  const proposerOptimal = finalRanks.every((rank, i) => rank === proposerBestRanks[i]);
+  if (!final.stable || !proposerOptimal) throw new Error('Internal final stability invariant failed.');
+  return freeze({
+    format: 'recallweave-stable-matching-trace/1',
+    profile: admitted, size, states, proposalCount: states.length - 1,
+    final, matchings, stableMatchingIndices, proposerBestRanks, proposerOptimal
+  });
+}
+
+
+const LEFT_LABELS = ['A', 'B', 'C', 'D'];
+const RIGHT_LABELS = ['W', 'X', 'Y', 'Z'];
+const PRESETS = {
+  provisional: { leftPreferences: [[0,1,2],[0,1,2],[1,0,2]], rightPreferences: [[1,0,2],[0,2,1],[0,1,2]], proposingSide: 'left' },
+  two: { leftPreferences: [[0,1],[1,0]], rightPreferences: [[1,0],[0,1]], proposingSide: 'left' },
+  shared: { leftPreferences: [[0,1,2,3],[0,1,2,3],[0,1,2,3],[0,1,2,3]], rightPreferences: [[3,2,1,0],[3,2,1,0],[3,2,1,0],[3,2,1,0]], proposingSide: 'left' },
+  aligned: { leftPreferences: [[0,1,2],[1,2,0],[2,0,1]], rightPreferences: [[0,1,2],[1,2,0],[2,0,1]], proposingSide: 'left' },
+  single: { leftPreferences: [[0]], rightPreferences: [[0]], proposingSide: 'left' }
+};
+
+function mountStableMatching(doc, payload) {
+  const byId = id => doc.getElementById(id);
+  const node = (tag, text, className) => {
+    const element = doc.createElement(tag);
+    if (text !== undefined) element.textContent = text;
+    if (className) element.className = className;
+    return element;
+  };
+  let result = null, selectedStep = 0, inspectedMatchingIndex = 0;
+  const pairText = matching => matching.map((right, left) => LEFT_LABELS[left] + '–' + RIGHT_LABELS[right]).join(' · ');
+  const proposerLabels = () => result.profile.proposingSide === 'left' ? LEFT_LABELS : RIGHT_LABELS;
+  const receiverLabels = () => result.profile.proposingSide === 'left' ? RIGHT_LABELS : LEFT_LABELS;
+
+  function retire(message = 'Preferences changed. Apply them to create a new trace and observation.') {
+    result = null;
+    selectedStep = 0;
+    inspectedMatchingIndex = 0;
+    byId('results').hidden = true;
+    byId('empty-state').hidden = false;
+    byId('download-observation').disabled = true;
+    byId('draft-status').textContent = message;
+    byId('preference-error').hidden = true;
+  }
+
+  function renderRows(profile) {
+    const size = profile.leftPreferences.length;
+    for (const [side, labels, other] of [['left', LEFT_LABELS, RIGHT_LABELS], ['right', RIGHT_LABELS, LEFT_LABELS]]) {
+      const container = byId(side + '-rows');
+      container.replaceChildren();
+      profile[side + 'Preferences'].forEach((row, index) => {
+        const wrapper = node('div', undefined, 'preference-row');
+        const id = side + '-preference-' + index;
+        const label = node('label', labels[index]);
+        label.htmlFor = id;
+        const input = node('input');
+        input.id = id; input.type = 'text'; input.className = 'preference-input';
+        input.value = row.map(value => other[value]).join(' ');
+        input.spellcheck = false; input.autocomplete = 'off';
+        input.setAttribute('aria-label', labels[index] + ' preferences, best first');
+        input.setAttribute('aria-describedby', 'draft-status');
+        input.maxLength = 32;
+        wrapper.append(label, input); container.append(wrapper);
+      });
+    }
+    byId('group-size').value = String(size);
+    byId('proposing-side').value = profile.proposingSide;
+  }
+
+  function readProfile() {
+    const size = Number(byId('group-size').value);
+    const profile = { leftPreferences: [], rightPreferences: [], proposingSide: byId('proposing-side').value };
+    for (const [side, labels, other] of [['left', LEFT_LABELS, RIGHT_LABELS], ['right', RIGHT_LABELS, LEFT_LABELS]]) {
+      const allowed = other.slice(0, size);
+      for (let index = 0; index < size; index++) {
+        const text = byId(side + '-preference-' + index).value.trim();
+        const tokens = text ? text.split(/\s+/) : [];
+        if (tokens.length !== size || new Set(tokens).size !== size || tokens.some(token => !allowed.includes(token))) {
+          throw new Error(labels[index] + ' must list ' + allowed.join(', ') + ' exactly once, best first. Your row was left unchanged.');
+        }
+        profile[side + 'Preferences'].push(tokens.map(token => allowed.indexOf(token)));
+      }
+    }
+    return profile;
+  }
+
+  function decisionText(action) {
+    if (!action) return 'Before any proposal: everyone is free and no receiver holds a partner.';
+    const p = proposerLabels()[action.proposerIndex], r = receiverLabels()[action.receiverIndex];
+    if (action.decision === 'hold') return p + ' proposes to ' + r + '. ' + r + ' has no incumbent and holds ' + p + '.';
+    const prior = proposerLabels()[action.previousProposerIndex];
+    if (action.decision === 'replace') return p + ' proposes to ' + r + '. ' + r + ' replaces ' + prior + ' (rank ' + action.receiverRankOfPrevious + ') with ' + p + ' (rank ' + action.receiverRankOfProposal + '). ' + prior + ' becomes free.';
+    return p + ' proposes to ' + r + '. ' + r + ' rejects ' + p + ' (rank ' + action.receiverRankOfProposal + ') and keeps ' + prior + ' (rank ' + action.receiverRankOfPrevious + ').';
+  }
+
+  function appendRow(body, cells) {
+    const row = node('tr');
+    for (const value of cells) row.append(node('td', value));
+    body.append(row);
+  }
+
+  function drawPairs(state) {
+    const svg = byId('held-diagram'), size = result.size;
+    svg.replaceChildren();
+    const namespace = 'http://www.w3.org/2000/svg';
+    function shape(tag, attributes, text) {
+      const element = doc.createElementNS(namespace, tag);
+      for (const [key, value] of Object.entries(attributes)) element.setAttribute(key, String(value));
+      if (text !== undefined) element.textContent = text;
+      svg.append(element); return element;
+    }
+    const y = index => 72 + 65 * index;
+    svg.setAttribute('viewBox', '0 0 520 ' + (102 + (size - 1) * 65));
+    const held = state.leftMatching.flatMap((right, left) => right === null ? [] : [LEFT_LABELS[left] + '–' + RIGHT_LABELS[right]]);
+    svg.setAttribute('aria-label', 'Held pairs at step ' + selectedStep + ': ' + (held.join(', ') || 'none'));
+    shape('text', { x: 68, y: 20, 'text-anchor': 'middle', fill: '#4c6868', 'font-size': 14 }, 'Left');
+    shape('text', { x: 452, y: 20, 'text-anchor': 'middle', fill: '#4c6868', 'font-size': 14 }, 'Right');
+    state.leftMatching.forEach((right, left) => {
+      if (right !== null) shape('path', { d: 'M 96 ' + y(left) + ' C 200 ' + y(left) + ', 320 ' + y(right) + ', 424 ' + y(right), fill: 'none', stroke: '#329778', 'stroke-width': 3 });
+    });
+    for (let index = 0; index < size; index++) {
+      for (const [x, label, matching] of [[68, LEFT_LABELS[index], state.leftMatching], [452, RIGHT_LABELS[index], state.rightMatching]]) {
+        shape('circle', { cx: x, cy: y(index), r: 26, fill: matching[index] === null ? '#f7f6ef' : '#e4f2ea', stroke: '#2d7465', 'stroke-width': 1.7 });
+        shape('text', { x, y: y(index) + 6, 'text-anchor': 'middle', fill: '#153b3b', 'font-size': 19, 'font-weight': 650 }, label);
+      }
+    }
+  }
+
+  function renderStep() {
+    const state = result.states[selectedStep];
+    byId('current-step').textContent = 'Selected step ' + selectedStep + ' of ' + result.proposalCount;
+    byId('step-select').value = String(selectedStep);
+    byId('first-step').disabled = byId('back-step').disabled = selectedStep === 0;
+    byId('next-step').disabled = byId('finish-step').disabled = selectedStep === result.proposalCount;
+    byId('decision').textContent = decisionText(state.action);
+    byId('decision').className = 'decision' + (state.action ? ' ' + state.action.decision : '');
+    drawPairs(state);
+    byId('free-proposers').textContent = 'Free proposers: ' + (state.freeProposers.map(index => proposerLabels()[index]).join(', ') || 'none — the matching is complete.');
+    const heldBody = byId('held-table').tBodies[0];
+    heldBody.replaceChildren();
+    state.leftMatching.forEach((right, left) => appendRow(heldBody, [
+      LEFT_LABELS[left], right === null ? 'Free' : RIGHT_LABELS[right],
+      right === null ? '—' : String(result.profile.leftPreferences[left].indexOf(right) + 1),
+      right === null ? '—' : String(result.profile.rightPreferences[right].indexOf(left) + 1)
+    ]));
+    const cursorBody = byId('cursor-table').tBodies[0];
+    cursorBody.replaceChildren();
+    const preferences = result.profile.proposingSide === 'left' ? result.profile.leftPreferences : result.profile.rightPreferences;
+    const matches = result.profile.proposingSide === 'left' ? state.leftMatching : state.rightMatching;
+    state.nextChoiceIndices.forEach((cursor, proposer) => appendRow(cursorBody, [
+      proposerLabels()[proposer],
+      matches[proposer] === null ? 'Free' : 'Held by ' + receiverLabels()[matches[proposer]],
+      cursor < result.size ? receiverLabels()[preferences[proposer][cursor]] + ' (rank ' + (cursor + 1) + ')' : 'No untried choice'
+    ]));
+  }
+
+  function renderInspection() {
+    const inspection = result.matchings[inspectedMatchingIndex];
+    const status = byId('inspection-status');
+    status.replaceChildren(node('span', inspection.stable ? 'Stable · no blocking pair' : 'Unstable · ' + inspection.blockingPairs.length + ' blocking pair' + (inspection.blockingPairs.length === 1 ? '' : 's'), 'stable-badge' + (inspection.stable ? '' : ' blocked')));
+    const matchingBody = byId('matching-table').tBodies[0];
+    matchingBody.replaceChildren();
+    inspection.leftMatching.forEach((right, left) => appendRow(matchingBody, [
+      LEFT_LABELS[left] + '–' + RIGHT_LABELS[right],
+      String(inspection.leftRanks[left]),
+      String(inspection.rightRanks[right])
+    ]));
+    const witness = byId('blocking-witnesses');
+    witness.replaceChildren();
+    if (inspection.stable) {
+      witness.append(node('p', 'Every possible left/right pair was checked. None offers both participants a strictly preferred partner.', 'subtle small'));
+      return;
+    }
+    witness.append(node('h3', 'Both comparisons must improve'));
+    const wrap = node('div', undefined, 'table-wrap'), table = node('table'), head = node('thead'), headRow = node('tr'), body = node('tbody');
+    for (const title of ['Blocking pair', 'Left prefers', 'Right prefers']) headRow.append(node('th', title));
+    head.append(headRow); table.append(head, body); wrap.append(table); witness.append(wrap);
+    for (const pair of inspection.blockingPairs) appendRow(body, [
+      LEFT_LABELS[pair.left] + '–' + RIGHT_LABELS[pair.right],
+      RIGHT_LABELS[pair.leftCurrentPartner] + ' (rank ' + pair.leftCurrentRank + ') → ' + RIGHT_LABELS[pair.right] + ' (rank ' + pair.leftAlternativeRank + ')',
+      LEFT_LABELS[pair.rightCurrentPartner] + ' (rank ' + pair.rightCurrentRank + ') → ' + LEFT_LABELS[pair.left] + ' (rank ' + pair.rightAlternativeRank + ')'
+    ]);
+  }
+
+  function renderApplied() {
+    byId('empty-state').hidden = true; byId('results').hidden = false;
+    byId('download-observation').disabled = false;
+    byId('draft-status').textContent = 'Applied. The result below uses exactly these preference rows and this proposing side.';
+    byId('preference-error').hidden = true;
+    byId('final-pairs').textContent = pairText(result.final.leftMatching);
+    byId('total-proposals').textContent = result.proposalCount + ' proposal' + (result.proposalCount === 1 ? '' : 's') + ' in the completed trace';
+    byId('stable-count').textContent = result.stableMatchingIndices.length + ' stable of ' + result.matchings.length + ' complete matching' + (result.matchings.length === 1 ? '' : 's');
+    byId('proposer-summary').textContent = result.profile.proposingSide === 'left' ? 'Left proposes' : 'Right proposes';
+    byId('optimal-summary').textContent = 'Best stable partner rank for each proposer: ' + result.proposerBestRanks.map((rank, i) => proposerLabels()[i] + ' rank ' + rank).join(' · ') + '. Checked against every stable alternative.';
+    const steps = byId('step-select'); steps.replaceChildren();
+    result.states.forEach(state => {
+      const option = node('option', state.step === 0 ? '0 · Before proposals' : state.step + ' · ' + proposerLabels()[state.action.proposerIndex] + ' → ' + receiverLabels()[state.action.receiverIndex] + ' · ' + state.action.decision);
+      option.value = String(state.step); steps.append(option);
+    });
+    const choices = byId('matching-select'); choices.replaceChildren();
+    result.matchings.forEach((matching, index) => {
+      const option = node('option', pairText(matching.leftMatching) + (matching.stable ? ' — stable' : ' — blocking pair'));
+      option.value = String(index); choices.append(option);
+    });
+    inspectedMatchingIndex = result.matchings.findIndex(matching => matching.leftMatching.every((right, left) => right === result.final.leftMatching[left]));
+    choices.value = String(inspectedMatchingIndex);
+    renderStep(); renderInspection();
+  }
+
+  function download(filename, text, type) {
+    const url = URL.createObjectURL(new Blob([text], { type }));
+    const anchor = node('a'); anchor.href = url; anchor.download = filename;
+    doc.body.append(anchor); anchor.click(); anchor.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+
+  byId('preference-form').addEventListener('submit', event => {
+    event.preventDefault();
+    try { result = traceStableMatching(readProfile()); selectedStep = 0; renderApplied(); }
+    catch (error) {
+      retire('The draft could not be applied. Correct the indicated row and try again.');
+      byId('preference-error').textContent = error.message;
+      byId('preference-error').hidden = false;
+      byId('preference-error').focus();
+    }
+  });
+  byId('preference-form').addEventListener('input', event => {
+    if (event.target.classList.contains('preference-input')) retire();
+  });
+  byId('proposing-side').addEventListener('change', () => retire());
+  byId('group-size').addEventListener('change', () => {
+    const size = Number(byId('group-size').value), order = Array.from({ length: size }, (_, i) => i);
+    renderRows({ leftPreferences: Array.from({ length: size }, () => [...order]), rightPreferences: Array.from({ length: size }, () => [...order]), proposingSide: byId('proposing-side').value });
+    retire('Group size changed. Every row was reset to the displayed label order. Apply preferences to continue.');
+  });
+  byId('load-preset').addEventListener('click', () => {
+    renderRows(PRESETS[byId('preset').value]);
+    retire('Preset loaded. Review the displayed rows, then apply preferences.');
+  });
+  for (const [id, change] of [['first-step', () => 0], ['back-step', () => selectedStep - 1], ['next-step', () => selectedStep + 1], ['finish-step', () => result.proposalCount]]) {
+    byId(id).addEventListener('click', () => { if (result) { selectedStep = change(); renderStep(); } });
+  }
+  byId('step-select').addEventListener('change', () => { if (result) { selectedStep = Number(byId('step-select').value); renderStep(); } });
+  byId('matching-select').addEventListener('change', () => { if (result) { inspectedMatchingIndex = Number(byId('matching-select').value); renderInspection(); } });
+  byId('download-course').addEventListener('click', () => download('stable-matching.json', payload.courseText, 'application/json;charset=utf-8'));
+  byId('download-guide').addEventListener('click', () => download('stable-matching.md', payload.guideText, 'text/markdown;charset=utf-8'));
+  byId('download-observation').addEventListener('click', () => {
+    if (!result) return;
+    const observation = {
+      format: 'recallweave-stable-matching-observation/1',
+      model: 'Strict complete equal-size one-to-one preferences; ordinal ranks; no fairness or real allocation claim.',
+      sourceHashes: payload.sourceHashes,
+      appliedProfile: result.profile,
+      labels: { left: LEFT_LABELS.slice(0, result.size), right: RIGHT_LABELS.slice(0, result.size) },
+      trace: result,
+      selectedStep,
+      inspectedMatchingIndex,
+      inspectedMatching: result.matchings[inspectedMatchingIndex]
+    };
+    download('stable-matching-observation.json', JSON.stringify(observation, null, 2) + '\n', 'application/json;charset=utf-8');
+  });
+  renderRows(PRESETS.provisional);
+  retire('Ready to apply the displayed preferences.');
+}
+
+mountStableMatching(document, JSON.parse(document.getElementById('stable-matching-payload').textContent));
+</script>
+</body>
+</html>

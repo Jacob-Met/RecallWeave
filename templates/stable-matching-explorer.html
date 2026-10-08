@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stable matching · RecallWeave</title>
+<style>
+:root{color-scheme:light;--ink:#153b3b;--muted:#4c6868;--paper:#f7f6ef;--white:#fff;--line:#cbd8d2;--teal:#08675c;--soft:#e4f2ea;--coral:#b6482d;--warm:#fff0e6;--focus:#0b6bd1}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.5 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+a{color:var(--teal)}button,input,select{font:inherit}button,select,input{max-width:100%}button,a,input,select{touch-action:manipulation}
+button{border:1px solid var(--teal);border-radius:8px;background:var(--white);color:var(--teal);padding:.62rem .86rem;font-weight:650;cursor:pointer;min-height:44px}
+button.primary{background:var(--teal);color:white}button:disabled{opacity:.48;cursor:default}button:hover:not(:disabled){filter:brightness(.96)}
+:focus-visible{outline:3px solid var(--focus);outline-offset:3px}input,select{border:1px solid #819a90;border-radius:6px;background:white;color:var(--ink);padding:.58rem;min-height:44px;width:100%}
+header{max-width:1320px;margin:auto;padding:2.25rem 2rem 1.6rem}.eyebrow{font-size:.78rem;letter-spacing:.16em;text-transform:uppercase;color:var(--teal);font-weight:800;margin:0 0 .5rem}
+h1{font-family:Georgia,serif;font-weight:500;font-size:clamp(2.45rem,5vw,4rem);line-height:1.06;letter-spacing:-.03em;margin:0 0 1rem}
+header .intro{font-size:1.08rem;max-width:780px;margin:.5rem 0 1.2rem;color:var(--muted)}
+.pills,.toolbar{display:flex;gap:.55rem;flex-wrap:wrap;align-items:center}.pill{border:1px solid var(--line);border-radius:99px;padding:.2rem .7rem;font-size:.82rem;background:#fff9}
+main{max-width:1320px;margin:0 auto;padding:0 2rem 3rem}.workspace{display:grid;grid-template-columns:minmax(290px,.83fr) minmax(0,1.6fr);gap:1.3rem;align-items:start}
+.card{background:var(--white);border:1px solid var(--line);border-radius:16px;padding:1.35rem;box-shadow:0 4px 16px #123e3e05;min-width:0}
+h2{font-size:1.22rem;line-height:1.25;margin:0 0 .65rem}h3{font-size:1rem;margin:1.1rem 0 .45rem}p{margin:.55rem 0 .85rem}.subtle{color:var(--muted);font-size:.9rem}.small{font-size:.82rem}
+label{display:block;font-weight:650;font-size:.9rem;margin-bottom:.35rem}.form-row{display:grid;grid-template-columns:1fr 1fr;gap:.7rem;margin:.85rem 0}
+.preset{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:.5rem;align-items:end}.preset label{grid-column:1/-1;margin-bottom:-.15rem}
+fieldset{padding:0;margin:1rem 0;border:0;min-width:0}legend{font-size:.88rem;font-weight:800;color:var(--teal);padding:0;margin-bottom:.45rem}
+.preference-row{display:grid;grid-template-columns:1.6rem 1fr;gap:.5rem;align-items:center;margin:.45rem 0}.preference-row label{margin:0;text-align:center;font-size:1rem}.preference-row input{font-family:ui-monospace,SFMono-Regular,monospace;letter-spacing:.12em}
+.input-hint{margin:.35rem 0 .65rem;font-size:.82rem;color:var(--muted)}.status{border-left:3px solid #71a793;padding:.4rem .65rem;background:#f1f7f2;font-size:.87rem;min-height:2.6rem}
+.error{border-left-color:var(--coral);background:var(--warm);color:#87341e}.full{width:100%}.downloads{border-top:1px solid var(--line);padding-top:1rem;margin-top:1rem}.downloads .toolbar>*{font-size:.85rem}
+.empty{padding:4rem 2rem;text-align:center;min-height:390px;display:grid;place-content:center}.empty .mark{font-family:Georgia,serif;font-size:3rem;color:#8ea99b}
+[hidden]{display:none!important}.result-stack{display:grid;gap:1.15rem}.result-summary{background:var(--ink);color:white;border:0}.result-summary .subtle{color:#cce1d6}
+.completed-label{font-size:.73rem;letter-spacing:.14em;text-transform:uppercase;color:#b8dec8;font-weight:750}.final-pairs{font-family:Georgia,serif;font-size:1.7rem;margin:.3rem 0 .55rem}
+.stat-line{display:flex;gap:.6rem;flex-wrap:wrap;font-size:.85rem}.stat-line span{background:#ffffff14;border-radius:7px;padding:.3rem .55rem}
+.step-heading{display:flex;gap:.8rem;align-items:baseline;justify-content:space-between;flex-wrap:wrap}.step-heading h2{margin:0}.step-heading span{font-size:.8rem;color:var(--muted)}
+.step-controls{display:flex;gap:.45rem;flex-wrap:wrap;margin:1rem 0 .65rem}.step-controls button{flex:1;padding:.5rem .65rem}
+.decision{padding:.8rem 1rem;border-radius:9px;background:var(--soft);font-size:.94rem;margin:.85rem 0}.decision.reject{background:var(--warm)}.decision.replace{background:#eaf0fa}
+.diagram{margin:.7rem 0 0}.diagram svg{width:100%;height:auto;max-height:350px;display:block}.diagram figcaption{font-size:.8rem;text-align:center;color:var(--muted);margin:.3rem 0 .65rem}
+.table-wrap{overflow-x:auto;max-width:100%;border:1px solid var(--line);border-radius:8px;margin:.7rem 0}table{border-collapse:collapse;width:100%;font-size:.85rem}th,td{padding:.55rem .6rem;text-align:left;vertical-align:top;border-bottom:1px solid #e1e8e3}th{background:#f0f5f1;font-weight:700}tbody tr:last-child td{border-bottom:0}.pair-cell{white-space:nowrap}
+details{margin:.8rem 0 .2rem}summary{cursor:pointer;font-weight:650;font-size:.9rem;padding:.4rem 0}.stable-badge{display:inline-block;background:var(--soft);padding:.3rem .6rem;border-radius:6px;font-weight:750;font-size:.9rem}.stable-badge.blocked{background:var(--warm);color:#87341e}
+#inspection-status{margin:.8rem 0 .5rem}.limits{margin-top:1.3rem;background:#edf2ec}.limits h2{font-size:1rem}.limits p{margin:.3rem 0;font-size:.85rem}
+footer{max-width:1320px;padding:0 2rem 2rem;margin:auto;color:var(--muted);font-size:.8rem}
+@media(max-width:850px){.workspace{grid-template-columns:1fr}header{padding:1.7rem 1rem 1.3rem}main{padding:0 1rem 2rem}.card{padding:1.05rem}.empty{min-height:220px;padding:2rem 1rem}footer{padding:0 1rem 1.5rem}}
+@media(max-width:420px){.form-row{grid-template-columns:1fr}.preset{grid-template-columns:minmax(0,1fr)}.preset label{grid-column:auto}.preset button{width:100%}.toolbar>*{flex:1}.final-pairs{font-size:1.4rem}.step-controls{gap:.35rem}.step-controls button{padding:.48rem .32rem}.card{border-radius:12px}th,td{padding:.5rem .4rem}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<header>
+<p class="eyebrow">RecallWeave · explore, then explain</p>
+<h1>Stable matching</h1>
+<p class="intro">Follow a proposal as it is held, replaced or rejected. Find the two people who would both prefer to switch—and see why changing the proposing side can change the outcome.</p>
+<div class="pills"><span class="pill">1–4 participants per side</span><span class="pill">Every complete matching</span><span class="pill">Works offline</span></div>
+</header>
+<main>
+<div class="workspace">
+<section class="card" aria-labelledby="preferences-title">
+<h2 id="preferences-title">1. Set the preferences</h2>
+<p class="subtle">Enter each opposite-side label once, best first. A rank describes an order, not how much someone values a partner.</p>
+<form id="preference-form" autocomplete="off">
+<div class="preset"><label for="preset">Start from an example</label><select id="preset"><option value="provisional">Provisional holds · 3 per side</option><option value="two">Two stable outcomes · 2 per side</option><option value="shared">Shared first choice · 4 per side</option><option value="aligned">Aligned first choices · 3 per side</option><option value="single">One possible pair · 1 per side</option></select><button id="load-preset" type="button">Load preset</button></div>
+<div class="form-row"><div><label for="group-size">Participants per side</label><select id="group-size"><option>1</option><option>2</option><option selected>3</option><option>4</option></select></div><div><label for="proposing-side">Proposing side</label><select id="proposing-side"><option value="left">Left proposes</option><option value="right">Right proposes</option></select></div></div>
+<p class="input-hint">Changing the group size resets every row to the displayed label order.</p>
+<fieldset><legend>Left preferences · choose right labels</legend><div id="left-rows"></div></fieldset>
+<fieldset><legend>Right preferences · choose left labels</legend><div id="right-rows"></div></fieldset>
+<p class="input-hint">Separate labels with spaces, for example <strong>W X Y</strong>. Uppercase labels are required.</p>
+<p id="draft-status" class="status" role="status">Ready to apply the displayed preferences.</p>
+<p id="preference-error" class="status error" role="alert" tabindex="-1" hidden></p>
+<button class="primary full" type="submit" id="apply">Apply preferences</button>
+</form>
+<div class="downloads">
+<h3>Take the lesson with you</h3>
+<p class="subtle">Download the original 12-question course, then import it through the learner’s file preview and Start flow.</p>
+<div class="toolbar"><button id="download-course" type="button">Course JSON</button><button id="download-guide" type="button">Worked guide</button></div>
+<p class="small"><a id="learner-link" href="../demo.html" target="_blank" rel="noopener">Open the RecallWeave learner</a></p>
+<button id="download-observation" class="full" type="button" disabled>Download this observation</button>
+<p class="small subtle">Includes applied preferences, the full trace, every matching and your current selections. Edits retire this download until Apply.</p>
+</div>
+</section>
+<div>
+<section id="empty-state" class="card empty"><div class="mark" aria-hidden="true">A ↔ W</div><h2>Your proposal trace starts here</h2><p class="subtle">Apply the displayed preferences to inspect every decision<br>and compare the complete matchings.</p></section>
+<div id="results" class="result-stack" hidden>
+<section class="card result-summary" aria-labelledby="completed-heading">
+<div id="completed-heading" class="completed-label">Completed result · separate from the selected step</div>
+<p id="final-pairs" class="final-pairs"></p>
+<div class="stat-line"><span id="total-proposals"></span><span id="stable-count"></span><span id="proposer-summary"></span></div>
+<p id="optimal-summary" class="subtle small"></p>
+</section>
+<section class="card" aria-labelledby="trace-title">
+<div class="step-heading"><h2 id="trace-title">2. Follow the proposals</h2><span id="current-step"></span></div>
+<p class="subtle">Held pairs are provisional. The lowest-index free proposer goes next.</p>
+<div class="step-controls"><button type="button" id="first-step">First</button><button type="button" id="back-step">Back</button><button type="button" id="next-step">Next</button><button type="button" id="finish-step">Finish</button></div>
+<label for="step-select">Inspect an exact step</label><select id="step-select"></select>
+<p id="decision" class="decision" role="status"></p>
+<figure class="diagram"><svg id="held-diagram" role="img" aria-label="Held pairs"></svg><figcaption>Lines show pairs held after the selected decision.</figcaption></figure>
+<p id="free-proposers" class="subtle small"></p>
+<div class="table-wrap"><table id="held-table"><thead><tr><th>Left</th><th>Held right</th><th>Left rank</th><th>Right rank</th></tr></thead><tbody></tbody></table></div>
+<details><summary>Each proposer’s next untried choice</summary><div class="table-wrap"><table id="cursor-table"><thead><tr><th>Proposer</th><th>State</th><th>Next untried choice</th></tr></thead><tbody></tbody></table></div></details>
+</section>
+<section class="card" aria-labelledby="matching-title">
+<h2 id="matching-title">3. Look for a blocking pair</h2>
+<p class="subtle">Choose any complete matching. A pair blocks only when both participants prefer each other to their current partners. This selection is independent of the trace step.</p>
+<label for="matching-select">Complete matching to inspect</label><select id="matching-select"></select>
+<p id="inspection-status" role="status"></p>
+<div class="table-wrap"><table id="matching-table"><thead><tr><th>Pair</th><th>Left’s rank</th><th>Right’s rank</th></tr></thead><tbody></tbody></table></div>
+<div id="blocking-witnesses"></div>
+</section>
+</div>
+</div>
+</div>
+<aside class="card limits"><h2>What this model can establish</h2><p>Strict, complete, equal-size one-to-one preferences only. The completed result has no blocking pair, and every proposer gets the best partner available to that proposer in a stable matching. Stability does not promise uniqueness or fairness; ordinal ranks are not utilities. No ties, incomplete lists, capacities, strategic behavior or real allocations are modeled. The worked guide includes original examples and mathematical references.</p></aside>
+</main>
+<footer>Original RecallWeave lesson and explorer. Direct-file operation; no network requests, accounts or saved browser state.</footer>
+<script type="application/json" id="stable-matching-payload">/*PAYLOAD*/</script>
+<script type="module">
+/*CORE*/
+/*UI*/
+mountStableMatching(document, JSON.parse(document.getElementById('stable-matching-payload').textContent));
+</script>
+</body>
+</html>

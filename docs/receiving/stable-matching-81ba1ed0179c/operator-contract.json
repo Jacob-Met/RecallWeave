@@ -1,0 +1,87 @@
+{
+  "schema": "hamon.external-consumer-contract.v1",
+  "frozen_at": "2026-10-08T21:33:46.885Z",
+  "owner": "estate-81ba1ed0179c/root",
+  "repository": "Jacob-Met/RecallWeave",
+  "topic": "Stable matching with strict complete two-sided preferences",
+  "canonical_base": "1c8ece2713554f95b0e507297a34909d50222736",
+  "canonical_tree": "96df1efcba39ea0fd1f929391a68c21f5020a208",
+  "beneficiary": "A learner follows why a held proposal can change, finds an actual blocking pair in another complete matching, and sees how the proposing side selects among stable outcomes.",
+  "input": {
+    "profile_keys": [
+      "leftPreferences",
+      "rightPreferences",
+      "proposingSide"
+    ],
+    "size": "Both sides have the same1..4participants. Every row is a dense strict permutation of numeric indices0..n-1. No ties, duplicates, missing or extra participants; no coercion of booleans,strings,fractions or nonfinite values.",
+    "proposingSide": "required literal left or right",
+    "label_convention": "Left A/B/C/D, right W/X/Y/Z, truncated to group size. API identity is index; UI translates explicit best-first label rows without repairing invalid orders."
+  },
+  "public_api": {
+    "traceStableMatching": "Validate/detach input; choose lowest-index free proposer; it proposes once to its next untried receiver. Receiver holds a first proposal, replaces an inferior incumbent, or rejects the new proposal. Record initial state and every atomic proposal decision; final complete matching and complete matching enumeration are returned as frozen JSON-safe data.",
+    "inspectMatching": "Validate one complete left-to-right permutation and return both one-based rank arrays, all blocking-pair witnesses in left/right index order, and stable iff no witness exists.",
+    "listCompleteMatchings": "Enumerate every left-to-right permutation in lexicographic order (at most24), with complete blocking-pair/rank evidence. No random search."
+  },
+  "trace_contract": {
+    "matching_identity": "Every state stores leftMatching/rightMatching with null for free participants; free proposers and their next-choice cursors are retained. Held pairs are provisional until the algorithm ends.",
+    "actions": [
+      "hold",
+      "replace",
+      "reject"
+    ],
+    "invariants": [
+      "Input remains unchanged and every returned array/object is frozen.",
+      "Every proposal is unique for its proposer/receiver pair; proposal count<=n*n.",
+      "Each state is a valid partial one-to-one matching; each receiver keeps its best proposal so far.",
+      "Final matching is complete, has no blocking pair, and each proposer's rank equals its best rank among all enumerated stable matchings."
+    ],
+    "scope": "Complete strict equal-size one-to-one preference model only. Ranks are ordinal positions, not cardinal utilities. Stability and proposer optimality do not claim fairness, uniqueness, maximum weight or a real allocation."
+  },
+  "ui": {
+    "draft": "Explicit Apply preferences; editing preference text, group size or proposing side retires result/trace download. Group-size changes explicitly reset rows. Invalid rows remain visible and are refused without silent repair.",
+    "inspection": "Reversible First/Back/Next/Finish and exact step selector; held-pair diagram plus readable partial-pair/state tables; completed result and proposal count labelled separately from current step.",
+    "matching_examination": "Select any complete matching from at most24; inspect all blocking witnesses or confirmed absence. Stable alternatives and ordinal ranks remain available.",
+    "downloads": "Original fixed course JSON and Markdown bytes; current observation with full applied preferences, full trace/enumeration, selected step, inspected matching and exact source hashes. Download does not import or trust derived results.",
+    "offline": "Standalone direct file, no network/storage/provider/account. Native keyboard and390px/desktop visual receiving and original downloaded lesson import through current unchanged learner are required."
+  },
+  "course": {
+    "questions": 12,
+    "concepts": [
+      "Preference order",
+      "Blocking pairs",
+      "Deferred acceptance",
+      "Stable outcomes"
+    ],
+    "content": "Original prompts/options/worked explanations/transfer prompts; balanced correct positions. Independent reviewer answers a question-only freeze before seeing the key.",
+    "references": [
+      "Gale and Shapley (1962), College Admissions and the Stability of Marriage, https://www.rand.org/content/dam/rand/pubs/papers/2012/P2240.pdf",
+      "Princeton official Algorithm Design stable-matching lectures, https://www.cs.princeton.edu/courses/archive/spring18/cos423/lectures/01StableMatching-2x2.pdf"
+    ],
+    "source_use": "Original examples, prose and implementation; references establish mathematical background. No reproduced paper exercises or diagrams."
+  },
+  "new_paths": [
+    "src/stable-matching.mjs",
+    "src/stable-matching-ui.mjs",
+    "templates/stable-matching-explorer.html",
+    "courses/stable-matching.json",
+    "courses/stable-matching.md",
+    "courses/stable-matching-explorer.html",
+    "tools/build-stable-matching.mjs",
+    "tools/check-stable-matching-browser.mjs",
+    "tests/stable-matching.test.mjs",
+    "tests/stable-matching-course.test.mjs",
+    "docs/receiving/stable-matching-81ba1ed0179c/**"
+  ],
+  "shared_write_limit": "One optional additive README discovery paragraph after qualification; all existing learner/deck/model/catalog/course/workflow/dependency files stay exact.",
+  "ownership": {
+    "bipartite_133": "Maximum-cardinality augmenting-path source owner preserved; its contract explicitly excludes stable matching.",
+    "native_read": "416 readable native coordination records,21 permission denied; no exact topic matches. Broad Conscience candidates post-filtered against exact topic; zero matches.691 complete central comment objects; zero exact matches.",
+    "native_identity": "External source contributor, no resident goal/Za/lease."
+  },
+  "execution_hold": {
+    "primary": "https://github.com/Jacob-Met/hamon/issues/143#issuecomment-6067592767",
+    "verified_at": "2026-10-08T21:21:26Z",
+    "rule": "No GitHub Actions execution or triggering ref/branch/PR/merge/dispatch/rerun/self-hosted/skip-CI route. Preserve required gates. Current5workflow declarations contain push/pull_request only, so an issue claim is non-triggering.",
+    "delivery": "Finish native qualification and exact source/evidence custody; triggering integration remains pending."
+  }
+}
