@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Compare substrate saturation and two stated enzyme-inhibition models with the existing RecallWeave enzyme lesson. Works offline.">
+<title>Enzyme kinetics · RecallWeave</title>
+<style>
+:root{color-scheme:light;--paper:#f5f3eb;--ink:#203d36;--muted:#536860;--line:#d9ded3;--panel:#fffef8;--green:#276349;--amber:#a44b25;--purple:#65539a;--soft:#e9eedf}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.5 ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+button,input{font:inherit}
+a{color:var(--green);text-underline-offset:3px}
+button{min-height:44px;border:1px solid var(--green);border-radius:8px;padding:10px 15px;background:var(--green);color:white;font-weight:650;cursor:pointer}
+button:hover{filter:brightness(.94)}
+button.secondary{color:var(--ink);background:var(--panel);border-color:#98aa9c}
+button:disabled{opacity:.48;cursor:not-allowed}
+button:disabled:hover{filter:none}
+:focus-visible{outline:3px solid #8e432a;outline-offset:3px}
+[hidden]{display:none!important}
+.skip{position:absolute;left:16px;top:-100px;padding:10px;background:white;z-index:3}
+.skip:focus{top:12px}
+.shell{width:min(1200px,calc(100% - 48px));margin-inline:auto}
+header{padding:22px 0;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:12px}
+.brand{font-weight:750;letter-spacing:-.04em;font-size:1.2rem}
+.brand-mark{display:inline-grid;place-items:center;width:30px;height:30px;margin-right:8px;border-radius:50%;background:var(--ink);color:#dbe7ac;font:700 20px Georgia,serif}
+.tag{font-size:.74rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+h1,h2,h3,p{margin-top:0}
+h1{font:400 clamp(2.65rem,5.5vw,4.8rem)/1.02 Georgia,serif;letter-spacing:-.045em;margin-bottom:16px}
+h2{font:400 1.65rem/1.2 Georgia,serif;letter-spacing:-.02em}
+h3{font-size:1rem}
+.hero{display:grid;grid-template-columns:1fr 310px;gap:50px;align-items:end;padding:36px 0 30px}
+.hero p:last-child{max-width:630px;color:var(--muted);font-size:1.06rem;margin-bottom:0}
+.eyebrow{font-size:.73rem;text-transform:uppercase;letter-spacing:.15em;font-weight:750;color:var(--green);margin-bottom:12px}
+.baseline{background:var(--soft);border-radius:12px;padding:20px}
+.baseline p{font-size:.83rem!important;margin:0;color:var(--muted)}
+.constants{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0}
+.constants div{border-left:2px solid #a4b68a;padding-left:12px}
+.constants dt{font-size:.8rem;color:var(--muted)}
+.constants dd{margin:0;font:400 1.8rem/1.25 Georgia,serif}
+.constants small{font:12px/1.35 ui-sans-serif,system-ui,sans-serif;display:block;margin-top:4px}
+.workbench{display:grid;grid-template-columns:282px minmax(0,1fr);border:1px solid var(--line);border-radius:15px;overflow:hidden;background:var(--panel)}
+.controls{padding:23px;border-right:1px solid var(--line);background:#edf0e7}
+.controls h2{font-size:1.45rem;margin-bottom:23px}
+.field{margin-bottom:24px}
+.field-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.field label{font-weight:700;font-size:.92rem}
+.field input[type=text]{min-width:0;width:72px;text-align:right;border:1px solid #8fa196;border-radius:6px;background:#fffef8;padding:7px 9px;color:var(--ink);font-variant-numeric:tabular-nums}
+.field input[aria-invalid=true]{border:2px solid #a33326}
+input[type=range]{accent-color:var(--green);width:100%;margin:15px 0 2px;min-height:24px;cursor:pointer}
+.hint{font-size:.79rem;color:var(--muted);line-height:1.45;margin:4px 0 0}
+fieldset{border:0;padding:0;margin:0 0 22px;min-width:0}
+legend{font-weight:700;font-size:.92rem;margin-bottom:10px}
+.model-options{display:grid;gap:8px}
+.model-option{display:flex;align-items:center;gap:8px;padding:8px;border:1px solid #cbd4c3;border-radius:7px;background:#f8f9f1;font-size:.88rem;cursor:pointer;min-height:44px}
+.model-option:has(input:checked){background:#e0e8cf;border-color:#91a280}
+.model-option input{accent-color:var(--green);margin:0;flex:0 0 auto}
+.control-actions{display:grid;gap:8px}
+.control-actions button{font-size:.82rem}
+.status{font-size:.78rem;line-height:1.4;margin:16px 0 0;color:var(--muted)}
+.status.has-error{color:#a33326;font-weight:650}
+.results{padding:24px;min-width:0}
+.figure-heading{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+.figure-heading h2{margin:0;font-size:1.5rem}
+#current-point{margin:0;font-size:.8rem;color:var(--muted);font-variant-numeric:tabular-nums}
+figure{margin:0}
+.legend{display:flex;gap:8px 18px;flex-wrap:wrap;list-style:none;padding:0;margin:14px 0 8px;font-size:.78rem;color:var(--ink)}
+.legend li{display:flex;align-items:center;gap:7px}
+.swatch{display:inline-block;width:25px;border-top:3px solid var(--green);height:0;flex:0 0 auto}
+.swatch.competitive{border-top:3px dashed var(--amber)}
+.swatch.pure_noncompetitive{border-top:3px dotted var(--purple)}
+#plot-wrap{width:100%;min-width:0}
+#kinetics-plot{display:block;width:100%;height:300px;overflow:visible}
+#kinetics-plot text{fill:var(--muted);font:11.5px ui-sans-serif,system-ui,sans-serif}
+.grid-line{stroke:#e2e6da;stroke-width:1}
+.axis-tick{stroke:#819889;stroke-width:1}
+.curve{fill:none;stroke:var(--green);stroke-width:2.7;opacity:.8}
+.curve.competitive{stroke:var(--amber);stroke-dasharray:10 5}
+.curve.pure_noncompetitive{stroke:var(--purple);stroke-dasharray:2 5;stroke-linecap:round}
+.curve.selected{stroke-width:3.5;opacity:1}
+.probe-line{stroke:#87968a;stroke-width:1;stroke-dasharray:3 4}
+.probe{stroke:var(--panel);stroke-width:1.5;fill:var(--green)}
+.probe.competitive{fill:var(--amber)}
+.probe.pure_noncompetitive{fill:var(--purple)}
+.plot-caption{font-size:.76rem;color:var(--muted);margin:2px 0 14px}
+.notice{padding:9px 12px;border-radius:6px;background:#f0ecd9;font-size:.82rem;margin-bottom:12px}
+.table-scroll{max-width:100%;overflow-x:auto;border:1px solid var(--line);border-radius:8px}
+table{width:100%;border-collapse:collapse;font-size:.78rem;font-variant-numeric:tabular-nums;min-width:570px}
+caption{text-align:left;padding:10px 12px;font-size:.84rem;font-weight:700;background:#f1f3e9}
+th,td{text-align:right;padding:10px 9px;border-top:1px solid var(--line)}
+thead th{font-weight:600;color:var(--muted);line-height:1.35;background:#f8f9f2}
+th:first-child{text-align:left}
+tbody th{font-weight:600;white-space:nowrap}
+tbody tr.selected{background:#eef2e4}
+tbody th .swatch{width:15px;margin-right:6px;vertical-align:middle}
+.rounding{font-size:.73rem;color:var(--muted);margin:7px 0 0}
+.explanation{margin-top:18px;padding:16px 18px;background:#edf1e4;border-left:3px solid #8fa271;border-radius:0 8px 8px 0}
+.explanation h3{margin-bottom:7px}
+.explanation p{font-size:.89rem;margin:0;color:#39554b}
+.invalid{padding:40px 24px;display:grid;align-content:center;min-height:460px}
+.invalid h2{font-size:1.6rem}
+.invalid p{color:var(--muted);max-width:450px}
+.download-row{display:flex;justify-content:flex-end;margin:13px 0 30px}
+.download-row button{font-size:.87rem}
+.course-points{display:grid;grid-template-columns:1fr 1.2fr;gap:30px;align-items:center;padding:22px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.course-points h2{margin:0 0 8px}
+.course-points p{font-size:.9rem;color:var(--muted);margin:0}
+.presets{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.presets button{font-size:1rem;text-align:left;background:var(--panel);border-color:#a9b69f;color:var(--ink);padding:13px}
+.presets small{display:block;font-size:.72rem;line-height:1.4;margin-top:5px;color:var(--muted)}
+.prompts{padding:30px 0;display:grid;grid-template-columns:repeat(3,1fr);gap:25px}
+.prompts article{border-top:3px solid #ccd5b9;padding-top:13px}
+.prompts h3{font:400 1.2rem/1.25 Georgia,serif;margin-bottom:9px}
+.prompts p{color:var(--muted);font-size:.87rem;margin:0}
+.step{display:block;font-size:.69rem;letter-spacing:.09em;font-weight:750;color:var(--green);margin-bottom:9px}
+.course{display:flex;align-items:center;justify-content:space-between;gap:24px;padding:25px;background:#e5ecdc;border-radius:12px;margin-bottom:28px}
+.course h2{font-size:1.6rem;margin-bottom:10px}
+.course p{margin:0;color:#435d51;font-size:.89rem;max-width:730px}
+.course button{flex:0 0 215px}
+.assumptions{display:grid;grid-template-columns:1.1fr 1fr;gap:36px;padding:4px 0 28px}
+.assumptions h2{font-size:1.4rem;margin-bottom:12px}
+.assumptions p,.assumptions li{font-size:.83rem;color:var(--muted)}
+.assumptions ul{padding-left:18px}
+.assumptions code{font-size:.83rem;white-space:normal}
+.assumptions summary{cursor:pointer;color:var(--green);font-weight:650;min-height:44px;padding:8px 0}
+.equations{padding:8px 12px;background:#eeefe7;border-radius:7px}
+.equations p{margin-bottom:8px}
+.equations p:last-child{margin-bottom:0}
+footer{border-top:1px solid var(--line);padding:20px 0 30px;font-size:.75rem;color:var(--muted)}
+noscript{display:block;padding:20px;background:#fff2d4;color:#613f24}
+@media(max-width:950px){.hero{grid-template-columns:1fr 260px;gap:24px}.workbench{grid-template-columns:246px minmax(0,1fr)}.controls{padding:18px}.results{padding:18px}.course{align-items:flex-start}.course button{flex-basis:190px}.course-points{gap:20px}}
+@media(max-width:730px){.shell{width:calc(100% - 28px)}.hero{grid-template-columns:1fr;padding-top:27px;gap:20px}.hero h1{font-size:3rem}.baseline{padding:14px 18px}.constants{margin:8px 0}.workbench{grid-template-columns:1fr}.controls{border-right:0;border-bottom:1px solid var(--line);padding:20px}.controls h2{margin-bottom:16px}.field{margin-bottom:19px}.model-options{grid-template-columns:1fr}.control-actions{grid-template-columns:1fr 1fr}.results{padding:18px 12px}.download-row{justify-content:stretch}.download-row button{width:100%}.course-points{grid-template-columns:1fr;gap:18px}.prompts{grid-template-columns:1fr;gap:20px}.course{display:block;padding:22px}.course button{margin-top:18px;width:100%}.assumptions{grid-template-columns:1fr;gap:12px}.tag{font-size:.65rem}.legend{gap:6px 13px}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<a class="skip" href="#workbench-title">Skip to the comparison</a>
+<div class="shell">
+<header><div class="brand"><span class="brand-mark" aria-hidden="true">r</span>RecallWeave</div><span class="tag">Biology · Offline explorer</span></header>
+<main>
+<section class="hero" aria-labelledby="page-title">
+<div><p class="eyebrow">Enzymes / Saturation &amp; regulation</p><h1 id="page-title">More substrate.<br>Same enzyme.</h1><p>See where the initial rate levels off—and when extra substrate can reduce an inhibitor’s fractional effect.</p></div>
+<aside class="baseline" aria-label="Fixed fictional baseline"><p>One fictional enzyme. Fixed baseline.</p><dl class="constants"><div><dt>V<sub>max</sub></dt><dd>10<small>product units/min</small></dd></div><div><dt>K<sub>m</sub></dt><dd>1<small>concentration unit</small></dd></div></dl><p>Three specified rate laws share these uninhibited parameters.</p></aside>
+</section>
+<noscript>This explorer needs JavaScript for its local calculations. You can still read the <a href="enzyme-kinetics.md">model guide</a> and the <a href="enzymes-energy-and-control.md">enzyme course</a>.</noscript>
+<div class="workbench">
+<form id="kinetics-controls" class="controls" novalidate>
+<h2 id="workbench-title" tabindex="-1">Change the conditions</h2>
+<div class="field"><div class="field-head"><label for="substrate">Substrate [S]</label><input id="substrate" type="text" inputmode="decimal" value="1" autocomplete="off" spellcheck="false" aria-describedby="substrate-help lab-status"></div><input id="substrate-slider" type="range" min="0" max="32" step="any" value="1" aria-label="Adjust substrate concentration" aria-describedby="substrate-help"><p id="substrate-help" class="hint">0–32 concentration units. Drag, use arrow keys, or type a decimal.</p></div>
+<div class="field"><div class="field-head"><label for="inhibitor-ratio">Inhibitor I/K<sub>i</sub></label><input id="inhibitor-ratio" type="text" inputmode="decimal" value="3" autocomplete="off" spellcheck="false" aria-describedby="inhibitor-help lab-status"></div><input id="inhibitor-slider" type="range" min="0" max="8" step="any" value="3" aria-label="Adjust inhibitor ratio" aria-describedby="inhibitor-help"><p id="inhibitor-help" class="hint">0–8, dimensionless. A ratio of 3 means inhibitor concentration is three times its inhibition constant. Compare two hypothetical inhibitors at the same ratio.</p></div>
+<fieldset><legend>Explain a curve</legend><div class="model-options">
+<label class="model-option"><input id="explain-uninhibited" type="radio" name="explain-model" value="uninhibited">Uninhibited</label>
+<label class="model-option"><input id="explain-competitive" type="radio" name="explain-model" value="competitive" checked>Competitive</label>
+<label class="model-option"><input id="explain-pure" type="radio" name="explain-model" value="pure_noncompetitive">Pure noncompetitive</label>
+</div></fieldset>
+<div class="control-actions"><button id="no-inhibitor" class="secondary" type="button">Set inhibitor to 0</button><button id="reset-example" class="secondary" type="button">Reset example</button></div>
+<p id="lab-status" class="status" role="status" aria-live="polite" aria-atomic="true">Preparing the local comparison.</p>
+</form>
+<section id="results" class="results" aria-label="Calculated comparison" hidden>
+<figure aria-labelledby="plot-heading">
+<div class="figure-heading"><h2 id="plot-heading">Same inputs. Compare the rates.</h2><p id="current-point"></p></div>
+<ul class="legend" aria-label="Curve styles"><li><span class="swatch" aria-hidden="true"></span>Uninhibited · circle</li><li><span class="swatch competitive" aria-hidden="true"></span>Competitive · square</li><li><span class="swatch pure_noncompetitive" aria-hidden="true"></span>Pure noncompetitive · triangle</li></ul>
+<div id="plot-wrap"><svg id="kinetics-plot" viewBox="0 0 700 300" role="img" aria-labelledby="plot-title plot-description"><title id="plot-title">Initial rate versus substrate concentration</title><desc id="plot-description"></desc><g id="plot-axes"></g><g id="plot-curves"></g><g id="plot-probes"></g></svg></div>
+<figcaption class="plot-caption">The vertical guide marks the current substrate value. Curve styles and marker shapes distinguish the cases; the table gives their current values.</figcaption>
+</figure>
+<p id="coincident-note" class="notice" hidden>With inhibitor ratio 0, all three curves and markers overlap.</p>
+<div class="table-scroll" tabindex="0" role="region" aria-label="Current rates and apparent parameters; scroll horizontally on a narrow screen">
+<table id="comparison-table"><caption>Current rates and apparent parameters</caption><thead><tr><th scope="col">Model</th><th scope="col">Initial rate<br>product units/min</th><th scope="col">Of uninhibited<br>rate</th><th scope="col">Limiting rate<br>product units/min</th><th scope="col">Apparent K<sub>m</sub><br>concentration units</th></tr></thead>
+<tbody>
+<tr data-model="uninhibited"><th scope="row"><span class="swatch" aria-hidden="true"></span>Uninhibited</th><td data-quantity="rate">—</td><td data-quantity="relativeRate">—</td><td data-quantity="limitingRate">—</td><td data-quantity="apparentKm">—</td></tr>
+<tr data-model="competitive"><th scope="row"><span class="swatch competitive" aria-hidden="true"></span>Competitive</th><td data-quantity="rate">—</td><td data-quantity="relativeRate">—</td><td data-quantity="limitingRate">—</td><td data-quantity="apparentKm">—</td></tr>
+<tr data-model="pure_noncompetitive"><th scope="row"><span class="swatch pure_noncompetitive" aria-hidden="true"></span>Pure noncompetitive</th><td data-quantity="rate">—</td><td data-quantity="relativeRate">—</td><td data-quantity="limitingRate">—</td><td data-quantity="apparentKm">—</td></tr>
+</tbody></table></div>
+<p class="rounding">Values are displayed to five significant figures. The CSV retains unrounded calculated values. Scroll the table sideways if its columns do not fit.</p>
+<p id="zero-note" class="notice" hidden>At zero substrate, “of uninhibited rate” is undefined because both rates are zero. Its CSV cell is empty.</p>
+<section class="explanation" aria-labelledby="explanation-title"><h3 id="explanation-title"></h3><p id="explanation-text"></p></section>
+</section>
+<div id="invalid-results" class="invalid" hidden><h2>Enter valid values to compare.</h2><p>The graph, table and comparison download will return when both inputs are within their shown ranges. The unchanged course deck remains available below.</p></div>
+</div>
+<div class="download-row"><button id="download-comparison" type="button" class="secondary" disabled>Download comparison as CSV</button></div>
+<section class="course-points" aria-labelledby="course-points-title"><div><p class="eyebrow">From the existing lesson</p><h2 id="course-points-title">Recreate the saturation example.</h2><p>These buttons change substrate only. Compare the uninhibited rates with question <strong>enz-binding-2</strong>, which rounds to one decimal.</p></div><div class="presets"><button type="button" data-substrate-preset="1">S = 1<small>Course rate: 5.0</small></button><button type="button" data-substrate-preset="4">S = 4<small>Course rate: 8.0</small></button><button type="button" data-substrate-preset="16">S = 16<small>Course rate: 9.4</small></button></div></section>
+<section class="prompts" aria-label="Suggested comparisons">
+<article><span class="step">01 / SATURATION</span><h3>Which increase buys more?</h3><p>Compare S = 1 → 4 with S = 4 → 16. Both changes multiply substrate by four. Why do their uninhibited rate increases differ?</p></article>
+<article><span class="step">02 / COMPETITION</span><h3>Can the fractional loss shrink?</h3><p>Keep inhibitor ratio 3. Move from S = 1 to S = 16 and follow the competitive percentage in the table. Predict what happens as substrate becomes very abundant.</p></article>
+<article><span class="step">03 / A STATED SPECIAL CASE</span><h3>What stays proportional?</h3><p>With the same nonzero inhibitor ratio, follow the pure noncompetitive percentage as you vary positive substrate. Separate a rising rate from recovery of the original limiting rate.</p></article>
+</section>
+<section class="course" aria-labelledby="course-title"><div><p class="eyebrow">Continue in RecallWeave</p><h2 id="course-title">Enzymes: energy, speed and control</h2><p>Download the existing twelve-question deck, then use <strong>Bring your own lesson → Choose a deck file</strong> in RecallWeave and explicitly start the selected deck. Read the <a href="enzymes-energy-and-control.md">worked course</a> or this explorer’s <a href="enzyme-kinetics.md">model guide</a>.</p></div><button id="download-course" type="button">Download the enzyme deck</button></section>
+<section class="assumptions" aria-label="Model assumptions and sources">
+<div><h2>What the curves mean</h2><p>These are fictional initial-rate calculations for a simple, reversible inhibition model: fixed enzyme amount, fixed temperature and pH, negligible substrate depletion and product accumulation during the initial-rate measurement, and inhibition already equilibrated. The curves do not describe reaction progress over time.</p><p><strong>Pure noncompetitive</strong> is the equal-inhibition-constant special case. It is an extension for comparison, not a kinetic label inferred from the course’s allosteric-binding example. Binding at a separate site alone does not identify a rate law.</p><p>No cooperativity, substrate inhibition, irreversible or slow-binding inhibition, pathway feedback dynamics, or equilibrium composition is calculated.</p></div>
+<div><h2>Read the model</h2><details><summary>Equations and parameter meanings</summary><div class="equations"><p>Let <strong>S</strong> be substrate concentration and <strong>r = I/K<sub>i</sub></strong>. With V<sub>max</sub> = 10 and K<sub>m</sub> = 1:</p><p><strong>Uninhibited:</strong> <code>v = 10 S / (1 + S)</code></p><p><strong>Competitive:</strong> <code>v = 10 S / (1 + r + S)</code></p><p><strong>Pure noncompetitive:</strong> <code>v = (10 / (1 + r)) S / (1 + S)</code></p><p>K<sub>m</sub> is the concentration giving half the limiting rate in a Michaelis–Menten curve; it is not generally a binding-equilibrium constant. The listed values use the fictional units shown above.</p></div></details><p>Primary references: IUBMB, <a href="https://iubmb.qmul.ac.uk/kinetics/ek4t6.html">enzyme kinetics §§4.1–4.2 and 6.2–6.4</a>, for rate terminology and the precise inhibition distinction; OpenStax, <a href="https://openstax.org/books/biology-2e/pages/6-5-enzymes">Biology 2e §6.5</a>, for the course’s biological context. The page, graph and examples are original.</p><p>Local calculation and interaction checks establish software behavior. No measured learning benefit is claimed.</p></div>
+</section>
+</main>
+<footer>RecallWeave · Enzyme kinetics explorer · Calculations and downloads work in this file offline. Reference and guide links open only when you choose them.</footer>
+</div>
+<script id="enzyme-course-data" type="application/json">/*__ENZYME_COURSE__*/</script>
+<script>
+(function () {
+'use strict';
+/*__ENZYME_MODEL__*/
+/*__ENZYME_UI__*/
+})();
+</script>
+</body>
+</html>
