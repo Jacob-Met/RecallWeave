@@ -339,3 +339,9 @@ Build with `node tools/build_least_squares.mjs`; `--check` verifies the generate
 ## Mathematical induction: a base, a bridge, every integer
 
 [Open the offline proof lab](courses/mathematical-induction-lab.html), download the [twelve-question lesson](courses/mathematical-induction.json), or read the [worked guide](courses/mathematical-induction.md). Compare an arithmetic sum with a proposed formula, inspect the exact base and symbolic successor step, and see why a few matching values do not prove every case. The lab keeps its finite examples separate from the induction argument and saves an explicit proof record. Import its lesson JSON through the existing learner preview and Start this deck controls.
+
+## Maximum bipartite matching: make room for one more pair
+
+Open [the offline augmenting-path lab](courses/bipartite-matching-explorer.html) to see why a greedy maximal matching can be improved, trace the alternating search and inspect every edge removed or added by a complete path flip. The original [12-question lesson](courses/bipartite-matching.json) and [worked guide](courses/bipartite-matching.md) include exact small-graph examples, maximum versus perfect coverage, and deterministic search choices. The lab accepts up to six vertices per side, 36 unweighted edges and a valid optional starting matching. Its lesson download opens in the existing learner through the ordinary file picker.
+
+Build or check the standalone file with `node tools/build-bipartite-matching.mjs [--check]`. Run the dedicated model/content checks with `node --test tests/bipartite-matching*.test.mjs`; actual author browser receiving uses `node tools/check_bipartite_matching_browser.mjs --out /absolute/new-directory`.
