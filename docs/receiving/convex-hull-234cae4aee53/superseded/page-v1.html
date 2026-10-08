@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Convex hulls — exact turns and outer boundaries</title>
+<style>
+:root{color-scheme:light;--ink:#182d33;--muted:#53666b;--line:#cbd6d5;--paper:#f4f7f3;--teal:#146b68;--gold:#b36a13}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.55 system-ui,sans-serif}main{max-width:1120px;margin:auto;padding:30px 22px 54px}header{max-width:850px;margin-bottom:26px}.eyebrow{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--teal);font-weight:750}h1{font-size:clamp(30px,5vw,48px);line-height:1.08;letter-spacing:-.03em;margin:10px 0 18px}h2{font-size:21px;margin:0 0 12px}p{margin:10px 0;color:var(--muted)}a{color:var(--teal)}.grid{display:grid;grid-template-columns:minmax(0,.82fr) minmax(0,1.18fr);gap:22px}.panel{background:#fff;border:1px solid var(--line);border-radius:16px;padding:22px;min-width:0}.stack{display:grid;gap:22px;align-content:start}.buttons{display:flex;gap:9px;flex-wrap:wrap;margin:14px 0}button{font:inherit;font-size:14px;border:1px solid #9eb4b3;border-radius:8px;padding:9px 13px;color:var(--ink);background:#fff;cursor:pointer}button.primary{background:var(--teal);color:white;border-color:var(--teal);font-weight:700}button:disabled{opacity:.43;cursor:default}button:focus-visible,textarea:focus-visible,a:focus-visible{outline:3px solid var(--gold);outline-offset:3px}label{display:block;font-weight:650;margin-bottom:8px}textarea{display:block;width:100%;resize:vertical;min-height:145px;border:1px solid #94aaa9;border-radius:8px;padding:12px;font:14px/1.6 ui-monospace,monospace;color:var(--ink);background:#fcfdfb}.small{font-size:13px}.status{min-height:1.5em}.error{color:#923b28;font-weight:650}.summary{background:#eaf3ef;border-left:4px solid var(--teal);padding:12px 14px;color:var(--ink);overflow-wrap:anywhere}pre{white-space:pre-wrap;overflow-wrap:anywhere;font:14px/1.6 ui-monospace,monospace;margin:0;color:var(--ink)}svg{display:block;width:100%;height:auto;aspect-ratio:1;background:#fbfcf8;border:1px solid #e1e7df;border-radius:10px}.axis{stroke:#bdccc8;stroke-width:1}.axis-label{fill:#637b78;font-size:14px}.point{fill:#607572;stroke:#fff;stroke-width:1.5}.active-point{fill:var(--teal)}.point-label{fill:var(--ink);font:13px system-ui}.active-chain{fill:none;stroke:var(--teal);stroke-width:3}.hull-region{fill:#dceee7;stroke:var(--teal);stroke-width:3}.tested-line{fill:none;stroke:var(--gold);stroke-width:2;stroke-dasharray:6 4}.table-wrap{overflow-x:auto}table{width:100%;border-collapse:collapse;font-size:14px}th,td{text-align:left;padding:9px 7px;border-bottom:1px solid #e0e7e2}th{color:var(--muted);font-size:12px}footer{margin-top:26px;max-width:900px}#step-summary{font-weight:700;color:var(--teal)}
+@media(max-width:720px){main{padding:22px 14px 36px}.grid{grid-template-columns:1fr}.panel{padding:17px}h1{font-size:34px}th,td{padding:8px 5px}}
+</style></head><body><main>
+<header><div class="eyebrow">RecallWeave · Algorithm explorer</div><h1>Exact turns.<br>Outer boundaries.</h1>
+<p>Build a convex hull from unordered points. Inspect why a chain keeps a left turn or removes a candidate vertex, while every input identity stays visible.</p>
+<div class="buttons"><button id="download-lesson">Download lesson JSON</button><button id="download-guide">Download worked guide (answers)</button></div>
+<p class="small">To study the lesson, open <a href="../demo.html">RecallWeave</a>, choose the downloaded JSON under “Bring your own lesson”, inspect its preview, and start that deck.</p></header>
+<div class="grid"><div class="stack"><section class="panel" aria-labelledby="input-title"><h2 id="input-title">1. Enter a point set</h2>
+<label for="points-input">JSON coordinate pairs</label><textarea id="points-input" spellcheck="false" rows="6" aria-describedby="input-help"></textarea>
+<p id="input-help" class="small">Use 0–16 pairs, with integer coordinates from −20 to 20. Enter [] for an empty set. x points right; y points up. Maximum 4,096 UTF-8 bytes.</p>
+<div class="buttons" aria-label="Load an example"><button data-hull-preset="rectangle">Rectangle + duplicates</button><button data-hull-preset="collinear">Collinear</button><button data-hull-preset="triangle">Half-area triangle</button><button data-hull-preset="empty">Empty set</button></div>
+<button id="compute-hull" class="primary">Compute hull</button>
+<p id="hull-status" class="small status" role="status"></p><p id="hull-error" class="error" role="alert"></p></section>
+<section class="panel" aria-labelledby="inspect-title"><h2 id="inspect-title">2. Inspect the construction</h2>
+<p id="step-summary" aria-live="polite">No inspection step.</p>
+<div class="buttons"><button id="previous-step" disabled>Previous</button><button id="next-step" disabled>Next</button><button id="final-step" disabled>Final</button></div>
+<pre id="step-detail"></pre><p class="small">A positive determinant is a left turn. Zero or negative removes the last point from that chain. Intermediate stacks are not the final hull.</p>
+<button id="download-trace" disabled>Download complete trace JSON</button>
+<p class="small">The full trace is retained. The selected inspection step is recorded separately.</p></section></div>
+<div class="stack"><section class="panel" aria-labelledby="result-title"><h2 id="result-title">Complete result and inspected view</h2><p id="result-summary" class="summary">No current computation.</p>
+<svg id="hull-diagram" viewBox="0 0 520 520" role="img" aria-label="Coordinate axes; no current computation."></svg>
+<p class="small">Solid line: inspected chain or completed hull. Dashed line: tested triple. The table and exact determinant define the calculation; the drawing is illustrative.</p></section>
+<section class="panel" aria-labelledby="identity-title"><h2 id="identity-title">Every input stays identifiable</h2>
+<div class="table-wrap"><table><thead><tr><th>Input</th><th>Coordinate</th><th>Representative</th><th>Final role</th></tr></thead><tbody id="point-rows"></tbody></table></div>
+<p class="small">Only extreme vertices enter the hull list. Collinear points between endpoints remain edge members. Duplicates use the first input ID as representative; every original row remains here and in the download.</p></section></div></div>
+<footer><p class="small">No floating-point tolerance decides a turn. Bounded integer arithmetic gives exact determinants and area. Empty, point and segment results are explicit. Editing the input clears the prior computation until you choose Compute hull again.</p></footer>
+</main><script type="module">
+const HULL_DECK_TEXT = "{\n  \"format\": \"recallweave-deck/1\",\n  \"title\": \"Convex hulls: exact turns and outer boundaries\",\n  \"attribution\": \"Original questions, examples, explanations and transfer prompts by the HAMON estate contribution estate-234cae4aee53 for RecallWeave. Mathematical background: University of Maryland CMSC754, Dave Mount, Lecture 2, Convex Hulls 1, https://www.cs.umd.edu/class/spring2026/cmsc754/Lects/lect02-hulls-1.pdf . No source exercises, passages or figures are reproduced.\",\n  \"license\": \"Original lesson content prepared for RecallWeave. This file makes no additional reuse-license grant; cited mathematical sources retain their own terms.\",\n  \"concepts\": [\n    \"Convex sets and extreme points\",\n    \"Exact orientation\",\n    \"Monotone chains\",\n    \"Degenerate hulls and checks\"\n  ],\n  \"items\": [\n    {\n      \"id\": \"hull-smallest\",\n      \"concept\": \"Convex sets and extreme points\",\n      \"prerequisites\": [],\n      \"prompt\": \"For a finite set of planar points, which object is its convex hull?\",\n      \"options\": [\n        \"The smallest convex set containing every point\",\n        \"The shortest path visiting every point in input order\",\n        \"An axis-aligned box containing every point\",\n        \"Any polygon whose vertices include every input point\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"The hull is the smallest convex set containing the inputs. Convexity requires the segment between any two members to remain in the set. A tour is an ordered path, and an axis-aligned box may contain extra area.\",\n      \"transfer\": \"Give a set of three noncollinear points. Describe one region contained in its bounding box but outside its convex hull.\"\n    },\n    {\n      \"id\": \"hull-left\",\n      \"concept\": \"Exact orientation\",\n      \"prerequisites\": [\n        \"Convex sets and extreme points\"\n      ],\n      \"prompt\": \"For A=(0,0), B=(3,0), C=(1,2), what are the orientation determinant and turn of A→B→C?\",\n      \"options\": [\n        \"−6, right turn\",\n        \"6, left turn\",\n        \"2, left turn\",\n        \"0, collinear\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"B−A=(3,0) and C−A=(1,2), so the determinant is 3×2−0×1=6. With x right and y up, a positive result is a left turn. The determinant is twice the signed triangle area, not the triangle area itself.\",\n      \"transfer\": \"Swap B and C in this example. Compute the new determinant and explain the sign change.\"\n    },\n    {\n      \"id\": \"hull-right\",\n      \"concept\": \"Exact orientation\",\n      \"prerequisites\": [\n        \"Convex sets and extreme points\"\n      ],\n      \"prompt\": \"For A=(−1,1), B=(2,1), C=(2,−2), what is the orientation determinant?\",\n      \"options\": [\n        \"9\",\n        \"0\",\n        \"−9\",\n        \"−3\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"B−A=(3,0) and C−A=(3,−3), giving 3×(−3)−0×3=−9. The negative sign indicates a right turn in the stated Cartesian axes.\",\n      \"transfer\": \"Translate all three points by the same vector. Explain why the determinant does not change.\"\n    },\n    {\n      \"id\": \"hull-collinear\",\n      \"concept\": \"Exact orientation\",\n      \"prerequisites\": [\n        \"Convex sets and extreme points\"\n      ],\n      \"prompt\": \"The complete point set is A=(0,0), B=(1,1), C=(2,2). A lower chain ends with A,B, and C is next. Under the stated extreme-vertex policy, what happens to B?\",\n      \"options\": [\n        \"It becomes an interior point of the plane\",\n        \"It is kept because its determinant is positive\",\n        \"It is copied twice to close the polygon\",\n        \"It is removed from the chain because the determinant is zero; it still lies on the final segment\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"The only inputs are A, B and C. Their determinant is zero, and B lies between A and C. The extreme-only scan removes B from its vertex stack. The geometric hull is still the complete segment AC, so B remains an edge member rather than disappearing from the input record.\",\n      \"transfer\": \"Explain the difference between retaining a coordinate as an input and retaining it as an extreme vertex.\"\n    },\n    {\n      \"id\": \"hull-rectangle\",\n      \"concept\": \"Convex sets and extreme points\",\n      \"prerequisites\": [],\n      \"prompt\": \"The input contains (0,0), (4,0), (4,3), (0,3), (2,1), and (2,0). How many extreme hull vertices are retained?\",\n      \"options\": [\n        \"4\",\n        \"5\",\n        \"6\",\n        \"3\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"The four rectangle corners are extreme vertices. The point (2,1) lies inside the rectangle. The point (2,0) lies on its lower edge between two corners, so the extreme-only convention excludes it from the vertex list while retaining its edge classification.\",\n      \"transfer\": \"Add a point beyond the rectangle's right edge. Explain why you must recompute rather than assume the four old corners all remain extreme.\"\n    },\n    {\n      \"id\": \"hull-duplicates\",\n      \"concept\": \"Convex sets and extreme points\",\n      \"prerequisites\": [],\n      \"prompt\": \"A point set already contains (4,0). Another input occurrence of (4,0) is added. Which statement is correct?\",\n      \"options\": [\n        \"The hull gains a new geometric vertex\",\n        \"The geometric hull is unchanged; both input identities can still be recorded\",\n        \"The area doubles\",\n        \"The entire input must be rejected\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"Repeating an existing coordinate does not enlarge the set of geometric locations and therefore does not change its hull or area. This explorer retains both original input IDs and uses the first occurrence as the computational representative.\",\n      \"transfer\": \"If several entries share a coordinate, explain which identity the explorer selects and which identities the download still retains.\"\n    },\n    {\n      \"id\": \"hull-sort\",\n      \"concept\": \"Monotone chains\",\n      \"prerequisites\": [\n        \"Exact orientation\"\n      ],\n      \"prompt\": \"Sort (2,0), (0,3), (0,−1), (−1,2) by x first, then y for equal x. Which order results?\",\n      \"options\": [\n        \"(0,−1), (2,0), (−1,2), (0,3)\",\n        \"(2,0), (0,3), (0,−1), (−1,2)\",\n        \"(−1,2), (0,−1), (0,3), (2,0)\",\n        \"(−1,2), (0,3), (0,−1), (2,0)\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"First compare x: −1 comes before 0, which comes before 2. The two x=0 points then compare y: −1 before 3. This gives (−1,2),(0,−1),(0,3),(2,0). The ordering is about coordinates, not the order in which points were entered.\",\n      \"transfer\": \"Give another pair of points with equal x and show how their y coordinates break the tie.\"\n    },\n    {\n      \"id\": \"hull-pop\",\n      \"concept\": \"Monotone chains\",\n      \"prerequisites\": [\n        \"Exact orientation\"\n      ],\n      \"prompt\": \"The lower chain is [(0,0),(1,2)] and next candidate is (2,0). The orientation determinant is −4. What is the next chain operation?\",\n      \"options\": [\n        \"Finish with a triangle\",\n        \"Remove (0,0)\",\n        \"Keep both old points because −4 is nonzero\",\n        \"Remove (1,2), then reconsider the candidate against the shortened chain\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"A non-left turn cannot stay in the lower extreme-vertex chain. The last stacked point (1,2) is popped. The candidate (2,0) is then reconsidered with the shortened stack; a scan may need several pops before it pushes a candidate.\",\n      \"transfer\": \"Construct a sorted candidate that causes two successive pops. Show both determinants.\"\n    },\n    {\n      \"id\": \"hull-vertical\",\n      \"concept\": \"Degenerate hulls and checks\",\n      \"prerequisites\": [\n        \"Exact orientation\"\n      ],\n      \"prompt\": \"What is the canonical extreme-vertex hull of [(2,3),(2,−1),(2,1)]?\",\n      \"options\": [\n        \"Segment [(2,−1),(2,3)]; (2,1) is an edge member\",\n        \"Triangle [(2,−1),(2,1),(2,3)]\",\n        \"Point [(2,1)]\",\n        \"An error because equal x coordinates are forbidden\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"All three coordinates have x=2, so they are collinear. The least endpoint is (2,−1) and the greatest is (2,3). They define a segment with zero area. The middle coordinate (2,1) remains an edge member. Equal x coordinates are allowed.\",\n      \"transfer\": \"Give a horizontal all-collinear example, identify its two endpoints, and classify a point between them.\"\n    },\n    {\n      \"id\": \"hull-triangle\",\n      \"concept\": \"Degenerate hulls and checks\",\n      \"prerequisites\": [\n        \"Exact orientation\"\n      ],\n      \"prompt\": \"For the points (0,0), (4,0), (1,3), which canonical hull ordering and area are correct?\",\n      \"options\": [\n        \"[(0,0),(1,3),(4,0)], area 6\",\n        \"[(0,0),(4,0),(1,3)], area 6\",\n        \"[(1,3),(0,0),(4,0)], area 12\",\n        \"[(0,0),(4,0),(1,3)], area 12\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"The least coordinate is (0,0). From it, (4,0) then (1,3) produces determinant 4×3−0×1=12, a positive counterclockwise turn. The triangle area is half that determinant, 6 square coordinate units.\",\n      \"transfer\": \"Reverse the triangle's order and compute its signed twice-area. Distinguish the sign from its unsigned geometric area.\"\n    },\n    {\n      \"id\": \"hull-degenerate\",\n      \"concept\": \"Degenerate hulls and checks\",\n      \"prerequisites\": [\n        \"Exact orientation\"\n      ],\n      \"prompt\": \"What hull kinds result, respectively, from [], [(2,1)], and [(2,1),(2,1)]?\",\n      \"options\": [\n        \"error, point, segment\",\n        \"empty, error, polygon\",\n        \"empty, point, point\",\n        \"point, point, point\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"The empty array has no hull vertices and is labeled empty. One distinct coordinate defines a point. Two occurrences of the same coordinate still define one geometric point, represented by the first input ID while both input occurrences remain recorded.\",\n      \"transfer\": \"Explain why two input rows do not necessarily define a line segment.\"\n    },\n    {\n      \"id\": \"hull-cost\",\n      \"concept\": \"Monotone chains\",\n      \"prerequisites\": [\n        \"Exact orientation\"\n      ],\n      \"prompt\": \"For n distinct points, why does sorting followed by two monotone-chain scans take O(n log n) time?\",\n      \"options\": [\n        \"Every possible triple must be inspected\",\n        \"Each chain repeats a complete sort after every pop\",\n        \"The scans each compare every pair of points\",\n        \"Sorting costs O(n log n); each point is pushed once and popped at most once per chain\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"Lexicographic sorting costs O(n log n). In each scan, a point is pushed once. Once it has been popped, it never returns to that scan's stack. Total push/pop work is linear, even though a particular candidate can trigger several pops.\",\n      \"transfer\": \"Distinguish the number of operations in one candidate's inner loop from the total number over a complete scan.\"\n    }\n  ]\n}\n";
+const HULL_GUIDE_TEXT = "# Convex hulls: exact turns and outer boundaries\n\nThis original lesson connects a point set with its smallest convex enclosure. Open convex-hull-explorer.html directly from your files, enter a JSON array of coordinate pairs, then choose Compute hull. The page is offline and needs no account, service, storage or dependencies.\n\nDownload the original lesson JSON, open RecallWeave, choose it under Bring your own lesson, inspect the preview and select Start this deck. The existing learner supplies feedback, review, separate practice and study notes. The worked answers below are optional study material.\n\n## Conventions before computing\n\n- Coordinates use x right and y up. Each coordinate must be an integer from -20 through 20; enter at most 16 pairs.\n- An explicit [] is an empty point set. A blank field or malformed JSON is refused. Input text is limited to 4,096 UTF-8 bytes.\n- Each entered pair receives an ID P1, P2, and so on. Identical coordinates use the first ID in computation, but all input occurrences and their representative remain in the table and trace.\n- The vertex list contains extreme vertices only. A collinear point between two endpoints remains on the geometric boundary even when omitted from the vertex list.\n- A polygon is listed counterclockwise from the smallest x, then smallest y. The closing vertex is not repeated. Empty, point and segment results are explicit, and have zero area.\n- No floating-point tolerance changes a turn or a classification. Bounds make integer determinants exact: each coordinate difference is at most 40 in magnitude, giving a conservative determinant bound of 3,200. At most 16 shoelace terms have an absolute sum at most 12,800, far below the exact-integer limit of Number. Fractional coordinates and larger unbounded inputs are outside this explorer's contract.\n\n## How to follow a scan\n\nSort unique coordinates by x, then y. The lower scan visits that order and the upper scan visits its reverse. When a candidate meets a stack with two or more points, inspect the last two stacked points A,B and the candidate C:\n\ndet = (Bx-Ax)(Cy-Ay) - (By-Ay)(Cx-Ax).\n\nPositive means a left turn, negative a right turn, and zero collinearity. Keep a left turn; otherwise pop B and reconsider the same candidate. Push the candidate after any required pops. Join the two chains without repeating their shared endpoints.\n\nPrevious, Next and Final inspect a complete retained calculation. The completed result and the currently inspected stack are labeled separately. An intermediate stack is not a finished hull. Editing any input retires the old view and trace download until you explicitly compute again.\n\nThe trace download contains normalized original inputs, every duplicate ID, sorted representatives, both chains, all copied comparison/pop/push snapshots, classifications, the final hull and exact area. A separate selectedStep value records the inspection cursor; the download is not truncated to that step. Lesson and guide downloads preserve their exact original UTF-8 text.\n\n## A complete worked set\n\nEnter:\n```json\n[[-4,-3],[4,-3],[4,3],[-4,3],[0,0],[0,-3],[4,-3]]\n```\n\nThe polygon is P1,P2,P3,P4, with twice-area 96 and area 48 square coordinate units. P5 is interior. P6 is an edge member, not an extreme vertex. P7 duplicates P2 and has the same geometric role, while its own input identity remains recorded. The lower scan's first pop tests P1,P4,P6: its determinant is -24, so it removes P4 from that lower stack. P4 still becomes an extreme vertex through the upper chain.\n\nThe complete record has 23 inspection steps for this example. Inspection step 3 (zero-based index 2 in the download) is that first pop. Its intermediate removal must not be interpreted as a final interior classification.\n\n## Worked answers and transfer prompts\n\n### 1. hull-smallest\n\nFor a finite set of planar points, which object is its convex hull?\n\nCorrect choice: The smallest convex set containing every point\n\nThe hull is the smallest convex set containing the inputs. Convexity requires the segment between any two members to remain in the set. A tour is an ordered path, and an axis-aligned box may contain extra area.\n\nTransfer: Give a set of three noncollinear points. Describe one region contained in its bounding box but outside its convex hull.\n\n### 2. hull-left\n\nFor A=(0,0), B=(3,0), C=(1,2), what are the orientation determinant and turn of A→B→C?\n\nCorrect choice: 6, left turn\n\nB−A=(3,0) and C−A=(1,2), so the determinant is 3×2−0×1=6. With x right and y up, a positive result is a left turn. The determinant is twice the signed triangle area, not the triangle area itself.\n\nTransfer: Swap B and C in this example. Compute the new determinant and explain the sign change.\n\n### 3. hull-right\n\nFor A=(−1,1), B=(2,1), C=(2,−2), what is the orientation determinant?\n\nCorrect choice: −9\n\nB−A=(3,0) and C−A=(3,−3), giving 3×(−3)−0×3=−9. The negative sign indicates a right turn in the stated Cartesian axes.\n\nTransfer: Translate all three points by the same vector. Explain why the determinant does not change.\n\n### 4. hull-collinear\n\nThe complete point set is A=(0,0), B=(1,1), C=(2,2). A lower chain ends with A,B, and C is next. Under the stated extreme-vertex policy, what happens to B?\n\nCorrect choice: It is removed from the chain because the determinant is zero; it still lies on the final segment\n\nThe only inputs are A, B and C. Their determinant is zero, and B lies between A and C. The extreme-only scan removes B from its vertex stack. The geometric hull is still the complete segment AC, so B remains an edge member rather than disappearing from the input record.\n\nTransfer: Explain the difference between retaining a coordinate as an input and retaining it as an extreme vertex.\n\n### 5. hull-rectangle\n\nThe input contains (0,0), (4,0), (4,3), (0,3), (2,1), and (2,0). How many extreme hull vertices are retained?\n\nCorrect choice: 4\n\nThe four rectangle corners are extreme vertices. The point (2,1) lies inside the rectangle. The point (2,0) lies on its lower edge between two corners, so the extreme-only convention excludes it from the vertex list while retaining its edge classification.\n\nTransfer: Add a point beyond the rectangle's right edge. Explain why you must recompute rather than assume the four old corners all remain extreme.\n\n### 6. hull-duplicates\n\nA point set already contains (4,0). Another input occurrence of (4,0) is added. Which statement is correct?\n\nCorrect choice: The geometric hull is unchanged; both input identities can still be recorded\n\nRepeating an existing coordinate does not enlarge the set of geometric locations and therefore does not change its hull or area. This explorer retains both original input IDs and uses the first occurrence as the computational representative.\n\nTransfer: If several entries share a coordinate, explain which identity the explorer selects and which identities the download still retains.\n\n### 7. hull-sort\n\nSort (2,0), (0,3), (0,−1), (−1,2) by x first, then y for equal x. Which order results?\n\nCorrect choice: (−1,2), (0,−1), (0,3), (2,0)\n\nFirst compare x: −1 comes before 0, which comes before 2. The two x=0 points then compare y: −1 before 3. This gives (−1,2),(0,−1),(0,3),(2,0). The ordering is about coordinates, not the order in which points were entered.\n\nTransfer: Give another pair of points with equal x and show how their y coordinates break the tie.\n\n### 8. hull-pop\n\nThe lower chain is [(0,0),(1,2)] and next candidate is (2,0). The orientation determinant is −4. What is the next chain operation?\n\nCorrect choice: Remove (1,2), then reconsider the candidate against the shortened chain\n\nA non-left turn cannot stay in the lower extreme-vertex chain. The last stacked point (1,2) is popped. The candidate (2,0) is then reconsidered with the shortened stack; a scan may need several pops before it pushes a candidate.\n\nTransfer: Construct a sorted candidate that causes two successive pops. Show both determinants.\n\n### 9. hull-vertical\n\nWhat is the canonical extreme-vertex hull of [(2,3),(2,−1),(2,1)]?\n\nCorrect choice: Segment [(2,−1),(2,3)]; (2,1) is an edge member\n\nAll three coordinates have x=2, so they are collinear. The least endpoint is (2,−1) and the greatest is (2,3). They define a segment with zero area. The middle coordinate (2,1) remains an edge member. Equal x coordinates are allowed.\n\nTransfer: Give a horizontal all-collinear example, identify its two endpoints, and classify a point between them.\n\n### 10. hull-triangle\n\nFor the points (0,0), (4,0), (1,3), which canonical hull ordering and area are correct?\n\nCorrect choice: [(0,0),(4,0),(1,3)], area 6\n\nThe least coordinate is (0,0). From it, (4,0) then (1,3) produces determinant 4×3−0×1=12, a positive counterclockwise turn. The triangle area is half that determinant, 6 square coordinate units.\n\nTransfer: Reverse the triangle's order and compute its signed twice-area. Distinguish the sign from its unsigned geometric area.\n\n### 11. hull-degenerate\n\nWhat hull kinds result, respectively, from [], [(2,1)], and [(2,1),(2,1)]?\n\nCorrect choice: empty, point, point\n\nThe empty array has no hull vertices and is labeled empty. One distinct coordinate defines a point. Two occurrences of the same coordinate still define one geometric point, represented by the first input ID while both input occurrences remain recorded.\n\nTransfer: Explain why two input rows do not necessarily define a line segment.\n\n### 12. hull-cost\n\nFor n distinct points, why does sorting followed by two monotone-chain scans take O(n log n) time?\n\nCorrect choice: Sorting costs O(n log n); each point is pushed once and popped at most once per chain\n\nLexicographic sorting costs O(n log n). In each scan, a point is pushed once. Once it has been popped, it never returns to that scan's stack. Total push/pop work is linear, even though a particular candidate can trigger several pops.\n\nTransfer: Distinguish the number of operations in one candidate's inner loop from the total number over a complete scan.\n\n## Verification and scope\n\nThe bounded core is checked against all 512 subsets of a 3×3 grid using an independent containment criterion for extreme points, plus supporting-side, winding, canonical-start, trace-replay, degenerate, boundary, duplicate and half-area controls. The independent criterion uses segments and triangles of other points, rather than repeating the chain algorithm. Native course receiving exercises the unchanged parser, adaptive selector, first-response review, separate practice and full reflected study-note export.\n\nThese checks are mathematical/software evidence, not a learning-efficacy claim. The rendered diagram is an illustration; exact coordinate, determinant and trace text defines the calculation. No clipping, triangulation, collision detection or handling of arbitrary floating-point geometry is implemented here. Those are distinct problems.\n\nMathematical background: [Dave Mount, University of Maryland CMSC754, Lecture 2](https://www.cs.umd.edu/class/spring2026/cmsc754/Lects/lect02-hulls-1.pdf). The containment oracle also uses the two-dimensional consequence of [Carathéodory's theorem, MIT 6.253 Lecture 3](https://ocw.mit.edu/courses/6-253-convex-analysis-and-optimization-spring-2012/3e2a100d7fa327637ed8e31771a22c18_MIT6_253S12_lec03.pdf). All wording, examples and diagrams here are original; source exercises and figures are not copied.\n\nOriginal lesson content prepared for RecallWeave. This file makes no additional reuse-license grant; cited mathematical sources retain their own terms.\n";
+/** Exact planar hulls for small, explicitly bounded integer point sets. */
+const MAX_HULL_POINTS = 16;
+const HULL_COORDINATE_LIMIT = 20;
+const MAX_HULL_INPUT_BYTES = 4096;
+
+function checkedPoints(value) {
+  if (!Array.isArray(value) || value.length > MAX_HULL_POINTS) {
+    throw new TypeError('Supply an array of 0–16 coordinate pairs.');
+  }
+  return Array.from(value, (pair, index) => {
+    if (!Array.isArray(pair) || pair.length !== 2
+      || !Array.from(pair).every(v => typeof v === 'number' && Number.isInteger(v)
+        && Math.abs(v) <= HULL_COORDINATE_LIMIT)) {
+      throw new TypeError('Point ' + (index + 1) + ' needs two integer coordinates from -20 through 20.');
+    }
+    return pair.map(v => v === 0 ? 0 : v);
+  });
+}
+
+function parseHullPoints(text) {
+  if (typeof text !== 'string' || new TextEncoder().encode(text).length > MAX_HULL_INPUT_BYTES) {
+    throw new TypeError('Point input must be UTF-8 text of at most 4096 bytes.');
+  }
+  let value;
+  try { value = JSON.parse(text); }
+  catch { throw new TypeError('Enter a JSON array of [x,y] pairs; use [] for an empty set.'); }
+  return checkedPoints(value);
+}
+
+function turn(a, b, c) {
+  // |coordinate difference| <= 40: each product <= 1600, difference <= 3200.
+  return (b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x);
+}
+
+function onSegment(p, a, b) {
+  return turn(a, b, p) === 0
+    && p.x >= Math.min(a.x, b.x) && p.x <= Math.max(a.x, b.x)
+    && p.y >= Math.min(a.y, b.y) && p.y <= Math.max(a.y, b.y);
+}
+
+function analyzeHull(points) {
+  const inputs = checkedPoints(points).map(([x, y], index) => ({ id: 'P' + (index + 1), x, y }));
+  const byCoordinate = new Map();
+  for (const point of inputs) {
+    const key = point.x + ',' + point.y;
+    if (!byCoordinate.has(key)) byCoordinate.set(key, { ...point, inputIds: [] });
+    byCoordinate.get(key).inputIds.push(point.id);
+  }
+  const unique = [...byCoordinate.values()].sort((a, b) => a.x - b.x || a.y - b.y);
+  const byId = new Map(unique.map(point => [point.id, point]));
+  const sortedIds = unique.map(point => point.id);
+  const steps = [];
+  const snapshot = (phase, action, candidate, before, after, tested = [], determinant = null, removed = null) => {
+    steps.push({ index: steps.length, phase, action, candidate,
+      before: [...before], after: [...after], tested: [...tested], determinant, removed });
+  };
+  function scan(ids, phase) {
+    const stack = [];
+    for (const candidate of ids) {
+      while (stack.length >= 2) {
+        const a = stack[stack.length - 2], b = stack[stack.length - 1];
+        const determinant = turn(byId.get(a), byId.get(b), byId.get(candidate));
+        const before = [...stack];
+        if (determinant > 0) {
+          snapshot(phase, 'retain', candidate, before, stack, [a, b, candidate], determinant);
+          break;
+        }
+        stack.pop();
+        snapshot(phase, 'pop', candidate, before, stack, [a, b, candidate], determinant, b);
+      }
+      const before = [...stack];
+      stack.push(candidate);
+      snapshot(phase, 'push', candidate, before, stack);
+    }
+    return stack;
+  }
+  const lower = unique.length < 2 ? [...sortedIds] : scan(sortedIds, 'lower');
+  const upper = unique.length < 2 ? [...sortedIds] : scan([...sortedIds].reverse(), 'upper');
+  const hull = unique.length < 2 ? [...sortedIds] : [...lower.slice(0, -1), ...upper.slice(0, -1)];
+  const kind = hull.length === 0 ? 'empty' : hull.length === 1 ? 'point' : hull.length === 2 ? 'segment' : 'polygon';
+  let twiceArea = 0;
+  if (kind === 'polygon') {
+    for (let index = 0; index < hull.length; index++) {
+      const a = byId.get(hull[index]), b = byId.get(hull[(index + 1) % hull.length]);
+      twiceArea += a.x * b.y - a.y * b.x;
+    }
+  }
+  // At most 16 terms, each |x*y-y*x| <= 800. No tolerance decides topology.
+  if (!Number.isSafeInteger(twiceArea) || twiceArea < 0) throw new Error('Internal hull orientation invariant failed.');
+  const vertices = new Set(hull);
+  const roleById = new Map();
+  for (const point of unique) {
+    let role = vertices.has(point.id) ? 'vertex' : 'interior';
+    if (role !== 'vertex' && hull.length >= 2) {
+      const count = kind === 'segment' ? 1 : hull.length;
+      for (let edge = 0; edge < count; edge++) {
+        if (onSegment(point, byId.get(hull[edge]), byId.get(hull[(edge + 1) % hull.length]))) {
+          role = 'edge';
+          break;
+        }
+      }
+    }
+    roleById.set(point.id, role);
+  }
+  const classifications = inputs.map(point => {
+    const representative = byCoordinate.get(point.x + ',' + point.y);
+    return { id: point.id, representativeId: representative.id,
+      duplicate: point.id !== representative.id, role: roleById.get(representative.id) };
+  });
+  snapshot('complete', 'complete', null, [], hull);
+  return { format: 'recallweave-convex-hull/1',
+    conventions: { coordinateLimit: HULL_COORDINATE_LIMIT, maxPoints: MAX_HULL_POINTS,
+      axis: 'x right, y up', boundary: 'extreme vertices only',
+      order: 'counterclockwise polygon from lexicographic minimum; sorted segment endpoints' },
+    inputs, unique, sortedIds, lower, upper, hull, kind, twiceArea, area: twiceArea / 2, classifications, steps };
+}
+
+function serializeHullRecord(points, selectedStep = 0) {
+  const result = analyzeHull(points);
+  if (!Number.isInteger(selectedStep) || selectedStep < 0 || selectedStep >= result.steps.length) {
+    throw new RangeError('Choose an existing inspection step.');
+  }
+  return JSON.stringify({ ...result, selectedStep }, null, 2) + '\n';
+}
+
+
+function mountHull(documentRoot, deckText, guideText) {
+  const get = selector => documentRoot.querySelector(selector);
+  let result = null, selected = 0;
+  const presets = {
+    rectangle: [[-4,-3],[4,-3],[4,3],[-4,3],[0,0],[0,-3],[4,-3]],
+    collinear: [[2,3],[2,-1],[2,1],[2,1]],
+    triangle: [[0,0],[3,0],[0,1]],
+    empty: [],
+  };
+  function node(tag, text, attributes = {}) {
+    const element = documentRoot.createElement(tag);
+    if (text !== undefined) element.textContent = text;
+    for (const [key, value] of Object.entries(attributes)) element.setAttribute(key, value);
+    return element;
+  }
+  function svgNode(tag, attributes = {}, text) {
+    const element = documentRoot.createElementNS('http://www.w3.org/2000/svg', tag);
+    for (const [key, value] of Object.entries(attributes)) element.setAttribute(key, String(value));
+    if (text !== undefined) element.textContent = text;
+    return element;
+  }
+  function diagram() {
+    const svg = get('#hull-diagram');
+    svg.replaceChildren();
+    svg.append(svgNode('line', {x1:40,y1:260,x2:480,y2:260,class:'axis'}),
+      svgNode('line', {x1:260,y1:40,x2:260,y2:480,class:'axis'}),
+      svgNode('text', {x:484,y:254,class:'axis-label'}, 'x'),
+      svgNode('text', {x:267,y:38,class:'axis-label'}, 'y'));
+    if (!result) { svg.setAttribute('aria-label', 'Coordinate axes; no current computation.'); return; }
+    const byId = new Map(result.unique.map(p => [p.id, p]));
+    const pixel = id => { const p = byId.get(id); return (260 + p.x * 10) + ',' + (260 - p.y * 10); };
+    const step = result.steps[selected];
+    if (step.tested.length) svg.append(svgNode('polyline', {points:step.tested.map(pixel).join(' '),class:'tested-line'}));
+    if (step.after.length >= 2) {
+      const tag = step.phase === 'complete' && result.kind === 'polygon' ? 'polygon' : 'polyline';
+      svg.append(svgNode(tag, {points:step.after.map(pixel).join(' '),class:tag === 'polygon' ? 'hull-region' : 'active-chain'}));
+    }
+    for (const point of result.unique) {
+      const cx = 260 + point.x * 10, cy = 260 - point.y * 10;
+      const circle = svgNode('circle', {cx,cy,r:5,class:step.after.includes(point.id) ? 'point active-point' : 'point'});
+      circle.append(svgNode('title', {}, point.inputIds.join(', ') + ': (' + point.x + ', ' + point.y + ')'));
+      const label = point.id + (point.inputIds.length > 1 ? ' ×' + point.inputIds.length : '');
+      svg.append(circle, svgNode('text', {x:cx + (point.x > 10 ? -8 : 8),y:cy-8,
+        'text-anchor':point.x > 10 ? 'end' : 'start',class:'point-label'}, label));
+    }
+    svg.setAttribute('aria-label', 'Input points and ' + (step.phase === 'complete' ? 'completed ' + result.kind : step.phase + ' chain') + '; exact identities and coordinates follow below.');
+  }
+  function controls() {
+    get('#previous-step').disabled = !result || selected === 0;
+    get('#next-step').disabled = !result || selected === result.steps.length - 1;
+    get('#final-step').disabled = !result || selected === result.steps.length - 1;
+    get('#download-trace').disabled = !result;
+  }
+  function clear(message = 'Inputs changed. Compute a new hull to inspect or download it.') {
+    result = null; selected = 0;
+    get('#hull-error').textContent = '';
+    get('#hull-status').textContent = message;
+    get('#result-summary').textContent = 'No current computation.';
+    get('#step-summary').textContent = 'No inspection step.';
+    get('#step-detail').textContent = '';
+    get('#point-rows').replaceChildren();
+    diagram(); controls();
+  }
+  function inspect() {
+    const step = result.steps[selected];
+    get('#step-summary').textContent = 'Step ' + (selected + 1) + ' of ' + result.steps.length + ' · ' + step.phase + ' · ' + step.action;
+    const lines = [
+      'Stack before: ' + (step.before.join(' → ') || '(empty)'),
+      'Stack after: ' + (step.after.join(' → ') || '(empty)'),
+    ];
+    if (step.candidate) lines.unshift('Candidate: ' + step.candidate);
+    if (step.tested.length) lines.push('Tested: ' + step.tested.join(' → '),
+      'Exact determinant: ' + step.determinant + ' (' + (step.determinant > 0 ? 'left turn' : step.determinant < 0 ? 'right turn' : 'collinear') + ')');
+    if (step.action === 'pop') lines.push('Remove ' + step.removed + ' from this chain; reconsider the same candidate.');
+    if (step.action === 'retain') lines.push('Retain the left turn before pushing the candidate.');
+    if (step.action === 'complete') lines.push('This is the completed hull, without a repeated closing vertex.');
+    get('#step-detail').textContent = lines.join('\n');
+    diagram(); controls();
+  }
+  function compute() {
+    try {
+      const points = parseHullPoints(get('#points-input').value);
+      result = analyzeHull(points); selected = 0;
+      get('#hull-error').textContent = '';
+      get('#hull-status').textContent = 'Computed ' + result.inputs.length + ' input occurrences and ' + result.unique.length + ' unique coordinates.';
+      get('#result-summary').textContent = 'Complete result: ' + result.kind + ' · vertices ' + (result.hull.join(' → ') || '(none)')
+        + ' · twice-area ' + result.twiceArea + ' · area ' + result.area + ' square coordinate units.';
+      get('#point-rows').replaceChildren(...result.inputs.map((point,index) => {
+        const role = result.classifications[index], row = node('tr');
+        for (const value of [point.id, '(' + point.x + ', ' + point.y + ')',
+          role.representativeId + (role.duplicate ? ' (duplicate)' : ''), role.role]) row.append(node('td', value));
+        return row;
+      }));
+      inspect();
+    } catch (error) {
+      clear('Input refused. Correct it and compute again.');
+      get('#hull-error').textContent = error.message;
+    }
+  }
+  function download(text, name, type) {
+    const url = URL.createObjectURL(new Blob([text], {type}));
+    const link = node('a', undefined, {href:url,download:name});
+    documentRoot.body.append(link); link.click(); link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+  get('#points-input').addEventListener('input', () => clear());
+  get('#compute-hull').addEventListener('click', compute);
+  for (const button of documentRoot.querySelectorAll('[data-hull-preset]')) {
+    button.addEventListener('click', () => {
+      get('#points-input').value = JSON.stringify(presets[button.dataset.hullPreset]);
+      clear('Example loaded. Choose Compute hull.');
+    });
+  }
+  get('#previous-step').addEventListener('click', () => { if (result && selected > 0) { selected--; inspect(); } });
+  get('#next-step').addEventListener('click', () => { if (result && selected < result.steps.length - 1) { selected++; inspect(); } });
+  get('#final-step').addEventListener('click', () => { if (result) { selected = result.steps.length - 1; inspect(); } });
+  get('#download-trace').addEventListener('click', () => {
+    if (result) download(serializeHullRecord(result.inputs.map(p => [p.x,p.y]), selected), 'convex-hull-trace.json', 'application/json;charset=utf-8');
+  });
+  get('#download-lesson').addEventListener('click', () => download(deckText, 'convex-hull.json', 'application/json;charset=utf-8'));
+  get('#download-guide').addEventListener('click', () => download(guideText, 'convex-hull.md', 'text/markdown;charset=utf-8'));
+  get('#points-input').value = JSON.stringify(presets.rectangle);
+  clear('Choose Compute hull to inspect the example.');
+}
+
+mountHull(document, HULL_DECK_TEXT, HULL_GUIDE_TEXT);
+</script></body></html>

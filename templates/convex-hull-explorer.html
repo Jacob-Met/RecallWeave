@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Convex hulls — exact turns and outer boundaries</title>
+<style>
+:root{color-scheme:light;--ink:#182d33;--muted:#53666b;--line:#cbd6d5;--paper:#f4f7f3;--teal:#146b68;--gold:#b36a13}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.55 system-ui,sans-serif}main{max-width:1120px;margin:auto;padding:30px 22px 54px}header{max-width:850px;margin-bottom:26px}.eyebrow{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--teal);font-weight:750}h1{font-size:clamp(30px,5vw,48px);line-height:1.08;letter-spacing:-.03em;margin:10px 0 18px}h2{font-size:21px;margin:0 0 12px}p{margin:10px 0;color:var(--muted)}a{color:var(--teal)}.grid{display:grid;grid-template-columns:minmax(0,.82fr) minmax(0,1.18fr);gap:22px}.panel{background:#fff;border:1px solid var(--line);border-radius:16px;padding:22px;min-width:0}.stack{display:grid;gap:22px;align-content:start}.buttons{display:flex;gap:9px;flex-wrap:wrap;margin:14px 0}button{font:inherit;font-size:14px;border:1px solid #9eb4b3;border-radius:8px;padding:9px 13px;color:var(--ink);background:#fff;cursor:pointer}button.primary{background:var(--teal);color:white;border-color:var(--teal);font-weight:700}button:disabled{opacity:.43;cursor:default}button:focus-visible,textarea:focus-visible,a:focus-visible{outline:3px solid var(--gold);outline-offset:3px}label{display:block;font-weight:650;margin-bottom:8px}textarea{display:block;width:100%;resize:vertical;min-height:145px;border:1px solid #94aaa9;border-radius:8px;padding:12px;font:14px/1.6 ui-monospace,monospace;color:var(--ink);background:#fcfdfb}.small{font-size:13px}.status{min-height:1.5em}.error{color:#923b28;font-weight:650}.summary{background:#eaf3ef;border-left:4px solid var(--teal);padding:12px 14px;color:var(--ink);overflow-wrap:anywhere}pre{white-space:pre-wrap;overflow-wrap:anywhere;font:14px/1.6 ui-monospace,monospace;margin:0;color:var(--ink)}svg{display:block;width:100%;height:auto;aspect-ratio:1;background:#fbfcf8;border:1px solid #e1e7df;border-radius:10px}.axis{stroke:#bdccc8;stroke-width:1}.axis-label{fill:#637b78;font-size:14px}.point{fill:#607572;stroke:#fff;stroke-width:1.5}.active-point{fill:var(--teal)}.point-label{fill:var(--ink);font:13px system-ui}.active-chain{fill:none;stroke:var(--teal);stroke-width:3}.hull-region{fill:#dceee7;stroke:var(--teal);stroke-width:3}.tested-line{fill:none;stroke:var(--gold);stroke-width:2;stroke-dasharray:6 4}.table-wrap{overflow-x:auto}table{width:100%;border-collapse:collapse;font-size:14px}th,td{text-align:left;padding:9px 7px;border-bottom:1px solid #e0e7e2}th{color:var(--muted);font-size:12px}footer{margin-top:26px;max-width:900px}#step-summary{font-weight:700;color:var(--teal)}
+@media(max-width:720px){main{padding:22px 14px 36px}.grid{grid-template-columns:1fr}.panel{padding:17px}h1{font-size:34px}th,td{padding:8px 5px}}
+</style></head><body><main>
+<header><div class="eyebrow">RecallWeave · Algorithm explorer</div><h1>Exact turns.<br>Outer boundaries.</h1>
+<p>Build a convex hull from unordered points. Inspect why a chain keeps a left turn or removes a candidate vertex, while every input identity stays visible.</p>
+<div class="buttons"><button id="download-lesson">Download lesson JSON</button><button id="download-guide">Download worked guide (answers)</button></div>
+<p class="small">To study the lesson, open <a href="../demo.html">RecallWeave</a>, choose the downloaded JSON under “Bring your own lesson”, inspect its preview, and start that deck.</p></header>
+<div class="grid"><div class="stack"><section class="panel" aria-labelledby="input-title"><h2 id="input-title">1. Enter a point set</h2>
+<label for="points-input">JSON coordinate pairs</label><textarea id="points-input" spellcheck="false" rows="6" aria-describedby="input-help"></textarea>
+<p id="input-help" class="small">Use 0–16 pairs, with integer coordinates from −20 to 20. Enter [] for an empty set. x points right; y points up. Maximum 4,096 UTF-8 bytes.</p>
+<div class="buttons" aria-label="Load an example"><button data-hull-preset="rectangle">Rectangle + duplicates</button><button data-hull-preset="collinear">Collinear</button><button data-hull-preset="triangle">Half-area triangle</button><button data-hull-preset="empty">Empty set</button></div>
+<button id="compute-hull" class="primary">Compute hull</button>
+<p id="hull-status" class="small status" role="status"></p><p id="hull-error" class="error" role="alert"></p></section>
+<section class="panel" aria-labelledby="inspect-title"><h2 id="inspect-title">2. Inspect the construction</h2>
+<p id="step-summary" aria-live="polite">No inspection step.</p>
+<div class="buttons"><button id="previous-step" disabled>Previous</button><button id="next-step" disabled>Next</button><button id="final-step" disabled>Final</button></div>
+<pre id="step-detail"></pre><p class="small">A positive determinant is a left turn. Zero or negative removes the last point from that chain. Intermediate stacks are not the final hull.</p>
+<button id="download-trace" disabled>Download complete trace JSON</button>
+<p class="small">The full trace is retained. The selected inspection step is recorded separately.</p></section></div>
+<div class="stack"><section class="panel" aria-labelledby="result-title"><h2 id="result-title">Complete result and inspected view</h2><p id="result-summary" class="summary">No current computation.</p>
+<svg id="hull-diagram" viewBox="0 0 520 520" role="img" aria-label="Coordinate axes; no current computation."></svg>
+<p class="small">Solid line: inspected chain or completed hull. Dashed line: tested triple. The table and exact determinant define the calculation; the drawing is illustrative.</p></section>
+<section class="panel" aria-labelledby="identity-title"><h2 id="identity-title">Every input stays identifiable</h2>
+<div class="table-wrap"><table><thead><tr><th>Input</th><th>Coordinate</th><th>Representative</th><th>Final role</th></tr></thead><tbody id="point-rows"></tbody></table></div>
+<p class="small">Only extreme vertices enter the hull list. Collinear points between endpoints remain edge members. Duplicates use the first input ID as representative; every original row remains here and in the download.</p></section></div></div>
+<footer><p class="small">No floating-point tolerance decides a turn. Bounded integer arithmetic gives exact determinants and area. Empty, point and segment results are explicit. Editing the input clears the prior computation until you choose Compute hull again.</p></footer>
+</main><script type="module">
+const HULL_DECK_TEXT = /* HULL_DECK_TEXT */;
+const HULL_GUIDE_TEXT = /* HULL_GUIDE_TEXT */;
+/* HULL_MODEL */
+/* HULL_UI */
+mountHull(document, HULL_DECK_TEXT, HULL_GUIDE_TEXT);
+</script></body></html>
