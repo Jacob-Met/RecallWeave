@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#f6f5ef">
+<meta name="description" content="Explore complex multiplication as rotation and scaling, with an original offline RecallWeave lesson.">
+<title>Turn, scale, repeat — RecallWeave</title>
+<style>
+:root{color-scheme:light;--paper:#f6f5ef;--white:#fffef9;--ink:#233b32;--muted:#596c62;--line:#d6dfd6;--green:#286347;--blue:#245f98;--purple:#723d91;--amber:#926017}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.55 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+button,input,select{font:inherit}
+button,a,input,select{touch-action:manipulation}
+a{color:var(--green);text-underline-offset:4px}
+a:hover{text-decoration-thickness:2px}
+button{min-height:46px;border:1px solid var(--line);border-radius:9px;background:var(--white);color:var(--ink);padding:10px 16px;font-weight:650;cursor:pointer}
+button:hover{border-color:var(--green);background:#edf3ed}
+button:disabled{opacity:.5;cursor:default}
+:focus-visible{outline:3px solid #c7872d;outline-offset:4px}
+input,select{width:100%;min-width:0;min-height:46px;border:1px solid #acbdb0;border-radius:7px;padding:9px 11px;background:#fff;color:var(--ink)}
+input:focus,select:focus{border-color:var(--green)}
+.skip{position:absolute;left:16px;top:-80px;padding:12px;background:#fff;z-index:4}
+.skip:focus{top:10px}
+header{max-width:1256px;margin:auto;padding:22px 32px;border-bottom:1px solid var(--line);display:flex;gap:20px;align-items:center;justify-content:space-between}
+.brand{font-size:20px;font-weight:700;text-decoration:none;color:var(--ink);letter-spacing:-.5px}
+.brand span{color:var(--green);font-weight:450}
+.local-label{font-size:11px;letter-spacing:.12em;font-weight:700;color:var(--muted)}
+main{max-width:1256px;margin:auto;padding:42px 32px 64px}
+.eyebrow{font-size:11px;font-weight:800;letter-spacing:.16em;color:var(--green);margin:0 0 12px;text-transform:uppercase}
+.intro{display:grid;grid-template-columns:1.25fr 1fr;gap:44px;align-items:end;margin-bottom:32px}
+h1{font:400 clamp(38px,5.5vw,68px)/1.06 Georgia,"Times New Roman",serif;letter-spacing:-2px;margin:0}
+h1 em{color:var(--green);font-style:italic}
+.intro-copy{max-width:47ch;color:var(--muted);margin:0 0 4px}
+.workbench{display:grid;grid-template-columns:310px minmax(0,1fr);gap:24px;align-items:start}
+.panel{background:var(--white);border:1px solid var(--line);border-radius:16px}
+.controls{padding:25px}
+h2{font:500 26px/1.18 Georgia,"Times New Roman",serif;margin:0 0 14px;letter-spacing:-.4px}
+.help{font-size:13px;color:var(--muted);margin:8px 0 20px}
+fieldset{border:0;padding:0;margin:22px 0}
+legend{font-size:14px;font-weight:700;margin-bottom:10px}
+.swatch{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;background:var(--green)}
+.swatch.start{background:var(--blue)}.swatch.multiplier{background:var(--amber);border-radius:0;transform:rotate(45deg)}.swatch.final{background:var(--purple)}
+.input-pair{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+label{display:block;font-size:12px;font-weight:650;margin-bottom:5px}
+.steps-field{margin:22px 0}
+.primary{background:var(--green);color:#fff;border-color:var(--green);width:100%}
+.primary:hover{background:#1e5139;color:#fff}
+.presets{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 0}
+.presets button{font-size:12px;padding:7px 10px;min-height:40px}
+.status{margin:17px 0 0;font-size:13px;color:var(--muted);overflow-wrap:anywhere}
+.control-note{border-top:1px solid var(--line);margin-top:23px;padding-top:17px;font-size:12px;color:var(--muted)}
+.control-note p{margin:0 0 8px}
+.stage{min-width:0}
+.empty{min-height:505px;display:flex;align-items:center;justify-content:center;text-align:center;padding:45px}
+.empty-inner{max-width:390px}
+.empty-symbol{font:400 68px/1 Georgia,serif;color:#789985;margin-bottom:22px}
+.empty h2{font-size:32px}
+.empty p{color:var(--muted)}
+.results{padding:26px}
+.result-header{display:flex;justify-content:space-between;align-items:start;gap:18px}
+.result-header h2{margin-bottom:8px}
+.result-header button{font-size:12px;flex:0 0 auto;max-width:190px}
+.operation{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:13px;color:var(--muted);overflow-wrap:anywhere;margin:0}
+.metrics{display:grid;grid-template-columns:1.35fr 1fr 1fr;gap:12px;margin:22px 0}
+.metric{background:#eef3ed;border-radius:10px;padding:13px 14px;min-width:0}
+.metric small{display:block;font-size:11px;font-weight:700;color:var(--muted);margin-bottom:6px}
+.metric output{display:block;font-size:19px;font-weight:600;overflow-wrap:anywhere;line-height:1.3}
+.metric:first-child{background:#edf1f7}
+.legend{display:flex;flex-wrap:wrap;gap:8px 17px;font-size:11px;color:var(--muted);margin:14px 0}
+figure{margin:0}
+.plot-frame{width:100%;aspect-ratio:1;border:1px solid var(--line);border-radius:11px;background:#fafbf7;overflow:hidden}
+#complex-plot{display:block;width:100%;height:100%;aspect-ratio:1}
+.axis-number{font:11px ui-monospace,SFMono-Regular,Consolas,monospace;fill:#63796c}
+.axis-title{font:600 12px system-ui,sans-serif;fill:#50665a}
+.point-label{font:700 13px system-ui,sans-serif;fill:#315343;paint-order:stroke;stroke:#fafbf7;stroke-width:4px}
+.multiplier-label{font:700 14px Georgia,serif;fill:var(--amber)}
+figcaption{font-size:12px;color:var(--muted);margin:11px 0}
+.transformation{font-size:13px;color:var(--muted);margin:16px 0 4px}
+.measured{font-size:12px;color:var(--muted);margin:7px 0}
+.table-heading{display:flex;justify-content:space-between;gap:16px;align-items:baseline;margin-top:24px}
+h3{font-size:15px;margin:0 0 8px}
+.count{font-size:11px;color:var(--muted)}
+.rounding,.scroll-hint{font-size:12px;color:var(--muted);margin:2px 0 10px}
+.scroll-hint{display:none}
+.table-scroll{overflow:auto;border:1px solid var(--line);border-radius:9px}
+table{width:100%;min-width:520px;border-collapse:collapse;font:12px/1.45 ui-monospace,SFMono-Regular,Consolas,monospace}
+th,td{padding:11px 13px;text-align:right;border-bottom:1px solid #e1e7df;white-space:nowrap}
+thead th{font:650 11px/1.35 system-ui,sans-serif;color:var(--muted);background:#f0f4ef}
+th:first-child{text-align:left}
+tbody th{font-weight:750;color:var(--green)}
+tr:last-child>*{border-bottom:0}
+tbody tr:nth-child(even){background:#f7f9f4}
+.course{display:grid;grid-template-columns:1.4fr 1fr;gap:38px;margin-top:30px;padding:30px}
+.course h2{font-size:30px}
+.course p{font-size:14px;color:var(--muted);max-width:62ch}
+.course button{background:#ede8f2;color:#603580;border-color:#d5c7df}
+.course ol{font-size:13px;padding-left:22px;color:var(--muted);margin:0}
+.course li{margin:0 0 9px}
+.source-notes{margin-top:24px;font-size:12px;color:var(--muted)}
+.source-notes summary{cursor:pointer;font-weight:650}
+.source-notes p{max-width:90ch}
+footer{max-width:1256px;margin:auto;padding:22px 32px;border-top:1px solid var(--line);color:var(--muted);font-size:11px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+@media(max-width:1050px){.workbench{grid-template-columns:280px minmax(0,1fr)}.controls,.results{padding:20px}.metrics{grid-template-columns:1fr 1fr}.metric:first-child{grid-column:1/-1}.result-header{display:block}.result-header button{margin-top:14px}.intro{gap:24px}.point-label{font-size:12px}}
+@media(max-width:760px){header{padding:17px 20px}.local-label{font-size:9px;letter-spacing:.07em}main{padding:30px 18px 40px}.intro{display:block;margin-bottom:24px}h1{letter-spacing:-1.3px}.intro-copy{margin-top:18px;font-size:14px}.workbench{grid-template-columns:1fr}.controls{padding:22px}.empty{min-height:245px;padding:28px}.empty-symbol{font-size:45px;margin-bottom:14px}.empty h2{font-size:26px}.results{padding:18px}.metric output{font-size:18px}.table-heading{display:block}.count{display:block;margin-bottom:8px}.scroll-hint{display:block}.course{display:block;padding:24px}.course ol{margin-top:22px}.course h2{font-size:27px}.legend{font-size:10px;gap:8px 12px}footer{padding:20px}.result-header button{max-width:none;width:100%}.axis-number{font-size:12px}}
+@media(prefers-reduced-motion:no-preference){button{transition:background .15s,border-color .15s}}
+@media print{header,.controls,.intro,.source-notes,footer,.course,#complex-experiment-download,.empty{display:none!important}main{padding:0}.workbench{display:block}.results{border:0;padding:0}.plot-frame{max-width:470px;margin:auto}.table-scroll{overflow:visible}table{min-width:0}.scroll-hint{display:none}.results{break-inside:avoid}}
+</style>
+</head>
+<body>
+<a class="skip" href="#complex-form">Skip to experiment</a>
+<header><a class="brand" href="../demo.html">recall<span>weave</span></a><span class="local-label">OFFLINE · ORIGINAL MATH LESSON</span></header>
+<main>
+<section class="intro" aria-labelledby="page-title">
+<div><p class="eyebrow">Complex plane / field notes 01</p><h1>Turn, scale,<br><em>repeat.</em></h1></div>
+<p class="intro-copy">Choose a starting point <strong>z</strong> and a multiplier <strong>w</strong>. See how each multiplication changes the point’s distance and direction, then follow the complete sequence.</p>
+</section>
+<div class="workbench">
+<aside class="panel controls">
+<form id="complex-form" novalidate>
+<h2>Set the experiment</h2>
+<p id="complex-range" class="help">Each real or imaginary coefficient: −10 to 10, with up to three decimal places. Use plain decimals, such as −1.5 or 0.25.</p>
+<fieldset><legend><span class="swatch start" aria-hidden="true"></span>Starting point z</legend><div class="input-pair">
+<div><label for="z-re">Real part</label><input id="z-re" name="z-re" type="text" inputmode="decimal" maxlength="16" value="2" aria-describedby="complex-range" autocomplete="off" spellcheck="false"></div>
+<div><label for="z-im">Imaginary coefficient</label><input id="z-im" name="z-im" type="text" inputmode="decimal" maxlength="16" value="1" aria-describedby="complex-range" autocomplete="off" spellcheck="false"></div>
+</div></fieldset>
+<fieldset><legend><span class="swatch multiplier" aria-hidden="true"></span>Multiplier w</legend><div class="input-pair">
+<div><label for="w-re">Real part</label><input id="w-re" name="w-re" type="text" inputmode="decimal" maxlength="16" value="0" aria-describedby="complex-range" autocomplete="off" spellcheck="false"></div>
+<div><label for="w-im">Imaginary coefficient</label><input id="w-im" name="w-im" type="text" inputmode="decimal" maxlength="16" value="1" aria-describedby="complex-range" autocomplete="off" spellcheck="false"></div>
+</div></fieldset>
+<div class="steps-field"><label for="complex-steps">Repeated multiplications</label><select id="complex-steps" name="complex-steps" aria-describedby="sequence-help">
+<option value="0">0 — starting point only</option><option value="1">1 multiplication</option><option value="2">2 multiplications</option><option value="3">3 multiplications</option><option value="4" selected>4 multiplications</option><option value="5">5 multiplications</option><option value="6">6 multiplications</option><option value="7">7 multiplications</option><option value="8">8 multiplications</option>
+</select></div>
+<button id="complex-calculate" class="primary" type="submit">Calculate products <span aria-hidden="true">→</span></button>
+<p id="complex-status" class="status" role="status" tabindex="-1"></p>
+</form>
+<div class="control-note"><strong>Try an example</strong><div class="presets">
+<button type="button" data-complex-preset="quarter">Quarter turns</button><button type="button" data-complex-preset="growth">Grow and turn</button><button type="button" data-complex-preset="shrink">Shrink</button>
+</div></div>
+<div class="control-note" id="sequence-help"><p><strong>P₀ = z</strong><br>Pₖ₊₁ = Pₖ × w</p><p>N multiplications keep N + 1 indexed points, including the start. Repeated positions keep their separate step numbers.</p></div>
+</aside>
+<section class="stage" aria-label="Calculated products">
+<div id="complex-empty" class="panel empty"><div class="empty-inner"><div class="empty-symbol" aria-hidden="true">z × w</div><h2>Calculate the current inputs.</h2><p>Choose <strong>Calculate products</strong> to see the single product and every indexed step for the inputs shown.</p></div></div>
+<section id="complex-results" class="panel results" hidden aria-labelledby="complex-result-title">
+<div class="result-header"><div><p class="eyebrow">One multiplication</p><h2 id="complex-result-title" tabindex="-1">From z to zw</h2><p id="complex-operation" class="operation"></p></div><button id="complex-experiment-download" type="button" disabled>Download experiment (.json)</button></div>
+<div class="metrics">
+<div class="metric"><small>Product z × w</small><output id="complex-product"></output></div>
+<div class="metric"><small>Distance multiplier |w|</small><output id="complex-scale"></output></div>
+<div class="metric"><small>Direction of w</small><output id="complex-turn"></output></div>
+</div>
+<p class="transformation" id="complex-transformation"></p><p class="measured">Measured direction change, z → zw: <output id="complex-measured-turn"></output></p>
+<div class="legend" aria-label="Plot key"><span><span class="swatch start" aria-hidden="true"></span>Start P₀</span><span><span class="swatch" aria-hidden="true"></span>Intermediate products</span><span><span class="swatch final" aria-hidden="true"></span>Last step</span><span><span class="swatch multiplier" aria-hidden="true"></span>w reference</span></div>
+<figure><div class="plot-frame"><svg id="complex-plot" viewBox="0 0 600 600" role="img" aria-labelledby="complex-plot-title complex-plot-description"></svg></div><figcaption><span id="complex-axis-range"></span><br>Dashed segments join discrete multiplication steps; they do not describe a continuous motion or winding. The gold vector marks w separately.</figcaption></figure>
+<div class="table-heading"><h3>Every indexed point</h3><span id="complex-path-count" class="count"></span></div>
+<p class="rounding">Shown to at most 8 significant digits. The JSON keeps full floating-point values; decimal arithmetic and polar values may be approximate. Zero has no argument. Directions use degrees in [−180°, 180°), modulo a full turn.</p>
+<p class="scroll-hint" id="complex-scroll-help">Scroll sideways to inspect every coordinate and angle.</p>
+<div class="table-scroll" tabindex="0" role="region" aria-label="Indexed complex products" aria-describedby="complex-scroll-help">
+<table><thead><tr><th scope="col">Step</th><th scope="col">Real</th><th scope="col">Imaginary<br>coefficient</th><th scope="col">Modulus</th><th scope="col">Argument</th></tr></thead><tbody id="complex-points"></tbody></table>
+</div>
+</section>
+</section>
+</div>
+<section class="panel course" aria-labelledby="course-title">
+<div><p class="eyebrow">Keep learning</p><h2 id="course-title">Connect the picture<br>with the algebra.</h2><p>Twelve original questions link coordinates, distance and direction, complex multiplication, and repeated products. Each answer includes a worked explanation and a prompt to apply the idea.</p><button id="complex-deck-download" type="button">Download the lesson (.json)</button><p id="complex-course-status" class="status" role="status">The lesson file opens in the existing RecallWeave learner. Nothing is uploaded.</p></div>
+<div><ol><li>Save the lesson JSON using the button here.</li><li>Open <a href="../demo.html">RecallWeave’s demo.html</a> in this project folder.</li><li>Under <strong>Bring your own lesson</strong>, choose the saved file and review its preview.</li><li>Select <strong>Start this deck</strong>. Keep your explanations and practice in the learner’s existing review and study-note flow.</li></ol><p>Read the <a href="complex-plane.md">worked guide</a> for the definitions, examples and calculation limits. If this explorer was copied alone, use the learner and guide from the same RecallWeave project.</p></div>
+</section>
+<details class="source-notes"><summary>Mathematical conventions and original content</summary><p>For z = a + bi, Re(z) = a and Im(z) = b. Nonzero multipliers scale distance by their modulus and add their argument modulo 360°. The zero multiplier collapses a point to the origin; zero itself has no direction. P₀ is assigned directly, so a zero-step sequence does not require 0⁰.</p><p>The original course and diagrams were authored for RecallWeave. Mathematical background was checked against OpenStax Precalculus 2e, <a href="https://openstax.org/books/precalculus-2e/pages/3-1-complex-numbers">Complex Numbers</a> and <a href="https://openstax.org/books/precalculus-2e/pages/8-5-polar-form-of-complex-numbers">Polar Form of Complex Numbers</a>. The lesson does not claim measured learning improvement. This explorer performs finite products; it does not model signals or elapsed time.</p></details>
+</main>
+<footer><span>RECALLWEAVE · ORIGINAL COMPLEX-NUMBER LESSON</span><span>Local calculations · Explicit downloads · No account</span></footer>
+<script id="complex-course-data" type="application/json">@@COMPLEX_COURSE@@</script>
+<script>@@COMPLEX_SCRIPT@@</script>
+</body>
+</html>
