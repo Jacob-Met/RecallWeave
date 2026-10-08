@@ -49,7 +49,17 @@ The author browser reported effective SVG font size of 15 CSS pixels at both nar
 
 The full suite was run on the composed candidate before the final SVG layout repair. That repair touched only the graph UI, its generated HTML and the authored browser receiver; the final focused native and complete browser paths exercised the repaired product. Independent receiving is a separate review and should be read with its own source pins and scope.
 
-### Preserved first attempts
+## Independent receiving
+
+The [independent mathematics and macOS acceptance](independent/ACCEPTANCE.json) accepts native product `9ef0ca1fa515aec1a1cf8fca5c0e5f89f6938ebe` and records its binding to public source `9207da3fe40a5376886c656d68b073815a563f8c`. A separately authored polynomial-antiderivative oracle passed **6,744 exact cases**, **24 invalid-input controls**, and **four detected mutation controls**. All twelve original answer keys and their worked explanations were reviewed. The independent browser passed **eight groups**, including exact non-grid sign crossings, a physical calculation download, edited/invalid drafts, native slider bounds, corner semantics and 320/390 layouts, with no observed page errors or external requests.
+
+The [content review](independent/CONTENT-REVIEW.md) and [preserved failures](independent/FAILURES.json) accompany a [23-member evidence archive](independent-receiving-evidence-20261008.tar.gz) and [manifest](independent-receiving-manifest.json). Original and repaired phone screenshots remain separate. Independent text-box measurements changed from about 6 to 13 pixels at 320 pixels, and 7 to 18 pixels at 390 pixels; the reviewer visually inspected both repaired layouts. Those measured text boxes are distinct from the author's effective SVG font-size metric above.
+
+The [independent Windows acceptance](windows/README.md) qualifies the exact **50,698-byte review ZIP** delivered at `59f2d62167c1ee9693903bf976734fe18b331965`. Native PowerShell extraction recovered exactly five members in a fresh folder whose path contains spaces; every member matched its manifest, and all four product files matched the independently received source. Native Chrome 154 passed **seven groups**: direct-file opening, exact motion, a real ArrowRight increment, physical calculation and exact lesson downloads, the actual relative link opening the matching learner, and imported-file preview followed by explicit start. The [acceptance record](windows/acceptance.json), [manifest](windows/manifest.json), and [complete receiving Git bundle](windows/receiving.bundle) preserve both the original receiver-selector failure and the accepted extraction run.
+
+The Windows receiver's initial standalone pages were monitored before navigation. In the accepted ZIP run, the real learner link opened a new tab that was attached after its first navigation; that initial navigation was not separately monitored. Its exact standalone bytes were already covered by the earlier monitored run. This is an explicit receiving boundary, not a claim of full pre-navigation monitoring for that tab. Both owned Windows browsers closed normally. No product file or review ZIP was changed by independent receiving.
+
+## Preserved first attempts
 
 The packet keeps failures as well as successful follow-ups.
 
