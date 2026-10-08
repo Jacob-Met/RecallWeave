@@ -54,8 +54,11 @@ function lessonReplay(document, deck) {
   const mastery = initialMastery(deck.concepts);
   const answers = [];
   for (const answer of document.firstAnswers) {
-    const item = selectNextItem(deck.items, asked, mastery);
-    if (!lessonRecord(answer, ['item', 'choice']) || !item || answer.item !== item.id
+    if (!lessonRecord(answer, ['item', 'choice'])) {
+      throw new RangeError('This lesson has invalid first answers or question order.');
+    }
+    const item = selectNextItem(deck.items, asked, mastery, DEFAULT_BKT, answer.item);
+    if (!item || answer.item !== item.id
         || !Number.isInteger(answer.choice) || answer.choice < 0 || answer.choice >= item.options.length) {
       throw new RangeError('This lesson has invalid first answers or question order.');
     }
@@ -69,8 +72,9 @@ function lessonReplay(document, deck) {
     throw new RangeError('This lesson does not preserve the original model estimates.');
   }
 
-  const nextItem = selectNextItem(deck.items, asked, mastery);
   const presentation = document.presentation;
+  const nextItem = selectNextItem(deck.items, asked, mastery, DEFAULT_BKT,
+    presentation?.phase === 'question' ? presentation.itemId : undefined);
   if (!lessonRecord(presentation, ['phase', 'itemId', 'optionOrders'])
       || !['question', 'feedback'].includes(presentation.phase)
       || presentation.itemId !== (presentation.phase === 'question' ? nextItem?.id : answers.at(-1)?.item)
