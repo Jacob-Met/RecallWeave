@@ -1,0 +1,16 @@
+import fs from 'node:fs';
+import crypto from 'node:crypto';
+import { pathToFileURL } from 'node:url';
+const root='/dev/86776bb3cdb8-product-recall-selection/baseline';
+const native=await import(pathToFileURL(root+'/src/knowledge.mjs'));
+const {parseDeck}=await import(pathToFileURL(root+'/src/deck.mjs'));
+const raw=fs.readFileSync(root+'/data/deck.json','utf8');
+const deck=parseDeck(raw); const asked=new Set();
+const initial=native.initialMastery(deck.concepts);
+const first=native.selectNextItem(deck.items,asked,initial);
+const cases=[['default',initial],['hypothetical photosynthesis=0.95',{...initial,photosynthesis:0.95}]].map(([name,mastery])=>({name,mastery,chosen:native.selectNextItem(deck.items,asked,mastery).id}));
+const branches=[true,false].map(correct=>{const next={...initial,[first.concept]:native.updateMastery(initial[first.concept],correct)};return {synthetic_correct:correct,selected:first.id,prior:initial[first.concept],after:next[first.concept],next:native.selectNextItem(deck.items,new Set([first.id]),next).id};});
+const result={base:'343d20e38fb619c5eea2ec588b61c5f26fea714b',tree:'a4dce90aebe38adecc6ee066e0f764dba53e02a4',native_runtime:process.version,parameters:native.DEFAULT_BKT,deck:deck.title,cases,branches,all_asked:native.selectNextItem(deck.items,new Set(deck.items.map(x=>x.id)),initial),source_files:['src/knowledge.mjs','src/deck.mjs','data/deck.json'].map(path=>{const b=fs.readFileSync(root+'/'+path);return {path,bytes:b.length,sha256:crypto.createHash('sha256').update(b).digest('hex')};}),scope:'Actual unchanged native functions over the bundled validated deck; no candidate implementation and no claim of browser execution.'};
+fs.mkdirSync('/dev/86776bb3cdb8-product-recall-selection/evidence',{recursive:true});
+fs.writeFileSync('/dev/86776bb3cdb8-product-recall-selection/evidence/native-baseline.json',JSON.stringify(result,null,2)+'\n');
+console.log(JSON.stringify(result));
