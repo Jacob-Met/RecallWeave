@@ -290,6 +290,8 @@ teaching order. Rebuild it with `python3 tools/make_focus.py`, or verify its
 standalone parity with `python3 tools/make_focus.py --check`. Its focused native
 and builder tests are included in the existing Node test command.
 
+Teachers can also prepare the same checked subsets with the [focused-lesson terminal command](docs/focus-course-cli.md). Pipe one course into `node tools/focus-course.mjs --list` to inspect exact concept names, then supply an explicit title and target concepts to emit the native prerequisite-complete lesson JSON. The command uses the existing focus model and preserves retained question content and source credit.
+
 ## Optional Markov-chain course
 
 Open the [Markov-chain explorer](courses/markov-chains-explorer.html) to edit a three-state transition table, follow probability flow, and compare mixing, alternation and absorbing states. It works as a single offline HTML file. Download its original fourteen-question course and import it through **Bring your own lesson**, or read the [course guide and worked checks](courses/markov-chains.md). The observation download keeps applied inputs and the complete computed trace; it is separate from a learner's answers.
