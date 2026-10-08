@@ -1,0 +1,278 @@
+{
+  "format": "recallweave-deck/1",
+  "title": "Bézier curves: a curve from repeated interpolation",
+  "attribution": "Original RecallWeave lesson and numerical examples by the HAMON cb636073cde0 contribution. Mathematical background: Patrikalakis, Maekawa and Cho, Shape Interrogation for Computer Aided Design and Manufacturing, sections 1.3.4–1.3.5 (MIT online edition).",
+  "license": "CC0-1.0 for this original lesson and guide. Referenced works retain their own terms.",
+  "concepts": [
+    "Affine interpolation",
+    "Recursive curve construction",
+    "Subdivision and local parameters",
+    "Derivatives and parameter speed"
+  ],
+  "items": [
+    {
+      "id": "bz-interpolate",
+      "concept": "Affine interpolation",
+      "prerequisites": [],
+      "prompt": "A = (2, -2), B = (10, 6). With L(t) = (1 - t)A + tB, what is L(1/4)?",
+      "options": [
+        "(4, 0)",
+        "(8, 4)",
+        "(3, -1)",
+        "(12, 4)"
+      ],
+      "answer": 0,
+      "explanation": "The weight on A is 3/4 and the weight on B is 1/4. Compute each coordinate: x = (3/4)2 + (1/4)10 = 4 and y = (3/4)(-2) + (1/4)6 = 0. Equivalently, move one quarter of B - A = (8, 8) from A. Adding a quarter of B alone would forget the starting point.",
+      "transfer": "Replace t by 3/4 and predict the point before calculating. Explain why exchanging A and B while replacing t by 1 - t recovers the original point."
+    },
+    {
+      "id": "bz-endpoints",
+      "concept": "Affine interpolation",
+      "prerequisites": [],
+      "prompt": "For L(t) = (1 - t)A + tB with arbitrary distinct points A and B, which ordered pair gives L(0), then L(1)?",
+      "options": [
+        "B, then A",
+        "A, then B",
+        "The midpoint, then B",
+        "A, then the midpoint"
+      ],
+      "answer": 1,
+      "explanation": "At t = 0 the two weights are 1 and 0, so L(0) = A. At t = 1 they are 0 and 1, so L(1) = B. These identities hold coordinate by coordinate and do not depend on where the origin lies. A midpoint uses two weights of 1/2, not either endpoint choice.",
+      "transfer": "Choose two points with negative coordinates and check both endpoints. Then explain why the same endpoint property holds for a whole de Casteljau triangle."
+    },
+    {
+      "id": "bz-convex",
+      "concept": "Affine interpolation",
+      "prerequisites": [],
+      "prompt": "Let 0 <= t <= 1. Why must L(t) = (1 - t)A + tB stay on the closed line segment from A to B?",
+      "options": [
+        "Both coordinates must increase with t.",
+        "Every value of t gives the midpoint.",
+        "Its weights are nonnegative and add to 1.",
+        "A and B must lie on a line through the origin."
+      ],
+      "answer": 2,
+      "explanation": "The weights 1 - t and t are both nonnegative and sum to 1. Thus L(t) is a convex combination of A and B, which describes their closed segment. A coordinate may increase, decrease or stay fixed depending on the endpoints. The segment need not pass through the origin.",
+      "transfer": "Use A = (4, 1), B = (-2, 1) to challenge the increasing-coordinate distractor. Predict what changes if t = 3/2, outside the stated interval."
+    },
+    {
+      "id": "bz-translation",
+      "concept": "Affine interpolation",
+      "prerequisites": [],
+      "prompt": "A construction gives L(1/4) = (4, 0). If both control points are translated by v = (-3, 5), what point does the same t give?",
+      "options": [
+        "(4, 0)",
+        "(-12, 0)",
+        "(7, -5)",
+        "(1, 5)"
+      ],
+      "answer": 3,
+      "explanation": "The translated combination is (1 - t)(A + v) + t(B + v) = L(t) + ((1 - t) + t)v = L(t) + v. Therefore (4, 0) becomes (1, 5). Repeated interpolation has the same property at every level, so translating all control points translates the entire curve.",
+      "transfer": "Translate the quadratic arch's three control points by (2, -1). Check one intermediate point and the final point; neither requires changing the parameter."
+    },
+    {
+      "id": "bz-quadratic",
+      "concept": "Recursive curve construction",
+      "prerequisites": [
+        "Affine interpolation"
+      ],
+      "prompt": "A quadratic has P0 = (0, 0), P1 = (4, 8), P2 = (8, 0). At t = 1/2, first interpolate adjacent pairs, then interpolate those results. What final point do you obtain?",
+      "options": [
+        "(4, 4)",
+        "(4, 8)",
+        "(2, 4)",
+        "(6, 4)"
+      ],
+      "answer": 0,
+      "explanation": "The first level gives Q0 = (2, 4) and Q1 = (6, 4). Interpolating those two with the same t = 1/2 gives (4, 4). The other two first-level points are intermediate construction points, not the final curve point. P1 shapes the bend but is not generally a point on the curve.",
+      "transfer": "Repeat the whole construction at t = 1/4, keeping the same fraction at both levels. Compare the final point with merely taking a quarter of the control polygon's length."
+    },
+    {
+      "id": "bz-control-point",
+      "concept": "Recursive curve construction",
+      "prerequisites": [
+        "Affine interpolation"
+      ],
+      "prompt": "For P0 = (0, 0), P1 = (4, 8), P2 = (8, 0), the quadratic's height is y(t) = 16t(1 - t), with 0 <= t <= 1. Does the curve pass through P1?",
+      "options": [
+        "Yes, because every control point is interpolated.",
+        "No; its maximum height is 4, below P1's height 8.",
+        "Yes, at t = 1/2.",
+        "No; it never passes through any control point."
+      ],
+      "answer": 1,
+      "explanation": "Rewrite t(1 - t) = 1/4 - (t - 1/2)^2. Its maximum is 1/4, so this curve's maximum y is 4. It cannot reach the control point at height 8. The first and last control points are still reached at t = 0 and t = 1; the statement concerns this interior point.",
+      "transfer": "Move P1 vertically while holding the endpoints fixed. Predict how the curve's height at t = 1/2 changes, and distinguish that value from P1's own height."
+    },
+    {
+      "id": "bz-cubic",
+      "concept": "Recursive curve construction",
+      "prerequisites": [
+        "Affine interpolation"
+      ],
+      "prompt": "A cubic has control points (0, 0), (0, 8), (8, 8), (8, 0). What is B(1/2) after all three interpolation levels?",
+      "options": [
+        "(4, 4)",
+        "(4, 8)",
+        "(4, 6)",
+        "(2, 6)"
+      ],
+      "answer": 2,
+      "explanation": "The first level is (0, 4), (4, 8), (8, 4). The second is (2, 6), (6, 6). The final point is their midpoint (4, 6). Four control points require three interpolation levels. Stopping early would leave two points rather than one curve point.",
+      "transfer": "Reflect every control point across the x-axis. Predict the new result without repeating the arithmetic, then verify the second construction level."
+    },
+    {
+      "id": "bz-collinear",
+      "concept": "Recursive curve construction",
+      "prerequisites": [
+        "Affine interpolation"
+      ],
+      "prompt": "A quadratic has P0 = (0, 0), P1 = (4, 0), P2 = (8, 0). What is B(1/4)?",
+      "options": [
+        "(4, 0)",
+        "(1, 0)",
+        "(6, 0)",
+        "(2, 0)"
+      ],
+      "answer": 3,
+      "explanation": "First interpolate at t = 1/4 to obtain (1, 0) and (5, 0). Their next interpolation gives (2, 0). In this example the evenly spaced collinear control points make B(t) = (8t, 0), so the quadratic representation traces a straight segment with constant parameter speed.",
+      "transfer": "Keep the same endpoints but move P1 to (0, 0). The traced segment is still straight. Compute B(1/4) and explain why straight geometry alone does not imply constant parameter speed."
+    },
+    {
+      "id": "bz-left-split",
+      "concept": "Subdivision and local parameters",
+      "prerequisites": [
+        "Recursive curve construction"
+      ],
+      "prompt": "Split the quadratic (0, 0), (4, 8), (8, 0) at t0 = 1/2. Which ordered control points represent the left subcurve from B(0) to B(t0)?",
+      "options": [
+        "(0, 0), (2, 4), (4, 4)",
+        "(0, 0), (4, 8), (4, 4)",
+        "(4, 4), (6, 4), (8, 0)",
+        "(4, 4), (2, 4), (0, 0)"
+      ],
+      "answer": 0,
+      "explanation": "Read the left edge of the construction triangle: the original P0 = (0, 0), first-level Q0 = (2, 4), then B(1/2) = (4, 4). This ordered triple represents the same portion of the original curve. Using P1 unchanged would generally make a different curve; reversing the triple reverses its traversal.",
+      "transfer": "Evaluate this left triple at its own parameter u = 1/2. Compare with the original curve at t = 1/4 to check both its shape and its parameter mapping."
+    },
+    {
+      "id": "bz-right-split",
+      "concept": "Subdivision and local parameters",
+      "prerequisites": [
+        "Recursive curve construction"
+      ],
+      "prompt": "Split that same quadratic at t0 = 1/2. Which ordered control points represent the right subcurve from B(t0) to B(1)?",
+      "options": [
+        "(8, 0), (6, 4), (4, 4)",
+        "(4, 4), (6, 4), (8, 0)",
+        "(4, 4), (4, 8), (8, 0)",
+        "(0, 0), (2, 4), (4, 4)"
+      ],
+      "answer": 1,
+      "explanation": "Read the right edge starting at the final point: B(1/2) = (4, 4), Q1 = (6, 4), P2 = (8, 0). This order starts at the split and ends at the original endpoint. The left triple is another valid subcurve, but it represents the other parameter interval.",
+      "transfer": "Compare the left and right triples' shared point. Check the endpoints u = 0 and u = 1 of each subcurve and state the corresponding original parameters."
+    },
+    {
+      "id": "bz-left-parameter",
+      "concept": "Subdivision and local parameters",
+      "prerequisites": [
+        "Recursive curve construction"
+      ],
+      "prompt": "The left subcurve formed at t0 = 1/4 has local parameter u from 0 to 1 and satisfies L(u) = B(t0*u). Which original t corresponds to u = 1/2?",
+      "options": [
+        "1/2",
+        "1/4",
+        "1/8",
+        "3/4"
+      ],
+      "answer": 2,
+      "explanation": "The local unit interval has been stretched onto the original interval [0, 1/4]. Substitute u = 1/2: t = (1/4)(1/2) = 1/8. The local value 1/2 is halfway through that parameter interval. It is not a claim that the curve point is halfway along the subcurve's arclength.",
+      "transfer": "For a split at t0 = 2/3, map local u = 3/4 to the original parameter. Explain how the mapping changes at the boundary split t0 = 0."
+    },
+    {
+      "id": "bz-right-parameter",
+      "concept": "Subdivision and local parameters",
+      "prerequisites": [
+        "Recursive curve construction"
+      ],
+      "prompt": "For a split at t0 = 1/4, the right subcurve satisfies R(u) = B(t0 + (1 - t0)*u). Which original t corresponds to u = 1/3?",
+      "options": [
+        "1/3",
+        "1/12",
+        "3/4",
+        "1/2"
+      ],
+      "answer": 3,
+      "explanation": "The right interval starts at 1/4 and has width 3/4. One third of that width is 1/4, so t = 1/4 + 1/4 = 1/2. Multiplying t0 by u would describe the left subcurve instead. Omitting the offset would incorrectly start the right subcurve at original t = 0.",
+      "transfer": "Map u = 0 and u = 1 first to check the formula's endpoints. Then choose an interior split and explain why the right subcurve's local derivative is scaled by 1 - t0."
+    },
+    {
+      "id": "bz-start-derivative",
+      "concept": "Derivatives and parameter speed",
+      "prerequisites": [
+        "Subdivision and local parameters"
+      ],
+      "prompt": "A cubic has P0 = (1, 2) and P1 = (3, 6). Using B'(0) = 3(P1 - P0), what is its derivative vector at the start?",
+      "options": [
+        "(6, 12)",
+        "(2, 4)",
+        "(9, 18)",
+        "(-6, -12)"
+      ],
+      "answer": 0,
+      "explanation": "Subtract before scaling: P1 - P0 = (2, 4). A cubic has degree 3, so B'(0) = (6, 12). This vector measures coordinate change per unit of the chosen parameter. Its magnitude is not the total length of the curve, and it is not automatically a unit tangent.",
+      "transfer": "Keep P0 and P1 fixed while changing the remaining two cubic control points. Predict which start-derivative facts remain fixed and which later parts of the curve can change."
+    },
+    {
+      "id": "bz-end-derivative",
+      "concept": "Derivatives and parameter speed",
+      "prerequisites": [
+        "Subdivision and local parameters"
+      ],
+      "prompt": "A cubic has P2 = (4, -1) and P3 = (8, 1). Using B'(1) = 3(P3 - P2), what is its derivative vector at the end?",
+      "options": [
+        "(4, 2)",
+        "(12, 6)",
+        "(-12, -6)",
+        "(24, 3)"
+      ],
+      "answer": 1,
+      "explanation": "The forward difference P3 - P2 is (4, 2), and multiplying by the degree gives (12, 6). Reversing the subtraction reverses traversal direction. The endpoint derivative is controlled by the final two control points, just as the starting derivative uses the first two.",
+      "transfer": "Reverse all four control points and compare the new starting derivative with this original ending derivative. Relate your answer to traversing B(1 - t)."
+    },
+    {
+      "id": "bz-stationary",
+      "concept": "Derivatives and parameter speed",
+      "prerequisites": [
+        "Subdivision and local parameters"
+      ],
+      "prompt": "For B(t) = (8t^2, 0), the quadratic control points are (0, 0), (0, 0), (8, 0). Which statement about t = 0 is correct?",
+      "options": [
+        "B'(0) = (8, 0), so the speed is constant.",
+        "The whole curve is constant because its first two points coincide.",
+        "B'(0) = (0, 0), but later points move along the x-axis.",
+        "A zero derivative proves that no geometric tangent can exist."
+      ],
+      "answer": 2,
+      "explanation": "Differentiate the given polynomial: B'(t) = (16t, 0), so the derivative at zero is exactly (0, 0). Yet B(1) = (8, 0), so the curve is not constant. A zero first derivative cannot be normalized to obtain a direction; it does not by itself decide whether a geometric tangent exists.",
+      "transfer": "Compare this curve with a constant cubic whose four controls all equal (3, -2). Both can have a zero derivative, but how do their later evaluated points distinguish them?"
+    },
+    {
+      "id": "bz-parameter-speed",
+      "concept": "Derivatives and parameter speed",
+      "prerequisites": [
+        "Subdivision and local parameters"
+      ],
+      "prompt": "For B(t) = (8t^2, 0), compare the travel from t = 0 to 1/2 with the travel from t = 1/2 to 1. What are the two distances, in that order?",
+      "options": [
+        "4 and 4",
+        "2 and 2",
+        "6 and 2",
+        "2 and 6"
+      ],
+      "answer": 3,
+      "explanation": "The three positions are B(0) = (0, 0), B(1/2) = (2, 0), and B(1) = (8, 0). Along this monotone straight segment, the two travel distances are therefore 2 and 6. Equal parameter increments need not give equal distances, even when the geometric path is a straight line.",
+      "transfer": "Use the evenly spaced quadratic (0, 0), (4, 0), (8, 0) as a comparison. Explain why its equal parameter intervals do give equal travel, without generalizing that result to all Bézier curves."
+    }
+  ]
+}
