@@ -114,3 +114,25 @@ test('export refuses missing, duplicate or foreign notebook identities instead o
   ];
   for (const reflections of cases) assert.throws(() => createStudyNotes({deck, ...session, reflections, exportedAt}), RangeError);
 });
+
+test('study notes retain the displayed imported-course application prompt without changing notebook or first-session data', () => {
+  const session = completedSession();
+  const reflections = updateApplicationReflection(createReflections(deck.items), 'My own connection → another idea');
+  const applicationPrompt = 'Choose one connection from this deck and explain how it relates to another idea in your own words.';
+  const input = {deck, ...session, reflections, exportedAt};
+  const before = structuredClone(input);
+  const original = createStudyNotes(input).text;
+  const imported = createStudyNotes({...input, applicationPrompt}).text;
+  assert.ok(original.includes(`Prompt: ${APPLICATION_PROMPT}`));
+  assert.ok(imported.includes(`Prompt: ${applicationPrompt}`));
+  assert.ok(!imported.includes(`Prompt: ${APPLICATION_PROMPT}`));
+  assert.equal(imported, original.replace(`Prompt: ${APPLICATION_PROMPT}`, `Prompt: ${applicationPrompt}`));
+  assert.deepEqual(input, before);
+});
+
+test('a notebook export refuses a missing or non-text displayed application prompt', () => {
+  const input = {deck, ...completedSession(), reflections: createReflections(deck.items), exportedAt};
+  for (const applicationPrompt of [null, 0, false, {}, '', '   ']) {
+    assert.throws(() => createStudyNotes({...input, applicationPrompt}), TypeError);
+  }
+});

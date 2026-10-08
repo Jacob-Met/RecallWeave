@@ -1,7 +1,7 @@
 import { APPLICATION_PROMPT, reflectionSnapshot } from './reflections.mjs';
 
 /** Build local, readable study notes from a completed first session and separate practice. */
-export function createStudyNotes({ deck, review, mastery, practice = null, reflections = null, exportedAt = new Date(), conceptLabel = id => id }) {
+export function createStudyNotes({ deck, review, mastery, practice = null, reflections = null, exportedAt = new Date(), conceptLabel = id => id, applicationPrompt = APPLICATION_PROMPT }) {
   if (!Array.isArray(review) || review.length !== deck.items.length || review.length === 0) {
     throw new RangeError('Finish the learning session before saving study notes.');
   }
@@ -28,6 +28,9 @@ export function createStudyNotes({ deck, review, mastery, practice = null, refle
   const savedAt = new Date(exportedAt);
   if (!Number.isFinite(savedAt.getTime())) throw new RangeError('Study notes need a valid save time.');
   const notebook = reflections === null ? null : reflectionSnapshot(reflections, deck.items);
+  if (notebook && (typeof applicationPrompt !== 'string' || !applicationPrompt.trim())) {
+    throw new TypeError('Study notes need the application prompt shown in this session.');
+  }
   const reflectionById = new Map(notebook?.notes.map(note => [note.item, note.text]));
   const lines = [
     'RecallWeave — study notes',
@@ -81,7 +84,7 @@ export function createStudyNotes({ deck, review, mastery, practice = null, refle
   });
   if (notebook) {
     lines.push('', 'YOUR APPLICATION REFLECTION — NOT SCORED');
-    lines.push(`Prompt: ${APPLICATION_PROMPT}`);
+    lines.push(`Prompt: ${applicationPrompt}`);
     lines.push(...(notebook.application ? notebook.application.split('\n').map(line => `  > ${line}`) : ['Not written.']));
   }
   lines.push('', 'DECK ATTRIBUTION', deck.attribution, deck.license, '', 'Saved from this browser session. The download does not upload the session or restore it after a refresh.');
