@@ -4,7 +4,7 @@ import argparse
 import re
 
 ROOT = Path(__file__).resolve().parents[1]
-MODULES = ("deck.mjs", "deck-author.mjs", "deck-author-loader.mjs", "deck-author-ui.mjs")
+MODULES = ("deck.mjs", "deck-author.mjs", "deck-author-draft.mjs", "deck-author-loader.mjs", "deck-author-ui.mjs")
 
 
 def bundle_module(name, available):

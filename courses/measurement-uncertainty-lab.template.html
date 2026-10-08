@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>Measurement lab · RecallWeave</title>
+  <style>
+    :root { font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #173d38; background: #f4f7f3; font-synthesis: none; line-height: 1.5; }
+    * { box-sizing: border-box; }
+    body { margin: 0; }
+    a { color: #075c73; text-underline-offset: .15em; }
+    button, input, textarea { font: inherit; }
+    button, input, textarea, summary { touch-action: manipulation; }
+    button, summary { cursor: pointer; }
+    :focus-visible { outline: 3px solid #a8410f; outline-offset: 4px; }
+    [hidden] { display: none !important; }
+    .skip-link { position: absolute; left: 16px; top: -80px; background: white; padding: 12px; z-index: 2; }
+    .skip-link:focus { top: 12px; }
+    header, main, footer { width: min(1200px, 100%); padding: 24px; margin: 0 auto; }
+    header { padding-top: 35px; padding-bottom: 12px; }
+    .brand { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; font-weight: 700; }
+    .badge { font-size: .78rem; text-transform: uppercase; letter-spacing: .08em; background: #e0eee4; border: 1px solid #b5d2c2; padding: 4px 9px; border-radius: 99px; }
+    h1 { max-width: 850px; font-size: clamp(2rem, 5vw, 3.3rem); line-height: 1.12; letter-spacing: -.025em; margin: 24px 0 14px; }
+    .lede { max-width: 800px; font-size: 1.13rem; color: #426059; }
+    h2 { font-size: 1.45rem; line-height: 1.25; margin: 0 0 14px; }
+    h3 { font-size: 1.08rem; margin: 24px 0 8px; }
+    p { margin: 10px 0 16px; }
+    .workspace { display: grid; grid-template-columns: minmax(290px, 350px) minmax(0, 1fr); align-items: start; gap: 22px; }
+    .panel { min-width: 0; padding: 24px; border: 1px solid #cddbd2; border-radius: 16px; background: #fff; box-shadow: 0 5px 18px #173d3805; }
+    .input-panel { border-top: 5px solid #266653; }
+    .input-panel > p { color: #52685e; }
+    label { font-weight: 680; display: block; margin: 20px 0 6px; }
+    input, textarea { width: 100%; min-width: 0; color: #173d38; background: #fff; border: 1px solid #8da89a; border-radius: 7px; padding: 10px 12px; }
+    textarea { resize: vertical; min-height: 106px; }
+    [aria-invalid="true"] { border: 2px solid #a32220; }
+    .help, .small { font-size: .88rem; color: #52685e; }
+    .help { margin: 6px 0 12px; }
+    button { border: 1px solid #a1b9aa; border-radius: 8px; padding: 10px 14px; background: #f7faf6; color: #173d38; min-height: 44px; }
+    button:hover { background: #eaf2e9; }
+    .primary { background: #195a49; color: #fff; border-color: #195a49; font-weight: 700; width: 100%; margin-top: 16px; }
+    .primary:hover { background: #124637; }
+    .presets { display: grid; gap: 8px; }
+    .presets button { text-align: left; font-size: .9rem; }
+    .presets button span { display: block; font-size: .8rem; color: #52685e; }
+    .error { background: #fff1ed; color: #842b21; border-left: 4px solid #a32220; padding: 12px; margin: 16px 0 0; }
+    .status { font-size: .87rem; color: #52685e; min-height: 1.5em; }
+    .results { min-width: 0; }
+    .result-intro { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; align-items: baseline; }
+    .result-intro h2 { margin-bottom: 0; }
+    .result-intro > p { margin: 0; }
+    .metrics { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 20px 0; }
+    .metric { background: #f4f7f3; border: 1px solid #d8e2da; border-radius: 11px; padding: 14px; min-width: 0; }
+    .metric strong { display: block; font-size: 1.35rem; line-height: 1.3; margin: 7px 0; overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }
+    .metric .label { font-size: .87rem; font-weight: 700; }
+    .metric p { font-size: .83rem; color: #52685e; margin: 6px 0 0; }
+    .metric.featured { background: #e9f3eb; border-color: #99bda7; }
+    .calculation-line { font-size: .9rem; color: #52685e; }
+    .notice { border-left: 4px solid #bb7027; background: #fff6e9; padding: 14px 16px; color: #634a29; font-size: .92rem; }
+    figure { margin: 0; }
+    .chart-scroll, .table-scroll { max-width: 100%; overflow-x: auto; overscroll-behavior-x: contain; border-radius: 6px; }
+    .chart-scroll:focus-visible, .table-scroll:focus-visible { outline-offset: -3px; }
+    .chart-scroll svg { width: 100%; min-width: 550px; display: block; }
+    .axis-label { font-size: 13px; fill: #47635a; }
+    .grid-line { stroke: #dbe5dd; stroke-width: 1; }
+    .mean-line { stroke: #6d8379; stroke-dasharray: 4 4; }
+    .reading-line { stroke: #4975a2; stroke-width: 1.8; fill: none; }
+    .reading-point { fill: #275c90; }
+    .series { stroke-width: 3; fill: none; }
+    .series.combined { stroke: #236247; }
+    .point.combined { fill: #236247; }
+    .series.repeatability { stroke: #2f6da4; stroke-dasharray: 8 4; }
+    .point.repeatability { fill: #2f6da4; }
+    .series.calibration { stroke: #aa5b1c; stroke-dasharray: 3 4; }
+    .point.calibration { fill: #aa5b1c; }
+    .legend { display: flex; gap: 8px 20px; flex-wrap: wrap; font-size: .82rem; margin: 12px 0; padding: 0; list-style: none; }
+    .legend li::before { content: ''; display: inline-block; width: 22px; margin-right: 7px; border-top: 3px solid; vertical-align: middle; }
+    .legend .combined { color: #236247; }
+    .legend .repeatability { color: #2f6da4; }
+    .legend .repeatability::before { border-top-style: dashed; }
+    .legend .calibration { color: #aa5b1c; }
+    .legend .calibration::before { border-top-style: dotted; }
+    figcaption { font-size: .87rem; color: #52685e; margin: 8px 0 18px; }
+    details { border-top: 1px solid #d8e2da; padding: 13px 0 0; margin-top: 16px; }
+    summary { font-weight: 650; min-height: 30px; }
+    table { width: 100%; border-collapse: collapse; font-size: .86rem; font-variant-numeric: tabular-nums; }
+    th, td { text-align: right; padding: 10px 8px; border-bottom: 1px solid #d8e2da; overflow-wrap: anywhere; }
+    th:first-child, td:first-child { text-align: left; }
+    th { font-weight: 650; }
+    caption { text-align: left; padding: 12px 0; font-size: .82rem; color: #52685e; }
+    .projection-table { min-width: 440px; }
+    .next-steps { margin-top: 24px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px; }
+    .next-steps ul { padding-left: 22px; }
+    .next-steps li { margin: 10px 0; }
+    .formula { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: .89rem; overflow-wrap: anywhere; }
+    footer { color: #52685e; font-size: .83rem; padding-bottom: 36px; }
+    footer ul { display: flex; flex-wrap: wrap; gap: 10px 24px; padding: 0; list-style: none; }
+    @media (max-width: 880px) { .workspace { grid-template-columns: minmax(0, 1fr); } .input-panel form { max-width: 660px; } .presets { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+    @media (max-width: 600px) { header, main, footer { padding-left: 16px; padding-right: 16px; } .panel { padding: 18px; } .next-steps { grid-template-columns: minmax(0, 1fr); } .presets { grid-template-columns: minmax(0, 1fr); } .metrics { gap: 8px; } .metric { padding: 11px; } .metric strong { font-size: 1.15rem; } }
+    @media print { :root { background: white; } header, main, footer { width: 100%; } .input-panel, .skip-link, #download-measurement-deck, .status { display: none; } .workspace, .next-steps { display: block; } .panel { border: 0; box-shadow: none; padding: 12px 0; } .chart-scroll, .table-scroll { overflow: visible; } .chart-scroll svg { min-width: 0; } }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#measurement-form">Skip to the measurement inputs</a>
+  <header>
+    <div class="brand"><span>RecallWeave · Measurement lab</span><span class="badge">Works offline</span></div>
+    <h1>What do more measurements change?</h1>
+    <p class="lede">Separate the scatter in your readings from the uncertainty in their mean. Then see why a calibration correction shared by every reading leaves a limit that repetition alone cannot remove.</p>
+  </header>
+  <main>
+    <noscript><p class="notice">Enable JavaScript to calculate in this local lab. The companion measurement-uncertainty.md guide explains the model and examples.</p></noscript>
+    <div class="workspace">
+      <section class="panel input-panel" aria-labelledby="inputs-heading">
+        <h2 id="inputs-heading">1. Set up a case</h2>
+        <p>These starting readings are fictional. Use one quantity and the same unit throughout.</p>
+        <form id="measurement-form" novalidate>
+          <label for="readings-input">Readings in acquisition order</label>
+          <textarea id="readings-input" rows="4" aria-describedby="readings-help numeric-help" spellcheck="false">9.8, 10.2, 9.9, 10.1, 10.0</textarea>
+          <p id="readings-help" class="help">Enter 2–100 decimal readings, separated by commas, spaces or newlines. A comma marks a field; don't leave one empty.</p>
+          <label for="unit-input">Unit label</label>
+          <input id="unit-input" value="mm" maxlength="16" aria-describedby="unit-help" autocomplete="off">
+          <p id="unit-help" class="help">For example, mm or ms. This label does not convert values.</p>
+          <label for="correction-input">Additive calibration correction</label>
+          <input id="correction-input" value="-0.04" inputmode="decimal" aria-describedby="correction-help numeric-help" autocomplete="off" spellcheck="false">
+          <p id="correction-help" class="help">Add this signed value to every reading. If readings are 0.04 too high, enter −0.04.</p>
+          <label for="half-width-input">Shared calibration half-width, a</label>
+          <input id="half-width-input" value="0.02" inputmode="decimal" aria-describedby="half-width-help numeric-help" autocomplete="off" spellcheck="false">
+          <p id="half-width-help" class="help">Assume the one shared correction is equally plausible anywhere within ±a of its stated value. Enter zero or a positive half-width, in the same unit.</p>
+          <p id="numeric-help" class="help">Use decimal points, an ordinary minus sign, and optional e notation. For this teaching lab, nonzero magnitudes range from 1e-12 to 1e9; zero is allowed.</p>
+          <button type="submit" class="primary">Calculate this case</button>
+          <p id="lab-error" class="error" role="alert" hidden></p>
+        </form>
+        <p id="calculation-status" class="status" role="status" aria-live="polite"></p>
+        <h3>Try a fictional preset</h3>
+        <div class="presets">
+          <button type="button" data-preset="repeatability">Reading scatter dominates<span>Small shared calibration component</span></button>
+          <button type="button" data-preset="calibration">Calibration dominates<span>Same readings, larger shared component</span></button>
+          <button type="button" data-preset="identical">Identical displayed readings<span>Zero observed scatter still has limits</span></button>
+        </div>
+        <p class="small">A preset replaces all four inputs. Calculations stay in this tab; they are not uploaded or automatically saved.</p>
+      </section>
+      <section id="measurement-results" class="panel results" aria-labelledby="results-heading" hidden>
+        <div class="result-intro"><h2 id="results-heading" tabindex="-1">2. Read the uncertainty budget</h2><p class="small"><span data-value="n">—</span> observations</p></div>
+        <div class="metrics">
+          <div class="metric featured"><span class="label">Corrected mean</span><strong data-value="correctedMean">—</strong><p>Raw mean plus the stated correction.</p></div>
+          <div class="metric featured"><span class="label">Combined standard uncertainty, u<sub>c</sub></span><strong data-value="combinedUncertainty">—</strong><p>Independent repeatability and shared calibration components combined.</p></div>
+          <div class="metric"><span class="label">Repeatability of the mean, u<sub>A</sub></span><strong data-value="meanUncertainty">—</strong><p>Estimated single-reading scatter divided by √n.</p></div>
+          <div class="metric"><span class="label">Shared calibration, u<sub>cal</sub></span><strong data-value="calibrationUncertainty">—</strong><p>Rectangular half-width a divided by √3. Shared across all readings.</p></div>
+        </div>
+        <p class="calculation-line">Raw mean: <strong data-value="rawMean">—</strong> · Applied correction: <strong data-value="correction">—</strong><br>Sample standard deviation of readings, s: <strong data-value="sampleSD">—</strong></p>
+        <p class="small">Budget and projection table values use six significant digits; chart ticks are abbreviated. Standard uncertainty is not a guaranteed bound or an automatic confidence percentage.</p>
+        <p id="zero-scatter-note" class="notice" hidden>These recorded values show zero scatter. Display resolution, shared offsets and other omitted effects can remain. Equal readings do not establish an exact true value.</p>
+        <h3>Look at the acquisition order</h3>
+        <figure>
+          <div id="readings-chart" class="chart-scroll" tabindex="0" aria-label="Readings chart; scroll horizontally on a narrow screen"></div>
+          <figcaption>Each point is a recorded reading minus the raw mean. A shared correction shifts every reading equally, so it does not change this plot. A trend is a reason to investigate stability; the chart does not test independence.</figcaption>
+        </figure>
+        <details><summary>Read every recorded value</summary><div class="table-scroll" tabindex="0" aria-label="Recorded readings table"><table><caption id="readings-table-caption"></caption><thead><tr><th scope="col">Reading</th><th scope="col">Recorded</th><th scope="col">Corrected</th></tr></thead><tbody id="readings-table-body"></tbody></table></div></details>
+        <h3>3. Imagine more independent readings</h3>
+        <p class="small">This projection keeps the estimated single-reading scatter and calibration information fixed. It is a planning comparison, not additional observed data. Copying the existing rows does not create independent evidence.</p>
+        <ul class="legend" aria-label="Chart legend"><li class="combined">Combined</li><li class="repeatability">Repeatability of mean</li><li class="calibration">Shared calibration</li></ul>
+        <figure>
+          <div id="projection-chart" class="chart-scroll" tabindex="0" aria-label="Sample-size projection chart; scroll horizontally on a narrow screen"></div>
+          <figcaption id="projection-floor"></figcaption>
+        </figure>
+        <div class="table-scroll" tabindex="0" aria-label="Projected uncertainty table"><table class="projection-table"><caption id="projection-table-caption"></caption><thead><tr><th scope="col">Sample size</th><th scope="col">Repeatability</th><th scope="col">Calibration</th><th scope="col">Combined</th></tr></thead><tbody id="projection-table-body"></tbody></table></div>
+      </section>
+    </div>
+    <div class="next-steps">
+      <section class="panel" aria-labelledby="assumptions-heading">
+        <h2 id="assumptions-heading">What this model assumes</h2>
+        <ul>
+          <li>Repeat readings are independent observations of one stable quantity. Their scatter estimates repeatability.</li>
+          <li>A recognized additive calibration correction has been applied. Its remaining uncertainty is shared across every reading.</li>
+          <li>The correction's stated ±a range is modeled as rectangular, and its uncertainty is independent of the repeatability component.</li>
+          <li>Other effects are outside this two-component teaching model. A real uncertainty budget may need resolution, drift, correlations and other inputs.</li>
+        </ul>
+        <p class="formula">u<sub>A</sub> = s / √n<br>u<sub>cal</sub> = a / √3<br>u<sub>c</sub> = √(u<sub>A</sub>² + u<sub>cal</sub>²)</p>
+        <p class="small">Type A and Type B describe evaluation methods. They do not mean “random” and “systematic,” and do not by themselves say what averaging will reduce.</p>
+      </section>
+      <section class="panel" aria-labelledby="practice-heading">
+        <h2 id="practice-heading">Try it, then explain it</h2>
+        <ol>
+          <li>Compare the first two presets. Which uncertainty component changes even though every reading stays the same?</li>
+          <li>Change only the additive correction. What moves, and why does the scatter stay fixed?</li>
+          <li>Enter 9.8, 9.9, 10.0, 10.1, 10.2. What could their acquisition order suggest that a mean alone hides?</li>
+        </ol>
+        <details><summary>Check your reasoning</summary><p>The calibration half-width changes the shared component and the combined result. An additive correction shifts the estimate, leaving deviations from the mean unchanged. The ordered readings may suggest drift; more evidence is needed before using an independent-repeatability model.</p></details>
+        <h3>Keep the practice questions</h3>
+        <p class="small">Twelve original questions connect correction signs, sample scatter, shared uncertainty and experimental decisions. Download the JSON deck for a RecallWeave version that supports local course import.</p>
+        <button id="download-measurement-deck" type="button">Download practice deck (.json)</button>
+        <p id="deck-download-status" class="status" role="status" aria-live="polite"></p>
+      </section>
+    </div>
+  </main>
+  <footer>
+    <p>Original AI-assisted educational examples for RecallWeave. This lab illustrates a specified model; it does not certify an instrument, a real measurement or a learning outcome.</p>
+    <p>Primary references: NIST Technical Note 1297, B. N. Taylor and C. E. Kuyatt (1994).</p>
+    <ul><li><a href="https://www.nist.gov/pml/nist-technical-note-1297/nist-tn-1297-appendix-law-propagation-uncertainty" rel="noreferrer">Mean and propagation equations</a></li><li><a href="https://www.nist.gov/pml/nist-technical-note-1297/nist-tn-1297-4-type-b-evaluation-standard-uncertainty" rel="noreferrer">Rectangular uncertainty model</a></li><li><a href="https://www.nist.gov/pml/nist-technical-note-1297/nist-tn-1297-5-combined-standard-uncertainty" rel="noreferrer">Corrections and combined uncertainty</a></li></ul>
+    <p>Reference links require a connection only if you choose to follow them. Calculations, charts and the deck download work offline.</p>
+  </footer>
+  <script id="measurement-deck" type="application/json">/* MEASUREMENT_DECK_TEXT */</script>
+  <script>
+/* MEASUREMENT_CALCULATIONS */
+/* MEASUREMENT_UI */
+  </script>
+</body>
+</html>
