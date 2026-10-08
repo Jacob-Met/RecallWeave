@@ -1,0 +1,492 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Markov chains — RecallWeave explorer</title>
+<style>
+:root{color-scheme:light;--ink:#16313a;--muted:#4c646b;--paper:#f4f7f4;--line:#ccdcd6;--teal:#166e80;--soft:#e1efea;--danger:#9e271d}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.55 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}a{color:var(--teal)}button,input,select{font:inherit}button,select{min-height:44px}button{border:1px solid var(--line);border-radius:9px;background:white;color:var(--ink);padding:9px 15px;cursor:pointer;font-weight:650}button:hover{background:#edf4ef}button:disabled{opacity:.45;cursor:default}button.primary{background:var(--teal);color:white;border-color:var(--teal)}:focus-visible{outline:3px solid #a6550d;outline-offset:3px}input,select{border:1px solid #819b99;border-radius:7px;padding:8px;background:#fff;color:var(--ink)}input[type=text]{width:100%;min-width:0;text-align:center}input[type=range]{width:100%;padding:0;accent-color:var(--teal);min-height:32px}h1,h2,h3,p{margin-top:0}h1{font-size:clamp(30px,4vw,48px);line-height:1.12;letter-spacing:-.03em;margin-bottom:18px;max-width:780px}h2{font-size:22px;line-height:1.25;margin-bottom:10px}h3{font-size:17px;margin-bottom:10px}.small{font-size:14px;color:var(--muted)}.skip{position:absolute;left:10px;top:10px;transform:translateY(-180%);background:white;padding:8px;z-index:9}.skip:focus{transform:none}.shell{max-width:1240px;padding:28px;margin:auto}.topline{display:flex;justify-content:space-between;gap:15px;align-items:center;margin-bottom:35px}.brand{font-weight:800;letter-spacing:.04em}.eyebrow{text-transform:uppercase;letter-spacing:.12em;font-size:12px;font-weight:750;color:var(--teal)}.intro{font-size:19px;max-width:760px;color:var(--muted)}.layout{display:grid;grid-template-columns:minmax(310px, .85fr) minmax(0,1.75fr);gap:22px;align-items:start;margin-top:30px}.panel{background:#fff;border:1px solid var(--line);border-radius:16px;padding:23px}.controls{position:sticky;top:16px}.controls p{margin-bottom:16px}.controls select{width:100%;margin:7px 0 20px}.matrix{width:100%;border-collapse:separate;border-spacing:5px;text-align:center;table-layout:fixed}.matrix th{font-size:13px;font-weight:700}.matrix th:first-child{width:61px;text-align:left}.matrix td{padding:0}.matrix input{padding:9px 3px;min-height:44px}.initial{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}.initial label{font-size:13px;font-weight:700}.initial span{display:flex;align-items:center;gap:3px;margin-top:5px}.initial input{font-size:16px;font-weight:450}.quick-starts{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}.quick-starts button{font-size:12px;padding:7px 9px;min-height:38px}.apply{width:100%;margin-top:16px}.error{color:var(--danger);font-weight:650;margin:10px 0 0}.status{margin-top:10px;font-size:13px;color:var(--muted)}.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:18px 0 10px}.stat{border-top:4px solid var(--teal);background:#f1f6f3;padding:12px;border-radius:5px}.stat:nth-child(2){border-color:#a74320}.stat:nth-child(3){border-color:#6c48a2}.stat b{display:block;font-size:clamp(16px,2.1vw,23px);letter-spacing:-.035em;font-variant-numeric:tabular-nums}.stat span{font-size:13px}.legend{display:flex;gap:18px;flex-wrap:wrap;font-size:13px;margin-top:18px}.legend span{display:flex;align-items:center;gap:7px}.legend i{display:inline-block;width:26px;border-top:3px solid var(--teal)}.legend .b{border-color:#a74320;border-top-style:dashed}.legend .c{border-color:#6c48a2;border-top-style:dotted}#chart{width:100%;min-height:310px}#chart svg{display:block;width:100%;height:auto}.axis{font:12px system-ui;fill:#49636c}.stepbar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:5px}.step-buttons{display:flex;gap:6px}.cursor{margin:16px 0}.cursor label{display:block;font-weight:700}.explainer{margin:22px 0 0;padding:16px;background:var(--soft);border-left:4px solid var(--teal);border-radius:5px}.explainer p:last-child{margin-bottom:0}.lower{margin-top:20px}.table-scroll{overflow-x:auto}.data-table{width:100%;border-collapse:collapse;font-size:14px;font-variant-numeric:tabular-nums}.data-table caption{text-align:left;color:var(--muted);font-size:13px;margin:0 0 12px}.data-table th,.data-table td{padding:10px 8px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}.data-table th:first-child{text-align:left}.data-table tfoot{font-weight:700;background:#edf4ef}.selected-row{background:#dfede8}.downloads{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}.guide{max-width:880px;margin-top:32px}.guide li{margin:8px 0}.guide details{margin-top:20px}summary{cursor:pointer;font-weight:700;min-height:44px;display:list-item;padding:8px 0}footer{margin-top:32px;padding-top:22px;border-top:1px solid var(--line);font-size:13px;color:var(--muted)}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}[hidden]{display:none!important}
+@media(max-width:850px){.layout{grid-template-columns:1fr}.controls{position:static}.shell{padding:20px}.topline{margin-bottom:26px}.panel{padding:20px}.intro{font-size:17px}}
+@media(max-width:420px){.shell{padding:15px}.panel{padding:16px}.stats{gap:6px}.stat{padding:9px}.stat b{font-size:17px}.step-buttons button{font-size:14px;padding:9px 11px}.data-table{font-size:12px}.data-table th,.data-table td{padding:9px 5px}.topline{align-items:flex-start}.topline .small{max-width:180px;text-align:right}.legend{gap:12px}.matrix{border-spacing:3px}}
+@media print{body{background:white}.shell{max-width:none;padding:0}.layout{display:block}.controls,.downloads,.cursor,.step-buttons,.skip,.topline{display:none}.panel{break-inside:avoid;margin-bottom:15px;border:0;padding:10px}.guide{margin-top:10px}details{display:block}summary{list-style:none}.small{color:#333}}
+</style>
+</head>
+<body>
+<a class="skip" href="#explorer">Skip to the probability trace</a>
+<div class="shell">
+<header>
+<div class="topline"><div class="brand">RecallWeave</div><div class="small">Optional course · 14 questions<br>Three-state systems · works offline</div></div>
+<p class="eyebrow">Markov chains</p>
+<h1>Where will the probability go?</h1>
+<p class="intro">Give each state a rule. Follow the mass one step at a time, then compare a settling distribution with one that keeps alternating.</p>
+<p class="small">These are hypothetical teaching systems. The trace computes probabilities for each step; it does not simulate a single path or make a real-world forecast.</p>
+</header>
+<main>
+<div class="layout">
+<section class="panel controls" aria-labelledby="controls-heading">
+<h2 id="controls-heading">1. Choose the rules</h2>
+<label for="preset">Start with a teaching system</label>
+<select id="preset"><option value="mixing">Mixing</option><option value="alternating">Alternating</option><option value="absorbing">Absorbing A</option><option value="closed">Two closed states</option><option value="custom" disabled>Custom system</option></select>
+<form id="transition-form" novalidate>
+<h3>Transition percentages</h3>
+<p class="small">Each row starts in one state. Columns say where it goes next. Use whole percentages; each row must total 100%.</p>
+<table class="matrix"><thead><tr><th>Current</th><th scope="col">To A</th><th scope="col">To B</th><th scope="col">To C</th></tr></thead><tbody><tr><th scope="row">From A</th><td><input id="matrix-0-0" type="text" inputmode="numeric" aria-label="From A to A, percent" maxlength="3" value="0"></td><td><input id="matrix-0-1" type="text" inputmode="numeric" aria-label="From A to B, percent" maxlength="3" value="0"></td><td><input id="matrix-0-2" type="text" inputmode="numeric" aria-label="From A to C, percent" maxlength="3" value="0"></td></tr>
+<tr><th scope="row">From B</th><td><input id="matrix-1-0" type="text" inputmode="numeric" aria-label="From B to A, percent" maxlength="3" value="0"></td><td><input id="matrix-1-1" type="text" inputmode="numeric" aria-label="From B to B, percent" maxlength="3" value="0"></td><td><input id="matrix-1-2" type="text" inputmode="numeric" aria-label="From B to C, percent" maxlength="3" value="0"></td></tr>
+<tr><th scope="row">From C</th><td><input id="matrix-2-0" type="text" inputmode="numeric" aria-label="From C to A, percent" maxlength="3" value="0"></td><td><input id="matrix-2-1" type="text" inputmode="numeric" aria-label="From C to B, percent" maxlength="3" value="0"></td><td><input id="matrix-2-2" type="text" inputmode="numeric" aria-label="From C to C, percent" maxlength="3" value="0"></td></tr></tbody></table>
+<h3 style="margin-top:20px">Initial distribution</h3>
+<p class="small">Where is the probability at step 0? These three entries must also total 100%.</p>
+<div class="initial"><label>State A<span><input id="initial-0" type="text" inputmode="numeric" aria-label="Initial A, percent" maxlength="3" value="0"> %</span></label><label>State B<span><input id="initial-1" type="text" inputmode="numeric" aria-label="Initial B, percent" maxlength="3" value="0"> %</span></label><label>State C<span><input id="initial-2" type="text" inputmode="numeric" aria-label="Initial C, percent" maxlength="3" value="0"> %</span></label></div>
+<button class="primary apply" type="submit">Apply this system</button>
+<div class="quick-starts" aria-label="Apply a starting distribution"><button id="all-a-start" type="button">All in A</button><button id="all-c-start" type="button">All in C</button><button id="stationary-start" type="button">50 / 25 / 25</button></div>
+<p id="draft-error" class="error" role="alert"></p><p id="draft-status" class="status" role="status"></p>
+</form>
+</section>
+<section id="explorer" class="panel" aria-labelledby="explorer-heading" tabindex="-1">
+<p class="eyebrow">Applied system: <span id="applied-name">Mixing</span></p>
+<h2 id="explorer-heading">2. Follow the distribution</h2>
+<div class="stats" aria-label="Probability at the selected step"><div class="stat"><span>State A</span><b id="mass-0">—</b></div><div class="stat"><span>State B</span><b id="mass-1">—</b></div><div class="stat"><span>State C</span><b id="mass-2">—</b></div></div>
+<p class="small">Total probability: <span id="mass-total">—</span>. Displayed percentages are rounded to four decimal places.</p>
+<div class="legend" aria-hidden="true"><span><i></i>A · solid</span><span><i class="b"></i>B · dashed</span><span><i class="c"></i>C · dotted</span></div>
+<div id="chart"></div>
+<div class="cursor"><label for="step-slider">Selected step: <output id="step-number" for="step-slider">0</output></label><input id="step-slider" type="range" min="0" max="30" value="0" step="1"></div>
+<div class="stepbar"><span class="small">All 30 transitions are calculated.</span><div class="step-buttons"><button id="previous-step" type="button">Previous</button><button id="next-step" type="button">Next step</button><button id="reset-step" type="button">Step 0</button></div></div>
+<p id="step-announcement" class="sr-only" aria-live="polite"></p>
+<div class="explainer"><p id="system-note"></p><p id="absorbing-note" class="small"></p></div>
+</section>
+</div>
+
+<div class="panel lower" aria-labelledby="flow-heading">
+<h2 id="flow-heading">Before the first transition</h2>
+<p id="flow-empty" class="small">Step 0 is the distribution you supplied. Move to step 1 or later to see the incoming contributions.</p>
+<div class="table-scroll"><table id="flow-table" class="data-table" hidden>
+<caption id="flow-caption"></caption>
+<thead><tr><th scope="col">Previous state</th><th scope="col">To A</th><th scope="col">To B</th><th scope="col">To C</th></tr></thead>
+<tbody id="flow-body"></tbody>
+<tfoot><tr><th scope="row">Next probability</th><td id="flow-total-0"></td><td id="flow-total-1"></td><td id="flow-total-2"></td></tr></tfoot>
+</table></div>
+<details><summary>See all 31 distributions</summary>
+<div class="table-scroll"><table class="data-table">
+<caption>Step 0 and 30 transitions. Percentages are rounded to four decimal places; a displayed 0% can be a small positive value.</caption>
+<thead><tr><th scope="col">Step</th><th scope="col">State A</th><th scope="col">State B</th><th scope="col">State C</th></tr></thead>
+<tbody id="distribution-body"></tbody>
+</table></div></details>
+</div>
+<section class="panel lower" aria-labelledby="keep-heading">
+<h2 id="keep-heading">3. Keep an observation or learn the course</h2>
+<p>The observation file records the applied transition table, initial distribution, selected step and all computed values. The course is a separate, original fourteen-question lesson for RecallWeave.</p>
+<div class="downloads"><button id="download-observation" type="button">Download observation (.json)</button><button id="download-deck" type="button" class="primary">Download course (.json)</button></div>
+<p id="download-status" class="status" role="status"></p>
+<p class="small">Open <a href="../demo.html">RecallWeave</a>, choose the downloaded course under <strong>Bring your own lesson</strong>, inspect its preview, then select <strong>Start this deck</strong>. The lesson opens in that page; this explorer stays a separate activity. When using a copied explorer by itself, open your existing RecallWeave file separately.</p>
+</section>
+<section class="guide" aria-labelledby="guide-heading">
+<p class="eyebrow">Try, explain, compare</p><h2 id="guide-heading">A rule for each state, a distribution for the whole system</h2>
+<p>A transition row is conditional: it answers where the system goes next <em>given</em> its current state. A distribution says how likely the current states are. To find the next distribution, multiply each row by that state's current probability, then add the incoming contributions by column.</p>
+<ol>
+<li><strong>Trace one calculation.</strong> Choose Mixing and move to step 2. The previous distribution is 60%, 20%, 20%. The contributions to A are 36%, 8%, 8%, which total 52%. A single A → B → C path has probability 2%; being in C after two steps includes other paths and has probability 24%.</li>
+<li><strong>Separate stationarity from a motionless path.</strong> Choose Alternating. All in A switches between 100/0/0 and 0/50/50. Apply 50/25/25: the distribution is now stationary, even though the transition matrix makes every individual path change state at each step.</li>
+<li><strong>Ask what the initial distribution changes.</strong> Choose Two closed states. All in C reaches 40/60/0 after one step; All in A stays in A. The same matrix can have more than one stationary distribution.</li>
+</ol>
+<p>For a finite irreducible chain, a stationary distribution is unique. Adding aperiodicity guarantees convergence to it from every initial distribution. Irreducibility alone does not guarantee convergence, as the Alternating example shows. These are sufficient conditions; a reducible chain can also have a unique stationary distribution, as Absorbing A does.</p>
+<p class="small">The editable systems use three states, fixed transition rules, whole percentages and a 30-step horizon. Computation uses JavaScript binary64 arithmetic. Neither a finite plot nor rounded labels prove an exact limiting result. An absorbing state has a 100% self-transition; that fact alone does not show that other states can reach it.</p>
+<details><summary>Mathematical references and teaching notes</summary>
+<p class="small">The questions, numbers and explanations are original. The following primary lecture notes support the standard definitions and theorems. These optional external links need an internet connection; the explorer and course do not.</p>
+<ul>
+<li><a href="https://ocw.mit.edu/courses/6-436j-fundamentals-of-probability-fall-2018/141423989a49375f14f0a44940d81e67_MIT6_436JF18_lec21.pdf" target="_blank" rel="noopener noreferrer">MIT 6.436J, Lecture 21: Markov chains</a> — transition convention, probability flow and stationarity.</li>
+<li><a href="https://ocw.mit.edu/courses/18-445-introduction-to-stochastic-processes-spring-2015/2edaa8542469ce692226813a8bd1ec88_MIT18_445S15_lecture2.pdf" target="_blank" rel="noopener noreferrer">Hao Wu, MIT 18.445, Lecture 2</a> — irreducibility, stationary distributions and period.</li>
+<li><a href="https://ocw.mit.edu/courses/18-445-introduction-to-stochastic-processes-spring-2015/5bd4774f613aa28bd111c36f3a3beeed_MIT18_445S15_lecture4.pdf" target="_blank" rel="noopener noreferrer">Hao Wu, MIT 18.445, Lecture 4</a> — convergence for finite irreducible aperiodic chains.</li>
+</ul>
+<p class="small"><a href="markov-chains.md">Course guide and worked checks</a> accompanies this page in the source repository.</p>
+</details>
+</section>
+</main>
+<footer>Original teaching content © 2026, released under CC0-1.0. Prepared with AI assistance and independently checked. Referenced materials retain their own terms; no third-party exercises or figures are included. Nothing is saved automatically: download a course or observation to keep it.</footer>
+</div>
+<script id="course-data" type="application/octet-stream">ewogICJmb3JtYXQiOiAicmVjYWxsd2VhdmUtZGVjay8xIiwKICAidGl0bGUiOiAiTWFya292IGNoYWluczogd2hlcmUgcHJvYmFiaWxpdHkgZ29lcyBuZXh0IiwKICAiYXR0cmlidXRpb24iOiAiT3JpZ2luYWwgcXVlc3Rpb25zLCBudW1lcmljYWwgZXhhbXBsZXMgYW5kIHdvcmtlZCB0cmFuc2ZlcnMgYnkgUmVjYWxsV2VhdmUgY29udHJpYnV0b3JzIHdpdGggQUkgYXNzaXN0YW5jZSwgMjAyNi4gTWF0aGVtYXRpY2FsIGJhY2tncm91bmQgY2hlY2tlZCBhZ2FpbnN0IE1JVCBPcGVuQ291cnNlV2FyZTogNi40MzZKLzE1LjA4NUosIEZhbGwgMjAxOCwgTGVjdHVyZSAyMSwgTWFya292IENoYWlucyAoaHR0cHM6Ly9vY3cubWl0LmVkdS9jb3Vyc2VzLzYtNDM2ai1mdW5kYW1lbnRhbHMtb2YtcHJvYmFiaWxpdHktZmFsbC0yMDE4LzE0MTQyMzk4OWE0OTM3NWYxNGYwYTQ0OTQwZDgxZTY3X01JVDZfNDM2SkYxOF9sZWMyMS5wZGYpOyBIYW8gV3UsIDE4LjQ0NSwgU3ByaW5nIDIwMTUsIExlY3R1cmVzIDIgYW5kIDQgKGh0dHBzOi8vb2N3Lm1pdC5lZHUvY291cnNlcy8xOC00NDUtaW50cm9kdWN0aW9uLXRvLXN0b2NoYXN0aWMtcHJvY2Vzc2VzLXNwcmluZy0yMDE1L3BhZ2VzL2xlY3R1cmUtbm90ZXMvKS4gTm8gc291cmNlIGV4ZXJjaXNlcywgcHJvc2Ugb3IgZmlndXJlcyBhcmUgcmVwcm9kdWNlZC4gQWxsIHN5c3RlbXMgaGVyZSBhcmUgaHlwb3RoZXRpY2FsIHRlYWNoaW5nIGV4YW1wbGVzLiIsCiAgImxpY2Vuc2UiOiAiQ0MwLTEuMCBmb3IgdGhpcyBvcmlnaW5hbCBjb3Vyc2UgY29udGVudC4gUmVmZXJlbmNlZCBNSVQgbWF0ZXJpYWxzIHJldGFpbiB0aGVpciBvd24gdGVybXMgYW5kIGFyZSBub3QgaW5jbHVkZWQgaW4gdGhpcyBkZWNrLiIsCiAgImNvbmNlcHRzIjogWwogICAgIlN0YXRlIGFuZCB0cmFuc2l0aW9uIHJ1bGVzIiwKICAgICJQcm9iYWJpbGl0eSBmbG93IiwKICAgICJSZXBlYXRlZCBzdGVwcyBhbmQgb2JzZXJ2YXRpb25zIiwKICAgICJTdGF0aW9uYXJ5IGRpc3RyaWJ1dGlvbnMiLAogICAgIkN5Y2xlcyBhbmQgY2xvc2VkIHN0YXRlcyIKICBdLAogICJpdGVtcyI6IFsKICAgIHsKICAgICAgImlkIjogIm1jLXJ1bGUiLAogICAgICAiY29uY2VwdCI6ICJTdGF0ZSBhbmQgdHJhbnNpdGlvbiBydWxlcyIsCiAgICAgICJwcmVyZXF1aXNpdGVzIjogW10sCiAgICAgICJwcm9tcHQiOiAiQSB0aW1lLWhvbW9nZW5lb3VzIE1hcmtvdiBtb2RlbCB1c2VzIHN0YXRlcyBBLCBCIGFuZCBDLiBBZnRlciB0aGUgY3VycmVudCBzdGF0ZSBpcyBrbm93biwgd2hpY2ggaW5mb3JtYXRpb24gZGV0ZXJtaW5lcyBpdHMgbW9kZWxlZCBwcm9iYWJpbGl0aWVzIGZvciB0aGUgbmV4dCBzdGF0ZT8iLAogICAgICAib3B0aW9ucyI6IFsKICAgICAgICAiT25seSB0aGUgY3VycmVudCBzdGF0ZSwgdGhyb3VnaCB0aGUgc2FtZSB0cmFuc2l0aW9uIHJ1bGUgYXQgZXZlcnkgc3RlcC4iLAogICAgICAgICJUaGUgZXhhY3QgZWFybGllciBwYXRoLCBldmVuIHdoZW4gdGhlIGN1cnJlbnQgc3RhdGUgaXMgdGhlIHNhbWUuIiwKICAgICAgICAiT25seSB0aGUgbnVtYmVyIG9mIHN0ZXBzIGFscmVhZHkgdGFrZW47IHRoZSBjdXJyZW50IHN0YXRlIGlzIGlycmVsZXZhbnQuIiwKICAgICAgICAiQSByZXF1aXJlbWVudCB0aGF0IHRoZSBuZXh0IHN0YXRlIGJlIGRpZmZlcmVudCBmcm9tIHRoZSBjdXJyZW50IHN0YXRlLiIKICAgICAgXSwKICAgICAgImFuc3dlciI6IDAsCiAgICAgICJleHBsYW5hdGlvbiI6ICJUaGUgTWFya292IGFzc3VtcHRpb24gc2F5cyB0aGF0LCBjb25kaXRpb25hbCBvbiB0aGUgcHJlc2VudCBzdGF0ZSwgdGhlIGVhcmxpZXIgcGF0aCBhZGRzIG5vIGluZm9ybWF0aW9uIGFib3V0IHRoZSBuZXh0LXN0YXRlIHByb2JhYmlsaXRpZXMuIFRpbWUtaG9tb2dlbmVvdXMgbWVhbnMgdGhhdCB0aGlzIGNvbmRpdGlvbmFsIHJ1bGUgZG9lcyBub3QgY2hhbmdlIHdpdGggdGhlIHN0ZXAgbnVtYmVyLiBJdCBkb2VzIG5vdCBtYWtlIHN1Y2Nlc3NpdmUgc3RhdGVzIGluZGVwZW5kZW50LCBhbmQgc2VsZi10cmFuc2l0aW9ucyBhcmUgYWxsb3dlZC4iLAogICAgICAidHJhbnNmZXIiOiAiQSBtYWNoaW5lJ3MgZmFpbHVyZSBjaGFuY2UgZGVwZW5kcyBvbiBib3RoIGl0cyBjdXJyZW50IG1vZGUgYW5kIGl0cyBhZ2UuIFdvdWxkIGEgbW9kZWwgdXNpbmcgb25seSB0aGUgbW9kZSBhdXRvbWF0aWNhbGx5IGJlIE1hcmtvdj8gTm8uIEFnZSBtYXkgY29udGFpbiByZWxldmFudCBpbmZvcm1hdGlvbiBub3QgY2FwdHVyZWQgYnkgdGhhdCBzdGF0ZS4gQWRkaW5nIGEgc3VpdGFibGUgYWdlIGNhdGVnb3J5IGNvdWxkIGltcHJvdmUgdGhlIHN0YXRlIGRlc2NyaXB0aW9uOyB3aGV0aGVyIGl0IGlzIGFkZXF1YXRlIHN0aWxsIG5lZWRzIGV2aWRlbmNlLiIKICAgIH0sCiAgICB7CiAgICAgICJpZCI6ICJtYy1yb3ciLAogICAgICAiY29uY2VwdCI6ICJTdGF0ZSBhbmQgdHJhbnNpdGlvbiBydWxlcyIsCiAgICAgICJwcmVyZXF1aXNpdGVzIjogW10sCiAgICAgICJwcm9tcHQiOiAiUm93cyBuYW1lIHRoZSBjdXJyZW50IHN0YXRlOyBjb2x1bW5zIG5hbWUgdGhlIG5leHQgc3RhdGUgaW4gb3JkZXIgQSwgQiwgQy4gVGhlIHJvdyBmb3IgQSBpcyBbNjAlLCAyMCUsIDIwJV0uIFdoYXQgZG9lcyBpdHMgbWlkZGxlIGVudHJ5IG1lYW4/IiwKICAgICAgIm9wdGlvbnMiOiBbCiAgICAgICAgIkV4YWN0bHkgMjAgb2YgZXZlcnkgMTAwIHRyYW5zaXRpb25zIGluIGEgZmluaXRlIHJ1biB3aWxsIGVuZCBpbiBCLiIsCiAgICAgICAgIlRoZSBzeXN0ZW0gc3BlbmRzIDIwJSBvZiBhbGwgZnV0dXJlIHRpbWUgaW4gQS4iLAogICAgICAgICJHaXZlbiB0aGF0IHRoZSBjdXJyZW50IHN0YXRlIGlzIEEsIHRoZSBtb2RlbGVkIGNoYW5jZSB0aGF0IHRoZSBuZXh0IHN0YXRlIGlzIEIgaXMgMjAlLiIsCiAgICAgICAgIkdpdmVuIHRoYXQgdGhlIG5leHQgc3RhdGUgaXMgQiwgdGhlIGNoYW5jZSB0aGUgY3VycmVudCBzdGF0ZSB3YXMgQSBpcyAyMCUuIgogICAgICBdLAogICAgICAiYW5zd2VyIjogMiwKICAgICAgImV4cGxhbmF0aW9uIjogIkEgcm93IGdpdmVzIGNvbmRpdGlvbmFsIG5leHQtc3RhdGUgcHJvYmFiaWxpdGllcyBmb3Igb25lIHNwZWNpZmllZCBjdXJyZW50IHN0YXRlLiBUaGUgbWlkZGxlIGVudHJ5IGlzIFAobmV4dCA9IEIgfCBjdXJyZW50ID0gQSkuIFJldmVyc2luZyB0aGUgY29uZGl0aW9uaW5nIGdlbmVyYWxseSBuZWVkcyB0aGUgY3VycmVudCBkaXN0cmlidXRpb24gYW5kIG90aGVyIHRyYW5zaXRpb24gcHJvYmFiaWxpdGllcy4gQSBwcm9iYWJpbGl0eSBhbHNvIGRvZXMgbm90IGZvcmNlIGV4YWN0IGNvdW50cyBpbiBhIGZpbml0ZSBvYnNlcnZlZCBydW4uIiwKICAgICAgInRyYW5zZmVyIjogIklmIHRoZSBCIHJvdyBpcyBbNDAlLCA1MCUsIDEwJV0sIHdoYXQgaXMgdGhlIGNoYW5jZSBvZiBBIG5leHQgd2hlbiB0aGUgY3VycmVudCBzdGF0ZSBpcyBCPyBJdCBpcyA0MCUuIFRoZSBBLXRvLUIgY2hhbmNlIHJlbWFpbnMgMjAlOyBvcHBvc2l0ZSBkaXJlY3Rpb25zIG5lZWQgbm90IGhhdmUgZXF1YWwgcHJvYmFiaWxpdGllcy4iCiAgICB9LAogICAgewogICAgICAiaWQiOiAibWMtdmFsaWQtcm93IiwKICAgICAgImNvbmNlcHQiOiAiU3RhdGUgYW5kIHRyYW5zaXRpb24gcnVsZXMiLAogICAgICAicHJlcmVxdWlzaXRlcyI6IFtdLAogICAgICAicHJvbXB0IjogIkEgcm93IGxpc3RzIGFsbCBwb3NzaWJsZSBuZXh0IHN0YXRlcyBBLCBCIGFuZCBDLiBXaGljaCByb3cgaXMgYSB2YWxpZCBwcm9iYWJpbGl0eSByb3cgd2l0aG91dCBjaGFuZ2luZyBhbnkgZW50cnk/IiwKICAgICAgIm9wdGlvbnMiOiBbCiAgICAgICAgIls2MCUsIDMwJSwgMjAlXSIsCiAgICAgICAgIlstMTAlLCA2MCUsIDUwJV0iLAogICAgICAgICJbMCUsIDAlLCAwJV0iLAogICAgICAgICJbMCUsIDM1JSwgNjUlXSIKICAgICAgXSwKICAgICAgImFuc3dlciI6IDMsCiAgICAgICJleHBsYW5hdGlvbiI6ICJFdmVyeSBlbnRyeSBtdXN0IGJlIG5vbm5lZ2F0aXZlIGFuZCB0aGUgY29tcGxldGUgcm93IG11c3Qgc3VtIHRvIDEwMCUuIFRoZSBsYXN0IHJvdyBtZWV0cyBib3RoIGNvbmRpdGlvbnMuIFRoZSBvdGhlciByb3dzIHJlc3BlY3RpdmVseSBzdW0gdG8gMTEwJSwgY29udGFpbiBhIG5lZ2F0aXZlIHByb2JhYmlsaXR5LCBhbmQgb21pdCBhbGwgcHJvYmFiaWxpdHkgbWFzcy4gQSB6ZXJvIGVudHJ5IGlzIGFsbG93ZWQ7IGEgcm93IG9mIHplcm9zIGlzIG5vdC4iLAogICAgICAidHJhbnNmZXIiOiAiRG9lcyBhIHJvdyBbMTAwJSwgMCUsIDAlXSBuZWVkIHRvIGJlIHNtb290aGVkIHRvIGJlIHZhbGlkPyBOby4gSXQgZGVzY3JpYmVzIGEgY2VydGFpbiBtb3ZlIHRvIEEuIFdoZXRoZXIgdGhhdCBpcyBhIHVzZWZ1bCBtb2RlbCBpcyBhIHNlcGFyYXRlIHF1ZXN0aW9uLiBJbiB0aGUgZXhwbG9yZXIsIGludmFsaWQgcm93cyBhcmUgcmVwb3J0ZWQgaW5zdGVhZCBvZiBzaWxlbnRseSBub3JtYWxpemVkLiIKICAgIH0sCiAgICB7CiAgICAgICJpZCI6ICJtYy1taXh0dXJlIiwKICAgICAgImNvbmNlcHQiOiAiUHJvYmFiaWxpdHkgZmxvdyIsCiAgICAgICJwcmVyZXF1aXNpdGVzIjogWwogICAgICAgICJTdGF0ZSBhbmQgdHJhbnNpdGlvbiBydWxlcyIKICAgICAgXSwKICAgICAgInByb21wdCI6ICJVc2UgdGhlIHRyYW5zaXRpb24gcm93cyBBOls2MCUsMjAlLDIwJV0sIEI6WzQwJSw1MCUsMTAlXSwgQzpbNDAlLDEwJSw1MCVdLCB3aXRoIGNvbHVtbnMgQSxCLEMuIFRoZSBjdXJyZW50IGRpc3RyaWJ1dGlvbiBpcyBbNTAlLDUwJSwwJV0uIFdoYXQgaXMgdGhlIG5leHQgZGlzdHJpYnV0aW9uPyIsCiAgICAgICJvcHRpb25zIjogWwogICAgICAgICJbNjAlLDIwJSwyMCVdIiwKICAgICAgICAiWzUwJSwzNSUsMTUlXSIsCiAgICAgICAgIlsxMDAlLDcwJSwzMCVdIiwKICAgICAgICAiWzUwJSw1MCUsMCVdIgogICAgICBdLAogICAgICAiYW5zd2VyIjogMSwKICAgICAgImV4cGxhbmF0aW9uIjogIldlaWdodCBlYWNoIHJvdyBieSB0aGUgcHJvYmFiaWxpdHkgb2YgaXRzIGN1cnJlbnQgc3RhdGUuIEEgbmV4dCByZWNlaXZlcyAwLjUww5cwLjYwICsgMC41MMOXMC40MCA9IDAuNTAuIEIgcmVjZWl2ZXMgMC41MMOXMC4yMCArIDAuNTDDlzAuNTAgPSAwLjM1LiBDIHJlY2VpdmVzIDAuNTDDlzAuMjAgKyAwLjUww5cwLjEwID0gMC4xNS4gQ29udHJpYnV0aW9ucyBmcm9tIGN1cnJlbnQgQyBhcmUgemVyby4gVGhlIHJlc3VsdCBzdW1zIHRvIG9uZS4iLAogICAgICAidHJhbnNmZXIiOiAiQ2hhbmdlIHRoZSBjdXJyZW50IGRpc3RyaWJ1dGlvbiB0byBbMCUsNTAlLDUwJV0uIFRoZSBuZXh0IGRpc3RyaWJ1dGlvbiBpcyBbNDAlLDMwJSwzMCVdOiBBIGdldHMgMC41MMOXMC40MCB0d2ljZTsgQiBnZXRzIDAuNTDDlzAuNTAgKyAwLjUww5cwLjEwOyBDIGdldHMgMC41MMOXMC4xMCArIDAuNTDDlzAuNTAuIgogICAgfSwKICAgIHsKICAgICAgImlkIjogIm1jLXR3by1zdGVwcyIsCiAgICAgICJjb25jZXB0IjogIlJlcGVhdGVkIHN0ZXBzIGFuZCBvYnNlcnZhdGlvbnMiLAogICAgICAicHJlcmVxdWlzaXRlcyI6IFsKICAgICAgICAiUHJvYmFiaWxpdHkgZmxvdyIKICAgICAgXSwKICAgICAgInByb21wdCI6ICJVc2UgdGhlIHNhbWUgZml4ZWQgcm93cyBBOls2MCUsMjAlLDIwJV0sIEI6WzQwJSw1MCUsMTAlXSwgQzpbNDAlLDEwJSw1MCVdLiBTdGFydCBjZXJ0YWlubHkgaW4gQSBhdCBzdGVwIDAuIFN0ZXAgMSBpcyBbNjAlLDIwJSwyMCVdLiBXaGF0IGlzIHRoZSBkaXN0cmlidXRpb24gYXQgc3RlcCAyPyIsCiAgICAgICJvcHRpb25zIjogWwogICAgICAgICJbNTIlLDI0JSwyNCVdIiwKICAgICAgICAiWzM2JSw0JSw0JV0iLAogICAgICAgICJbNjAlLDIwJSwyMCVdIiwKICAgICAgICAiWzUwJSwyNSUsMjUlXSIKICAgICAgXSwKICAgICAgImFuc3dlciI6IDAsCiAgICAgICJleHBsYW5hdGlvbiI6ICJBcHBseSB0aGUgZnVsbCB0cmFuc2l0aW9uIHJ1bGUgYWdhaW4uIEEgcmVjZWl2ZXMgMC42MMOXMC42MCArIDAuMjDDlzAuNDAgKyAwLjIww5cwLjQwID0gMC41Mi4gQiByZWNlaXZlcyAwLjYww5cwLjIwICsgMC4yMMOXMC41MCArIDAuMjDDlzAuMTAgPSAwLjI0LiBDIHJlY2VpdmVzIDAuNjDDlzAuMjAgKyAwLjIww5cwLjEwICsgMC4yMMOXMC41MCA9IDAuMjQuIFNxdWFyaW5nIGVudHJpZXMgaW5kaXZpZHVhbGx5IGRyb3BzIHBhdGhzIHRocm91Z2ggaW50ZXJtZWRpYXRlIHN0YXRlcy4iLAogICAgICAidHJhbnNmZXIiOiAiT25lIG1vcmUgc3RlcCBnaXZlcyBbNTAuNCUsMjQuOCUsMjQuOCVdLiBGb3IgQSwgY2FsY3VsYXRlIDAuNTLDlzAuNjAgKyAwLjI0w5cwLjQwICsgMC4yNMOXMC40MCA9IDAuNTA0LiBSZXBlYXRlZCBtdWx0aXBsaWNhdGlvbiBkZXNjcmliZXMgcmVwZWF0ZWQgdXNlIG9mIHRoZSBzYW1lIGNvbmRpdGlvbmFsIHJ1bGUuIgogICAgfSwKICAgIHsKICAgICAgImlkIjogIm1jLXBhdGgtdmVyc3VzLWVuZHBvaW50IiwKICAgICAgImNvbmNlcHQiOiAiUHJvYmFiaWxpdHkgZmxvdyIsCiAgICAgICJwcmVyZXF1aXNpdGVzIjogWwogICAgICAgICJTdGF0ZSBhbmQgdHJhbnNpdGlvbiBydWxlcyIKICAgICAgXSwKICAgICAgInByb21wdCI6ICJUaGUgZml4ZWQgcm93cyBhcmUgQTpbNjAlLDIwJSwyMCVdLCBCOls0MCUsNTAlLDEwJV0sIEM6WzQwJSwxMCUsNTAlXS4gU3RhcnRpbmcgaW4gQSwgd2hhdCBpcyB0aGUgcHJvYmFiaWxpdHkgb2YgdGhlIHBhcnRpY3VsYXIgdHdvLXN0ZXAgcGF0aCBBIOKGkiBCIOKGkiBDPyIsCiAgICAgICJvcHRpb25zIjogWwogICAgICAgICIyNCUsIGJlY2F1c2UgdGhhdCBpcyB0aGUgdG90YWwgcHJvYmFiaWxpdHkgb2YgZW5kaW5nIGluIEMgYWZ0ZXIgdHdvIHN0ZXBzLiIsCiAgICAgICAgIjMwJSwgb2J0YWluZWQgYnkgYWRkaW5nIHRoZSB0d28gdHJhbnNpdGlvbiBwcm9iYWJpbGl0aWVzLiIsCiAgICAgICAgIjIlLCBvYnRhaW5lZCBmcm9tIDIwJSDDlyAxMCUuIiwKICAgICAgICAiMTAlLCBiZWNhdXNlIG9ubHkgdGhlIGxhc3QgdHJhbnNpdGlvbiBtYXR0ZXJzLiIKICAgICAgXSwKICAgICAgImFuc3dlciI6IDIsCiAgICAgICJleHBsYW5hdGlvbiI6ICJUaGUgc3BlY2lmaWVkIHBhdGggcmVxdWlyZXMgYm90aCB0cmFuc2l0aW9uczogQSB0byBCIHdpdGggcHJvYmFiaWxpdHkgMC4yMCwgdGhlbiBCIHRvIEMgd2l0aCBwcm9iYWJpbGl0eSAwLjEwLiBUaGVpciBjb25kaXRpb25hbCBwcm9kdWN0IGlzIDAuMDIuIEVuZGluZyBpbiBDIGFmdGVyIHR3byBzdGVwcyBhbHNvIGFsbG93cyBB4oaSQeKGkkMgYW5kIEHihpJD4oaSQzsgc3VtbWluZyBhbGwgdGhyZWUgZGlzam9pbnQgcGF0aHMgZ2l2ZXMgMC4xMiArIDAuMDIgKyAwLjEwID0gMC4yNC4iLAogICAgICAidHJhbnNmZXIiOiAiV2hhdCBpcyB0aGUgcHJvYmFiaWxpdHkgb2YgQSDihpIgQyDihpIgQT8gSXQgaXMgMC4yMMOXMC40MCA9IDAuMDgsIG9yIDglLiBUaGlzIGlzIG9ubHkgb25lIGNvbnRyaWJ1dGlvbiB0byB0aGUgZnVsbCBzdGVwLTIgcHJvYmFiaWxpdHkgb2YgQSwgd2hpY2ggaXMgNTIlLiIKICAgIH0sCiAgICB7CiAgICAgICJpZCI6ICJtYy1kaXN0cmlidXRpb24tbm90LWNvdW50IiwKICAgICAgImNvbmNlcHQiOiAiUmVwZWF0ZWQgc3RlcHMgYW5kIG9ic2VydmF0aW9ucyIsCiAgICAgICJwcmVyZXF1aXNpdGVzIjogWwogICAgICAgICJQcm9iYWJpbGl0eSBmbG93IgogICAgICBdLAogICAgICAicHJvbXB0IjogIkEgdG95IG1vZGVsIGdpdmVzIHRoZSBzdGVwLTIgZGlzdHJpYnV0aW9uIFs1MiUsMjQlLDI0JV0uIE9uZSBodW5kcmVkIGluZGVwZW5kZW50IGNvcGllcyB1c2UgdGhhdCBtb2RlbCBhbmQgYWxsIHN0YXJ0IGluIEEuIFdoaWNoIGNvbmNsdXNpb24gaXMganVzdGlmaWVkPyIsCiAgICAgICJvcHRpb25zIjogWwogICAgICAgICJFdmVyeSBjb3B5IG11c3QgcGFzcyB0aHJvdWdoIGFsbCB0aHJlZSBzdGF0ZXMgYnkgc3RlcCAyLiIsCiAgICAgICAgIkV4YWN0bHkgNTIgY29waWVzIHdpbGwgYmUgaW4gQSBpbiB0aGlzIHBhcnRpY3VsYXIgZXhwZXJpbWVudC4iLAogICAgICAgICJFYWNoIGNvcHkgbXVzdCBzcGVuZCA1MiUgb2YgaXRzIGZpcnN0IHR3byBzdGVwcyBpbiBBLiIsCiAgICAgICAgIlRoZSBleHBlY3RlZCBudW1iZXIgaW4gQSBhdCBzdGVwIDIgaXMgNTIsIHdoaWxlIHRoZSBvYnNlcnZlZCBudW1iZXIgY2FuIGRpZmZlci4iCiAgICAgIF0sCiAgICAgICJhbnN3ZXIiOiAzLAogICAgICAiZXhwbGFuYXRpb24iOiAiRm9yIGVhY2ggY29weSwgdGhlIHByb2JhYmlsaXR5IG9mIGJlaW5nIGluIEEgYXQgdGhhdCBzcGVjaWZpZWQgc3RlcCBpcyAwLjUyLiBTdW1taW5nIHRoZSAxMDAgaW5kaWNhdG9yIGV4cGVjdGF0aW9ucyBnaXZlcyBhbiBleHBlY3RlZCBjb3VudCBvZiA1Mi4gQW4gZXhwZWN0YXRpb24gbmVlZCBub3QgZXF1YWwgYSBmaW5pdGUgZXhwZXJpbWVudCdzIHJlYWxpemVkIGNvdW50LiBBIGRpc3RyaWJ1dGlvbiBhdCBvbmUgc3RlcCBpcyBhbHNvIGRpZmZlcmVudCBmcm9tIGEgdGltZSBmcmFjdGlvbiBhbG9uZyBvbmUgcGF0aC4iLAogICAgICAidHJhbnNmZXIiOiAiRm9yIDI1IGluZGVwZW5kZW50IGNvcGllcywgdGhlIGV4cGVjdGVkIG51bWJlciBpbiBBIGlzIDI1w5cwLjUyID0gMTMuIEFuIG9ic2VydmVkIGNvdW50IHN1Y2ggYXMgMTEgZG9lcyBub3QgYnkgaXRzZWxmIGNvbnRyYWRpY3QgdGhlIG1vZGVsLiBUaGUgZXhwbG9yZXIgY29tcHV0ZXMgZGlzdHJpYnV0aW9ucyBkaXJlY3RseSBhbmQgZG9lcyBub3QgZ2VuZXJhdGUgYSByYW5kb20gc2FtcGxlIG9mIHBhdGhzLiIKICAgIH0sCiAgICB7CiAgICAgICJpZCI6ICJtYy1zdGVwLXplcm8iLAogICAgICAiY29uY2VwdCI6ICJSZXBlYXRlZCBzdGVwcyBhbmQgb2JzZXJ2YXRpb25zIiwKICAgICAgInByZXJlcXVpc2l0ZXMiOiBbCiAgICAgICAgIlByb2JhYmlsaXR5IGZsb3ciCiAgICAgIF0sCiAgICAgICJwcm9tcHQiOiAiQW4gaW5pdGlhbCBkaXN0cmlidXRpb24gaXMgWzIwJSwzMCUsNTAlXS4gQmVmb3JlIGFwcGx5aW5nIGFueSB0cmFuc2l0aW9uLCB3aGF0IHNob3VsZCB0aGUgZXhwbG9yZXIgZGlzcGxheSBhdCBzdGVwIDA/IiwKICAgICAgIm9wdGlvbnMiOiBbCiAgICAgICAgIlswJSwwJSwwJV0sIGJlY2F1c2Ugbm8gdHJhbnNpdGlvbnMgaGF2ZSBvY2N1cnJlZC4iLAogICAgICAgICJbMjAlLDMwJSw1MCVdLCB0aGUgaW5pdGlhbCBkaXN0cmlidXRpb24gaXRzZWxmLiIsCiAgICAgICAgIlRoZSBmaXJzdCByb3cgb2YgdGhlIHRyYW5zaXRpb24gbWF0cml4LiIsCiAgICAgICAgIlRoZSBzdGF0aW9uYXJ5IGRpc3RyaWJ1dGlvbiwgd2hhdGV2ZXIgdGhlIGluaXRpYWwgZGlzdHJpYnV0aW9uIHdhcy4iCiAgICAgIF0sCiAgICAgICJhbnN3ZXIiOiAxLAogICAgICAiZXhwbGFuYXRpb24iOiAiU3RlcCAwIGRlc2NyaWJlcyB0aGUgaW5pdGlhbCBzdGF0ZSB1bmNlcnRhaW50eS4gQXBwbHlpbmcgemVybyB0cmFuc2l0aW9ucyBsZWF2ZXMgaXQgdW5jaGFuZ2VkLiBBIHRyYW5zaXRpb24gbWF0cml4IGNoYW5nZXMgdGhlIGRpc3RyaWJ1dGlvbiBvbmx5IHdoZW4gYSBzdGVwIGlzIHRha2VuOyBpdCBkb2VzIG5vdCByZXBsYWNlIHRoZSBpbml0aWFsIGNvbmRpdGlvbiBhdXRvbWF0aWNhbGx5LiIsCiAgICAgICJ0cmFuc2ZlciI6ICJJZiB0aGUgaW5pdGlhbCBkaXN0cmlidXRpb24gaXMgWzAlLDEwMCUsMCVdLCB0aGUgc3lzdGVtIGlzIGNlcnRhaW5seSBpbiBCIGF0IHN0ZXAgMC4gSXRzIHN0ZXAtMSBkaXN0cmlidXRpb24gaXMgdGhlIEIgcm93LCBub3QgdGhlIEEgcm93IGFuZCBub3QgYW4gYXZlcmFnZSBvZiBhbGwgcm93cy4iCiAgICB9LAogICAgewogICAgICAiaWQiOiAibWMtc3RhdGlvbmFyeS10ZXN0IiwKICAgICAgImNvbmNlcHQiOiAiU3RhdGlvbmFyeSBkaXN0cmlidXRpb25zIiwKICAgICAgInByZXJlcXVpc2l0ZXMiOiBbCiAgICAgICAgIlByb2JhYmlsaXR5IGZsb3ciCiAgICAgIF0sCiAgICAgICJwcm9tcHQiOiAiQSBjYW5kaWRhdGUgdmVjdG9yIM+AIGhhcyBub25uZWdhdGl2ZSBlbnRyaWVzIHN1bW1pbmcgdG8gb25lLiBJbiB0aGUgcm93LXZlY3RvciBjb252ZW50aW9uIHAobmV4dCkgPSBwKGN1cnJlbnQpUCwgd2hhdCBjaGVja3Mgd2hldGhlciDPgCBpcyBzdGF0aW9uYXJ5PyIsCiAgICAgICJvcHRpb25zIjogWwogICAgICAgICJBbGwgZW50cmllcyBvZiDPgCBtdXN0IGJlIGVxdWFsLiIsCiAgICAgICAgIkV2ZXJ5IHRyYW5zaXRpb24gaW4gUCBtdXN0IGxlYXZlIGl0cyBzdGF0ZSB1bmNoYW5nZWQuIiwKICAgICAgICAiTXVsdGlwbHlpbmcgb25jZSBtdXN0IGdpdmUgz4BQID0gz4AuIiwKICAgICAgICAiQSBjaGFydCBtdXN0IGxvb2sgbmVhcmx5IGZsYXQgYWZ0ZXIgYSBmaW5pdGUgbnVtYmVyIG9mIHBsb3R0ZWQgc3RlcHMuIgogICAgICBdLAogICAgICAiYW5zd2VyIjogMiwKICAgICAgImV4cGxhbmF0aW9uIjogIlN0YXRpb25hcnkgbWVhbnMgdGhhdCBzdGFydGluZyB3aXRoIGRpc3RyaWJ1dGlvbiDPgCBwcm9kdWNlcyBleGFjdGx5IHRoZSBzYW1lIGRpc3RyaWJ1dGlvbiBhZnRlciBhIHRyYW5zaXRpb24uIFRoZW4gcmVwZWF0ZWQgdHJhbnNpdGlvbnMgcHJlc2VydmUgaXQgYXMgd2VsbC4gVGhlIGNvbmRpdGlvbiBjb25jZXJucyB0aGUgZGlzdHJpYnV0aW9uLCBub3Qgd2hldGhlciBpbmRpdmlkdWFsIHBhdGhzIG1vdmUuIFVuaWZvcm0gcHJvYmFiaWxpdGllcyBhbmQgYSB2aXN1YWxseSBmbGF0IGZpbml0ZSBwbG90IGFyZSBub3QgZ2VuZXJhbCBkZWZpbml0aW9ucyBvZiBzdGF0aW9uYXJpdHkuIiwKICAgICAgInRyYW5zZmVyIjogIkZvciByb3dzIEE6WzYwJSwyMCUsMjAlXSwgQjpbNDAlLDUwJSwxMCVdLCBDOls0MCUsMTAlLDUwJV0sIHRyeSDPgD1bNTAlLDI1JSwyNSVdLiBUaGUgbmV4dCBBIHByb2JhYmlsaXR5IGlzIDAuMzArMC4xMCswLjEwPTAuNTA7IEIgaXMgMC4xMCswLjEyNSswLjAyNT0wLjI1OyBDIGlzIDAuMTArMC4wMjUrMC4xMjU9MC4yNS4iCiAgICB9LAogICAgewogICAgICAiaWQiOiAibWMtc3RhdGlvbmFyeS1kb2VzLW5vdC1mcmVlemUiLAogICAgICAiY29uY2VwdCI6ICJTdGF0aW9uYXJ5IGRpc3RyaWJ1dGlvbnMiLAogICAgICAicHJlcmVxdWlzaXRlcyI6IFsKICAgICAgICAiUHJvYmFiaWxpdHkgZmxvdyIKICAgICAgXSwKICAgICAgInByb21wdCI6ICJVc2Ugcm93cyBBOlswJSw1MCUsNTAlXSwgQjpbMTAwJSwwJSwwJV0sIEM6WzEwMCUsMCUsMCVdLiBUaGUgaW5pdGlhbCBkaXN0cmlidXRpb24gWzUwJSwyNSUsMjUlXSBpcyBzdGF0aW9uYXJ5LiBXaGF0IGhhcHBlbnMgdG8gYW4gaW5kaXZpZHVhbCBzdGF0ZSBvbiBpdHMgbmV4dCB0cmFuc2l0aW9uPyIsCiAgICAgICJvcHRpb25zIjogWwogICAgICAgICJJdCBzdGF5cyBpbiBpdHMgY3VycmVudCBzdGF0ZSwgYmVjYXVzZSB0aGUgZGlzdHJpYnV0aW9uIGlzIHN0YXRpb25hcnkuIiwKICAgICAgICAiSXQgY2hhbmdlcyBzdGF0ZSB3aXRoIHByb2JhYmlsaXR5IG9uZSwgZXZlbiB0aG91Z2ggdGhlIG92ZXJhbGwgZGlzdHJpYnV0aW9uIHN0YXlzIHRoZSBzYW1lLiIsCiAgICAgICAgIkl0IG11c3QgYmVjb21lIEEgd2l0aCBwcm9iYWJpbGl0eSBvbmUsIHJlZ2FyZGxlc3Mgb2YgaXRzIGN1cnJlbnQgc3RhdGUuIiwKICAgICAgICAiSXRzIG5leHQgc3RhdGUgaXMgaW5kZXBlbmRlbnQgb2YgaXRzIGN1cnJlbnQgc3RhdGUuIgogICAgICBdLAogICAgICAiYW5zd2VyIjogMSwKICAgICAgImV4cGxhbmF0aW9uIjogIkV2ZXJ5IGRpYWdvbmFsIGVudHJ5IGlzIHplcm8uIEZyb20gQSB0aGUgbmV4dCBzdGF0ZSBpcyBCIG9yIEMsIGFuZCBmcm9tIEIgb3IgQyBpdCBpcyBBLCBzbyBldmVyeSBwYXRoIGNoYW5nZXMgc3RhdGUuIE1lYW53aGlsZSB0aGUgbWFzcyBpbiBCIGFuZCBDIHRvdGFscyA1MCUgYW5kIGZsb3dzIGludG8gQTsgQSdzIDUwJSBzcGxpdHMgaW50byAyNSUgZm9yIEIgYW5kIDI1JSBmb3IgQy4gVGhlIGRpc3RyaWJ1dGlvbiBpcyB1bmNoYW5nZWQgd2l0aG91dCBmcmVlemluZyBpbmRpdmlkdWFscy4iLAogICAgICAidHJhbnNmZXIiOiAiU3RhcnRpbmcgZnJvbSB0aGF0IHN0YXRpb25hcnkgZGlzdHJpYnV0aW9uLCB0aGUgcHJvYmFiaWxpdHkgb2YgYmVpbmcgaW4gQSBpcyA1MCUgYXQgZXZlcnkgc3RlcC4gU3RhcnRpbmcgY2VydGFpbmx5IGluIEEgaW5zdGVhZCwgaXQgaXMgMTAwJSBhdCBzdGVwIDAgYW5kIDAlIGF0IHN0ZXAgMS4gU3RhdGlvbmFyaXR5IGlzIGEgcHJvcGVydHkgb2YgYSBwYXJ0aWN1bGFyIGRpc3RyaWJ1dGlvbiB0b2dldGhlciB3aXRoIHRoZSB0cmFuc2l0aW9uIHJ1bGUuIgogICAgfSwKICAgIHsKICAgICAgImlkIjogIm1jLWFsdGVybmF0aW9uIiwKICAgICAgImNvbmNlcHQiOiAiQ3ljbGVzIGFuZCBjbG9zZWQgc3RhdGVzIiwKICAgICAgInByZXJlcXVpc2l0ZXMiOiBbCiAgICAgICAgIlJlcGVhdGVkIHN0ZXBzIGFuZCBvYnNlcnZhdGlvbnMiLAogICAgICAgICJTdGF0aW9uYXJ5IGRpc3RyaWJ1dGlvbnMiCiAgICAgIF0sCiAgICAgICJwcm9tcHQiOiAiVXNlIEE6WzAlLDUwJSw1MCVdLCBCOlsxMDAlLDAlLDAlXSwgQzpbMTAwJSwwJSwwJV0sIGFuZCBzdGFydCBjZXJ0YWlubHkgaW4gQS4gV2hpY2ggZGVzY3JpcHRpb24gaXMgY29ycmVjdD8iLAogICAgICAib3B0aW9ucyI6IFsKICAgICAgICAiVGhlIHByb2JhYmlsaXR5IG9mIEEgaXMgMTAwJSBhdCBldmVyeSBldmVuIHN0ZXAgYW5kIDAlIGF0IGV2ZXJ5IG9kZCBzdGVwLCBzbyB0aGVzZSBkaXN0cmlidXRpb25zIGRvIG5vdCBjb252ZXJnZS4iLAogICAgICAgICJUaGUgZGlzdHJpYnV0aW9uIGJlY29tZXMgWzUwJSwyNSUsMjUlXSBhZnRlciB0d28gc3RlcHMgYW5kIHN0YXlzIHRoZXJlLiIsCiAgICAgICAgIlRoZXJlIGlzIG5vIHN0YXRpb25hcnkgZGlzdHJpYnV0aW9uIGJlY2F1c2UgdGhlIHBhdGgga2VlcHMgbW92aW5nLiIsCiAgICAgICAgIkluY3JlYXNpbmcgdGhlIHBsb3R0ZWQgaG9yaXpvbiBtdXN0IGV2ZW50dWFsbHkgcmVtb3ZlIHRoZSBhbHRlcm5hdGlvbi4iCiAgICAgIF0sCiAgICAgICJhbnN3ZXIiOiAwLAogICAgICAiZXhwbGFuYXRpb24iOiAiT25lIHN0ZXAgc2VuZHMgYWxsIG1hc3MgZnJvbSBBIGludG8gQiBhbmQgQyBlcXVhbGx5LiBUaGUgbmV4dCBzZW5kcyBhbGwgb2YgaXQgYmFjayB0byBBLiBUaGlzIHJlcGVhdHMgZm9yZXZlcjogWzEsMCwwXSwgdGhlbiBbMCwwLjUsMC41XSwgdGhlbiBbMSwwLDBdLiBUaGUgY2hhaW4gaGFzIGEgc3RhdGlvbmFyeSBkaXN0cmlidXRpb24gWzAuNSwwLjI1LDAuMjVdLCBidXQgdGhlIGRpc3RyaWJ1dGlvbnMgZnJvbSB0aGlzIGluaXRpYWwgc3RhdGUgZG8gbm90IGFwcHJvYWNoIGl0LiBTdGF0aW9uYXJpdHkgYWxvbmUgZG9lcyBub3QgZ3VhcmFudGVlIGNvbnZlcmdlbmNlLiIsCiAgICAgICJ0cmFuc2ZlciI6ICJBdCBzdGVwIDkgdGhlIGRpc3RyaWJ1dGlvbiBpcyBbMCUsNTAlLDUwJV07IGF0IHN0ZXAgMTAgaXQgaXMgWzEwMCUsMCUsMCVdLiBBdmVyYWdpbmcgbWFueSBzdGVwcyBpcyBhIGRpZmZlcmVudCBvcGVyYXRpb24gZnJvbSBhc2tpbmcgZm9yIHRoZSBkaXN0cmlidXRpb24gYXQgb25lIGxhdGUgc3RlcC4gQSBsb25nZXIgcGxvdCBkb2VzIG5vdCBjaGFuZ2UgdGhlIHJ1bGUuIgogICAgfSwKICAgIHsKICAgICAgImlkIjogIm1jLW1peGluZy1jb25kaXRpb25zIiwKICAgICAgImNvbmNlcHQiOiAiQ3ljbGVzIGFuZCBjbG9zZWQgc3RhdGVzIiwKICAgICAgInByZXJlcXVpc2l0ZXMiOiBbCiAgICAgICAgIlJlcGVhdGVkIHN0ZXBzIGFuZCBvYnNlcnZhdGlvbnMiLAogICAgICAgICJTdGF0aW9uYXJ5IGRpc3RyaWJ1dGlvbnMiCiAgICAgIF0sCiAgICAgICJwcm9tcHQiOiAiQ29uc2lkZXIgYSBmaW5pdGUsIHRpbWUtaG9tb2dlbmVvdXMgTWFya292IGNoYWluLiBFdmVyeSBzdGF0ZSBjYW4gcmVhY2ggZXZlcnkgb3RoZXIgKGlycmVkdWNpYmxlKSwgYW5kIHRoZSBjaGFpbiBoYXMgcGVyaW9kIG9uZSAoYXBlcmlvZGljKS4gV2hhdCBmb2xsb3dzPyIsCiAgICAgICJvcHRpb25zIjogWwogICAgICAgICJBbGwgc3RhdGVzIGhhdmUgZXF1YWwgc3RhdGlvbmFyeSBwcm9iYWJpbGl0aWVzLiIsCiAgICAgICAgIkV2ZXJ5IHRyYW5zaXRpb24gYmVjb21lcyBkZXRlcm1pbmlzdGljIGFmdGVyIGVub3VnaCBzdGVwcy4iLAogICAgICAgICJFdmVyeSBmaW5pdGUgb2JzZXJ2ZWQgcGF0aCB2aXNpdHMgZWFjaCBzdGF0ZSBlcXVhbGx5IG9mdGVuLiIsCiAgICAgICAgIlRoZXJlIGlzIGEgdW5pcXVlIHN0YXRpb25hcnkgZGlzdHJpYnV0aW9uLCBhbmQgZGlzdHJpYnV0aW9ucyBmcm9tIGFueSBpbml0aWFsIGRpc3RyaWJ1dGlvbiBhcHByb2FjaCBpdCBhcyB0aGUgbnVtYmVyIG9mIHN0ZXBzIGdyb3dzLiIKICAgICAgXSwKICAgICAgImFuc3dlciI6IDMsCiAgICAgICJleHBsYW5hdGlvbiI6ICJGb3IgYSBmaW5pdGUgaXJyZWR1Y2libGUgYXBlcmlvZGljIGNoYWluLCB0aGUgY29udmVyZ2VuY2UgdGhlb3JlbSBnaXZlcyBhIHVuaXF1ZSBzdGF0aW9uYXJ5IGRpc3RyaWJ1dGlvbiBhbmQgY29udmVyZ2VuY2UgdG8gaXQgZnJvbSBhbnkgaW5pdGlhbCBkaXN0cmlidXRpb24uIEl0IGRvZXMgbm90IHJlcXVpcmUgYSB1bmlmb3JtIHN0YXRpb25hcnkgZGlzdHJpYnV0aW9uIG9yIGV4YWN0IGFncmVlbWVudCBhZnRlciBhIGZpbml0ZSBudW1iZXIgb2Ygc3RlcHMuIElycmVkdWNpYmlsaXR5IGFsb25lIGd1YXJhbnRlZXMgdW5pcXVlbmVzcyBmb3IgYSBmaW5pdGUgY2hhaW4sIGJ1dCBhIHBlcmlvZGljIGNoYWluIGNhbiBzdGlsbCBmYWlsIHRvIGNvbnZlcmdlIGZyb20gc29tZSBzdGFydHMuIiwKICAgICAgInRyYW5zZmVyIjogIlRoZSBtaXhpbmcgcHJlc2V0IGhhcyByb3dzIFs2MCUsMjAlLDIwJV0sIFs0MCUsNTAlLDEwJV0sIFs0MCUsMTAlLDUwJV0uIEV2ZXJ5IHRyYW5zaXRpb24gaXMgcG9zaXRpdmUsIHNvIGFsbCBzdGF0ZXMgY29tbXVuaWNhdGUgYW5kIGVhY2ggaGFzIGEgc2VsZi1yZXR1cm4gaW4gb25lIHN0ZXAuIEl0cyBzdGF0aW9uYXJ5IGRpc3RyaWJ1dGlvbiBpcyBbNTAlLDI1JSwyNSVdLCB3aGljaCBpcyBub3QgdW5pZm9ybS4gQSByb3VuZGVkIGNoYXJ0IG5lYXIgdGhhdCB2YWx1ZSBpcyBhbiBpbGx1c3RyYXRpb24sIG5vdCBhIHByb29mLiIKICAgIH0sCiAgICB7CiAgICAgICJpZCI6ICJtYy1hYnNvcmJpbmciLAogICAgICAiY29uY2VwdCI6ICJDeWNsZXMgYW5kIGNsb3NlZCBzdGF0ZXMiLAogICAgICAicHJlcmVxdWlzaXRlcyI6IFsKICAgICAgICAiU3RhdGUgYW5kIHRyYW5zaXRpb24gcnVsZXMiLAogICAgICAgICJSZXBlYXRlZCBzdGVwcyBhbmQgb2JzZXJ2YXRpb25zIgogICAgICBdLAogICAgICAicHJvbXB0IjogIlJvd3MgYW5kIGNvbHVtbnMgdXNlIG9yZGVyIEEsIEIsIEMuIEluIGEgdG95IG1vZGVsLCB0aGUgQSByb3cgaXMgWzEwMCUsMCUsMCVdLiBXaGF0IGNhbiB5b3UgY29uY2x1ZGUgZnJvbSB0aGF0IHJvdyBhbG9uZT8iLAogICAgICAib3B0aW9ucyI6IFsKICAgICAgICAiRXZlcnkgaW5pdGlhbCBzdGF0ZSByZWFjaGVzIEEgYWZ0ZXIgYXQgbW9zdCBvbmUgc3RlcC4iLAogICAgICAgICJBIGlzIGFic29yYmluZzogb25jZSB0aGUgc3RhdGUgaXMgQSwgYWxsIGxhdGVyIHN0YXRlcyByZW1haW4gQSB1bmRlciB0aGlzIHVuY2hhbmdlZCBydWxlLiIsCiAgICAgICAgIkEgaXMgdGhlIG9ubHkgcG9zc2libGUgc3RhdGlvbmFyeSBzdGF0ZSBmb3IgZXZlcnkgY2hvaWNlIG9mIHRoZSBCIGFuZCBDIHJvd3MuIiwKICAgICAgICAiVGhlIGN1cnJlbnQgZGlzdHJpYnV0aW9uIG11c3QgYXNzaWduIDEwMCUgcHJvYmFiaWxpdHkgdG8gQS4iCiAgICAgIF0sCiAgICAgICJhbnN3ZXIiOiAxLAogICAgICAiZXhwbGFuYXRpb24iOiAiVGhlIHJvdyBndWFyYW50ZWVzIGEgc2VsZi10cmFuc2l0aW9uIGZyb20gQSB3aXRoIHByb2JhYmlsaXR5IG9uZSwgbWFraW5nIEEgYWJzb3JiaW5nLiBJdCBzYXlzIG5vdGhpbmcgYnkgaXRzZWxmIGFib3V0IHdoZXRoZXIgQiBvciBDIGNhbiByZWFjaCBBLiBUaGV5IGNvdWxkIGhhdmUgdGhlaXIgb3duIGNsb3NlZCBiZWhhdmlvci4gVGhlIGN1cnJlbnQgZGlzdHJpYnV0aW9uIGlzIGFuIGluaXRpYWwgb3IgZXZvbHZlZCBwcm9iYWJpbGl0eSB2ZWN0b3IsIG5vdCBzb21ldGhpbmcgaW1wb3NlZCBieSB0aGUgQSByb3cgYWxvbmUuIiwKICAgICAgInRyYW5zZmVyIjogIklmIEIncyByb3cgaXMgWzAlLDEwMCUsMCVdIHRvbywgc3RhcnRpbmcgaW4gQiBuZXZlciByZWFjaGVzIEEuIEluIHRoZSBleHBsb3JlcidzIGFic29yYmluZyBwcmVzZXQsIEIgYW5kIEMgZG8gaGF2ZSByb3V0ZXMgaW50byBBOyB0aGUgZ3JhZHVhbGx5IGluY3JlYXNpbmcgQSBwcm9iYWJpbGl0eSBpbGx1c3RyYXRlcyB0aG9zZSBhZGRpdGlvbmFsIHJvd3MsIG5vdCBqdXN0IHRoZSBmYWN0IHRoYXQgQSBpcyBhYnNvcmJpbmcuIgogICAgfSwKICAgIHsKICAgICAgImlkIjogIm1jLWNsb3NlZC1zdGFydCIsCiAgICAgICJjb25jZXB0IjogIkN5Y2xlcyBhbmQgY2xvc2VkIHN0YXRlcyIsCiAgICAgICJwcmVyZXF1aXNpdGVzIjogWwogICAgICAgICJSZXBlYXRlZCBzdGVwcyBhbmQgb2JzZXJ2YXRpb25zIiwKICAgICAgICAiU3RhdGlvbmFyeSBkaXN0cmlidXRpb25zIgogICAgICBdLAogICAgICAicHJvbXB0IjogIlVzZSBBOlsxMDAlLDAlLDAlXSwgQjpbMCUsMTAwJSwwJV0sIEM6WzQwJSw2MCUsMCVdLiBXaGF0IGhhcHBlbnMgd2hlbiB0aGUgc3lzdGVtIHN0YXJ0cyBjZXJ0YWlubHkgaW4gQz8iLAogICAgICAib3B0aW9ucyI6IFsKICAgICAgICAiSXQgY29udmVyZ2VzIHRvIHRoZSBzYW1lIGRpc3RyaWJ1dGlvbiBhcyBhIHN5c3RlbSBzdGFydGluZyBjZXJ0YWlubHkgaW4gQS4iLAogICAgICAgICJJdCBhbHRlcm5hdGVzIGJldHdlZW4gQSBhbmQgQiB3aXRoIGVhY2ggc3RlcC4iLAogICAgICAgICJBZnRlciBvbmUgc3RlcCBpdHMgZGlzdHJpYnV0aW9uIGlzIFs0MCUsNjAlLDAlXSwgd2hpY2ggc3RheXMgdW5jaGFuZ2VkOyBzdGFydGluZyBjZXJ0YWlubHkgaW4gQSBpbnN0ZWFkIHN0YXlzIFsxMDAlLDAlLDAlXS4iLAogICAgICAgICJJdCBoYXMgbm8gc3RhdGlvbmFyeSBkaXN0cmlidXRpb24gYmVjYXVzZSBDIGlzIG5vdCBhYnNvcmJpbmcuIgogICAgICBdLAogICAgICAiYW5zd2VyIjogMiwKICAgICAgImV4cGxhbmF0aW9uIjogIkMgc2VuZHMgNDAlIG9mIGl0cyBtYXNzIGludG8gYWJzb3JiaW5nIEEgYW5kIDYwJSBpbnRvIGFic29yYmluZyBCLiBUaGVyZWFmdGVyIGVhY2ggcGFydCBzdGF5cyB3aGVyZSBpdCB3ZW50LiBTdGFydGluZyBpbiBBIGhhcyBhIGRpZmZlcmVudCBvdXRjb21lIGJlY2F1c2UgdGhlcmUgaXMgbm8gcm91dGUgZnJvbSBBIHRvIEIuIFRoZSBjaGFpbiBoYXMgbW9yZSB0aGFuIG9uZSBzdGF0aW9uYXJ5IGRpc3RyaWJ1dGlvbjsgZXZlcnkgZGlzdHJpYnV0aW9uIHN1cHBvcnRlZCBvbmx5IG9uIEEgYW5kIEIgaXMgc3RhdGlvbmFyeS4iLAogICAgICAidHJhbnNmZXIiOiAiU3RhcnQgd2l0aCBbMjAlLDMwJSw1MCVdLiBPbmUgc3RlcCBnaXZlcyBBOiAwLjIwICsgMC41MMOXMC40MCA9IDAuNDAsIEI6IDAuMzAgKyAwLjUww5cwLjYwID0gMC42MCwgQzogMC4gVGhlc2UgcHJvYmFiaWxpdGllcyB0aGVuIHN0YXkgZml4ZWQuIFRoaXMgZXhhbXBsZSBzaG93cyB3aHkgdGhlIGluaXRpYWwgZGlzdHJpYnV0aW9uIGNhbiBrZWVwIG1hdHRlcmluZy4iCiAgICB9CiAgXQp9Cg==</script>
+<script type="module">
+const { MAX_STEPS, STATES, PRESETS, parsePercent, validateConfiguration, computeTrace, presetFor, absorbingStates, observationJSON } = (() => {
+/** Finite, time-homogeneous three-state teaching systems. All inputs are hypothetical. */
+const MAX_STEPS = 30;
+const STATES = Object.freeze(["A", "B", "C"]);
+const freezeRows = rows => Object.freeze(rows.map(row => Object.freeze([...row])));
+const presetData = [
+  {
+    "id": "mixing",
+    "label": "Mixing",
+    "matrix": [
+      [
+        60,
+        20,
+        20
+      ],
+      [
+        40,
+        50,
+        10
+      ],
+      [
+        40,
+        10,
+        50
+      ]
+    ],
+    "initial": [
+      100,
+      0,
+      0
+    ],
+    "note": "All transitions are positive. The known stationary distribution is [50%,25%,25%]. Distributions approach it from any initial distribution."
+  },
+  {
+    "id": "alternating",
+    "label": "Alternating",
+    "matrix": [
+      [
+        0,
+        50,
+        50
+      ],
+      [
+        100,
+        0,
+        0
+      ],
+      [
+        100,
+        0,
+        0
+      ]
+    ],
+    "initial": [
+      100,
+      0,
+      0
+    ],
+    "note": "Starting with all mass in A alternates between A and the group B/C. The stationary distribution [50%,25%,25%] exists; starting entirely in A does not approach it."
+  },
+  {
+    "id": "absorbing",
+    "label": "Absorbing A",
+    "matrix": [
+      [
+        100,
+        0,
+        0
+      ],
+      [
+        25,
+        50,
+        25
+      ],
+      [
+        0,
+        50,
+        50
+      ]
+    ],
+    "initial": [
+      0,
+      0,
+      100
+    ],
+    "note": "A is absorbing and both other states can reach it. Probability accumulates in A. The finite plotted horizon does not imply every path is already absorbed."
+  },
+  {
+    "id": "closed",
+    "label": "Two closed states",
+    "matrix": [
+      [
+        100,
+        0,
+        0
+      ],
+      [
+        0,
+        100,
+        0
+      ],
+      [
+        40,
+        60,
+        0
+      ]
+    ],
+    "initial": [
+      0,
+      0,
+      100
+    ],
+    "note": "A and B are separate absorbing states. Starting at C produces [40%,60%,0%] after one step. The initial distribution can change the long-run outcome."
+  }
+];
+const PRESETS = Object.freeze(presetData.map(p => Object.freeze({
+  ...p, matrix: freezeRows(p.matrix), initial: Object.freeze([...p.initial])
+})));
+
+function percentRow(row, label) {
+  if (!Array.isArray(row) || row.length !== 3) throw new Error(label + " needs three percentages.");
+  const copy = Array.from(row, (value, index) => {
+    if (typeof value !== "number" || !Number.isInteger(value) || value < 0 || value > 100) {
+      throw new Error(label + ", state " + STATES[index] + ": enter a whole percentage from 0 to 100.");
+    }
+    return value;
+  });
+  const sum = copy.reduce((a, b) => a + b, 0);
+  if (sum !== 100) throw new Error(label + " adds to " + sum + "%. It must add to 100%.");
+  return Object.freeze(copy);
+}
+function parsePercent(text, label = "Percentage") {
+  if (typeof text !== "string" || !/^\d+$/.test(text.trim())) {
+    throw new Error(label + ": enter a whole percentage from 0 to 100.");
+  }
+  const value = Number(text.trim());
+  if (!Number.isInteger(value) || value < 0 || value > 100) {
+    throw new Error(label + ": enter a whole percentage from 0 to 100.");
+  }
+  return value;
+}
+function validateConfiguration(input) {
+  if (!input || typeof input !== "object" || !Array.isArray(input.matrix) || input.matrix.length !== 3) {
+    throw new Error("Provide one transition row for each of A, B and C.");
+  }
+  return Object.freeze({
+    matrix: Object.freeze(Array.from(input.matrix, (row, i) => percentRow(row, "From " + STATES[i]))),
+    initial: percentRow(input.initial, "Initial distribution")
+  });
+}
+function validateProbabilities(row) {
+  if (!Array.isArray(row) || row.length !== 3 ||
+      row.some(x => typeof x !== "number" || !Number.isFinite(x) || x < 0 || x > 1 + 1e-12) ||
+      Math.abs(row.reduce((a, b) => a + b, 0) - 1) > 1e-12) {
+    throw new Error("A computed distribution must have three finite probabilities totaling one.");
+  }
+}
+function computeTrace(input, steps = MAX_STEPS) {
+  const config = validateConfiguration(input);
+  if (!Number.isInteger(steps) || steps < 0 || steps > MAX_STEPS) {
+    throw new Error("Choose a whole step count from 0 to " + MAX_STEPS + ".");
+  }
+  let probabilities = Object.freeze(config.initial.map(x => x / 100));
+  const trace = [Object.freeze({step: 0, probabilities, contributions: null})];
+  for (let step = 1; step <= steps; step++) {
+    // A row contributes its current mass times each conditional next-state probability.
+    const contributions = freezeRows(config.matrix.map((row, i) =>
+      row.map(percent => probabilities[i] * (percent / 100))));
+    probabilities = Object.freeze(STATES.map((_, j) =>
+      contributions.reduce((sum, row) => sum + row[j], 0)));
+    validateProbabilities(probabilities);
+    trace.push(Object.freeze({step, probabilities, contributions}));
+  }
+  return Object.freeze({config, trace: Object.freeze(trace)});
+}
+function presetFor(input) {
+  const config = validateConfiguration(input);
+  return PRESETS.find(p => p.matrix.every((row, i) =>
+    row.every((value, j) => value === config.matrix[i][j]))) || null;
+}
+function absorbingStates(input) {
+  const {matrix} = validateConfiguration(input);
+  return STATES.filter((_, i) => matrix[i][i] === 100);
+}
+function observationJSON(computed, selectedStep) {
+  if (!Number.isInteger(selectedStep) || selectedStep < 0 || selectedStep >= computed.trace.length) {
+    throw new Error("Select an available step.");
+  }
+  // Recompute from applied inputs so the exported record cannot mix a draft with old output.
+  const fresh = computeTrace(computed.config, computed.trace.length - 1);
+  return JSON.stringify({
+    format: "recallweave-markov-observation/1",
+    interpretation: "Hypothetical finite time-homogeneous Markov system; distributions, not sampled paths.",
+    convention: "Rows are current states; columns are next states; state order A, B, C.",
+    inputUnits: "Integer percentages; each row and the initial distribution total 100.",
+    transitionPercent: fresh.config.matrix,
+    initialPercent: fresh.config.initial,
+    selectedStep,
+    arithmetic: "JavaScript binary64; displayed percentages are rounded to four decimal places. Numeric JSON retains computed precision.",
+    trace: fresh.trace
+  }, null, 2) + "\n";
+}
+
+return { MAX_STEPS, STATES, PRESETS, parsePercent, validateConfiguration, computeTrace, presetFor, absorbingStates, observationJSON };
+})();
+
+const byId = id => document.getElementById(id);
+const colors = ["#166e80", "#a74320", "#6c48a2"];
+const dashes = ["", "8 4", "2 4"];
+const svgNS = "http://www.w3.org/2000/svg";
+let computed;
+let selectedStep = 0;
+let dirty = false;
+const percent = p => (p * 100).toFixed(4) + "%";
+function cell(value, tag = "td") {
+  const node = document.createElement(tag);
+  node.textContent = value;
+  return node;
+}
+function svg(tag, attrs, text) {
+  const node = document.createElementNS(svgNS, tag);
+  for (const [key, value] of Object.entries(attrs || {})) node.setAttribute(key, String(value));
+  if (text !== undefined) node.textContent = text;
+  return node;
+}
+function markDirty() {
+  dirty = true;
+  byId("draft-status").textContent = "Draft edited. Apply it to update the chart and downloads; the applied system remains below.";
+}
+function readDraft() {
+  return {
+    matrix: STATES.map((from, i) => STATES.map((to, j) =>
+      parsePercent(byId("matrix-" + i + "-" + j).value, from + " to " + to))),
+    initial: STATES.map((state, i) => parsePercent(byId("initial-" + i).value, "Initial " + state))
+  };
+}
+function fillDraft(config) {
+  config.matrix.forEach((row, i) => row.forEach((value, j) => {
+    byId("matrix-" + i + "-" + j).value = String(value);
+  }));
+  config.initial.forEach((value, i) => { byId("initial-" + i).value = String(value); });
+}
+function applyDraft(event) {
+  event?.preventDefault();
+  try {
+    const next = computeTrace(readDraft());
+    computed = next;
+    selectedStep = 0;
+    dirty = false;
+    const preset = presetFor(computed.config);
+    byId("preset").value = preset?.id || "custom";
+    byId("draft-error").textContent = "";
+    byId("draft-status").textContent = "Applied. Step 0 shows the initial distribution.";
+    render();
+  } catch (error) {
+    byId("draft-error").textContent = error.message + " The applied system has not changed.";
+  }
+}
+function moveTo(step) {
+  selectedStep = Math.max(0, Math.min(MAX_STEPS, step));
+  render();
+}
+function drawChart() {
+  if (!computed) return;
+  const host = byId("chart");
+  const width = Math.max(330, Math.min(900, host.clientWidth || 760));
+  const height = 310, left = 48, right = 16, top = 24, bottom = 44;
+  const plotWidth = width - left - right, plotHeight = height - top - bottom;
+  const x = step => left + step * plotWidth / MAX_STEPS;
+  const y = probability => top + (1 - probability) * plotHeight;
+  const image = svg("svg", {viewBox: "0 0 " + width + " " + height, role: "img",
+    "aria-labelledby": "chart-title chart-desc"});
+  image.append(svg("title", {id: "chart-title"}, "Probability by step, from 0 to " + MAX_STEPS));
+  image.append(svg("desc", {id: "chart-desc"}, "A is a solid teal line; B is a dashed rust line; C is a dotted purple line. Current step " + selectedStep + ". The complete values are available in the distribution table."));
+  for (const tick of [0, .25, .5, .75, 1]) {
+    image.append(svg("line", {x1:left, y1:y(tick), x2:width-right, y2:y(tick), stroke:"#cdd9d7", "stroke-width":1}));
+    image.append(svg("text", {x:left-7, y:y(tick)+4, "text-anchor":"end", class:"axis"}, String(tick*100) + "%"));
+  }
+  for (const tick of [0, 5, 10, 15, 20, 25, 30]) {
+    image.append(svg("text", {x:x(tick), y:height-21, "text-anchor":"middle", class:"axis"}, String(tick)));
+  }
+  image.append(svg("text", {x:left+plotWidth/2, y:height-3, "text-anchor":"middle", class:"axis"}, "Step"));
+  STATES.forEach((state, i) => {
+    image.append(svg("polyline", {points:computed.trace.map(row => x(row.step)+","+y(row.probabilities[i])).join(" "),
+      fill:"none",stroke:colors[i],"stroke-width":3,"stroke-dasharray":dashes[i]}));
+  });
+  image.append(svg("line", {x1:x(selectedStep),y1:top,x2:x(selectedStep),y2:height-bottom,stroke:"#172d35","stroke-width":1.5,"stroke-dasharray":"3 4"}));
+  STATES.forEach((_,i) => image.append(svg("circle",{cx:x(selectedStep),cy:y(computed.trace[selectedStep].probabilities[i]),r:4,fill:colors[i],stroke:"#fff","stroke-width":1.5})));
+  host.replaceChildren(image);
+}
+function renderTables() {
+  const step = computed.trace[selectedStep];
+  byId("flow-heading").textContent = selectedStep === 0 ? "Before the first transition" : "Where step " + selectedStep + " probability came from";
+  byId("flow-empty").hidden = selectedStep !== 0;
+  byId("flow-table").hidden = selectedStep === 0;
+  if (step.contributions) {
+    byId("flow-caption").textContent = "Step " + (selectedStep-1) + " to step " + selectedStep + ". Each cell is current probability × conditional transition probability.";
+    const rows = step.contributions.map((row, i) => {
+      const tr = document.createElement("tr"); const heading = cell("From " + STATES[i], "th");
+      heading.scope = "row"; tr.append(heading, ...row.map(p => cell(percent(p)))); return tr;
+    });
+    byId("flow-body").replaceChildren(...rows);
+    STATES.forEach((_, i) => { byId("flow-total-" + i).textContent = percent(step.probabilities[i]); });
+  }
+  const allRows = computed.trace.map(row => {
+    const tr = document.createElement("tr");
+    if (row.step === selectedStep) tr.className = "selected-row";
+    const th = cell(String(row.step), "th"); th.scope = "row";
+    tr.append(th, ...row.probabilities.map(p => cell(percent(p)))); return tr;
+  });
+  byId("distribution-body").replaceChildren(...allRows);
+}
+
+function render() {
+  const row = computed.trace[selectedStep];
+  byId("step-slider").value = String(selectedStep);
+  byId("step-number").textContent = String(selectedStep);
+  byId("previous-step").disabled = selectedStep === 0;
+  byId("next-step").disabled = selectedStep === MAX_STEPS;
+  STATES.forEach((_, i) => { byId("mass-" + i).textContent = percent(row.probabilities[i]); });
+  byId("mass-total").textContent = percent(row.probabilities.reduce((a,b) => a+b,0));
+  const preset = presetFor(computed.config);
+  byId("applied-name").textContent = preset?.label || "Custom system";
+  const notes = {
+    mixing:"For this matrix, [50%, 25%, 25%] is stationary. Every transition is positive, and distributions approach that vector from any initial distribution.",
+    alternating:"Starting with all mass in A gives alternating distributions. Starting with [50%, 25%, 25%] instead stays stationary while every individual state changes.",
+    absorbing:"A is absorbing and the other states can reach it. A finite plot does not prove that every individual path has already reached A.",
+    closed:"A and B are separate absorbing states. Starting entirely in C gives [40%, 60%, 0%] after one step; other initial distributions can give different outcomes."
+  };
+  byId("system-note").textContent = preset ? notes[preset.id] :
+    "This is your applied hypothetical transition rule. The chart computes its first 30 steps; a finite plot does not establish a general long-run limit.";
+  const absorbing = absorbingStates(computed.config);
+  byId("absorbing-note").textContent = absorbing.length ?
+    "Absorbing states in the applied matrix: " + absorbing.join(", ") + ". Their self-transition is 100%." :
+    "No state in the applied matrix is absorbing.";
+  renderTables();
+  drawChart();
+  byId("step-announcement").textContent = "Step " + selectedStep + ": " +
+    STATES.map((s,i) => s + " " + percent(row.probabilities[i])).join(", ") +
+    (dirty ? ". Draft changes are not applied." : ".");
+}
+function download(text, name, mime) {
+  const blob = new Blob([text], {type:mime});
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  anchor.href = url; anchor.download = name;
+  document.body.append(anchor); anchor.click(); anchor.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  byId("download-status").textContent = "Download prepared: " + name + ".";
+}
+byId("transition-form").addEventListener("submit", applyDraft);
+byId("transition-form").addEventListener("input", markDirty);
+byId("preset").addEventListener("change", event => {
+  const preset = PRESETS.find(p => p.id === event.target.value);
+  if (preset) { fillDraft(preset); applyDraft(); }
+});
+byId("stationary-start").addEventListener("click", () => {
+  [50,25,25].forEach((n,i) => { byId("initial-"+i).value = String(n); });
+  applyDraft();
+});
+byId("all-a-start").addEventListener("click", () => {
+  [100,0,0].forEach((n,i) => { byId("initial-"+i).value = String(n); });
+  applyDraft();
+});
+byId("all-c-start").addEventListener("click", () => {
+  [0,0,100].forEach((n,i) => { byId("initial-"+i).value = String(n); });
+  applyDraft();
+});
+byId("previous-step").addEventListener("click", () => moveTo(selectedStep-1));
+byId("next-step").addEventListener("click", () => moveTo(selectedStep+1));
+byId("reset-step").addEventListener("click", () => moveTo(0));
+byId("step-slider").addEventListener("input", event => moveTo(Number(event.target.value)));
+byId("download-observation").addEventListener("click", () => {
+  download(observationJSON(computed,selectedStep),"recallweave-markov-observation.json","application/json");
+});
+byId("download-deck").addEventListener("click", () => {
+  const bytes = Uint8Array.from(atob(byId("course-data").textContent.trim()), c => c.charCodeAt(0));
+  download(new TextDecoder("utf-8",{fatal:true}).decode(bytes),"markov-chains.json","application/json");
+});
+if (typeof ResizeObserver === "function") new ResizeObserver(drawChart).observe(byId("chart"));
+else window.addEventListener("resize",drawChart);
+fillDraft(PRESETS[0]);
+applyDraft();
+
+</script>
+</body>
+</html>
