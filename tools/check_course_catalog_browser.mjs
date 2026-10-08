@@ -177,6 +177,8 @@ async function main(settings) {
     networkRequests: [], documentAudits: [], objectUrlCleanup: [], harnessErrors: [],
   };
   let server, browser, socket, profile;
+  let browserDidClose = true;
+  let browserClosed = Promise.resolve();
   let browserLog = '';
   const pending = new Map();
   const pages = new Map();
@@ -465,6 +467,13 @@ async function main(settings) {
       '--remote-debugging-address=127.0.0.1', '--remote-debugging-port=0',
       '--user-data-dir=' + profile, 'about:blank',
     ], {stdio: ['ignore', 'ignore', 'pipe']});
+    // Observe close from launch: exit alone can precede shared stdio shutdown.
+    browserDidClose = false;
+    browserClosed = new Promise(done => browser.once('close', (code, signal) => {
+      browserDidClose = true;
+      report.browserExit = {code, signal};
+      done();
+    }));
     browser.stderr.on('data', bytes => { browserLog = (browserLog + bytes.toString()).slice(-8000); });
     let launchError;
     browser.on('error', error => { launchError = error; });
@@ -705,14 +714,20 @@ async function main(settings) {
     socket?.close();
     for (const item of pending.values()) { clearTimeout(item.timer); item.reject(new Error('Browser receiver closed')); }
     pending.clear();
-    if (browser && browser.exitCode === null) {
-      browser.kill('SIGTERM');
-      await Promise.race([new Promise(done => browser.once('exit', done)), sleep(1000)]);
-      if (browser.exitCode === null) browser.kill('SIGKILL');
-    }
     try {
       if (server?.listening) { server.closeAllConnections(); await new Promise(done => server.close(done)); }
-      if (profile) await rm(profile, {recursive: true, force: true});
+      if (browser && !browserDidClose) {
+        await Promise.race([browserClosed, sleep(3000)]);
+        for (const signal of ['SIGTERM', 'SIGKILL']) {
+          if (browserDidClose) break;
+          (report.browserShutdownSignals ??= []).push(signal);
+          browser.kill(signal);
+          await Promise.race([browserClosed, sleep(2000)]);
+        }
+        assert.ok(browserDidClose, 'Chrome process and its stdio did not close before profile cleanup');
+      }
+      // Retry only transient filesystem refusal within this receiver's own profile.
+      if (profile) await rm(profile, {recursive: true, force: true, maxRetries: 5, retryDelay: 100});
     } catch (error) {
       report.cleanupError = String(error);
       report.status = 'failed';
