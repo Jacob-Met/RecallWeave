@@ -1,0 +1,116 @@
+{
+  "schema": "recallweave.independent-content-review.v1",
+  "status": "draft reviewed; native receiving pending author freeze",
+  "review_type": "Independent content review, not blinded: the draft answer indices and explanations were read. Independent arithmetic and the fixed cosine preparation provide the acceptance basis.",
+  "reviewer": "universal-0df473646168/runtime_capability",
+  "draft_identity": {
+    "source": "/dev/shm/universal-0df473646168/product/recallweave-sampling/candidate/courses/sampling-aliasing.json",
+    "copy": "/dev/shm/universal-0df473646168/runtime-export/recallweave-review/intake/draft-course.json",
+    "bytes": 11663,
+    "sha256": "17d7d77753f3b53073283c3e9bf62ec48c524d7e48849c6fb852b35fb410df78",
+    "git_blob": "dd6a1388085b685d58f57edc7cfd3de58f174b6c"
+  },
+  "question_count": 12,
+  "concrete_content_defects_found": 0,
+  "questions": [
+    {
+      "id": "sampling-clock-interval",
+      "expected_answer": 0,
+      "expected_correct_option": "0.125 seconds",
+      "reason": "1/8 second separates samples.",
+      "transfer_solution": "1/20 = 0.05 seconds; it is shorter because the rate is higher."
+    },
+    {
+      "id": "sampling-clock-count",
+      "expected_answer": 1,
+      "expected_correct_option": "7 samples",
+      "reason": "The inclusive indices 0 through 6 contain seven elements.",
+      "transfer_solution": "At 10 Hz from 0 through 0.4 seconds inclusive, indices 0 through 4 give five observations."
+    },
+    {
+      "id": "sampling-clock-phase",
+      "expected_answer": 2,
+      "expected_correct_option": "π/2 radians",
+      "reason": "2*pi*3/12 = pi/2 radians per sample.",
+      "transfer_solution": "2*pi*5/20 = pi/2 radians per sample."
+    },
+    {
+      "id": "sampling-alias-nine",
+      "expected_answer": 3,
+      "expected_correct_option": "1 Hz",
+      "reason": "9/8 cycles per sample differs from 1/8 by one whole cycle. The 7 Hz option also matches but is not lowest.",
+      "transfer_solution": "17 Hz at 12 Hz has 5 Hz as its lowest nonnegative cosine representative."
+    },
+    {
+      "id": "sampling-alias-fold",
+      "expected_answer": 0,
+      "expected_correct_option": "3 Hz",
+      "reason": "13 Hz at 10 Hz differs from 3 Hz by the sample rate. The other matching option 7 Hz is larger.",
+      "transfer_solution": "7 Hz at 8 Hz reflects to 1 Hz. An 11 Hz reference at 8 Hz has the 3 Hz representative."
+    },
+    {
+      "id": "sampling-alias-family",
+      "expected_answer": 1,
+      "expected_correct_option": "A 12 Hz cosine",
+      "reason": "12 Hz differs from 2 Hz by exactly the 10 Hz sample rate. The distractors do not have that equivalence.",
+      "transfer_solution": "17 Hz differs from 7 Hz by the 10 Hz sample rate; 3 Hz also matches by reflection."
+    },
+    {
+      "id": "sampling-assumption-rate",
+      "expected_answer": 2,
+      "expected_correct_option": "12 samples per second",
+      "reason": "The supplied strict condition is fs>10; only 12 among the options satisfies it.",
+      "transfer_solution": "For B=7, rate 14 is equality and fails the stated strict condition; rate 15 satisfies it."
+    },
+    {
+      "id": "sampling-assumption-boundary",
+      "expected_answer": 3,
+      "expected_correct_option": "Every sample is zero while the sine varies between samples.",
+      "reason": "sin(pi*n)=0 for integer n, while the analog sine is nonzero between sample times.",
+      "transfer_solution": "The cosine samples are (-1)^n; the sine samples are zero, showing the consequential phase dependence."
+    },
+    {
+      "id": "sampling-assumption-evidence",
+      "expected_answer": 0,
+      "expected_correct_option": "Both curves remain compatible with these observations.",
+      "reason": "Agreement with a finite set of readings establishes compatibility, not physical provenance.",
+      "transfer_solution": "A justified bound below the higher alternative can exclude it; the readings themselves do not establish that bound."
+    },
+    {
+      "id": "sampling-acquisition-filter",
+      "expected_answer": 1,
+      "expected_correct_option": "Attenuate 11 Hz before sampling while retaining 0–3 Hz.",
+      "reason": "11 Hz at 8 Hz aliases to 3 Hz, overlapping wanted input content. Analog attenuation before sampling can remove that contribution.",
+      "transfer_solution": "15 Hz at 12 Hz aliases to 3 Hz. Attenuation must precede sampling to prevent the fold."
+    },
+    {
+      "id": "sampling-acquisition-after",
+      "expected_answer": 2,
+      "expected_correct_option": "No, because the filter receives identical input sequences.",
+      "reason": "A fixed deterministic operation cannot distinguish identical input sequences.",
+      "transfer_solution": "More integer samples at the same rate do not distinguish these two specified cosines; the identity holds for all integer n."
+    },
+    {
+      "id": "sampling-acquisition-rate",
+      "expected_answer": 3,
+      "expected_correct_option": "24 samples per second",
+      "reason": "9<24/2, while 9=18/2. Only 24 among the options meets the strict comparison.",
+      "transfer_solution": "20 Hz also works because 9<20/2=10."
+    }
+  ],
+  "native_executions": 0,
+  "primary_sources": [
+    {
+      "url": "https://sigproc.mit.edu/_static/fall25/lectures/Sampling_and_Aliasing-handout.pdf",
+      "role": "Course primary reference; uniform cosine aliases, baseband convention and pre-sampling filtering.",
+      "retrieved": "2026-10-08",
+      "web_ref": "turn10view0"
+    },
+    {
+      "url": "https://ocw.mit.edu/courses/6-003-signals-and-systems-fall-2011/12e6e5d7567fca2e993ef8563fef5a60_MIT6_003F11_lec21.pdf",
+      "role": "Course primary reference; strict sampling theorem assumptions and aliasing.",
+      "retrieved": "2026-10-08",
+      "web_ref": "turn11view0"
+    }
+  ]
+}

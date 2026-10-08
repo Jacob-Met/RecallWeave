@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src 'none'; base-uri 'none'; form-action 'none'">
+  <title>Shortest paths — RecallWeave explorer</title>
+  <style>
+    :root { --ink:#1c3540; --muted:#52656d; --paper:#f5f3ec; --panel:#fffefa; --line:#d6dedb; --teal:#116958; --teal-soft:#e2f2ea; --amber:#a9441c; --amber-soft:#fff0de; --navy:#203c47; --radius:18px; }
+    * { box-sizing:border-box; }
+    body { margin:0; color:var(--ink); background:var(--paper); font:16px/1.55 ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
+    button,input,select { font:inherit; }
+    button,select,input { min-height:44px; }
+    button,select { cursor:pointer; }
+    button { border:1px solid var(--line); border-radius:10px; padding:10px 14px; color:var(--ink); background:var(--panel); font-weight:700; }
+    button:hover:not(:disabled) { border-color:var(--teal); background:#edf6f0; }
+    button:disabled { cursor:default; opacity:.52; }
+    button.primary { background:var(--teal); border-color:var(--teal); color:white; }
+    button.primary:hover:not(:disabled) { background:#085144; }
+    a { color:var(--teal); text-underline-offset:3px; }
+    :focus-visible { outline:3px solid #c75e27; outline-offset:4px; }
+    .skip { position:absolute; top:-100px; left:16px; z-index:5; background:white; padding:12px; }
+    .skip:focus { top:8px; }
+    .shell { width:min(1240px,100%); margin:auto; padding:28px 28px 48px; }
+    .brand { display:flex; align-items:center; justify-content:space-between; gap:20px; font-size:.85rem; font-weight:750; letter-spacing:.055em; text-transform:uppercase; }
+    .brand-mark { display:inline-flex; gap:9px; align-items:center; }
+    .brand-mark::before { content:""; width:14px; height:14px; border:3px solid var(--teal); border-radius:4px; transform:rotate(12deg); }
+    .offline { color:var(--muted); font-size:.74rem; letter-spacing:.07em; }
+    header { padding:30px 0 24px; }
+    .eyebrow { margin:0 0 8px; color:var(--amber); font-size:.78rem; font-weight:800; letter-spacing:.12em; text-transform:uppercase; }
+    h1 { max-width:850px; font-family:ui-serif,Georgia,serif; font-size:clamp(2rem,4vw,3.3rem); line-height:1.1; letter-spacing:-.035em; margin:0 0 14px; font-weight:600; }
+    .intro { max-width:780px; color:var(--muted); margin:0; font-size:1.03rem; }
+    h2,h3,p { overflow-wrap:anywhere; }
+    h2 { margin:0; font-size:1.08rem; line-height:1.35; }
+    h3 { margin:0 0 10px; font-size:1rem; }
+    .small { font-size:.82rem; color:var(--muted); }
+    .setup { display:grid; grid-template-columns:minmax(210px,1fr) 130px 130px; gap:14px; margin:0 0 14px; }
+    .setup label,.weight-field { display:grid; gap:5px; font-size:.82rem; font-weight:700; }
+    select,input { width:100%; background:var(--panel); color:var(--ink); border:1px solid #a8b9b7; border-radius:9px; padding:9px 10px; }
+    .setup-note { margin:0 0 18px; min-height:26px; color:var(--muted); font-size:.88rem; }
+    .setup-note strong { color:var(--ink); font-weight:700; }
+    .workbench { display:grid; grid-template-columns:minmax(0,1fr) 330px; grid-template-areas:"graph controls" "graph table"; gap:16px; align-items:stretch; }
+    .panel { background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); padding:20px; min-width:0; box-shadow:0 3px 0 #18372a05; }
+    .panel-top { display:flex; align-items:center; justify-content:space-between; gap:14px; margin-bottom:12px; }
+    .chip { display:inline-block; flex-shrink:0; border-radius:30px; padding:4px 9px; background:#e9eeeb; font-size:.72rem; font-weight:750; }
+    .graph-panel { grid-area:graph; display:flex; flex-direction:column; }
+    .graph-panel svg { display:block; width:100%; height:auto; margin:auto 0; overflow:visible; }
+    .edge { stroke:#758b8f; stroke-width:2.8; }
+    .edge.route { stroke:var(--teal); stroke-width:5; }
+    .edge-weight-box { fill:var(--panel); stroke:#b6c5c0; stroke-width:1; rx:8px; }
+    .edge-weight { fill:var(--ink); font:700 26px ui-monospace,SFMono-Regular,Consolas,monospace; text-anchor:middle; dominant-baseline:central; }
+    .vertex circle { fill:#f1f3ee; stroke:#7b9195; stroke-width:2.5; }
+    .vertex.frontier circle { fill:var(--amber-soft); stroke:#a35431; stroke-dasharray:5 4; }
+    .vertex.settled circle { fill:var(--teal-soft); stroke:var(--teal); stroke-width:3; }
+    .vertex.last circle { stroke:var(--amber); stroke-width:5; }
+    .vertex-name { fill:var(--ink); font:750 28px ui-sans-serif,system-ui,sans-serif; text-anchor:middle; dominant-baseline:central; }
+    .vertex-distance { fill:var(--ink); font:650 21px ui-monospace,SFMono-Regular,Consolas,monospace; text-anchor:middle; }
+    .legend { display:flex; flex-wrap:wrap; gap:6px 17px; font-size:.76rem; color:var(--muted); margin-top:4px; }
+    .legend span { display:inline-flex; align-items:center; gap:6px; }
+    .dot { display:inline-block; width:11px; height:11px; border-radius:50%; border:1.5px solid #7b9195; background:#f1f3ee; }
+    .dot.frontier { border-color:#a35431; background:var(--amber-soft); border-style:dashed; }
+    .route-key { display:inline-block; width:18px; border-top:3px solid var(--teal); }
+    .dot.settled { border-color:var(--teal); background:var(--teal-soft); }
+    .route-summary { padding:14px 16px; border-radius:12px; margin-top:18px; background:var(--navy); color:#f4faf4; }
+    .route-summary h3 { font-size:1.04rem; margin:0 0 5px; }
+    .route-summary p { margin:0; color:#d6e8e7; font-size:.86rem; }
+    .route-summary[data-status="final"] { background:#145948; }
+    .route-summary[data-status="invalid"] { background:#683e2b; }
+    .control-panel { grid-area:controls; }
+    .actions { display:flex; flex-wrap:wrap; gap:8px; margin:14px 0 10px; }
+    .actions button:first-child { flex:1 1 100%; }
+    .actions button:not(:first-child) { flex:1; }
+    #run-status { min-height:44px; margin:0 0 14px; font-size:.85rem; color:var(--muted); }
+    .prediction { border-top:1px solid var(--line); padding-top:12px; }
+    .prediction label { display:block; font-size:.81rem; font-weight:700; margin-bottom:6px; }
+    .prediction-row { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:8px; }
+    #prediction-feedback { margin:8px 0 0; font-size:.81rem; min-height:25px; color:var(--muted); }
+    .table-panel { grid-area:table; }
+    table { width:100%; border-collapse:collapse; font-size:.8rem; }
+    th { text-align:left; color:var(--muted); font-weight:650; font-size:.71rem; }
+    td,th { padding:8px 5px; border-bottom:1px solid #e4e8e3; }
+    th:first-child,td:first-child { padding-left:0; }
+    td:last-child,th:last-child { padding-right:0; }
+    td:nth-child(1),td:nth-child(2),td:nth-child(3) { font-family:ui-monospace,SFMono-Regular,Consolas,monospace; }
+    tr[data-status="final"] td:last-child { color:var(--teal); font-weight:700; }
+    tr[data-status="tentative"] td:last-child { color:var(--amber); }
+    .table-note { margin:10px 0 0; font-size:.75rem; color:var(--muted); }
+    .detail-grid { display:grid; grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr); gap:16px; margin-top:16px; }
+    .weight-list { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px 18px; margin-top:15px; }
+    .weight-field { display:grid; grid-template-columns:minmax(0,1fr) 70px; align-items:center; }
+    .weight-field input { min-width:0; text-align:center; font-family:ui-monospace,SFMono-Regular,Consolas,monospace; }
+    [aria-invalid="true"] { border:2px solid #a73d24; background:#fff1eb; }
+    #weight-error { color:#8a301d; margin:12px 0 0; font-size:.86rem; font-weight:650; }
+    [hidden] { display:none !important; }
+    #step-title { font-size:.95rem; margin:0 0 10px; }
+    #step-updates { margin:0; padding-left:22px; font-size:.87rem; }
+    #step-updates li { padding:3px 0 8px; }
+    .settled-order { margin:12px 0; font-size:.8rem; color:var(--muted); }
+    details { border-top:1px solid var(--line); padding-top:10px; margin-top:14px; }
+    summary { cursor:pointer; font-size:.86rem; font-weight:700; min-height:32px; }
+    #history { padding-left:22px; font-size:.82rem; color:var(--muted); }
+    #history li { padding:4px 0; }
+    .downloads { display:grid; grid-template-columns:1fr auto; gap:16px; align-items:center; margin-top:16px; }
+    .downloads p { margin:7px 0 0; max-width:790px; }
+    .download-actions { display:flex; flex-direction:column; gap:9px; }
+    #download-status { min-height:24px; font-size:.82rem; color:var(--muted); margin:12px 0 0; }
+    .teaching-note { margin:26px 0 0; font-size:.88rem; color:var(--muted); max-width:960px; }
+    .teaching-note strong { color:var(--ink); }
+    footer { border-top:1px solid var(--line); margin-top:24px; padding-top:18px; font-size:.76rem; color:var(--muted); }
+    footer p { margin:7px 0; }
+    @media (max-width:900px) {
+      .workbench { grid-template-columns:minmax(0,1fr) 300px; }
+      .shell { padding:24px 20px 40px; }
+      .panel { padding:16px; }
+    }
+    @media (max-width:720px) {
+      .shell { padding:20px 16px 36px; }
+      header { padding:26px 0 20px; }
+      .brand { gap:12px; align-items:flex-start; }
+      .offline { max-width:115px; text-align:right; }
+      .setup { grid-template-columns:1fr 1fr; }
+      .setup label:first-child { grid-column:1 / -1; }
+      .workbench { grid-template-columns:minmax(0,1fr); grid-template-areas:"controls" "graph" "table"; }
+      .detail-grid,.downloads { grid-template-columns:minmax(0,1fr); }
+      .actions { margin-top:10px; }
+      .actions button:first-child { flex:1 1 auto; }
+      .actions button:not(:first-child) { flex:1 1 auto; }
+      #run-status { min-height:0; }
+      .prediction-row { grid-template-columns:minmax(0,1fr) auto; }
+      .panel { padding:16px; }
+      .graph-panel { padding:14px 10px; }
+      .graph-panel .panel-top,.graph-panel .legend { padding-inline:4px; }
+      .route-summary { margin-top:14px; }
+      h1 { font-size:2.3rem; }
+      .download-actions { flex-direction:row; flex-wrap:wrap; }
+      .download-actions button { flex:1 1 180px; }
+      .weight-list { column-gap:14px; }
+      .weight-field { grid-template-columns:minmax(0,1fr) 60px; }
+    }
+    @media (prefers-reduced-motion:reduce) { * { scroll-behavior:auto !important; } }
+  </style>
+</head>
+<body>
+  <a class="skip" href="#explorer">Skip to the explorer</a>
+  <div class="shell">
+    <div class="brand"><span class="brand-mark">RecallWeave / graph lab</span><span class="offline">A complete offline page</span></div>
+    <header>
+      <p class="eyebrow">Algorithms · shortest paths</p>
+      <h1>One decision closer<br>to a shortest path.</h1>
+      <p class="intro">Discover a route, check whether it can improve, and see why settling the minimum makes its distance final. Every step uses the directed edges and weights you can see.</p>
+    </header>
+    <main id="explorer" tabindex="-1">
+      <section aria-label="Choose a graph setup">
+        <div class="setup">
+          <label>Example layout<select id="preset"></select></label>
+          <label>Source<select id="source"></select></label>
+          <label>Target<select id="target"></select></label>
+        </div>
+        <p class="setup-note"><strong id="setup-kind">Original example.</strong> <span id="setup-description"></span></p>
+      </section>
+      <div class="workbench">
+        <section class="panel graph-panel" aria-labelledby="graph-heading">
+          <div class="panel-top"><h2 id="graph-heading">Follow the arrows</h2><span class="chip" id="step-count">0 settled</span></div>
+          <svg id="graph" viewBox="0 0 665 370" role="img" aria-labelledby="graph-title graph-desc"></svg>
+          <div class="legend" aria-label="Graph status legend">
+            <span><i class="dot" aria-hidden="true"></i>Unreached</span>
+            <span><i class="dot frontier" aria-hidden="true"></i>Tentative</span>
+            <span><i class="dot settled" aria-hidden="true"></i>Settled</span>
+            <span><i class="route-key" aria-hidden="true"></i>Current target route</span>
+          </div>
+          <div class="route-summary" id="route-summary" data-status="unreached">
+            <h3 id="route-heading"></h3><p id="route-detail"></p>
+          </div>
+        </section>
+        <section class="panel control-panel" aria-labelledby="control-heading">
+          <h2 id="control-heading">Settle, then relax</h2>
+          <div class="actions">
+            <button class="primary" id="step" type="button">Settle next vertex</button>
+            <button id="finish" type="button">Finish run</button>
+            <button id="reset" type="button">Reset run</button>
+          </div>
+          <p id="run-status" role="status" aria-live="polite"></p>
+          <div class="prediction">
+            <label for="prediction">Predict the next settled vertex</label>
+            <div class="prediction-row"><select id="prediction"></select><button id="check-prediction" type="button">Check</button></div>
+            <p id="prediction-feedback" aria-live="polite"></p>
+          </div>
+        </section>
+        <section class="panel table-panel" aria-labelledby="table-heading">
+          <h2 id="table-heading">Distance from the source</h2>
+          <table aria-label="Current distances, predecessors and status">
+            <thead><tr><th scope="col">Vertex</th><th scope="col">Cost</th><th scope="col">Via</th><th scope="col">State</th></tr></thead>
+            <tbody id="distances"></tbody>
+          </table>
+          <p class="table-note">∞ means no route has been found. It becomes “unreachable” only when the discovered frontier is empty. “Via” is the recorded predecessor.</p>
+        </section>
+      </div>
+      <div class="detail-grid">
+        <section class="panel" aria-labelledby="weights-heading">
+          <h2 id="weights-heading">Change an edge. Start a new run.</h2>
+          <p class="small">Whole-number weights from 0 to 50. Zero is allowed. Any edit clears the old decisions; a negative or incomplete weight pauses the explorer.</p>
+          <div id="weights" class="weight-list"></div>
+          <p id="weight-error" role="alert" hidden></p>
+        </section>
+        <section class="panel" aria-labelledby="decision-heading">
+          <h2 id="decision-heading">What this step changed</h2>
+          <p class="settled-order" id="settled-order"></p>
+          <h3 id="step-title"></h3>
+          <ol id="step-updates"></ol>
+          <details id="history-details"><summary id="history-heading">Earlier decisions</summary><ol id="history"></ol></details>
+        </section>
+      </div>
+      <section class="panel downloads" aria-labelledby="downloads-heading">
+        <div>
+          <h2 id="downloads-heading">Keep the run. Take the course.</h2>
+          <p class="small">The course has 12 original questions across 4 connected concepts. Its fixed examples stay the same when you edit this graph. Open its JSON in RecallWeave’s Deck Studio to inspect or edit it; the separate lesson importer is still being qualified.</p>
+          <p class="small">A run download records this graph, every completed step and the current route status. It is a readable JSON record, not a saved RecallWeave learning session.</p>
+        </div>
+        <div class="download-actions">
+          <button id="download-course" type="button">Download course (.json)</button>
+          <button id="download-run" type="button">Download this run (.json)</button>
+        </div>
+      </section>
+      <p id="download-status" role="status" aria-live="polite"></p>
+      <p class="teaching-note"><strong>The guarantee has a condition.</strong> Dijkstra’s settlement rule requires nonnegative edge weights. A target can be reachable while its distance is still tentative. Equal-cost routes may both be shortest; this trace breaks equal-distance vertex ties alphabetically and keeps the first predecessor on equal route cost.</p>
+    </main>
+    <footer>
+      <p>Original examples and explanations for RecallWeave, with AI assistance. Algorithm background: <a href="https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/pages/lecture-notes/" target="_blank" rel="noreferrer">MIT OpenCourseWare, 6.006 (Spring 2020), Lectures 11 and 13</a>.</p>
+      <p>No install, server, account, network request or automatic storage is needed. Refreshing this page resets its graph run. Checking a prediction is feedback on this example, not a learning assessment.</p>
+    </footer>
+  </div>
+  <!-- SHORTEST_PATHS_DECK -->
+  <!-- SHORTEST_PATHS_SCRIPT -->
+</body>
+</html>

@@ -30,7 +30,8 @@ storage, account, external asset or provider call.
 
 This catalog is an explicitly curated list. A new course author can add a
 validated course path to `catalog/courses.json` when it should appear in the
-catalog. Internal authoring `*.source.json` files are not checked course files
+catalog and update the independent browser receiver's expected COURSE_FILES
+list when extending that selection. Internal authoring `*.source.json` files are not checked course files
 and are excluded. The original four courses are not edited by this contribution.
 
 ## Rebuild and check
@@ -82,3 +83,22 @@ check, not Node execution or browser acceptance.
 Actual Node/build and browser outcomes, exact checkout identities, complete
 raw log/download/screenshot receipts and independent review will be recorded
 here after execution. Source publication alone is not acceptance or deployment.
+
+## First actual hosted Node qualification
+
+Existing test workflow run 37787925762 / node-test job 113347385606 passed all
+143 tests, with no failures or skipped tests, and passed existing standalone
+demo parity. It ran Node 20.20.2 on actual temporary merge checkout
+`4d630b63d878844005925b5457abd15f24e0708e`,
+tree `1c844a163670851b6c2cab25c87316d55a00d498`,
+combining source head 3490a7fc with actual main 98d43c30.
+
+All six catalog tests executed and passed. This includes an actual Node build
+comparison with catalog.html, every embedded original course byte, and a
+malicious script-boundary fixture. Root independently read the complete
+decoded job log, exact checkout, actual commit tree/parents and every job step.
+
+The complete log is `hosted-node-3490a7fc.log`; its exact identities
+and source pins are in `hosted-node-3490a7fc.json`.
+Real Chrome downloads, layout and learner-file admission remain a separate
+pending acceptance gate.
