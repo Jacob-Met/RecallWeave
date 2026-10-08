@@ -1,0 +1,73 @@
+{
+  "issue": "https://github.com/Jacob-Met/RecallWeave/issues/11",
+  "reviewer": "/root/source_coordination/trace_archive_review",
+  "base_commit": "3e3217959bdf277ae5ef61a7afe68142e2626486",
+  "device": {
+    "id": "0e3d582f-e25b-44b2-8418-9639fc4e4e33",
+    "name": "Mac.lan",
+    "runtime": "Node v26.3.0"
+  },
+  "source_directory": "/Users/me/workspace/estate/estate-49f845d0dece/recallweave-trace-archive",
+  "source_sha256": {
+    "src/trace-archive.mjs": "d9e6d4343563eac97a17f0e79ea9080d0cfe694fd74f5e0173b53a4af3d912c6",
+    "src/trace-archive-ui.mjs": "b32fdef2f1c311193abd25830862b265bca257461bacf008d65a80ed73f1f025",
+    "src/app.mjs": "be4831f7a82fa5c1188092490412dfcdf6d5d270a31e9a0daa338b44ac352e13",
+    "tests/trace-archive.test.mjs": "0eccb0565527f78266961796b0faf2d28585a530533b778a956069bcc5c96b27",
+    "src/knowledge.mjs": "909dd4f171ed55ae7c65493f445b85a4df0f602bc354eca78a09bc4046e471c0",
+    "src/review.mjs": "06f23787c718313e0a3a546ba6677441f7708f3f74cbb4e3d5b347d39a4bf81a"
+  },
+  "verdict": "Accepted at these pins for the reviewed codec and controller race/data-loss boundaries; native browser download, File API and rendering evidence belongs to the parent receiver.",
+  "source_findings": [
+    "The codec requires exactly one valid canonical first answer per loaded deck item, reconstructs immutable review, and checks full precision mastery by replaying the existing model.",
+    "Archived deck content is structural identity only; restored content comes from the already loaded deck.",
+    "Practice is replayed through the existing bounded round API, preserving original first answers and mastery.",
+    "Reading and previewing produce separate state; errors cannot partially mutate the current lesson.",
+    "The controller invalidates older file reads with generation tickets and compares deck, answers, mastery and practice after the read and immediately before confirmation.",
+    "The sole state-changing callback is synchronous at this app pin, preserves the existing answer/mastery containers, replaces completed review/practice state, reconstructs asked IDs, and does not modify reflection-owner state.",
+    "Preview copy explicitly describes replacement of first answers and practice, and preservation of any existing reflections."
+  ],
+  "codec_receiver": {
+    "scope": "Two independent inline native adversarial cases plus valid restoration after the refusals; captured results reused without rerunning.",
+    "pid": 19715,
+    "exit_code": 0,
+    "runtime_seconds": 0.09,
+    "completion_provenance": "Exit 0 and runtime 0.09s were separately observed via RDC read_process_output after the captured start-process output below.",
+    "captured_tool_output": "Process started with PID 19715 (shell: /bin/zsh)\nInitial output:\n{\"node\":\"v26.3.0\",\"pins\":{\"src/trace-archive.mjs\":\"d9e6d4343563eac97a17f0e79ea9080d0cfe694fd74f5e0173b53a4af3d912c6\",\"tests/trace-archive.test.mjs\":\"0eccb0565527f78266961796b0faf2d28585a530533b778a956069bcc5c96b27\",\"src/knowledge.mjs\":\"909dd4f171ed55ae7c65493f445b85a4df0f602bc354eca78a09bc4046e471c0\",\"src/review.mjs\":\"06f23787c718313e0a3a546ba6677441f7708f3f74cbb4e3d5b347d39a4bf81a\"}}\n{\"test\":\"embedded-deck-cannot-introduce-content\",\"passed\":true,\"message\":\"This trace belongs to a different course or course version. Load its course, then choose this file again.\",\"currentStateUnchanged\":true}\n{\"test\":\"late-practice-replay-error-atomic\",\"passed\":true,\"message\":\"This trace has invalid practice progress.\",\"currentStateUnchanged\":true}\n{\"test\":\"post-rejection-valid-restore\",\"passed\":true}\n\n\n[executed on device: Mac.lan (0e3d582f-e25b-44b2-8418-9639fc4e4e33)]"
+  },
+  "controller_receiver": {
+    "scope": "Two independent inline Node controller boundary tests with a minimal DOM stub; this is not browser evidence.",
+    "pid": 29600,
+    "exit_code": 0,
+    "runtime_seconds": 0.1,
+    "captured_tool_output": "[Reading 4 new lines (total: 4 lines)]\n\n{\"receiver\":\"independent-controller-boundaries\",\"node\":\"v26.3.0\",\"pins\":{\"src/trace-archive.mjs\":\"d9e6d4343563eac97a17f0e79ea9080d0cfe694fd74f5e0173b53a4af3d912c6\",\"src/trace-archive-ui.mjs\":\"b32fdef2f1c311193abd25830862b265bca257461bacf008d65a80ed73f1f025\",\"src/app.mjs\":\"be4831f7a82fa5c1188092490412dfcdf6d5d270a31e9a0daa338b44ac352e13\",\"tests/trace-archive.test.mjs\":\"0eccb0565527f78266961796b0faf2d28585a530533b778a956069bcc5c96b27\"}}\n{\"test\":\"older-read-cannot-replace-newer-preview\",\"passed\":true,\"previewDidNotMutateCurrentLesson\":true,\"confirmedNewerAnswersOnly\":true,\"repeatConfirmationDidNotRestoreAgain\":true}\n{\"test\":\"changed-answer-blocks-confirm-without-refresh\",\"passed\":true,\"restoreCalls\":0,\"currentStateUnchanged\":true,\"previewCleared\":true}\n\n✅ Process completed with exit code 0 (runtime: 0.10s)\n\n[executed on device: Mac.lan (0e3d582f-e25b-44b2-8418-9639fc4e4e33)]",
+    "inline_source": "import assert from 'node:assert/strict';\nimport {readFileSync} from 'node:fs';\nimport {createHash} from 'node:crypto';\nimport {pathToFileURL} from 'node:url';\nconst base='/Users/me/workspace/estate/estate-49f845d0dece/recallweave-trace-archive';\nconst files=['src/trace-archive.mjs','src/trace-archive-ui.mjs','src/app.mjs','tests/trace-archive.test.mjs'];\nconst pins=Object.fromEntries(files.map(file=>[file,createHash('sha256').update(readFileSync(base+'/'+file)).digest('hex')]));\nconsole.log(JSON.stringify({receiver:'independent-controller-boundaries',node:process.version,pins}));\nconst {mountTraceArchive}=await import(pathToFileURL(base+'/src/trace-archive-ui.mjs'));\nconst {createTraceArchive}=await import(pathToFileURL(base+'/src/trace-archive.mjs'));\nconst {initialMastery,selectNextItem,updateMastery}=await import(pathToFileURL(base+'/src/knowledge.mjs'));\nconst deck=JSON.parse(readFileSync(base+'/data/deck.json','utf8'));\nconst blank=()=>({answers:[],mastery:initialMastery(deck.concepts),practice:null});\nfunction completed(correct) {\n  const state=blank(),asked=new Set();\n  while(asked.size<deck.items.length){\n    const item=selectNextItem(deck.items,asked,state.mastery);\n    const choice=correct?item.answer:(item.answer+1)%item.options.length;\n    state.answers.push({item:item.id,concept:item.concept,choice,correct});\n    state.mastery[item.concept]=updateMastery(state.mastery[item.concept],correct);\n    asked.add(item.id);\n  }\n  return state;\n}\nfunction mount(current) {\n  const nodes=new Map();\n  const query=selector=>{\n    if(!nodes.has(selector))nodes.set(selector,{hidden:false,files:[],value:'',textContent:'',handlers:{},addEventListener(type,handler){this.handlers[type]=handler;},focus(){}});\n    return nodes.get(selector);\n  };\n  const restored=[];\n  mountTraceArchive({container:{innerHTML:'',querySelector:query},getDeck:()=>deck,getTrace:()=>current.state,restoreTrace:state=>{restored.push(state);current.state={answers:state.answers,mastery:state.mastery,practice:state.practice};}});\n  return {query,restored};\n}\nconst savedAt='2026-10-08T10:00:00.000Z';\nconst archiveA=createTraceArchive({deck,...completed(false),savedAt}).text;\nconst archiveB=createTraceArchive({deck,...completed(true),savedAt}).text;\n{\n  const current={state:blank()},ui=mount(current);\n  const input=ui.query('#trace-file');\n  let resolveOlder;\n  const olderText=new Promise(resolve=>{resolveOlder=resolve;});\n  input.files=[{size:Buffer.byteLength(archiveA),text:()=>olderText}];\n  const older=input.handlers.change();\n  input.files=[{size:Buffer.byteLength(archiveB),text:async()=>archiveB}];\n  await input.handlers.change();\n  const newerPreview=ui.query('#trace-preview-summary').textContent;\n  assert.match(newerPreview,/First try: 6 of 6/);\n  assert.equal(ui.restored.length,0);\n  resolveOlder(archiveA);\n  await older;\n  assert.equal(ui.query('#trace-preview-summary').textContent,newerPreview);\n  assert.equal(ui.restored.length,0);\n  ui.query('#restore-trace-confirm').handlers.click();\n  assert.equal(ui.restored.length,1);\n  assert.deepEqual(ui.restored[0].answers,completed(true).answers);\n  ui.query('#restore-trace-confirm').handlers.click();\n  assert.equal(ui.restored.length,1);\n  console.log(JSON.stringify({test:'older-read-cannot-replace-newer-preview',passed:true,previewDidNotMutateCurrentLesson:true,confirmedNewerAnswersOnly:true,repeatConfirmationDidNotRestoreAgain:true}));\n}\n{\n  const current={state:blank()},ui=mount(current);\n  const input=ui.query('#trace-file');\n  input.files=[{size:Buffer.byteLength(archiveA),text:async()=>archiveA}];\n  await input.handlers.change();\n  assert.equal(ui.query('#trace-preview').hidden,false);\n  const item=selectNextItem(deck.items,new Set(),current.state.mastery);\n  current.state.answers.push({item:item.id,concept:item.concept,choice:item.answer,correct:true});\n  current.state.mastery[item.concept]=updateMastery(current.state.mastery[item.concept],true);\n  const before=JSON.stringify(current.state);\n  ui.query('#restore-trace-confirm').handlers.click();\n  assert.equal(ui.restored.length,0);\n  assert.equal(JSON.stringify(current.state),before);\n  assert.equal(ui.query('#trace-preview').hidden,true);\n  assert.match(ui.query('#trace-restore-status').textContent,/Your lesson changed/);\n  console.log(JSON.stringify({test:'changed-answer-blocks-confirm-without-refresh',passed:true,restoreCalls:0,currentStateUnchanged:true,previewCleared:true}));\n}\n"
+  },
+  "mutations": "No application source files changed. Only independent-review.json and independent-review.md are written by this reviewer.",
+  "final_pin_dispositions": [
+    {
+      "review_type": "Focused final source diff review; no receiver rerun",
+      "reviewer": "/root/source_coordination/trace_archive_review",
+      "diff_base_commit": "7506eb005eb17d8472d359602ed0f103917e2fdf",
+      "integration_base_commit_prefix_reported_by_parent": "a64369f8",
+      "source_sha256": {
+        "src/trace-archive-ui.mjs": "c62d7d40460ca20e47dba22a4401aff6aa2afbb0c9b873a94944d140c5fba28e",
+        "src/app.mjs": "582e0ba9778f775a3b8455fb1928a9ce5a06ad2f1d1d53a3610c09593e3738a2"
+      },
+      "verdict": "Accepted at these final pins for the reviewed archive restore and race/data-loss boundaries.",
+      "observed_changes": [
+        "clearPreview(message, resetInput = true) conditionally clears input.value; the file-change handler calls clearPreview(undefined, false), retaining the native selected filename during reading and preview.",
+        "Generation increment, pending-state reset, post-read comparison, confirmation comparison and sole synchronous restore callback remain unchanged.",
+        "Cancellation, validation/read failure, stale-session invalidation and confirmation retain default input clearing, allowing a later selection of the same file.",
+        "Application composition adds a per-item optionOrders map and uses displayed positions only for option letters; data-choice and data-practice-choice remain canonical item.options indices.",
+        "The archive restore callback is unchanged by the app composition. It does not read or replace presentation order and leaves the review's canonical saved choices intact."
+      ],
+      "evidence_method": "Read the native Git diff from 7506eb005eb17d8472d359602ed0f103917e2fdf and independently verified both final file SHA-256 values. No application source changes.",
+      "previous_artifact_sha256": {
+        "independent-review.json": "c29cba049affa5eb81b51af0d7434a8a08bcbea80083850933ed91b420c96ea2",
+        "independent-review.md": "ec25941a8367cc3329c667646ecb1203d7bbd33810e143b640c833082fe673c8"
+      },
+      "receiver_scope": "Earlier captured codec and DOM-stub results are preserved intact and remain evidence for their stated prior pins. They were not rerun or relabeled. Final actual-browser qualification is supplied by the parent receiver.",
+      "recorded_at_utc": "2026-10-08T10:25:32.538Z"
+    }
+  ]
+}

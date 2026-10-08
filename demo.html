@@ -37,6 +37,16 @@
 .result-card h2:focus{outline:2px solid var(--orange);outline-offset:5px}
 @media(max-width:800px){.layout{grid-template-columns:1fr;gap:35px;padding-top:42px}.intro{padding-top:0}.intro h1{font-size:57px;margin-top:20px}.concept-map{margin-top:35px}.workbench{min-height:0}.topbar{height:64px}.local-badge{font-size:8px}}@media(max-width:480px){.topbar{padding:0 18px}.layout{padding:32px 18px 52px;gap:26px}.intro h1{font-size:49px}.intro>p{font-size:13px}.concept-map{max-width:100%}.map-node{font-size:9px}.map-line{margin-left:7px;margin-right:7px}.workbench{padding:22px 18px 16px}.welcome-card{padding:30px 2px 18px}.welcome-card h2{font-size:30px}.question-card{padding:24px 0 14px}.question-card h2{font-size:26px}.mastery-row{grid-template-columns:78px 1fr 35px}footer{padding:18px;flex-direction:column}footer span:last-child{text-align:left}}
 
+/* Local learning trace archive controls. */
+.trace-archive summary{cursor:pointer;font-size:13px;font-weight:600;color:var(--green)}
+.trace-archive label{display:block;font-size:12px;line-height:1.6;margin-top:16px}
+.trace-archive input{display:block;width:100%;max-width:100%;font:inherit;font-size:12px;margin:8px 0}
+.trace-archive input:focus-visible{outline:3px solid var(--orange);outline-offset:3px}
+.trace-archive button:disabled{cursor:default;opacity:.55}
+.trace-archive-actions{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+.trace-archive-actions .primary-button{margin-top:0}
+#trace-preview{margin-top:18px;overflow-wrap:anywhere}
+
 </style>
 </head>
 <body>
@@ -69,6 +79,7 @@
           <div class="simulation-launch"><button id="simulation-button" class="text-button">Or inspect a scripted learner simulation ↗</button><p>Clearly synthetic; compares the adaptive selector with fixed deck order.</p><div id="simulation-output" aria-live="polite"></div></div>
         </div>
       </div>
+      <section id="trace-archive" class="practice-summary trace-archive" aria-label="Save or restore a learning trace"></section>
       <details class="model-note"><summary>How the adaptive model works</summary><p>Bayesian Knowledge Tracing estimates mastery per concept using explicit initial-knowledge, guess, slip, and learning-transition probabilities. After each response, the selector scores unasked items by expected information gain, weighted toward prerequisite concepts. The values are illustrative defaults, not a validated assessment.</p></details>
     </section>
   </main>
@@ -343,6 +354,262 @@ function orderOptions(count, random = Math.random) {
   return Object.freeze(order);
 }
 
+
+const TRACE_ARCHIVE_MAX_BYTES = 2 * 1024 * 1024;
+const TRACE_ARCHIVE_FORMAT = 'recallweave.learning-trace';
+const TRACE_ARCHIVE_MODEL = Object.freeze({name: 'recallweave-bkt-v1', parameters: DEFAULT_BKT});
+
+function traceRecord(value, keys) {
+  return value !== null && typeof value === 'object' && !Array.isArray(value)
+    && JSON.stringify(Object.keys(value).sort()) === JSON.stringify([...keys].sort());
+}
+
+function traceCanonical(value) {
+  if (Array.isArray(value)) return '[' + value.map(traceCanonical).join(',') + ']';
+  if (value !== null && typeof value === 'object') {
+    return '{' + Object.keys(value).sort().map(key => JSON.stringify(key) + ':' + traceCanonical(value[key])).join(',') + '}';
+  }
+  return JSON.stringify(value);
+}
+
+function traceReplay(document, deck) {
+  if (!traceRecord(document, ['format', 'version', 'savedAt', 'deck', 'model', 'firstAnswers', 'mastery', 'practice'])
+      || document.format !== TRACE_ARCHIVE_FORMAT || document.version !== 1) {
+    throw new RangeError('This learning trace format is not supported.');
+  }
+  if (typeof document.savedAt !== 'string' || document.savedAt.length !== 24
+      || !Number.isFinite(Date.parse(document.savedAt))
+      || new Date(document.savedAt).toISOString() !== document.savedAt) {
+    throw new RangeError('This learning trace has an invalid save time.');
+  }
+  // Archived course content is only compared; restoration always uses the already loaded deck.
+  if (traceCanonical(document.deck) !== traceCanonical(deck)) {
+    throw new RangeError('This trace belongs to a different course or course version. Load its course, then choose this file again.');
+  }
+  if (traceCanonical(document.model) !== traceCanonical(TRACE_ARCHIVE_MODEL)) {
+    throw new RangeError('This trace uses a different learning model.');
+  }
+  if (!Array.isArray(document.firstAnswers) || document.firstAnswers.length === 0
+      || document.firstAnswers.length !== deck.items.length) {
+    throw new RangeError('This file does not contain a complete first session.');
+  }
+  if (!document.firstAnswers.every(answer => traceRecord(answer, ['item', 'choice']))) {
+    throw new RangeError('This trace has invalid first answers.');
+  }
+  let review;
+  try { review = createReview(deck.items, document.firstAnswers); }
+  catch { throw new RangeError('This trace has invalid first answers.'); }
+  const mastery = initialMastery(deck.concepts);
+  const answers = Object.freeze(review.map(item => {
+    mastery[item.concept] = updateMastery(mastery[item.concept], item.correct);
+    return Object.freeze({item: item.id, concept: item.concept, choice: item.choice, correct: item.correct});
+  }));
+  if (!traceRecord(document.mastery, deck.concepts)
+      || deck.concepts.some(concept => !Number.isFinite(document.mastery[concept]) || document.mastery[concept] !== mastery[concept])) {
+    throw new RangeError('This trace does not preserve the original model estimates.');
+  }
+  let practice = null;
+  if (document.practice !== null) {
+    if (!traceRecord(document.practice, ['answers']) || !Array.isArray(document.practice.answers)) {
+      throw new RangeError('This trace has invalid practice progress.');
+    }
+    practice = beginPractice(review);
+    try {
+      for (const answer of document.practice.answers) {
+        if (!traceRecord(answer, ['item', 'choice'])) throw new RangeError();
+        practice = answerPractice(practice, answer.item, answer.choice);
+      }
+    } catch { throw new RangeError('This trace has invalid practice progress.'); }
+  }
+  const missed = review.filter(item => !item.correct).length;
+  return Object.freeze({
+    savedAt: document.savedAt,
+    title: deck.title,
+    answers,
+    mastery: Object.freeze(mastery),
+    review,
+    practice,
+    summary: Object.freeze({
+      firstAnswers: answers.length,
+      correctFirst: answers.length - missed,
+      practiceStarted: practice !== null,
+      practiceAnswers: practice?.answers.length ?? 0,
+      practiceTotal: missed
+    })
+  });
+}
+
+/** Read bounded JSON into immutable state without changing the current lesson. */
+function readTraceArchive(text, deck) {
+  if (typeof text !== 'string' || new TextEncoder().encode(text).byteLength > TRACE_ARCHIVE_MAX_BYTES) {
+    throw new RangeError('Choose a learning trace file no larger than 2 MiB.');
+  }
+  let document;
+  try { document = JSON.parse(text); }
+  catch { throw new RangeError('This file is not valid learning trace JSON.'); }
+  return traceReplay(document, deck);
+}
+
+/** Save completed first answers and one separate practice round, including full precision estimates. */
+function createTraceArchive({deck, answers, mastery, practice = null, savedAt = new Date()}) {
+  if (!Array.isArray(answers)) throw new RangeError('Finish the first session before saving a trace.');
+  const when = new Date(savedAt);
+  if (!Number.isFinite(when.getTime())) throw new RangeError('A learning trace needs a valid save time.');
+  const document = {
+    format: TRACE_ARCHIVE_FORMAT,
+    version: 1,
+    savedAt: when.toISOString(),
+    deck,
+    model: TRACE_ARCHIVE_MODEL,
+    firstAnswers: answers.map(answer => ({item: answer.item, choice: answer.choice})),
+    mastery,
+    practice: practice === null ? null : {
+      answers: practice.answers.map(answer => ({item: answer.item, choice: answer.choice}))
+    }
+  };
+  const text = JSON.stringify(document, null, 2) + '\n';
+  const restored = readTraceArchive(text, deck);
+  if (practice !== null && traceCanonical(practice.items.map(item => item.id))
+      !== traceCanonical(restored.practice.items.map(item => item.id))) {
+    throw new RangeError('This trace has invalid practice progress.');
+  }
+  return Object.freeze({
+    filename: 'recallweave-learning-trace-' + when.toISOString().slice(0, 10) + '.json',
+    mediaType: 'application/json;charset=utf-8',
+    text
+  });
+}
+
+
+/** Explicit local download and preview/restore; the owner supplies the sole state-changing callback. */
+function mountTraceArchive({container, getDeck, getTrace, restoreTrace}) {
+  container.innerHTML = '<details id="trace-archive-panel"><summary>Keep or restore a learning trace</summary>'
+    + '<p>Save completed first answers and any practice progress. To return later, open the same course and choose the saved file.</p>'
+    + '<button type="button" class="reset-button" id="save-trace-button" aria-describedby="save-trace-status">Download trace (.json)</button>'
+    + '<p id="save-trace-status" role="status"></p>'
+    + '<label for="trace-file">Choose a saved learning trace (.json, up to 2 MiB)</label>'
+    + '<input type="file" id="trace-file" accept=".json,application/json" aria-describedby="trace-restore-status">'
+    + '<p id="trace-restore-status" role="status">A preview appears before anything is restored.</p>'
+    + '<section id="trace-preview" hidden aria-labelledby="trace-preview-title">'
+    + '<h3 id="trace-preview-title" tabindex="-1">Preview saved trace</h3><p id="trace-preview-summary"></p>'
+    + '<p>Restoring replaces the first answers and practice progress in this tab. This file contains answers and practice progress only; any reflections already in this tab stay as they are.</p>'
+    + '<div class="trace-archive-actions"><button type="button" class="primary-button" id="restore-trace-confirm">Restore these answers</button>'
+    + '<button type="button" class="reset-button" id="restore-trace-cancel">Cancel</button></div></section></details>';
+  const query = selector => container.querySelector(selector);
+  const saveButton = query('#save-trace-button');
+  const saveStatus = query('#save-trace-status');
+  const input = query('#trace-file');
+  const restoreStatus = query('#trace-restore-status');
+  const preview = query('#trace-preview');
+  let generation = 0;
+  let pending = null;
+  let readingStamp = null;
+  let previousCanSave;
+
+  function stamp() {
+    const {answers, mastery, practice} = getTrace();
+    return JSON.stringify({deck: getDeck(), answers, mastery, practice});
+  }
+  function clearPreview(message, resetInput = true) {
+    generation++;
+    pending = null;
+    readingStamp = null;
+    preview.hidden = true;
+    if (resetInput) input.value = '';
+    if (message) restoreStatus.textContent = message;
+  }
+  function refresh() {
+    const trace = getTrace();
+    const canSave = trace.answers.length > 0 && trace.answers.length === getDeck().items.length;
+    saveButton.disabled = !canSave;
+    if (canSave !== previousCanSave) {
+      saveStatus.textContent = canSave
+        ? 'Download a trace to return to these answers and recorded practice later.'
+        : 'Finish the first session before saving a trace.';
+      previousCanSave = canSave;
+    }
+    const expected = pending?.stamp ?? readingStamp;
+    if (expected !== null && expected !== undefined && expected !== stamp()) {
+      clearPreview('Your lesson changed. Choose the trace file again to preview it against the current session.');
+    }
+  }
+
+  saveButton.addEventListener('click', () => {
+    let url;
+    try {
+      const archive = createTraceArchive({deck: getDeck(), ...getTrace()});
+      url = URL.createObjectURL(new Blob([archive.text], {type: archive.mediaType}));
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = archive.filename;
+      document.body.append(link);
+      try { link.click(); } finally { link.remove(); }
+      saveStatus.textContent = 'Download requested. Check your browser’s downloads for the learning trace. Your answers are still here.';
+    } catch {
+      saveStatus.textContent = 'The trace could not be prepared. Your answers are still here; try the download again.';
+    } finally {
+      if (url) setTimeout(() => URL.revokeObjectURL(url), 10000);
+    }
+  });
+
+  input.addEventListener('change', async () => {
+    const file = input.files?.[0];
+    clearPreview(undefined, false);
+    if (!file) {
+      restoreStatus.textContent = 'No trace selected. Your current lesson is unchanged.';
+      return;
+    }
+    const ticket = generation;
+    readingStamp = stamp();
+    const beforeRead = readingStamp;
+    restoreStatus.textContent = 'Reading the selected trace…';
+    try {
+      if (file.size > TRACE_ARCHIVE_MAX_BYTES) throw new RangeError('Choose a learning trace file no larger than 2 MiB.');
+      const text = await file.text();
+      if (ticket !== generation) return;
+      if (beforeRead !== stamp()) {
+        clearPreview('Your lesson changed. Choose the trace file again to preview it against the current session.');
+        return;
+      }
+      const state = readTraceArchive(text, getDeck());
+      pending = {state, stamp: beforeRead};
+      readingStamp = null;
+      const summary = state.summary;
+      const practiceText = !summary.practiceTotal ? 'No missed connections need practice.'
+        : !summary.practiceStarted ? 'Practice not started: ' + summary.practiceTotal + ' missed connections.'
+        : 'Practice: ' + summary.practiceAnswers + ' of ' + summary.practiceTotal + ' answers recorded.';
+      query('#trace-preview-summary').textContent = state.title + ' — saved ' + state.savedAt
+        + '. First try: ' + summary.correctFirst + ' of ' + summary.firstAnswers + ' connections correct. ' + practiceText;
+      preview.hidden = false;
+      restoreStatus.textContent = 'Preview ready. Your current lesson is unchanged until you restore.';
+      query('#trace-preview-title').focus();
+    } catch (error) {
+      if (ticket !== generation) return;
+      clearPreview((error instanceof RangeError ? error.message : 'This trace could not be read.') + ' Your current lesson is unchanged.');
+    }
+  });
+
+  query('#restore-trace-cancel').addEventListener('click', () => {
+    clearPreview('Restore canceled. Your current lesson is unchanged.');
+    input.focus();
+  });
+  query('#restore-trace-confirm').addEventListener('click', () => {
+    if (!pending) return;
+    if (pending.stamp !== stamp()) {
+      clearPreview('Your lesson changed. Choose the trace file again before restoring.');
+      input.focus();
+      return;
+    }
+    const state = pending.state;
+    clearPreview();
+    restoreTrace(state);
+    refresh();
+    restoreStatus.textContent = 'Trace restored. Review your first answers and resume any remaining practice from the learning trace.';
+  });
+  refresh();
+  return Object.freeze({refresh});
+}
+
 const root = document.querySelector('#session-content');
 const deck = JSON.parse(document.querySelector('#deck-json').textContent);
 const concepts = deck.concepts;
@@ -353,12 +620,14 @@ const answers = [];
 let review = null;
 let practice = null;
 let inPractice = false;
+let traceArchiveControls = null;
 const progressFill = document.querySelector('#progress-fill');
 const progressTrack = document.querySelector('[role="progressbar"]');
 const stepLabel = document.querySelector('#step-label');
 const stepCount = document.querySelector('#step-count');
 
 function setProgress() {
+  traceArchiveControls?.refresh();
   const count = inPractice ? practice.answers.length : answers.length;
   const total = inPractice ? practice.items.length : deck.items.length;
   stepCount.textContent = `${count} / ${total}`;
@@ -504,6 +773,20 @@ document.querySelector('#simulation-button').addEventListener('click', () => {
   document.querySelector('#simulation-output').innerHTML = `<div class="simulation-result"><strong>Scripted run · not learner evidence</strong><p>One deterministic toy profile (latent concept strengths: 0.53–0.82), same seed and response model; only item order changes.</p><div class="simulation-compare"><span>Adaptive: ${correctCount(adaptive)}/${adaptive.trace.length} correct · mean estimated mastery ${Math.round(adaptive.meanEstimatedMastery * 100)}%</span><span>Fixed order: ${correctCount(fixed)}/${fixed.trace.length} correct · mean estimated mastery ${Math.round(fixed.meanEstimatedMastery * 100)}%</span></div><p>One tiny synthetic run is not a performance claim. Use the test suite for invariants; efficacy needs a larger, preregistered study.</p></div>`;
 });
 document.querySelector('#start-button').addEventListener('click', renderQuestion);
+traceArchiveControls = mountTraceArchive({
+  container: document.querySelector('#trace-archive'),
+  getDeck: () => deck,
+  getTrace: () => ({answers, mastery, practice}),
+  restoreTrace: state => {
+    answers.splice(0, answers.length, ...state.answers);
+    asked.clear();
+    for (const answer of state.answers) asked.add(answer.item);
+    Object.assign(mastery, state.mastery);
+    review = state.review;
+    practice = state.practice;
+    renderResults();
+  }
+});
 setProgress();
 
 </script>
