@@ -1,0 +1,626 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Explore classical Boolean logic through complete truth tables and counterexamples. Includes an original RecallWeave course.">
+  <title>Boolean logic explorer · RecallWeave</title>
+  <style>
+    :root { color-scheme: light; --ink:#152b38; --muted:#4b6570; --line:#ccdada; --paper:#f3f7f5; --green:#11634d; --blue:#194c72; --red:#913c33; --focus:#ba6200; }
+    * { box-sizing:border-box; }
+    body { margin:0; font:17px/1.55 system-ui,sans-serif; color:var(--ink); background:var(--paper); }
+    [hidden] { display:none !important; }
+    a { color:var(--blue); text-underline-offset:.2em; }
+    button,input { font:inherit; }
+    button { padding:.6rem .85rem; border:1px solid #8ba4a8; border-radius:.45rem; color:var(--ink); background:#fff; cursor:pointer; }
+    button:hover:not(:disabled) { background:#e3eee9; border-color:var(--green); }
+    button:disabled { cursor:default; color:#71828a; background:#edf1f1; border-color:#cdd7d8; }
+    button:focus-visible,input:focus-visible,a:focus-visible,summary:focus-visible { outline:3px solid var(--focus); outline-offset:3px; }
+    code { font: .93em/1.5 ui-monospace,SFMono-Regular,Consolas,monospace; overflow-wrap:anywhere; }
+    header { max-width:1120px; margin:auto; padding:2.7rem 1.25rem 1.6rem; }
+    .brand { letter-spacing:.17em; text-transform:uppercase; font-size:.8rem; font-weight:750; color:var(--green); }
+    h1 { margin:.45rem 0 .65rem; font:clamp(2.3rem,6vw,4.1rem)/1.08 Georgia,serif; letter-spacing:-.025em; }
+    h2 { margin:0 0 .7rem; font-size:1.4rem; line-height:1.25; }
+    h3 { margin:0 0 .6rem; font-size:1.04rem; }
+    p { margin:.4rem 0 1rem; }
+    .intro { max-width:760px; color:var(--muted); font-size:1.08rem; }
+    main { max-width:1120px; margin:0 auto; padding:0 1.25rem 3rem; }
+    .panel { background:#fff; border:1px solid var(--line); border-radius:.9rem; padding:1.4rem; margin-bottom:1.2rem; box-shadow:0 3px 16px #14392a05; min-width:0; }
+    .eyebrow { display:block; font-size:.78rem; font-weight:750; text-transform:uppercase; letter-spacing:.09em; color:var(--muted); margin-bottom:.35rem; }
+    .input-grid,.result-grid { display:grid; grid-template-columns:1fr 1fr; gap:1.2rem; }
+    .input-grid label { display:block; font-weight:650; margin-bottom:.4rem; }
+    .optional { font-weight:400; color:var(--muted); font-size:.85em; }
+    input[type=text] { width:100%; min-width:0; border:1px solid #8ba4a8; border-radius:.45rem; background:#fbfdfc; color:var(--ink); padding:.75rem; font-family:ui-monospace,SFMono-Regular,Consolas,monospace; }
+    input[aria-invalid=true] { border:2px solid var(--red); }
+    .hint { font-size:.87rem; color:var(--muted); margin-top:.5rem; }
+    .examples { display:flex; flex-wrap:wrap; gap:.5rem; margin-top:1.1rem; }
+    .examples button { font-size:.9rem; }
+    #example-note { border-left:3px solid #78aa97; padding:.15rem 0 .15rem .9rem; color:var(--muted); margin:1rem 0; }
+    #expression-error { color:var(--red); font-weight:650; margin:1rem 0 0; }
+    #expression-error:empty { margin:0; }
+    details { border-top:1px solid var(--line); padding-top:.8rem; margin-top:.8rem; }
+    summary { cursor:pointer; font-weight:650; }
+    details p { margin-top:.8rem; }
+    .grammar { font-size:.9rem; }
+    .grammar ul { padding-left:1.3rem; }
+    .grouped { display:block; font-size:1.05rem; font-weight:650; margin-bottom:.35rem; }
+    #comparison-verdict { margin:1.1rem 0; border-radius:.5rem; padding:.8rem 1rem; background:#e7f1eb; color:#174f3e; font-weight:650; }
+    .toolbar { display:flex; flex-wrap:wrap; align-items:center; gap:1rem; margin-bottom:.8rem; }
+    .checkbox { display:flex; gap:.55rem; align-items:center; cursor:pointer; }
+    input[type=checkbox] { width:1.2rem; height:1.2rem; accent-color:var(--green); }
+    .table-scroll { max-width:100%; overflow-x:auto; border:1px solid var(--line); border-radius:.6rem; }
+    table { width:100%; border-collapse:collapse; text-align:left; font-size:.94rem; }
+    caption { text-align:left; padding:.7rem .8rem; color:var(--muted); background:#f8faf9; }
+    th,td { padding:.62rem .8rem; border-top:1px solid var(--line); vertical-align:middle; }
+    thead th { background:#edf3f1; font-size:.84rem; white-space:nowrap; }
+    .row-button { padding:.3rem .6rem; min-width:2.3rem; font-variant-numeric:tabular-nums; }
+    .row-button[aria-pressed=true] { background:var(--blue); border-color:var(--blue); color:#fff; }
+    .selected-row { background:#edf5f9; }
+    .truth { display:inline-block; font-weight:700; white-space:nowrap; }
+    .true-value { color:var(--green); }
+    .false-value,.different-result { color:var(--red); }
+    .different-result { font-weight:600; }
+    #selected-section { border-color:#9cb9c9; background:#f8fbfd; }
+    #selected-assignment { font-weight:650; font-variant-numeric:tabular-nums; }
+    #selected-details { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+    .selected-expression { display:flex; flex-direction:column; align-items:flex-start; gap:.2rem; }
+    .selected-expression .truth { font-size:1.4rem; }
+    #selected-meaning { margin:1rem 0 0; color:var(--muted); }
+    .downloads { display:flex; gap:.7rem; flex-wrap:wrap; margin:1rem 0 .4rem; }
+    .primary { background:var(--green); color:#fff; border-color:var(--green); }
+    .primary:hover:not(:disabled) { background:#0e4c3b; color:#fff; }
+    .course-layout { display:grid; grid-template-columns:1.5fr 1fr; gap:1.7rem; }
+    .course-layout p:last-child { margin-bottom:0; }
+    .course-meta { color:var(--muted); font-size:.83rem; overflow-wrap:anywhere; }
+    .course-layout ol { padding-left:1.4rem; margin:.4rem 0; }
+    .note { font-size:.9rem; color:var(--muted); }
+    footer { max-width:1120px; margin:auto; padding:0 1.25rem 2rem; color:var(--muted); font-size:.85rem; }
+    @media (max-width:650px) { body { font-size:16px; } header { padding-top:1.8rem; } .panel { padding:1rem; } .input-grid,.result-grid,.course-layout,#selected-details { grid-template-columns:1fr; gap:1rem; } th,td { padding:.5rem .6rem; } .examples button { flex:1 1 40%; } }
+    @media print { body { background:#fff; } header { padding-top:0; } .input-panel,.toolbar,.downloads,button,footer { display:none; } .panel { box-shadow:none; break-inside:avoid; } .table-scroll { overflow:visible; } table { font-size:10pt; } }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">RecallWeave · Offline course companion</div>
+    <h1>Make the logic visible.</h1>
+    <p class="intro">Change an expression. Inspect every assignment. A matching example is a start; a complete truth table settles whether two expressions are equivalent.</p>
+  </header>
+  <main id="logic-app">
+    <section class="panel input-panel" aria-labelledby="expressions-title">
+      <span class="eyebrow">01 · Write a claim</span>
+      <h2 id="expressions-title">Your expressions</h2>
+      <div class="input-grid">
+        <div><label for="expression-left">Expression 1</label><input id="expression-left" type="text" value="A -> B" maxlength="512" autocomplete="off" autocapitalize="off" spellcheck="false" aria-describedby="expression-help expression-error"></div>
+        <div><label for="expression-right">Expression 2 <span class="optional">optional comparison</span></label><input id="expression-right" type="text" value="B -> A" maxlength="512" autocomplete="off" autocapitalize="off" spellcheck="false" aria-describedby="expression-help expression-error"></div>
+      </div>
+      <p class="hint" id="expression-help">Use A–E, true, false, not, and, xor, or, -&gt;, &lt;-&gt; and parentheses. Clear Expression 2 to study one expression.</p>
+      <div class="examples" aria-label="Example expressions">
+        <button type="button" data-example="implication">Implication</button><button type="button" data-example="converse">Converse</button><button type="button" data-example="contrapositive">Contrapositive</button><button type="button" data-example="demorgan">De Morgan's law</button><button type="button" data-example="inference">Valid inference</button>
+      </div>
+      <p id="example-note">Reversing the arrow creates the converse. Find an assignment where the two expressions disagree.</p>
+      <p id="expression-error" role="alert"></p>
+      <details class="grammar"><summary>How expressions are read</summary>
+        <p>This explorer uses classical two-valued propositional logic. Each variable is True or False. <strong>or</strong> includes the both-True case; <strong>xor</strong> requires exactly one True operand. <code>A -&gt; B</code> is False only when A=True and B=False. <code>A &lt;-&gt; B</code> is True when their values match.</p>
+        <p>Precedence, strongest first: <strong>not → and → xor → or → implication (-&gt;) → biconditional (&lt;-&gt;)</strong>. Implication groups to the right: <code>A -&gt; B -&gt; C</code> means <code>A -&gt; (B -&gt; C)</code>. Other binary operators group to the left. The grouped forms below make this convention explicit.</p>
+        <ul><li>Words and variables accept either case. Symbols other than the listed arrows and parentheses are not part of this grammar.</li><li>Each expression has at most 512 characters, 128 tokens, 32 nested parentheses and 32 nested operators.</li><li>Only A–E are supported, giving at most 32 complete assignments. Constants alone have one empty assignment.</li></ul>
+      </details>
+    </section>
+    <section class="panel" id="table-section" aria-labelledby="table-title" hidden>
+      <span class="eyebrow">02 · Check every possibility</span><h2 id="table-title">Complete truth table</h2>
+      <div class="result-grid">
+        <div><span class="eyebrow">Expression 1 · grouped</span><code class="grouped" id="left-canonical"></code><p class="hint" id="left-summary"></p></div>
+        <div id="right-result"><span class="eyebrow">Expression 2 · grouped</span><code class="grouped" id="right-canonical"></code><p class="hint" id="right-summary"></p></div>
+      </div>
+      <p id="comparison-verdict" role="status"></p>
+      <div class="toolbar"><label class="checkbox"><input id="differences-only" type="checkbox">Show differing rows only</label><button id="inspect-difference" type="button">Inspect first difference</button></div>
+      <p class="hint" id="row-count"></p>
+      <div class="table-scroll"><table><caption>All assignments of the variables used by these expressions</caption><thead><tr id="truth-head"></tr></thead><tbody id="truth-body"></tbody></table></div>
+      <p id="no-differences" class="hint" hidden>No differing rows. The complete table has matching outputs throughout.</p>
+    </section>
+    <section class="panel" id="selected-section" aria-labelledby="selected-title" hidden>
+      <span class="eyebrow">03 · Inspect one assignment</span><h2 id="selected-title">Why this row matters</h2>
+      <p id="selected-assignment"></p><div id="selected-details"></div><p id="selected-meaning"></p>
+    </section>
+    <section class="panel" aria-labelledby="course-heading">
+      <div class="course-layout">
+        <div><span class="eyebrow">Keep exploring</span><h2 id="course-heading">Study the connections</h2><p id="course-title"></p><p class="hint" id="course-count"></p><p>The original lesson connects truth values, material implication, equivalence and valid inference through worked explanations and open transfer prompts.</p></div>
+        <div><h3>Use the course in RecallWeave</h3><ol><li>Download the course JSON.</li><li>Open the <a href="../demo.html">RecallWeave learner</a>.</li><li>Choose the downloaded course, inspect the preview, then explicitly start it.</li></ol><p class="note">Your current learner session is separate from this page. Opening the companion or downloading a file does not replace it.</p></div>
+      </div>
+      <div class="downloads"><button type="button" class="primary" id="download-course">Download course (.json)</button><button type="button" id="download-table" disabled>Download full table (.csv)</button></div>
+      <p id="download-status" role="status" class="hint"></p>
+      <details class="course-meta"><summary>Course attribution and use</summary><p id="course-attribution"></p><p id="course-license"></p><p>The table evaluates a formal model. It does not establish real-world truth or causation. Formal validity does not verify an argument's premises. AI-assisted educational content should receive educator review before use with learners.</p></details>
+    </section>
+    <noscript><p class="panel">This offline explorer needs JavaScript to evaluate expressions. No account or internet connection is needed.</p></noscript>
+  </main>
+  <footer>Original RecallWeave companion. Expressions stay in this page. Downloads happen only when you request them.</footer>
+  <script type="module">
+const BOOLEAN_COURSE_TEXT = "{\n  \"format\": \"recallweave-deck/1\",\n  \"title\": \"Logic \u003c/script>\u003cimg src=x> & $& Unicode λ\",\n  \"attribution\": \"Original questions, explanations and transfer prompts authored for RecallWeave by the HAMON estate contribution chatgpt-acd057031fb2, with AI assistance. Conceptual references: OpenStax Contemporary Mathematics, sections 2.2 and 2.4–2.7 (https://openstax.org/books/contemporary-mathematics/pages/2-2-compound-statements). No textbook exercise or figure is reproduced.\",\n  \"license\": \"Original lesson text: CC BY 4.0. Classical two-valued propositional logic only; these questions do not establish the empirical truth of premises or measured learning benefit.\",\n  \"concepts\": [\n    \"Truth values and connectives\",\n    \"Material implication\",\n    \"Logical equivalence\",\n    \"Valid inference\"\n  ],\n  \"items\": [\n    {\n      \"id\": \"logic-connectives-1\",\n      \"concept\": \"Truth values and connectives\",\n      \"prerequisites\": [],\n      \"prompt\": \"A and B are both True. What are the values of (A or B) and (A xor B), in that order?\",\n      \"options\": [\n        \"True, True\",\n        \"True, False\",\n        \"False, True\",\n        \"False, False\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"Inclusive or is True when at least one operand is True, including the both-True case. Exclusive or (xor) requires exactly one True operand. With two True operands, the pair is therefore True, False. The two operators agree on the mixed assignments but differ here.\",\n      \"transfer\": \"Invent two propositions about a fictional display. Describe how an inclusive-or rule and an exclusive-or rule would behave when both propositions are True.\"\n    },\n    {\n      \"id\": \"logic-connectives-2\",\n      \"concept\": \"Truth values and connectives\",\n      \"prerequisites\": [],\n      \"prompt\": \"Which assignment makes A and not (B or C) True?\",\n      \"options\": [\n        \"A=True, B=True, C=False\",\n        \"A=True, B=False, C=True\",\n        \"A=False, B=False, C=False\",\n        \"A=True, B=False, C=False\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"The outer and requires A=True and not (B or C)=True. The latter requires B or C=False, which happens only when both B and C are False. An assignment with B=True or C=True makes the parenthesized or True; A=False fails the outer and. Only A=True, B=False, C=False satisfies both parts.\",\n      \"transfer\": \"Write an expression that is True exactly when A is True and at least one of B or C is True. Compare its accepted assignments with this question's expression.\"\n    },\n    {\n      \"id\": \"logic-connectives-3\",\n      \"concept\": \"Truth values and connectives\",\n      \"prerequisites\": [],\n      \"prompt\": \"Set A=True and B=False. What are the values of ((not A) and B) and not (A and B), in that order?\",\n      \"options\": [\n        \"False, True\",\n        \"True, False\",\n        \"False, False\",\n        \"True, True\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"In the first expression, not changes A to False, and False and False is False. In the second, A and B is False, so negating the entire conjunction gives True. The parentheses change what not applies to; negating one operand is different from negating the whole compound expression.\",\n      \"transfer\": \"Choose another assignment and evaluate both expressions in small steps. Explain why agreement on one assignment would not establish equivalence.\"\n    },\n    {\n      \"id\": \"logic-implication-1\",\n      \"concept\": \"Material implication\",\n      \"prerequisites\": [\n        \"Truth values and connectives\"\n      ],\n      \"prompt\": \"Which assignment makes the material implication A -> B False?\",\n      \"options\": [\n        \"A=True, B=True\",\n        \"A=False, B=True\",\n        \"A=True, B=False\",\n        \"A=False, B=False\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"A -> B excludes the case where A is True but B is False. It is True on each of the other three assignments. This is the truth-functional material conditional: its table alone says nothing about a causal, temporal or explanatory connection between the propositions.\",\n      \"transfer\": \"Invent a fictional if-then rule and identify the one combination of antecedent and consequent that would violate its material-implication table.\"\n    },\n    {\n      \"id\": \"logic-implication-2\",\n      \"concept\": \"Material implication\",\n      \"prerequisites\": [\n        \"Truth values and connectives\"\n      ],\n      \"prompt\": \"A is False and the material implication A -> B is True. What does this tell you about B?\",\n      \"options\": [\n        \"B can be either True or False.\",\n        \"B must be False because A is False.\",\n        \"B must be True because the implication is True.\",\n        \"The given truth values are inconsistent.\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"The rows (A=False, B=True) and (A=False, B=False) both make A -> B True. The information therefore leaves B undetermined. Inferring not B from not A would add a condition that the original implication does not contain.\",\n      \"transfer\": \"Compare A -> B with A \u003c-> B on the two rows where A is False. Explain how the biconditional imposes an additional restriction.\"\n    },\n    {\n      \"id\": \"logic-implication-3\",\n      \"concept\": \"Material implication\",\n      \"prerequisites\": [\n        \"Truth values and connectives\"\n      ],\n      \"prompt\": \"Which expression is the contrapositive of (A and B) -> C?\",\n      \"options\": [\n        \"C -> (A and B)\",\n        \"not (A and B) -> not C\",\n        \"not C -> not (A and B)\",\n        \"not C -> ((not A) and (not B))\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"The contrapositive of P -> Q is not Q -> not P. Here the complete antecedent P is (A and B), so it must be negated as a unit: not C -> not (A and B). Negating a conjunction means at least one operand is False, not necessarily both. This contrapositive agrees with the original implication on all eight assignments.\",\n      \"transfer\": \"Form the contrapositive of (A or B) -> C. Keep the antecedent grouped, then use a truth table to check your expression against the original.\"\n    },\n    {\n      \"id\": \"logic-equivalence-1\",\n      \"concept\": \"Logical equivalence\",\n      \"prerequisites\": [\n        \"Truth values and connectives\",\n        \"Material implication\"\n      ],\n      \"prompt\": \"Which expression has the same truth value as not (A or B) for every assignment?\",\n      \"options\": [\n        \"(not A) or B\",\n        \"(not A) or (not B)\",\n        \"not (A and B)\",\n        \"(not A) and (not B)\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"For A or B to be False, A and B must both be False. Therefore not (A or B) is True exactly when not A and not B are both True. This is one of De Morgan's laws. Replacing and with or would also admit mixed assignments, so it would change the truth table.\",\n      \"transfer\": \"Derive the corresponding expression for not (A and B). Find a mixed assignment that distinguishes the two De Morgan laws.\"\n    },\n    {\n      \"id\": \"logic-equivalence-2\",\n      \"concept\": \"Logical equivalence\",\n      \"prerequisites\": [\n        \"Truth values and connectives\",\n        \"Material implication\"\n      ],\n      \"prompt\": \"Which listed case is a counterexample to the claim that A -> B and B -> A are logically equivalent?\",\n      \"options\": [\n        \"A=True, B=True\",\n        \"A=False, B=True\",\n        \"A=False, B=False\",\n        \"No truth assignment can distinguish them.\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"At A=False, B=True, the first implication is True but B -> A is False. A single differing assignment refutes equivalence. The both-True and both-False rows give matching outputs, so neither listed matching row is a counterexample. The converse reverses direction; the contrapositive reverses and negates both sides.\",\n      \"transfer\": \"Locate the other differing assignment for these two implications. Then replace the converse with the contrapositive and check all four rows.\"\n    },\n    {\n      \"id\": \"logic-equivalence-3\",\n      \"concept\": \"Logical equivalence\",\n      \"prerequisites\": [\n        \"Truth values and connectives\",\n        \"Material implication\"\n      ],\n      \"prompt\": \"What must a complete truth table show to establish that A -> B and (not A) or B are logically equivalent?\",\n      \"options\": [\n        \"They use the same variable letters.\",\n        \"Their outputs agree when A and B are both True.\",\n        \"Their outputs agree for every assignment of A and B.\",\n        \"Each expression has at least one True row.\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"Equivalence requires matching truth values for every assignment, not just a selected example. These expressions both have the column True, False, True, True when the assignments are (True,True), (True,False), (False,True), (False,False). Using the same variables or merely having some True rows is insufficient.\",\n      \"transfer\": \"Give two expressions that agree on one assignment but are not equivalent. Explain what additional rows are needed to decide the question completely.\"\n    },\n    {\n      \"id\": \"logic-inference-1\",\n      \"concept\": \"Valid inference\",\n      \"prerequisites\": [\n        \"Material implication\",\n        \"Logical equivalence\"\n      ],\n      \"prompt\": \"The premises A -> B and A are both True. Which listed conclusion must be True?\",\n      \"options\": [\n        \"not B\",\n        \"B\",\n        \"not A\",\n        \"A and not B\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"A is True by the second premise. If B were False, the first premise A -> B would be False, contrary to the given premises. Hence B must be True. This valid inference pattern is called modus ponens; it preserves truth when its premises are true.\",\n      \"transfer\": \"Write the single conditional ((A -> B) and A) -> B and examine every row. Explain how its being always True corresponds to the inference pattern.\"\n    },\n    {\n      \"id\": \"logic-inference-2\",\n      \"concept\": \"Valid inference\",\n      \"prerequisites\": [\n        \"Material implication\",\n        \"Logical equivalence\"\n      ],\n      \"prompt\": \"An argument has premises A -> B and B, with conclusion A. Which assignment makes both premises True and the conclusion False?\",\n      \"options\": [\n        \"A=False, B=True\",\n        \"A=True, B=False\",\n        \"A=True, B=True\",\n        \"A=False, B=False\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"With A=False and B=True, A -> B is True and B is True, yet A is False. This is a counterexample to the argument's validity. The invalid pattern is called affirming the consequent. B might be true in a case where A is false; the original one-way implication does not rule that out.\",\n      \"transfer\": \"Create a fictional example of affirming the consequent. Show a possible situation in which the two premises hold but the proposed conclusion does not.\"\n    },\n    {\n      \"id\": \"logic-inference-3\",\n      \"concept\": \"Valid inference\",\n      \"prerequisites\": [\n        \"Material implication\",\n        \"Logical equivalence\"\n      ],\n      \"prompt\": \"A complete truth table has no row where all an argument's premises are True and its conclusion is False. What has been established?\",\n      \"options\": [\n        \"Every premise is true in the actual world.\",\n        \"The conclusion is True under every assignment, even when premises are False.\",\n        \"The premises describe a cause of the conclusion.\",\n        \"The argument's form is valid; whether its premises are actually true is a separate question.\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"The absence of a counterexample establishes the truth-preserving form of the argument. It does not verify the actual premises, make the conclusion a tautology, or establish causation. A sound argument additionally has true premises; a truth table of the form alone cannot supply that empirical information.\",\n      \"transfer\": \"Give a valid argument with a premise whose real-world truth would need evidence. Describe what the logical test establishes and what remains to be checked.\"\n    }\n  ]\n}\n";
+/** Local lesson content. Imported data cannot replace the model or run code. */
+const DECK_FORMAT = 'recallweave-deck/1';
+const MAX_DECK_BYTES = 262144;
+
+function deckRecord(value, path) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    throw new Error(`${path} must be an object.`);
+  }
+  return value;
+}
+
+function deckText(value, path, limit) {
+  if (typeof value !== 'string' || !value.trim() || value.length > limit) {
+    throw new Error(`${path} must be nonempty text of at most ${limit} characters.`);
+  }
+  return value;
+}
+
+function deckList(value, path, minimum, maximum) {
+  if (!Array.isArray(value) || value.length < minimum || value.length > maximum) {
+    throw new Error(`${path} must contain ${minimum}–${maximum} entries.`);
+  }
+  return value;
+}
+
+/** Validate and copy only the content fields used by the existing lesson runtime. */
+function validateDeck(value) {
+  const input = deckRecord(value, 'Deck');
+  if (input.format !== undefined && input.format !== DECK_FORMAT) {
+    throw new Error(`Unsupported deck format. Use ${DECK_FORMAT}.`);
+  }
+  const title = deckText(input.title, 'title', 160);
+  const attribution = deckText(input.attribution, 'attribution', 2000);
+  const license = deckText(input.license, 'license', 2000);
+  const concepts = deckList(input.concepts, 'concepts', 1, 32).map((concept, index) =>
+    deckText(concept, `concepts[${index}]`, 80));
+  if (new Set(concepts).size !== concepts.length) throw new Error('Concept names must be unique.');
+  const knownConcepts = new Set(concepts);
+  const ids = new Set();
+  const coveredConcepts = new Set();
+  const links = new Map(concepts.map(concept => [concept, new Set()]));
+  const items = deckList(input.items, 'items', 1, 100).map((value, index) => {
+    const path = `items[${index}]`;
+    const item = deckRecord(value, path);
+    const id = deckText(item.id, `${path}.id`, 80);
+    if (ids.has(id)) throw new Error(`${path}.id duplicates another question ID.`);
+    ids.add(id);
+    const concept = deckText(item.concept, `${path}.concept`, 80);
+    if (!knownConcepts.has(concept)) throw new Error(`${path}.concept is not in concepts.`);
+    coveredConcepts.add(concept);
+    const prerequisites = deckList(item.prerequisites, `${path}.prerequisites`, 0, 31).map((name, p) => {
+      deckText(name, `${path}.prerequisites[${p}]`, 80);
+      if (!knownConcepts.has(name)) throw new Error(`${path}.prerequisites contains an unknown concept.`);
+      if (name === concept) throw new Error(`${path} cannot require its own concept.`);
+      links.get(concept).add(name);
+      return name;
+    });
+    if (new Set(prerequisites).size !== prerequisites.length) throw new Error(`${path}.prerequisites contains a duplicate.`);
+    const options = deckList(item.options, `${path}.options`, 2, 6).map((option, o) =>
+      deckText(option, `${path}.options[${o}]`, 1000));
+    if (new Set(options).size !== options.length) throw new Error(`${path}.options must be distinct.`);
+    if (!Number.isInteger(item.answer) || item.answer < 0 || item.answer >= options.length) {
+      throw new Error(`${path}.answer must be a zero-based index of an option.`);
+    }
+    return Object.freeze({
+      id, concept, prerequisites: Object.freeze(prerequisites),
+      prompt: deckText(item.prompt, `${path}.prompt`, 2000),
+      options: Object.freeze(options), answer: item.answer,
+      explanation: deckText(item.explanation, `${path}.explanation`, 4000),
+      transfer: deckText(item.transfer, `${path}.transfer`, 2000)
+    });
+  });
+  if (coveredConcepts.size !== concepts.length) throw new Error('Every concept must have at least one question.');
+  const visiting = new Set();
+  const visited = new Set();
+  const visit = concept => {
+    if (visiting.has(concept)) throw new Error('Prerequisite links must not form a cycle.');
+    if (visited.has(concept)) return;
+    visiting.add(concept);
+    for (const prerequisite of links.get(concept)) visit(prerequisite);
+    visiting.delete(concept);
+    visited.add(concept);
+  };
+  concepts.forEach(visit);
+  return Object.freeze({
+    format: DECK_FORMAT, title, attribution, license,
+    concepts: Object.freeze(concepts), items: Object.freeze(items)
+  });
+}
+
+/** The same size limit applies to a File and to programmatically supplied UTF-8 JSON. */
+function parseDeck(text) {
+  if (typeof text !== 'string' || new TextEncoder().encode(text).length > MAX_DECK_BYTES) {
+    throw new Error('Choose a JSON deck no larger than 256 KiB.');
+  }
+  let value;
+  try { value = JSON.parse(text); }
+  catch { throw new Error('The file is not valid JSON. Check its commas, quotes and brackets.'); }
+  return validateDeck(value);
+}
+
+/** Export the existing bundled lesson as an editable example of the same contract. */
+function serializeDeck(deck) {
+  return JSON.stringify(validateDeck(deck), null, 2) + '\n';
+}
+
+/** Bounded classical propositional logic. Input is parsed as data, never executed. */
+const LOGIC_LIMITS = Object.freeze({characters: 512, tokens: 128, parentheses: 32, operators: 32});
+
+class LogicInputError extends RangeError {
+  constructor(message, position = null, field = null) {
+    super(message);
+    this.name = 'LogicInputError';
+    this.position = position;
+    this.field = field;
+  }
+}
+
+const PRECEDENCE = Object.freeze({'<->': 1, '->': 2, or: 3, xor: 4, and: 5});
+const WORDS = new Set(['not', 'and', 'xor', 'or', 'true', 'false']);
+
+function tokenize(source) {
+  if (typeof source !== 'string' || source.length > LOGIC_LIMITS.characters) {
+    throw new LogicInputError(`Use at most ${LOGIC_LIMITS.characters} characters in each expression.`);
+  }
+  const tokens = [];
+  let position = 0;
+  while (position < source.length) {
+    const rest = source.slice(position);
+    const space = /^\s+/u.exec(rest);
+    if (space) { position += space[0].length; continue; }
+    const match = /^(<->|->|[()]|[A-Za-z]+)/u.exec(rest);
+    if (!match) throw new LogicInputError(`Unexpected character at position ${position + 1}. Use the listed logic operators.`, position);
+    const text = match[0];
+    const lower = text.toLowerCase();
+    let kind = lower;
+    let value;
+    if (/^[a-e]$/u.test(lower)) { kind = 'variable'; value = lower.toUpperCase(); }
+    else if (/^[a-z]+$/u.test(lower) && !WORDS.has(lower)) {
+      throw new LogicInputError(`Unknown word at position ${position + 1}. Variables are A to E.`, position);
+    }
+    tokens.push(Object.freeze({kind, value, position}));
+    if (tokens.length > LOGIC_LIMITS.tokens) {
+      throw new LogicInputError(`Use at most ${LOGIC_LIMITS.tokens} tokens in each expression.`, position);
+    }
+    position += text.length;
+  }
+  tokens.push(Object.freeze({kind: 'end', position: source.length}));
+  return tokens;
+}
+
+function makeNode(kind, values, children = []) {
+  const depth = children.length ? 1 + Math.max(...children.map(child => child.depth)) : 0;
+  if (depth > LOGIC_LIMITS.operators) {
+    throw new LogicInputError(`Use at most ${LOGIC_LIMITS.operators} nested operators.`);
+  }
+  return Object.freeze({kind, ...values, depth});
+}
+
+function format(node) {
+  if (node.kind === 'variable') return node.name;
+  if (node.kind === 'literal') return node.value ? 'true' : 'false';
+  if (node.kind === 'not') return `(not ${format(node.child)})`;
+  return `(${format(node.left)} ${node.kind} ${format(node.right)})`;
+}
+
+/** Parse a complete expression, including explicit grouping and bounded immutable syntax. */
+function parseLogicExpression(source) {
+  const tokens = tokenize(source);
+  let cursor = 0;
+  const names = new Set();
+  const current = () => tokens[cursor];
+  function unary(parentheses) {
+    const token = tokens[cursor++];
+    if (token.kind === 'not') {
+      const child = unary(parentheses);
+      return makeNode('not', {child}, [child]);
+    }
+    if (token.kind === '(') {
+      if (parentheses >= LOGIC_LIMITS.parentheses) {
+        throw new LogicInputError(`Use at most ${LOGIC_LIMITS.parentheses} nested parentheses.`, token.position);
+      }
+      const node = binary(1, parentheses + 1);
+      if (current().kind !== ')') {
+        throw new LogicInputError(`Expected a closing parenthesis at position ${current().position + 1}.`, current().position);
+      }
+      cursor++;
+      return node;
+    }
+    if (token.kind === 'variable') {
+      names.add(token.value);
+      return makeNode('variable', {name: token.value});
+    }
+    if (token.kind === 'true' || token.kind === 'false') return makeNode('literal', {value: token.kind === 'true'});
+    throw new LogicInputError(`Expected a variable, true, false, not or an opening parenthesis at position ${token.position + 1}.`, token.position);
+  }
+  function binary(minimum, parentheses) {
+    let left = unary(parentheses);
+    while ((PRECEDENCE[current().kind] ?? 0) >= minimum) {
+      const operator = tokens[cursor++].kind;
+      const right = binary(PRECEDENCE[operator] + (operator === '->' ? 0 : 1), parentheses);
+      left = makeNode(operator, {left, right}, [left, right]);
+    }
+    return left;
+  }
+  const root = binary(1, 0);
+  if (current().kind !== 'end') {
+    throw new LogicInputError(`Unexpected token at position ${current().position + 1}. Check the operators and parentheses.`, current().position);
+  }
+  return Object.freeze({source: source.trim(), canonical: format(root), variables: Object.freeze([...names].sort()), root});
+}
+
+function evaluate(node, assignment) {
+  if (node.kind === 'variable') return assignment[node.name];
+  if (node.kind === 'literal') return node.value;
+  if (node.kind === 'not') return !evaluate(node.child, assignment);
+  const left = evaluate(node.left, assignment);
+  const right = evaluate(node.right, assignment);
+  switch (node.kind) {
+    case 'and': return left && right;
+    case 'or': return left || right;
+    case 'xor': return left !== right;
+    case '->': return !left || right;
+    case '<->': return left === right;
+    default: throw new TypeError('Unknown parsed operator.');
+  }
+}
+
+function parseField(text, field) {
+  try { return parseLogicExpression(text); }
+  catch (error) {
+    if (!(error instanceof LogicInputError)) throw error;
+    throw new LogicInputError(`Expression ${field === 'left' ? 1 : 2}: ${error.message}`, error.position, field);
+  }
+}
+
+const classification = (trueRows, total) => trueRows === total ? 'tautology' : trueRows === 0 ? 'contradiction' : 'contingent';
+
+/** Exhaust every assignment of the union of variables. A blank right side is optional. */
+function analyzeLogic(leftText, rightText = '') {
+  const left = parseField(leftText, 'left');
+  if (typeof rightText !== 'string') throw new LogicInputError('Expression 2 must be text.', null, 'right');
+  if (rightText.length > LOGIC_LIMITS.characters) {
+    throw new LogicInputError(`Expression 2: Use at most ${LOGIC_LIMITS.characters} characters in each expression.`, null, 'right');
+  }
+  const right = rightText.trim() ? parseField(rightText, 'right') : null;
+  const variables = Object.freeze([...new Set([...left.variables, ...(right?.variables ?? [])])].sort());
+  const rows = [];
+  const differences = [];
+  let leftTrue = 0;
+  let rightTrue = 0;
+  const total = 2 ** variables.length;
+  for (let index = 0; index < total; index++) {
+    const assignment = Object.freeze(Object.fromEntries(variables.map((name, offset) =>
+      [name, (index & (1 << (variables.length - offset - 1))) === 0])));
+    const leftValue = evaluate(left.root, assignment);
+    const rightValue = right ? evaluate(right.root, assignment) : null;
+    const equal = right ? leftValue === rightValue : null;
+    if (leftValue) leftTrue++;
+    if (rightValue) rightTrue++;
+    if (equal === false) differences.push(index);
+    rows.push(Object.freeze({index, assignment, left: leftValue, right: rightValue, equal}));
+  }
+  return Object.freeze({
+    left, right, variables, rows: Object.freeze(rows), differences: Object.freeze(differences),
+    equivalent: right ? differences.length === 0 : null,
+    leftSummary: Object.freeze({trueRows: leftTrue, total, classification: classification(leftTrue, total)}),
+    rightSummary: right ? Object.freeze({trueRows: rightTrue, total, classification: classification(rightTrue, total)}) : null
+  });
+}
+
+/** The explicit download is rebuilt from the same current inputs and contains every row. */
+function createLogicCsv(leftText, rightText = '') {
+  const table = analyzeLogic(leftText, rightText);
+  const columns = [...table.variables, `Expression 1: ${table.left.canonical}`];
+  if (table.right) columns.push(`Expression 2: ${table.right.canonical}`, 'Same result');
+  const truth = value => value ? 'True' : 'False';
+  const cells = [columns, ...table.rows.map(row => {
+    const values = [...table.variables.map(name => truth(row.assignment[name])), truth(row.left)];
+    if (table.right) values.push(truth(row.right), row.equal ? 'Yes' : 'No');
+    return values;
+  })];
+  const text = cells.map(row => row.map(cell => `"${cell.replaceAll('"', '""')}"`).join(',')).join('\r\n') + '\r\n';
+  return Object.freeze({filename: 'recallweave-boolean-truth-table.csv', mediaType: 'text/csv;charset=utf-8', text});
+}
+
+
+/** A separate offline companion. It has no connection to a learner session or stored state. */
+function mountBooleanLogic(root, deckText) {
+  const deck = parseDeck(deckText);
+  const query = selector => root.querySelector(selector);
+  const leftInput = query('#expression-left');
+  const rightInput = query('#expression-right');
+  const filter = query('#differences-only');
+  const tableSection = query('#table-section');
+  const selectedSection = query('#selected-section');
+  const errorNode = query('#expression-error');
+  const downloadStatus = query('#download-status');
+  const csvButton = query('#download-table');
+  const witnessButton = query('#inspect-difference');
+  let analysis = null;
+  let selected = 0;
+  let lastInputs = null;
+
+  const examples = {
+    implication: ['A -> B', '', 'An implication excludes just the True → False case. Inspect that row, then compare it with the two rows where A is False.'],
+    converse: ['A -> B', 'B -> A', 'Reversing the arrow creates the converse. Two mixed assignments distinguish it from the original implication.'],
+    contrapositive: ['A -> B', 'not B -> not A', 'Reverse the arrow and negate both ends. Every assignment gives matching outputs.'],
+    demorgan: ['not (A or B)', '(not A) and (not B)', 'Negating an inclusive or requires both operands to be False. Inspect the matching columns.'],
+    inference: ['((A -> B) and A) -> B', '((A -> B) and B) -> A', 'The first expression represents modus ponens. The second affirms the consequent: find its row with true premises and a false conclusion.']
+  };
+
+  function element(tag, text, className) {
+    const node = document.createElement(tag);
+    if (text !== undefined) node.textContent = text;
+    if (className) node.className = className;
+    return node;
+  }
+  function truth(value) { return value ? 'True' : 'False'; }
+  function valueNode(value) { return element('span', truth(value), value ? 'truth true-value' : 'truth false-value'); }
+  function assignmentText(row) {
+    return analysis.variables.length
+      ? analysis.variables.map(name => `${name}=${truth(row.assignment[name])}`).join(', ')
+      : 'No variables: one constant assignment';
+  }
+  function summaryText(summary) {
+    const label = {tautology: 'Tautology', contradiction: 'Contradiction', contingent: 'Contingent'}[summary.classification];
+    return `${label} · True on ${summary.trueRows} of ${summary.total} assignments`;
+  }
+  function showSelected() {
+    const row = analysis?.rows[selected];
+    const details = query('#selected-details');
+    details.replaceChildren();
+    selectedSection.hidden = !row;
+    if (!row) return;
+    query('#selected-assignment').textContent = assignmentText(row);
+    for (const [label, expression, value] of [
+      ['Expression 1', analysis.left, row.left],
+      ...(analysis.right ? [['Expression 2', analysis.right, row.right]] : [])
+    ]) {
+      const item = element('div', undefined, 'selected-expression');
+      item.append(element('span', label, 'eyebrow'), element('code', expression.canonical), valueNode(value));
+      details.append(item);
+    }
+    query('#selected-meaning').textContent = analysis.right
+      ? row.equal ? 'The outputs agree on this assignment. Equivalence still requires agreement on every assignment.'
+        : 'The outputs differ. This assignment is a counterexample to equivalence.'
+      : 'This row evaluates the formal expression under the displayed assignment.';
+  }
+  function showRows() {
+    const head = query('#truth-head');
+    const body = query('#truth-body');
+    head.replaceChildren();
+    body.replaceChildren();
+    if (!analysis) return;
+    const headers = ['Inspect', ...analysis.variables, 'Expression 1', ...(analysis.right ? ['Expression 2', 'Same result'] : [])];
+    for (const label of headers) { const th = element('th', label); th.scope = 'col'; head.append(th); }
+    const rows = analysis.rows.filter(row => !filter.checked || row.equal === false);
+    query('#row-count').textContent = `Showing ${rows.length} of ${analysis.rows.length} assignments. Variables are alphabetical; True comes before False. CSV includes every row.`;
+    query('#no-differences').hidden = rows.length !== 0;
+    for (const row of rows) {
+      const tr = element('tr');
+      tr.dataset.row = String(row.index);
+      if (selected === row.index) tr.className = 'selected-row';
+      const selectCell = element('th');
+      selectCell.scope = 'row';
+      const button = element('button', String(row.index + 1), 'row-button');
+      button.type = 'button';
+      button.dataset.inspectRow = String(row.index);
+      button.setAttribute('aria-label', `Inspect assignment ${row.index + 1}: ${assignmentText(row)}`);
+      button.setAttribute('aria-pressed', String(selected === row.index));
+      button.addEventListener('click', () => {
+        selected = row.index;
+        showRows();
+        showSelected();
+        query(`[data-inspect-row="${row.index}"]`)?.focus();
+      });
+      selectCell.append(button);
+      tr.append(selectCell);
+      for (const value of [...analysis.variables.map(name => row.assignment[name]), row.left, ...(analysis.right ? [row.right] : [])]) {
+        const td = element('td'); td.append(valueNode(value)); tr.append(td);
+      }
+      if (analysis.right) tr.append(element('td', row.equal ? 'Yes' : 'No — counterexample', row.equal ? '' : 'different-result'));
+      body.append(tr);
+    }
+  }
+  function clearResults() {
+    analysis = null;
+    selected = null;
+    tableSection.hidden = true;
+    selectedSection.hidden = true;
+    query('#truth-head').replaceChildren();
+    query('#truth-body').replaceChildren();
+    query('#selected-details').replaceChildren();
+    for (const id of ['#left-canonical', '#right-canonical', '#left-summary', '#right-summary', '#comparison-verdict', '#selected-assignment', '#selected-meaning', '#row-count']) query(id).textContent = '';
+    query('#right-result').hidden = true;
+    query('#no-differences').hidden = true;
+    csvButton.disabled = true;
+    witnessButton.disabled = true;
+    filter.disabled = true;
+    filter.checked = false;
+  }
+  function refresh() {
+    const inputs = [leftInput.value, rightInput.value];
+    const changed = !lastInputs || inputs.some((text, index) => text !== lastInputs[index]);
+    lastInputs = inputs;
+    if (changed) { selected = 0; filter.checked = false; downloadStatus.textContent = ''; }
+    leftInput.removeAttribute('aria-invalid');
+    rightInput.removeAttribute('aria-invalid');
+    errorNode.textContent = '';
+    try {
+      analysis = analyzeLogic(...inputs);
+      tableSection.hidden = false;
+      csvButton.disabled = false;
+      filter.disabled = !analysis.right;
+      witnessButton.disabled = analysis.differences.length === 0;
+      query('#left-canonical').textContent = analysis.left.canonical;
+      query('#left-summary').textContent = summaryText(analysis.leftSummary);
+      query('#right-result').hidden = !analysis.right;
+      query('#right-canonical').textContent = analysis.right?.canonical ?? '';
+      query('#right-summary').textContent = analysis.rightSummary ? summaryText(analysis.rightSummary) : '';
+      query('#comparison-verdict').textContent = analysis.right
+        ? analysis.equivalent ? `Equivalent: the outputs match on all ${analysis.rows.length} assignments.`
+          : `Not equivalent: the outputs differ on ${analysis.differences.length} of ${analysis.rows.length} assignments.`
+        : 'One expression: inspect its complete truth table.';
+      if (filter.checked && analysis.rows[selected]?.equal !== false) selected = analysis.differences[0] ?? null;
+      showRows();
+      showSelected();
+    } catch (error) {
+      clearResults();
+      errorNode.textContent = error instanceof LogicInputError ? error.message : 'The expressions could not be evaluated. Check the inputs and try again.';
+      (error.field === 'right' ? rightInput : leftInput).setAttribute('aria-invalid', 'true');
+    }
+  }
+  function requestDownload(file) {
+    let url;
+    try {
+      url = URL.createObjectURL(new Blob([file.text], {type: file.mediaType}));
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = file.filename;
+      document.body.append(link);
+      try { link.click(); } finally { link.remove(); }
+      downloadStatus.textContent = `Download requested: ${file.filename}. Check your browser's downloads.`;
+    } catch {
+      downloadStatus.textContent = 'The download could not be prepared. Your expressions are still here; try again.';
+    } finally {
+      if (url) setTimeout(() => URL.revokeObjectURL(url), 10000);
+    }
+  }
+
+  for (const input of [leftInput, rightInput]) input.addEventListener('input', () => {
+    query('#example-note').textContent = 'Your expressions. The grouped forms below show exactly how they are read.';
+    refresh();
+  });
+  filter.addEventListener('change', refresh);
+  witnessButton.addEventListener('click', () => {
+    if (!analysis?.differences.length) return;
+    selected = analysis.differences[0];
+    showRows(); showSelected();
+    query(`[data-inspect-row="${selected}"]`)?.focus();
+  });
+  for (const button of root.querySelectorAll('[data-example]')) button.addEventListener('click', () => {
+    const example = examples[button.dataset.example];
+    leftInput.value = example[0];
+    rightInput.value = example[1];
+    query('#example-note').textContent = example[2];
+    refresh();
+  });
+  csvButton.addEventListener('click', () => {
+    if (!analysis) return;
+    // Re-read current controls: a programmatic value change must not download an old table.
+    refresh();
+    if (analysis) requestDownload(createLogicCsv(leftInput.value, rightInput.value));
+  });
+  query('#download-course').addEventListener('click', () => requestDownload({
+    filename: 'boolean-logic.json', mediaType: 'application/json;charset=utf-8', text: deckText
+  }));
+  query('#course-title').textContent = deck.title;
+  query('#course-attribution').textContent = deck.attribution;
+  query('#course-license').textContent = deck.license;
+  query('#course-count').textContent = `${deck.items.length} questions · ${deck.concepts.length} connected concepts`;
+  refresh();
+}
+
+mountBooleanLogic(document.querySelector('#logic-app'), BOOLEAN_COURSE_TEXT);
+  </script>
+</body>
+</html>
