@@ -184,3 +184,9 @@ AI assistance was used to develop and test the implementation and to draft origi
 ## Status and unresolved gates
 
 This public source repository supports the ForgeHacks 2026 demo. The Devpost account and join status for jacobsmetoyer@gmail.com are not verified; no contest join, terms acceptance, upload, or submission was made. Before submitting, confirm eligibility and the live entry form’s required fields, disclosure format, and deadline; this offline demo is not evidence of learning efficacy.
+
+## Explore stable sorting
+
+Open [Sorting with equal keys](stable-sorting.html) directly from disk to compare complete insertion and selection traces on the same 2–8 records. Numbered input identities make equal-key crossings visible; each panel shows declared comparisons and exchanges, with algorithm guarantees separate from the final tie order observed for that input. Edits retire the current run, and the complete-comparison JSON download includes both full traces.
+
+The explorer also downloads the exact original [twelve-question sorting course](courses/stable-sorting.json). Import it through the learner’s course picker, inspect the preview and choose **Start this deck** to begin. The [course guide](courses/stable-sorting.md) explains the worked example, review/practice flow, study-notes downloads and primary conceptual references. The [modular explorer](stable-sorting/index.html) works under the existing static server; rebuild the standalone file with `node tools/make_stable_sorting.mjs`.
