@@ -357,3 +357,11 @@ Build with `node tools/build_least_squares.mjs`; `--check` verifies the generate
 ## Mathematical induction: a base, a bridge, every integer
 
 [Open the offline proof lab](courses/mathematical-induction-lab.html), download the [twelve-question lesson](courses/mathematical-induction.json), or read the [worked guide](courses/mathematical-induction.md). Compare an arithmetic sum with a proposed formula, inspect the exact base and symbolic successor step, and see why a few matching values do not prove every case. The lab keeps its finite examples separate from the induction argument and saves an explicit proof record. Import its lesson JSON through the existing learner preview and Start this deck controls.
+
+## Discrete Fourier: coefficients and reconstruction
+
+Open the **[offline Fourier lab](courses/discrete-fourier-lab.html)** to enter 4, 8 or 16 real samples, inspect every complex coefficient, and reconstruct the finite sample grid from selected conjugate pairs. Compare the original and reconstructed points, residuals and normalization-aware energy values. DC and Nyquist remain single-bin selections; unresolved phase is labeled rather than assigned a confident angle.
+
+The **[worked guide](courses/discrete-fourier.md)** connects the existing sampling and phasor lessons to four experiments. Download the original **[twelve-question course](courses/discrete-fourier.json)** from the lab, then use **Bring your own lesson**, preview it and select **Start this deck** in the unchanged learner. A separate analysis JSON records the numerical inputs, pair selection and raw calculations. The lab runs from a local file with no network requests or automatic saving; it does not infer a continuous signal between samples.
+
+Rebuild only this lab with `node tools/build-discrete-fourier.mjs`, or verify its committed artifact with `--check`. Run its focused regression checks with `node --test tests/discrete-fourier.test.mjs tests/discrete-fourier-course.test.mjs`.

@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Discrete Fourier lab · RecallWeave</title>
+<style>
+:root{color-scheme:light;--ink:#142938;--muted:#496171;--paper:#f6f7f2;--card:#fff;--line:#cdd7d8;--teal:#006e67;--orange:#ab410c;--wash:#e6f3ee;--focus:#8e3505}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif}a{color:var(--teal);text-underline-offset:3px}button,input,select,textarea{font:inherit}button,a,select,input,textarea{touch-action:manipulation}button{padding:.65rem 1rem;border:1px solid var(--teal);border-radius:6px;background:var(--teal);color:white;cursor:pointer;font-weight:650}button.secondary{background:white;color:var(--teal)}button:disabled{opacity:.55;cursor:not-allowed}button:hover:enabled{filter:brightness(.93)}:focus-visible{outline:3px solid var(--focus);outline-offset:3px}header{background:#132e3b;color:#fff;padding:2.2rem max(1rem,calc((100vw - 1200px)/2)) 2.6rem}header a{color:#a8e6d6}.brand{display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;font-size:.9rem;letter-spacing:.03em}.eyebrow{text-transform:uppercase;letter-spacing:.14em;font-weight:650;font-size:.75rem;margin:2rem 0 .5rem;color:#b4d8d5}h1{font-size:clamp(2rem,5vw,3.4rem);line-height:1.12;margin:.4rem 0 1rem;max-width:22ch;letter-spacing:-.035em}header p{max-width:65ch;color:#d6e5e9;margin-bottom:0}main{max-width:1232px;margin:auto;padding:1.5rem 1rem 3rem}h2{font-size:1.35rem;line-height:1.3;margin:0 0 1rem}h3{font-size:1rem;margin:0 0 .7rem}.intro{display:flex;gap:1rem;justify-content:space-between;align-items:center;flex-wrap:wrap;margin:0 0 1.5rem}.intro p{margin:0;color:var(--muted)}.actions{display:flex;gap:.6rem;flex-wrap:wrap}.layout{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:1.25rem;align-items:start}.layout>div{min-width:0}.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:1.3rem;min-width:0;margin:0 0 1.25rem}.step{display:inline-grid;place-items:center;width:1.65rem;height:1.65rem;border-radius:50%;background:var(--wash);color:var(--teal);font-size:.9rem;margin-right:.4rem}.field{display:grid;gap:.35rem;margin:1rem 0}label,legend{font-weight:650}select,textarea{width:100%;border:1px solid #84999e;background:#fff;color:var(--ink);padding:.65rem;border-radius:5px}textarea{min-height:6.1rem;resize:vertical;font:15px/1.6 ui-monospace,monospace}textarea[aria-invalid=true]{border:2px solid #a52828}.help,.small{font-size:.87rem;color:var(--muted)}.help{margin:.3rem 0}.status{min-height:1.6em;margin:.8rem 0 0;color:var(--teal);font-weight:600}.status.error{color:#a52828}.aside{background:#e9efec}.aside p{font-size:.92rem}.aside ol{padding-left:1.3rem}.aside li{margin:.75rem 0}.formula{overflow-wrap:anywhere;background:#fff;padding:.8rem;border-radius:6px;font-family:ui-monospace,monospace;font-size:.82rem}.pill{display:inline-block;color:var(--teal);background:var(--wash);font-size:.8rem;font-weight:650;border-radius:99px;padding:.15rem .6rem}.metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.7rem;margin:1rem 0}.metric{background:#f0f5f3;border-radius:6px;padding:.85rem}.metric dt{font-size:.8rem;line-height:1.35;color:var(--muted)}.metric dd{font:650 1.3rem/1.6 ui-monospace,monospace;margin:.25rem 0 0;overflow-wrap:anywhere}.legend{display:flex;gap:1rem;flex-wrap:wrap;font-size:.85rem}.legend span::before{content:"";display:inline-block;width:.7rem;height:.7rem;margin-right:.4rem;background:var(--teal);border-radius:50%}.legend span:last-child::before{background:transparent;border:2px solid var(--orange);border-radius:0}figure{margin:1rem 0}svg{width:100%;height:auto;display:block}figcaption{font-size:.84rem;color:var(--muted);margin:.3rem 0}.pair-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:.5rem;margin:.8rem 0}.pair-choice{display:flex;align-items:center;gap:.5rem;border:1px solid var(--line);border-radius:6px;padding:.55rem;font-size:.88rem;font-weight:500}.pair-choice:has(input:checked){background:var(--wash);border-color:#629a90}.pair-choice input{accent-color:var(--teal);width:1.15rem;height:1.15rem;flex:none}fieldset{border:0;padding:0;margin:0;min-width:0}legend{padding:0}.table-scroll{overflow-x:auto;border:1px solid var(--line);border-radius:6px;max-width:100%;margin:.8rem 0}table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;font-size:.87rem;white-space:nowrap}th,td{text-align:right;padding:.6rem .7rem;border-bottom:1px solid #e3e9e8}th{background:#f0f5f3;color:var(--muted);font-weight:650}th:first-child,td:first-child{text-align:left}caption{text-align:left;white-space:normal;padding:.65rem;font-weight:650}tbody tr:last-child td{border-bottom:0}tbody tr[data-selected=false]{color:#617179;background:#f8f9f7}summary{cursor:pointer;font-weight:650;padding:.5rem 0}details{margin:.8rem 0}code{font-family:ui-monospace,monospace;font-size:.9em}.note{border-left:3px solid var(--teal);padding:.2rem 0 .2rem .9rem;font-size:.9rem;color:var(--muted)}footer{border-top:1px solid var(--line);padding-top:1rem;color:var(--muted);font-size:.85rem;margin-top:1.5rem}[hidden]{display:none!important}
+@media(max-width:850px){.layout{grid-template-columns:minmax(0,1fr)}.aside{order:2}.metrics{grid-template-columns:repeat(2,minmax(0,1fr))}header{padding:1.5rem 1rem 2rem}.eyebrow{margin-top:1.5rem}}
+@media(max-width:420px){.card{padding:1rem}.metric{padding:.7rem}.metric dd{font-size:1.1rem}.actions button{flex:1}main{padding:1rem .65rem 2rem}.pair-grid{grid-template-columns:1fr}.brand{font-size:.85rem}}
+</style>
+</head>
+<body>
+<header>
+<div class="brand"><strong>RecallWeave / Signal notebook</strong><a href="../demo.html">Open lesson learner ↗</a></div>
+<p class="eyebrow">Finite samples · Interactive lab</p>
+<h1>A signal, taken apart.<br>A sample grid, built back.</h1>
+<p>Inspect the discrete Fourier coefficients of a small array. Keep or drop frequency pairs, then see exactly what changes at each sample position.</p>
+</header>
+<main>
+<div class="intro"><p><span class="pill">Offline · No automatic saving</span> A lab plus a 12-question lesson.</p><div class="actions"><a href="discrete-fourier.md">Worked guide</a><button id="download-deck" class="secondary" type="button">Download lesson deck</button></div></div>
+<div class="layout">
+<div>
+<section class="card" aria-labelledby="input-title">
+<h2 id="input-title"><span class="step">1</span> Choose a sample grid</h2>
+<form id="sample-form" novalidate>
+<div class="field"><label for="preset">Start with an example</label><select id="preset">
+<option value="mixture">Offset + two tones (8 samples)</option><option value="impulse">Impulse (8 samples)</option><option value="constant">Constant (4 samples)</option><option value="alternating">Alternating (8 samples)</option><option value="zero">Zero (4 samples)</option>
+</select></div>
+<div class="field"><label for="samples">Real samples, in order</label><textarea id="samples" spellcheck="false" aria-describedby="sample-help status"></textarea><p id="sample-help" class="help">Exactly 4, 8 or 16 numbers, each from −1000 to 1000. Use commas or spaces. Scientific notation works; enter 0.5 instead of 1/2.</p></div>
+<div class="actions"><button type="submit">Analyze samples</button><button id="reset" class="secondary" type="button">Reset example</button></div>
+<p id="status" class="status" role="status" aria-live="polite"></p>
+</form>
+</section>
+<div id="results" hidden>
+<section class="card" aria-labelledby="pairs-title">
+<h2 id="pairs-title"><span class="step">2</span> Keep the pieces you want</h2>
+<fieldset><legend>Frequency pairs included in reconstruction</legend><p class="help">Interior p keeps p and N−p together. DC and Nyquist each keep one bin.</p><div class="pair-grid" id="pairs"></div></fieldset>
+<div class="actions"><button id="all-pairs" class="secondary" type="button">Keep all pairs</button><button id="no-pairs" class="secondary" type="button">Keep no pairs</button></div>
+<figure><svg id="spectrum-chart" viewBox="0 0 720 220" role="img" aria-labelledby="spectrum-title spectrum-desc"></svg><figcaption>Raw coefficient magnitudes |X[k]|. Green bins are retained; gray bins are omitted. A bin magnitude is not a sample amplitude.</figcaption></figure>
+</section>
+<section class="card" aria-labelledby="reconstruct-title">
+<h2 id="reconstruct-title"><span class="step">3</span> Compare the reconstructed grid</h2>
+<p id="selection-summary" class="note"></p>
+<dl class="metrics">
+<div class="metric"><dt>RMS residual</dt><dd id="rms"></dd></div>
+<div class="metric"><dt>Maximum real residual</dt><dd id="max-error"></dd></div>
+<div class="metric"><dt>Input energy Σx²</dt><dd id="input-energy"></dd></div>
+<div class="metric"><dt>Full coefficient energy Σ|X|²/N</dt><dd id="coefficient-energy"></dd></div>
+</dl>
+<div class="legend"><span>Entered samples</span><span>Reconstruction</span></div>
+<figure><svg id="sample-chart" viewBox="0 0 720 280" role="img" aria-labelledby="sample-chart-title sample-chart-desc"></svg><figcaption>Only the N sample positions are shown. No connecting curve or unknown values between samples are inferred.</figcaption></figure>
+<p class="small">Selected reconstruction energy: <strong id="selected-energy"></strong>. Maximum imaginary residual: <strong id="imaginary-error"></strong>. Error = reconstructed real value − entered sample.</p>
+<details><summary>Inspect every sample and residual</summary><div class="table-scroll" tabindex="0" role="region" aria-label="Sample comparison table"><table><caption>Original and reconstructed values on the finite grid</caption><thead><tr><th scope="col">n</th><th scope="col">Entered</th><th scope="col">Reconstructed real</th><th scope="col">Error</th><th scope="col">Imaginary</th></tr></thead><tbody id="sample-rows"></tbody></table></div></details>
+<details open><summary>Inspect coefficients and phase</summary><p id="phase-note" class="small"></p><div class="table-scroll" tabindex="0" role="region" aria-label="Fourier coefficient table"><table><caption>Unscaled forward coefficients — displayed numbers are rounded</caption><thead><tr><th scope="col">Bin k</th><th scope="col">Kept</th><th scope="col">Real</th><th scope="col">Imaginary</th><th scope="col">Magnitude</th><th scope="col">Phase (radians)</th></tr></thead><tbody id="bin-rows"></tbody></table></div></details>
+<div class="actions"><button id="download-analysis" class="secondary" type="button">Download analysis JSON</button></div>
+<p class="help">Includes the numerical samples, selected pairs, raw coefficients, residuals and energy values. Download only when you want a record.</p>
+</section>
+</div>
+</div>
+<aside class="card aside" aria-labelledby="try-title">
+<h2 id="try-title">Predict. Change. Explain.</h2>
+<ol>
+<li><strong>Find the mean.</strong> Choose Constant. Predict DC, then remove it. Why does the reconstruction change from 3 to approximately 0?</li>
+<li><strong>Keep a pair.</strong> Enter <code>1, 0, -1, 0</code>. Keep pair 1. How do two magnitudes of 2 rebuild samples of amplitude 1?</li>
+<li><strong>Find a singleton.</strong> Choose Alternating. Keep only Nyquist. Why does it need no second bin?</li>
+<li><strong>Explain the loss.</strong> Return to the mixture. Drop a pair and use the RMS residual to describe what the reconstruction leaves out.</li>
+</ol>
+<h3>One convention throughout</h3>
+<p class="formula">X[k] = Σ x[n] e<sup>−i2πkn/N</sup><br>y[n] = (1/N) Σ<sub>selected k</sub> X[k] e<sup>+i2πkn/N</sup></p>
+<p>The forward sum is unscaled. The inverse divides by N. For real samples, partners k and N−k are complex conjugates, apart from numerical roundoff.</p>
+<h3>What this can tell you</h3>
+<p>It compares a finite array with a reconstruction on that same grid. Bin k represents k/N cycles per sample before interpreting negative-frequency partners. No sampling rate is supplied, so the lab does not assign hertz or infer a continuous signal.</p>
+<h3>Continue in RecallWeave</h3>
+<p>Download the lesson deck, <a href="../demo.html">open the learner</a>, and choose the JSON file in its lesson selector. The four concepts and 12 questions use the existing learning flow.</p>
+</aside>
+</div>
+<footer>Original RecallWeave lesson · <a href="discrete-fourier.md">Worked examples, numerical limits and reference</a>. Runs in this page without a network connection, account or automatic browser storage. Floating-point results are approximations; tiny squared energies may underflow.</footer>
+<noscript><p class="card">JavaScript is required for this lab. The worked guide and JSON lesson deck remain available as files.</p></noscript>
+</main>
+<script>
+'use strict';
+const fourierDeckText = /* FOURIER_DECK_TEXT */;
+/* FOURIER_MODEL */
+/* FOURIER_UI */
+</script>
+</body>
+</html>
