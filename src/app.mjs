@@ -4,6 +4,7 @@ import { validateDeck } from './deck.mjs';
 import { mountDeckPicker } from './deck-picker.mjs';
 import { createStudyNotes } from './session-export.mjs';
 import { mountTraceArchive } from './trace-archive-ui.mjs';
+import { mountLessonArchive } from './lesson-archive-ui.mjs';
 import { APPLICATION_PROMPT, createReflections, itemReflection, updateReflection, updateApplicationReflection } from './reflections.mjs';
 import { orderOptions } from './answer-order.mjs';
 
@@ -23,6 +24,10 @@ let review = null;
 let practice = null;
 let inPractice = false;
 let traceArchiveControls = null;
+let lessonArchiveControls = null;
+let lessonPhase = null;
+let lessonItemId = null;
+let lessonSessionRevision = 0;
 const progressFill = document.querySelector('#progress-fill');
 const progressTrack = document.querySelector('[role="progressbar"]');
 const stepLabel = document.querySelector('#step-label');
@@ -57,6 +62,7 @@ function renderDeckContext() {
 }
 
 function resetSession(nextDeck = deck) {
+  lessonSessionRevision++;
   deck = nextDeck;
   reflections = createReflections(deck.items);
   concepts = deck.concepts;
@@ -68,6 +74,8 @@ function resetSession(nextDeck = deck) {
   practice = null;
   inPractice = false;
   root.innerHTML = welcomeMarkup;
+  lessonPhase = null;
+  lessonItemId = null;
   root.querySelector('.simulation-launch').hidden = deck !== bundledDeck;
   bindWelcome();
   renderDeckContext();
@@ -79,6 +87,7 @@ function resetSession(nextDeck = deck) {
 
 function setProgress() {
   traceArchiveControls?.refresh();
+  lessonArchiveControls?.refresh();
   const count = inPractice ? practice.answers.length : answers.length;
   const total = inPractice ? practice.items.length : deck.items.length;
   stepCount.textContent = `${count} / ${total}`;
@@ -101,18 +110,29 @@ function conceptLabel(concept) {
 function renderQuestion() {
   const item = selectNextItem(deck.items, asked, mastery);
   if (!item) return renderResults();
+  renderLessonQuestion(item);
+}
+function renderLessonQuestion(item, restoredAnswer = null) {
   asked.add(item.id);
-  root.innerHTML = `<article class="question-card"><div class="question-type">CONNECTION ${String(answers.length + 1).padStart(2, '0')} · ${escapeHtml(conceptLabel(item.concept).toUpperCase())}</div><h2>${escapeHtml(item.prompt)}</h2><p class="prompt">Choose the best explanation, then connect it to the larger idea.</p><div class="choices" role="group" aria-label="Answer options">${optionOrders.get(item.id).map((choice, position) => `<button class="choice" data-choice="${choice}"><span class="choice-key">${String.fromCharCode(65+position)}</span>${escapeHtml(item.options[choice])}</button>`).join('')}</div><div id="feedback-slot"></div>${renderMastery()}</article>`;
+  lessonPhase = 'question';
+  lessonItemId = item.id;
+  root.innerHTML = `<article class="question-card"><div class="question-type">CONNECTION ${String(answers.length + (restoredAnswer ? 0 : 1)).padStart(2, '0')} · ${escapeHtml(conceptLabel(item.concept).toUpperCase())}</div><h2>${escapeHtml(item.prompt)}</h2><p class="prompt">Choose the best explanation, then connect it to the larger idea.</p><div class="choices" role="group" aria-label="Answer options">${optionOrders.get(item.id).map((choice, position) => `<button class="choice" data-choice="${choice}"><span class="choice-key">${String.fromCharCode(65+position)}</span>${escapeHtml(item.options[choice])}</button>`).join('')}</div><div id="feedback-slot"></div>${renderMastery()}</article>`;
   root.querySelectorAll('[data-choice]').forEach(button => button.addEventListener('click', () => submitAnswer(item, Number(button.dataset.choice))));
   const first = root.querySelector('[data-choice]');
   first?.focus({preventScroll:true});
   setProgress();
+  if (restoredAnswer) renderAnswerFeedback(item, restoredAnswer.choice, restoredAnswer.correct);
 }
 function submitAnswer(item, choice) {
   if (answers.some(answer => answer.item === item.id)) return;
   const correct = choice === item.answer;
   answers.push(Object.freeze({item: item.id, concept:item.concept, choice, correct}));
   mastery[item.concept] = updateMastery(mastery[item.concept] ?? DEFAULT_BKT.initial, correct);
+  renderAnswerFeedback(item, choice, correct);
+}
+function renderAnswerFeedback(item, choice, correct) {
+  lessonPhase = 'feedback';
+  lessonItemId = item.id;
   root.querySelectorAll('[data-choice]').forEach(button => {
     button.disabled = true;
     const selected = Number(button.dataset.choice);
@@ -134,6 +154,8 @@ function applicationPrompt() {
 }
 
 function renderResults() {
+  lessonPhase = null;
+  lessonItemId = null;
   inPractice = false;
   review ??= createReview(deck.items, answers);
   const correct = answers.filter(answer => answer.correct).length;
@@ -253,6 +275,30 @@ mountDeckPicker(document.querySelector('#deck-picker'), bundledDeck, nextDeck =>
   renderQuestion();
 });
 bindWelcome();
+lessonArchiveControls = mountLessonArchive({
+  container: document.querySelector('#lesson-archive'),
+  // Match the active source identity used by completed learning traces.
+  getDeck: () => deck === bundledDeck ? bundledSource : deck,
+  getSessionRevision: () => lessonSessionRevision,
+  getLesson: () => ({answers, mastery, presentation: {
+    phase: lessonPhase, itemId: lessonItemId, optionOrders: Object.fromEntries(optionOrders)
+  }}),
+  resumeLesson: state => {
+    answers.splice(0, answers.length, ...state.answers);
+    asked.clear();
+    for (const answer of state.answers) asked.add(answer.item);
+    Object.assign(mastery, state.mastery);
+    optionOrders.clear();
+    for (const [id, order] of Object.entries(state.presentation.optionOrders)) optionOrders.set(id, [...order]);
+    review = null;
+    practice = null;
+    inPractice = false;
+    if (state.presentation.phase === 'feedback') {
+      const item = deck.items.find(candidate => candidate.id === state.presentation.itemId);
+      renderLessonQuestion(item, state.answers[state.answers.length - 1]);
+    } else renderQuestion();
+  }
+});
 traceArchiveControls = mountTraceArchive({
   container: document.querySelector('#trace-archive'),
   // Keep the bundled course identity compatible with traces saved before local imports.

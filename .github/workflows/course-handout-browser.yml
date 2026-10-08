@@ -1,0 +1,98 @@
+name: course-handout-browser
+
+on:
+  pull_request:
+    paths:
+      - 'handout/**'
+      - 'handout.html'
+      - 'src/course-handout*.mjs'
+      - 'src/deck.mjs'
+      - 'author/**'
+      - 'author.html'
+      - 'src/deck-author*.mjs'
+      - 'tools/make_handout.py'
+      - 'tools/make_author.py'
+      - 'tools/check_course_handout_browser.mjs'
+      - 'docs/receiving/course-handout-7879c2abc07f/fixture.json'
+      - '.github/workflows/course-handout-browser.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'handout/**'
+      - 'handout.html'
+      - 'src/course-handout*.mjs'
+      - 'src/deck.mjs'
+      - 'author/**'
+      - 'author.html'
+      - 'src/deck-author*.mjs'
+      - 'tools/make_handout.py'
+      - 'tools/make_author.py'
+      - 'tools/check_course_handout_browser.mjs'
+      - 'docs/receiving/course-handout-7879c2abc07f/fixture.json'
+      - '.github/workflows/course-handout-browser.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  receive-handout:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4, inherited project pin
+      - name: Require cached Node 22 and an installed system browser
+        id: native
+        shell: bash
+        run: |
+          set -euo pipefail
+          HANDOUT_NODE_VERSION=
+          for HANDOUT_NODE_DIR in "${RUNNER_TOOL_CACHE}/node"/22.*; do
+            if [[ -x "${HANDOUT_NODE_DIR}/x64/bin/node" && -f "${HANDOUT_NODE_DIR}/x64.complete" ]]; then
+              HANDOUT_NODE_VERSION="${HANDOUT_NODE_DIR##*/}"
+            fi
+          done
+          [[ -n "${HANDOUT_NODE_VERSION}" ]] || { echo "A complete cached Node 22 is required; no runtime will be installed."; exit 1; }
+          printf 'node=%s\n' "${HANDOUT_NODE_VERSION}" >> "${GITHUB_OUTPUT}"
+          HANDOUT_BROWSER=
+          for HANDOUT_BROWSER_NAME in google-chrome google-chrome-stable chromium chromium-browser; do
+            if command -v "${HANDOUT_BROWSER_NAME}" >/dev/null 2>&1; then
+              HANDOUT_BROWSER="$(command -v "${HANDOUT_BROWSER_NAME}")"
+              break
+            fi
+          done
+          [[ -n "${HANDOUT_BROWSER}" ]] || { echo "An installed Chrome/Chromium is required; no browser will be installed."; exit 1; }
+          printf 'browser=%s\n' "${HANDOUT_BROWSER}" >> "${GITHUB_OUTPUT}"
+          "${HANDOUT_BROWSER}" --version
+          command -v python3
+          if command -v pdftotext >/dev/null 2>&1; then pdftotext -v; else echo "pdftotext unavailable; PDF artifacts require separate direct inspection."; fi
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4, inherited project pin
+        with:
+          node-version: ${{ steps.native.outputs.node }}
+      - name: Install and identify the standard CJK print font
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends fonts-noto-cjk
+          dpkg-query -W -f='${binary:Package} ${Version}\n' fonts-noto-cjk
+          command -v fc-match
+          HANDOUT_JP_FONT_FAMILY="$(fc-match --format='%{family}\n' 'sans-serif:lang=ja')"
+          HANDOUT_JP_FONT_FILE="$(fc-match --format='%{file}\n' 'sans-serif:lang=ja')"
+          printf 'Japanese font family: %s\nJapanese font file: %s\n' "${HANDOUT_JP_FONT_FAMILY}" "${HANDOUT_JP_FONT_FILE}"
+          [[ "${HANDOUT_JP_FONT_FAMILY}" == *"Noto Sans CJK JP"* ]]
+          [[ -f "${HANDOUT_JP_FONT_FILE}" ]]
+          dpkg-query -S -- "${HANDOUT_JP_FONT_FILE}"
+          sha256sum -- "${HANDOUT_JP_FONT_FILE}"
+      - name: Receive actual studio, file selection, separate downloads and print artifacts
+        run: node tools/check_course_handout_browser.mjs --browser "${{ steps.native.outputs.browser }}" --output "${RUNNER_TEMP}/course-handout-receiving"
+      - name: Verify the direct-open teacher page matches its modular sources
+        run: python3 tools/make_handout.py --check
+      - name: Preserve bounded original browser and print artifacts
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4, verified from the official tag
+        with:
+          name: course-handout-receiving-${{ github.run_id }}
+          path: ${{ runner.temp }}/course-handout-receiving
+          if-no-files-found: warn
+          retention-days: 14
+          compression-level: 6

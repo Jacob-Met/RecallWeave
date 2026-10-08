@@ -12,6 +12,12 @@ Open **[When groups and totals disagree](courses/grouped-data-explorer.html)** f
 
 The [worked guide](courses/grouped-data.md) includes the assumptions, missing-rate behavior and derivations. To study its original [twelve-question course](courses/grouped-data.json), save the JSON file and open it through **Bring your own lesson** in RecallWeave. The explorer itself opens directly without a server or account.
 
+### Make a course handout
+
+Open [Course handouts](handout.html), choose a checked local deck JSON, review its title and source credit, then select **Use this deck**. Print or save an unanswered worksheet for learners and an explicitly separate answer key with the correct choices and authored explanations. Both keep the original question and option order, literal wording, attribution and permission; transfer prompts leave room for a written response because the deck supplies no separate transfer answer.
+
+Each saved HTML file opens and prints offline on its own. The worksheet file contains questions only; the teacher’s builder and the separate key receive the full checked deck. Cancelling a selection or choosing an invalid file leaves the current handout in place. This is a separate preparation flow; it does not start or change a learning session. Modular source lives in `handout/` and `src/course-handout*.mjs`; rebuild `handout.html` with `python3 tools/make_handout.py`, or verify it with `--check`.
+
 ## Core and interaction
 
 - `src/knowledge.mjs` implements a transparent BKT update: initial knowledge, learning transition, guess, and slip are explicit probabilities. It also computes binary entropy and expected information gain.
@@ -79,6 +85,14 @@ After the first session, choose **Download study notes (.txt)** to save a readab
 The file also includes the latest question reflections and application response, explicitly labeled as the learner's writing rather than scored answers. Blank fields are marked as unwritten. Multiline writing is indented with `>` so it stays distinguishable from the original questions and explanations.
 
 The download works offline in both the modular app and `demo.html`. It saves a UTF-8 text file through the browser's normal download flow. It does not upload the session or restore it after a refresh. Model estimates remain labeled as model state rather than grades, and practice never replaces the original answers.
+
+### Save and resume an unfinished lesson
+
+Open **Save or resume an unfinished lesson** to download your current question or feedback, first answers, model estimates, and answer display order. You can save immediately after starting, before answering anything. Saving leaves the lesson open.
+
+On another visit, open the same course and choose the saved lesson file. For a local course, first choose its deck file and select **Start this deck**. Previewing a saved lesson does not load course content or change your current answers; **Resume this lesson** explicitly replaces the current lesson and practice progress. A resumed feedback screen keeps the original answer and estimate, then continues with the next unanswered question. Starting any deck, restarting the current course, answering, or moving to the next question cancels an outdated pending restore.
+
+The bounded JSON file includes course content and a consistent first-answer history. It is not proof of identity, effort, or learning. A changed course or learning model is refused. After the last first answer, use the completed learning trace below, which also preserves practice answers.
 
 ### Save and restore a learning trace
 
