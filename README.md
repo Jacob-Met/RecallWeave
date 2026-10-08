@@ -6,6 +6,12 @@
 
 Open `demo.html` directly in a browser—no server, install, build step, internet, login, API key, or user data storage is required. It is a single self-contained file with embedded CSS, JavaScript and deck. The modular source is in `index.html`, `src/`, and `data/`; to test that version locally, serve this directory with `python3 -m http.server 8080` and visit `http://localhost:8080`. Rebuild the direct-open demo with `python3 tools/make_demo.py` after source changes. No hosted endpoint is called by either version.
 
+## Find the directions a matrix preserves
+
+Open **[When a transformation stays on a line](courses/eigen-directions-explorer.html)** directly in a browser. Enter a small integer 2×2 matrix and a nonzero integer vector, then select **Apply experiment** to compare the input with its transformed output. An exact collinearity check decides whether the probe is an eigenvector; the diagram shows approximate eigenlines on equally scaled axes. Negative and zero eigenvalues, a repeated root with one eigenline, scalar matrices, irrational roots and a rotation with no real eigenline have explicit examples.
+
+Pending edits keep the accepted experiment visible with its matrix and vector. Download that applied calculation, the original [fourteen-question course](courses/eigen-directions.json), or its [worked guide](courses/eigen-directions.md). Import the course through **Bring your own lesson** for the existing review, practice and notes flow. The page works offline without a server, account or automatic browser storage. Rebuild it with `node tools/build-eigen-directions.mjs`; use `--check` to verify exact source, course and guide parity.
+
 ## Trace a maximum flow
 
 Open **[More flow needs a way through](courses/network-flow-explorer.html)** directly in a browser to follow a small directed capacity network from zero assignment to a matching flow-and-cut certificate. Inspect each breadth-first residual path, including cancellation of an earlier edge assignment, and keep independently supplied opposite edges distinct. The original-edge, residual and conservation tables expose every integer value.

@@ -1,0 +1,502 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>Eigen directions — RecallWeave</title>
+<style>
+:root{--ink:#182735;--muted:#4b5f6b;--paper:#f5f4ed;--panel:#fff;--edge:#ced7d6;--blue:#165d9e;--pink:#a82c68;--gold:#95690f;--navy:#122a3b;--good:#195b44}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.55 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+a{color:var(--blue)}button,input,select{font:inherit}button,input,select,a{touch-action:manipulation}button{max-width:100%;white-space:normal;cursor:pointer;border:1px solid var(--navy);border-radius:.5rem;padding:.66rem .85rem;background:var(--navy);color:white;font-weight:650}button.secondary{background:white;color:var(--navy);border-color:#9baeb7}button:hover{filter:brightness(.94)}button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible,summary:focus-visible{outline:3px solid #cc761a;outline-offset:3px}
+input,select{border:1px solid #8196a2;border-radius:.35rem;background:white;color:var(--ink);padding:.5rem;min-width:0;width:100%}input{text-align:center;font-variant-numeric:tabular-nums}select{font-size:.92rem}
+.skip{position:absolute;top:-8rem;left:1rem;background:white;padding:.5rem;z-index:2}.skip:focus{top:.5rem}
+header{background:var(--navy);color:white;padding:2.4rem max(1rem,calc((100vw - 1220px)/2)) 2rem;border-bottom:6px solid #d3b667}
+.eyebrow{font-size:.78rem;letter-spacing:.17em;text-transform:uppercase;color:#b8d5df;margin:0 0 .65rem;font-weight:700}h1{font-size:clamp(2rem,5vw,3.5rem);letter-spacing:-.04em;line-height:1.05;margin:0 0 .85rem;max-width:22ch}header p:last-child{max-width:68ch;color:#e0e9ed;margin:0}
+main{max-width:1252px;margin:auto;padding:1.4rem 1rem 2.5rem}.workspace{display:grid;grid-template-columns:310px minmax(0,1fr);gap:1.2rem;align-items:start}
+.panel{min-width:0;background:var(--panel);border:1px solid var(--edge);border-radius:.85rem;padding:1.25rem;box-shadow:0 4px 18px #122a3b07}.editor{position:sticky;top:1rem}.editor h2{margin-top:0}h2{font-size:1.3rem;line-height:1.25;margin:.15rem 0 .85rem;letter-spacing:-.02em}h3{font-size:1.02rem;margin:.3rem 0 .55rem}p{margin:.5rem 0 1rem}.small,.hint{font-size:.87rem;color:var(--muted)}.hint{margin:.6rem 0}.full{width:100%}.preset-row{display:grid;gap:.6rem}.editor hr{border:0;border-top:1px solid var(--edge);margin:1.25rem 0}fieldset{min-inline-size:0;border:0;padding:0;margin:0 0 1rem}legend{font-weight:700;margin-bottom:.5rem}.matrix{display:grid;grid-template-columns:1fr 1fr;gap:.55rem;border-left:3px solid var(--ink);border-right:3px solid var(--ink);padding:.1rem .65rem;border-radius:.2rem}.matrix label,.probe label{font-size:.76rem;color:var(--muted);display:grid;gap:.2rem}.probe{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}.status{padding:.8rem;border-radius:.5rem;background:#edf3f5;border-left:4px solid var(--blue);font-size:.88rem;margin:.85rem 0 0;min-height:5.3rem}.status[data-state="pending"]{background:#fff5d9;border-color:#9c6c09}.status[data-state="invalid"]{background:#fff0ed;border-color:#a82c34}.right{display:grid;gap:1.2rem;min-width:0}.accepted-label{color:var(--muted);font-size:.75rem;text-transform:uppercase;letter-spacing:.12em;font-weight:750}.answer{font-size:clamp(1.35rem,3vw,1.85rem);font-weight:750;line-height:1.2;margin:.45rem 0 .7rem}.answer[data-eigen="yes"]{color:var(--good)}
+.plot-wrap{display:grid;grid-template-columns:minmax(0,1fr);gap:.2rem}.plot{display:block;width:100%;height:auto;max-height:590px;aspect-ratio:1}.plot text{font-family:system-ui,sans-serif;fill:#4c5c66}.plot .vector-label{font-size:17px;font-weight:800;paint-order:stroke;stroke:white;stroke-width:5px;stroke-linejoin:round}.plot .tick{font-size:12px}.plot .axis-label{font-size:15px;font-weight:700}.legend{display:flex;gap:1rem;flex-wrap:wrap;font-size:.88rem;margin:.3rem 0}.legend span{display:inline-flex;align-items:center;gap:.4rem}.swatch{width:1.8rem;height:0;border-top:4px solid var(--blue)}.swatch.output{border-top:4px dashed var(--pink)}.swatch.eigen{border-top:2px dashed var(--gold)}.toggle{display:flex;gap:.55rem;align-items:start;font-size:.9rem}.toggle input{width:auto;min-height:1.3rem;accent-color:var(--gold)}.plot-caption{font-size:.85rem;color:var(--muted);margin:.5rem 0}
+.equation{font:600 1rem/1.65 ui-monospace,SFMono-Regular,Consolas,monospace;overflow-wrap:anywhere;background:#f2f5f5;border-radius:.5rem;padding:.75rem;margin:.8rem 0}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.7rem;margin:1rem 0}.stat{border:1px solid var(--edge);border-radius:.5rem;padding:.65rem .75rem}.stat strong{display:block;font-size:1.5rem;font-variant-numeric:tabular-nums}.stat span{font-size:.76rem;color:var(--muted)}
+.table-wrap{overflow-x:auto;max-width:100%}table{border-collapse:collapse;width:100%;font-size:.85rem}th,td{text-align:left;padding:.55rem .5rem;border-bottom:1px solid var(--edge);vertical-align:top}th{background:#f0f4f4}td{overflow-wrap:anywhere}.summary{font-weight:650;color:var(--navy)}.footer-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;margin-top:1.2rem}.downloads{display:flex;flex-wrap:wrap;gap:.6rem;margin:.8rem 0}.callout{padding:.8rem;border-left:4px solid #bd9341;background:#faf5e9;font-size:.9rem}.concepts{padding-left:1.25rem}.concepts li{margin:.25rem 0}summary{cursor:pointer;font-weight:700}details p,details ol{font-size:.9rem}footer{max-width:1220px;margin:0 auto;padding:0 1rem 2rem;color:var(--muted);font-size:.85rem}code{overflow-wrap:anywhere}
+@media(max-width:850px){.workspace{grid-template-columns:1fr}.editor{position:static}.footer-grid{grid-template-columns:1fr}.editor form{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}.editor form button,.editor .status{grid-column:1/-1}.editor fieldset{margin:0}.preset-row{grid-template-columns:minmax(0,1fr) auto}.panel{padding:1rem}.plot{max-height:none}}
+@media(max-width:430px){header{padding:1.6rem 1rem}main{padding:1rem .65rem}.panel{padding:.85rem}.editor form{gap:.6rem}.matrix{padding:0 .4rem;gap:.4rem}.stats{gap:.4rem}.stat{padding:.5rem}.stat span{font-size:.7rem}.downloads>*{width:100%}.legend{gap:.6rem;font-size:.8rem}th,td{padding:.45rem .35rem;font-size:.8rem}.preset-row{grid-template-columns:1fr}.equation{font-size:.9rem}}
+@media print{header{color:#111;background:white;padding:1rem;border-bottom:2px solid #333}header p:last-child,.eyebrow{color:#444}.workspace{display:block}.editor,.downloads,.toggle,.skip{display:none}.panel{box-shadow:none;break-inside:avoid;margin-bottom:1rem}.footer-grid{display:block}.plot{max-height:380px}.footer-grid .panel{break-before:auto}body{background:white}}
+</style>
+</head>
+<body>
+<a class="skip" href="#experiment-result">Skip to applied result</a>
+<header>
+<p class="eyebrow">RecallWeave · linear algebra lab</p>
+<h1>When a transformation stays on a line</h1>
+<p>Apply a matrix. Follow a vector. Find the directions that stretch, reverse or vanish without leaving their line through the origin.</p>
+</header>
+<main>
+<div class="workspace">
+<aside class="panel editor" aria-labelledby="edit-title">
+<h2 id="edit-title">Set up an experiment</h2>
+<label for="preset">Worked example</label>
+<div class="preset-row"><select id="preset"></select><button id="load-preset" type="button" class="secondary">Load example</button></div>
+<p id="challenge" class="hint"></p>
+<hr>
+<form id="experiment-form" novalidate>
+<fieldset><legend>Matrix A</legend>
+<div class="matrix">
+<label>A₁₁<input id="a11" inputmode="numeric" type="text" value="3" spellcheck="false" aria-describedby="matrix-bound"></label>
+<label>A₁₂<input id="a12" inputmode="numeric" type="text" value="0" spellcheck="false" aria-describedby="matrix-bound"></label>
+<label>A₂₁<input id="a21" inputmode="numeric" type="text" value="0" spellcheck="false" aria-describedby="matrix-bound"></label>
+<label>A₂₂<input id="a22" inputmode="numeric" type="text" value="1" spellcheck="false" aria-describedby="matrix-bound"></label>
+</div><p id="matrix-bound" class="hint">Whole numbers −9 to 9.</p>
+</fieldset>
+<fieldset><legend>Input vector v</legend>
+<div class="probe"><label>x<input id="probe-x" inputmode="numeric" type="text" value="1" spellcheck="false" aria-describedby="probe-bound"></label><label>y<input id="probe-y" inputmode="numeric" type="text" value="1" spellcheck="false" aria-describedby="probe-bound"></label></div>
+<p id="probe-bound" class="hint">Whole numbers −20 to 20. At least one must be nonzero.</p>
+</fieldset>
+<button class="full" type="submit">Apply experiment</button>
+</form>
+<p id="input-status" class="status" data-state="applied" role="status" aria-live="polite"></p>
+</aside>
+<div class="right">
+<section id="experiment-result" class="panel" aria-labelledby="result-title">
+<span class="accepted-label">Applied experiment</span>
+<h2 id="result-title" class="answer" data-eigen="no"></h2>
+<p id="action-description"></p>
+<div id="action-equation" class="equation"></div>
+<div class="plot-wrap">
+<svg id="vector-plot" class="plot" viewBox="0 0 560 560" role="img" aria-labelledby="plot-title plot-description">
+<title id="plot-title">Input, output and real eigendirections</title>
+<desc id="plot-description"></desc>
+<defs>
+<marker id="arrow-input" markerWidth="10" markerHeight="10" refX="8" refY="3.5" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L8,3.5 L0,7 Z" fill="#165d9e"></path></marker>
+<marker id="arrow-output" markerWidth="10" markerHeight="10" refX="8" refY="3.5" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L8,3.5 L0,7 Z" fill="#a82c68"></path></marker>
+<clipPath id="plot-bound"><rect x="50" y="50" width="460" height="460"></rect></clipPath>
+</defs>
+<g id="plot-grid"></g><g id="plot-eigen" clip-path="url(#plot-bound)"></g><g id="plot-vectors"></g>
+</svg>
+</div>
+<div class="legend" aria-label="Plot key"><span><i class="swatch" aria-hidden="true"></i>v · input</span><span><i class="swatch output" aria-hidden="true"></i>Av · output</span><span><i class="swatch eigen" aria-hidden="true"></i>eigenlines</span></div>
+<label class="toggle"><input id="show-lines" type="checkbox" checked>Show approximate eigenline drawings</label>
+<p id="plot-caption" class="plot-caption"></p>
+<p class="callout">Integer probes allow an exact yes/no check. A drawing uses rounded coordinates: looking nearly aligned is not the same as satisfying Av = λv.</p>
+<h3>Exact check for this probe</h3>
+<div id="cross-equation" class="equation"></div>
+<p class="small">For a nonzero input v = (x, y) and output Av = (u, w), the two vectors are collinear exactly when xw − yu = 0. This test includes a zero output.</p>
+<button id="download-observation" type="button" class="secondary">Download applied experiment (.json)</button>
+</section>
+<section class="panel" aria-labelledby="directions-title">
+<h2 id="directions-title">How many real eigendirections?</h2>
+<p id="direction-summary" class="summary"></p>
+<div class="stats"><div class="stat"><span>Trace · a + d</span><strong id="trace"></strong></div><div class="stat"><span>Determinant · ad − bc</span><strong id="determinant"></strong></div><div class="stat"><span>Discriminant · trace² − 4 det</span><strong id="discriminant"></strong></div></div>
+<div id="polynomial" class="equation"></div>
+<div class="table-wrap" tabindex="0" role="region" aria-label="Eigenvalue table"><table id="eigen-table"><caption class="small">All real eigenspaces of the applied matrix</caption><thead><tr><th scope="col">Eigenvalue · exact</th><th scope="col">Approximate decimal</th><th scope="col">Eigenspace</th><th scope="col">Unit representative · approximate</th></tr></thead><tbody id="eigen-rows"></tbody></table></div>
+<p id="direction-note" class="small"></p>
+</section>
+</div>
+</div>
+<div class="footer-grid">
+<section class="panel" aria-labelledby="lesson-title">
+<h2 id="lesson-title">Take the lesson with you</h2>
+<p>Fourteen original questions connect the picture to the equation, including the negative, zero and repeated cases.</p>
+<ol class="concepts"><li>Apply a matrix to a column vector.</li><li>Check the nonzero eigenvector condition.</li><li>Interpret positive, negative and zero scales.</li><li>Distinguish repeated roots from independent directions.</li></ol>
+<div class="downloads"><button id="download-course" type="button">Download lesson (.json)</button><button id="download-guide" type="button" class="secondary">Download worked guide (.md)</button></div>
+<p class="small">In <a href="../demo.html">RecallWeave</a>, choose the downloaded JSON under <strong>Bring your own lesson</strong>, preview it, then select <strong>Start this deck</strong>. The existing review, separate practice and study-note flow stays available.</p>
+</section>
+<section class="panel" aria-labelledby="read-title">
+<h2 id="read-title">Read the equation carefully</h2>
+<p class="equation">Av = λv, with v ≠ 0</p>
+<p>The line is preserved. The arrow may keep its direction, reverse it, or collapse to the origin. The zero vector is never an eigenvector.</p>
+<details><summary>Why repeated roots need another check</summary><p>Subtract the eigenvalue from both diagonal entries and solve (A − λI)v = 0. A shear with a repeated root leaves one eigenline; a scalar matrix leaves every line. Multiplicity and eigenspace dimension answer different questions.</p></details>
+<p class="small">The model covers real 2×2 integer matrices within the displayed bounds. Its integer probes cannot exactly represent an irrational slope. Complex eigenvalues are reported symbolically; their eigenvectors are outside this real-plane drawing.</p>
+<p class="small">Original examples and wording. Mathematical references: <a href="https://ocw.mit.edu/courses/18-06sc-linear-algebra-fall-2011/pages/least-squares-determinants-and-eigenvalues/eigenvalues-and-eigenvectors/">MIT OpenCourseWare 18.06SC</a> and <a href="https://github.com/mitmath/1806">MIT 18.06, Lecture 21</a>. Sources are optional reading; the lab works offline.</p>
+</section>
+</div>
+<noscript><p class="panel">This explorer needs JavaScript for the calculation. The equation, assumptions and reading guidance above remain available. Open the sibling eigen-directions.json and eigen-directions.md files for the lesson and guide.</p></noscript>
+</main>
+<footer>No account, network request or automatic storage. Downloads keep the applied experiment or exact lesson source; they do not record a learner's answers or establish learning outcomes.</footer>
+<script>
+const EIGEN_DECK_SOURCE = "{\n  \"format\": \"recallweave-deck/1\",\n  \"title\": \"Eigen directions: when a transformation stays on a line\",\n  \"attribution\": \"Original teaching text, questions, examples and illustrations prepared for RecallWeave in October 2026. Mathematical references: MIT OpenCourseWare 18.06SC, Eigenvalues and Eigenvectors (Gilbert Strang), https://ocw.mit.edu/courses/18-06sc-linear-algebra-fall-2011/pages/least-squares-determinants-and-eigenvalues/eigenvalues-and-eigenvectors/ ; MIT 18.06 Spring 2025, Lecture 21, https://github.com/mitmath/1806 . References checked 2026-10-08. No source exercise, figure or prose is reproduced.\",\n  \"license\": \"Original teaching text and examples. This contribution makes no additional reuse-license grant. The linked references retain their own terms.\",\n  \"concepts\": [\n    \"Matrix action\",\n    \"Eigenvector condition\",\n    \"Eigenvalue meaning\",\n    \"Counting real eigenlines\"\n  ],\n  \"items\": [\n    {\n      \"id\": \"ed-01\",\n      \"concept\": \"Matrix action\",\n      \"prerequisites\": [],\n      \"prompt\": \"A = [[2, 1], [−1, 3]] and v = (2, 1). Using column vectors, what is Av?\",\n      \"options\": [\n        \"(4, 3)\",\n        \"(5, 1)\",\n        \"(3, 5)\",\n        \"(2, 1)\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"The first output coordinate is 2×2 + 1×1 = 5. The second is (−1)×2 + 3×1 = 1. Each row forms one dot product with the input; multiplying only matching positions would omit the off-diagonal contributions.\",\n      \"transfer\": \"For the same matrix, calculate A(1, −2) and explain what each output coordinate uses.\"\n    },\n    {\n      \"id\": \"ed-02\",\n      \"concept\": \"Matrix action\",\n      \"prerequisites\": [],\n      \"prompt\": \"A = [[3, −2], [1, 4]]. Which vector is A(0, 1)?\",\n      \"options\": [\n        \"(3, 1)\",\n        \"(1, 4)\",\n        \"(−2, 4)\",\n        \"(0, 4)\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"Multiplying by the second basis vector selects the second column: 0 times the first column plus 1 times the second column. The image is (−2, 4). Columns show where the coordinate basis vectors go.\",\n      \"transfer\": \"What is A(1, 0)? Use both columns to predict A(1, 1).\"\n    },\n    {\n      \"id\": \"ed-03\",\n      \"concept\": \"Eigenvector condition\",\n      \"prerequisites\": [\n        \"Matrix action\"\n      ],\n      \"prompt\": \"Which requirement belongs to the definition of a real eigenvector v of a real matrix A?\",\n      \"options\": [\n        \"v is nonzero and Av = λv for some real number λ.\",\n        \"v may be zero, but λ must be positive.\",\n        \"v must have length 1 and λ must be an integer.\",\n        \"v must point along a coordinate axis.\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"An eigenvector is nonzero and its image is a scalar multiple of itself. The scale may be negative or zero, and the vector need not have unit length or lie on an axis. Excluding zero prevents 0 = λ0 from making every number an eigenvalue.\",\n      \"transfer\": \"Explain why merely checking A0 = λ0 cannot tell you an eigenvalue of A.\"\n    },\n    {\n      \"id\": \"ed-04\",\n      \"concept\": \"Eigenvalue meaning\",\n      \"prerequisites\": [\n        \"Eigenvector condition\"\n      ],\n      \"prompt\": \"A nonzero vector satisfies Av = −3v. What happens to it under this one application of A?\",\n      \"options\": [\n        \"It turns through a right angle.\",\n        \"Its length becomes negative.\",\n        \"It cannot be an eigenvector because the scale is negative.\",\n        \"Its length is multiplied by 3 and its direction reverses on the same line.\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"A negative scale reverses direction while preserving the line through the origin. Length is nonnegative and is multiplied by the magnitude |−3| = 3. Negative eigenvalues are fully compatible with the eigenvector equation.\",\n      \"transfer\": \"Compare the geometric effects of eigenvalues −1, −1/2 and +1.\"\n    },\n    {\n      \"id\": \"ed-05\",\n      \"concept\": \"Eigenvalue meaning\",\n      \"prerequisites\": [\n        \"Eigenvector condition\"\n      ],\n      \"prompt\": \"For A = [[1, 0], [0, 0]], the nonzero vector v = (0, 2) maps to (0, 0). Which statement is correct?\",\n      \"options\": [\n        \"v is an eigenvector with eigenvalue 0.\",\n        \"v is not an eigenvector because its image has no direction.\",\n        \"The zero output is an eigenvector with every eigenvalue.\",\n        \"v has eigenvalue 2 because its original length is 2.\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"The input is nonzero and Av = 0v, so v is an eigenvector with eigenvalue zero. An output of zero has no arrow direction, but the equation still holds. The zero output itself does not become an eigenvector.\",\n      \"transfer\": \"Find a nonzero eigenvector for the same matrix with eigenvalue 1.\"\n    },\n    {\n      \"id\": \"ed-06\",\n      \"concept\": \"Eigenvector condition\",\n      \"prerequisites\": [\n        \"Matrix action\"\n      ],\n      \"prompt\": \"Suppose Av = 2v and v is nonzero. What can be concluded about w = −4v?\",\n      \"options\": [\n        \"w has eigenvalue −8.\",\n        \"w is an eigenvector with eigenvalue 2.\",\n        \"w is an eigenvector only if it is normalized.\",\n        \"w has eigenvalue −4.\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"Linearity gives A(−4v) = −4Av = −4(2v) = 2(−4v) = 2w. Changing the nonzero representative on one eigenline does not change its eigenvalue. Multiplying by zero would produce an excluded input.\",\n      \"transfer\": \"Show the same argument with any nonzero real multiplier c instead of −4.\"\n    },\n    {\n      \"id\": \"ed-07\",\n      \"concept\": \"Eigenvector condition\",\n      \"prerequisites\": [\n        \"Matrix action\"\n      ],\n      \"prompt\": \"A = [[2, 0], [0, 1]] and v = (1, 1), so Av = (2, 1). Is v an eigenvector?\",\n      \"options\": [\n        \"Yes, because A is diagonal.\",\n        \"Yes, with eigenvalue 3.\",\n        \"No: no single scalar multiplies both input coordinates to produce the output.\",\n        \"No: eigenvectors can never have two nonzero coordinates.\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"The first coordinate would require λ = 2 and the second would require λ = 1. There is no common scale, so this probe changes line. The matrix still has eigenvectors along its coordinate axes, and other matrices can have oblique eigenvectors.\",\n      \"transfer\": \"Try v = (3, 0) and v = (0, −2) for the same matrix. Find their scales.\"\n    },\n    {\n      \"id\": \"ed-08\",\n      \"concept\": \"Counting real eigenlines\",\n      \"prerequisites\": [\n        \"Eigenvector condition\",\n        \"Eigenvalue meaning\"\n      ],\n      \"prompt\": \"For A = [[4, 1], [2, 3]], the trace is 7 and determinant is 10. Which equation and pair give its eigenvalues?\",\n      \"options\": [\n        \"λ² + 7λ + 10 = 0; −5 and −2.\",\n        \"λ² − 7λ + 10 = 0; 5 and 2.\",\n        \"λ² − 10λ + 7 = 0; 7 and 3.\",\n        \"λ² − 7λ − 10 = 0; 10 and −1.\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"For a 2×2 matrix, det(A − λI) = λ² − trace(A)λ + det(A). Here (λ−5)(λ−2) = λ²−7λ+10. The roots sum to 7 and multiply to 10. These are scales; their eigenvectors require a separate equation.\",\n      \"transfer\": \"For the same A, check whether (1, 1) or (1, −2) is associated with each root.\"\n    },\n    {\n      \"id\": \"ed-09\",\n      \"concept\": \"Counting real eigenlines\",\n      \"prerequisites\": [\n        \"Eigenvector condition\",\n        \"Eigenvalue meaning\"\n      ],\n      \"prompt\": \"For A = [[2, 1], [1, 2]], which pairing of eigenvector and eigenvalue is correct?\",\n      \"options\": [\n        \"(1, 1) has λ = 1; (1, −1) has λ = 3.\",\n        \"Both (1, 1) and (1, −1) have λ = 2.\",\n        \"(1, 0) has λ = 2; (0, 1) has λ = 2.\",\n        \"(1, 1) has λ = 3; (1, −1) has λ = 1.\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"A(1,1) = (3,3) = 3(1,1), while A(1,−1) = (1,−1). These are two different real eigenlines, neither tied to a coordinate axis. Every nonzero scalar multiple on either line keeps that line's eigenvalue.\",\n      \"transfer\": \"Predict A²(1, −1) and A²(1, 1) without multiplying the two matrices.\"\n    },\n    {\n      \"id\": \"ed-10\",\n      \"concept\": \"Counting real eigenlines\",\n      \"prerequisites\": [\n        \"Eigenvector condition\",\n        \"Eigenvalue meaning\"\n      ],\n      \"prompt\": \"A = [[1, 2], [0, 1]] has the repeated eigenvalue 1. What are its real eigenvectors?\",\n      \"options\": [\n        \"Every nonzero vector in the plane.\",\n        \"Exactly two vectors, (1, 0) and (0, 1).\",\n        \"All nonzero vectors on the x-axis only.\",\n        \"There are none because the root is repeated.\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"Solving (A−I)(x,y) = (2y,0) = (0,0) forces y = 0 while x may be any nonzero real number. The repeated root has a one-dimensional eigenspace. Counting roots with multiplicity does not count independent eigenvectors.\",\n      \"transfer\": \"Replace the off-diagonal 2 with 0. What changes about the eigenspace, even though the roots stay the same?\"\n    },\n    {\n      \"id\": \"ed-11\",\n      \"concept\": \"Counting real eigenlines\",\n      \"prerequisites\": [\n        \"Eigenvector condition\",\n        \"Eigenvalue meaning\"\n      ],\n      \"prompt\": \"A = [[2, 0], [0, 2]]. How many lines through the origin consist of nonzero eigenvectors away from the origin?\",\n      \"options\": [\n        \"Exactly one.\",\n        \"Every such line; all nonzero vectors have eigenvalue 2.\",\n        \"Exactly two, because the matrix is 2×2.\",\n        \"None, because both roots are equal.\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"A = 2I multiplies every vector by 2. The eigenspace is the whole plane and has dimension 2, but it contains infinitely many lines. Two independent basis vectors can describe that plane without exhausting its eigenvectors.\",\n      \"transfer\": \"Does the zero matrix also have every nonzero direction as an eigenvector? Identify its eigenvalue.\"\n    },\n    {\n      \"id\": \"ed-12\",\n      \"concept\": \"Counting real eigenlines\",\n      \"prerequisites\": [\n        \"Eigenvector condition\",\n        \"Eigenvalue meaning\"\n      ],\n      \"prompt\": \"A = [[0, −1], [1, 0]] rotates the real plane by 90°. Its characteristic equation is λ² + 1 = 0. What follows?\",\n      \"options\": [\n        \"It has no nonzero real eigenvectors; its eigenvalues over the complex numbers are i and −i.\",\n        \"Its real eigenvectors are the two coordinate axes.\",\n        \"Its real eigenvalues are 1 and −1.\",\n        \"The zero vector is its only real eigenvector.\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"No real number squares to −1, so there is no real eigenvalue and no nonzero real eigenvector. Every nonzero real input turns onto a different line. Complex eigenvalues exist when the field is extended, but this explorer draws the real plane. Zero remains excluded from the definition.\",\n      \"transfer\": \"Contrast a 180° rotation with this 90° rotation. Which one keeps every line through the origin?\"\n    },\n    {\n      \"id\": \"ed-13\",\n      \"concept\": \"Eigenvector condition\",\n      \"prerequisites\": [\n        \"Matrix action\"\n      ],\n      \"prompt\": \"A = [[1, 1], [1, 0]] and v = (2, 1), so Av = (3, 2). The two arrows may look nearly aligned in a small diagram. Which exact conclusion is justified?\",\n      \"options\": [\n        \"v is an eigenvector because the arrows are close.\",\n        \"v has eigenvalue 3/2 because the first coordinates have that ratio.\",\n        \"v has eigenvalue 2 because the second coordinates have that ratio.\",\n        \"v is not an eigenvector: 2×2 − 1×3 = 1, so the two vectors are not collinear.\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"For nonzero (x,y), collinearity with (u,w) is equivalent to xw−yu = 0. Here the exact cross-product is 1, not zero. The real eigenlines have irrational slopes; a rounded drawing does not turn this integer probe into an exact eigenvector.\",\n      \"transfer\": \"Calculate A(3, 2) and its cross-product with (3, 2). Does a visually closer direction necessarily satisfy exact equality?\"\n    },\n    {\n      \"id\": \"ed-14\",\n      \"concept\": \"Eigenvalue meaning\",\n      \"prerequisites\": [\n        \"Eigenvector condition\"\n      ],\n      \"prompt\": \"A nonzero v satisfies Av = −2v. If the same matrix acts twice, what is A²v?\",\n      \"options\": [\n        \"−4v\",\n        \"−2v\",\n        \"4v\",\n        \"2v\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"Linearity gives A²v = A(−2v) = −2Av = (−2)²v = 4v. Each step reverses direction; after two steps the direction is restored and length is multiplied by 4. This shortcut applies because v is an eigenvector of the same matrix at every step.\",\n      \"transfer\": \"Predict A³v and A⁴v. Separate direction from length in your explanation.\"\n    }\n  ]\n}\n";
+const EIGEN_GUIDE_SOURCE = "# Eigen directions: when a transformation stays on a line\n\nOpen [the offline explorer](eigen-directions-explorer.html), or download\n[the original fourteen-question lesson](eigen-directions.json). In RecallWeave,\nchoose the JSON under **Bring your own lesson**, inspect the preview, then select\n**Start this deck**. The normal review, separate practice and study-note downloads\nuse this course without changing the learner.\n\nThe explorer and lesson are separate activities. An experiment download records\nmatrix arithmetic, not a learner's answers, identity or progress.\n\n## What the experiment asks\n\nA matrix sends an input vector to an output vector. With column vectors,\n\n    A = [[a, b], [c, d]],  v = (x, y)\n    Av = (ax + by, cx + dy).\n\nAn eigenvector is a **nonzero** input for which one real scale works for both\ncoordinates: Av = λv. The input and output stay on the same line through the\norigin, with an important special case when the output is zero.\n\n- A positive λ keeps the arrow direction.\n- A negative λ reverses its direction on that line.\n- λ = 0 collapses the nonzero input to the origin.\n- Length changes by the nonnegative factor |λ|.\n\nThe zero vector itself is excluded. Otherwise A0 = λ0 would hold for every\nnumber λ and would tell us nothing about the matrix.\n\nIf v is an eigenvector, every nonzero multiple cv is another representative on\nthe same eigenline: A(cv) = cAv = cλv = λ(cv). The scale λ does not change when\nthe representative changes.\n\n## Begin with a prediction\n\n1. Load **Different stretches**. The axes stretch by different amounts. Predict\n   whether v = (1, 1) keeps its line, then inspect Av = (3, 1).\n2. Change the probe to (1, 0) and apply it. Then try (0, 1). Each axis has one\n   common scale even though the diagonal probe did not.\n3. Load **Reflection**. Its probe reverses, and still satisfies the eigenvector\n   equation. Staying on a line does not require a positive scale.\n4. Load **Projection**. The nonzero y-axis probe vanishes. Its eigenvalue is zero.\n5. Compare **Shear** and **Uniform scaling**. Both have a repeated root, but they\n   preserve different numbers of directions.\n6. Load **Quarter-turn**. Every nonzero real direction leaves its original line.\n7. Load **Real directions with irrational slopes**. A nearby-looking integer\n   probe fails an exact equality check.\n\nEach preset loads and applies its complete matrix and probe. Editing an input\ncreates a pending change. **Apply experiment** validates all six entries together.\nPending and refused edits leave the clearly labeled applied result and its\ndownload intact. The result prints the applied matrix and vector so those values\nremain visible even when the form has later edits.\n\n## Exact entered probes and approximate drawings\n\nMatrix coefficients are integers from −9 to 9. Probe components are integers\nfrom −20 to 20, with at least one nonzero component. Whole-number strings may\ninclude a leading plus or minus and surrounding whitespace. Blank text,\nfractions, exponent notation, nonfinite values and values outside these bounds\nare refused.\n\nFor these bounds, JavaScript represents every intermediate integer in the\nmultiplication and exact probe check without rounding. Let Av = (u, w). The\nsigned two-dimensional cross-product is\n\n    xw − yu.\n\nBecause the input is nonzero, this quantity is zero exactly when the output is\na scalar multiple of the input. When it is zero, the scale is computed and\nreduced as an exact rational:\n\n    λ = (xu + yw) / (x² + y²).\n\nThis expression is used as an eigenvalue only after collinearity is established.\nA ratio from just one coordinate is insufficient when another coordinate\ndisagrees.\n\nThe plot uses equal scales on both axes. Small arrows may use an endpoint dot;\ntheir exact coordinates remain printed. Dashed eigenlines and their unit\nrepresentatives use approximate decimal coordinates. Integer probes cannot\nrepresent an irrational slope exactly. The drawing therefore helps locate a\ndirection but never overrides the exact probe check.\n\nFor A = [[1, 1], [1, 0]] and v = (2, 1), Av = (3, 2). The cross-product is\n2×2 − 1×3 = 1. Even a close-looking picture must report that this probe is not\nan eigenvector. The real eigenvalues are (1 + √5)/2 and (1 − √5)/2.\n\n## Find all the real eigenlines\n\nRewrite Av = λv as (A − λI)v = 0. A nonzero solution requires\n\n    det(A − λI) = λ² − trace(A)λ + det(A) = 0.\n\nFor a 2×2 matrix, trace(A) = a + d and det(A) = ad − bc. Define the\ndiscriminant D = trace(A)² − 4 det(A).\n\n| Case | Real eigenvalues | Real eigendirections |\n|---|---|---|\n| D > 0 | Two distinct roots | One line for each root |\n| D = 0, A is not λI | One root repeated twice | One eigenline |\n| D = 0, A = λI | One root repeated twice | Every line; the eigenspace is the whole plane |\n| D \u003c 0 | None | No nonzero real eigenvectors |\n\nFor a repeated root, multiplicity counts how often a root occurs in the\npolynomial. Eigenspace dimension counts independent directions solving the\nvector equation. They need not be equal.\n\nFor the shear [[1, 2], [0, 1]], the repeated root is 1. Solving\n(A − I)(x, y) = (2y, 0) = (0, 0) forces y = 0, leaving only the x-axis.\nFor [[2, 0], [0, 2]], every vector satisfies Av = 2v. Its eigenspace has\ndimension 2 but contains infinitely many lines. The few dashed spokes in the\nplot are examples, not an exhaustive list.\n\nThe quarter-turn [[0, −1], [1, 0]] has polynomial λ² + 1 and D = −4.\nIts eigenvalues over the complex numbers are i and −i. This lab draws the\nreal plane, where no nonzero eigenvector exists. It does not draw complex\neigenvectors.\n\n## Worked preset checks\n\n| Preset | Eigenvalues | Independent real directions |\n|---|---|---|\n| Different stretches | 3, 1 | x-axis, y-axis |\n| Reflection | 1, −1 | x-axis, y-axis |\n| Projection | 1, 0 | x-axis, y-axis |\n| Shear | 1 repeated | x-axis only |\n| Uniform scaling | 2 repeated | Whole plane |\n| Quarter-turn | i, −i over the complex numbers | None in the real plane |\n| Two oblique eigenlines | 3, 1 | (1, 1), (1, −1) |\n| Irrational slopes | (1 + √5)/2, (1 − √5)/2 | Two real lines with irrational slopes |\n| Zero map | 0 repeated | Whole plane |\n\nA listed direction represents all its nonzero multiples. Two different\neigenvalues have linearly independent eigenvectors, but a generic matrix need\nnot have perpendicular eigenlines.\n\n## Lesson answer and transfer checks\n\nThe learner shuffles displayed options. The stable question IDs identify these\nanswers independently of their on-screen letters.\n\n| ID | Worked conclusion |\n|---|---|\n| ed-01 | Av = (5, 1). The transfer probe (1, −2) gives (0, −7). |\n| ed-02 | A(0, 1) is the second column (−2, 4). A(1, 0) = (3, 1), and A(1, 1) = (1, 5). |\n| ed-03 | v must be nonzero and satisfy Av = λv for a real λ. |\n| ed-04 | λ = −3 reverses direction and multiplies length by 3. |\n| ed-05 | The nonzero vector (0, 2) has eigenvalue 0. The x-axis supplies eigenvectors with eigenvalue 1. |\n| ed-06 | −4v still has eigenvalue 2 because linearity preserves the same scale. |\n| ed-07 | (2, 1) is not a single multiple of (1, 1). The transfer probes have eigenvalues 2 and 1. |\n| ed-08 | λ² − 7λ + 10 = (λ − 5)(λ − 2). The probes (1, 1) and (1, −2) have eigenvalues 5 and 2. |\n| ed-09 | (1, 1) has eigenvalue 3, while (1, −1) has eigenvalue 1. A² multiplies them by 9 and 1. |\n| ed-10 | Only nonzero x-axis vectors solve the shear's eigenvector equation. |\n| ed-11 | Every nonzero vector is an eigenvector of 2I. For the zero matrix, the common eigenvalue is 0. |\n| ed-12 | A quarter-turn has no nonzero real eigenvector. A half-turn is −I and preserves every line. |\n| ed-13 | Cross-product 1 refuses exact collinearity. The transfer probe (3, 2) maps to (5, 3) and has cross-product −1, so it also fails. |\n| ed-14 | A²v = 4v. The next two powers give A³v = −8v and A⁴v = 16v. |\n\n## Source and build\n\nThe calculation is in `src/eigen-directions.mjs`; its UI is in\n`src/eigen-directions-ui.mjs`. The template, original course and this guide are\nembedded into the standalone page. Its download buttons preserve the exact\ncourse/guide UTF-8 source, including their final newline.\n\nFrom the repository root:\n\n    node tools/build-eigen-directions.mjs\n    node tools/build-eigen-directions.mjs --check\n    node --test tests/eigen-directions.test.mjs\n\nThe builder validates the original course with the existing shared deck\nvalidator and refuses unexpected template/import boundaries. It changes only\nthe eigen-directions standalone page.\n\n## Mathematical references and authorship\n\nConcepts were checked against [MIT OpenCourseWare 18.06SC, Eigenvalues and\nEigenvectors](https://ocw.mit.edu/courses/18-06sc-linear-algebra-fall-2011/pages/least-squares-determinants-and-eigenvalues/eigenvalues-and-eigenvectors/)\nand [MIT 18.06 Spring 2025, Lecture 21](https://github.com/mitmath/1806).\nThe formal nonzero-input definition is retained throughout, including for zero\neigenvalues and rotations.\n\nAll lesson prompts, options, worked examples, explanatory prose and diagrams are\nnewly authored for this contribution. No textbook passage, exercise or figure\nis copied. This contribution makes no additional reuse-license grant.\nThe linked sources retain their own terms. Reference review is not an empirical\nevaluation of the lesson's learning effects.\n";
+const { EIGEN_PRESETS, analyzeEigen, serializeEigen } = (() => {
+/** Exact integer 2x2 actions; decimal eigenline geometry is explicitly approximate. */
+const MATRIX_LIMIT = 9;
+const PROBE_LIMIT = 20;
+
+function deepFreeze(value) {
+  if (value && typeof value === 'object') {
+    Object.values(value).forEach(deepFreeze);
+    Object.freeze(value);
+  }
+  return value;
+}
+
+const EIGEN_PRESETS = deepFreeze([
+  { id: 'stretch', label: 'Different stretches', matrix: [[3, 0], [0, 1]], probe: [1, 1],
+    prompt: 'Try (1, 0), then (0, 1). Why does the diagonal probe turn?' },
+  { id: 'reflection', label: 'Reflection: a negative eigenvalue', matrix: [[1, 0], [0, -1]], probe: [0, 2],
+    prompt: 'The output points the other way. Does it still stay on the same line?' },
+  { id: 'projection', label: 'Projection: an output of zero', matrix: [[1, 0], [0, 0]], probe: [0, 2],
+    prompt: 'A nonzero input vanishes. Which eigenvalue makes the equation true?' },
+  { id: 'shear', label: 'Shear: a repeated root, one eigenline', matrix: [[1, 2], [0, 1]], probe: [1, 1],
+    prompt: 'Compare the x-axis with another direction. A repeated root need not give two eigenlines.' },
+  { id: 'scalar', label: 'Uniform scaling: every direction', matrix: [[2, 0], [0, 2]], probe: [2, -1],
+    prompt: 'Choose any nonzero integer probe. What stays true each time?' },
+  { id: 'rotation', label: 'Quarter-turn: no real eigenline', matrix: [[0, -1], [1, 0]], probe: [1, 0],
+    prompt: 'Every nonzero real vector turns through a right angle. Inspect the discriminant.' },
+  { id: 'oblique', label: 'Two oblique eigenlines', matrix: [[2, 1], [1, 2]], probe: [1, -1],
+    prompt: 'Compare (1, -1) with (1, 1): the two eigenlines have different scales.' },
+  { id: 'irrational', label: 'Real directions with irrational slopes', matrix: [[1, 1], [1, 0]], probe: [2, 1],
+    prompt: 'The probe looks close to a dashed line. Its exact cross-product still decides.' },
+  { id: 'zero', label: 'Zero map: every nonzero input vanishes', matrix: [[0, 0], [0, 0]], probe: [1, 2],
+    prompt: 'Zero is a valid eigenvalue; a zero input is still excluded from the definition.' }
+]);
+
+function parseBoundedInteger(value, label, limit) {
+  if (typeof value === 'string') {
+    const text = value.trim();
+    if (!/^[+-]?\d{1,3}$/.test(text)) throw new Error(label + ' must be a whole number from ' + (-limit) + ' to ' + limit + '.');
+    value = Number(text);
+  }
+  if (typeof value !== 'number' || !Number.isSafeInteger(value) || Math.abs(value) > limit) {
+    throw new Error(label + ' must be a whole number from ' + (-limit) + ' to ' + limit + '.');
+  }
+  return Object.is(value, -0) ? 0 : value;
+}
+
+function pair(value, label) {
+  if (!Array.isArray(value) || value.length !== 2 || !Object.hasOwn(value, 0) || !Object.hasOwn(value, 1)) throw new Error(label + ' must have exactly two entries.');
+  return value;
+}
+
+function gcd(a, b) {
+  a = Math.abs(a);
+  b = Math.abs(b);
+  while (b) [a, b] = [b, a % b];
+  return a || 1;
+}
+
+function rational(num, den = 1) {
+  if (den < 0) { num = -num; den = -den; }
+  const divisor = gcd(num, den);
+  num /= divisor;
+  den /= divisor;
+  if (num === 0) num = 0;
+  return { numerator: num, denominator: den, text: den === 1 ? String(num) : num + '/' + den };
+}
+
+function realRoot(trace, discriminant, sign) {
+  const radical = Math.sqrt(discriminant);
+  if (Number.isInteger(radical)) {
+    const fraction = rational(trace + sign * radical, 2);
+    return { exact: fraction.text, approximate: fraction.numerator / fraction.denominator, rational: fraction };
+  }
+  return {
+    exact: '(' + trace + (sign > 0 ? ' + ' : ' − ') + '√' + discriminant + ')/2',
+    approximate: (trace + sign * radical) / 2,
+    rational: null
+  };
+}
+
+function unitEigenDirection(matrix, lambda) {
+  const [[a, b], [c, d]] = matrix;
+  const candidates = [[b, lambda - a], [lambda - d, c]];
+  const size = vector => Math.hypot(...vector);
+  let chosen = size(candidates[0]) >= size(candidates[1]) ? candidates[0] : candidates[1];
+  const norm = size(chosen);
+  if (!(norm > 0) || !Number.isFinite(norm)) throw new Error('A finite nonzero eigenline representative could not be constructed.');
+  chosen = chosen.map(value => value / norm);
+  const first = chosen.find(value => Math.abs(value) > 1e-14);
+  if (first < 0) chosen = chosen.map(value => -value);
+  return chosen.map(value => Math.abs(value) < 1e-14 ? 0 : value);
+}
+
+/** Inputs are copied and bounded before any result is returned. */
+function analyzeEigen(matrixInput, probeInput) {
+  pair(matrixInput, 'Matrix');
+  const matrix = matrixInput.map((row, i) => pair(row, 'Matrix row ' + (i + 1))
+    .map((value, j) => parseBoundedInteger(value, 'A' + (i + 1) + (j + 1), MATRIX_LIMIT)));
+  const probe = pair(probeInput, 'Probe').map((value, i) =>
+    parseBoundedInteger(value, i === 0 ? 'Probe x' : 'Probe y', PROBE_LIMIT));
+  if (probe.every(value => value === 0)) throw new Error('Choose a nonzero probe: the zero vector is never an eigenvector.');
+  const [[a, b], [c, d]] = matrix;
+  const [x, y] = probe;
+  const image = [a * x + b * y, c * x + d * y];
+  const crossProduct = x * image[1] - y * image[0];
+  const isEigenvector = crossProduct === 0;
+  const trace = a + d;
+  const determinant = a * d - b * c;
+  const discriminant = trace * trace - 4 * determinant;
+  const scalar = a === d && b === 0 && c === 0;
+  let classification;
+  let eigenspaces = [];
+  let complexPair = null;
+  if (discriminant < 0) {
+    classification = 'no-real-eigenline';
+    complexPair = {
+      realPart: rational(trace, 2).text,
+      imaginaryMagnitude: '√' + (-discriminant) + '/2',
+      expression: '(' + trace + ' ± i√' + (-discriminant) + ')/2'
+    };
+  } else if (scalar) {
+    classification = 'every-direction';
+    eigenspaces = [{ eigenvalue: realRoot(trace, 0, 1), algebraicMultiplicity: 2,
+      dimension: 2, basisApproximate: [[1, 0], [0, 1]] }];
+  } else if (discriminant === 0) {
+    classification = 'one-real-eigenline';
+    const eigenvalue = realRoot(trace, 0, 1);
+    eigenspaces = [{ eigenvalue, algebraicMultiplicity: 2, dimension: 1,
+      basisApproximate: [unitEigenDirection(matrix, eigenvalue.approximate)] }];
+  } else {
+    classification = 'two-real-eigenlines';
+    eigenspaces = [1, -1].map(sign => {
+      const eigenvalue = realRoot(trace, discriminant, sign);
+      return { eigenvalue, algebraicMultiplicity: 1, dimension: 1,
+        basisApproximate: [unitEigenDirection(matrix, eigenvalue.approximate)] };
+    });
+  }
+  const scale = isEigenvector ? rational(x * image[0] + y * image[1], x * x + y * y) : null;
+  const action = !isEigenvector ? 'changes-line' : scale.numerator === 0 ? 'vanishes'
+    : scale.numerator < 0 ? 'reverses-direction' : 'keeps-direction';
+  return deepFreeze({
+    format: 'recallweave-eigen-directions/1',
+    matrix, probe, image, crossProduct, isEigenvector, scale, action,
+    trace, determinant, discriminant, classification, eigenspaces, complexPair,
+    arithmetic: 'Entered integers, matrix action and probe certification are exact within the stated bounds. Eigenline unit vectors and radical decimals are approximate.',
+    probeBounds: PROBE_LIMIT,
+    matrixBounds: MATRIX_LIMIT
+  });
+}
+
+/** Recompute from accepted inputs, so a supplied result cannot forge its arithmetic. */
+function serializeEigen(result) {
+  return JSON.stringify(analyzeEigen(result.matrix, result.probe), null, 2) + '\n';
+}
+
+return { EIGEN_PRESETS, analyzeEigen, serializeEigen };
+})();
+
+const byId = id => document.getElementById(id);
+const fieldIds = ['a11', 'a12', 'a21', 'a22', 'probe-x', 'probe-y'];
+const fields = fieldIds.map(byId);
+let accepted = null;
+
+function vectorText(vector) { return '(' + vector.join(', ') + ')'; }
+function decimal(value) {
+  if (value === 0) return '0';
+  return Number(value.toPrecision(7)).toString();
+}
+function status(state, message) {
+  byId('input-status').dataset.state = state;
+  byId('input-status').textContent = message;
+}
+function inputValues() {
+  return {
+    matrix: [[fields[0].value, fields[1].value], [fields[2].value, fields[3].value]],
+    probe: [fields[4].value, fields[5].value]
+  };
+}
+function svgElement(name, attributes, parent) {
+  const element = document.createElementNS('http://www.w3.org/2000/svg', name);
+  Object.entries(attributes).forEach(([key, value]) => element.setAttribute(key, String(value)));
+  parent.append(element);
+  return element;
+}
+function svgText(text, attributes, parent) {
+  const element = svgElement('text', attributes, parent);
+  element.textContent = text;
+  return element;
+}
+function niceStep(target) {
+  const exponent = 10 ** Math.floor(Math.log10(target));
+  const scaled = target / exponent;
+  return (scaled <= 1 ? 1 : scaled <= 2 ? 2 : scaled <= 5 ? 5 : 10) * exponent;
+}
+function plot(result) {
+  const grid = byId('plot-grid');
+  const eigen = byId('plot-eigen');
+  const vectors = byId('plot-vectors');
+  [grid, eigen, vectors].forEach(group => group.replaceChildren());
+  const maximum = Math.max(2, ...result.probe.map(Math.abs), ...result.image.map(Math.abs));
+  const step = niceStep(maximum / 3);
+  const range = step * (Math.ceil(maximum / step) + 1);
+  const size = Math.max(160, Math.min(560, byId('vector-plot').clientWidth || 560));
+  const middle = size / 2;
+  const edge = size - 50;
+  byId('vector-plot').setAttribute('viewBox', '0 0 ' + size + ' ' + size);
+  const boundary = byId('plot-bound').firstElementChild;
+  boundary.setAttribute('width', size - 100);
+  boundary.setAttribute('height', size - 100);
+  const scale = (middle - 50) / range;
+  const screen = ([x, y]) => [middle + x * scale, middle - y * scale];
+  const point = vector => screen(vector).map(value => Number(value.toFixed(5)));
+  for (let tick = -range; tick <= range + step / 10; tick += step) {
+    const cleanTick = Math.abs(tick) < step / 100 ? 0 : Number(tick.toPrecision(10));
+    const [coordinate] = screen([cleanTick, 0]);
+    const color = cleanTick === 0 ? '#8a9ba5' : '#e2e8e9';
+    svgElement('line', { x1: coordinate, y1: 50, x2: coordinate, y2: edge, stroke: color, 'stroke-width': cleanTick === 0 ? 1.5 : 1 }, grid);
+    svgElement('line', { x1: 50, y1: size - coordinate, x2: edge, y2: size - coordinate, stroke: color, 'stroke-width': cleanTick === 0 ? 1.5 : 1 }, grid);
+    if (cleanTick !== 0) {
+      svgText(String(cleanTick), { x: coordinate, y: size - 28, 'text-anchor': 'middle', class: 'tick' }, grid);
+      svgText(String(cleanTick), { x: 41, y: size + 5 - coordinate, 'text-anchor': 'end', class: 'tick' }, grid);
+    }
+  }
+  svgText('x', { x: size - 16, y: middle + 5, class: 'axis-label' }, grid);
+  svgText('y', { x: middle - 4, y: 28, class: 'axis-label' }, grid);
+  svgText('0', { x: middle - 13, y: middle + 17, class: 'tick' }, grid);
+  if (byId('show-lines').checked) {
+    const directions = result.classification === 'every-direction'
+      ? [[1, 0], [0, 1], [1, 1], [1, -1], [1, 2], [2, 1]]
+      : result.eigenspaces.flatMap(space => space.basisApproximate);
+    directions.forEach((direction, index) => {
+      const norm = Math.hypot(...direction);
+      const extent = range * 2;
+      const [x1, y1] = point(direction.map(value => -value * extent / norm));
+      const [x2, y2] = point(direction.map(value => value * extent / norm));
+      svgElement('line', { x1, y1, x2, y2, stroke: '#95690f', 'stroke-width': 1.8,
+        'stroke-dasharray': index % 2 ? '3 5' : '9 5', opacity: result.classification === 'every-direction' ? .55 : .85 }, eigen);
+    });
+  }
+  const drawVector = (vector, label, color, marker, output) => {
+    const [x2, y2] = point(vector);
+    const length = Math.hypot(...vector) * scale;
+    if (length === 0) {
+      svgElement('circle', { cx: middle, cy: middle, r: 6, fill: 'white', stroke: color, 'stroke-width': 3 }, vectors);
+      svgText(label + ' = 0', { x: middle + 13, y: middle + 28, class: 'vector-label', fill: color }, vectors);
+      return;
+    }
+    const attrs = { x1: middle, y1: middle, x2, y2, stroke: color, 'stroke-width': output ? 5 : 3 };
+    if (output) attrs['stroke-dasharray'] = '8 5';
+    if (length >= 22) attrs['marker-end'] = 'url(#' + marker + ')';
+    svgElement('line', attrs, vectors);
+    if (length < 22) svgElement('circle', { cx: x2, cy: y2, r: output ? 4 : 3, fill: color }, vectors);
+    const right = vector[0] >= 0;
+    svgText(label, { x: x2 + (right ? 9 : -9), y: y2 + (output ? 21 : -10),
+      'text-anchor': right ? 'start' : 'end', class: 'vector-label', fill: color }, vectors);
+  };
+  drawVector(result.image, 'Av', '#a82c68', 'arrow-output', true);
+  drawVector(result.probe, 'v', '#165d9e', 'arrow-input', false);
+  const eigenDescription = result.classification === 'every-direction'
+    ? 'Every line is an eigenline; the dashed spokes are examples.'
+    : result.classification === 'no-real-eigenline' ? 'There is no real eigenline.'
+    : result.classification === 'one-real-eigenline' ? 'There is one real eigenline.' : 'There are two real eigenlines.';
+  byId('plot-description').textContent = 'Input v = ' + vectorText(result.probe) + '; output Av = ' + vectorText(result.image) + '. ' + eigenDescription + ' Both axes use the same scale.';
+  byId('plot-caption').textContent = 'Equal axis scale: each grid interval is ' + decimal(step) + '. Tiny vectors use an endpoint dot. ' +
+    (byId('show-lines').checked ? eigenDescription + ' Eigenline geometry is approximate.' : 'Eigenline drawings are hidden.');
+}
+function appendCell(row, text) {
+  const cell = document.createElement('td');
+  cell.textContent = text;
+  row.append(cell);
+}
+function render(result) {
+  const isEigen = result.isEigenvector;
+  byId('result-title').dataset.eigen = isEigen ? 'yes' : 'no';
+  byId('result-title').textContent = isEigen ? 'Yes — eigenvalue ' + result.scale.text : 'This probe changes line';
+  byId('action-description').textContent = !isEigen
+    ? 'No single real scale turns this input into its output. This probe is not an eigenvector of the applied matrix.'
+    : result.action === 'vanishes'
+      ? 'The nonzero input maps to zero. Av = 0v still holds, so the input is an eigenvector; the zero output itself is not.'
+      : result.action === 'reverses-direction'
+        ? 'The output reverses direction on the same line. A negative eigenvalue is allowed.'
+        : 'The output keeps the input direction on the same line. The eigenvalue gives its scale.';
+  const [[a, b], [c, d]] = result.matrix;
+  const [x, y] = result.probe;
+  const [u, w] = result.image;
+  byId('action-equation').textContent = 'A = [[' + a + ', ' + b + '], [' + c + ', ' + d + ']]\n' +
+    'v = ' + vectorText(result.probe) + '  →  Av = ' + vectorText(result.image) +
+    (isEigen ? ' = (' + result.scale.text + ')v' : '');
+  byId('action-equation').style.whiteSpace = 'pre-wrap';
+  byId('cross-equation').textContent = '(' + x + ')×(' + w + ') − (' + y + ')×(' + u + ') = ' +
+    result.crossProduct + (isEigen ? '  →  collinear' : '  ≠ 0  →  not collinear');
+  byId('trace').textContent = result.trace;
+  byId('determinant').textContent = result.determinant;
+  byId('discriminant').textContent = result.discriminant;
+  byId('polynomial').textContent = 'λ² − (' + result.trace + ')λ + (' + result.determinant + ') = 0';
+  const descriptions = {
+    'two-real-eigenlines': 'Two distinct real roots, with one eigenline for each.',
+    'one-real-eigenline': 'One repeated real root, with only one eigenline.',
+    'every-direction': 'One repeated real root, and every real direction is an eigendirection.',
+    'no-real-eigenline': 'No real roots and no nonzero real eigenvectors.'
+  };
+  byId('direction-summary').textContent = descriptions[result.classification];
+  const rows = byId('eigen-rows');
+  rows.replaceChildren();
+  if (result.complexPair) {
+    const row = document.createElement('tr');
+    const cell = document.createElement('td');
+    cell.colSpan = 4;
+    cell.textContent = 'No real eigenspace. Over the complex numbers: λ = ' + result.complexPair.expression + '.';
+    row.append(cell);
+    rows.append(row);
+  } else {
+    result.eigenspaces.forEach(space => {
+      const row = document.createElement('tr');
+      appendCell(row, space.eigenvalue.exact + (space.algebraicMultiplicity === 2 ? ' · repeated twice' : ''));
+      appendCell(row, decimal(space.eigenvalue.approximate));
+      appendCell(row, space.dimension === 2 ? 'Whole real plane · dimension 2' : 'One line · dimension 1');
+      appendCell(row, space.dimension === 2 ? 'Any nonzero vector; (1, 0) and (0, 1) are a basis.'
+        : vectorText(space.basisApproximate[0].map(decimal)));
+      rows.append(row);
+    });
+  }
+  byId('direction-note').textContent = result.classification === 'every-direction'
+    ? 'A scalar matrix multiplies every vector by the same value. A two-dimensional eigenspace contains infinitely many lines; the origin is excluded when choosing an eigenvector.'
+    : result.classification === 'one-real-eigenline'
+      ? 'The root appears twice in the polynomial, but solving (A − λI)v = 0 leaves only one independent direction. Nonzero multiples on that line share the eigenvalue.'
+      : result.classification === 'no-real-eigenline'
+        ? 'A negative discriminant gives a complex-conjugate pair. The real plane has no nonzero direction satisfying Av = λv with real λ.'
+        : 'Each listed unit vector is a rounded representative. Every nonzero scalar multiple on the same eigenline shares its eigenvalue.';
+  plot(result);
+}
+function apply() {
+  const values = inputValues();
+  try {
+    const next = analyzeEigen(values.matrix, values.probe);
+    accepted = next;
+    render(next);
+    status('applied', 'Applied. The diagram, exact check and experiment download use the matrix and vector shown in the result.');
+  } catch (error) {
+    status('invalid', error.message + ' The last applied experiment is still shown and exported.');
+  }
+}
+function loadPreset() {
+  const preset = EIGEN_PRESETS.find(entry => entry.id === byId('preset').value);
+  if (!preset) return;
+  const values = [...preset.matrix.flat(), ...preset.probe];
+  fields.forEach((field, index) => { field.value = String(values[index]); });
+  byId('challenge').textContent = preset.prompt;
+  apply();
+}
+function download(text, type, filename) {
+  const url = URL.createObjectURL(new Blob([text], { type }));
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  document.body.append(link);
+  link.click();
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 2000);
+}
+EIGEN_PRESETS.forEach(preset => {
+  const option = document.createElement('option');
+  option.value = preset.id;
+  option.textContent = preset.label;
+  byId('preset').append(option);
+});
+byId('experiment-form').addEventListener('submit', event => { event.preventDefault(); apply(); });
+fields.forEach(field => field.addEventListener('input', () => {
+  status('pending', 'Edits are pending. Apply the complete experiment to change the result. The last applied values are still shown and exported.');
+  byId('challenge').textContent = 'Try your own matrix and probe. Predict what will happen before applying them.';
+}));
+byId('load-preset').addEventListener('click', loadPreset);
+byId('show-lines').addEventListener('change', () => { if (accepted) plot(accepted); });
+byId('download-observation').addEventListener('click', () => {
+  if (accepted) download(serializeEigen(accepted), 'application/json;charset=utf-8', 'eigen-directions-experiment.json');
+});
+byId('download-course').addEventListener('click', () => download(EIGEN_DECK_SOURCE, 'application/json;charset=utf-8', 'eigen-directions.json'));
+byId('download-guide').addEventListener('click', () => download(EIGEN_GUIDE_SOURCE, 'text/markdown;charset=utf-8', 'eigen-directions.md'));
+window.addEventListener('resize', () => { if (accepted) plot(accepted); });
+loadPreset();
+
+</script>
+</body>
+</html>
