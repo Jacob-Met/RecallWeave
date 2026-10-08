@@ -1,0 +1,212 @@
+{
+  "format": "recallweave-deck/1",
+  "title": "Mathematical induction: a base, a bridge, every integer",
+  "attribution": "Original questions, options, explanations, transfer prompts and examples authored for Jacob’s RecallWeave project with AI assistance. Background: MIT OpenCourseWare, Mathematics for Computer Science, Chapter 3: Induction (Fall 2010), https://ocw.mit.edu/courses/6-042j-mathematics-for-computer-science-fall-2010/resources/mit6_042jf10_chap03/. Standard induction and arithmetic identities are used; no source exercises, passages or figures are copied.",
+  "license": "Original course content authored for Jacob’s RecallWeave project; no additional reuse license is granted here. Reference material retains its published terms.",
+  "concepts": [
+    "Statement and domain",
+    "Successor algebra",
+    "Finding proof gaps",
+    "Coverage and exact certificates"
+  ],
+  "items": [
+    {
+      "id": "ind-domain",
+      "concept": "Statement and domain",
+      "prerequisites": [],
+      "prompt": "A statement P(n) is intended for every integer n ≥ 3. Which induction plan reaches exactly that whole intended domain?",
+      "options": [
+        "Prove P(0), then prove P(n) implies P(n + 1) only for n ≥ 3.",
+        "Prove P(3), then prove P(n) implies P(n + 1) for every integer n ≥ 3.",
+        "Check P(3), P(4) and P(5), then stop.",
+        "Assume P(n + 1), then use it to assert P(n)."
+      ],
+      "answer": 1,
+      "explanation": "The base starts at the smallest intended integer, 3. The successor argument applies at every reachable n: 3 reaches 4, 4 reaches 5, and so on. A base at 0 cannot cross the missing 0-to-3 interval when the given step starts at 3. A finite list alone is not this universal argument.",
+      "transfer": "Suppose the intended domain is n ≥ 7. State a sufficient base and the precise range of the ordinary successor implication."
+    },
+    {
+      "id": "ind-empty-base",
+      "concept": "Statement and domain",
+      "prerequisites": [],
+      "prompt": "Let S(n) = sum of (2k − 1) for k = 1 through n, with S(0) defined as the empty sum 0. For the claim S(n) = n² on integers n ≥ 0, what is its base check?",
+      "options": [
+        "S(0) = −1 because substituting k = 0 creates one term.",
+        "S(0) = 1 because the first odd number is 1.",
+        "S(1) = 1 is the required check for a domain starting at 0.",
+        "S(0) = 0 and 0² = 0, so the stated base is true."
+      ],
+      "answer": 3,
+      "explanation": "At n = 0 the index range 1 through 0 has no terms, so its sum is the stated empty sum 0. There is no k = 0 term. The right side is 0² = 0. Checking n = 1 is useful but does not replace the specified base at 0.",
+      "transfer": "For T(n) = sum from k = 1 through n of (4k + 1), state T(0) and T(1). Explain which is the base if the claim starts at 0."
+    },
+    {
+      "id": "ind-hypothesis",
+      "concept": "Statement and domain",
+      "prerequisites": [],
+      "prompt": "You want to prove 1 + 2 + ⋯ + n = n(n + 1)/2 for every integer n ≥ 0, with the empty sum at 0. Which is a legitimate hypothesis inside the successor step?",
+      "options": [
+        "For an arbitrary integer n ≥ 0, assume the formula holds at n and use that assumption to derive it at n + 1.",
+        "Assume the formula holds for every integer, which already gives the desired conclusion.",
+        "Assume the formula at n + 1 and present that same expression as the proof.",
+        "Check the formula at n = 10 and treat n as fixed at 10."
+      ],
+      "answer": 0,
+      "explanation": "The hypothesis is conditional at an arbitrary allowed n. You derive the next case using that condition, producing P(n) implies P(n + 1). Separately proving the base gives the starting point for repeated use. Assuming the final universal claim would skip the proof.",
+      "transfer": "Write the hypothesis and target for proving the odd-number sum S(n) = n² by induction starting at 0. Keep the assumed and to-be-proved statements distinct."
+    },
+    {
+      "id": "ind-odd-step",
+      "concept": "Successor algebra",
+      "prerequisites": [
+        "Statement and domain"
+      ],
+      "prompt": "Assume sum from k = 1 through n of (2k − 1) equals n². Which calculation justifies adding the next term?",
+      "options": [
+        "n² + (2n − 1) = (n + 1)².",
+        "n² + 2(n + 1) = (n + 1)².",
+        "n² + [2(n + 1) − 1] = n² + 2n + 1 = (n + 1)².",
+        "n² + (n + 1)² = 2n² + 1."
+      ],
+      "answer": 2,
+      "explanation": "The next index is n + 1, so its odd term is 2(n + 1) − 1 = 2n + 1. Under the hypothesis the new sum is n² + 2n + 1, which factors as (n + 1)². Using the old term 2n − 1 would advance the index incorrectly.",
+      "transfer": "Use the odd-number induction step at n = 4. State the old sum, new term and next sum."
+    },
+    {
+      "id": "ind-triangular-step",
+      "concept": "Successor algebra",
+      "prerequisites": [
+        "Statement and domain"
+      ],
+      "prompt": "Assume the sum 1 + 2 + ⋯ + n is n(n + 1)/2. What does adding the next term n + 1 produce?",
+      "options": [
+        "n(n + 1)/2 + 1 = (n + 1)(n + 2)/2.",
+        "n(n + 1)/2 + n = (n + 1)(n + 2)/2.",
+        "n(n + 1)/2 + (n + 1) = n(n + 2)/2.",
+        "n(n + 1)/2 + (n + 1) = (n + 1)(n + 2)/2."
+      ],
+      "answer": 3,
+      "explanation": "Factor out n + 1: n(n + 1)/2 + (n + 1) = (n + 1)(n/2 + 1) = (n + 1)(n + 2)/2. This is the same proposed formula with n replaced by n + 1. The next term is n + 1, not 1 or n.",
+      "transfer": "Using the triangular formula at n = 4, calculate the fifth partial sum by adding the next term and by substituting into the formula."
+    },
+    {
+      "id": "ind-base-essential",
+      "concept": "Finding proof gaps",
+      "prerequisites": [
+        "Successor algebra"
+      ],
+      "prompt": "For S(n) = sum from k = 1 through n of (2k − 1), someone proposes S(n) = n² + 5 for every integer n ≥ 0. The proposed right side increases by exactly 2n + 1 when n becomes n + 1. What does that establish?",
+      "options": [
+        "The whole claim is true because matching successive differences makes the base unnecessary.",
+        "The successor difference matches, but the base fails: S(0) = 0 whereas 0² + 5 = 5.",
+        "The base is true, but the successor difference is 2n + 5.",
+        "The claim becomes true for all n ≥ 1, because the first case can be skipped."
+      ],
+      "answer": 1,
+      "explanation": "Adding a constant does not change successive differences: (n + 1)² + 5 − (n² + 5) = 2n + 1. However, S(0) is 0 and the proposed base is 5. Without the true base this step cannot establish the claim. In fact the proposed expression stays 5 above the actual sum at every n.",
+      "transfer": "Replace the constant 5 by any integer c in the proposed odd-number formula n² + c. Which c passes the base at 0, and what happens to the successor difference?"
+    },
+    {
+      "id": "ind-step-essential",
+      "concept": "Finding proof gaps",
+      "prerequisites": [
+        "Successor algebra"
+      ],
+      "prompt": "A proposed formula for 1 + 2 + ⋯ + n is n² for integers n ≥ 1. Its base at n = 1 is true. What happens at the first successor?",
+      "options": [
+        "The next sum is 4 because a true base forces the formula to remain true.",
+        "The next sum is 2 because only the new term counts.",
+        "The next sum is 1 + 2 = 3, while the proposed value 2² is 4; the base alone is insufficient.",
+        "The discrepancy is harmless because induction allows one exception after its base."
+      ],
+      "answer": 2,
+      "explanation": "At n = 1 the formula gives the right value 1, but at n = 2 the actual sum is 3 and the proposal is 4. A successful base is one required part, not evidence that every needed implication has been justified. This is a direct counterexample in the claimed domain.",
+      "transfer": "For the same false triangular proposal n², compare the true and proposed totals at n = 3. State the numerical difference."
+    },
+    {
+      "id": "ind-finite",
+      "concept": "Finding proof gaps",
+      "prerequisites": [
+        "Successor algebra"
+      ],
+      "prompt": "For S(n) = 1 + 2 + ⋯ + n, consider Q(n) = (3n² − 5n + 4)/2. It matches S(n) at n = 1 and n = 2. Which observation correctly challenges a claim that these two matches prove equality for every n ≥ 1?",
+      "options": [
+        "At n = 3, S(3) = 6 but Q(3) = 8, so two matching cases did not prove the universal claim.",
+        "At n = 3, both values are 6; matching twice determines every possible formula.",
+        "At n = 3, S(3) = 8 but Q(3) = 6.",
+        "Two matches are sufficient because Q is a polynomial."
+      ],
+      "answer": 0,
+      "explanation": "Q(1) = (3 − 5 + 4)/2 = 1 and Q(2) = (12 − 10 + 4)/2 = 3. But Q(3) = (27 − 15 + 4)/2 = 8, while 1 + 2 + 3 = 6. Two numerical matches leave this false proposal possible; they do not supply induction's all-n step.",
+      "transfer": "Write Q(n) as n(n + 1)/2 plus (n − 1)(n − 2). Use that difference to explain both initial matches and the discrepancy at n = 4."
+    },
+    {
+      "id": "ind-step-size",
+      "concept": "Coverage and exact certificates",
+      "prerequisites": [
+        "Finding proof gaps"
+      ],
+      "prompt": "For a statement about nonnegative integers, a proof establishes P(0) and P(n) implies P(n + 2) for every integer n ≥ 0. What coverage follows from those facts alone?",
+      "options": [
+        "All nonnegative integers, because +2 always increases the input.",
+        "Every nonnegative even integer; reaching the odd integers also needs a starting odd case or another bridge.",
+        "Only P(0), because a step of size 2 cannot be used repeatedly.",
+        "Only the odd integers, because adding 2 changes parity."
+      ],
+      "answer": 1,
+      "explanation": "Adding 2 preserves parity. Repeatedly applying the given implication from 0 reaches 2, 4, 6 and every later even integer. It never reaches 1. A true base P(1) together with the same step would also start the odd chain.",
+      "transfer": "State two base cases that, together with the +2 successor implication, cover every integer n ≥ 0."
+    },
+    {
+      "id": "ind-missing-bridge",
+      "concept": "Coverage and exact certificates",
+      "prerequisites": [
+        "Finding proof gaps"
+      ],
+      "prompt": "A proof intends to establish P(n) for all integers n ≥ 4. It checks P(4), but its argument P(n) implies P(n + 1) is valid only for n ≥ 5. What is missing?",
+      "options": [
+        "Nothing; the difference between 4 and 5 is too small to matter.",
+        "An argument for P(3), because induction must always begin before the claimed domain.",
+        "A calculation of P(100), which bypasses the first step.",
+        "A justification reaching P(5), such as a valid 4-to-5 step or a separate true base at 5."
+      ],
+      "answer": 3,
+      "explanation": "The successor argument is unavailable at n = 4, so the stated proof cannot move from its only known base to 5. Proving P(5) separately would then let the given step cover 6, 7 and every larger integer, while P(4) remains separately checked.",
+      "transfer": "If the successor argument were valid only for n ≥ 6, which additional individual cases would bridge a checked P(4) to that range?"
+    },
+    {
+      "id": "ind-arithmetic",
+      "concept": "Successor algebra",
+      "prerequisites": [
+        "Statement and domain"
+      ],
+      "prompt": "Let S(n) = sum from k = 1 through n of (3k + 2), and S(0) = 0. Which proposed formula has the correct base and increases by the next term 3(n + 1) + 2 for every integer n ≥ 0?",
+      "options": [
+        "S(n) = (3n² + 7n)/2.",
+        "S(n) = (3n² + 4n)/2.",
+        "S(n) = (3n² + 7n + 2)/2.",
+        "S(n) = (3n² + n)/2."
+      ],
+      "answer": 0,
+      "explanation": "At n = 0, (3n² + 7n)/2 is 0. Its successor difference is [3((n + 1)² − n²) + 7]/2 = (6n + 10)/2 = 3n + 5, exactly 3(n + 1) + 2. These two facts prove the stated formula by induction on all n ≥ 0.",
+      "transfer": "Propose and verify a formula for the sum from k = 1 through n of (2k + 3), starting at n = 0."
+    },
+    {
+      "id": "ind-coefficients",
+      "concept": "Coverage and exact certificates",
+      "prerequisites": [
+        "Finding proof gaps"
+      ],
+      "prompt": "In an exact symbolic check, the successor residual Q(n + 1) − Q(n) − t(n + 1) is (6n − 6)/2. It is zero at n = 1. Can this residual certify the required successor identity for every integer n ≥ 1?",
+      "options": [
+        "Yes; one zero residual proves an identity in n.",
+        "Yes; the denominator 2 cancels every numerator.",
+        "No; at n = 2 the residual is 3, so the successor identity fails within the stated domain.",
+        "No; a symbolic expression can never be used in an induction argument."
+      ],
+      "answer": 2,
+      "explanation": "Substituting n = 2 gives (12 − 6)/2 = 3. The required identity is therefore not true at every allowed n. A nonzero linear polynomial can have a particular zero without being identically zero. Exact symbolic coefficients, rather than a single successful substitution, determine that distinction.",
+      "transfer": "A successor residual is (0n + 0)/7. What does that establish about the successor identity? What separate fact is still needed for an induction proof?"
+    }
+  ]
+}
