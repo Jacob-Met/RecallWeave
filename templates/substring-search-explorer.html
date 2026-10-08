@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>Substring search · RecallWeave</title>
+  <style>/* SUBSTRING_STYLE */</style>
+</head>
+<body>
+  <main>
+    <header>
+      <p class="eyebrow">RecallWeave · an original offline lesson</p>
+      <h1>Find the match.<br>Keep what still fits.</h1>
+      <p class="lede">Find every exact substring, including overlaps. Follow ordinary left-to-right search, build a prefix table, then see how KMP uses a shorter matching border without moving backward through the text.</p>
+    </header>
+    <section class="card" aria-labelledby="input-heading">
+      <h2 id="input-heading">1. Choose the text and pattern</h2>
+      <p id="input-rules">Positions start at 0 and count Unicode code points. Matching is literal and case-sensitive: no normalization, regular expressions or grapheme grouping. Text may be empty; a pattern must contain 1–16 code points. Text is limited to 64.</p>
+      <label for="search-example">Load an example as a draft</label>
+      <select id="search-example"><option value="">Choose an example</option></select>
+      <form id="search-form">
+        <div class="input-grid">
+          <div><label for="search-text">Text · up to 64 code points</label><textarea id="search-text" rows="3" aria-describedby="input-rules" spellcheck="false">ABABABABA</textarea></div>
+          <div><label for="search-pattern">Pattern · 1–16 code points</label><textarea id="search-pattern" rows="3" aria-describedby="input-rules" spellcheck="false">ABABA</textarea></div>
+        </div>
+        <button class="primary" type="submit">Build traces</button>
+      </form>
+      <p id="search-status" class="status" role="status" aria-live="polite" aria-atomic="true">Choose inputs, then build the complete traces.</p>
+    </section>
+    <section id="search-result" hidden aria-labelledby="result-heading">
+      <div class="card result-heading">
+        <h2 id="result-heading">2. Inspect the accepted calculation</h2>
+        <pre id="search-identity"></pre>
+        <p id="search-summary" class="summary"></p>
+        <p>Each panel starts at its initial state. Previous, Next and the step selector inspect an already complete trace; they do not run more comparisons. A comparison is one equality test. Recording a result, moving a cursor and applying a fallback add zero comparisons.</p>
+        <button id="download-calculation" type="button" disabled>Download complete calculation (.json)</button>
+        <p class="small">Editing either input retires this result until you build again. The download includes every step in all three traces, not just the current panels.</p>
+      </div>
+      <div class="trace-stack">
+        <section id="trace-naive" class="card" aria-labelledby="naive-heading"><h3 id="naive-heading">Naive search</h3><p>Try every feasible full-pattern start, including overlaps. Compare left to right and stop an alignment on its first mismatch.</p></section>
+        <section id="trace-prefix" class="card" aria-labelledby="prefix-heading"><h3 id="prefix-heading">Prefix preparation</h3><p>pi[i] is the longest proper prefix that is also a suffix of the pattern through i. A proper border is shorter than that whole prefix. Uncomputed entries are —.</p></section>
+        <section id="trace-kmp" class="card" aria-labelledby="kmp-heading"><h3 id="kmp-heading">KMP search</h3><p>i is the next text position; q is the matched-prefix length. On a mismatch with q &gt; 0, retain q = pi[q − 1] and compare the same text token again. After a full match, use the same border rule to preserve overlaps.</p></section>
+      </div>
+    </section>
+    <section class="card" aria-labelledby="lesson-heading">
+      <h2 id="lesson-heading">3. Explain it without the trace</h2>
+      <p>What remains true when the pattern falls back? Why can AA appear three times in AAAA? What changes if a visually similar letter uses a different code-point sequence?</p>
+      <button id="download-course" type="button">Download original 12-question course (.json)</button>
+      <p>Open RecallWeave and choose <strong>Bring your own lesson</strong>. Preview this saved course, then choose <strong>Start this deck</strong>. The existing lesson, review, practice and notes flow will use its original questions and explanations.</p>
+      <p><a href="substring-search.md">Read the worked guide and answers</a> · <a href="../demo.html">Open RecallWeave</a></p>
+      <p class="small">The explorer and its two downloads are self-contained. The guide and RecallWeave links refer to companion repository files.</p>
+    </section>
+    <footer>
+      <h2>What these numbers mean</h2>
+      <p>This is a prefix-function KMP variant. Preparing a pattern and searching a text has a linear combined bound, but that does not promise fewer comparisons on every small example. Prefix preparation and text search are shown separately. Counts are not elapsed-time measurements. Full teaching snapshots use more space than the underlying algorithm's working state.</p>
+      <p>The page has no account, upload, storage or external asset dependency. All traces stay in this page unless you explicitly request a download.</p>
+      <p>Original course content: CC0-1.0. Algorithm background: <a href="https://xlinux.nist.gov/dads/HTML/knuthMorrisPratt.html">NIST</a>, <a href="https://epubs.siam.org/doi/10.1137/0206024">Knuth, Morris and Pratt (1977; metadata and abstract)</a>, and <a href="https://www.cs.utexas.edu/~moore/best-ideas/string-searching/kpm-example.html">J Strother Moore</a>. Referenced works retain their own terms.</p>
+    </footer>
+  </main>
+  <script type="application/json" id="substring-course-source">/* SUBSTRING_COURSE */</script>
+  <script type="module">/* SUBSTRING_SCRIPT */</script>
+</body>
+</html>

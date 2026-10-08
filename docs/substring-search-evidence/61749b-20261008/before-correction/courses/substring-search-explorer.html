@@ -1,0 +1,480 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>Substring search · RecallWeave</title>
+  <style>:root { color-scheme: light dark; --paper: #f5f2ea; --ink: #1b2c32; --card: #fffef9; --line: #aeb9b5; --accent: #135c56; --soft: #dcebe2; --focus: #954917; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--paper); color: var(--ink); font-family: system-ui, sans-serif; line-height: 1.6; }
+main { max-width: 1080px; margin: auto; padding: 2rem 1.25rem 4rem; }
+header { max-width: 820px; padding: 2rem 0; }
+h1 { font-size: clamp(2.35rem, 6vw, 4.4rem); line-height: 1.1; letter-spacing: -.035em; margin: .6rem 0 1.25rem; }
+h2 { font-size: 1.45rem; margin-top: 0; } h3 { font-size: 1.3rem; margin-top: 0; }
+.eyebrow { text-transform: uppercase; letter-spacing: .12em; font-size: .8rem; font-weight: 750; color: var(--accent); }
+.lede { font-size: 1.16rem; } .small { font-size: .9rem; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 1rem; padding: 1.5rem; margin-bottom: 1.25rem; }
+label { display: block; font-weight: 650; margin: .65rem 0 .3rem; }
+input, textarea, select, button { font: inherit; color: inherit; }
+textarea, select { background: var(--card); border: 1px solid var(--line); border-radius: .35rem; padding: .5rem; max-width: 100%; }
+textarea { display: block; width: 100%; resize: vertical; font-family: ui-monospace, monospace; }
+button { border: 1px solid var(--accent); border-radius: .4rem; padding: .55rem .9rem; background: var(--card); cursor: pointer; font-weight: 650; }
+button.primary { background: var(--accent); color: #fff; margin-top: 1rem; }
+button:disabled { opacity: .5; cursor: default; }
+:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+a { color: var(--accent); text-underline-offset: .2em; }
+.input-grid { display: grid; grid-template-columns: 1.6fr 1fr; gap: 1rem; }
+.status { border-left: 4px solid var(--accent); padding: .5rem .8rem; background: var(--soft); min-height: 2.5rem; }
+.status.error { border-left-color: #a13622; }
+pre { white-space: pre-wrap; overflow-wrap: anywhere; font: .94rem/1.6 ui-monospace, monospace; }
+.summary { font-size: 1.07rem; font-weight: 650; }
+.trace-controls { display: flex; align-items: center; gap: .6rem; flex-wrap: wrap; }
+.trace-controls label { margin: 0; font-weight: 500; } .trace-controls select { margin-left: .3rem; }
+.step-position { color: var(--accent); font-weight: 700; }
+.step-event { padding: .75rem; background: var(--soft); border-radius: .4rem; }
+.trace-visual { overflow-x: auto; padding: .5rem 0 1rem; border-block: 1px solid var(--line); }
+.token-row { display: flex; width: max-content; min-width: 100%; margin: .4rem 0; align-items: center; }
+.row-label { width: 5.5rem; flex: 0 0 5.5rem; }
+.tokens { display: flex; align-items: stretch; gap: .2rem; }
+.token { display: inline-flex; flex-direction: column; align-items: center; justify-content: space-between; width: 4.25rem; min-height: 4.3rem; padding: .2rem; border: 1px solid var(--line); border-radius: .3rem; }
+.token small { font: .7rem ui-monospace, monospace; } .token b { text-align: center; font: .85rem ui-monospace, monospace; overflow-wrap: anywhere; }
+.token.comparing { background: var(--soft); outline: 2px solid var(--accent); outline-offset: -2px; }
+.token.comparing small::after { content: ' ◉'; } .token.gap { border-color: transparent; }
+.empty { align-self: center; padding: .5rem; }
+footer { border-top: 1px solid var(--line); margin-top: 2rem; padding-top: 1.5rem; font-size: .93rem; }
+[hidden] { display: none !important; }
+@media (max-width: 660px) { .input-grid { grid-template-columns: 1fr; } .card { padding: 1rem; } main { padding-inline: .75rem; } .row-label { width: 4.5rem; flex-basis: 4.5rem; } }
+@media (prefers-color-scheme: dark) { :root { --paper: #132326; --ink: #e8efec; --card: #1b3032; --line: #59716b; --accent: #91dbc8; --soft: #294843; --focus: #ffbb78; } button.primary { color: #112b28; } .status.error { border-left-color: #ffac95; } }
+</style>
+</head>
+<body>
+  <main>
+    <header>
+      <p class="eyebrow">RecallWeave · an original offline lesson</p>
+      <h1>Find the match.<br>Keep what still fits.</h1>
+      <p class="lede">Find every exact substring, including overlaps. Follow ordinary left-to-right search, build a prefix table, then see how KMP uses a shorter matching border without moving backward through the text.</p>
+    </header>
+    <section class="card" aria-labelledby="input-heading">
+      <h2 id="input-heading">1. Choose the text and pattern</h2>
+      <p id="input-rules">Positions start at 0 and count Unicode code points. Matching is literal and case-sensitive: no normalization, regular expressions or grapheme grouping. Text may be empty; a pattern must contain 1–16 code points. Text is limited to 64.</p>
+      <label for="search-example">Load an example as a draft</label>
+      <select id="search-example"><option value="">Choose an example</option></select>
+      <form id="search-form">
+        <div class="input-grid">
+          <div><label for="search-text">Text · up to 64 code points</label><textarea id="search-text" rows="3" aria-describedby="input-rules" spellcheck="false">ABABABABA</textarea></div>
+          <div><label for="search-pattern">Pattern · 1–16 code points</label><textarea id="search-pattern" rows="3" aria-describedby="input-rules" spellcheck="false">ABABA</textarea></div>
+        </div>
+        <button class="primary" type="submit">Build traces</button>
+      </form>
+      <p id="search-status" class="status" role="status" aria-live="polite" aria-atomic="true">Choose inputs, then build the complete traces.</p>
+    </section>
+    <section id="search-result" hidden aria-labelledby="result-heading">
+      <div class="card result-heading">
+        <h2 id="result-heading">2. Inspect the accepted calculation</h2>
+        <pre id="search-identity"></pre>
+        <p id="search-summary" class="summary"></p>
+        <p>Each panel starts at its initial state. Previous, Next and the step selector inspect an already complete trace; they do not run more comparisons. A comparison is one equality test. Recording a result, moving a cursor and applying a fallback add zero comparisons.</p>
+        <button id="download-calculation" type="button" disabled>Download complete calculation (.json)</button>
+        <p class="small">Editing either input retires this result until you build again. The download includes every step in all three traces, not just the current panels.</p>
+      </div>
+      <div class="trace-stack">
+        <section id="trace-naive" class="card" aria-labelledby="naive-heading"><h3 id="naive-heading">Naive search</h3><p>Try every feasible full-pattern start, including overlaps. Compare left to right and stop an alignment on its first mismatch.</p></section>
+        <section id="trace-prefix" class="card" aria-labelledby="prefix-heading"><h3 id="prefix-heading">Prefix preparation</h3><p>pi[i] is the longest proper prefix that is also a suffix of the pattern through i. A proper border is shorter than that whole prefix. Uncomputed entries are —.</p></section>
+        <section id="trace-kmp" class="card" aria-labelledby="kmp-heading"><h3 id="kmp-heading">KMP search</h3><p>i is the next text position; q is the matched-prefix length. On a mismatch with q &gt; 0, retain q = pi[q − 1] and compare the same text token again. After a full match, use the same border rule to preserve overlaps.</p></section>
+      </div>
+    </section>
+    <section class="card" aria-labelledby="lesson-heading">
+      <h2 id="lesson-heading">3. Explain it without the trace</h2>
+      <p>What remains true when the pattern falls back? Why can AA appear three times in AAAA? What changes if a visually similar letter uses a different code-point sequence?</p>
+      <button id="download-course" type="button">Download original 12-question course (.json)</button>
+      <p>Open RecallWeave and choose <strong>Bring your own lesson</strong>. Preview this saved course, then choose <strong>Start this deck</strong>. The existing lesson, review, practice and notes flow will use its original questions and explanations.</p>
+      <p><a href="substring-search.md">Read the worked guide and answers</a> · <a href="../demo.html">Open RecallWeave</a></p>
+      <p class="small">The explorer and its two downloads are self-contained. The guide and RecallWeave links refer to companion repository files.</p>
+    </section>
+    <footer>
+      <h2>What these numbers mean</h2>
+      <p>This is a prefix-function KMP variant. Preparing a pattern and searching a text has a linear combined bound, but that does not promise fewer comparisons on every small example. Prefix preparation and text search are shown separately. Counts are not elapsed-time measurements. Full teaching snapshots use more space than the underlying algorithm's working state.</p>
+      <p>The page has no account, upload, storage or external asset dependency. All traces stay in this page unless you explicitly request a download.</p>
+      <p>Original course content: CC0-1.0. Algorithm background: <a href="https://xlinux.nist.gov/dads/HTML/knuthMorrisPratt.html">NIST</a>, <a href="https://epubs.siam.org/doi/10.1137/0206024">Knuth, Morris and Pratt (1977; metadata and abstract)</a>, and <a href="https://www.cs.utexas.edu/~moore/best-ideas/string-searching/kpm-example.html">J Strother Moore</a>. Referenced works retain their own terms.</p>
+    </footer>
+  </main>
+  <script type="application/json" id="substring-course-source">"{\n  \"format\": \"recallweave-deck/1\",\n  \"title\": \"Substring search: matches, borders and fallback\",\n  \"attribution\": \"Original questions, explanations and worked examples for RecallWeave, 2026. Algorithm background: NIST Dictionary of Algorithms and Data Structures, Knuth–Morris–Pratt (https://xlinux.nist.gov/dads/HTML/knuthMorrisPratt.html); Knuth, Morris and Pratt, Fast Pattern Matching in Strings, SIAM Journal on Computing 6(2), 1977, publisher metadata and abstract (https://epubs.siam.org/doi/10.1137/0206024); J Strother Moore's university-hosted explanation (https://www.cs.utexas.edu/~moore/best-ideas/string-searching/kpm-example.html). No source exercises, prose or figures are reproduced.\",\n  \"license\": \"CC0-1.0 for this original course content. Referenced publications retain their own terms and are not included in this deck. This grant does not change the repository's terms for other files.\",\n  \"concepts\": [\"Matches and positions\", \"Repeated prefixes\", \"Prefix fallback\", \"Search cost\"],\n  \"items\": [\n    {\n      \"id\": \"ss-matches-overlap\",\n      \"concept\": \"Matches and positions\",\n      \"prerequisites\": [],\n      \"prompt\": \"Find every exact occurrence of pattern AA in text AAAA. Indices start at 0, and an occurrence may overlap another. Which list contains all starting indices?\",\n      \"options\": [\"[0, 1, 2]\", \"[0, 2]\", \"[0, 1, 2, 3]\", \"[1, 2]\"],\n      \"answer\": 0,\n      \"explanation\": \"The length-two slices starting at 0, 1 and 2 are all AA. A slice starting at 3 has only one token left. Reporting only 0 and 2 would silently impose a nonoverlap rule that this search does not use.\",\n      \"transfer\": \"Find all starts of AAA in AAAAA. The starts are [0, 1, 2]; each complete length-three slice counts even though adjacent matches share two tokens.\"\n    },\n    {\n      \"id\": \"ss-matches-units\",\n      \"concept\": \"Matches and positions\",\n      \"prerequisites\": [],\n      \"prompt\": \"This course counts Unicode code points from 0, rather than UTF-16 code units. For text 😀A😀A😀 and pattern 😀A, which starting positions match? Each displayed emoji here is one code point.\",\n      \"options\": [\"[0, 3]\", \"[0, 2]\", \"[1, 3]\", \"[0, 2, 4]\"],\n      \"answer\": 1,\n      \"explanation\": \"The text has five code points: 😀, A, 😀, A, 😀 at indices 0 through 4. The two-token pattern begins at 0 and 2. The final emoji lacks a following A. JavaScript's UTF-16 offsets for the two matches would be 0 and 3, so the index unit must be declared.\",\n      \"transfer\": \"Search 😀😀😀 for 😀😀 using this course's units. Starts [0, 1] are both matches. An index in a code-point sequence is not automatically a byte offset, UTF-16 offset or user-perceived grapheme position.\"\n    },\n    {\n      \"id\": \"ss-matches-literal\",\n      \"concept\": \"Matches and positions\",\n      \"prerequisites\": [],\n      \"prompt\": \"The text is the three-code-point sequence [U+0065 LATIN SMALL LETTER E, U+0301 COMBINING ACUTE ACCENT, U+00E9 LATIN SMALL LETTER E WITH ACUTE]. The pattern is the single code point U+00E9. Literal matching performs no Unicode normalization. Which starts match?\",\n      \"options\": [\"[0, 2], because both visible accents look similar.\", \"[1], because the accent is the pattern.\", \"[2] only.\", \"No starts match.\"],\n      \"answer\": 2,\n      \"explanation\": \"Only the final code point equals U+00E9. The first two code points form a different literal sequence even if a font makes it look like the same accented letter. Normalizing text would be a separate, explicit operation and could change the position mapping.\",\n      \"transfer\": \"For text aAaA and pattern Aa, literal case-sensitive matching reports [1]. It does not treat a and A as interchangeable or add a match that would extend past the end.\"\n    },\n    {\n      \"id\": \"ss-prefix-proper\",\n      \"concept\": \"Repeated prefixes\",\n      \"prerequisites\": [\"Matches and positions\"],\n      \"prompt\": \"A border is a prefix that is also a suffix. A proper border must be shorter than the whole string. What is the length of the longest proper border of ABABA?\",\n      \"options\": [\"5, using ABABA itself.\", \"4, using ABAB.\", \"2, using AB.\", \"3, using ABA.\"],\n      \"answer\": 3,\n      \"explanation\": \"ABA is both the first three and last three tokens. ABAB is not the suffix BABA, and the whole five-token string is excluded by proper. Border lengths count tokens; they are not the index of the border's last token.\",\n      \"transfer\": \"The longest proper border of AAAA is AAA, length 3. For ABC it is empty, length 0. Repetition can make several borders valid; the table records the longest.\"\n    },\n    {\n      \"id\": \"ss-prefix-table\",\n      \"concept\": \"Repeated prefixes\",\n      \"prerequisites\": [\"Matches and positions\"],\n      \"prompt\": \"Define pi[i] as the longest proper-border length of pattern[0..i], including token i. Which full prefix table belongs to ABABA?\",\n      \"options\": [\"[0, 0, 1, 2, 3]\", \"[0, 1, 2, 3, 4]\", \"[0, 0, 0, 0, 0]\", \"[1, 2, 3, 4, 5]\"],\n      \"answer\": 0,\n      \"explanation\": \"The prefixes A and AB have no nonempty proper border. ABA has border A (1); ABAB has border AB (2); ABABA has border ABA (3). In particular pi[0] is 0 because a one-token prefix has no nonempty proper border.\",\n      \"transfer\": \"For AAAA, enumerate the proper borders of each growing prefix. The table is [0, 1, 2, 3]. For ABABAC it is [0, 0, 1, 2, 3, 0]; the final C prevents a nonempty border.\"\n    },\n    {\n      \"id\": \"ss-prefix-chain\",\n      \"concept\": \"Repeated prefixes\",\n      \"prerequisites\": [\"Matches and positions\"],\n      \"prompt\": \"While preparing the table for ABABAC, i = 5 points at C and q = 3 is the candidate border length. Compare C with pattern[3] = B and find a mismatch. The rule is q = pi[q - 1]. What happens immediately?\",\n      \"options\": [\"Move i back to 3 and keep q = 3.\", \"Keep i = 5 and set q = pi[2] = 1.\", \"Keep i = 5 and set q = pi[3] = 2.\", \"Record pi[5] = 3 without another comparison.\"],\n      \"answer\": 1,\n      \"explanation\": \"The already matched prefix of length 3 is ABA. Its longest proper border has length pi[2] = 1, so q becomes 1 while C remains the unresolved token. C then mismatches pattern[1] = B, and after another fallback it mismatches pattern[0] = A; pi[5] becomes 0.\",\n      \"transfer\": \"Count only equality tests for the whole ABABAC preparation. The first four comparisons at i = 1 through 4 plus three comparisons at i = 5 total 7. Assigning a fallback is not another equality test.\"\n    },\n    {\n      \"id\": \"ss-fallback-stationary\",\n      \"concept\": \"Prefix fallback\",\n      \"prerequisites\": [\"Repeated prefixes\"],\n      \"prompt\": \"Search text ABABACABABABAC for pattern ABABAC. Later, i = 11 points at text token B while q = 5 means ABABA was matched. Comparing B with pattern[5] = C fails. With pi = [0, 0, 1, 2, 3, 0], what state follows this mismatch?\",\n      \"options\": [\"i = 12, q = 0: discard the unresolved B.\", \"i = 6, q = 0: reread the whole alignment.\", \"i = 11, q = pi[4] = 3: compare the same B with pattern[3] next.\", \"i = 11, q = 4: always decrement q by one.\"],\n      \"answer\": 2,\n      \"explanation\": \"ABABA ends in ABA, which is also the pattern's first three tokens. Those three already matched tokens can be retained, so q falls to 3 and i stays 11. The B is then compared with pattern[3] = B and can extend that shorter match. The text cursor does not move backward.\",\n      \"transfer\": \"For pattern AAAAAB, a mismatch after matching five As falls from q = 5 to pi[4] = 4. If the unresolved text token is A, it can extend that shorter prefix without rereading the earlier text.\"\n    },\n    {\n      \"id\": \"ss-fallback-full-match\",\n      \"concept\": \"Prefix fallback\",\n      \"prerequisites\": [\"Repeated prefixes\"],\n      \"prompt\": \"Pattern ABABA has pi = [0, 0, 1, 2, 3]. In text ABABABABA, the first full match ends with i = 5 and q = 5, where i is the next text index. After reporting start 0, which fallback preserves possible overlapping matches?\",\n      \"options\": [\"Set i = 0 and q = 0.\", \"Keep q = 5 and compare pattern[5].\", \"Set i = 6 and q = 0.\", \"Keep i = 5 and set q = pi[4] = 3.\"],\n      \"answer\": 3,\n      \"explanation\": \"The completed match's suffix ABA can be the next match's prefix. Retaining q = 3 lets later B and A complete another occurrence starting at 2, then another at 4. Pattern index 5 would be outside the pattern; a full match must be reported and followed by its proper-border fallback before another comparison.\",\n      \"transfer\": \"For text AAAA and pattern AA, pi[1] = 1. After every full match, retaining one A yields starts [0, 1, 2]. Resetting q to 0 after each match would lose start 1 in this scan.\"\n    },\n    {\n      \"id\": \"ss-fallback-empty\",\n      \"concept\": \"Prefix fallback\",\n      \"prerequisites\": [\"Repeated prefixes\"],\n      \"prompt\": \"Use the declared prefix-function algorithm with an empty text and nonempty pattern AB. Prefix preparation always runs; the text-search loop runs while i \u003c text length. Which result is correct?\",\n      \"options\": [\"No matches; 1 prefix-preparation comparison and 0 text-search comparisons.\", \"A match at 0; 1 preparation comparison and 0 search comparisons.\", \"No matches; 0 preparation comparisons and 1 search comparison.\", \"The algorithm must read text[0] before it can stop.\"],\n      \"answer\": 0,\n      \"explanation\": \"Preparing AB compares B with A once and produces [0, 0]. The text has length 0, so the search loop never reads a token. A nonempty pattern cannot fit. This explorer refuses an empty pattern instead of inventing a boundary-occurrence convention for it.\",\n      \"transfer\": \"For text AB and longer pattern ABAB, there is still no match. This declared KMP variant prepares the pattern and scans two text tokens; the naive feasible-alignment variant makes zero comparisons because no full pattern could fit.\"\n    },\n    {\n      \"id\": \"ss-cost-counts\",\n      \"concept\": \"Search cost\",\n      \"prerequisites\": [\"Prefix fallback\"],\n      \"prompt\": \"For text ABABABABA and pattern ABABA, the naive algorithm compares left to right at every feasible start and stops each alignment at its first mismatch. The prefix-function variant makes 4 prefix-preparation comparisons and 9 text-search comparisons. What is the correct comparison summary?\",\n      \"options\": [\"Naive 9; KMP total 4.\", \"Naive 17; KMP total 13, with preparation and search shown separately.\", \"Naive 17; KMP total 9 because preparation is free.\", \"Naive 25; KMP total 17.\"],\n      \"answer\": 1,\n      \"explanation\": \"The five naive starts cost 5, 1, 5, 1 and 5 comparisons, totaling 17. KMP costs 4 + 9 = 13 when preparing this pattern for this search. Reporting only 9 would answer a different question: search cost after a prefix table is already available.\",\n      \"transfer\": \"For text AAAA and pattern AA, the naive cost is 2 + 2 + 2 = 6. Prefix preparation costs 1, KMP search costs 4, and their total is 5. Count comparisons, not the number of displayed trace states.\"\n    },\n    {\n      \"id\": \"ss-cost-small\",\n      \"concept\": \"Search cost\",\n      \"prerequisites\": [\"Prefix fallback\"],\n      \"prompt\": \"For text XYZXYZ and pattern AB, none of the first-token comparisons can match. The naive variant tries only feasible full-pattern starts; KMP scans all six text tokens after preparing the pattern. Which statement is correct?\",\n      \"options\": [\"KMP must use fewer comparisons on every input.\", \"Both variants must make exactly 6 comparisons in total.\", \"Naive makes 5 comparisons; KMP makes 1 + 6 = 7. A linear bound does not promise a win on each small input.\", \"Naive makes 12 comparisons because every alignment must compare both pattern tokens.\"],\n      \"answer\": 2,\n      \"explanation\": \"Only starts 0 through 4 can fit a length-two pattern; each fails on its first comparison. The declared KMP loop visits six text tokens, and AB preparation adds one comparison. Asymptotic bounds describe growth and worst-case behavior, not a universal ranking of exact counts or elapsed time.\",\n      \"transfer\": \"Try text AB with pattern ABAB. The naive variant has no feasible starts and makes 0 comparisons; this KMP variant makes 3 preparation comparisons and 2 search comparisons. Both correctly report no occurrence.\"\n    },\n    {\n      \"id\": \"ss-cost-bound\",\n      \"concept\": \"Search cost\",\n      \"prerequisites\": [\"Prefix fallback\"],\n      \"prompt\": \"Why can the prefix-function search avoid repeatedly moving backward through the text, while retaining every occurrence? Choose the explanation consistent with this course's trace and cost claims.\",\n      \"options\": [\"It sorts the text before searching, so equal tokens are adjacent.\", \"It skips comparison counts whenever a trace panel is closed.\", \"It stores all trace snapshots in constant space regardless of input size.\", \"The text cursor only advances; mismatches use previously computed proper borders to reduce the matched-prefix length. Preparation plus search is linear in their input lengths.\"],\n      \"answer\": 3,\n      \"explanation\": \"The text cursor never retreats. Successful comparisons advance it and increase the matched-prefix length; fallback comparisons reduce that length, so the work can be bounded by progress rather than restarting every alignment. Prefix preparation uses the same kind of border fallback. The teaching explorer deliberately retains full snapshots, which take more space than the underlying algorithm's working state. It does not measure elapsed time.\",\n      \"transfer\": \"Explain why changing the step selector cannot change a comparison total: the explorer selects from a completed immutable trace. Distinguish that retained teaching data from executing a streaming search with only its current state and prefix table.\"\n    }\n  ]\n}\n"</script>
+  <script type="module">// Literal code-point substring search with complete teaching traces.
+// Counts are token equality tests in these declared variants, not timings.
+export const INPUT_LIMITS = Object.freeze({ text: 64, pattern: 16 });
+export const TRACE_FORMAT = 'recallweave.substring-search/1';
+
+function freeze(value) {
+  if (value && typeof value === 'object' && !Object.isFrozen(value)) {
+    for (const child of Object.values(value)) freeze(child);
+    Object.freeze(value);
+  }
+  return value;
+}
+
+function tokens(value, name, limit) {
+  if (typeof value !== 'string') throw new TypeError(name + ' must be text.');
+  const result = Array.from(value);
+  if (result.some(token => token.codePointAt(0) >= 0xD800 && token.codePointAt(0) <= 0xDFFF)) {
+    throw new RangeError(name + ' contains an unpaired Unicode surrogate.');
+  }
+  if (result.length > limit) throw new RangeError(name + ' may contain at most ' + limit + ' Unicode code points.');
+  return result;
+}
+
+function comparison(leftSequence, leftIndex, left, rightIndex, right) {
+  // This is the one algorithm equality evaluation counted by a compare event.
+  return {
+    left: { sequence: leftSequence, index: leftIndex, token: left },
+    right: { sequence: 'pattern', index: rightIndex, token: right },
+    equal: left === right
+  };
+}
+
+function naiveTrace(text, pattern) {
+  const steps = [], matches = [];
+  let start = 0, offset = 0, comparisons = 0;
+  const emit = (kind, extra = {}) => steps.push({
+    kind, start, offset, comparisons, matches: [...matches], comparison: null, ...extra
+  });
+  emit('initial');
+  for (start = 0; start + pattern.length <= text.length; start++) {
+    offset = 0;
+    if (start > 0) emit('shift');
+    while (offset < pattern.length) {
+      const pair = comparison('text', start + offset, text[start + offset], offset, pattern[offset]);
+      comparisons++;
+      emit('compare', { comparison: pair });
+      if (!pair.equal) { emit('reject'); break; }
+      offset++;
+      emit('advance');
+    }
+    if (offset === pattern.length) {
+      matches.push(start);
+      emit('match', { match: start });
+    }
+  }
+  emit('complete');
+  return { comparisons, matches, steps };
+}
+
+function prefixTrace(pattern) {
+  const steps = [], table = Array(pattern.length).fill(null);
+  table[0] = 0;
+  let i = 1, q = 0, comparisons = 0;
+  const emit = (kind, extra = {}) => steps.push({
+    kind, i, q, comparisons, table: [...table], comparison: null, ...extra
+  });
+  emit('initial');
+  while (i < pattern.length) {
+    const pair = comparison('pattern', i, pattern[i], q, pattern[q]);
+    comparisons++;
+    emit('compare', { comparison: pair });
+    if (pair.equal) {
+      q++;
+      table[i] = q;
+      const recorded = i++;
+      emit('record', { recorded });
+    } else if (q > 0) {
+      const from = q;
+      q = table[q - 1];
+      emit('fallback', { fallback: { from, to: q } });
+    } else {
+      table[i] = 0;
+      const recorded = i++;
+      emit('record', { recorded });
+    }
+  }
+  emit('complete');
+  return { comparisons, table, steps };
+}
+
+function kmpTrace(text, pattern, table) {
+  const steps = [], matches = [];
+  let i = 0, q = 0, comparisons = 0;
+  const emit = (kind, extra = {}) => steps.push({
+    kind, i, q, comparisons, matches: [...matches], comparison: null, ...extra
+  });
+  emit('initial');
+  while (i < text.length) {
+    const pair = comparison('text', i, text[i], q, pattern[q]);
+    comparisons++;
+    emit('compare', { comparison: pair });
+    if (pair.equal) {
+      i++; q++;
+      emit('advance');
+      if (q === pattern.length) {
+        const match = i - pattern.length;
+        matches.push(match);
+        emit('match', { match });
+        const from = q;
+        q = table[q - 1];
+        emit('match-fallback', { fallback: { from, to: q } });
+      }
+    } else if (q > 0) {
+      const from = q;
+      q = table[q - 1];
+      emit('fallback', { fallback: { from, to: q } });
+    } else {
+      i++;
+      emit('skip');
+    }
+  }
+  emit('complete');
+  return { comparisons, matches, steps };
+}
+
+/** Build once; navigation reads the deeply frozen snapshots it receives. */
+export function buildSearchComparison(text, pattern) {
+  const haystack = tokens(text, 'Text', INPUT_LIMITS.text);
+  const needle = tokens(pattern, 'Pattern', INPUT_LIMITS.pattern);
+  if (needle.length === 0) throw new RangeError('Pattern must contain at least one Unicode code point.');
+  const prefix = prefixTrace(needle);
+  const naive = naiveTrace(haystack, needle);
+  const kmp = kmpTrace(haystack, needle, prefix.table);
+  return freeze({
+    format: TRACE_FORMAT,
+    conventions: {
+      indices: 'zero-based Unicode code points',
+      equality: 'literal and case-sensitive; no normalization',
+      counts: 'one token equality test per compare event',
+      variant: 'prefix-function KMP; preparation is separate; all overlapping occurrences',
+      storage: 'complete retained teaching traces; not the algorithm working-space bound'
+    },
+    text, pattern, textTokens: haystack, patternTokens: needle,
+    prefix, naive, kmp,
+    counts: { naive: naive.comparisons, prefix: prefix.comparisons, kmpSearch: kmp.comparisons,
+      kmpTotal: prefix.comparisons + kmp.comparisons }
+  });
+}
+
+export const EXAMPLES = freeze([
+  { name: 'Overlapping matches', text: 'ABABABABA', pattern: 'ABABA' },
+  { name: 'Fallback before a later match', text: 'ABABACABABABAC', pattern: 'ABABAC' },
+  { name: 'Repeated prefix, no match', text: 'AAAAAAAAAC', pattern: 'AAAAAB' },
+  { name: 'Small input: preparation matters', text: 'XYZXYZ', pattern: 'AB' },
+  { name: 'Unicode code-point positions', text: '😀A😀A😀', pattern: '😀A' },
+  { name: 'Combining text is not normalized', text: 'e\u0301é', pattern: 'é' }
+]);
+
+
+const PHASES = ['naive', 'prefix', 'kmp'];
+const TITLES = { naive: 'Naive search', prefix: 'Prefix preparation', kmp: 'KMP search' };
+
+function tokenLabel(token) {
+  const code = 'U+' + token.codePointAt(0).toString(16).toUpperCase().padStart(4, '0');
+  const named = { ' ': 'SPACE', '\n': 'LF', '\r': 'CR', '\t': 'TAB', '\0': 'NUL' };
+  if (Object.hasOwn(named, token)) return named[token] + ' ' + code;
+  if (/\p{C}|\p{M}|\p{Z}/u.test(token)) return code;
+  return token;
+}
+
+function describe(phase, step) {
+  if (step.kind === 'compare') {
+    const pair = step.comparison;
+    return pair.left.sequence + '[' + pair.left.index + '] ' + tokenLabel(pair.left.token) +
+      (pair.equal ? ' equals ' : ' differs from ') + 'pattern[' + pair.right.index + '] ' +
+      tokenLabel(pair.right.token) + '. Count this one equality test.';
+  }
+  if (step.kind === 'fallback' || step.kind === 'match-fallback') {
+    return (step.kind === 'match-fallback' ? 'After the complete match, retain its proper border: ' : 'Use a shorter proper border: ') +
+      'q ' + step.fallback.from + ' → ' + step.fallback.to + '. ' +
+      (phase === 'prefix' ? 'Preparation index' : 'Text index') + ' i stays ' + step.i + '. No comparison added.';
+  }
+  if (step.kind === 'match') return 'Report the complete occurrence starting at ' + step.match + '. Overlaps are allowed.';
+  if (step.kind === 'record') return 'Record pi[' + step.recorded + '] = ' + step.table[step.recorded] + '. Advance to the next prefix.';
+  if (step.kind === 'reject') return 'This alignment failed. The next feasible start will be tried.';
+  if (step.kind === 'shift') return 'Try the next feasible alignment, starting at ' + step.start + '.';
+  if (step.kind === 'skip') return 'No prefix token matched. Advance the text cursor once.';
+  if (step.kind === 'advance') return 'The equality succeeded. Advance the matched length and cursor; no extra comparison.';
+  if (step.kind === 'initial') return phase === 'prefix' ? 'Start with pi[0] = 0. Unknown table entries are shown as —.' : 'Initial state. No text comparisons yet.';
+  return phase === 'prefix' ? 'Preparation complete. The final table can be reused for this exact pattern.' :
+    'Search complete. ' + (step.matches.length ? 'All starts: ' + step.matches.join(', ') + '.' : 'No complete occurrence.');
+}
+
+/** Request a download; cleanup always runs. Browser saving remains user-controlled. */
+export function requestDownload(document, platform, content, filename, type) {
+  const blob = new platform.Blob([content], { type });
+  const url = platform.URL.createObjectURL(blob);
+  let anchor;
+  try {
+    anchor = document.createElement('a');
+    anchor.href = url; anchor.download = filename; anchor.hidden = true;
+    document.body.append(anchor);
+    anchor.click();
+  } finally {
+    try { if (anchor) anchor.remove(); }
+    finally { platform.URL.revokeObjectURL(url); }
+  }
+}
+
+/** Actual page handlers; callers may supply a DOM/platform for native QA. */
+export function mountExplorer(document, platform = globalThis, courseText) {
+  if (typeof courseText !== 'string') throw new TypeError('The exact authored course text is required.');
+  const byId = id => {
+    const value = document.getElementById(id);
+    if (!value) throw new Error('Missing explorer element: ' + id);
+    return value;
+  };
+  const textInput = byId('search-text'), patternInput = byId('search-pattern');
+  const form = byId('search-form'), examples = byId('search-example');
+  const resultRegion = byId('search-result'), status = byId('search-status');
+  const resultDownload = byId('download-calculation'), courseDownload = byId('download-course');
+  const summary = byId('search-summary'), identity = byId('search-identity');
+  const cursors = { naive: 0, prefix: 0, kmp: 0 };
+  const panels = {};
+  let accepted = null;
+
+  function element(tag, text, className) {
+    const node = document.createElement(tag);
+    if (text !== undefined) node.textContent = text;
+    if (className) node.className = className;
+    return node;
+  }
+  function announce(message, error = false) {
+    status.textContent = message;
+    status.className = error ? 'status error' : 'status';
+  }
+  function retire(message = 'Inputs changed. Build a new trace to inspect or download this draft.') {
+    accepted = null;
+    resultRegion.hidden = true;
+    resultDownload.disabled = true;
+    announce(message);
+  }
+  function rail(label, values, comparison, sequence, shift = 0) {
+    const row = element('div', undefined, 'token-row');
+    row.append(element('strong', label, 'row-label'));
+    const cells = element('div', undefined, 'tokens');
+    if (!values.length) cells.append(element('span', '(empty)', 'empty'));
+    for (let gap = 0; gap < shift; gap++) {
+      const blank = element('span', '', 'token gap'); blank.setAttribute('aria-hidden', 'true'); cells.append(blank);
+    }
+    values.forEach((token, index) => {
+      const compared = comparison && [comparison.left, comparison.right].some(part => part.sequence === sequence && part.index === index);
+      const cell = element('span', undefined, 'token' + (compared ? ' comparing' : ''));
+      const code = 'U+' + token.codePointAt(0).toString(16).toUpperCase().padStart(4, '0');
+      cell.append(element('small', String(index)), element('b', tokenLabel(token)));
+      cell.setAttribute('aria-label', label + ' index ' + index + ', ' + code + (compared ? ', compared in this step' : ''));
+      cells.append(cell);
+    });
+    row.append(cells);
+    return row;
+  }
+  function renderPhase(phase) {
+    if (!accepted) return;
+    const trace = accepted[phase], panel = panels[phase];
+    const index = cursors[phase], step = trace.steps[index];
+    panel.position.textContent = 'Step ' + index + ' of ' + (trace.steps.length - 1) + ' · ' + step.kind;
+    panel.select.value = String(index);
+    panel.previous.disabled = index === 0;
+    panel.next.disabled = index === trace.steps.length - 1;
+    panel.event.textContent = describe(phase, step);
+    panel.count.textContent = 'Equality comparisons so far: ' + step.comparisons;
+    panel.state.textContent = phase === 'naive' ? 'Start = ' + step.start + '; matched length = ' + step.offset :
+      (phase === 'prefix' ? 'Preparation' : 'Text') + ' index i = ' + step.i + '; matched-prefix length q = ' + step.q;
+    const rows = [];
+    if (phase !== 'prefix') rows.push(rail('Text', accepted.textTokens, step.comparison, 'text'));
+    const shift = phase === 'naive' ? step.start : phase === 'kmp' ? step.i - step.q : 0;
+    rows.push(rail('Pattern', accepted.patternTokens, step.comparison, 'pattern', Math.max(0, shift)));
+    if (phase === 'prefix') {
+      const row = element('div', undefined, 'token-row'); row.append(element('strong', 'pi', 'row-label'));
+      const cells = element('div', undefined, 'tokens');
+      step.table.forEach((value, i) => {
+        const cell = element('span', undefined, 'token');
+        cell.append(element('small', String(i)), element('b', value === null ? '—' : String(value)));
+        cells.append(cell);
+      });
+      row.append(cells); rows.push(row);
+      panel.matches.textContent = 'pi[i] is a proper-border length for the prefix ending at i.';
+    } else panel.matches.textContent = 'Reported starts so far: ' + (step.matches.length ? step.matches.join(', ') : 'none');
+    panel.visual.replaceChildren(...rows);
+  }
+
+  PHASES.forEach(phase => {
+    const host = byId('trace-' + phase), controls = element('div', undefined, 'trace-controls');
+    const previous = element('button', 'Previous'), next = element('button', 'Next');
+    previous.type = next.type = 'button';
+    previous.setAttribute('aria-label', TITLES[phase] + ': previous step');
+    next.setAttribute('aria-label', TITLES[phase] + ': next step');
+    const label = element('label', 'Jump to step '), select = element('select');
+    select.setAttribute('aria-label', TITLES[phase] + ': choose a retained step'); label.append(select);
+    controls.append(previous, next, label);
+    const position = element('p', undefined, 'step-position'), event = element('p', undefined, 'step-event');
+    event.setAttribute('aria-live', 'polite');
+    const state = element('p'), count = element('p'), visual = element('div', undefined, 'trace-visual'), matches = element('p');
+    visual.setAttribute('role', 'region'); visual.setAttribute('aria-label', TITLES[phase] + ' token positions');
+    visual.tabIndex = 0;
+    host.append(controls, position, event, state, count, visual, matches);
+    panels[phase] = { previous, next, select, position, event, state, count, visual, matches };
+    previous.addEventListener('click', () => { if (accepted && cursors[phase] > 0) { cursors[phase]--; renderPhase(phase); } });
+    next.addEventListener('click', () => { if (accepted && cursors[phase] + 1 < accepted[phase].steps.length) { cursors[phase]++; renderPhase(phase); } });
+    select.addEventListener('change', () => {
+      const value = Number(select.value);
+      if (accepted && Number.isInteger(value) && value >= 0 && value < accepted[phase].steps.length) {
+        cursors[phase] = value; renderPhase(phase);
+      }
+    });
+  });
+  EXAMPLES.forEach((example, index) => {
+    const option = element('option', example.name); option.value = String(index); examples.append(option);
+  });
+  examples.addEventListener('change', () => {
+    if (examples.value === '') return;
+    const example = EXAMPLES[Number(examples.value)];
+    if (!example) return;
+    textInput.value = example.text; patternInput.value = example.pattern;
+    retire('Example loaded as a draft. Select Build traces to inspect it.');
+  });
+  [textInput, patternInput].forEach(input => input.addEventListener('input', () => { examples.value = ''; retire(); }));
+  form.addEventListener('submit', event => {
+    event.preventDefault();
+    retire();
+    try {
+      accepted = buildSearchComparison(textInput.value, patternInput.value);
+      identity.textContent = 'Accepted text: ' + JSON.stringify(accepted.text) + '\nAccepted pattern: ' + JSON.stringify(accepted.pattern) +
+        '\nPositions use Unicode code points; case and combining marks are literal.';
+      summary.textContent = 'All match starts: ' + (accepted.kmp.matches.length ? accepted.kmp.matches.join(', ') : 'none') +
+        '. Comparisons — naive: ' + accepted.counts.naive + '; prefix preparation: ' + accepted.counts.prefix +
+        '; KMP text search: ' + accepted.counts.kmpSearch + '; KMP total: ' + accepted.counts.kmpTotal + '. ' +
+        'Final prefix table: [' + accepted.prefix.table.join(', ') + '].';
+      PHASES.forEach(phase => {
+        cursors[phase] = 0;
+        panels[phase].select.replaceChildren(...accepted[phase].steps.map((step, index) => {
+          const option = element('option', index + ': ' + step.kind); option.value = String(index); return option;
+        }));
+        renderPhase(phase);
+      });
+      resultRegion.hidden = false; resultDownload.disabled = false;
+      announce('Complete traces are ready. Each panel has its own retained step position.');
+    } catch (error) {
+      retire(error.message || 'The draft could not be calculated.');
+      announce(error.message || 'The draft could not be calculated.', true);
+    }
+  });
+  resultDownload.addEventListener('click', () => {
+    const captured = accepted;
+    if (!captured) return;
+    // A programmatic edit may not dispatch input; refuse a stale result anyway.
+    if (textInput.value !== captured.text || patternInput.value !== captured.pattern) { retire(); return; }
+    try {
+      requestDownload(document, platform, JSON.stringify(captured, null, 2) + '\n', 'substring-search-calculation.json', 'application/json;charset=utf-8');
+      announce('Calculation download requested. It includes all three complete traces, regardless of the displayed steps.');
+    } catch (error) { announce('Calculation download could not be requested. Your trace is retained; try again. ' + error.message, true); }
+  });
+  courseDownload.addEventListener('click', () => {
+    try {
+      requestDownload(document, platform, courseText, 'substring-search.json', 'application/json;charset=utf-8');
+      announce('Original course download requested. In RecallWeave, choose Bring your own lesson, preview it, then Start this deck.');
+    } catch (error) { announce('Course download could not be requested. Try again. ' + error.message, true); }
+  });
+  retire('Choose an example or write a text and pattern, then build the complete traces.');
+}
+
+if (typeof document !== 'undefined') {
+  const embedded = document.getElementById('substring-course-source');
+  if (embedded) mountExplorer(document, globalThis, JSON.parse(embedded.textContent));
+}
+</script>
+</body>
+</html>

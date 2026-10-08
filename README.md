@@ -42,6 +42,10 @@ Each saved HTML file opens and prints offline on its own. The worksheet file con
 
 Open the [Boolean explorer](courses/boolean-logic-explorer.html) directly from your files to compare expressions, inspect complete truth tables, and find a counterexample when two expressions differ. Download the current full table as CSV or the original twelve-question course as JSON. Import that course through the learner’s existing preview and explicit start flow, then review, practice and save your notes. The [course guide](courses/boolean-logic.md) explains the supported grammar, worked answers and content sources.
 
+## Explore substring search
+
+Open the [substring-search explorer](courses/substring-search-explorer.html) to find all literal matches, including overlaps, and inspect separate naive, prefix-table and KMP traces. Follow exact equality-comparison counts, keep Unicode code-point positions explicit, and save the complete calculation or the original [twelve-question course](courses/substring-search.json). The [worked guide](courses/substring-search.md) explains border fallback, preprocessing cost and the declared algorithm variants. The standalone explorer opens directly without an account or server.
+
 ## Core and interaction
 
 - `src/knowledge.mjs` implements a transparent BKT update: initial knowledge, learning transition, guess, and slip are explicit probabilities. It also computes binary entropy and expected information gain.

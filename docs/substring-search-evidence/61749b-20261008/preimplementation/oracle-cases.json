@@ -1,0 +1,206 @@
+{
+  "kind": "Preimplementation independent occurrence/border/count oracles; KMP totals remain hand-derived expectations",
+  "runtime": "v24.19.0",
+  "cases": [
+    {
+      "name": "overlapping border",
+      "text": "ABABABABA",
+      "pattern": "ABABA",
+      "matches": [
+        0,
+        2,
+        4
+      ],
+      "prefix": [
+        0,
+        0,
+        1,
+        2,
+        3
+      ],
+      "naive": 17,
+      "preparation": 4,
+      "search": 9
+    },
+    {
+      "name": "fallback while text cursor stays",
+      "text": "ABABACABABABAC",
+      "pattern": "ABABAC",
+      "matches": [
+        0,
+        8
+      ],
+      "prefix": [
+        0,
+        0,
+        1,
+        2,
+        3,
+        0
+      ],
+      "naive": 28,
+      "preparation": 7,
+      "search": 15
+    },
+    {
+      "name": "repeated-prefix absent match",
+      "text": "AAAAAAAAAC",
+      "pattern": "AAAAAB",
+      "matches": [],
+      "prefix": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        0
+      ],
+      "naive": 30,
+      "preparation": 9,
+      "search": 19
+    },
+    {
+      "name": "all overlapping occurrences",
+      "text": "AAAA",
+      "pattern": "AA",
+      "matches": [
+        0,
+        1,
+        2
+      ],
+      "prefix": [
+        0,
+        1
+      ],
+      "naive": 6,
+      "preparation": 1,
+      "search": 4
+    },
+    {
+      "name": "empty text",
+      "text": "",
+      "pattern": "AB",
+      "matches": [],
+      "prefix": [
+        0,
+        0
+      ],
+      "naive": 0,
+      "preparation": 1,
+      "search": 0
+    },
+    {
+      "name": "one-token pattern",
+      "text": "ABAAB",
+      "pattern": "A",
+      "matches": [
+        0,
+        2,
+        3
+      ],
+      "prefix": [
+        0
+      ],
+      "naive": 5,
+      "preparation": 0,
+      "search": 5
+    },
+    {
+      "name": "pattern longer than text",
+      "text": "AB",
+      "pattern": "ABAB",
+      "matches": [],
+      "prefix": [
+        0,
+        0,
+        1,
+        2
+      ],
+      "naive": 0,
+      "preparation": 3,
+      "search": 2
+    },
+    {
+      "name": "no shared first token",
+      "text": "XYZXYZ",
+      "pattern": "AB",
+      "matches": [],
+      "prefix": [
+        0,
+        0
+      ],
+      "naive": 5,
+      "preparation": 1,
+      "search": 6
+    },
+    {
+      "name": "case is meaningful",
+      "text": "aAaA",
+      "pattern": "Aa",
+      "matches": [
+        1
+      ],
+      "prefix": [
+        0,
+        0
+      ],
+      "naive": 4,
+      "preparation": 1,
+      "search": 4
+    },
+    {
+      "name": "astral code-point indices",
+      "text": "😀A😀A😀",
+      "pattern": "😀A",
+      "matches": [
+        0,
+        2
+      ],
+      "prefix": [
+        0,
+        0
+      ],
+      "naive": 6,
+      "preparation": 1,
+      "search": 5
+    },
+    {
+      "name": "combining sequence is not normalized",
+      "text": "éé",
+      "pattern": "é",
+      "matches": [
+        2
+      ],
+      "prefix": [
+        0
+      ],
+      "naive": 3,
+      "preparation": 0,
+      "search": 3
+    },
+    {
+      "name": "line break is an exact token",
+      "text": "A\nA",
+      "pattern": "\n",
+      "matches": [
+        1
+      ],
+      "prefix": [
+        0
+      ],
+      "naive": 3,
+      "preparation": 0,
+      "search": 3
+    }
+  ],
+  "checks": {
+    "occurrence_oracle": 12,
+    "border_oracle": 12,
+    "naive_count_definition": 12
+  },
+  "not_executed": [
+    "No substring explorer runtime exists at this point",
+    "KMP comparison totals have not yet been checked against a candidate",
+    "No browser or learner efficacy qualification"
+  ]
+}

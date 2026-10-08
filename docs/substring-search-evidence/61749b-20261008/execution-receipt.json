@@ -1,0 +1,49 @@
+{
+  "kind": "Source-qualified authored execution split around an independently reproduced correction",
+  "current_frozen_manifest_sha256": "5ae70e2b2253a619efda56ea651b6de1436d81419755206d4e11970f9590656d",
+  "original_execution_receipt": {
+    "path": "before-correction/execution-receipt.json",
+    "sha256": "d46e9bc62080df10f4e34603aa793a2928827fb6a94e3781baecb4f6bd0ed743",
+    "original_methods_passed": 16,
+    "original_source_manifest_sha256": "b25ab06f1299e7f9b83df0d3e8c0131cf4690f76bcc4caeea79e4fcf251f113f"
+  },
+  "correction": "Reset only naive offset to0 before complete snapshot; matches/counts and all other runtime source unchanged. Exact source inverse was checked.",
+  "current_executions": [
+    {
+      "command": "node --test --test-name-pattern='every naive displayed state' tests/substring-search.test.mjs",
+      "exit_code": 0,
+      "methods_passed": 1,
+      "cases": 13,
+      "log": "naive-completion-correction.log",
+      "sha256": "90ba6501ba698d61e031e3a7c43193ffaa66324b8dfb3ab8f93bb71c90faa8f5"
+    },
+    {
+      "command": "python tools/make_substring_search.py",
+      "exit_code": 0,
+      "log": "build-after-correction.log",
+      "sha256": "ed73e54db82de2896fce6f22fc5f244749c3220aa3dbb9c3e9bf4fc47bdd1601"
+    },
+    {
+      "command": "node --test tests/substring-search-build.test.mjs",
+      "exit_code": 0,
+      "methods_passed": 3,
+      "log": "artifact-after-correction.log",
+      "sha256": "09d29738e7135374108464ee771983aa1e7c552bfd0cf83c17ef6557aac6f16e"
+    }
+  ],
+  "independent_boundary": {
+    "harness_sha256": "5607a9bfe002107ece5ac94a002d069fa42c2002612847a1ae8b4d42f2cd2e27",
+    "before_receipt_sha256": "f192c01c330a92e2fe811338318ca12092bdcbd43733083bdbacb5579eebc276",
+    "before_exit_code": 1,
+    "after_receipt_sha256": "b06080ad9247d776a6bd355fb0ed6e0deffbe936b1718313d772d3929228f68d",
+    "after_exit_code": 0,
+    "source_unchanged_each_run": true
+  },
+  "not_claimed": [
+    "No full17-method corrected-source rerun",
+    "No unchanged exhaustive/course/UI rerun",
+    "No broad existing suite",
+    "No browser rendering, assistive-technology, file-picker or completed-download acceptance",
+    "No installation, deployment or learning-efficacy claim"
+  ]
+}

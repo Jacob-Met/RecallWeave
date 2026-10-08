@@ -1,0 +1,129 @@
+{
+  "format": "recallweave-deck/1",
+  "title": "Substring search: matches, borders and fallback",
+  "attribution": "Original questions, explanations and worked examples for RecallWeave, 2026. Algorithm background: NIST Dictionary of Algorithms and Data Structures, Knuth–Morris–Pratt (https://xlinux.nist.gov/dads/HTML/knuthMorrisPratt.html); Knuth, Morris and Pratt, Fast Pattern Matching in Strings, SIAM Journal on Computing 6(2), 1977, publisher metadata and abstract (https://epubs.siam.org/doi/10.1137/0206024); J Strother Moore's university-hosted explanation (https://www.cs.utexas.edu/~moore/best-ideas/string-searching/kpm-example.html). No source exercises, prose or figures are reproduced.",
+  "license": "CC0-1.0 for this original course content. Referenced publications retain their own terms and are not included in this deck. This grant does not change the repository's terms for other files.",
+  "concepts": ["Matches and positions", "Repeated prefixes", "Prefix fallback", "Search cost"],
+  "items": [
+    {
+      "id": "ss-matches-overlap",
+      "concept": "Matches and positions",
+      "prerequisites": [],
+      "prompt": "Find every exact occurrence of pattern AA in text AAAA. Indices start at 0, and an occurrence may overlap another. Which list contains all starting indices?",
+      "options": ["[0, 1, 2]", "[0, 2]", "[0, 1, 2, 3]", "[1, 2]"],
+      "answer": 0,
+      "explanation": "The length-two slices starting at 0, 1 and 2 are all AA. A slice starting at 3 has only one token left. Reporting only 0 and 2 would silently impose a nonoverlap rule that this search does not use.",
+      "transfer": "Find all starts of AAA in AAAAA. The starts are [0, 1, 2]; each complete length-three slice counts even though adjacent matches share two tokens."
+    },
+    {
+      "id": "ss-matches-units",
+      "concept": "Matches and positions",
+      "prerequisites": [],
+      "prompt": "This course counts Unicode code points from 0, rather than UTF-16 code units. For text 😀A😀A😀 and pattern 😀A, which starting positions match? Each displayed emoji here is one code point.",
+      "options": ["[0, 3]", "[0, 2]", "[1, 3]", "[0, 2, 4]"],
+      "answer": 1,
+      "explanation": "The text has five code points: 😀, A, 😀, A, 😀 at indices 0 through 4. The two-token pattern begins at 0 and 2. The final emoji lacks a following A. JavaScript's UTF-16 offsets for the two matches would be 0 and 3, so the index unit must be declared.",
+      "transfer": "Search 😀😀😀 for 😀😀 using this course's units. Starts [0, 1] are both matches. An index in a code-point sequence is not automatically a byte offset, UTF-16 offset or user-perceived grapheme position."
+    },
+    {
+      "id": "ss-matches-literal",
+      "concept": "Matches and positions",
+      "prerequisites": [],
+      "prompt": "The text is the three-code-point sequence [U+0065 LATIN SMALL LETTER E, U+0301 COMBINING ACUTE ACCENT, U+00E9 LATIN SMALL LETTER E WITH ACUTE]. The pattern is the single code point U+00E9. Literal matching performs no Unicode normalization. Which starts match?",
+      "options": ["[0, 2], because both visible accents look similar.", "[1], because the accent is the pattern.", "[2] only.", "No starts match."],
+      "answer": 2,
+      "explanation": "Only the final code point equals U+00E9. The first two code points form a different literal sequence even if a font makes it look like the same accented letter. Normalizing text would be a separate, explicit operation and could change the position mapping.",
+      "transfer": "For text aAaA and pattern Aa, literal case-sensitive matching reports [1]. It does not treat a and A as interchangeable or add a match that would extend past the end."
+    },
+    {
+      "id": "ss-prefix-proper",
+      "concept": "Repeated prefixes",
+      "prerequisites": ["Matches and positions"],
+      "prompt": "A border is a prefix that is also a suffix. A proper border must be shorter than the whole string. What is the length of the longest proper border of ABABA?",
+      "options": ["5, using ABABA itself.", "4, using ABAB.", "2, using AB.", "3, using ABA."],
+      "answer": 3,
+      "explanation": "ABA is both the first three and last three tokens. ABAB is not the suffix BABA, and the whole five-token string is excluded by proper. Border lengths count tokens; they are not the index of the border's last token.",
+      "transfer": "The longest proper border of AAAA is AAA, length 3. For ABC it is empty, length 0. Repetition can make several borders valid; the table records the longest."
+    },
+    {
+      "id": "ss-prefix-table",
+      "concept": "Repeated prefixes",
+      "prerequisites": ["Matches and positions"],
+      "prompt": "Define pi[i] as the longest proper-border length of pattern[0..i], including token i. Which full prefix table belongs to ABABA?",
+      "options": ["[0, 0, 1, 2, 3]", "[0, 1, 2, 3, 4]", "[0, 0, 0, 0, 0]", "[1, 2, 3, 4, 5]"],
+      "answer": 0,
+      "explanation": "The prefixes A and AB have no nonempty proper border. ABA has border A (1); ABAB has border AB (2); ABABA has border ABA (3). In particular pi[0] is 0 because a one-token prefix has no nonempty proper border.",
+      "transfer": "For AAAA, enumerate the proper borders of each growing prefix. The table is [0, 1, 2, 3]. For ABABAC it is [0, 0, 1, 2, 3, 0]; the final C prevents a nonempty border."
+    },
+    {
+      "id": "ss-prefix-chain",
+      "concept": "Repeated prefixes",
+      "prerequisites": ["Matches and positions"],
+      "prompt": "While preparing the table for ABABAC, i = 5 points at C and q = 3 is the candidate border length. Compare C with pattern[3] = B and find a mismatch. The rule is q = pi[q - 1]. What happens immediately?",
+      "options": ["Move i back to 3 and keep q = 3.", "Keep i = 5 and set q = pi[2] = 1.", "Keep i = 5 and set q = pi[3] = 2.", "Record pi[5] = 3 without another comparison."],
+      "answer": 1,
+      "explanation": "The already matched prefix of length 3 is ABA. Its longest proper border has length pi[2] = 1, so q becomes 1 while C remains the unresolved token. C then mismatches pattern[1] = B, and after another fallback it mismatches pattern[0] = A; pi[5] becomes 0.",
+      "transfer": "Count only equality tests for the whole ABABAC preparation. The first four comparisons at i = 1 through 4 plus three comparisons at i = 5 total 7. Assigning a fallback is not another equality test."
+    },
+    {
+      "id": "ss-fallback-stationary",
+      "concept": "Prefix fallback",
+      "prerequisites": ["Repeated prefixes"],
+      "prompt": "Search text ABABACABABABAC for pattern ABABAC. Later, i = 11 points at text token B while q = 5 means ABABA was matched. Comparing B with pattern[5] = C fails. With pi = [0, 0, 1, 2, 3, 0], what state follows this mismatch?",
+      "options": ["i = 12, q = 0: discard the unresolved B.", "i = 6, q = 0: reread the whole alignment.", "i = 11, q = pi[4] = 3: compare the same B with pattern[3] next.", "i = 11, q = 4: always decrement q by one."],
+      "answer": 2,
+      "explanation": "ABABA ends in ABA, which is also the pattern's first three tokens. Those three already matched tokens can be retained, so q falls to 3 and i stays 11. The B is then compared with pattern[3] = B and can extend that shorter match. The text cursor does not move backward.",
+      "transfer": "For pattern AAAAAB, a mismatch after matching five As falls from q = 5 to pi[4] = 4. If the unresolved text token is A, it can extend that shorter prefix without rereading the earlier text."
+    },
+    {
+      "id": "ss-fallback-full-match",
+      "concept": "Prefix fallback",
+      "prerequisites": ["Repeated prefixes"],
+      "prompt": "Pattern ABABA has pi = [0, 0, 1, 2, 3]. In text ABABABABA, the first full match ends with i = 5 and q = 5, where i is the next text index. After reporting start 0, which fallback preserves possible overlapping matches?",
+      "options": ["Set i = 0 and q = 0.", "Keep q = 5 and compare pattern[5].", "Set i = 6 and q = 0.", "Keep i = 5 and set q = pi[4] = 3."],
+      "answer": 3,
+      "explanation": "The completed match's suffix ABA can be the next match's prefix. Retaining q = 3 lets later B and A complete another occurrence starting at 2, then another at 4. Pattern index 5 would be outside the pattern; a full match must be reported and followed by its proper-border fallback before another comparison.",
+      "transfer": "For text AAAA and pattern AA, pi[1] = 1. After every full match, retaining one A yields starts [0, 1, 2]. Resetting q to 0 after each match would lose start 1 in this scan."
+    },
+    {
+      "id": "ss-fallback-empty",
+      "concept": "Prefix fallback",
+      "prerequisites": ["Repeated prefixes"],
+      "prompt": "Use the declared prefix-function algorithm with an empty text and nonempty pattern AB. Prefix preparation always runs; the text-search loop runs while i < text length. Which result is correct?",
+      "options": ["No matches; 1 prefix-preparation comparison and 0 text-search comparisons.", "A match at 0; 1 preparation comparison and 0 search comparisons.", "No matches; 0 preparation comparisons and 1 search comparison.", "The algorithm must read text[0] before it can stop."],
+      "answer": 0,
+      "explanation": "Preparing AB compares B with A once and produces [0, 0]. The text has length 0, so the search loop never reads a token. A nonempty pattern cannot fit. This explorer refuses an empty pattern instead of inventing a boundary-occurrence convention for it.",
+      "transfer": "For text AB and longer pattern ABAB, there is still no match. This declared KMP variant prepares the pattern and scans two text tokens; the naive feasible-alignment variant makes zero comparisons because no full pattern could fit."
+    },
+    {
+      "id": "ss-cost-counts",
+      "concept": "Search cost",
+      "prerequisites": ["Prefix fallback"],
+      "prompt": "For text ABABABABA and pattern ABABA, the naive algorithm compares left to right at every feasible start and stops each alignment at its first mismatch. The prefix-function variant makes 4 prefix-preparation comparisons and 9 text-search comparisons. What is the correct comparison summary?",
+      "options": ["Naive 9; KMP total 4.", "Naive 17; KMP total 13, with preparation and search shown separately.", "Naive 17; KMP total 9 because preparation is free.", "Naive 25; KMP total 17."],
+      "answer": 1,
+      "explanation": "The five naive starts cost 5, 1, 5, 1 and 5 comparisons, totaling 17. KMP costs 4 + 9 = 13 when preparing this pattern for this search. Reporting only 9 would answer a different question: search cost after a prefix table is already available.",
+      "transfer": "For text AAAA and pattern AA, the naive cost is 2 + 2 + 2 = 6. Prefix preparation costs 1, KMP search costs 4, and their total is 5. Count comparisons, not the number of displayed trace states."
+    },
+    {
+      "id": "ss-cost-small",
+      "concept": "Search cost",
+      "prerequisites": ["Prefix fallback"],
+      "prompt": "For text XYZXYZ and pattern AB, none of the first-token comparisons can match. The naive variant tries only feasible full-pattern starts; KMP scans all six text tokens after preparing the pattern. Which statement is correct?",
+      "options": ["KMP must use fewer comparisons on every input.", "Both variants must make exactly 6 comparisons in total.", "Naive makes 5 comparisons; KMP makes 1 + 6 = 7. A linear bound does not promise a win on each small input.", "Naive makes 12 comparisons because every alignment must compare both pattern tokens."],
+      "answer": 2,
+      "explanation": "Only starts 0 through 4 can fit a length-two pattern; each fails on its first comparison. The declared KMP loop visits six text tokens, and AB preparation adds one comparison. Asymptotic bounds describe growth and worst-case behavior, not a universal ranking of exact counts or elapsed time.",
+      "transfer": "Try text AB with pattern ABAB. The naive variant has no feasible starts and makes 0 comparisons; this KMP variant makes 3 preparation comparisons and 2 search comparisons. Both correctly report no occurrence."
+    },
+    {
+      "id": "ss-cost-bound",
+      "concept": "Search cost",
+      "prerequisites": ["Prefix fallback"],
+      "prompt": "Why can the prefix-function search avoid repeatedly moving backward through the text, while retaining every occurrence? Choose the explanation consistent with this course's trace and cost claims.",
+      "options": ["It sorts the text before searching, so equal tokens are adjacent.", "It skips comparison counts whenever a trace panel is closed.", "It stores all trace snapshots in constant space regardless of input size.", "The text cursor only advances; mismatches use previously computed proper borders to reduce the matched-prefix length. Preparation plus search is linear in their input lengths."],
+      "answer": 3,
+      "explanation": "The text cursor never retreats. Successful comparisons advance it and increase the matched-prefix length; fallback comparisons reduce that length, so the work can be bounded by progress rather than restarting every alignment. Prefix preparation uses the same kind of border fallback. The teaching explorer deliberately retains full snapshots, which take more space than the underlying algorithm's working state. It does not measure elapsed time.",
+      "transfer": "Explain why changing the step selector cannot change a comparison total: the explorer selects from a completed immutable trace. Distinguish that retained teaching data from executing a streaming search with only its current state and prefix table."
+    }
+  ]
+}
