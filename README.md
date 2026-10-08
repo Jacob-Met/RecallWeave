@@ -335,3 +335,17 @@ The fit minimizes equal-weight squared vertical errors for the entered rows. Rep
 Download the fixed **[sixteen-question course](courses/least-squares.json)** from the lab or this link, then use **Bring your own lesson**, preview it and choose **Start this deck** in the existing learner. The **[worked guide](courses/least-squares.md)** derives the six examples, the minimum identity and all sixteen transfer answers. Editing the lab never changes the course download; tab changes are not automatically saved or uploaded.
 
 Build with `node tools/build_least_squares.mjs`; `--check` verifies the generated standalone file. Run the focused native tests with `node --test tests/least-squares.test.mjs`. The [receiving packet](docs/receiving/least-squares-db371a37f4c8/README.md) records the separate independent mathematical review, actual course download/import/review flow and responsive browser checks. The shared learner, importer and catalog are unchanged.
+
+## Download the complete offline course pack
+
+Save [the offline course pack](offline/) as one ZIP, extract the entire
+RecallWeave folder, and open its catalog.html. The matching demo.html and original
+registered course files are included. Choose a course from the courses folder
+under **Bring your own lesson**, inspect its preview, then explicitly start it.
+
+After changing the learner, rebuild it with `python3 tools/make_demo.py`.
+After catalog or registered-course changes, run `node tools/build-course-catalog.mjs`.
+Then run `python3 tools/build-offline-pack.py` to update the ZIP;
+`python3 tools/build-offline-pack.py --check` checks exact bytes without writing.
+The pack uses the explicit catalog/courses.json registration list. Its
+SHA256SUMS.json records every other included file's byte length and content hash.
