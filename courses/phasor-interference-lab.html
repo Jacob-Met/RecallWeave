@@ -1,0 +1,529 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src 'none'; base-uri 'none'; form-action 'none'">
+<title>Coherent waves · RecallWeave</title>
+<style>
+:root{color-scheme:light;--paper:#f7f5ed;--ink:#182a35;--muted:#465c68;--line:#cbd5d6;--panel:#fffef9;--a:#087c79;--b:#ad492c;--sum:#51449b;--wash:#e8efea;--danger:#932c22}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.55 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}a{color:#285a75;text-underline-offset:3px}button,input{font:inherit}button,a,input,summary{touch-action:manipulation}:focus-visible{outline:3px solid #246cc0;outline-offset:4px}[hidden]{display:none!important}
+.shell{max-width:1280px;margin:auto;padding:28px 30px 48px}.masthead{display:flex;align-items:center;justify-content:space-between;gap:20px;padding-bottom:22px;border-bottom:1px solid var(--line)}.brand{font-weight:850;letter-spacing:.12em;font-size:.85rem;text-decoration:none;color:var(--ink)}.brand-mark{color:var(--a);margin-right:8px}.masthead nav{display:flex;gap:24px;font-size:.9rem}
+.eyebrow{text-transform:uppercase;font-size:.76rem;letter-spacing:.14em;font-weight:750;color:var(--a)}.intro{display:grid;grid-template-columns:1.5fr 1fr;gap:44px;align-items:center;margin:36px 0 28px}h1{font-family:Georgia,"Times New Roman",serif;font-size:clamp(2.5rem,5vw,4.1rem);font-weight:500;line-height:1.05;letter-spacing:-.025em;margin:10px 0 16px}h2{font-size:1.15rem;line-height:1.3;margin:0 0 8px}h3{font-size:1rem;margin:0 0 8px}p{margin:0 0 12px}.intro-copy{font-size:1.04rem;max-width:43rem;color:var(--muted)}.prediction{border-left:3px solid var(--a);padding:15px 0 15px 24px;color:var(--muted)}.prediction strong{color:var(--ink);display:block;margin:6px 0}.formula{font-family:Georgia,"Times New Roman",serif;font-size:1.2rem;color:var(--ink);white-space:normal}
+.presets{display:flex;gap:9px;flex-wrap:wrap;margin:18px 0}.preset{background:transparent;border:1px solid #9baeb3;color:var(--ink);border-radius:30px;padding:9px 15px;font-size:.88rem;cursor:pointer}.preset[aria-pressed=true]{background:var(--ink);border-color:var(--ink);color:white}.preset:hover{box-shadow:0 0 0 2px #9baeb340}
+.controls{background:var(--wash);border:1px solid #c2d2cc;border-radius:12px;padding:22px;margin-bottom:24px}.control-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:18px}.field label{display:block;font-weight:700;font-size:.86rem;margin-bottom:6px}.field small{display:block;color:var(--muted);font-size:.76rem;margin-top:5px}.field input[type=number]{width:100%;border:1px solid #829da3;border-radius:6px;background:#fffefb;color:var(--ink);padding:9px 11px}.field input[aria-invalid=true]{border:2px solid var(--danger)}.cursor-control{display:flex;gap:18px;align-items:center;border-top:1px solid #c2d2cc;padding-top:18px;margin-top:20px}.cursor-control label{font-size:.87rem;font-weight:700;min-width:100px}.cursor-control input{flex:1;min-width:60px;accent-color:var(--sum)}.cursor-control output{min-width:142px;font-variant-numeric:tabular-nums;text-align:right;font-size:.88rem}.step{border:1px solid #829da3;border-radius:6px;background:var(--panel);padding:5px 11px;cursor:pointer;color:var(--ink)}.step:disabled{opacity:.45;cursor:default}.error{color:var(--danger);font-weight:650;margin:14px 0 0}
+.results-grid{display:grid;grid-template-columns:.85fr 1.25fr;gap:20px}.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:23px}.card-head{display:flex;justify-content:space-between;gap:10px}.number{font-size:.73rem;color:var(--muted);letter-spacing:.12em;padding-top:3px}.subtle{font-size:.87rem;color:var(--muted)}.legend{display:flex;gap:20px;flex-wrap:wrap;font-size:.82rem;margin:14px 0 4px}.legend span{display:inline-flex;gap:7px;align-items:center}.key{display:inline-block;width:24px;border-top:3px solid}.key.a{border-color:var(--a)}.key.b{border-color:var(--b);border-top-style:dashed}.key.sum{border-color:var(--sum);border-top-width:4px}
+svg{display:block;width:100%;height:auto;overflow:visible}.pi-grid{stroke:#dbe2e1;stroke-width:1}.pi-axis{stroke:#82949c;stroke-width:1.3}.pi-label{fill:var(--muted);font:12px system-ui,sans-serif}.pi-label.strong{fill:var(--ink);font-weight:650}.pi-wave-a{stroke:var(--a);stroke-width:2.7;fill:none}.pi-wave-b{stroke:var(--b);stroke-width:2.7;stroke-dasharray:7 4;fill:none}.pi-wave-sum{stroke:var(--sum);stroke-width:3.7;fill:none}.pi-cursor{stroke:#67747c;stroke-width:1.2;stroke-dasharray:3 4}.figure-note{font-size:.8rem;color:var(--muted);border-top:1px solid #e0e5e2;padding-top:12px;margin-bottom:0;min-height:3.2rem}
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);margin:20px 0;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--panel)}.metric{padding:20px 22px;border-right:1px solid var(--line)}.metric:last-child{border-right:0}.metric dt{font-size:.76rem;color:var(--muted);font-weight:700;letter-spacing:.035em}.metric dd{margin:4px 0 1px;font-size:1.7rem;line-height:1.25;letter-spacing:-.025em;font-variant-numeric:tabular-nums}.metric small{font-size:.75rem;color:var(--muted)}.explanation{border-left:3px solid var(--sum);padding:8px 18px;margin:18px 0 26px;max-width:900px}.explanation p{margin-bottom:0}.measurements{margin-top:20px}.measurements summary{font-weight:700;cursor:pointer;padding:4px 0}.table-wrap{overflow:auto;max-height:430px;margin-top:14px;border:1px solid var(--line);border-radius:8px}table{border-collapse:collapse;width:100%;font-size:.86rem;font-variant-numeric:tabular-nums}th,td{text-align:right;padding:9px 13px;white-space:nowrap;border-bottom:1px solid #e2e7e5}th{background:#e8efea;position:sticky;top:0;color:var(--ink);font-size:.79rem}th:first-child,td:first-child{text-align:left}caption{text-align:left;padding:12px 13px;background:var(--panel);font-size:.8rem;color:var(--muted)}tbody tr:last-child td{border-bottom:0}
+.downloads{display:grid;grid-template-columns:1fr 1fr;gap:30px;padding:24px 0;margin-top:22px;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}.button-row{display:flex;gap:9px;flex-wrap:wrap;margin:12px 0}.button{border:1px solid var(--ink);background:var(--ink);color:white;border-radius:7px;padding:10px 15px;cursor:pointer;font-weight:650;font-size:.88rem}.button.secondary{background:transparent;color:var(--ink)}.button:disabled{opacity:.45;cursor:default}.status{font-size:.84rem;color:var(--muted);min-height:1.5em;margin:15px 0}
+.notes{display:grid;grid-template-columns:1fr 1fr;gap:30px;margin-top:28px}.notes p,.notes li{font-size:.87rem;color:var(--muted)}.notes ol,.notes ul{padding-left:20px;margin:10px 0}.notes li{margin:8px 0}.notes .formula{font-size:1.08rem;color:var(--ink)}footer{font-size:.76rem;color:var(--muted);margin-top:30px;padding-top:20px;border-top:1px solid var(--line)}footer p{margin-bottom:6px}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+@media(max-width:900px){.control-grid{grid-template-columns:repeat(3,1fr)}.intro{gap:26px}.results-grid{grid-template-columns:1fr 1.2fr}.card{padding:16px}.metrics{grid-template-columns:repeat(2,1fr)}.metric:nth-child(2){border-right:0}.metric:nth-child(-n+2){border-bottom:1px solid var(--line)}.cursor-control{flex-wrap:wrap}.cursor-control input{flex-basis:40%}}
+@media(max-width:650px){.shell{padding:20px 16px 32px}.masthead nav{gap:14px}.intro{grid-template-columns:1fr;gap:12px;margin-top:28px}.prediction{padding:10px 0 10px 18px}.control-grid{grid-template-columns:repeat(2,1fr);gap:14px}.controls{padding:17px}.results-grid,.downloads,.notes{grid-template-columns:1fr}.cursor-control{gap:10px}.cursor-control label{min-width:80px}.cursor-control output{min-width:auto}.cursor-control input{order:5;flex-basis:100%}.card{padding:19px}.metric{padding:17px}.metric dd{font-size:1.45rem}.downloads,.notes{gap:24px}.intro-copy{font-size:1rem}#pi-trace-svg .pi-label{font-size:20px}#pi-phasor-svg text{font-size:14px}}
+@media(prefers-reduced-motion:no-preference){button{transition:background .12s,box-shadow .12s}}
+@media print{body{background:white}.shell{max-width:none;padding:0}.controls,.presets,.downloads,.masthead nav{display:none}.card,.metrics{break-inside:avoid}.intro{margin:15px 0}.notes{gap:20px}.table-wrap{max-height:none}.results-grid{grid-template-columns:1fr 1.2fr}.status{display:none}}
+</style>
+</head>
+<body>
+<div class="shell">
+<header class="masthead">
+<a class="brand" href="../demo.html"><span class="brand-mark" aria-hidden="true">↗</span>RECALLWEAVE</a>
+<nav aria-label="Related learning"><a href="../demo.html">Open learner</a><a href="phasor-interference.md">Worked guide</a></nav>
+</header>
+<main>
+<section class="intro" aria-labelledby="page-title">
+<div><p class="eyebrow">A small lab for coherent waves</p><h1 id="page-title">Two waves.<br>One signal.</h1><p class="intro-copy">Turn phase into a picture. Add two rotating arrows, then watch their real projections combine into a single cosine.</p></div>
+<aside class="prediction"><span class="eyebrow">Predict, then explore</span><strong>Can peaks of 3 and 4 make a peak of 5?</strong><p>The starting waves are a quarter-cycle apart. Find their sum in the arrow diagram and the time trace.</p><p class="formula">x(t) = Re{Z e<sup>i2πft</sup>}</p></aside>
+</section>
+<div class="presets" role="group" aria-label="Example experiments">
+<button type="button" class="preset" data-pi-preset="quadrature" aria-pressed="true">Quarter-cycle · 3 + 4</button>
+<button type="button" class="preset" data-pi-preset="constructive" aria-pressed="false">In phase · 2 + 2</button>
+<button type="button" class="preset" data-pi-preset="cancel" aria-pressed="false">Cancel · 2 − 2</button>
+<button type="button" class="preset" data-pi-preset="unequal" aria-pressed="false">Oppose · 3 − 1</button>
+</div>
+<form class="controls" id="pi-controls" novalidate aria-label="Phasor experiment settings">
+<div class="control-grid">
+<div class="field"><label for="pi-amplitude-a">Wave A amplitude</label><input id="pi-amplitude-a" name="amplitudeA" type="number" min="0" max="5" step="any" value="3" aria-describedby="pi-amplitude-a-help"><small id="pi-amplitude-a-help">0–5 · common signal units</small></div>
+<div class="field"><label for="pi-amplitude-b">Wave B amplitude</label><input id="pi-amplitude-b" name="amplitudeB" type="number" min="0" max="5" step="any" value="4" aria-describedby="pi-amplitude-b-help"><small id="pi-amplitude-b-help">0–5 · common signal units</small></div>
+<div class="field"><label for="pi-relative-phase">B relative to A</label><input id="pi-relative-phase" name="phaseDifferenceDegrees" type="number" min="-180" max="180" step="any" value="90" aria-describedby="pi-relative-phase-help"><small id="pi-relative-phase-help">−180° to 180° · phase difference</small></div>
+<div class="field"><label for="pi-common-phase">Common phase</label><input id="pi-common-phase" name="commonPhaseDegrees" type="number" min="-180" max="180" step="any" value="0" aria-describedby="pi-common-phase-help"><small id="pi-common-phase-help">−180° to 180° · rotate both</small></div>
+<div class="field"><label for="pi-frequency">Shared frequency</label><input id="pi-frequency" name="frequencyHz" type="number" min="0.1" max="10" step="any" value="1" aria-describedby="pi-frequency-help"><small id="pi-frequency-help">0.1–10 Hz · cycles per second</small></div>
+</div>
+<div class="cursor-control">
+<label for="pi-cursor">Time cursor</label>
+<button type="button" class="step" id="pi-step-back" aria-label="Back one sixteenth of a cycle">−</button>
+<input id="pi-cursor" name="cursorCycle" type="range" min="0" max="2" step="0.015625" value="0" aria-describedby="pi-cursor-value">
+<button type="button" class="step" id="pi-step-forward" aria-label="Forward one sixteenth of a cycle">+</button>
+<output id="pi-cursor-value" for="pi-cursor">0 cycles · 0 s</output>
+</div>
+<p id="pi-error" class="error" role="alert" hidden></p>
+</form>
+<section id="pi-results" aria-label="Current checked experiment">
+<div class="results-grid">
+<section class="card" aria-labelledby="phasor-heading">
+<div class="card-head"><h2 id="phasor-heading">Add the arrows</h2><span class="number">01 / PHASORS</span></div>
+<p class="subtle">The arrows rotate together at the time cursor.</p>
+<svg id="pi-phasor-svg" viewBox="0 0 420 350" role="img" aria-labelledby="pi-phasor-title pi-phasor-description"><title id="pi-phasor-title">Complex amplitudes at the selected time</title><desc id="pi-phasor-description">Wave A, wave B and their vector sum, with a projection onto the real axis.</desc><g id="pi-phasor-drawing"></g></svg>
+<div class="legend" aria-label="Plot legend"><span><i class="key a" aria-hidden="true"></i>Wave A</span><span><i class="key b" aria-hidden="true"></i>Wave B</span><span><i class="key sum" aria-hidden="true"></i>Sum</span></div>
+<p class="figure-note">The faint shifted copy of B completes head-to-tail addition. The sum's horizontal projection is its real signal value.</p>
+</section>
+<section class="card" aria-labelledby="trace-heading">
+<div class="card-head"><h2 id="trace-heading">Read the real signal</h2><span class="number">02 / TIME</span></div>
+<p class="subtle">The same calculation, followed through two cycles.</p>
+<svg id="pi-trace-svg" viewBox="0 0 620 350" role="img" aria-labelledby="pi-trace-title pi-trace-description"><title id="pi-trace-title">Two cosine signals and their sum</title><desc id="pi-trace-description">Time in seconds on the horizontal axis; scalar signal value on the vertical axis.</desc><g id="pi-trace-drawing"></g></svg>
+<div class="legend" aria-label="Plot legend"><span><i class="key a" aria-hidden="true"></i>Wave A</span><span><i class="key b" aria-hidden="true"></i>Wave B</span><span><i class="key sum" aria-hidden="true"></i>Sum</span></div>
+<p id="pi-cursor-equation" class="figure-note"></p>
+</section>
+</div>
+<dl class="metrics">
+<div class="metric"><dt>COMBINED PEAK</dt><dd id="pi-amplitude"></dd><small>Common signal units</small></div>
+<div class="metric"><dt>RESULTANT PHASE</dt><dd id="pi-phase"></dd><small>At t = 0 · [−180°, 180°)</small></div>
+<div class="metric"><dt>CYCLE MEAN SQUARE</dt><dd id="pi-mean-square"></dd><small>Squared signal units</small></div>
+<div class="metric"><dt>ROOT MEAN SQUARE</dt><dd id="pi-rms"></dd><small>Common signal units</small></div>
+</dl>
+<div class="explanation"><p id="pi-relation"></p></div>
+<details class="measurements">
+<summary>Inspect all 129 model values</summary>
+<p class="subtle">Uniform evaluations across two cycles include both endpoints. Displayed numbers use up to six decimal places, with scientific notation for small nonzero values. Downloads retain numerical precision.</p>
+<div class="table-wrap" tabindex="0" role="region" aria-label="Scrollable signal values">
+<table><caption id="pi-table-caption"></caption><thead><tr><th scope="col">Index</th><th scope="col">Cycle</th><th scope="col">Time (s)</th><th scope="col">Wave A</th><th scope="col">Wave B</th><th scope="col">Sum</th></tr></thead><tbody id="pi-sample-rows"></tbody></table>
+</div>
+</details>
+</section>
+<section class="downloads" aria-label="Keep this experiment and continue learning">
+<div><h2>Keep the current experiment</h2><p class="subtle">Save the settings and calculated results, or a table of the two-cycle trace.</p><div class="button-row"><button id="pi-download-json" type="button" class="button secondary">Experiment · JSON</button><button id="pi-download-csv" type="button" class="button secondary">Signal values · CSV</button></div><p class="subtle">Settings stay in this tab only. Refreshing returns to the starting example.</p></div>
+<div><h2>Practice the connections</h2><p class="subtle">16 original questions connect complex amplitudes, addition, relative phase and the model's boundaries.</p><div class="button-row"><button id="pi-download-course" type="button" class="button">Download practice course</button></div><p class="subtle">In <a href="../demo.html">RecallWeave</a>, use <strong>Bring your own lesson</strong>, choose this JSON file, review the preview, then select <strong>Start this deck</strong>.</p></div>
+</section>
+<p id="pi-status" class="status" role="status" aria-live="polite"></p>
+<section class="notes" aria-label="Model and suggested experiments">
+<div><h2>What the picture assumes</h2><p>Both signals are real cosines with the same positive frequency, constant amplitudes, fixed relative phase and common scalar units. We project onto the real axis; positive phase advances a cosine in time.</p><p class="formula">Z<sub>A</sub> = A e<sup>iφ</sup> &nbsp;·&nbsp; Z<sub>B</sub> = B e<sup>i(φ+δ)</sup><br>R² = A² + B² + 2AB cos δ</p><p>For a nonzero resultant, the sum is one cosine of peak amplitude R. A zero resultant has no defined phase. Its cycle mean square is R²/2; this is a mathematical signal average, not a calibrated intensity. Arrow angle encodes phase, without specifying a direction in physical space.</p><p>The curves join evaluations of the stated model. These are calculated values, not measurements; this lab does not model different-frequency beats or a physical propagation medium.</p></div>
+<div><h2>Three things to try</h2><ol><li><strong>Rotate together.</strong> Keep 3 and 4 a quarter-cycle apart. Change common phase. Which numbers stay the same, and what shifts?</li><li><strong>Cancel, then disturb it.</strong> Choose the cancellation preset. Change B to 2.1. Is the remaining signal identically zero?</li><li><strong>Change the clock.</strong> Hold amplitudes and phases fixed, then double frequency. Compare the seconds axis with the unchanged phase relationships.</li></ol><p>The <a href="phasor-interference.md">worked guide</a> develops the calculations and explains the course's answer choices.</p></div>
+</section>
+</main>
+<footer><p>Original RecallWeave lesson, questions and diagrams, with AI assistance. Original lesson content: CC0-1.0. No source exercises or figures are reproduced.</p><p>Mathematical background: <a href="https://ocw.mit.edu/courses/mas-160-signals-systems-and-information-for-media-technology-fall-2007/66c9d296a29c7e96d7ceb3be945e2d71_rec2.pdf">MIT MAS.160 · Recitation 2</a>, <a href="https://ocw.mit.edu/courses/8-03sc-physics-iii-vibrations-and-waves-fall-2016/8eb46d081c5ba4728cbbb369a03ba45e_MIT8_03SCF16_Text_Ch1.pdf">MIT 8.03SC · Chapter 1</a>, and <a href="https://animations.physics.unsw.edu.au/jw/phasor-addition.html">UNSW Physclips · Phasor addition</a>. Sources retain their own licenses. This lesson explicitly uses a cosine convention.</p></footer>
+</div>
+<script type="application/json" id="pi-course-data">"{\n  \"format\": \"recallweave-deck/1\",\n  \"title\": \"Coherent waves: from phasors to interference\",\n  \"attribution\": \"Original questions, distractors, explanations and worked examples for RecallWeave, with AI assistance. Mathematical background: MIT MAS.160, Recitation 2 (Fall 2007), https://ocw.mit.edu/courses/mas-160-signals-systems-and-information-for-media-technology-fall-2007/66c9d296a29c7e96d7ceb3be945e2d71_rec2.pdf; MIT 8.03SC, Chapter 1 (Fall 2016), https://ocw.mit.edu/courses/8-03sc-physics-iii-vibrations-and-waves-fall-2016/8eb46d081c5ba4728cbbb369a03ba45e_MIT8_03SCF16_Text_Ch1.pdf; UNSW School of Physics, Physclips: Phasor addition, https://animations.physics.unsw.edu.au/jw/phasor-addition.html. This course uses a cosine convention and original numerical examples; no source passages, exercises or figures are copied.\",\n  \"license\": \"Original question wording, explanations, worked examples and diagrams in this course: CC0-1.0. Referenced teaching materials retain their own licenses. No license change is made to other repository content.\",\n  \"concepts\": [\n    \"complex-amplitude\",\n    \"vector-addition\",\n    \"relative-phase\",\n    \"model-boundaries\"\n  ],\n  \"items\": [\n    {\n      \"id\": \"phasor-real-part\",\n      \"concept\": \"complex-amplitude\",\n      \"prerequisites\": [],\n      \"prompt\": \"Use the convention x(t) = Re{Z exp(i2πft)}, where f > 0 and Z = A exp(iφ), with A ≥ 0. Which real signal does Z represent?\",\n      \"options\": [\n        \"A sin(2πft + φ)\",\n        \"A cos(2πft − φ)\",\n        \"A cos(2πft + φ)\",\n        \"A sin(2πft − φ)\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"Multiplying the exponentials gives A exp(i(2πft + φ)). Euler's formula makes its real part A cos(2πft + φ). Taking the imaginary part would give sine instead. The stated convention fixes both the projection and the phase sign.\",\n      \"transfer\": \"For A = 2 and φ = π, write the real signal and evaluate it at t = 0.\"\n    },\n    {\n      \"id\": \"phasor-quarter-cycle\",\n      \"concept\": \"complex-amplitude\",\n      \"prerequisites\": [],\n      \"prompt\": \"A cosine-convention phasor starts at Z = 3 on the positive real axis. After a positive quarter-cycle rotation, what is the real signal's instantaneous value?\",\n      \"options\": [\n        \"0\",\n        \"3\",\n        \"−3\",\n        \"1.5\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"A quarter cycle rotates 3 to 3i. The real signal is the horizontal, real-axis projection, which is zero at that instant. The arrow's length remains 3; instantaneous value and peak amplitude are different quantities.\",\n      \"transfer\": \"Give the real-axis projections after one half-cycle and after one full cycle.\"\n    },\n    {\n      \"id\": \"phasor-modulus\",\n      \"concept\": \"complex-amplitude\",\n      \"prerequisites\": [],\n      \"prompt\": \"With x(t) = Re{Z exp(i2πft)}, a constant complex amplitude is Z = −3 + 4i. What is the real signal's peak amplitude?\",\n      \"options\": [\n        \"1\",\n        \"7\",\n        \"−3\",\n        \"5\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"Peak amplitude is the nonnegative magnitude |Z| = sqrt((−3)² + 4²) = 5. Adding component magnitudes would give 7, and −3 is only the signal's value at t = 0. The imaginary component affects the phase as well as the magnitude.\",\n      \"transfer\": \"For Z = 5 − 12i, calculate the peak amplitude and the initial real value separately.\"\n    },\n    {\n      \"id\": \"phasor-negative-real\",\n      \"concept\": \"complex-amplitude\",\n      \"prerequisites\": [],\n      \"prompt\": \"A nonzero cosine-convention phasor is Z = −2. Express phase in the interval [−180°, 180°). Which amplitude and phase describe it?\",\n      \"options\": [\n        \"Amplitude −2, phase 0°\",\n        \"Amplitude 2, phase −180°\",\n        \"Amplitude 2, phase −90°\",\n        \"Amplitude 2, phase 0°\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"The magnitude is 2, and the arrow points along the negative real axis. Its phase is 180° modulo a full turn; the specified half-open interval represents that direction as −180°. A negative magnitude is not the amplitude convention used here.\",\n      \"transfer\": \"What amplitude and principal phase describe Z = −2i in the same interval?\"\n    },\n    {\n      \"id\": \"phasor-in-phase\",\n      \"concept\": \"vector-addition\",\n      \"prerequisites\": [\n        \"complex-amplitude\"\n      ],\n      \"prompt\": \"Two real cosine signals have the same positive frequency, the same phase and common units. Their peak amplitudes are 1.5 and 2.5. What is the peak amplitude of their sum?\",\n      \"options\": [\n        \"1\",\n        \"4\",\n        \"sqrt(8.5)\",\n        \"3.75\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"Equal phases point both phasors in the same direction. Their lengths add: 1.5 + 2.5 = 4. Subtracting applies to opposite phases, while sqrt(1.5² + 2.5²) would apply to a 90° relative phase.\",\n      \"transfer\": \"Keep those amplitudes but turn the second phasor by 180°. Predict the new peak amplitude.\"\n    },\n    {\n      \"id\": \"phasor-opposite-unequal\",\n      \"concept\": \"vector-addition\",\n      \"prerequisites\": [\n        \"complex-amplitude\"\n      ],\n      \"prompt\": \"At a common frequency, Z_A = 3 and Z_B = −1 in the same signal units. What constant resultant phasor represents the sum?\",\n      \"options\": [\n        \"4\",\n        \"−2\",\n        \"2i\",\n        \"2\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"Complex amplitudes add component by component: 3 + (−1) = 2. Opposite directions reduce the resultant, but unequal magnitudes do not cancel completely. The positive real result has amplitude 2 and phase 0°.\",\n      \"transfer\": \"Swap the magnitudes so Z_A = 1 and Z_B = −3. Give the resultant and its principal phase.\"\n    },\n    {\n      \"id\": \"phasor-quadrature\",\n      \"concept\": \"vector-addition\",\n      \"prerequisites\": [\n        \"complex-amplitude\"\n      ],\n      \"prompt\": \"Two same-frequency cosine signals have constant phasors Z_A = 3 and Z_B = 4i. What is the peak amplitude of their combined real signal?\",\n      \"options\": [\n        \"5\",\n        \"7\",\n        \"1\",\n        \"sqrt(7)\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"The resultant is 3 + 4i, so its magnitude is sqrt(3² + 4²) = 5. The individual peaks occur at different times because the relative phase is 90°. Adding peak magnitudes would predict 7 and overlook that timing difference.\",\n      \"transfer\": \"Evaluate the two components and their sum at t = 0. Why is that sum smaller than the combined peak amplitude?\"\n    },\n    {\n      \"id\": \"phasor-resultant-phase\",\n      \"concept\": \"vector-addition\",\n      \"prerequisites\": [\n        \"complex-amplitude\"\n      ],\n      \"prompt\": \"Same-frequency component phasors add to Z = −2 − 2i. In the interval [−180°, 180°), what is the resultant's phase?\",\n      \"options\": [\n        \"45°\",\n        \"−45°\",\n        \"−135°\",\n        \"135°\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"Both coordinates are negative, so the direction lies in the third quadrant. Equal coordinate magnitudes place it 45° past the negative real axis: 225°, represented as −135° in the requested interval. Using arctan(im/re) alone would lose the quadrant.\",\n      \"transfer\": \"Find the principal phase of Z = −2 + 2i and explain which sign changed.\"\n    },\n    {\n      \"id\": \"phasor-common-rotation\",\n      \"concept\": \"relative-phase\",\n      \"prerequisites\": [\n        \"complex-amplitude\",\n        \"vector-addition\"\n      ],\n      \"prompt\": \"Two same-frequency phasors have fixed amplitudes and fixed relative phase. Rotate both by an additional 40° while keeping the time origin fixed. Which property of their sum must remain unchanged?\",\n      \"options\": [\n        \"Its value at t = 0\",\n        \"Its phase relative to the time origin\",\n        \"The times of its peaks\",\n        \"Its peak amplitude\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"A common rotation rotates the vector sum by the same angle without changing its length. The resultant amplitude and cycle mean square stay the same. For a nonzero sum, its phase and peak times shift; its initial real projection can change.\",\n      \"transfer\": \"Use the lab's 3-and-4 quadrature preset. Compare common phases 0° and 40° while keeping relative phase at 90°.\"\n    },\n    {\n      \"id\": \"phasor-amplitude-law\",\n      \"concept\": \"relative-phase\",\n      \"prerequisites\": [\n        \"vector-addition\"\n      ],\n      \"prompt\": \"Two coherent cosine signals have peak amplitudes A and B, common units and relative phase δ. If R is their resultant peak amplitude, which expression is correct?\",\n      \"options\": [\n        \"R² = A² + B² for every δ\",\n        \"R² = A² + B² − 2AB cos δ\",\n        \"R² = A² + B² + 2AB cos δ\",\n        \"R² = (A + B)² for every δ\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"Take one phasor along the real axis. The sum has coordinates A + B cos δ and B sin δ. Squaring and adding gives R² = A² + B² + 2AB cos δ. The relative phase controls the cross term.\",\n      \"transfer\": \"Insert δ = 0°, 90° and 180°. Explain the three resulting amplitude rules.\"\n    },\n    {\n      \"id\": \"phasor-complete-cancellation\",\n      \"concept\": \"relative-phase\",\n      \"prerequisites\": [\n        \"vector-addition\"\n      ],\n      \"prompt\": \"Both component amplitudes are strictly positive. Their real cosine signals have the same positive frequency and common units. What is required for their sum to vanish at every time?\",\n      \"options\": [\n        \"Equal amplitudes and a 90° relative phase\",\n        \"Equal amplitudes and a 180° relative phase modulo 360°\",\n        \"Any amplitudes and a 180° relative phase modulo 360°\",\n        \"Any amplitudes and an instant when both projections are zero\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"An identically zero sum requires opposite, equal-length phasors. Equal amplitudes with a half-turn separation cancel at every instant. Opposite unequal phasors leave a nonzero difference, and a single zero crossing does not establish cancellation for an entire cycle.\",\n      \"transfer\": \"In the cancellation preset, change only one amplitude from 2 to 2.1. Describe what remains.\"\n    },\n    {\n      \"id\": \"phasor-cycle-mean-square\",\n      \"concept\": \"relative-phase\",\n      \"prerequisites\": [\n        \"vector-addition\"\n      ],\n      \"prompt\": \"Two same-frequency cosine signals each have peak amplitude 2 and a 60° relative phase. In squared signal units, what is the cycle mean square of their sum?\",\n      \"options\": [\n        \"6\",\n        \"4\",\n        \"8\",\n        \"12\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"The resultant amplitude squared is 2² + 2² + 2×2×2 cos 60° = 12. A cosine's squared value averages to one half over a complete cycle, giving 12/2 = 6. The separate mean squares add to 4; the coherent cross term contributes the remaining 2. This is a mathematical signal average, not a calibrated intensity.\",\n      \"transfer\": \"Keep both amplitudes at 2. Calculate the combined cycle mean square at 0° and at 180° relative phase.\"\n    },\n    {\n      \"id\": \"phasor-different-frequencies\",\n      \"concept\": \"model-boundaries\",\n      \"prerequisites\": [\n        \"relative-phase\"\n      ],\n      \"prompt\": \"Two real cosines have frequencies 2 Hz and 3 Hz. Why does one constant resultant phasor rotating at a single shared frequency fail to represent their sum for all time?\",\n      \"options\": [\n        \"Their relative phase changes with time.\",\n        \"Their amplitudes must grow with time.\",\n        \"Complex numbers cannot represent either component.\",\n        \"Adding real signals requires equal instantaneous values.\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"The components rotate at different angular rates, so their relative phase is not constant. They can still be added at each time, but the fixed shared-frequency model in this lab does not apply. A momentary phasor picture cannot supply one constant resultant for the whole signal.\",\n      \"transfer\": \"How many full turns of relative phase accumulate in one second between 2 Hz and 3 Hz?\"\n    },\n    {\n      \"id\": \"phasor-zero-phase\",\n      \"concept\": \"model-boundaries\",\n      \"prerequisites\": [\n        \"complex-amplitude\",\n        \"relative-phase\"\n      ],\n      \"prompt\": \"Equal opposite phasors sum exactly to Z = 0. Which amplitude and phase should the lab report for that resultant?\",\n      \"options\": [\n        \"Amplitude 0, phase 0° uniquely\",\n        \"Amplitude 0, phase 180° uniquely\",\n        \"Amplitude 0, phase undefined\",\n        \"Amplitude undefined, phase 90°\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"Zero has magnitude 0 but no direction. Any phase multiplied by zero describes the same zero signal, so no unique phase can be inferred. Reporting an arbitrary angle as a physical result would invent information. A small nonzero resultant still has a phase.\",\n      \"transfer\": \"Explain why rounding a small residual to zero before calculating phase could hide a meaningful difference.\"\n    },\n    {\n      \"id\": \"phasor-phase-lead\",\n      \"concept\": \"model-boundaries\",\n      \"prerequisites\": [\n        \"complex-amplitude\"\n      ],\n      \"prompt\": \"Under the stated cosine convention, compare y(t) = cos(4πt + π/2) with x(t) = cos(4πt), with t in seconds. What time shift expresses y relative to x?\",\n      \"options\": [\n        \"y lags x by 0.125 seconds.\",\n        \"y leads x by 0.125 seconds.\",\n        \"y leads x by 0.25 seconds.\",\n        \"y lags x by 0.25 seconds.\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"Write y(t) = cos(4π(t + 1/8)) = x(t + 0.125). It reaches corresponding phases one eighth of a second earlier, so it leads x. Positive phase in this convention is a time advance; the frequency is unchanged at 2 Hz.\",\n      \"transfer\": \"Replace +π/2 with −π/2. State the corresponding lead or lag.\"\n    },\n    {\n      \"id\": \"phasor-diagram-meaning\",\n      \"concept\": \"model-boundaries\",\n      \"prerequisites\": [\n        \"complex-amplitude\",\n        \"vector-addition\"\n      ],\n      \"prompt\": \"The lab plots arrows on axes labeled Real and Imaginary for two scalar signals. What does an arrow's angle encode in this diagram?\",\n      \"options\": [\n        \"The physical direction in which a wave travels.\",\n        \"The location of a source in a room.\",\n        \"The direction of energy transport in space.\",\n        \"The signal's phase in the chosen cosine convention.\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"These axes hold complex-amplitude components. Arrow angle encodes phase; its real projection supplies the instantaneous scalar value after time rotation. The diagram contains no positions, travel directions, medium or energy-transport law. A physical application would need those additional definitions.\",\n      \"transfer\": \"Name one extra physical assumption needed before interpreting a squared signal value as an intensity.\"\n    }\n  ]\n}\n"</script>
+<script>
+(() => {
+'use strict';
+/** Same-frequency cosine superposition in a common scalar signal unit. */
+const INTERFERENCE_FORMAT = 'recallweave-phasor-interference/1';
+const TRACE_CYCLES = 2;
+const TRACE_INTERVALS = 128;
+const DEFAULT_INTERFERENCE = Object.freeze({
+  amplitudeA: 3, amplitudeB: 4, phaseDifferenceDegrees: 90,
+  commonPhaseDegrees: 0, frequencyHz: 1, cursorCycle: 0,
+});
+
+const fields = Object.freeze({
+  amplitudeA: [0, 5, 'Wave A amplitude must be a finite number from 0 to 5.'],
+  amplitudeB: [0, 5, 'Wave B amplitude must be a finite number from 0 to 5.'],
+  phaseDifferenceDegrees: [-180, 180, 'Relative phase must be from −180 to 180 degrees.'],
+  commonPhaseDegrees: [-180, 180, 'Common phase must be from −180 to 180 degrees.'],
+  frequencyHz: [0.1, 10, 'Shared frequency must be from 0.1 to 10 Hz.'],
+  cursorCycle: [0, TRACE_CYCLES, 'The time cursor must be from 0 to 2 cycles.'],
+});
+
+function validateInterference(input) {
+  if (!input || typeof input !== 'object' || Array.isArray(input)) {
+    throw new TypeError('Supply all six phasor experiment settings.');
+  }
+  const result = {};
+  for (const [key, [min, max, message]] of Object.entries(fields)) {
+    const value = input[key];
+    if (typeof value !== 'number' || !Number.isFinite(value) || value < min || value > max) {
+      throw new RangeError(message);
+    }
+    result[key] = Object.is(value, -0) ? 0 : value;
+  }
+  return Object.freeze(result);
+}
+
+function principalDegrees(value) {
+  let angle = value % 360;
+  if (angle >= 180) angle -= 360;
+  if (angle < -180) angle += 360;
+  return Object.is(angle, -0) ? 0 : angle;
+}
+
+/** Exact cardinal directions keep exact cancellation from acquiring a roundoff phase. */
+function direction(degrees) {
+  const angle = principalDegrees(degrees);
+  if (angle === 0) return [1, 0];
+  if (angle === 90) return [0, 1];
+  if (angle === -90) return [0, -1];
+  if (angle === -180) return [-1, 0];
+  const radians = angle * Math.PI / 180;
+  return [Math.cos(radians), Math.sin(radians)];
+}
+
+function vector(re, im) {
+  return Object.freeze({ re: Object.is(re, -0) ? 0 : re, im: Object.is(im, -0) ? 0 : im });
+}
+
+function rotate(z, degrees) {
+  const [c, s] = direction(degrees);
+  return vector(z.re * c - z.im * s, z.re * s + z.im * c);
+}
+
+function coefficients(p) {
+  const [c, s] = direction(p.phaseDifferenceDegrees);
+  const a = vector(p.amplitudeA, 0);
+  const b = vector(p.amplitudeB * c, p.amplitudeB * s);
+  // Sum before the common rotation: equal opposite inputs remain exactly zero.
+  const sum = vector(a.re + b.re, b.im);
+  return Object.freeze({
+    a: rotate(a, p.commonPhaseDegrees),
+    b: rotate(b, p.commonPhaseDegrees),
+    sum: rotate(sum, p.commonPhaseDegrees),
+  });
+}
+
+function sample(p, phasors, cycle) {
+  const a = rotate(phasors.a, cycle * 360);
+  const b = rotate(phasors.b, cycle * 360);
+  const sum = rotate(phasors.sum, cycle * 360);
+  return Object.freeze({
+    cycle, timeSeconds: cycle / p.frequencyHz,
+    waveA: a.re, waveB: b.re, sum: sum.re,
+    phasors: Object.freeze({ a, b, sum }),
+  });
+}
+
+/** A checked numerical evaluation at an explicitly supplied point in the two-cycle trace. */
+function sampleInterference(input, cycle) {
+  const p = validateInterference(input);
+  if (typeof cycle !== 'number' || !Number.isFinite(cycle) || cycle < 0 || cycle > TRACE_CYCLES) {
+    throw new RangeError('Choose a finite trace position from 0 to 2 cycles.');
+  }
+  return sample(p, coefficients(p), cycle);
+}
+
+/** One immutable experiment supplies every displayed and downloaded value. */
+function analyzeInterference(input) {
+  const parameters = validateInterference(input);
+  const phasors = coefficients(parameters);
+  const amplitude = Math.hypot(phasors.sum.re, phasors.sum.im);
+  const phaseDegrees = amplitude === 0 ? null
+    : principalDegrees(Math.atan2(phasors.sum.im, phasors.sum.re) * 180 / Math.PI);
+  const samples = Array.from({ length: TRACE_INTERVALS + 1 }, (_, index) => {
+    const point = sample(parameters, phasors, TRACE_CYCLES * index / TRACE_INTERVALS);
+    return Object.freeze({
+      index, cycle: point.cycle, timeSeconds: point.timeSeconds,
+      waveA: point.waveA, waveB: point.waveB, sum: point.sum,
+    });
+  });
+  const [relativeCosine] = direction(parameters.phaseDifferenceDegrees);
+  return Object.freeze({
+    format: INTERFERENCE_FORMAT,
+    parameters, phasors, amplitude, phaseDegrees,
+    periodSeconds: 1 / parameters.frequencyHz,
+    rms: amplitude / Math.sqrt(2),
+    meanSquare: amplitude * amplitude / 2,
+    separateMeanSquares: (parameters.amplitudeA ** 2 + parameters.amplitudeB ** 2) / 2,
+    interferenceMeanSquare: parameters.amplitudeA * parameters.amplitudeB * relativeCosine,
+    amplitudeRange: Object.freeze({
+      min: Math.abs(parameters.amplitudeA - parameters.amplitudeB),
+      max: parameters.amplitudeA + parameters.amplitudeB,
+    }),
+    cursor: sample(parameters, phasors, parameters.cursorCycle),
+    traceCycles: TRACE_CYCLES, traceIntervals: TRACE_INTERVALS,
+    samples: Object.freeze(samples),
+  });
+}
+
+function interferenceJson(input) {
+  const snapshot = analyzeInterference(input);
+  return JSON.stringify({
+    ...snapshot,
+    assumptions: [
+      'Two real scalar cosine signals with the same positive frequency and common units.',
+      'Relative phase and amplitudes are constant; the common phase uses a cosine convention.',
+      'Mean square is a cycle average of the mathematical signal, not a calibrated intensity.',
+      'The finite numeric trace is an evaluation of the specified model, not measured data.',
+      'A zero resultant has no defined phase; nonzero near-cancellation is retained.',
+    ],
+  }, null, 2) + '\n';
+}
+
+function interferenceCsv(input) {
+  const s = analyzeInterference(input);
+  const p = s.parameters;
+  const header = 'index,cycle,time_seconds,wave_a,wave_b,sum,amplitude_a,amplitude_b,relative_phase_degrees,common_phase_degrees,frequency_hz,cursor_cycle';
+  return header + '\n' + s.samples.map(row => [
+    row.index, row.cycle, row.timeSeconds, row.waveA, row.waveB, row.sum,
+    p.amplitudeA, p.amplitudeB, p.phaseDifferenceDegrees, p.commonPhaseDegrees, p.frequencyHz, p.cursorCycle,
+  ].join(',')).join('\n') + '\n';
+}
+
+
+const SVG_NS = 'http://www.w3.org/2000/svg';
+const palette = Object.freeze({ a: '#087c79', b: '#ad492c', sum: '#51449b' });
+const presets = Object.freeze({
+  quadrature: DEFAULT_INTERFERENCE,
+  constructive: { ...DEFAULT_INTERFERENCE, amplitudeA: 2, amplitudeB: 2, phaseDifferenceDegrees: 0 },
+  cancel: { ...DEFAULT_INTERFERENCE, amplitudeA: 2, amplitudeB: 2, phaseDifferenceDegrees: 180 },
+  unequal: { ...DEFAULT_INTERFERENCE, amplitudeA: 3, amplitudeB: 1, phaseDifferenceDegrees: 180 },
+});
+
+function formatInterferenceValue(value) {
+  if (value === 0) return '0';
+  if (Math.abs(value) < 0.00001) return value.toExponential(3);
+  return Number(value.toFixed(6)).toString();
+}
+
+/** Render and export one checked experiment; invalid controls retire its results. */
+function mountInterferenceLab(doc = document) {
+  const find = id => doc.getElementById(id);
+  const controls = {
+    amplitudeA: find('pi-amplitude-a'),
+    amplitudeB: find('pi-amplitude-b'),
+    phaseDifferenceDegrees: find('pi-relative-phase'),
+    commonPhaseDegrees: find('pi-common-phase'),
+    frequencyHz: find('pi-frequency'),
+    cursorCycle: find('pi-cursor'),
+  };
+  const exports = [find('pi-download-json'), find('pi-download-csv')];
+  const courseText = JSON.parse(find('pi-course-data').textContent);
+  const fmt = formatInterferenceValue;
+  let current = null;
+
+  function svg(tag, attributes, text) {
+    const node = doc.createElementNS(SVG_NS, tag);
+    for (const [name, value] of Object.entries(attributes)) node.setAttribute(name, String(value));
+    if (text !== undefined) node.textContent = text;
+    return node;
+  }
+
+  function phasorPicture(s) {
+    const group = svg('g', {});
+    const bound = Math.max(1, s.parameters.amplitudeA + s.parameters.amplitudeB) * 1.15;
+    const scale = 137 / bound;
+    const x = re => 210 + re * scale;
+    const y = im => 170 - im * scale;
+    const tick = Math.max(1, s.parameters.amplitudeA + s.parameters.amplitudeB);
+    for (const value of [-tick, 0, tick]) {
+      group.append(svg('line', { x1: x(-bound), y1: y(value), x2: x(bound), y2: y(value), class: value === 0 ? 'pi-axis' : 'pi-grid' }));
+      group.append(svg('line', { x1: x(value), y1: y(-bound), x2: x(value), y2: y(bound), class: value === 0 ? 'pi-axis' : 'pi-grid' }));
+      if (value !== 0) {
+        group.append(svg('text', { x: x(value), y: y(0) + 19, 'text-anchor': 'middle', class: 'pi-label' }, fmt(value)));
+        group.append(svg('text', { x: x(0) - 8, y: y(value) + 4, 'text-anchor': 'end', class: 'pi-label' }, fmt(value)));
+      }
+    }
+    group.append(svg('text', { x: 210, y: 18, 'text-anchor': 'middle', class: 'pi-label strong' }, 'Imaginary'));
+    group.append(svg('text', { x: 412, y: 174, 'text-anchor': 'end', class: 'pi-label strong' }, 'Real'));
+    group.append(svg('text', { x: 210, y: 342, 'text-anchor': 'middle', class: 'pi-label' }, 'Common signal units · phase is an angle'));
+
+    const defs = svg('defs', {});
+    for (const name of ['a', 'b', 'sum']) {
+      const marker = svg('marker', { id: 'pi-arrow-' + name, viewBox: '0 0 10 10', refX: 9, refY: 5, markerWidth: 6, markerHeight: 6, orient: 'auto', markerUnits: 'strokeWidth' });
+      marker.append(svg('path', { d: 'M 0 0 L 10 5 L 0 10 z', fill: palette[name] }));
+      defs.append(marker);
+    }
+    group.append(defs);
+    const c = s.cursor;
+    group.append(svg('line', {
+      x1: x(c.phasors.a.re), y1: y(c.phasors.a.im),
+      x2: x(c.phasors.sum.re), y2: y(c.phasors.sum.im),
+      stroke: palette.b, 'stroke-width': 2, 'stroke-dasharray': '3 5', opacity: 0.55,
+    }));
+    for (const [name, label, offset] of [['a', 'A', -10], ['b', 'B', 20], ['sum', 'Sum', -26]]) {
+      const z = c.phasors[name];
+      if (Math.hypot(z.re, z.im) !== 0) {
+        group.append(svg('line', {
+          x1: x(0), y1: y(0), x2: x(z.re), y2: y(z.im),
+          stroke: palette[name], 'stroke-width': name === 'sum' ? 3.5 : 2.5,
+          'stroke-dasharray': name === 'b' ? '7 4' : 'none', 'marker-end': 'url(#pi-arrow-' + name + ')',
+          'data-vector': name,
+        }));
+        group.append(svg('text', { x: x(z.re) + 9, y: y(z.im) + offset, fill: palette[name], 'font-size': 13, 'font-weight': 700 }, label));
+      } else if (name === 'sum') {
+        group.append(svg('circle', { cx: x(0), cy: y(0), r: 5, fill: 'none', stroke: palette.sum, 'stroke-width': 2.5, 'data-zero-resultant': 'true' }));
+        group.append(svg('text', { x: x(0) + 10, y: y(0) - 13, fill: palette.sum, 'font-size': 13, 'font-weight': 700 }, 'Sum = 0'));
+      }
+    }
+    if (s.amplitude !== 0) {
+      group.append(svg('line', { x1: x(c.sum), y1: y(c.phasors.sum.im), x2: x(c.sum), y2: y(0), class: 'pi-cursor' }));
+      group.append(svg('circle', { cx: x(c.sum), cy: y(0), r: 4.5, fill: palette.sum }));
+    }
+    return group;
+  }
+
+  function timePicture(s) {
+    const group = svg('g', {});
+    const bound = Math.max(1, s.parameters.amplitudeA + s.parameters.amplitudeB) * 1.15;
+    const x = cycle => 53 + cycle / 2 * 550;
+    const y = value => 164 - value / bound * 125;
+    const tick = Math.max(1, s.parameters.amplitudeA + s.parameters.amplitudeB);
+    for (const value of [-tick, 0, tick]) {
+      group.append(svg('line', { x1: x(0), x2: x(2), y1: y(value), y2: y(value), class: value === 0 ? 'pi-axis' : 'pi-grid' }));
+      group.append(svg('text', { x: 43, y: y(value) + 4, 'text-anchor': 'end', class: 'pi-label' }, fmt(value)));
+    }
+    for (const cycle of [0, 0.5, 1, 1.5, 2]) {
+      group.append(svg('line', { x1: x(cycle), x2: x(cycle), y1: 30, y2: 299, class: 'pi-grid' }));
+      group.append(svg('text', { x: x(cycle), y: 318, 'text-anchor': 'middle', class: 'pi-label' }, fmt(cycle / s.parameters.frequencyHz)));
+    }
+    group.append(svg('text', { x: 53, y: 18, class: 'pi-label strong' }, 'Signal value'));
+    group.append(svg('text', { x: 328, y: 343, 'text-anchor': 'middle', class: 'pi-label strong' }, 'Time (seconds)'));
+    for (const [key, name] of [['waveA', 'a'], ['waveB', 'b'], ['sum', 'sum']]) {
+      const d = s.samples.map((row, i) => (i ? 'L' : 'M') + x(row.cycle).toFixed(3) + ',' + y(row[key]).toFixed(3)).join(' ');
+      group.append(svg('path', { d, class: 'pi-wave-' + name, 'data-trace': name }));
+    }
+    group.append(svg('line', { x1: x(s.cursor.cycle), x2: x(s.cursor.cycle), y1: 30, y2: 299, class: 'pi-cursor' }));
+    for (const [key, name] of [['waveA', 'a'], ['waveB', 'b'], ['sum', 'sum']]) {
+      group.append(svg('circle', { cx: x(s.cursor.cycle), cy: y(s.cursor[key]), r: name === 'sum' ? 5 : 3.5, fill: palette[name] }));
+    }
+    return group;
+  }
+
+  function tableRows(s) {
+    const rows = doc.createDocumentFragment();
+    for (const sample of s.samples) {
+      const row = doc.createElement('tr');
+      for (const key of ['index', 'cycle', 'timeSeconds', 'waveA', 'waveB', 'sum']) {
+        const cell = doc.createElement('td');
+        cell.textContent = fmt(sample[key]);
+        row.append(cell);
+      }
+      rows.append(row);
+    }
+    return rows;
+  }
+
+  function readInputs() {
+    const settings = {};
+    const errors = [];
+    for (const [key, input] of Object.entries(controls)) {
+      input.removeAttribute('aria-invalid');
+      const value = Number(input.value);
+      if (!input.value.trim() || input.validity.badInput || !Number.isFinite(value)
+          || value < Number(input.min) || value > Number(input.max)) {
+        input.setAttribute('aria-invalid', 'true');
+        errors.push(doc.querySelector('label[for="' + input.id + '"]').textContent
+          + ': enter a number from ' + input.min + ' to ' + input.max + '.');
+      }
+      settings[key] = value;
+    }
+    if (errors.length) throw new RangeError(errors.join(' '));
+    return analyzeInterference(settings);
+  }
+
+  function retire(failure) {
+    current = null;
+    find('pi-results').hidden = true;
+    find('pi-sample-rows').replaceChildren();
+    find('pi-phasor-drawing').replaceChildren();
+    find('pi-trace-drawing').replaceChildren();
+    for (const button of exports) button.disabled = true;
+    find('pi-error').hidden = false;
+    find('pi-error').textContent = failure instanceof Error ? failure.message : 'The experiment could not be calculated.';
+    find('pi-status').textContent = 'Results paused. Correct the input to calculate and download the experiment.';
+    find('pi-cursor-value').textContent = 'Results paused';
+    find('pi-step-back').disabled = true;
+    find('pi-step-forward').disabled = true;
+    for (const button of doc.querySelectorAll('[data-pi-preset]')) button.setAttribute('aria-pressed', 'false');
+  }
+
+  function update() {
+    try {
+      const next = readInputs();
+      const arrows = phasorPicture(next);
+      const trace = timePicture(next);
+      const rows = tableRows(next);
+      // Build before committing: all three representations belong to this snapshot.
+      find('pi-phasor-drawing').replaceChildren(arrows);
+      find('pi-trace-drawing').replaceChildren(trace);
+      find('pi-sample-rows').replaceChildren(rows);
+      find('pi-amplitude').textContent = fmt(next.amplitude);
+      find('pi-phase').textContent = next.phaseDegrees === null ? 'Undefined' : fmt(next.phaseDegrees) + '°';
+      find('pi-mean-square').textContent = fmt(next.meanSquare);
+      find('pi-rms').textContent = fmt(next.rms);
+      find('pi-cursor-value').textContent = fmt(next.cursor.cycle) + ' cycles · ' + fmt(next.cursor.timeSeconds) + ' s';
+      controls.cursorCycle.setAttribute('aria-valuetext', fmt(next.cursor.cycle) + ' cycles, ' + fmt(next.cursor.timeSeconds) + ' seconds');
+      find('pi-cursor-equation').textContent = 'At ' + fmt(next.cursor.timeSeconds) + ' s: A (' + fmt(next.cursor.waveA)
+        + ') + B (' + fmt(next.cursor.waveB) + ') = ' + fmt(next.cursor.sum) + ' signal units.';
+      find('pi-phasor-description').textContent = 'At ' + fmt(next.cursor.timeSeconds) + ' seconds, wave A has real projection '
+        + fmt(next.cursor.waveA) + ', wave B ' + fmt(next.cursor.waveB) + ', and the resultant ' + fmt(next.cursor.sum)
+        + '. The fixed resultant peak amplitude is ' + fmt(next.amplitude) + '.';
+      find('pi-trace-description').textContent = 'Two ' + fmt(next.parameters.frequencyHz) + ' Hz cosines and their sum across '
+        + fmt(2 * next.periodSeconds) + ' seconds. Peak amplitudes are ' + fmt(next.parameters.amplitudeA) + ', '
+        + fmt(next.parameters.amplitudeB) + ' and ' + fmt(next.amplitude) + '. The numerical table gives all 129 evaluations.';
+      find('pi-table-caption').textContent = 'A = ' + fmt(next.parameters.amplitudeA) + '; B = ' + fmt(next.parameters.amplitudeB)
+        + '; relative phase ' + fmt(next.parameters.phaseDifferenceDegrees) + '°; common phase '
+        + fmt(next.parameters.commonPhaseDegrees) + '°; frequency ' + fmt(next.parameters.frequencyHz) + ' Hz.';
+      find('pi-relation').textContent = next.amplitude === 0
+        ? (next.parameters.amplitudeA === 0 && next.parameters.amplitudeB === 0
+          ? 'Both input amplitudes are zero. The combined signal is zero at every time and its phase is undefined.'
+          : 'Complete cancellation: the combined signal is zero at every time. A zero resultant has no direction, so its phase is undefined.')
+        : 'The combined peak can range from ' + fmt(next.amplitudeRange.min) + ' to ' + fmt(next.amplitudeRange.max)
+          + ' as relative phase changes. Here it is ' + fmt(next.amplitude) + '. The separate cycle mean squares total '
+          + fmt(next.separateMeanSquares) + '; the coherent cross term is ' + fmt(next.interferenceMeanSquare)
+          + ', giving a combined mean square of ' + fmt(next.meanSquare) + '.';
+      for (const button of doc.querySelectorAll('[data-pi-preset]')) {
+        const preset = presets[button.dataset.piPreset];
+        button.setAttribute('aria-pressed', String(Object.keys(controls).every(key => key === 'cursorCycle' || next.parameters[key] === preset[key])));
+      }
+      find('pi-step-back').disabled = next.parameters.cursorCycle === 0;
+      find('pi-step-forward').disabled = next.parameters.cursorCycle === 2;
+      find('pi-error').hidden = true;
+      find('pi-error').textContent = '';
+      find('pi-results').hidden = false;
+      for (const button of exports) button.disabled = false;
+      current = next;
+      find('pi-status').textContent = 'Current experiment ready. Both plots and 129 values use these settings.';
+      return true;
+    } catch (failure) {
+      retire(failure);
+      return false;
+    }
+  }
+
+  function download(text, mediaType, filename) {
+    let url;
+    let link;
+    try {
+      url = URL.createObjectURL(new Blob([text], { type: mediaType }));
+      link = doc.createElement('a');
+      link.href = url;
+      link.download = filename;
+      doc.body.append(link);
+      link.click();
+      find('pi-status').textContent = 'Prepared ' + filename + ' for the browser download.';
+    } catch (failure) {
+      find('pi-status').textContent = 'The download could not be prepared. The current experiment is still available.';
+    } finally {
+      if (link) link.remove();
+      if (url) setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+  }
+
+  for (const input of Object.values(controls)) input.addEventListener('input', update);
+  find('pi-controls').addEventListener('submit', event => { event.preventDefault(); update(); });
+  for (const button of doc.querySelectorAll('[data-pi-preset]')) {
+    button.addEventListener('click', () => {
+      for (const [key, input] of Object.entries(controls)) input.value = String(presets[button.dataset.piPreset][key]);
+      update();
+    });
+  }
+  for (const [id, change] of [['pi-step-back', -1 / 16], ['pi-step-forward', 1 / 16]]) {
+    find(id).addEventListener('click', () => {
+      if (!update() || !current) return;
+      controls.cursorCycle.value = String(Math.min(2, Math.max(0, current.parameters.cursorCycle + change)));
+      update();
+    });
+  }
+  find('pi-download-json').addEventListener('click', () => {
+    if (update() && current) download(interferenceJson(current.parameters), 'application/json;charset=utf-8', 'phasor-experiment.json');
+  });
+  find('pi-download-csv').addEventListener('click', () => {
+    if (update() && current) download(interferenceCsv(current.parameters), 'text/csv;charset=utf-8', 'phasor-signal-values.csv');
+  });
+  find('pi-download-course').addEventListener('click', () => download(courseText, 'application/json;charset=utf-8', 'phasor-interference.json'));
+  update();
+}
+
+if (typeof document !== 'undefined') mountInterferenceLab(document);
+
+})();
+</script>
+</body>
+</html>

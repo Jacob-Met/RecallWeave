@@ -1,0 +1,532 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<meta name="feedback-course-sha256" content="65ca9c4a49f9131985a81b4250873eca0a73108458e0e0adb366878dbbaa7e1e">
+<meta name="feedback-model-sha256" content="5fa64d93e5f1d641a6ed9ba771a54decbe97532eaa390652a2de8801482713a5">
+<title>When correction overshoots · RecallWeave</title>
+<style>
+:root{--ink:#15313f;--muted:#4d626b;--paper:#f5f2ea;--panel:#fffdf7;--line:#c9d4d2;--teal:#006c70;--coral:#b4462e;--blue:#465eab;--soft:#e5eeea;--gold:#e9c666}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.55}
+main{max-width:1280px;margin:auto;padding:28px 34px 54px}
+a{color:var(--teal);text-underline-offset:3px}
+button,input,select{font:inherit}
+button{cursor:pointer;min-height:44px;border:1px solid var(--ink);border-radius:8px;padding:9px 14px;background:var(--panel);color:var(--ink);font-weight:650;line-height:1.3}
+button:hover{background:var(--soft)}
+button:disabled{cursor:default;opacity:.55}
+button.primary{background:var(--ink);color:white}
+button.primary:hover{background:#245267}
+:focus-visible{outline:3px solid var(--blue);outline-offset:3px}
+.skip{position:absolute;top:-100px;left:20px;z-index:5;background:white;padding:12px}
+.skip:focus{top:12px}
+.eyebrow{font-size:.78rem;letter-spacing:.13em;text-transform:uppercase;font-weight:750;color:var(--teal);margin:0 0 8px}
+h1{font-size:clamp(2rem,4vw,3.5rem);line-height:1.08;letter-spacing:-.035em;margin:0 0 15px;max-width:800px}
+h2{font-size:1.25rem;line-height:1.25;margin:0 0 12px}
+h3{font-size:1rem;line-height:1.3;margin:0 0 8px}
+p{margin:0 0 12px}
+.intro{max-width:810px;color:var(--muted);font-size:1.08rem}
+.equations{display:grid;grid-template-columns:1fr 1.2fr 1fr;gap:12px;margin:24px 0}
+.equation{padding:16px 18px;border-top:3px solid var(--teal);background:#e9efea;border-radius:0 0 8px 8px}
+.equation small{display:block;color:var(--muted);margin-bottom:4px}
+.equation strong{font-size:1.06rem;font-variant-numeric:tabular-nums}
+.presets{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 18px}
+.presets button{font-size:.88rem}
+.presets button[aria-pressed=true]{background:var(--teal);border-color:var(--teal);color:white}
+.workspace{display:grid;grid-template-columns:minmax(250px,290px) minmax(0,1fr);gap:18px;align-items:start}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:21px;min-width:0}
+.control-intro{font-size:.88rem;color:var(--muted)}
+.fields{display:grid;grid-template-columns:1fr 1fr;gap:13px 12px;margin:18px 0}
+.field{min-width:0}
+.field label{display:block;font-size:.86rem;font-weight:700;margin-bottom:4px}
+.field small{display:block;color:var(--muted);font-size:.76rem;margin-top:3px}
+.field input{width:100%;min-height:44px;border:1px solid #93a7a7;border-radius:6px;background:white;padding:7px 9px;color:var(--ink);font-variant-numeric:tabular-nums}
+.field.wide{grid-column:1/-1}
+.actions{display:flex;flex-wrap:wrap;gap:8px}
+#apply-experiment{flex:1}
+#run-status{border-left:3px solid var(--teal);padding:9px 11px;background:var(--soft);font-size:.87rem;margin:16px 0 0}
+#run-status.dirty{border-color:#98741d;background:#fbf1cf}
+#run-status.error{border-color:var(--coral);background:#fff0e9}
+.metrics{display:grid;grid-template-columns:.65fr 1.4fr 1fr;gap:10px;border-bottom:1px solid var(--line);padding-bottom:15px;margin-bottom:14px}
+.metric-label{display:block;color:var(--muted);font-size:.77rem;margin-bottom:4px}
+.metric-value{display:block;font-weight:750;font-size:1.14rem;line-height:1.3;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.metric-value.large{font-size:1.6rem}
+#behavior-detail{font-size:.92rem}
+.plot-wrap{width:100%;min-width:0}
+#trace-plot{display:block;width:100%;height:auto;overflow:visible}
+.legend{display:flex;gap:9px 20px;flex-wrap:wrap;font-size:.8rem;margin:3px 0 14px;color:var(--muted)}
+.legend span{display:flex;align-items:center;gap:7px}
+.swatch{display:inline-block;width:24px;border-top:3px solid var(--teal)}
+.swatch.other{border-color:var(--coral);border-top-style:dashed}
+.swatch.reference{border-color:var(--blue);border-top-width:2px;border-top-style:dotted}
+.plot-note{font-size:.79rem;color:var(--muted)}
+.step-header{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-top:20px}
+.step-header label{font-weight:750}
+#step-label{font-variant-numeric:tabular-nums;color:var(--teal)}
+#selected-step{display:block;width:100%;min-height:36px;accent-color:var(--teal);margin:2px 0 10px}
+.step-values{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.step-values div{background:var(--soft);padding:10px;border-radius:6px;min-width:0}
+.step-values dt{font-size:.74rem;color:var(--muted)}
+.step-values dd{margin:3px 0 0;font-weight:700;font-size:.98rem;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+#step-note{font-size:.83rem;color:var(--muted)}
+#applied-settings{font-size:.77rem;color:var(--muted);margin:10px 0 0;overflow-wrap:anywhere}
+.lower{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:18px}
+.learning-list{margin:12px 0 18px;padding-left:22px}
+.learning-list li{padding:0 0 7px 3px}
+.learning-list strong{color:var(--teal)}
+details{border-top:1px solid var(--line);padding:12px 0}
+details:last-child{padding-bottom:0}
+summary{font-weight:700;cursor:pointer;min-height:32px}
+details p{font-size:.92rem;margin:8px 0 3px;color:var(--muted)}
+.table-panel{margin-top:18px}
+.table-panel>summary{font-size:1.03rem}
+.table-scroll{overflow:auto;max-height:390px;border:1px solid var(--line);border-radius:8px;margin-top:12px}
+table{border-collapse:collapse;width:100%;font-size:.8rem;font-variant-numeric:tabular-nums;white-space:nowrap}
+caption{text-align:left;white-space:normal;padding:11px;color:var(--muted)}
+th,td{text-align:right;padding:8px 11px;border-bottom:1px solid #e3e8e3}
+thead th{background:#e7eeea;position:sticky;top:0}
+tbody tr.selected{background:#fbefc6}
+tbody th{font-weight:650}
+footer{font-size:.8rem;color:var(--muted);margin-top:24px;max-width:1050px}
+footer p{margin-bottom:7px}
+noscript{display:block;padding:20px;border:2px solid var(--coral);margin-bottom:20px}
+@media(max-width:920px){main{padding:24px}.workspace{grid-template-columns:250px minmax(0,1fr)}.metrics{grid-template-columns:.6fr 1fr}.metrics>div:last-child{grid-column:1/-1}.step-values{grid-template-columns:1fr 1fr}}
+@media(max-width:700px){main{padding:20px 14px 36px}.equations{grid-template-columns:1fr;gap:7px;margin:20px 0}.equation{padding:11px 14px}.equation small{display:inline;margin-right:10px}.workspace,.lower{grid-template-columns:1fr}.panel{padding:17px}.fields{grid-template-columns:1fr 1fr}.field.wide{grid-column:auto}.metrics{grid-template-columns:.6fr 1.4fr}.presets{gap:7px}.presets button{flex:1 1 135px}.step-values{grid-template-columns:1fr 1fr}.intro{font-size:1rem}}
+@media print{body{background:white}main{padding:0;max-width:none}.presets,.actions,#selected-step,.skip{display:none}.workspace,.lower{display:block}.panel{break-inside:avoid;margin-bottom:12px}.equations{margin:12px 0}.table-scroll{max-height:none;overflow:visible}footer{margin-top:12px}}
+</style>
+</head>
+<body>
+<a class="skip" href="#experiment-form">Skip to experiment</a>
+<main>
+<noscript>The explorer needs JavaScript to compute the recurrence. The equations and explanations below remain readable.</noscript>
+<header>
+<p class="eyebrow">RecallWeave · Dynamics lab</p>
+<h1>When correction overshoots</h1>
+<p class="intro">A correction can settle a system, make it alternate, or send it farther away. Change one rule, compare two starting states, and explain what the next update will do.</p>
+</header>
+<section class="equations" aria-label="The model">
+<div class="equation"><small>Correction from the current state</small><strong>u[n] = k (r − x[n])</strong></div>
+<div class="equation"><small>One state update</small><strong>x[n+1] = a x[n] + u[n] + d</strong></div>
+<div class="equation"><small>The multiplier to watch</small><strong>q = a − k</strong></div>
+</section>
+<section aria-labelledby="preset-heading">
+<h2 id="preset-heading">Start with a behavior</h2>
+<div id="presets" class="presets"></div>
+</section>
+<div class="workspace">
+<section class="panel" aria-labelledby="controls-heading">
+<h2 id="controls-heading">Set the experiment</h2>
+<p class="control-intro">Keep the rule constant during each run. The second run starts at x[0] + δ, with every other input unchanged.</p>
+<form id="experiment-form" novalidate>
+<div class="fields">
+<div class="field"><label for="a">Persistence a</label><input id="a" name="a" type="number" min="0" max="1.25" step="0.25" value="0.75" required><small>0 to 1.25</small></div>
+<div class="field"><label for="gain">Correction k</label><input id="gain" name="gain" type="number" min="0" max="3" step="0.25" value="0.5" required><small>0 to 3</small></div>
+<div class="field"><label for="reference">Reference r</label><input id="reference" name="reference" type="number" min="-2" max="2" step="0.25" value="1" required><small>−2 to 2</small></div>
+<div class="field"><label for="disturbance">Constant input d</label><input id="disturbance" name="disturbance" type="number" min="-0.5" max="0.5" step="0.25" value="0" required><small>−0.5 to 0.5</small></div>
+<div class="field"><label for="initial">Initial state x[0]</label><input id="initial" name="initial" type="number" min="-2" max="2" step="0.25" value="0" required><small>−2 to 2</small></div>
+<div class="field"><label for="offset">Start difference δ</label><input id="offset" name="offset" type="number" min="-1" max="1" step="0.25" value="0.25" required><small>−1 to 1</small></div>
+<div class="field wide"><label for="steps">Number of updates N</label><input id="steps" name="steps" type="number" min="1" max="60" step="1" value="30" required><small>1 to 60 integer updates</small></div>
+</div>
+<div class="actions"><button id="apply-experiment" class="primary" type="submit">Apply settings</button><button id="restore-defaults" type="button">Reset</button></div>
+<p id="run-status" role="status" aria-live="polite">Preparing the default experiment.</p>
+</form>
+</section>
+<section class="panel" aria-labelledby="plot-heading">
+<h2 id="plot-heading">The same rule, two starting states</h2>
+<div class="metrics">
+<div><span class="metric-label">Multiplier q = a − k</span><output class="metric-value large" id="multiplier"></output></div>
+<div><span class="metric-label">Effect of the initial difference</span><output class="metric-value" id="behavior"></output></div>
+<div><span class="metric-label">Fixed point x*</span><output class="metric-value" id="fixed-point"></output></div>
+</div>
+<p id="behavior-detail"></p>
+<div class="plot-wrap"><svg id="trace-plot" role="img" aria-labelledby="trace-title trace-description"></svg></div>
+<div class="legend"><span><i class="swatch" aria-hidden="true"></i>State x[n]</span><span><i class="swatch other" aria-hidden="true"></i>Different start</span><span><i class="swatch reference" aria-hidden="true"></i>Reference r</span></div>
+<p class="plot-note">The vertical scale follows both recorded trajectories and the reference. The update index n has no specified duration in seconds.</p>
+<div class="step-header"><label for="selected-step">Inspect one update</label><output id="step-label" for="selected-step"></output></div>
+<input id="selected-step" type="range" min="0" max="30" step="1" value="0" aria-describedby="step-note">
+<dl class="step-values">
+<div><dt>Current state x[n]</dt><dd id="step-state"></dd></div>
+<div><dt>Reference error r − x[n]</dt><dd id="step-error"></dd></div>
+<div><dt>Applied correction u[n]</dt><dd id="step-control"></dd></div>
+<div><dt>Next state x[n+1]</dt><dd id="step-next"></dd></div>
+</dl>
+<p id="step-note"></p>
+<div class="actions"><button id="download-trace" type="button">Download applied trace CSV</button></div>
+<p id="applied-settings"></p>
+<p class="plot-note" id="download-status" role="status" aria-live="polite"></p>
+</section>
+</div>
+<div class="lower">
+<section class="panel" aria-labelledby="explore-heading">
+<p class="eyebrow">Try · predict · explain</p>
+<h2 id="explore-heading">Explore before answering</h2>
+<ol class="learning-list">
+<li><strong>Predict the first update.</strong> With the default rule and x[0] = 0, calculate the correction, then the next state. Move the inspection control to check.</li>
+<li><strong>Increase correction k.</strong> Compare gentle correction, alternating recovery, the repeating boundary, and growth. Explain each change using q.</li>
+<li><strong>Challenge a flat line.</strong> Open “A flat run can hide instability.” One run stays at zero. What does the different starting state reveal?</li>
+<li><strong>Separate two outcomes.</strong> Reset, then change d to −0.25. Does q change? Does the fixed point equal the reference?</li>
+</ol>
+<button id="download-course" class="primary" type="button">Download the 18-question course</button>
+<p class="plot-note" style="margin-top:12px">Open RecallWeave, choose a local JSON lesson, and select this download. Its six connected concepts include explanations and transfer prompts. The download contains the course questions and their authored explanations; it does not include your experiment.</p>
+</section>
+<section class="panel" aria-labelledby="explain-heading">
+<h2 id="explain-heading">Read the rule</h2>
+<details open><summary>Why q predicts the separation</summary><p>Substitute the correction to get x[n+1] = q x[n] + c, where c = k r + d. Subtract the two runs: their common constant input cancels. In exact arithmetic, a starting difference δ becomes δ qⁿ after n updates.</p></details>
+<details><summary>A fixed point can miss the reference</summary><p>If q ≠ 1, the fixed point is x* = c / (1 − q). At the default settings it is 2/3, while the reference is 1. A stable recurrence can therefore retain a nonzero reference error. A fixed point exists even when perturbations grow.</p></details>
+<details><summary>The boundary needs its own name</summary><p>If |q| &lt; 1, deviations decay. If |q| &gt; 1, nonzero deviations grow. At q = −1 they repeat with alternating sign. At q = 1 the separation persists; c = 0 makes every state fixed, while c ≠ 0 causes drift. These boundary cases do not have decaying perturbations.</p></details>
+<details><summary>What this experiment establishes</summary><p>This is a dimensionless scalar recurrence with constant coefficients, no delay, no saturation and no noise. A finite trace illustrates its behavior; the geometric multiplier supplies the all-update argument. Actual systems and learner outcomes require their own evidence.</p></details>
+<details><summary>Why the last digits can differ</summary><p>Controls use exact quarter increments, and the computer iterates with ordinary finite-precision numbers. Very small differences can round away when two state values become equal. The table and CSV include both computed separation and the analytical value δ qⁿ.</p></details>
+</section>
+</div>
+<details class="panel table-panel" id="trace-details">
+<summary>Inspect all recorded states</summary>
+<p class="plot-note">There are N + 1 state rows for N updates. The final state has no applied correction or recorded next state. Export includes both runs, settings and full numeric values.</p>
+<div class="table-scroll" role="region" aria-label="Computed state table, scroll horizontally for all columns" tabindex="0">
+<table>
+<caption>Values shown here are rounded for reading. The CSV retains the computed numbers.</caption>
+<thead><tr><th scope="col">n</th><th scope="col">x[n]</th><th scope="col">Different start</th><th scope="col">r − x[n]</th><th scope="col">u[n]</th><th scope="col">x[n+1]</th><th scope="col">Computed separation</th><th scope="col">δ qⁿ</th></tr></thead>
+<tbody id="trace-rows"></tbody>
+</table>
+</div>
+</details>
+<footer>
+<p>An original, AI-assisted RecallWeave course and explorer. Course prose and questions are dedicated under CC0-1.0. Background reading: MIT OpenCourseWare, <a href="https://ocw.mit.edu/courses/6-003-signals-and-systems-fall-2011/resources/lecture-2-discrete-time-dt-systems/">Discrete Time Systems</a> and <a href="https://ocw.mit.edu/courses/2-161-signal-processing-continuous-and-discrete-fall-2008/resources/lecture_14/">Discrete-Time Stability</a>. Those materials retain their own terms.</p>
+<p>This file computes locally. It makes no automatic network requests and does not save experiment settings between visits. Downloads occur when you select their buttons.</p>
+</footer>
+</main>
+<script id="course-bytes" type="application/octet-stream">ewogICJmb3JtYXQiOiAicmVjYWxsd2VhdmUtZGVjay8xIiwKICAidGl0bGUiOiAiRmVlZGJhY2sgY29udHJvbDogY29ycmVjdGlvbiwgZml4ZWQgcG9pbnRzIGFuZCBzdGFiaWxpdHkiLAogICJhdHRyaWJ1dGlvbiI6ICJPcmlnaW5hbCBtb2RlbCBleGFtcGxlcywgd29ya2VkIHF1ZXN0aW9ucyBhbmQgZXhwbGFuYXRpb25zIGZvciBSZWNhbGxXZWF2ZSwgMjAyNi4gQmFja2dyb3VuZCByZWZlcmVuY2VzOiBNSVQgT3BlbkNvdXJzZVdhcmUsIERlbm5pcyBGcmVlbWFuLCA2LjAwMyBMZWN0dXJlIDIsIERpc2NyZXRlLVRpbWUgU3lzdGVtcyAoaHR0cHM6Ly9vY3cubWl0LmVkdS9jb3Vyc2VzLzYtMDAzLXNpZ25hbHMtYW5kLXN5c3RlbXMtZmFsbC0yMDExL3Jlc291cmNlcy9sZWN0dXJlLTItZGlzY3JldGUtdGltZS1kdC1zeXN0ZW1zLyk7IERlcmVrIFJvd2VsbCwgMi4xNjEgTGVjdHVyZSAxNCwgZGlzY3JldGUtdGltZSBzdGFiaWxpdHkgKGh0dHBzOi8vb2N3Lm1pdC5lZHUvY291cnNlcy8yLTE2MS1zaWduYWwtcHJvY2Vzc2luZy1jb250aW51b3VzLWFuZC1kaXNjcmV0ZS1mYWxsLTIwMDgvcmVzb3VyY2VzL2xlY3R1cmVfMTQvKS4gQWxsIGNhbGN1bGF0aW9ucyBoZXJlIGZvbGxvdyB0aGUgZXhwbGljaXRseSBzdGF0ZWQgb25lLXN0YXRlIG1vZGVsLiBTb3VyY2UgZXhlcmNpc2VzLCBwYXNzYWdlcyBhbmQgZmlndXJlcyBhcmUgbm90IHJlcHJvZHVjZWQuIiwKICAibGljZW5zZSI6ICJDQzAtMS4wIGZvciB0aGlzIG9yaWdpbmFsIGNvdXJzZSBjb250ZW50LiBUaGUgbGlua2VkIE1JVCBtYXRlcmlhbHMgcmV0YWluIHRoZWlyIG93biBsaWNlbnNlIGFuZCBhcmUgbm90IGJ1bmRsZWQuIEFJIGFzc2lzdGFuY2Ugd2FzIHVzZWQgdG8gYXV0aG9yIGFuZCB2ZXJpZnkgdGhlIG9yaWdpbmFsIG1hdGVyaWFsLiIsCiAgImNvbmNlcHRzIjogWwogICAgIlJlYWQgb25lIHVwZGF0ZSIsCiAgICAiQ2xvc2UgdGhlIGxvb3AiLAogICAgIkZpbmQgdGhlIGZpeGVkIHBvaW50IiwKICAgICJUZXN0IGRlY2F5IGFuZCBncm93dGgiLAogICAgIlNlcGFyYXRlIHRyYWNraW5nIGFuZCBkaXN0dXJiYW5jZSIsCiAgICAiUmVhZCB0aGUgbW9kZWwncyBsaW1pdHMiCiAgXSwKICAiaXRlbXMiOiBbCiAgICB7CiAgICAgICJpZCI6ICJmYy1yZWFkLW9yZGVyIiwKICAgICAgImNvbmNlcHQiOiAiUmVhZCBvbmUgdXBkYXRlIiwKICAgICAgInByZXJlcXVpc2l0ZXMiOiBbXSwKICAgICAgInByb21wdCI6ICJBdCB1cGRhdGUgbiwgdGhlIG1vZGVsIHVzZXMgdVtuXSA9IGsociDiiJIgeFtuXSkgYW5kIHhbbisxXSA9IGEgeFtuXSArIHVbbl0gKyBkLiBIZXJlIHIgYW5kIGQgc3RheSBjb25zdGFudC4gV2hpY2ggc2VxdWVuY2UgbWF0Y2hlcyB0aGlzIGRlZmluaXRpb24/IiwKICAgICAgIm9wdGlvbnMiOiBbCiAgICAgICAgIkNvbXB1dGUgdVtuXSBmcm9tIHhbbisxXSwgdGhlbiBzb2x2ZSBhbiB1bnN0YXRlZCBzaW11bHRhbmVvdXMgZXF1YXRpb24uIiwKICAgICAgICAiUmVwbGFjZSB4W25dIGJ5IHIgYmVmb3JlIGNvbXB1dGluZyB0aGUgY29ycmVjdGlvbi4iLAogICAgICAgICJSZWFkIHhbbl0sIGNvbXB1dGUgaXRzIGNvcnJlY3Rpb24gdVtuXSwgdGhlbiBjb21wdXRlIHRoZSBuZXh0IHN0YXRlIHhbbisxXS4iLAogICAgICAgICJBZGQgdGhlIGNvcnJlY3Rpb24gZGlyZWN0bHkgdG8gdGhlIHJlZmVyZW5jZSBhbmQgbGVhdmUgdGhlIHN0YXRlIHVuY2hhbmdlZC4iCiAgICAgIF0sCiAgICAgICJhbnN3ZXIiOiAyLAogICAgICAiZXhwbGFuYXRpb24iOiAiVGhlIGNvbnRyb2xsZXIgb2JzZXJ2ZXMgdGhlIGN1cnJlbnQgc3RhdGUgeFtuXS4gSXRzIGNvcnJlY3Rpb24gaXMgYW4gaW5wdXQgdG8gdGhlIGZvbGxvd2luZyBzdGF0ZSB1cGRhdGUuIFRoZSBkZWZpbml0aW9uIGRvZXMgbm90IHVzZSB0aGUgbmV4dCBzdGF0ZSB0byBjb21wdXRlIHRoZSBjdXJyZW50IGNvcnJlY3Rpb24uIFRoaXMgb25lLXN0ZXAgb3JkZXJpbmcgbWFrZXMgdGhlIG1vZGVsIGFuIGV4cGxpY2l0IHJlY3VycmVuY2UuIiwKICAgICAgInRyYW5zZmVyIjogIldpdGggYSA9IDAuNzUsIGsgPSAwLjUsIHIgPSAxLCBkID0gMCBhbmQgeFswXSA9IDAsIGNhbGN1bGF0ZSB1WzBdIGJlZm9yZSBjYWxjdWxhdGluZyB4WzFdLiIKICAgIH0sCiAgICB7CiAgICAgICJpZCI6ICJmYy1yZWFkLW51bWJlciIsCiAgICAgICJjb25jZXB0IjogIlJlYWQgb25lIHVwZGF0ZSIsCiAgICAgICJwcmVyZXF1aXNpdGVzIjogW10sCiAgICAgICJwcm9tcHQiOiAiVXNlIGEgPSAwLjc1LCBrID0gMC41LCByID0gMSwgZCA9IDAgYW5kIHhbMF0gPSAwLjUuIFdpdGggdVswXSA9IGsociDiiJIgeFswXSkgYW5kIHhbMV0gPSBhIHhbMF0gKyB1WzBdICsgZCwgd2hhdCBpcyB4WzFdPyIsCiAgICAgICJvcHRpb25zIjogWwogICAgICAgICIwLjI1IiwKICAgICAgICAiMC42MjUiLAogICAgICAgICIwLjc1IiwKICAgICAgICAiMS4yNSIKICAgICAgXSwKICAgICAgImFuc3dlciI6IDEsCiAgICAgICJleHBsYW5hdGlvbiI6ICJUaGUgZXJyb3IgaXMgMSDiiJIgMC41ID0gMC41LCBzbyB0aGUgY29ycmVjdGlvbiBpcyAwLjUgw5cgMC41ID0gMC4yNS4gVGhlIHJldGFpbmVkIHBhcnQgb2YgdGhlIHN0YXRlIGlzIDAuNzUgw5cgMC41ID0gMC4zNzUuIEFkZGluZyB0aGUgdHdvIGdpdmVzIHhbMV0gPSAwLjYyNS4gVGhlIGNvcnJlY3Rpb24gYWxvbmUgaXMgbm90IHRoZSBuZXh0IHN0YXRlLiIsCiAgICAgICJ0cmFuc2ZlciI6ICJSZXBlYXQgdGhlIGNhbGN1bGF0aW9uIHdpdGggZCA9IOKIkjAuMjUuIElkZW50aWZ5IHdoaWNoIHRlcm0gY2hhbmdlcyBhbmQgd2hpY2ggdHdvIHRlcm1zIHN0YXkgdGhlIHNhbWUuIgogICAgfSwKICAgIHsKICAgICAgImlkIjogImZjLXJlYWQtc2lnbiIsCiAgICAgICJjb25jZXB0IjogIlJlYWQgb25lIHVwZGF0ZSIsCiAgICAgICJwcmVyZXF1aXNpdGVzIjogW10sCiAgICAgICJwcm9tcHQiOiAiSW4gdVtuXSA9IGsociDiiJIgeFtuXSksIGxldCBrID4gMCBhbmQgbGV0IHRoZSBjdXJyZW50IHN0YXRlIGJlIGFib3ZlIHRoZSByZWZlcmVuY2U6IHhbbl0gPiByLiBXaGF0IHNpZ24gZG9lcyB0aGUgY29udHJvbGxlcidzIGNvcnJlY3Rpb24gaGF2ZT8iLAogICAgICAib3B0aW9ucyI6IFsKICAgICAgICAiUG9zaXRpdmUsIGJlY2F1c2UgayBpcyBwb3NpdGl2ZS4iLAogICAgICAgICJaZXJvLCBiZWNhdXNlIHRoZSByZWZlcmVuY2UgaXMgY29uc3RhbnQuIiwKICAgICAgICAiSXRzIHNpZ24gY2Fubm90IGJlIGRldGVybWluZWQgd2l0aG91dCBrbm93aW5nIGEuIiwKICAgICAgICAiTmVnYXRpdmUsIGJlY2F1c2UgciDiiJIgeFtuXSBpcyBuZWdhdGl2ZS4iCiAgICAgIF0sCiAgICAgICJhbnN3ZXIiOiAzLAogICAgICAiZXhwbGFuYXRpb24iOiAiQSBwb3NpdGl2ZSBnYWluIHByZXNlcnZlcyB0aGUgc2lnbiBvZiB0aGUgZXJyb3IuIEFib3ZlIHRoZSByZWZlcmVuY2UsIHRoZSBlcnJvciBpcyBuZWdhdGl2ZSwgc28gdGhlIGNvcnJlY3Rpb24gaXMgbmVnYXRpdmUuIFRoaXMgZGVzY3JpYmVzIHRoZSBjb3JyZWN0aW9uIHRlcm0sIG5vdCBhIGd1YXJhbnRlZSB0aGF0IHRoZSB3aG9sZSBuZXh0IHN0YXRlIHdpbGwgZGVjcmVhc2U6IHRoZSByZXRhaW5lZCBzdGF0ZSBhbmQgZGlzdHVyYmFuY2UgYWxzbyBjb250cmlidXRlLiIsCiAgICAgICJ0cmFuc2ZlciI6ICJFeHBsYWluIHdoeSBhIG5lZ2F0aXZlIGNvcnJlY3Rpb24gZG9lcyBub3QsIGJ5IGl0c2VsZiwgcHJvdmUgdGhhdCB0aGUgd2hvbGUgZmVlZGJhY2sgc3lzdGVtIGlzIHN0YWJsZS4iCiAgICB9LAogICAgewogICAgICAiaWQiOiAiZmMtbG9vcC1jb2VmZmljaWVudCIsCiAgICAgICJjb25jZXB0IjogIkNsb3NlIHRoZSBsb29wIiwKICAgICAgInByZXJlcXVpc2l0ZXMiOiBbCiAgICAgICAgIlJlYWQgb25lIHVwZGF0ZSIKICAgICAgXSwKICAgICAgInByb21wdCI6ICJTdWJzdGl0dXRlIHVbbl0gPSBrKHIg4oiSIHhbbl0pIGludG8geFtuKzFdID0gYSB4W25dICsgdVtuXSArIGQuIFdoaWNoIHBhaXIgZ2l2ZXMgdGhlIGVxdWl2YWxlbnQgZm9ybSB4W24rMV0gPSBxIHhbbl0gKyBjPyIsCiAgICAgICJvcHRpb25zIjogWwogICAgICAgICJxID0gYSDiiJIgayBhbmQgYyA9IGsgciArIGQuIiwKICAgICAgICAicSA9IGEgKyBrIGFuZCBjID0gayByICsgZC4iLAogICAgICAgICJxID0gYSDiiJIgayBhbmQgYyA9IHIgKyBkLiIsCiAgICAgICAgInEgPSBrIGFuZCBjID0gYSByIOKIkiBkLiIKICAgICAgXSwKICAgICAgImFuc3dlciI6IDAsCiAgICAgICJleHBsYW5hdGlvbiI6ICJFeHBhbmQgayhyIOKIkiB4W25dKSBhcyBrIHIg4oiSIGsgeFtuXS4gQ29sbGVjdGluZyB0aGUgc3RhdGUgdGVybXMgZ2l2ZXMgKGEg4oiSIGspeFtuXSwgYW5kIHRoZSBjb25zdGFudCB0ZXJtcyBnaXZlIGsgciArIGQuIFRoZXJlZm9yZSBxID0gYSDiiJIgayBhbmQgYyA9IGsgciArIGQuIEJvdGggdGhlIHBsYW50IHJldGVudGlvbiBhbmQgdGhlIGZlZWRiYWNrIGdhaW4gYWZmZWN0IHRoZSBzdGF0ZSBtdWx0aXBsaWVyLiIsCiAgICAgICJ0cmFuc2ZlciI6ICJGb3IgYSA9IDAuNzUgYW5kIGsgPSAxLjI1LCBjYWxjdWxhdGUgcS4gUHJlZGljdCB3aGV0aGVyIGEgZGV2aWF0aW9uIHdpbGwga2VlcCBpdHMgc2lnbiBhZnRlciBvbmUgdXBkYXRlLiIKICAgIH0sCiAgICB7CiAgICAgICJpZCI6ICJmYy1sb29wLXR3by1zdGFydHMiLAogICAgICAiY29uY2VwdCI6ICJDbG9zZSB0aGUgbG9vcCIsCiAgICAgICJwcmVyZXF1aXNpdGVzIjogWwogICAgICAgICJSZWFkIG9uZSB1cGRhdGUiCiAgICAgIF0sCiAgICAgICJwcm9tcHQiOiAiVHdvIHJ1bnMgdXNlIHRoZSBzYW1lIHEgYW5kIGMgaW4geFtuKzFdID0gcSB4W25dICsgYywgYnV0IHN0YXJ0IGF0IGRpZmZlcmVudCBzdGF0ZXMuIERlZmluZSB0aGVpciBzZXBhcmF0aW9uIGFzIM6UW25dID0geEJbbl0g4oiSIHhBW25dLiBXaGljaCBlcXVhdGlvbiBmb2xsb3dzPyIsCiAgICAgICJvcHRpb25zIjogWwogICAgICAgICLOlFtuKzFdID0gcSDOlFtuXSArIDJjLiIsCiAgICAgICAgIs6UW24rMV0gPSBjIM6UW25dLiIsCiAgICAgICAgIs6UW24rMV0gPSBxIM6UW25dLiIsCiAgICAgICAgIs6UW24rMV0gPSDOlFtuXSByZWdhcmRsZXNzIG9mIHEuIgogICAgICBdLAogICAgICAiYW5zd2VyIjogMiwKICAgICAgImV4cGxhbmF0aW9uIjogIlN1YnRyYWN0IHRoZSB0d28gdXBkYXRlIGVxdWF0aW9ucy4gVGhlaXIgaWRlbnRpY2FsIGNvbnN0YW50IHRlcm1zIGNhbmNlbDogKHEgeEJbbl0gKyBjKSDiiJIgKHEgeEFbbl0gKyBjKSA9IHEoeEJbbl0g4oiSIHhBW25dKS4gVGh1cyDOlFtuKzFdID0gcSDOlFtuXS4gVGhpcyBjb21wYXJpc29uIHNlcGFyYXRlcyB0aGUgcmVzcG9uc2UgdG8gZGlmZmVyZW50IGluaXRpYWwgc3RhdGVzIGZyb20gdGhlIGNvbW1vbiBmb3JjaW5nLiIsCiAgICAgICJ0cmFuc2ZlciI6ICJJZiB0aGUgcnVucyBpbnN0ZWFkIHVzZSBkaWZmZXJlbnQgY29uc3RhbnQgZGlzdHVyYmFuY2VzLCB3cml0ZSB0aGUgZXh0cmEgdGVybSB0aGF0IHJlbWFpbnMgd2hlbiB5b3Ugc3VidHJhY3QgdGhlaXIgdXBkYXRlcy4iCiAgICB9LAogICAgewogICAgICAiaWQiOiAiZmMtbG9vcC10aHJlZS1zdGVwcyIsCiAgICAgICJjb25jZXB0IjogIkNsb3NlIHRoZSBsb29wIiwKICAgICAgInByZXJlcXVpc2l0ZXMiOiBbCiAgICAgICAgIlJlYWQgb25lIHVwZGF0ZSIKICAgICAgXSwKICAgICAgInByb21wdCI6ICJGb3IgdHdvIHJ1bnMgd2l0aCBpZGVudGljYWwgY29uc3RhbnQgaW5wdXRzLCB0aGUgaW5pdGlhbCBzZXBhcmF0aW9uIGlzIM6UWzBdID0gMSBhbmQgdGhlIG11bHRpcGxpZXIgaXMgcSA9IOKIkjAuNS4gV2hhdCBpcyB0aGVpciBzZXBhcmF0aW9uIGFmdGVyIHRocmVlIHVwZGF0ZXM/IiwKICAgICAgIm9wdGlvbnMiOiBbCiAgICAgICAgIjAuMTI1IiwKICAgICAgICAi4oiSMC4xMjUiLAogICAgICAgICLiiJIxLjUiLAogICAgICAgICIwLjUiCiAgICAgIF0sCiAgICAgICJhbnN3ZXIiOiAxLAogICAgICAiZXhwbGFuYXRpb24iOiAiQXBwbHkgdGhlIG11bHRpcGxpZXIgb25jZSBwZXIgdXBkYXRlOiDOlFsxXSA9IOKIkjAuNSwgzpRbMl0gPSAwLjI1IGFuZCDOlFszXSA9IOKIkjAuMTI1LiBFcXVpdmFsZW50bHksIM6UWzNdID0gKOKIkjAuNSleMyDDlyAxLiBBIG5lZ2F0aXZlIG11bHRpcGxpZXIgYWx0ZXJuYXRlcyB0aGUgc2lnbjsgaXRzIG1hZ25pdHVkZSBiZWxvdyBvbmUgbWFrZXMgdGhlIHNlcGFyYXRpb24gc2hyaW5rLiIsCiAgICAgICJ0cmFuc2ZlciI6ICJDYWxjdWxhdGUgzpRbNF0sIHRoZW4gY29tcGFyZSB8zpRbNF18IHdpdGggfM6UWzNdfC4gV2hpY2ggcGFydCBvZiBxIGNvbnRyb2xzIHRoZSByYXRpbz8iCiAgICB9LAogICAgewogICAgICAiaWQiOiAiZmMtZml4ZWQtcG9pbnQiLAogICAgICAiY29uY2VwdCI6ICJGaW5kIHRoZSBmaXhlZCBwb2ludCIsCiAgICAgICJwcmVyZXF1aXNpdGVzIjogWwogICAgICAgICJDbG9zZSB0aGUgbG9vcCIKICAgICAgXSwKICAgICAgInByb21wdCI6ICJUaGUgdXBkYXRlIGlzIHhbbisxXSA9IHEgeFtuXSArIGMsIHdpdGggcSDiiaAgMS4gQSBmaXhlZCBwb2ludCB4KiBpcyBhIHN0YXRlIHRoYXQgcmVwcm9kdWNlcyBpdHNlbGYgYWZ0ZXIgb25lIHVwZGF0ZS4gV2hhdCBpcyB4Kj8iLAogICAgICAib3B0aW9ucyI6IFsKICAgICAgICAiYyAvICgxICsgcSkiLAogICAgICAgICJxIC8gKDEg4oiSIGMpIiwKICAgICAgICAiYyDiiJIgcSIsCiAgICAgICAgImMgLyAoMSDiiJIgcSkiCiAgICAgIF0sCiAgICAgICJhbnN3ZXIiOiAzLAogICAgICAiZXhwbGFuYXRpb24iOiAiU2V0IHRoZSBuZXh0IHN0YXRlIGVxdWFsIHRvIHRoZSBjdXJyZW50IHN0YXRlOiB4KiA9IHEgeCogKyBjLiBSZWFycmFuZ2luZyBnaXZlcyAoMSDiiJIgcSl4KiA9IGMsIHNvIHgqID0gYy8oMSDiiJIgcSkuIFRoaXMgaXMgYW4gYWxnZWJyYWljIGZpeGVkIHBvaW50LiBJdHMgZXhpc3RlbmNlIGFsb25lIGRvZXMgbm90IGVzdGFibGlzaCB0aGF0IG5lYXJieSBzdGF0ZXMgYXBwcm9hY2ggaXQuIiwKICAgICAgInRyYW5zZmVyIjogIkZpbmQgdGhlIGZpeGVkIHBvaW50IG9mIHhbbisxXSA9IDEuMjUgeFtuXSDiiJIgMC41LiBUaGVuIGFzayBzZXBhcmF0ZWx5IHdoZXRoZXIgbmVhcmJ5IHN0YXRlcyBhcHByb2FjaCBpdC4iCiAgICB9LAogICAgewogICAgICAiaWQiOiAiZmMtZml4ZWQtcmVmZXJlbmNlIiwKICAgICAgImNvbmNlcHQiOiAiRmluZCB0aGUgZml4ZWQgcG9pbnQiLAogICAgICAicHJlcmVxdWlzaXRlcyI6IFsKICAgICAgICAiQ2xvc2UgdGhlIGxvb3AiCiAgICAgIF0sCiAgICAgICJwcm9tcHQiOiAiTGV0IGEgPSAwLjc1LCBrID0gMC41LCByID0gMSBhbmQgZCA9IDAuIFRoZW4gcSA9IDAuMjUgYW5kIGMgPSAwLjUuIFRoZSByZXNwb25zZSBhcHByb2FjaGVzIGl0cyBmaXhlZCBwb2ludC4gV2hhdCBhcmUgdGhhdCBmaXhlZCBwb2ludCBhbmQgdGhlIHJlbWFpbmluZyByZWZlcmVuY2UgZXJyb3IgciDiiJIgeCo/IiwKICAgICAgIm9wdGlvbnMiOiBbCiAgICAgICAgIngqID0gMi8zIGFuZCByIOKIkiB4KiA9IDEvMy4iLAogICAgICAgICJ4KiA9IDEgYW5kIHIg4oiSIHgqID0gMC4iLAogICAgICAgICJ4KiA9IDEvMiBhbmQgciDiiJIgeCogPSAxLzIuIiwKICAgICAgICAieCogPSAyIGFuZCByIOKIkiB4KiA9IOKIkjEuIgogICAgICBdLAogICAgICAiYW5zd2VyIjogMCwKICAgICAgImV4cGxhbmF0aW9uIjogIlRoZSBmaXhlZCBwb2ludCBpcyAwLjUvKDEg4oiSIDAuMjUpID0gMC41LzAuNzUgPSAyLzMuIFRoZSByZWZlcmVuY2UgaXMgMSwgc28gdGhlIHJlbWFpbmluZyBlcnJvciBpcyAxLzMuIFByb3BvcnRpb25hbCBjb3JyZWN0aW9uIGluIHRoaXMgbW9kZWwgY2FuIHByb2R1Y2UgYSBzdGFibGUgcmVzcG9uc2Ugd2l0aCBhIG5vbnplcm8gdHJhY2tpbmcgZXJyb3IuIFN0YWJpbGl0eSBhbmQgZXhhY3QgcmVmZXJlbmNlIHRyYWNraW5nIGFyZSBkaWZmZXJlbnQgcXVlc3Rpb25zLiIsCiAgICAgICJ0cmFuc2ZlciI6ICJLZWVwaW5nIGsgPSAwLjUsIHIgPSAxIGFuZCBkID0gMCwgY2hhbmdlIGEgdG8gMS4gQ2FsY3VsYXRlIHRoZSBuZXcgZml4ZWQgcG9pbnQgYW5kIGNoZWNrIHxxfC4iCiAgICB9LAogICAgewogICAgICAiaWQiOiAiZmMtZml4ZWQtZXhjZXB0aW9uIiwKICAgICAgImNvbmNlcHQiOiAiRmluZCB0aGUgZml4ZWQgcG9pbnQiLAogICAgICAicHJlcmVxdWlzaXRlcyI6IFsKICAgICAgICAiQ2xvc2UgdGhlIGxvb3AiCiAgICAgIF0sCiAgICAgICJwcm9tcHQiOiAiQSByZWN1cnJlbmNlIGhhcyBxID0gMSBhbmQgYyA9IDAuMjUsIHNvIHhbbisxXSA9IHhbbl0gKyAwLjI1LiBXaGljaCBzdGF0ZW1lbnQgaXMgY29ycmVjdD8iLAogICAgICAib3B0aW9ucyI6IFsKICAgICAgICAiSXRzIHVuaXF1ZSBmaXhlZCBwb2ludCBpcyAwLjI1LiIsCiAgICAgICAgIkV2ZXJ5IHN0YXRlIGlzIGEgZml4ZWQgcG9pbnQuIiwKICAgICAgICAiSXQgaGFzIG5vIGZpeGVkIHBvaW50OyB0aGUgc3RhdGUgaW5jcmVhc2VzIGJ5IDAuMjUgb24gZXZlcnkgdXBkYXRlLiIsCiAgICAgICAgIkl0IGFwcHJvYWNoZXMgemVybyBiZWNhdXNlIHRoZSBpbmNyZW1lbnQgaXMgbGVzcyB0aGFuIG9uZS4iCiAgICAgIF0sCiAgICAgICJhbnN3ZXIiOiAyLAogICAgICAiZXhwbGFuYXRpb24iOiAiQSBmaXhlZCBwb2ludCB3b3VsZCByZXF1aXJlIHgqID0geCogKyAwLjI1LCB3aGljaCBpcyBpbXBvc3NpYmxlLiBUaGUgc3RhdGUgZHJpZnRzIGJ5IGEgY29uc3RhbnQgYW1vdW50LiBUaGUgZm9ybXVsYSBjLygxIOKIkiBxKSBpcyBpbmFwcGxpY2FibGUgYmVjYXVzZSBpdHMgZGVub21pbmF0b3IgaXMgemVyby4gSW4gdGhlIHNlcGFyYXRlIGNhc2UgcSA9IDEgYW5kIGMgPSAwLCBldmVyeSBzdGF0ZSB3b3VsZCBiZSBhIGZpeGVkIHBvaW50LCB3aXRoIG5vIGF0dHJhY3Rpb24gYmV0d2VlbiBkaWZmZXJlbnQgc3RhcnRpbmcgc3RhdGVzLiIsCiAgICAgICJ0cmFuc2ZlciI6ICJDb21wYXJlIHRoZSBzZXBhcmF0aW9uIG9mIHR3byBzdGFydGluZyBzdGF0ZXMgd2hlbiBxID0gMSwgYyA9IDAuMjUgd2l0aCB0aGVpciBzZXBhcmF0aW9uIHdoZW4gcSA9IDEsIGMgPSAwLiBXaGF0IHN0YXlzIHRoZSBzYW1lPyIKICAgIH0sCiAgICB7CiAgICAgICJpZCI6ICJmYy1zdGFiaWxpdHktYWx0ZXJuYXRpb24iLAogICAgICAiY29uY2VwdCI6ICJUZXN0IGRlY2F5IGFuZCBncm93dGgiLAogICAgICAicHJlcmVxdWlzaXRlcyI6IFsKICAgICAgICAiQ2xvc2UgdGhlIGxvb3AiLAogICAgICAgICJGaW5kIHRoZSBmaXhlZCBwb2ludCIKICAgICAgXSwKICAgICAgInByb21wdCI6ICJBIHVuaXF1ZSBmaXhlZCBwb2ludCBleGlzdHMsIGFuZCBkZXZpYXRpb25zIGZyb20gaXQgZm9sbG93IHpbbisxXSA9IHEgeltuXS4gV2hpY2ggdmFsdWUgbWFrZXMgYSBub256ZXJvIGRldmlhdGlvbiBhbHRlcm5hdGUgaW4gc2lnbiB3aGlsZSBzaHJpbmtpbmc/IiwKICAgICAgIm9wdGlvbnMiOiBbCiAgICAgICAgInEgPSAwLjUiLAogICAgICAgICJxID0g4oiSMC41IiwKICAgICAgICAicSA9IOKIkjEuMjUiLAogICAgICAgICJxID0gMSIKICAgICAgXSwKICAgICAgImFuc3dlciI6IDEsCiAgICAgICJleHBsYW5hdGlvbiI6ICJXaXRoIHEgPSDiiJIwLjUsIGV2ZXJ5IGRldmlhdGlvbiBpcyBtdWx0aXBsaWVkIGJ5IGEgbmVnYXRpdmUgbnVtYmVyIG9mIG1hZ25pdHVkZSBsZXNzIHRoYW4gb25lLiBJdHMgc2lnbiBhbHRlcm5hdGVzIGFuZCBpdHMgbWFnbml0dWRlIGhhbHZlcy4gcSA9IDAuNSBzaHJpbmtzIHdpdGhvdXQgYWx0ZXJuYXRpbmc7IHEgPSDiiJIxLjI1IGFsdGVybmF0ZXMgYnV0IGdyb3dzOyBxID0gMSBwcmVzZXJ2ZXMgdGhlIGRldmlhdGlvbi4iLAogICAgICAidHJhbnNmZXIiOiAiU3RhcnRpbmcgd2l0aCB6WzBdID0gMiwgd3JpdGUgelsxXSB0aHJvdWdoIHpbNF0gZm9yIHEgPSDiiJIwLjUuIgogICAgfSwKICAgIHsKICAgICAgImlkIjogImZjLXN0YWJpbGl0eS1nYWluIiwKICAgICAgImNvbmNlcHQiOiAiVGVzdCBkZWNheSBhbmQgZ3Jvd3RoIiwKICAgICAgInByZXJlcXVpc2l0ZXMiOiBbCiAgICAgICAgIkNsb3NlIHRoZSBsb29wIiwKICAgICAgICAiRmluZCB0aGUgZml4ZWQgcG9pbnQiCiAgICAgIF0sCiAgICAgICJwcm9tcHQiOiAiS2VlcCBhID0gMC43NSBhbmQgdXNlIG5vbm5lZ2F0aXZlIGdhaW4gay4gRm9yIHRoaXMgb25lLXN0YXRlIG1vZGVsLCBpbml0aWFsLXN0YXRlIHBlcnR1cmJhdGlvbnMgZGVjYXkgZXhhY3RseSB3aGVuIHxhIOKIkiBrfCA8IDEuIFdoaWNoIGZ1bGwgcmFuZ2Ugb2YgayBzYXRpc2ZpZXMgdGhhdCBjb25kaXRpb24/IiwKICAgICAgIm9wdGlvbnMiOiBbCiAgICAgICAgIkV2ZXJ5IGsg4omlIDAuIiwKICAgICAgICAiMCDiiaQgayDiiaQgMS43NSwgaW5jbHVkaW5nIHRoZSB1cHBlciBlbmRwb2ludC4iLAogICAgICAgICJPbmx5IDAuNzUgPCBrIDwgMS43NS4iLAogICAgICAgICIwIOKJpCBrIDwgMS43NS4iCiAgICAgIF0sCiAgICAgICJhbnN3ZXIiOiAzLAogICAgICAiZXhwbGFuYXRpb24iOiAiU29sdmUg4oiSMSA8IDAuNzUg4oiSIGsgPCAxLiBUaGlzIGdpdmVzIOKIkjAuMjUgPCBrIDwgMS43NS4gUmVzdHJpY3RpbmcgdG8gdGhlIHN0YXRlZCBub25uZWdhdGl2ZSBnYWlucyBsZWF2ZXMgMCDiiaQgayA8IDEuNzUuIFRoZSB1cHBlciBlbmRwb2ludCBwcm9kdWNlcyBxID0g4oiSMSwgd2hlcmUgbm9uemVybyBkZXZpYXRpb25zIHJlcGVhdCByYXRoZXIgdGhhbiBkZWNheS4gQSBsYXJnZXIgZ2FpbiBpcyBub3QgYXV0b21hdGljYWxseSBhIGJldHRlciBjb3JyZWN0aW9uLiIsCiAgICAgICJ0cmFuc2ZlciI6ICJDb21wYXJlIGsgPSAxLjI1LCAxLjc1IGFuZCAyIGJ5IGNvbXB1dGluZyBxIGFuZCBkZXNjcmliaW5nIHdoYXQgaGFwcGVucyB0byBhIHNtYWxsIGluaXRpYWwgb2Zmc2V0LiIKICAgIH0sCiAgICB7CiAgICAgICJpZCI6ICJmYy1zdGFiaWxpdHktYm91bmRhcnkiLAogICAgICAiY29uY2VwdCI6ICJUZXN0IGRlY2F5IGFuZCBncm93dGgiLAogICAgICAicHJlcmVxdWlzaXRlcyI6IFsKICAgICAgICAiQ2xvc2UgdGhlIGxvb3AiLAogICAgICAgICJGaW5kIHRoZSBmaXhlZCBwb2ludCIKICAgICAgXSwKICAgICAgInByb21wdCI6ICJTdXBwb3NlIHEgPSDiiJIxIGFuZCB0aGUgaW5pdGlhbCBkZXZpYXRpb24gZnJvbSB0aGUgZml4ZWQgcG9pbnQgaXMgelswXSA9IDAuMjUuIFdoYXQgaGFwcGVucyBpbiBleGFjdCBhcml0aG1ldGljPyIsCiAgICAgICJvcHRpb25zIjogWwogICAgICAgICJUaGUgZGV2aWF0aW9uIHJlcGVhdHMgYXMgMC4yNSwg4oiSMC4yNSwgMC4yNSwg4oiSMC4yNSwg4oCmOyBpdCBkb2VzIG5vdCBhcHByb2FjaCB6ZXJvLiIsCiAgICAgICAgIlRoZSBkZXZpYXRpb24gYmVjb21lcyB6ZXJvIGFmdGVyIHR3byB1cGRhdGVzLiIsCiAgICAgICAgIkl0cyBtYWduaXR1ZGUgZG91YmxlcyBvbiBlYWNoIHVwZGF0ZS4iLAogICAgICAgICJJdCBhcHByb2FjaGVzIHRoZSBmaXhlZCBwb2ludCB3aXRob3V0IGNoYW5naW5nIHNpZ24uIgogICAgICBdLAogICAgICAiYW5zd2VyIjogMCwKICAgICAgImV4cGxhbmF0aW9uIjogIk11bHRpcGx5aW5nIGJ5IOKIkjEgcmV2ZXJzZXMgdGhlIHNpZ24gd2l0aG91dCBjaGFuZ2luZyB0aGUgbWFnbml0dWRlLiBUaGUgcmVzcG9uc2UgY2FuIHJlbWFpbiBib3VuZGVkIHdoaWxlIGZhaWxpbmcgdG8gYXBwcm9hY2ggdGhlIGZpeGVkIHBvaW50LiBUaGlzIGNvdXJzZSBjYWxscyB0aGUgYm91bmRhcnkgbm9uLWRlY2F5aW5nOyBpdCBkb2VzIG5vdCBjb21iaW5lIGFsbCB1c2VzIG9mIHRoZSB3b3JkICdzdGFibGUnIGludG8gb25lIGxhYmVsLiIsCiAgICAgICJ0cmFuc2ZlciI6ICJFeHBsYWluIHRoZSBkaWZmZXJlbmNlIGJldHdlZW4gJ2JvdW5kZWQgZm9yIHRoaXMgaW5pdGlhbCBzdGF0ZScgYW5kICdhbGwgbmVhcmJ5IHN0YXRlcyBjb252ZXJnZSB0byB0aGUgZml4ZWQgcG9pbnQnLiIKICAgIH0sCiAgICB7CiAgICAgICJpZCI6ICJmYy1zdGFiaWxpdHktZmxhdCIsCiAgICAgICJjb25jZXB0IjogIlRlc3QgZGVjYXkgYW5kIGdyb3d0aCIsCiAgICAgICJwcmVyZXF1aXNpdGVzIjogWwogICAgICAgICJDbG9zZSB0aGUgbG9vcCIsCiAgICAgICAgIkZpbmQgdGhlIGZpeGVkIHBvaW50IgogICAgICBdLAogICAgICAicHJvbXB0IjogIkZvciB4W24rMV0gPSDiiJIxLjI1IHhbbl0sIGEgcnVuIHN0YXJ0aW5nIGF0IHhbMF0gPSAwIHN0YXlzIGV4YWN0bHkgYXQgemVyby4gRG9lcyB0aGF0IGZsYXQgdHJhY2UgZXN0YWJsaXNoIHRoYXQgc21hbGwgaW5pdGlhbC1zdGF0ZSBwZXJ0dXJiYXRpb25zIGRlY2F5PyIsCiAgICAgICJvcHRpb25zIjogWwogICAgICAgICJZZXM7IGV2ZXJ5IG9ic2VydmVkIHZhbHVlIGlzIHplcm8uIiwKICAgICAgICAiWWVzOyB0aGUgbXVsdGlwbGllciBpcyBuZWdhdGl2ZS4iLAogICAgICAgICJObzsgYSBub256ZXJvIGluaXRpYWwgcGVydHVyYmF0aW9uIGlzIG11bHRpcGxpZWQgYnkg4oiSMS4yNSwgc28gaXRzIG1hZ25pdHVkZSBncm93cy4iLAogICAgICAgICJObzsgdGhlIGZpeGVkIHBvaW50IGRvZXMgbm90IGV4aXN0LiIKICAgICAgXSwKICAgICAgImFuc3dlciI6IDIsCiAgICAgICJleHBsYW5hdGlvbiI6ICJaZXJvIGlzIGEgZml4ZWQgcG9pbnQsIHNvIHN0YXJ0aW5nIGV4YWN0bHkgdGhlcmUgZ2l2ZXMgYSBmbGF0IHNwZWNpYWwgcnVuLiBBIG5lYXJieSBpbml0aWFsIHN0YXRlIGluc3RlYWQgZm9sbG93cyB6W25dID0gKOKIkjEuMjUpXm4gelswXS4gSXRzIG1hZ25pdHVkZSBncm93cyB3aGVuIHpbMF0gaXMgbm9uemVyby4gSW5zcGVjdGluZyBhIHNpbmdsZSBleGFjdC1lcXVpbGlicml1bSB0cmFqZWN0b3J5IGNhbiBoaWRlIHRoaXMgYmVoYXZpb3IuIiwKICAgICAgInRyYW5zZmVyIjogIlVzZSB0aGUgZXhwbG9yZXIncyBmbGF0LXJ1biBwcmVzZXQuIENvbXBhcmUgdGhlIHplcm8gc3RhcnRpbmcgc3RhdGUgd2l0aCB0aGUgc2VwYXJhdGUgcnVuIGJlZ2lubmluZyAwLjI1IHVuaXRzIGF3YXkuIgogICAgfSwKICAgIHsKICAgICAgImlkIjogImZjLWRpc3R1cmJhbmNlLW9mZnNldCIsCiAgICAgICJjb25jZXB0IjogIlNlcGFyYXRlIHRyYWNraW5nIGFuZCBkaXN0dXJiYW5jZSIsCiAgICAgICJwcmVyZXF1aXNpdGVzIjogWwogICAgICAgICJGaW5kIHRoZSBmaXhlZCBwb2ludCIsCiAgICAgICAgIlRlc3QgZGVjYXkgYW5kIGdyb3d0aCIKICAgICAgXSwKICAgICAgInByb21wdCI6ICJTdGFydCB3aXRoIGEgPSAwLjc1LCBrID0gMC41IGFuZCByID0gMS4gQ2hhbmdlIHRoZSBjb25zdGFudCBkaXN0dXJiYW5jZSBmcm9tIGQgPSAwIHRvIGQgPSDiiJIwLjI1LCBsZWF2aW5nIGV2ZXJ5dGhpbmcgZWxzZSBmaXhlZC4gV2hhdCBoYXBwZW5zIHRvIHEgYW5kIHRoZSBhdHRyYWN0aW5nIGZpeGVkIHBvaW50PyIsCiAgICAgICJvcHRpb25zIjogWwogICAgICAgICJxIGNoYW5nZXMgZnJvbSAwLjI1IHRvIDA7IHRoZSBmaXhlZCBwb2ludCBzdGF5cyAyLzMuIiwKICAgICAgICAicSBzdGF5cyAwLjI1OyB0aGUgZml4ZWQgcG9pbnQgY2hhbmdlcyBmcm9tIDIvMyB0byAxLzMuIiwKICAgICAgICAicSBzdGF5cyAwLjI1OyB0aGUgZml4ZWQgcG9pbnQgY2hhbmdlcyBmcm9tIDIvMyB0byAxLiIsCiAgICAgICAgInEgY2hhbmdlcyB0byDiiJIwLjI1OyB0aGUgZml4ZWQgcG9pbnQgYmVjb21lcyB6ZXJvLiIKICAgICAgXSwKICAgICAgImFuc3dlciI6IDEsCiAgICAgICJleHBsYW5hdGlvbiI6ICJUaGUgZGlzdHVyYmFuY2UgYXBwZWFycyBvbmx5IGluIGMgPSBrIHIgKyBkLiBUaGUgbXVsdGlwbGllciByZW1haW5zIHEgPSAwLjc1IOKIkiAwLjUgPSAwLjI1LiBUaGUgY29uc3RhbnQgdGVybSBmYWxscyBmcm9tIDAuNSB0byAwLjI1LCBzbyB0aGUgZml4ZWQgcG9pbnQgY2hhbmdlcyBmcm9tIDAuNS8wLjc1ID0gMi8zIHRvIDAuMjUvMC43NSA9IDEvMy4gVGhlIHJhdGUgYXQgd2hpY2ggaW5pdGlhbCBkZXZpYXRpb25zIGRlY2F5IGlzIHVuY2hhbmdlZC4iLAogICAgICAidHJhbnNmZXIiOiAiRm9yIHRoaXMgc2FtZSBxLCBjYWxjdWxhdGUgdGhlIGNoYW5nZSBpbiBmaXhlZCBwb2ludCBjYXVzZWQgYnkgYW4gYWRkZWQgZGlzdHVyYmFuY2Ugb2YgKzAuMjUuIgogICAgfSwKICAgIHsKICAgICAgImlkIjogImZjLXJlZmVyZW5jZS12cy1yYXRlIiwKICAgICAgImNvbmNlcHQiOiAiU2VwYXJhdGUgdHJhY2tpbmcgYW5kIGRpc3R1cmJhbmNlIiwKICAgICAgInByZXJlcXVpc2l0ZXMiOiBbCiAgICAgICAgIkZpbmQgdGhlIGZpeGVkIHBvaW50IiwKICAgICAgICAiVGVzdCBkZWNheSBhbmQgZ3Jvd3RoIgogICAgICBdLAogICAgICAicHJvbXB0IjogIlR3byBydW5zIHVzZSB0aGUgc2FtZSBhIGFuZCBrLCBidXQgZGlmZmVyZW50IGNvbnN0YW50IHJlZmVyZW5jZXMgci4gV2hpY2ggc3RhdGVtZW50IG11c3QgaG9sZCBmb3IgdGhlIG1vZGVsIHhbbisxXSA9IChhIOKIkiBrKXhbbl0gKyBrIHIgKyBkPyIsCiAgICAgICJvcHRpb25zIjogWwogICAgICAgICJUaGUgbXVsdGlwbGllciBxIGlzIHVuY2hhbmdlZDsgY2hhbmdpbmcgciBjYW4gbW92ZSB0aGUgZml4ZWQgcG9pbnQuIiwKICAgICAgICAiVGhlIHJ1bnMgbXVzdCBhcHByb2FjaCB0aGUgc2FtZSBmaXhlZCBwb2ludC4iLAogICAgICAgICJBIGxhcmdlciByZWZlcmVuY2UgbmVjZXNzYXJpbHkgbWFrZXMgaW5pdGlhbCBwZXJ0dXJiYXRpb25zIGdyb3cgZmFzdGVyLiIsCiAgICAgICAgIlRoZSBnYWluIGsgaXMgYXV0b21hdGljYWxseSBjaGFuZ2VkIGJ5IHRoZSBuZXcgcmVmZXJlbmNlLiIKICAgICAgXSwKICAgICAgImFuc3dlciI6IDAsCiAgICAgICJleHBsYW5hdGlvbiI6ICJUaGUgbXVsdGlwbGllciBxID0gYSDiiJIgayBkb2VzIG5vdCBpbmNsdWRlIHIuIEEgZGlmZmVyZW50IHJlZmVyZW5jZSBjaGFuZ2VzIHRoZSBmb3JjaW5nIHRlcm0gayByICsgZCBhbmQgY2FuIG1vdmUgdGhlIGZpeGVkIHBvaW50IHdoZW4gayBpcyBub256ZXJvLiBJdCBkb2VzIG5vdCBjaGFuZ2UgdGhlIG11bHRpcGxpZXIgdGhhdCBnb3Zlcm5zIGRldmlhdGlvbnMgdW5kZXIgZWFjaCBydW4ncyBjb25zdGFudCBpbnB1dHMuIENvbXBhcmluZyB0d28gcnVucyB3aXRoIGRpZmZlcmVudCByZWZlcmVuY2VzIGlzIGRpZmZlcmVudCBmcm9tIGNvbXBhcmluZyB0d28gaW5pdGlhbCBzdGF0ZXMgdW5kZXIgaWRlbnRpY2FsIGZvcmNpbmcuIiwKICAgICAgInRyYW5zZmVyIjogIkdpdmUgYW4gZXhhbXBsZSB3aXRoIGsgPSAwLiBEb2VzIGNoYW5naW5nIHRoZSByZWZlcmVuY2UgYWZmZWN0IHRoZSBzdGF0ZSB1cGRhdGUgaW4gdGhhdCBzcGVjaWFsIGNhc2U/IgogICAgfSwKICAgIHsKICAgICAgImlkIjogImZjLWxpbWl0LXRpbWUiLAogICAgICAiY29uY2VwdCI6ICJSZWFkIHRoZSBtb2RlbCdzIGxpbWl0cyIsCiAgICAgICJwcmVyZXF1aXNpdGVzIjogWwogICAgICAgICJUZXN0IGRlY2F5IGFuZCBncm93dGgiLAogICAgICAgICJTZXBhcmF0ZSB0cmFja2luZyBhbmQgZGlzdHVyYmFuY2UiCiAgICAgIF0sCiAgICAgICJwcm9tcHQiOiAiVGhlIGhvcml6b250YWwgYXhpcyBpbiB0aGUgZXhwbG9yZXIgaXMgdXBkYXRlIGluZGV4IG4uIE5vIHBoeXNpY2FsIHNhbXBsaW5nIGludGVydmFsIGhhcyBiZWVuIHNwZWNpZmllZC4gV2hpY2ggaW50ZXJwcmV0YXRpb24gaXMganVzdGlmaWVkPyIsCiAgICAgICJvcHRpb25zIjogWwogICAgICAgICJPbmUgdXBkYXRlIGFsd2F5cyBtZWFucyBvbmUgc2Vjb25kLiIsCiAgICAgICAgIkRvdWJsaW5nIHRoZSBudW1iZXIgb2YgdXBkYXRlcyBkb3VibGVzIGEgdmFsaWRhdGVkIHBoeXNpY2FsIGR1cmF0aW9uLiIsCiAgICAgICAgIlRoZSBzYW1lIGEgYW5kIGsgY2FuIGJlIGNvcGllZCB1bmNoYW5nZWQgdG8gYW55IGRldmljZSBzYW1wbGluZyByYXRlLiIsCiAgICAgICAgIlRoZSBwbG90IGRlc2NyaWJlcyBkaXNjcmV0ZSB1cGRhdGVzOyBwaHlzaWNhbCB0aW1lIHJlcXVpcmVzIGEgc2VwYXJhdGVseSBzcGVjaWZpZWQgbW9kZWwgYW5kIHNhbXBsaW5nIGludGVydmFsLiIKICAgICAgXSwKICAgICAgImFuc3dlciI6IDMsCiAgICAgICJleHBsYW5hdGlvbiI6ICJUaGUgcmVjdXJyZW5jZSBkZWZpbmVzIG9uZSBtYXRoZW1hdGljYWwgdXBkYXRlLCBub3QgYSBkdXJhdGlvbiBpbiBzZWNvbmRzLiBNYXBwaW5nIGl0IHRvIGEgcGh5c2ljYWwgcHJvY2VzcyByZXF1aXJlcyBhIHNhbXBsaW5nIGludGVydmFsIGFuZCBhIG1vZGVsIHdob3NlIGNvZWZmaWNpZW50cyBhcHBseSBhdCB0aGF0IGludGVydmFsLiBDaGFuZ2luZyB0aGUgaW50ZXJ2YWwgY2FuIGNoYW5nZSB0aGUgYXBwcm9wcmlhdGUgY29lZmZpY2llbnRzLiBUaGUgZXhwbG9yZXIgZG9lcyBub3QgZXN0YWJsaXNoIHRoYXQgbWFwcGluZy4iLAogICAgICAidHJhbnNmZXIiOiAiSWYgYSByZWFsIG1vZGVsIGlzIGlkZW50aWZpZWQgZm9yIGEgMjAgbXMgaW50ZXJ2YWwsIHdoYXQgZXh0cmEgd29yayBpcyBuZWVkZWQgYmVmb3JlIHJldXNpbmcgaXRzIHBhcmFtZXRlcnMgYXQgNSBtcz8iCiAgICB9LAogICAgewogICAgICAiaWQiOiAiZmMtbGltaXQtaG9yaXpvbiIsCiAgICAgICJjb25jZXB0IjogIlJlYWQgdGhlIG1vZGVsJ3MgbGltaXRzIiwKICAgICAgInByZXJlcXVpc2l0ZXMiOiBbCiAgICAgICAgIlRlc3QgZGVjYXkgYW5kIGdyb3d0aCIsCiAgICAgICAgIlNlcGFyYXRlIHRyYWNraW5nIGFuZCBkaXN0dXJiYW5jZSIKICAgICAgXSwKICAgICAgInByb21wdCI6ICJBIGZpbml0ZSBwbG90dGVkIHJ1biBsb29rcyBjbG9zZSB0byBpdHMgZml4ZWQgcG9pbnQuIFdoYXQgZ2l2ZXMgYW4gYW5hbHl0aWNhbCB0ZXN0IHRoYXQgZXZlcnkgaW5pdGlhbCBkZXZpYXRpb24gZGVjYXlzIGluIHRoaXMgc3RhdGVkIHNjYWxhciwgY29uc3RhbnQtY29lZmZpY2llbnQgbW9kZWw/IiwKICAgICAgIm9wdGlvbnMiOiBbCiAgICAgICAgIlRoZSBsYXN0IGRpc3BsYXllZCBwb2ludCBhcHBlYXJzIG5lYXIgdGhlIHJlZmVyZW5jZS4iLAogICAgICAgICJFdmVyeSBzYW1wbGVkIGNvbnRyb2wgaW5wdXQgaW4gdGhlIHZpc2libGUgdGFibGUgaXMgcG9zaXRpdmUuIiwKICAgICAgICAiVGhlIGRlcml2ZWQgbXVsdGlwbGllciBzYXRpc2ZpZXMgfHF8IDwgMSwgYmVjYXVzZSB6W25dID0gcV5uIHpbMF0uIiwKICAgICAgICAiVGhlIHJ1biBjb250YWlucyBhdCBsZWFzdCAzMCB1cGRhdGVzLiIKICAgICAgXSwKICAgICAgImFuc3dlciI6IDIsCiAgICAgICJleHBsYW5hdGlvbiI6ICJUaGUgZGV2aWF0aW9uIGZvcm11bGEgYXBwbGllcyBmb3IgZXZlcnkgdXBkYXRlIGNvdW50LiBJZiB8cXwgPCAxLCBpdHMgcG93ZXJzIHRlbmQgdG8gemVybywgc28gZXZlcnkgaW5pdGlhbCBkZXZpYXRpb24gZGVjYXlzLiBBIHNob3J0IHRyYWNlIGNhbiBiZSBzdWdnZXN0aXZlLCBidXQgYSBwYXJ0aWN1bGFyIHN0YXJ0aW5nIHN0YXRlIG9yIGEgc2hvcnQgaG9yaXpvbiBjYW4gY29uY2VhbCBub24tZGVjYXlpbmcgb3IgZ3Jvd2luZyBiZWhhdmlvci4gVGhpcyBjb25jbHVzaW9uIGlzIHNwZWNpZmljIHRvIHRoZSBzdGF0ZWQgc2NhbGFyIHJlY3VycmVuY2UuIiwKICAgICAgInRyYW5zZmVyIjogIkZvciBxID0gMS4yNSBhbmQgelswXSA9IDAsIGV4cGxhaW4gd2h5IHRoZSB2aXNpYmxlIHRyYWNlIGFuZCB0aGUgZ2VuZXJhbCBwZXJ0dXJiYXRpb24gdGVzdCBhbnN3ZXIgZGlmZmVyZW50IHF1ZXN0aW9ucy4iCiAgICB9LAogICAgewogICAgICAiaWQiOiAiZmMtbGltaXQtdHJhbnNmZXIiLAogICAgICAiY29uY2VwdCI6ICJSZWFkIHRoZSBtb2RlbCdzIGxpbWl0cyIsCiAgICAgICJwcmVyZXF1aXNpdGVzIjogWwogICAgICAgICJUZXN0IGRlY2F5IGFuZCBncm93dGgiLAogICAgICAgICJTZXBhcmF0ZSB0cmFja2luZyBhbmQgZGlzdHVyYmFuY2UiCiAgICAgIF0sCiAgICAgICJwcm9tcHQiOiAiVGhlIGV4cGxvcmVyIHByZWRpY3RzIGRlY2F5aW5nIHBlcnR1cmJhdGlvbnMgZm9yIGl0cyBjaG9zZW4gc2V0dGluZ3MuIFdoaWNoIGNvbmNsdXNpb24gY2FuIGJlIGNhcnJpZWQgZGlyZWN0bHkgZnJvbSB0aGF0IHJlc3VsdD8iLAogICAgICAib3B0aW9ucyI6IFsKICAgICAgICAiQSBwaHlzaWNhbCBhY3R1YXRvciB3aXRoIGRlbGF5IGFuZCBzYXR1cmF0aW9uIHdpbGwgaGF2ZSB0aGUgc2FtZSByZXNwb25zZS4iLAogICAgICAgICJUaGUgc3RhdGVkIGlkZWFsIHJlY3VycmVuY2UgaGFzIGRlY2F5aW5nIGluaXRpYWwtc3RhdGUgcGVydHVyYmF0aW9uczsgYWRkaXRpb25hbCBwaHlzaWNhbCBlZmZlY3RzIHJlcXVpcmUgYSBtb2RlbCBhbmQgY2hlY2tzIHRoYXQgaW5jbHVkZSB0aGVtLiIsCiAgICAgICAgIlRoZSBwcm9wb3J0aW9uYWwgY29udHJvbGxlciBlbGltaW5hdGVzIGV2ZXJ5IGNvbnN0YW50IHRyYWNraW5nIGVycm9yLiIsCiAgICAgICAgIkNvbXBsZXRpbmcgdGhlIGxlc3NvbiBkZW1vbnN0cmF0ZXMgdGhhdCBhIHBlcnNvbiBjYW4gc2FmZWx5IHR1bmUgYSBwaHlzaWNhbCBjb250cm9sbGVyLiIKICAgICAgXSwKICAgICAgImFuc3dlciI6IDEsCiAgICAgICJleHBsYW5hdGlvbiI6ICJUaGUgY2FsY3VsYXRpb24gY29uY2VybnMgdGhlIGV4cGxpY2l0IG9uZS1zdGF0ZSByZWN1cnJlbmNlIHdpdGggZml4ZWQgY29lZmZpY2llbnRzIGFuZCBjb25zdGFudCBpbnB1dHMuIEl0IG9taXRzIGVmZmVjdHMgc3VjaCBhcyBkZWxheSwgc2F0dXJhdGlvbiwgbWVhc3VyZW1lbnQgbm9pc2UgYW5kIGNoYW5naW5nIGR5bmFtaWNzLiBBIHBoeXNpY2FsIGRlc2lnbiBtdXN0IHJlcHJlc2VudCBhbmQgdmVyaWZ5IHRoZSBlZmZlY3RzIHJlbGV2YW50IHRvIHRoYXQgc3lzdGVtLiBUaGUgY291cnNlIGFsc28gbWFrZXMgbm8gdmFsaWRhdGVkIGFzc2Vzc21lbnQgb2YgYSBsZWFybmVyJ3MgYWJpbGl0eS4iLAogICAgICAidHJhbnNmZXIiOiAiTmFtZSBvbmUgb21pdHRlZCBlZmZlY3QgdGhhdCBjb3VsZCBjaGFuZ2UgYSByZWFsIHJlc3BvbnNlLCBhbmQgZGVzY3JpYmUgd2hhdCBpbmZvcm1hdGlvbiB3b3VsZCBiZSBuZWVkZWQgdG8gaW5jbHVkZSBpdCBpbiBhIG1vZGVsLiIKICAgIH0KICBdCn0K</script>
+<script type="module">
+/** Exact model definition for the optional RecallWeave feedback teaching lab.
+ * This is a dimensionless, discrete, one-state model, not a physical controller.
+ * Quarter-unit controls make the entered coefficients and q boundaries exact in
+ * binary arithmetic. State iteration still uses ordinary finite-precision numbers.
+ */
+const FEEDBACK_FORMAT = 'recallweave-feedback/1';
+const DEFAULT_SETTINGS = Object.freeze({
+  a: 0.75, gain: 0.5, reference: 1, disturbance: 0,
+  initial: 0, offset: 0.25, steps: 30
+});
+const PRESETS = Object.freeze([
+  Object.freeze({ id: 'gentle', title: 'Gentle correction', settings: DEFAULT_SETTINGS }),
+  Object.freeze({ id: 'alternating', title: 'Alternating recovery',
+    settings: Object.freeze({ ...DEFAULT_SETTINGS, gain: 1.25 }) }),
+  Object.freeze({ id: 'boundary', title: 'A repeating boundary',
+    settings: Object.freeze({ ...DEFAULT_SETTINGS, gain: 1.75 }) }),
+  Object.freeze({ id: 'growing', title: 'Too much correction',
+    settings: Object.freeze({ ...DEFAULT_SETTINGS, gain: 2 }) }),
+  Object.freeze({ id: 'flat-unstable', title: 'A flat run can hide instability',
+    settings: Object.freeze({ ...DEFAULT_SETTINGS, gain: 2, reference: 0 }) }),
+  Object.freeze({ id: 'drift', title: 'No fixed point',
+    settings: Object.freeze({ ...DEFAULT_SETTINGS, a: 1, gain: 0, disturbance: 0.25 }) })
+]);
+const BOUNDS = Object.freeze({
+  a: [0, 1.25], gain: [0, 3], reference: [-2, 2],
+  disturbance: [-0.5, 0.5], initial: [-2, 2], offset: [-1, 1]
+});
+
+function validateSettings(value) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    throw new TypeError('Experiment settings must be an object.');
+  }
+  const keys = [...Object.keys(BOUNDS), 'steps'];
+  if (Object.keys(value).some(key => !keys.includes(key))) {
+    throw new TypeError('Experiment settings contain an unknown field.');
+  }
+  const result = {};
+  for (const [name, bounds] of Object.entries(BOUNDS)) {
+    const number = value[name];
+    if (typeof number !== 'number' || !Number.isFinite(number) ||
+        number < bounds[0] || number > bounds[1] || !Number.isInteger(number * 4)) {
+      throw new RangeError(name + ' must be from ' + bounds[0] + ' to ' +
+        bounds[1] + ' in steps of 0.25.');
+    }
+    result[name] = number === 0 ? 0 : number;
+  }
+  if (!Number.isInteger(value.steps) || value.steps < 1 || value.steps > 60) {
+    throw new RangeError('steps must be an integer from 1 to 60.');
+  }
+  result.steps = value.steps;
+  return Object.freeze(result);
+}
+
+function analyzeSettings(value) {
+  const settings = validateSettings(value);
+  const { a, gain, reference, disturbance } = settings;
+  const q = a - gain;
+  const c = gain * reference + disturbance;
+  let kind, label, detail;
+  if (Math.abs(q) < 1) {
+    kind = 'decay';
+    label = 'Perturbations decay';
+    detail = q === 0 ? 'All starting states reach the same fixed point after one update.'
+      : q < 0 ? 'Deviations from the fixed point alternate in sign and shrink.'
+        : 'Deviations from the fixed point keep their sign and shrink.';
+  } else if (Math.abs(q) === 1) {
+    kind = 'boundary';
+    label = 'Perturbations do not decay';
+    detail = q === -1 ? 'A nonzero deviation repeats with alternating sign.'
+      : 'The separation of two starting states persists; a nonzero constant input causes drift.';
+  } else {
+    kind = 'growth';
+    label = 'Perturbations grow';
+    detail = q < 0 ? 'A nonzero deviation alternates in sign and grows in magnitude.'
+      : 'A nonzero deviation keeps its sign and grows in magnitude.';
+  }
+  const fixedPoint = q === 1
+    ? Object.freeze({ kind: c === 0 ? 'every-state' : 'none', value: null })
+    : Object.freeze({ kind: 'unique', value: c / (1 - q) });
+  return Object.freeze({ settings, q, c, kind, label, detail, fixedPoint });
+}
+
+/** Record states n=0..N. The final row has no applied control or next state. */
+function simulateFeedback(value) {
+  const analysis = analyzeSettings(value);
+  const { settings, q, c } = analysis;
+  let x = settings.initial;
+  let compared = settings.initial + settings.offset;
+  const rows = [];
+  for (let n = 0; n <= settings.steps; n += 1) {
+    const applied = n < settings.steps;
+    const error = settings.reference - x;
+    const comparedError = settings.reference - compared;
+    const control = applied ? settings.gain * error : null;
+    const comparedControl = applied ? settings.gain * comparedError : null;
+    const next = applied ? q * x + c : null;
+    const comparedNext = applied ? q * compared + c : null;
+    const row = {
+      n, x, compared, error, comparedError, control, comparedControl,
+      next, comparedNext, difference: compared - x,
+      predictedDifference: settings.offset * q ** n, applied
+    };
+    for (const number of Object.values(row)) {
+      if (typeof number === 'number' && !Number.isFinite(number)) {
+        throw new RangeError('The model produced a nonfinite value.');
+      }
+    }
+    rows.push(Object.freeze(row));
+    if (applied) { x = next; compared = comparedNext; }
+  }
+  return Object.freeze({ ...analysis, rows: Object.freeze(rows) });
+}
+
+function csvCell(value) {
+  return '"' + (value === null ? '' : String(value)).replaceAll('"', '""') + '"';
+}
+
+/** Export the computed run, including its settings and analytical separation. */
+function feedbackCsv(run) {
+  // Recompute from validated settings so callers cannot export a forged row table.
+  const current = simulateFeedback(run.settings);
+  const fields = [
+    'format', 'a', 'gain', 'reference', 'disturbance', 'initial', 'offset',
+    'steps', 'q', 'constant_input', 'n', 'state', 'compared_state',
+    'reference_error', 'compared_reference_error', 'applied_control',
+    'compared_applied_control', 'next_state', 'compared_next_state',
+    'computed_separation', 'analytical_separation', 'row_kind'
+  ];
+  const { settings: s } = current;
+  const lines = [fields.map(csvCell).join(',')];
+  for (const row of current.rows) {
+    lines.push([
+      FEEDBACK_FORMAT, s.a, s.gain, s.reference, s.disturbance, s.initial,
+      s.offset, s.steps, current.q, current.c, row.n, row.x, row.compared,
+      row.error, row.comparedError, row.control, row.comparedControl,
+      row.next, row.comparedNext, row.difference, row.predictedDifference,
+      row.applied ? 'update' : 'final-state'
+    ].map(csvCell).join(','));
+  }
+  return lines.join('\r\n') + '\r\n';
+}
+
+
+const byId = id => document.getElementById(id);
+const form = byId('experiment-form');
+const names = Object.keys(DEFAULT_SETTINGS);
+const fields = Object.fromEntries(names.map(name => [name, byId(name)]));
+const plot = byId('trace-plot');
+const slider = byId('selected-step');
+const status = byId('run-status');
+const downloadStatus = byId('download-status');
+const ns = 'http://www.w3.org/2000/svg';
+let current;
+let selected = 0;
+
+function number(value, precision = 6) {
+  if (value === null) return '—';
+  if (value === 0) return '0';
+  return Number(value.toPrecision(precision)).toString();
+}
+function setStatus(message, kind = '') {
+  status.textContent = message;
+  status.className = kind;
+}
+function setFields(settings) {
+  for (const name of names) fields[name].value = String(settings[name]);
+}
+function readFields() {
+  return Object.fromEntries(names.map(name => [name, fields[name].valueAsNumber]));
+}
+function markDraft() {
+  byId('download-trace').disabled = true;
+  setStatus('Settings changed. Apply them to compute a new run. The plot and table still show the last applied experiment.', 'dirty');
+}
+function svgElement(tag, attributes = {}, text = undefined) {
+  const node = document.createElementNS(ns, tag);
+  for (const [key, value] of Object.entries(attributes)) node.setAttribute(key, String(value));
+  if (text !== undefined) node.textContent = text;
+  return node;
+}
+function drawPlot() {
+  if (!current) return;
+  const width = Math.max(250, Math.round(plot.parentElement.getBoundingClientRect().width));
+  const height = width < 400 ? 280 : 310;
+  const left = width < 400 ? 63 : 70;
+  const right = width - 13;
+  const top = 21;
+  const bottom = height - 36;
+  const values = current.rows.flatMap(row => [row.x, row.compared]);
+  values.push(current.settings.reference);
+  const smallest = Math.min(...values);
+  const largest = Math.max(...values);
+  const padding = Math.max((largest - smallest) * 0.08, 0.125);
+  const low = smallest - padding;
+  const high = largest + padding;
+  const px = n => left + n / current.settings.steps * (right - left);
+  const py = state => bottom - (state - low) / (high - low) * (bottom - top);
+  plot.setAttribute('viewBox', '0 0 ' + width + ' ' + height);
+  plot.replaceChildren(
+    svgElement('title', { id: 'trace-title' }, 'Two starting states under the same feedback rule'),
+    svgElement('desc', { id: 'trace-description' },
+      'Updates 0 to ' + current.settings.steps + '. Recorded state range ' + number(smallest) + ' to ' +
+      number(largest) + '. ' + current.label + '. The table contains the recorded values.')
+  );
+  const add = node => plot.appendChild(node);
+  for (let tick = 0; tick <= 4; tick += 1) {
+    const value = low + (high - low) * tick / 4;
+    const y = py(value);
+    add(svgElement('line', { x1: left, y1: y, x2: right, y2: y, stroke: '#dce4de', 'stroke-width': 1 }));
+    add(svgElement('text', { x: left - 9, y: y + 4, 'text-anchor': 'end', fill: '#4d626b', 'font-size': 11 }, number(value, 3)));
+  }
+  const ticks = [...new Set([0, Math.floor(current.settings.steps / 2), current.settings.steps])];
+  for (const n of ticks) {
+    add(svgElement('text', { x: px(n), y: bottom + 19, 'text-anchor': 'middle', fill: '#4d626b', 'font-size': 11 }, String(n)));
+  }
+  add(svgElement('text', { x: left, y: 12, fill: '#4d626b', 'font-size': 11 }, 'state'));
+  add(svgElement('text', { x: right, y: height - 2, 'text-anchor': 'end', fill: '#4d626b', 'font-size': 11 }, 'update n'));
+  add(svgElement('line', { x1: left, y1: py(current.settings.reference), x2: right, y2: py(current.settings.reference), stroke: '#465eab', 'stroke-width': 1.5, 'stroke-dasharray': '2 4' }));
+  const path = key => current.rows.map((row, index) => (index ? 'L' : 'M') + px(row.n) + ',' + py(row[key])).join(' ');
+  add(svgElement('path', { d: path('x'), fill: 'none', stroke: '#006c70', 'stroke-width': 2.8, 'stroke-linejoin': 'round' }));
+  add(svgElement('path', { d: path('compared'), fill: 'none', stroke: '#b4462e', 'stroke-width': 2.1, 'stroke-dasharray': '7 4', 'stroke-linejoin': 'round' }));
+  const row = current.rows[selected];
+  add(svgElement('line', { x1: px(row.n), y1: top, x2: px(row.n), y2: bottom, stroke: '#7c897f', 'stroke-width': 1, 'stroke-dasharray': '3 4' }));
+  add(svgElement('circle', { cx: px(row.n), cy: py(row.x), r: 4, fill: '#006c70', stroke: '#fffdf7', 'stroke-width': 1.5 }));
+  add(svgElement('circle', { cx: px(row.n), cy: py(row.compared), r: 3, fill: '#b4462e', stroke: '#fffdf7', 'stroke-width': 1 }));
+}
+function renderSelected() {
+  const row = current.rows[selected];
+  byId('step-label').textContent = 'n = ' + selected + ' of ' + current.settings.steps;
+  byId('step-state').textContent = number(row.x);
+  byId('step-error').textContent = number(row.error);
+  byId('step-control').textContent = number(row.control);
+  byId('step-next').textContent = number(row.next);
+  byId('step-note').textContent = row.applied
+    ? 'Read x[' + row.n + '], compute u[' + row.n + '], then obtain x[' + (row.n + 1) + ']. Values above are rounded for reading.'
+    : 'This is the final recorded state. No correction is applied after it in this run, and no next state is recorded.';
+  for (const node of byId('trace-rows').children) node.classList.toggle('selected', Number(node.dataset.step) === selected);
+  drawPlot();
+}
+function renderTable() {
+  const body = byId('trace-rows');
+  const rows = current.rows.map(row => {
+    const tr = document.createElement('tr');
+    tr.dataset.step = String(row.n);
+    const heading = document.createElement('th');
+    heading.scope = 'row';
+    heading.textContent = String(row.n);
+    tr.appendChild(heading);
+    for (const key of ['x', 'compared', 'error', 'control', 'next', 'difference', 'predictedDifference']) {
+      const cell = document.createElement('td');
+      cell.textContent = number(row[key]);
+      tr.appendChild(cell);
+    }
+    return tr;
+  });
+  body.replaceChildren(...rows);
+}
+function apply(settings) {
+  try {
+    const run = simulateFeedback(settings);
+    current = run;
+    selected = 0;
+    slider.max = String(run.settings.steps);
+    slider.value = '0';
+    byId('multiplier').textContent = number(run.q);
+    byId('behavior').textContent = run.label;
+    byId('behavior-detail').textContent = run.detail;
+    byId('fixed-point').textContent = run.fixedPoint.kind === 'unique'
+      ? number(run.fixedPoint.value)
+      : run.fixedPoint.kind === 'every-state' ? 'Every state is fixed' : 'No fixed point';
+    const s = run.settings;
+    byId('applied-settings').textContent = 'Applied: a = ' + s.a + ', k = ' + s.gain + ', r = ' + s.reference +
+      ', d = ' + s.disturbance + ', x[0] = ' + s.initial + ', δ = ' + s.offset + ', N = ' + s.steps + '.';
+    for (const button of byId('presets').children) {
+      const preset = PRESETS.find(item => item.id === button.dataset.preset);
+      button.setAttribute('aria-pressed', String(names.every(name => preset.settings[name] === s[name])));
+    }
+    renderTable();
+    renderSelected();
+    byId('download-trace').disabled = false;
+    setStatus('Applied ' + s.steps + ' updates; showing ' + run.rows.length + ' state rows. The trace download uses these settings.');
+    downloadStatus.textContent = '';
+  } catch (error) {
+    byId('download-trace').disabled = true;
+    setStatus(error.message + ' The last applied plot and table are unchanged. Correct the settings and apply again.', 'error');
+  }
+}
+function requestDownload(bytes, filename, type) {
+  let url;
+  try {
+    url = URL.createObjectURL(new Blob([bytes], { type }));
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    downloadStatus.textContent = 'Download requested: ' + filename;
+  } catch (error) {
+    downloadStatus.textContent = 'The download could not be requested: ' + error.message;
+  } finally {
+    if (url) setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+}
+for (const preset of PRESETS) {
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.dataset.preset = preset.id;
+  button.textContent = preset.title;
+  button.setAttribute('aria-pressed', 'false');
+  button.addEventListener('click', () => { setFields(preset.settings); apply(preset.settings); });
+  byId('presets').appendChild(button);
+}
+form.addEventListener('input', markDraft);
+form.addEventListener('submit', event => { event.preventDefault(); apply(readFields()); });
+byId('restore-defaults').addEventListener('click', () => { setFields(DEFAULT_SETTINGS); apply(DEFAULT_SETTINGS); });
+slider.addEventListener('input', () => { selected = Number(slider.value); renderSelected(); });
+byId('download-trace').addEventListener('click', () => {
+  if (current && !byId('download-trace').disabled) requestDownload(feedbackCsv(current), 'feedback-control-trace.csv', 'text/csv;charset=utf-8');
+});
+byId('download-course').addEventListener('click', () => {
+  const encoded = byId('course-bytes').textContent.trim();
+  const bytes = Uint8Array.from(atob(encoded), character => character.charCodeAt(0));
+  requestDownload(bytes, 'feedback-control.json', 'application/json;charset=utf-8');
+});
+new ResizeObserver(drawPlot).observe(plot.parentElement);
+setFields(DEFAULT_SETTINGS);
+apply(DEFAULT_SETTINGS);
+
+</script>
+</body>
+</html>

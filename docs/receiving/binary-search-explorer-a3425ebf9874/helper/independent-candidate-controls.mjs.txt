@@ -1,0 +1,100 @@
+import assert from 'node:assert/strict';
+import { pathToFileURL } from 'node:url';
+import { admit, verifyTrace, smallSortedArrays, smallTargets, manualCases, invalidCases } from './independent-oracle.mjs';
+
+// This adapter maps only fields recorded by the candidate. It does not execute
+// the search, derive an answer, repair a state, or manufacture a comparison.
+export function normalizeRecordedTrace(values, target, trace) {
+  assert.equal(trace?.format, 'recallweave.binary-search-trace/1');
+  assert.ok(Array.isArray(trace.values), 'trace carries an Array copy');
+  assert.notEqual(trace.values, values, 'trace must not alias the caller array');
+  assert.equal(trace.values.length, values.length, 'copied input length');
+  values.forEach((value, index) => assert.ok(Object.is(trace.values[index], value), `copied input at ${index}`));
+  assert.ok(Object.is(trace.target, target), 'recorded target');
+  assert.ok(Array.isArray(trace.steps), 'recorded comparison steps');
+  const frames = trace.steps.map((step, index) => {
+    assert.ok(Object.hasOwn(trace.steps, index), 'dense recorded steps');
+    assert.equal(typeof step.lessThanTarget, 'boolean', 'recorded relation is Boolean');
+    assert.ok(Object.is(step.value, values[step.mid]), 'recorded compared value');
+    if (index + 1 < trace.steps.length) {
+      assert.equal(step.nextLo, trace.steps[index + 1].lo, 'recorded lower-bound continuity');
+      assert.equal(step.nextHi, trace.steps[index + 1].hi, 'recorded upper-bound continuity');
+    }
+    return { lo: step.lo, hi: step.hi, mid: step.mid, relation: step.lessThanTarget ? 'less' : 'not_less' };
+  });
+  const last = trace.steps.at(-1);
+  frames.push(last ? { lo: last.nextLo, hi: last.nextHi } : { lo: 0, hi: 0 });
+  assert.equal(trace.comparisons, trace.steps.length, 'comparison count equals recorded steps');
+  return { frames, boundary: trace.boundary, found: trace.present, orderingComparisons: trace.comparisons };
+}
+
+function exactOwnValues(value) {
+  return Object.getOwnPropertyDescriptors(value);
+}
+
+export function runCandidateControls({ traceLowerBound, parseBinarySearchInput }) {
+  assert.equal(typeof traceLowerBound, 'function');
+  assert.equal(typeof parseBinarySearchInput, 'function');
+  const counts = { exhaustive: 0, handWorked: 0, signedZero: 0, invalidHelper: 0, validParser: 0, invalidParser: 0 };
+  function receive(values, target) {
+    admit(values, target);
+    Object.freeze(values);
+    const before = exactOwnValues(values);
+    const trace = traceLowerBound(values, target);
+    assert.deepEqual(exactOwnValues(values), before, 'caller input descriptors and values preserved');
+    const normalized = normalizeRecordedTrace(values, target, trace);
+    verifyTrace(values, target, normalized);
+    return normalized;
+  }
+  for (const values of smallSortedArrays()) {
+    for (const target of smallTargets) {
+      receive(values, target);
+      counts.exhaustive += 1;
+    }
+  }
+  for (const item of manualCases) {
+    assert.deepEqual(receive([...item.values], item.target), item.trace, item.name);
+    counts.handWorked += 1;
+  }
+  receive([-0, 0, 1], -0);
+  counts.signedZero += 1;
+  for (const item of invalidCases()) {
+    const before = exactOwnValues(item.values);
+    assert.throws(() => traceLowerBound(item.values, item.target), undefined, item.name);
+    assert.deepEqual(exactOwnValues(item.values), before, `${item.name}: invalid input preserved`);
+    counts.invalidHelper += 1;
+  }
+
+  const validText = [
+    ['', '0', [], 0],
+    ['  \n\t ', '-9999', [], -9999],
+    [' -3, -3, 0, 7 ', ' 4 ', [-3, -3, 0, 7], 4],
+    ['-9999,0,9999', '9999', [-9999, 0, 9999], 9999],
+    [Array(32).fill('0').join(','), '1', Array(32).fill(0), 1],
+  ];
+  for (const [arrayText, targetText, expectedValues, expectedTarget] of validText) {
+    const parsed = parseBinarySearchInput(arrayText, targetText);
+    assert.deepEqual(parsed.values, expectedValues, 'parsed values');
+    assert.equal(parsed.target, expectedTarget, 'parsed target');
+    receive(parsed.values, parsed.target);
+    counts.validParser += 1;
+  }
+  const invalidText = [
+    ['1,,2', '1'], [',1', '1'], ['1,', '1'], ['1, ,2', '1'],
+    ['2,1', '1'], ['1.5', '1'], ['NaN', '1'], ['Infinity', '1'],
+    ['-10000', '1'], ['10000', '1'], [Array(33).fill('0').join(','), '0'],
+    ['1 2', '1'], ['[1,2]', '1'], ['', ''], ['', '1.5'], ['', '10000'],
+    ['', '-10000'], ['', '1,2'], [null, '1'], ['1', null],
+  ];
+  for (const [arrayText, targetText] of invalidText) {
+    assert.throws(() => parseBinarySearchInput(arrayText, targetText), undefined, 'malformed input refused');
+    counts.invalidParser += 1;
+  }
+  return counts;
+}
+
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  assert.ok(process.argv[2], 'pass the exact candidate module path');
+  const candidate = await import(pathToFileURL(process.argv[2]).href);
+  console.log(JSON.stringify({ status: 'PASS', counts: runCandidateControls(candidate) }));
+}

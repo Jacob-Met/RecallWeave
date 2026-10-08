@@ -1,0 +1,74 @@
+{
+  "format": "recallweave-weighted-interval-independent-answer-review/1",
+  "reviewedAt": "2026-10-08T15:38:19.162Z",
+  "projectionCommit": "c1e774b77eec859e34f06a2b96f960ebaf6ff919",
+  "deckSha256": "31335096bc9f08241f9b228f53bdfb3a9284fdc857569f9b4a5128ce0f6e3edf",
+  "status": "accepted",
+  "method": "Each prompt, option, explanation and transfer checked directly against stated interval semantics; numerical results independently recomputed. This key was authored after reading the frozen deck and before reading the course guide or executing the learner.",
+  "answers": {
+    "wis-compatible-1": {
+      "answer": 0,
+      "option": "[4, 6)",
+      "reason": "Its start equals the excluded endpoint4. Every other option intersects [1,4). The transfer's unit setup gap changes the bound to next.start>=previous.end+1."
+    },
+    "wis-compatible-2": {
+      "answer": 1,
+      "option": "C alone, with total value 7",
+      "reason": "Feasible alternatives A+B total4, A2, B2, C7 and empty0; C overlaps both. Lower C to3 and A+B becomes optimal4."
+    },
+    "wis-compatible-3": {
+      "answer": 2,
+      "option": "Requiring that selecting activity D must also select activity A",
+      "reason": "An implication between selections is an additional constraint not represented by pairwise overlap and additive values. Empty, touching and equal-finish cases are admitted."
+    },
+    "wis-prefix-1": {
+      "answer": 3,
+      "option": "1",
+      "reason": "D starts2; earlier ends2,3,5 leave only row1 compatible. Moving D start to3 admits row2 and changes p(4) to2."
+    },
+    "wis-prefix-2": {
+      "answer": 0,
+      "option": "The greatest total value of any compatible subset of rows 1 through j",
+      "reason": "The prefix optimum permits omission of j. Empty prefix0 provides the base; equal best values can occur on zero/tied/skipped rows."
+    },
+    "wis-prefix-3": {
+      "answer": 1,
+      "option": "A compatible subset of rows 1 through p(j)",
+      "reason": "With positive-duration finish-sorted activities, an earlier compatible selected row must end before or at j's start. Those candidates are exactly the predecessor prefix; its optimum need not include p(j)."
+    },
+    "wis-decision-1": {
+      "answer": 2,
+      "option": "Take, giving 11 by adding 4 to OPT(2)",
+      "reason": "Take=4+7=11 exceeds skip9. Using OPT(j-1) could include overlaps. Lower value2 creates9=9 and the stated policy skips."
+    },
+    "wis-decision-2": {
+      "answer": 3,
+      "option": "10, by taking D instead of the best earlier prefix",
+      "reason": "D take10+OPT0=10 exceeds skip8. F subsequently can use D's prefix, giving5+10=15."
+    },
+    "wis-decision-3": {
+      "answer": 0,
+      "option": "The empty schedule, with value 0",
+      "reason": "At every zero-valued row, take and skip both0, hence every choice skips. Empty is optimal but not uniquely so. With exactly one positive value1, that activity is required for value1 and every zero-valued row still skips."
+    },
+    "wis-trace-1": {
+      "answer": 1,
+      "option": "D and F, with total value 15",
+      "reason": "Backtracking follows F row6->4 then D row4->0. Prefix5 follows E5->C3->A1->0 and totals12. Taking every table row marked take would be infeasible."
+    },
+    "wis-trace-2": {
+      "answer": 2,
+      "option": "The explorer returns A, but B alone is another optimal schedule",
+      "reason": "A precedes B by code-unit ID. Both singletons give5, but their pair overlaps; skip-current chooses A. Renaming to X/C chooses C with unchanged optimum5."
+    },
+    "wis-trace-3": {
+      "answer": 3,
+      "option": "O(n) table work and at most n backtracking steps",
+      "reason": "With predecessors already supplied, each row uses two existing scalar values and constant work. Every backtracking next is strictly smaller, bounding visits byn. The general sorting plus binary predecessor search gives O(n log n) preprocessing and O(n) table space; this is not a timing benchmark."
+    }
+  },
+  "limitations": [
+    "No learning-efficacy claim: the existing learner's BKT parameters remain illustrative.",
+    "Finite independent solver testing qualifies the admitted 0–8 activity domain; it is not an unrestricted scheduling service."
+  ]
+}

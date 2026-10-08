@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <meta name="description" content="An offline, step-by-step lower-bound search explorer with precise element and insertion-boundary intervals.">
+  <title>Binary search, one decision at a time · RecallWeave</title>
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: #20342d;
+      background: #f5f7f2;
+      font-synthesis: none;
+      line-height: 1.55;
+      --ink: #20342d;
+      --muted: #506259;
+      --line: #ccd8cf;
+      --accent: #245c46;
+      --focus: #a34d00;
+      --prefix-bg: #eaf3e9;
+      --prefix-ink: #285333;
+      --unresolved-bg: #e7f0fc;
+      --unresolved-ink: #21496d;
+      --suffix-bg: #f0eafa;
+      --suffix-ink: #563774;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-width: 280px; }
+    button, input, textarea, select { font: inherit; }
+    button, input, select { min-height: 44px; }
+    button, input, textarea, select, summary { touch-action: manipulation; }
+    button, a, input, textarea, select, summary, [tabindex] { -webkit-tap-highlight-color: transparent; }
+    :focus-visible { outline: 3px solid var(--focus); outline-offset: 4px; }
+    #trace-heading:focus { outline: 3px solid var(--focus); outline-offset: 5px; }
+    [hidden] { display: none !important; }
+    h1, h2, h3, p { margin-top: 0; }
+    h1 { max-width: 21ch; font-size: clamp(2rem, 4.3vw, 3.4rem); line-height: 1.1; letter-spacing: -.035em; margin-bottom: 1rem; }
+    h2 { font-size: clamp(1.3rem, 2.6vw, 1.65rem); line-height: 1.25; margin-bottom: .8rem; }
+    h3 { font-size: 1rem; line-height: 1.35; margin-bottom: .5rem; }
+    p:last-child { margin-bottom: 0; }
+    a { color: #195a77; text-decoration-thickness: .1em; text-underline-offset: .18em; }
+    a:hover { color: #0e3b52; }
+    code { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: .94em; }
+    .wrap { width: min(72rem, calc(100% - 2rem)); margin-inline: auto; }
+    .skip-link { position: absolute; z-index: 10; top: -8rem; left: 1rem; padding: .8rem 1rem; background: white; border: 2px solid var(--accent); border-radius: .4rem; }
+    .skip-link:focus { top: 1rem; }
+    .hero { padding: clamp(2rem, 5vw, 4rem) 0 1.75rem; }
+    .eyebrow { color: var(--accent); font-size: .78rem; font-weight: 800; letter-spacing: .13em; text-transform: uppercase; margin-bottom: 1rem; }
+    .intro { max-width: 66ch; color: var(--muted); font-size: 1.08rem; }
+    main { display: grid; gap: 1.25rem; padding-bottom: 2rem; }
+    .panel { min-width: 0; padding: clamp(1rem, 2.8vw, 1.8rem); background: #fff; border: 1px solid var(--line); border-radius: 1rem; box-shadow: 0 3px 15px #20342d06; }
+    .section-top { display: flex; justify-content: space-between; align-items: start; gap: 1rem; flex-wrap: wrap; }
+    .section-top > * { min-width: 0; }
+    .muted, .hint, .fine-print { color: var(--muted); }
+    .hint { margin: .4rem 0 0; font-size: .88rem; }
+    .fine-print { font-size: .9rem; }
+    .input-grid { display: grid; grid-template-columns: minmax(0, 3fr) minmax(9rem, 1fr); gap: 1rem; }
+    .field { min-width: 0; }
+    label { display: block; font-weight: 700; margin-bottom: .45rem; }
+    input, textarea, select { width: 100%; color: var(--ink); background: #fff; border: 1.5px solid #8b9f91; border-radius: .5rem; padding: .65rem .8rem; }
+    textarea { display: block; min-height: 6rem; resize: vertical; font-family: ui-monospace, SFMono-Regular, Consolas, monospace; }
+    input[aria-invalid="true"], textarea[aria-invalid="true"] { border-color: #a3292e; }
+    .actions { display: flex; flex-wrap: wrap; align-items: center; gap: .65rem; margin-top: 1rem; }
+    button { display: inline-flex; align-items: center; justify-content: center; gap: .35rem; padding: .65rem 1rem; font-weight: 700; line-height: 1.3; color: var(--accent); background: #fff; border: 1.5px solid var(--accent); border-radius: .5rem; cursor: pointer; }
+    button:hover:not(:disabled) { background: #eff5ef; }
+    button.primary { color: white; background: var(--accent); }
+    button.primary:hover:not(:disabled) { background: #194532; }
+    button:disabled { color: #68746d; border-color: #bdc7c0; background: #f0f3ef; cursor: default; }
+    #input-error:not(:empty) { margin: 1rem 0 0; padding: .8rem 1rem; color: #86232a; background: #fff0ef; border: 1px solid #d99091; border-radius: .5rem; }
+    #input-error:empty { display: none; }
+    .examples { display: flex; align-items: end; gap: .7rem; flex-wrap: wrap; margin-top: 1.4rem; padding-top: 1.15rem; border-top: 1px solid var(--line); }
+    .examples .field { flex: 1 1 18rem; }
+    .examples button { flex: 0 0 auto; }
+    .empty-view { padding: 1.75rem 1rem; text-align: center; background: #edf3ed; border: 1px dashed #9db29f; border-radius: .8rem; }
+    .empty-view p { max-width: 58ch; margin-inline: auto; color: var(--muted); }
+    .step-count { margin: 0; padding: .4rem .7rem; color: var(--accent); background: #edf4ed; border-radius: .45rem; font-weight: 700; }
+    .metrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .75rem; margin: 1rem 0; }
+    .metrics > div { min-width: 0; padding: .8rem; border: 1px solid var(--line); border-radius: .6rem; background: #fafcf8; }
+    dt { color: var(--muted); font-size: .82rem; line-height: 1.4; }
+    dd { margin: .4rem 0 0; font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: 1.15rem; font-weight: 750; overflow-wrap: anywhere; }
+    .legend { display: flex; flex-wrap: wrap; gap: .45rem .85rem; list-style: none; padding: 0; margin: 1rem 0 .5rem; font-size: .87rem; }
+    .legend li { display: inline-flex; align-items: center; gap: .4rem; }
+    .swatch { width: 1rem; height: 1rem; flex: 0 0 1rem; border: 1px solid currentColor; border-radius: .2rem; }
+    .legend .prefix { color: var(--prefix-ink); }
+    .legend .prefix .swatch { background: var(--prefix-bg); }
+    .legend .unresolved { color: var(--unresolved-ink); }
+    .legend .unresolved .swatch { background: var(--unresolved-bg); }
+    .legend .suffix { color: var(--suffix-ink); }
+    .legend .suffix .swatch { background: var(--suffix-bg); }
+    .legend .mid .swatch { background: white; outline: 2px solid var(--focus); outline-offset: 2px; }
+    .array-region, .history-scroll { min-width: 0; max-width: 100%; }
+    #array { display: flex; align-items: stretch; gap: .65rem; max-width: 100%; margin: .6rem 0; padding: 3rem 1.5rem 1.1rem; overflow-x: auto; overscroll-behavior-x: contain; scroll-padding-inline: 1.5rem; list-style: none; border: 1px solid var(--line); border-radius: .65rem; background: #fafbf8; }
+    #array > li { position: relative; flex: 0 0 7.1rem; min-height: 7.1rem; padding: .65rem .5rem; text-align: center; border: 1.5px solid #9cae9f; border-radius: .55rem; color: var(--ink); background: white; }
+    #array > li.prefix, #array > li.less { color: var(--prefix-ink); background: var(--prefix-bg); border-color: #91af92; }
+    #array > li.unresolved { color: var(--unresolved-ink); background: var(--unresolved-bg); border-color: #86a8c5; }
+    #array > li.suffix, #array > li.at-least { color: var(--suffix-ink); background: var(--suffix-bg); border-color: #b09ac9; }
+    #array > li.mid, #array > li.middle { outline: 3px solid var(--focus); outline-offset: 3px; }
+    #array > li.end { background: #f5f5f0; border-style: dashed; }
+    .cell-index, .index-label { display: block; font-size: .78rem; font-weight: 600; }
+    .cell-value, .array-value { display: block; margin: .2rem 0; font: 750 1.45rem/1.3 ui-monospace, SFMono-Regular, Consolas, monospace; }
+    .cell-state, .classification { display: block; font-size: .77rem; line-height: 1.35; }
+    .boundary-label { display: block; margin-bottom: .35rem; color: var(--muted); font-size: .76rem; font-weight: 650; }
+    .middle-label { display: block; margin-top: .3rem; color: #844100; font-size: .77rem; font-weight: 750; }
+    #array > li.result-cell { border-color: var(--accent); box-shadow: inset 0 0 0 2px var(--accent); }
+    .boundary-marker { position: absolute; inset-inline-start: -.35rem; inset-block-start: -2.2rem; display: inline-flex; align-items: center; justify-content: center; min-height: 1.6rem; padding: .15rem .35rem; color: var(--ink); background: #fff; border: 1px solid #789382; border-radius: .3rem; font-size: .76rem; font-weight: 750; white-space: nowrap; }
+    .boundary-marker::after { content: ""; position: absolute; inset-inline-start: .28rem; top: 100%; height: .7rem; border-inline-start: 2px solid #789382; }
+    .boundary-marker.answer { color: white; background: var(--accent); border-color: var(--accent); }
+    .decision-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .85rem; margin-top: 1.25rem; }
+    .decision { min-width: 0; padding: 1rem; background: #f6f8f3; border: 1px solid var(--line); border-radius: .6rem; }
+    .decision p { overflow-wrap: anywhere; }
+    #membership { margin: 1rem 0 0; padding: 1rem; border-inline-start: 4px solid var(--accent); background: #edf4ed; font-weight: 650; overflow-wrap: anywhere; }
+    .step-controls { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .6rem; margin-top: 1rem; }
+    .history { margin-top: 1.6rem; }
+    .history-scroll { overflow-x: auto; padding: .3rem; }
+    table { width: 100%; border-collapse: collapse; font-size: .9rem; }
+    caption { text-align: left; color: var(--muted); font-size: .85rem; padding-bottom: .7rem; }
+    th, td { text-align: left; padding: .65rem .7rem; border-bottom: 1px solid var(--line); vertical-align: top; }
+    th { font-size: .78rem; color: var(--muted); background: #f5f8f2; }
+    td { white-space: nowrap; }
+    .conventions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+    .conventions > div { min-width: 0; }
+    .conventions ul { padding-left: 1.25rem; }
+    .conventions li + li, .study-steps li + li { margin-top: .55rem; }
+    .study-steps { padding-left: 1.4rem; }
+    .downloads { padding-top: 1rem; border-top: 1px solid var(--line); }
+    #file-status:not(:empty) { padding: .75rem 0 0; color: var(--accent); overflow-wrap: anywhere; }
+    footer { padding: 0 0 2rem; color: var(--muted); font-size: .86rem; }
+    .sr-only { position: absolute !important; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
+    @media (max-width: 680px) {
+      .metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .input-grid, .decision-grid, .conventions { grid-template-columns: minmax(0, 1fr); }
+    }
+    @media (max-width: 440px) {
+      .wrap { width: calc(100% - 1.25rem); }
+      .hero { padding-top: 1.75rem; }
+      .panel { padding: 1rem; border-radius: .75rem; }
+      .step-controls { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .examples button, .downloads button { width: 100%; }
+      .metrics { gap: .5rem; }
+      .metrics > div { padding: .65rem; }
+      .section-top { gap: .6rem; }
+    }
+    @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+    @media print {
+      body { background: white; }
+      .hero { padding-top: 0; }
+      .wrap { width: 100%; }
+      .panel { box-shadow: none; break-inside: avoid; }
+      .skip-link, form, .examples, .step-controls, .downloads, #file-status { display: none !important; }
+      #array { flex-wrap: wrap; overflow: visible; gap: 3rem .75rem; }
+      .history-scroll { overflow: visible; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#search-form">Skip to the search inputs</a>
+  <header class="hero wrap">
+    <p class="eyebrow">RecallWeave · an offline course companion</p>
+    <h1>Binary search, one decision at a time</h1>
+    <p class="intro">Find the first boundary where values stop being less than your target. Follow each comparison, see which elements are resolved, and check why the remaining interval gets smaller.</p>
+  </header>
+  <main class="wrap">
+    <section class="panel" aria-labelledby="inputs-heading">
+      <h2 id="inputs-heading">Choose a sorted array</h2>
+      <p class="muted">Use up to 32 whole numbers in nondecreasing order. Equal neighbors are welcome. The search leaves your array unchanged.</p>
+      <form id="search-form" novalidate autocomplete="off">
+        <div class="input-grid">
+          <div class="field">
+            <label for="values">Array values</label>
+            <textarea id="values" name="values" rows="2" spellcheck="false" aria-describedby="values-help input-error">2,4,6,8,10,12,14,16</textarea>
+            <p class="hint" id="values-help">Separate integers with commas. Each must be from −9999 to 9999. Leave this field blank for an empty array.</p>
+          </div>
+          <div class="field">
+            <label for="target">Target</label>
+            <input id="target" name="target" type="text" inputmode="numeric" value="7" spellcheck="false" aria-describedby="target-help input-error">
+            <p class="hint" id="target-help">A whole number from −9999 to 9999.</p>
+          </div>
+        </div>
+        <div class="actions">
+          <button type="submit" class="primary">Build trace</button>
+          <span class="fine-print">Start with <code>lo = 0</code> and <code>hi = n</code>.</span>
+        </div>
+        <p id="input-error" role="alert" aria-atomic="true"></p>
+      </form>
+      <div class="examples">
+        <div class="field">
+          <label for="example">Try a worked example</label>
+          <select id="example" aria-describedby="example-help"></select>
+          <p id="example-help" class="hint">Choose an example, then apply it to the inputs.</p>
+        </div>
+        <button id="apply-example" type="button">Apply example</button>
+      </div>
+    </section>
+
+    <section class="panel" aria-label="Search trace">
+      <div id="empty-view" class="empty-view">
+        <h2>Make the boundaries visible</h2>
+        <p>Build a trace to see the initial interval. Then take one ordering comparison at a time, move back to inspect a decision, or jump to the final boundary.</p>
+      </div>
+      <div id="trace-view" hidden>
+        <div class="section-top">
+          <h2 id="trace-heading" tabindex="-1">Your search trace</h2>
+          <p id="step-count" class="step-count">0 ordering comparisons</p>
+        </div>
+        <dl class="metrics">
+          <div><dt>Unresolved indices <code>[lo, hi)</code></dt><dd id="bounds">—</dd></div>
+          <div><dt>Possible boundaries <code>[lo, hi]</code></dt><dd id="possible-boundaries">—</dd></div>
+          <div><dt>Unresolved elements</dt><dd id="remaining">—</dd></div>
+          <div><dt>Target</dt><dd id="trace-target">—</dd></div>
+        </dl>
+        <ul class="legend" aria-label="Array state key">
+          <li class="prefix"><span class="swatch" aria-hidden="true"></span>Prefix: &lt; target</li>
+          <li class="unresolved"><span class="swatch" aria-hidden="true"></span>Unresolved: <code>[lo, hi)</code></li>
+          <li class="suffix"><span class="swatch" aria-hidden="true"></span>Suffix: ≥ target</li>
+          <li class="mid"><span class="swatch" aria-hidden="true"></span>Outlined: next middle index</li>
+        </ul>
+        <p class="hint" id="array-help">A boundary sits <strong>before</strong> its indexed element. Boundary <code>n</code>, marked <strong>END</strong>, is after the last element and has no element of its own. Scroll the array sideways when needed.</p>
+        <div class="array-region" role="region" aria-label="Array values and insertion boundaries">
+          <ol id="array" tabindex="0" aria-label="Array elements and boundary markers" aria-describedby="array-help"></ol>
+        </div>
+        <div class="decision-grid">
+          <div class="decision">
+            <h3>Last completed decision</h3>
+            <p id="last-decision">No ordering comparison has been made yet.</p>
+          </div>
+          <div class="decision">
+            <h3>Next ordering comparison</h3>
+            <p id="next-decision">Build a trace to begin.</p>
+          </div>
+        </div>
+        <p id="membership">The final boundary and membership check appear when the interval is resolved.</p>
+        <nav class="step-controls" aria-label="Move through the recorded comparisons">
+          <button id="first-step" type="button" disabled>First state</button>
+          <button id="previous-step" type="button" disabled>Previous comparison</button>
+          <button id="next-step" type="button" class="primary" disabled>Next comparison</button>
+          <button id="last-step" type="button" disabled>Final state</button>
+        </nav>
+        <p class="fine-print" style="margin-top:.8rem">The count includes only <code>a[mid] &lt; target</code> ordering comparisons. It excludes input validation, rendering and the separate final equality check.</p>
+        <section class="history" aria-labelledby="history-heading">
+          <h3 id="history-heading">Completed comparisons</h3>
+          <p id="no-history" class="muted">No ordering comparisons have been completed yet.</p>
+          <div class="history-scroll" role="region" aria-label="Completed comparison table" tabindex="0">
+            <table id="history-table" hidden>
+              <caption>Bounds before and after each completed decision. Each comparison strictly reduces the unresolved length.</caption>
+              <thead><tr><th scope="col">Comparison</th><th scope="col">Before <code>[lo, hi)</code></th><th scope="col">Middle index</th><th scope="col">Compared value</th><th scope="col">Decision</th><th scope="col">After <code>[lo, hi)</code></th></tr></thead>
+              <tbody id="history-body"></tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+      <p id="step-announcement" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></p>
+    </section>
+
+    <section class="panel" aria-labelledby="conventions-heading">
+      <h2 id="conventions-heading">Two intervals, one precise answer</h2>
+      <div class="conventions">
+        <div>
+          <h3>Elements still to resolve</h3>
+          <p><code>[lo, hi)</code> includes <code>lo</code> and excludes <code>hi</code>. Everything before <code>lo</code> is already known to be less than the target. Everything at or after <code>hi</code> is already known to be at least the target.</p>
+          <p>The next middle index is <code>lo + floor((hi − lo) / 2)</code>. A smaller middle value moves <code>lo</code> to <code>mid + 1</code>; otherwise, including equality, <code>hi</code> moves to <code>mid</code>.</p>
+        </div>
+        <div>
+          <h3>Boundaries that can still be the answer</h3>
+          <p><code>[lo, hi]</code> includes <strong>both</strong> endpoints. Once <code>lo = hi</code>, no unresolved element remains and the single remaining boundary is the answer.</p>
+          <p>The result is the first position <code>p</code> where <code>a[p] ≥ target</code>, or <code>n</code> if every value is smaller. Presence is a separate fact: <code>p &lt; n</code> and <code>a[p] = target</code>. An empty array has just boundary 0 and needs zero ordering comparisons.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel" aria-labelledby="study-heading">
+      <h2 id="study-heading">Keep the trace. Study the ideas.</h2>
+      <p>The companion course, <strong>Binary search: precise boundaries</strong>, has twelve questions about sorted input, duplicate values, interval updates, insertion boundaries, progress and cost.</p>
+      <ol class="study-steps">
+        <li>Download the course JSON below.</li>
+        <li>Open RecallWeave and choose that file under <strong>Bring your own lesson</strong>.</li>
+        <li>Inspect the course preview, then select <strong>Start this deck</strong> when you are ready to begin a fresh lesson.</li>
+        <li>Use the lesson’s review and practice, then download study notes to keep your answers and explanations.</li>
+      </ol>
+      <p class="fine-print">This explorer keeps its current inputs and trace in this page. Download a trace to keep a copy. The course and guide downloads contain the original course files.</p>
+      <div class="actions downloads" aria-label="Save files">
+        <button id="download-trace" type="button" disabled>Download trace (.json)</button>
+        <button id="download-course" type="button">Download course (.json)</button>
+        <button id="download-guide" type="button">Download worked guide (.md)</button>
+      </div>
+      <p id="file-status" role="status" aria-live="polite" aria-atomic="true"></p>
+    </section>
+    <noscript><section class="panel"><h2>JavaScript is needed to step through a search</h2><p>The interval explanation above is still readable. Open this standalone file in a browser with JavaScript enabled to build a trace and save the embedded course files.</p></section></noscript>
+  </main>
+  <footer class="wrap">
+    <p>Optional external reference: <a href="https://docs.python.org/3/library/bisect.html#bisect.bisect_left" target="_blank" rel="noopener noreferrer">Python’s <code>bisect_left</code> documentation</a> opens the Python documentation website in a new tab.</p>
+  </footer>
+  <script type="module">
+const SOURCE_DECK = @@DECK_JSON@@;
+const SOURCE_GUIDE = @@GUIDE_JSON@@;
+@@SCRIPT@@
+  </script>
+</body>
+</html>

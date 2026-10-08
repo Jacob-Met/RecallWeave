@@ -1,0 +1,281 @@
+{
+  "format": "recallweave-deck/1",
+  "title": "Coherent waves: from phasors to interference",
+  "attribution": "Original questions, distractors, explanations and worked examples for RecallWeave, with AI assistance. Mathematical background: MIT MAS.160, Recitation 2 (Fall 2007), https://ocw.mit.edu/courses/mas-160-signals-systems-and-information-for-media-technology-fall-2007/66c9d296a29c7e96d7ceb3be945e2d71_rec2.pdf; MIT 8.03SC, Chapter 1 (Fall 2016), https://ocw.mit.edu/courses/8-03sc-physics-iii-vibrations-and-waves-fall-2016/8eb46d081c5ba4728cbbb369a03ba45e_MIT8_03SCF16_Text_Ch1.pdf; UNSW School of Physics, Physclips: Phasor addition, https://animations.physics.unsw.edu.au/jw/phasor-addition.html. This course uses a cosine convention and original numerical examples; no source passages, exercises or figures are copied.",
+  "license": "Original question wording, explanations, worked examples and diagrams in this course: CC0-1.0. Referenced teaching materials retain their own licenses. No license change is made to other repository content.",
+  "concepts": [
+    "complex-amplitude",
+    "vector-addition",
+    "relative-phase",
+    "model-boundaries"
+  ],
+  "items": [
+    {
+      "id": "phasor-real-part",
+      "concept": "complex-amplitude",
+      "prerequisites": [],
+      "prompt": "Use the convention x(t) = Re{Z exp(i2πft)}, where f > 0 and Z = A exp(iφ), with A ≥ 0. Which real signal does Z represent?",
+      "options": [
+        "A sin(2πft + φ)",
+        "A cos(2πft − φ)",
+        "A cos(2πft + φ)",
+        "A sin(2πft − φ)"
+      ],
+      "answer": 2,
+      "explanation": "Multiplying the exponentials gives A exp(i(2πft + φ)). Euler's formula makes its real part A cos(2πft + φ). Taking the imaginary part would give sine instead. The stated convention fixes both the projection and the phase sign.",
+      "transfer": "For A = 2 and φ = π, write the real signal and evaluate it at t = 0."
+    },
+    {
+      "id": "phasor-quarter-cycle",
+      "concept": "complex-amplitude",
+      "prerequisites": [],
+      "prompt": "A cosine-convention phasor starts at Z = 3 on the positive real axis. After a positive quarter-cycle rotation, what is the real signal's instantaneous value?",
+      "options": [
+        "0",
+        "3",
+        "−3",
+        "1.5"
+      ],
+      "answer": 0,
+      "explanation": "A quarter cycle rotates 3 to 3i. The real signal is the horizontal, real-axis projection, which is zero at that instant. The arrow's length remains 3; instantaneous value and peak amplitude are different quantities.",
+      "transfer": "Give the real-axis projections after one half-cycle and after one full cycle."
+    },
+    {
+      "id": "phasor-modulus",
+      "concept": "complex-amplitude",
+      "prerequisites": [],
+      "prompt": "With x(t) = Re{Z exp(i2πft)}, a constant complex amplitude is Z = −3 + 4i. What is the real signal's peak amplitude?",
+      "options": [
+        "1",
+        "7",
+        "−3",
+        "5"
+      ],
+      "answer": 3,
+      "explanation": "Peak amplitude is the nonnegative magnitude |Z| = sqrt((−3)² + 4²) = 5. Adding component magnitudes would give 7, and −3 is only the signal's value at t = 0. The imaginary component affects the phase as well as the magnitude.",
+      "transfer": "For Z = 5 − 12i, calculate the peak amplitude and the initial real value separately."
+    },
+    {
+      "id": "phasor-negative-real",
+      "concept": "complex-amplitude",
+      "prerequisites": [],
+      "prompt": "A nonzero cosine-convention phasor is Z = −2. Express phase in the interval [−180°, 180°). Which amplitude and phase describe it?",
+      "options": [
+        "Amplitude −2, phase 0°",
+        "Amplitude 2, phase −180°",
+        "Amplitude 2, phase −90°",
+        "Amplitude 2, phase 0°"
+      ],
+      "answer": 1,
+      "explanation": "The magnitude is 2, and the arrow points along the negative real axis. Its phase is 180° modulo a full turn; the specified half-open interval represents that direction as −180°. A negative magnitude is not the amplitude convention used here.",
+      "transfer": "What amplitude and principal phase describe Z = −2i in the same interval?"
+    },
+    {
+      "id": "phasor-in-phase",
+      "concept": "vector-addition",
+      "prerequisites": [
+        "complex-amplitude"
+      ],
+      "prompt": "Two real cosine signals have the same positive frequency, the same phase and common units. Their peak amplitudes are 1.5 and 2.5. What is the peak amplitude of their sum?",
+      "options": [
+        "1",
+        "4",
+        "sqrt(8.5)",
+        "3.75"
+      ],
+      "answer": 1,
+      "explanation": "Equal phases point both phasors in the same direction. Their lengths add: 1.5 + 2.5 = 4. Subtracting applies to opposite phases, while sqrt(1.5² + 2.5²) would apply to a 90° relative phase.",
+      "transfer": "Keep those amplitudes but turn the second phasor by 180°. Predict the new peak amplitude."
+    },
+    {
+      "id": "phasor-opposite-unequal",
+      "concept": "vector-addition",
+      "prerequisites": [
+        "complex-amplitude"
+      ],
+      "prompt": "At a common frequency, Z_A = 3 and Z_B = −1 in the same signal units. What constant resultant phasor represents the sum?",
+      "options": [
+        "4",
+        "−2",
+        "2i",
+        "2"
+      ],
+      "answer": 3,
+      "explanation": "Complex amplitudes add component by component: 3 + (−1) = 2. Opposite directions reduce the resultant, but unequal magnitudes do not cancel completely. The positive real result has amplitude 2 and phase 0°.",
+      "transfer": "Swap the magnitudes so Z_A = 1 and Z_B = −3. Give the resultant and its principal phase."
+    },
+    {
+      "id": "phasor-quadrature",
+      "concept": "vector-addition",
+      "prerequisites": [
+        "complex-amplitude"
+      ],
+      "prompt": "Two same-frequency cosine signals have constant phasors Z_A = 3 and Z_B = 4i. What is the peak amplitude of their combined real signal?",
+      "options": [
+        "5",
+        "7",
+        "1",
+        "sqrt(7)"
+      ],
+      "answer": 0,
+      "explanation": "The resultant is 3 + 4i, so its magnitude is sqrt(3² + 4²) = 5. The individual peaks occur at different times because the relative phase is 90°. Adding peak magnitudes would predict 7 and overlook that timing difference.",
+      "transfer": "Evaluate the two components and their sum at t = 0. Why is that sum smaller than the combined peak amplitude?"
+    },
+    {
+      "id": "phasor-resultant-phase",
+      "concept": "vector-addition",
+      "prerequisites": [
+        "complex-amplitude"
+      ],
+      "prompt": "Same-frequency component phasors add to Z = −2 − 2i. In the interval [−180°, 180°), what is the resultant's phase?",
+      "options": [
+        "45°",
+        "−45°",
+        "−135°",
+        "135°"
+      ],
+      "answer": 2,
+      "explanation": "Both coordinates are negative, so the direction lies in the third quadrant. Equal coordinate magnitudes place it 45° past the negative real axis: 225°, represented as −135° in the requested interval. Using arctan(im/re) alone would lose the quadrant.",
+      "transfer": "Find the principal phase of Z = −2 + 2i and explain which sign changed."
+    },
+    {
+      "id": "phasor-common-rotation",
+      "concept": "relative-phase",
+      "prerequisites": [
+        "complex-amplitude",
+        "vector-addition"
+      ],
+      "prompt": "Two same-frequency phasors have fixed amplitudes and fixed relative phase. Rotate both by an additional 40° while keeping the time origin fixed. Which property of their sum must remain unchanged?",
+      "options": [
+        "Its value at t = 0",
+        "Its phase relative to the time origin",
+        "The times of its peaks",
+        "Its peak amplitude"
+      ],
+      "answer": 3,
+      "explanation": "A common rotation rotates the vector sum by the same angle without changing its length. The resultant amplitude and cycle mean square stay the same. For a nonzero sum, its phase and peak times shift; its initial real projection can change.",
+      "transfer": "Use the lab's 3-and-4 quadrature preset. Compare common phases 0° and 40° while keeping relative phase at 90°."
+    },
+    {
+      "id": "phasor-amplitude-law",
+      "concept": "relative-phase",
+      "prerequisites": [
+        "vector-addition"
+      ],
+      "prompt": "Two coherent cosine signals have peak amplitudes A and B, common units and relative phase δ. If R is their resultant peak amplitude, which expression is correct?",
+      "options": [
+        "R² = A² + B² for every δ",
+        "R² = A² + B² − 2AB cos δ",
+        "R² = A² + B² + 2AB cos δ",
+        "R² = (A + B)² for every δ"
+      ],
+      "answer": 2,
+      "explanation": "Take one phasor along the real axis. The sum has coordinates A + B cos δ and B sin δ. Squaring and adding gives R² = A² + B² + 2AB cos δ. The relative phase controls the cross term.",
+      "transfer": "Insert δ = 0°, 90° and 180°. Explain the three resulting amplitude rules."
+    },
+    {
+      "id": "phasor-complete-cancellation",
+      "concept": "relative-phase",
+      "prerequisites": [
+        "vector-addition"
+      ],
+      "prompt": "Both component amplitudes are strictly positive. Their real cosine signals have the same positive frequency and common units. What is required for their sum to vanish at every time?",
+      "options": [
+        "Equal amplitudes and a 90° relative phase",
+        "Equal amplitudes and a 180° relative phase modulo 360°",
+        "Any amplitudes and a 180° relative phase modulo 360°",
+        "Any amplitudes and an instant when both projections are zero"
+      ],
+      "answer": 1,
+      "explanation": "An identically zero sum requires opposite, equal-length phasors. Equal amplitudes with a half-turn separation cancel at every instant. Opposite unequal phasors leave a nonzero difference, and a single zero crossing does not establish cancellation for an entire cycle.",
+      "transfer": "In the cancellation preset, change only one amplitude from 2 to 2.1. Describe what remains."
+    },
+    {
+      "id": "phasor-cycle-mean-square",
+      "concept": "relative-phase",
+      "prerequisites": [
+        "vector-addition"
+      ],
+      "prompt": "Two same-frequency cosine signals each have peak amplitude 2 and a 60° relative phase. In squared signal units, what is the cycle mean square of their sum?",
+      "options": [
+        "6",
+        "4",
+        "8",
+        "12"
+      ],
+      "answer": 0,
+      "explanation": "The resultant amplitude squared is 2² + 2² + 2×2×2 cos 60° = 12. A cosine's squared value averages to one half over a complete cycle, giving 12/2 = 6. The separate mean squares add to 4; the coherent cross term contributes the remaining 2. This is a mathematical signal average, not a calibrated intensity.",
+      "transfer": "Keep both amplitudes at 2. Calculate the combined cycle mean square at 0° and at 180° relative phase."
+    },
+    {
+      "id": "phasor-different-frequencies",
+      "concept": "model-boundaries",
+      "prerequisites": [
+        "relative-phase"
+      ],
+      "prompt": "Two real cosines have frequencies 2 Hz and 3 Hz. Why does one constant resultant phasor rotating at a single shared frequency fail to represent their sum for all time?",
+      "options": [
+        "Their relative phase changes with time.",
+        "Their amplitudes must grow with time.",
+        "Complex numbers cannot represent either component.",
+        "Adding real signals requires equal instantaneous values."
+      ],
+      "answer": 0,
+      "explanation": "The components rotate at different angular rates, so their relative phase is not constant. They can still be added at each time, but the fixed shared-frequency model in this lab does not apply. A momentary phasor picture cannot supply one constant resultant for the whole signal.",
+      "transfer": "How many full turns of relative phase accumulate in one second between 2 Hz and 3 Hz?"
+    },
+    {
+      "id": "phasor-zero-phase",
+      "concept": "model-boundaries",
+      "prerequisites": [
+        "complex-amplitude",
+        "relative-phase"
+      ],
+      "prompt": "Equal opposite phasors sum exactly to Z = 0. Which amplitude and phase should the lab report for that resultant?",
+      "options": [
+        "Amplitude 0, phase 0° uniquely",
+        "Amplitude 0, phase 180° uniquely",
+        "Amplitude 0, phase undefined",
+        "Amplitude undefined, phase 90°"
+      ],
+      "answer": 2,
+      "explanation": "Zero has magnitude 0 but no direction. Any phase multiplied by zero describes the same zero signal, so no unique phase can be inferred. Reporting an arbitrary angle as a physical result would invent information. A small nonzero resultant still has a phase.",
+      "transfer": "Explain why rounding a small residual to zero before calculating phase could hide a meaningful difference."
+    },
+    {
+      "id": "phasor-phase-lead",
+      "concept": "model-boundaries",
+      "prerequisites": [
+        "complex-amplitude"
+      ],
+      "prompt": "Under the stated cosine convention, compare y(t) = cos(4πt + π/2) with x(t) = cos(4πt), with t in seconds. What time shift expresses y relative to x?",
+      "options": [
+        "y lags x by 0.125 seconds.",
+        "y leads x by 0.125 seconds.",
+        "y leads x by 0.25 seconds.",
+        "y lags x by 0.25 seconds."
+      ],
+      "answer": 1,
+      "explanation": "Write y(t) = cos(4π(t + 1/8)) = x(t + 0.125). It reaches corresponding phases one eighth of a second earlier, so it leads x. Positive phase in this convention is a time advance; the frequency is unchanged at 2 Hz.",
+      "transfer": "Replace +π/2 with −π/2. State the corresponding lead or lag."
+    },
+    {
+      "id": "phasor-diagram-meaning",
+      "concept": "model-boundaries",
+      "prerequisites": [
+        "complex-amplitude",
+        "vector-addition"
+      ],
+      "prompt": "The lab plots arrows on axes labeled Real and Imaginary for two scalar signals. What does an arrow's angle encode in this diagram?",
+      "options": [
+        "The physical direction in which a wave travels.",
+        "The location of a source in a room.",
+        "The direction of energy transport in space.",
+        "The signal's phase in the chosen cosine convention."
+      ],
+      "answer": 3,
+      "explanation": "These axes hold complex-amplitude components. Arrow angle encodes phase; its real projection supplies the instantaneous scalar value after time rotation. The diagram contains no positions, travel directions, medium or energy-transport law. A physical application would need those additional definitions.",
+      "transfer": "Name one extra physical assumption needed before interpreting a squared signal value as an intensity."
+    }
+  ]
+}

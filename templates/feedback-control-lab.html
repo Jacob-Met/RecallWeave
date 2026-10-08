@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<meta name="feedback-course-sha256" content="__COURSE_SHA256__">
+<meta name="feedback-model-sha256" content="__MODEL_SHA256__">
+<title>When correction overshoots · RecallWeave</title>
+<style>
+:root{--ink:#15313f;--muted:#4d626b;--paper:#f5f2ea;--panel:#fffdf7;--line:#c9d4d2;--teal:#006c70;--coral:#b4462e;--blue:#465eab;--soft:#e5eeea;--gold:#e9c666}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.55}
+main{max-width:1280px;margin:auto;padding:28px 34px 54px}
+a{color:var(--teal);text-underline-offset:3px}
+button,input,select{font:inherit}
+button{cursor:pointer;min-height:44px;border:1px solid var(--ink);border-radius:8px;padding:9px 14px;background:var(--panel);color:var(--ink);font-weight:650;line-height:1.3}
+button:hover{background:var(--soft)}
+button:disabled{cursor:default;opacity:.55}
+button.primary{background:var(--ink);color:white}
+button.primary:hover{background:#245267}
+:focus-visible{outline:3px solid var(--blue);outline-offset:3px}
+.skip{position:absolute;top:-100px;left:20px;z-index:5;background:white;padding:12px}
+.skip:focus{top:12px}
+.eyebrow{font-size:.78rem;letter-spacing:.13em;text-transform:uppercase;font-weight:750;color:var(--teal);margin:0 0 8px}
+h1{font-size:clamp(2rem,4vw,3.5rem);line-height:1.08;letter-spacing:-.035em;margin:0 0 15px;max-width:800px}
+h2{font-size:1.25rem;line-height:1.25;margin:0 0 12px}
+h3{font-size:1rem;line-height:1.3;margin:0 0 8px}
+p{margin:0 0 12px}
+.intro{max-width:810px;color:var(--muted);font-size:1.08rem}
+.equations{display:grid;grid-template-columns:1fr 1.2fr 1fr;gap:12px;margin:24px 0}
+.equation{padding:16px 18px;border-top:3px solid var(--teal);background:#e9efea;border-radius:0 0 8px 8px}
+.equation small{display:block;color:var(--muted);margin-bottom:4px}
+.equation strong{font-size:1.06rem;font-variant-numeric:tabular-nums}
+.presets{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 18px}
+.presets button{font-size:.88rem}
+.presets button[aria-pressed=true]{background:var(--teal);border-color:var(--teal);color:white}
+.workspace{display:grid;grid-template-columns:minmax(250px,290px) minmax(0,1fr);gap:18px;align-items:start}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:21px;min-width:0}
+.control-intro{font-size:.88rem;color:var(--muted)}
+.fields{display:grid;grid-template-columns:1fr 1fr;gap:13px 12px;margin:18px 0}
+.field{min-width:0}
+.field label{display:block;font-size:.86rem;font-weight:700;margin-bottom:4px}
+.field small{display:block;color:var(--muted);font-size:.76rem;margin-top:3px}
+.field input{width:100%;min-height:44px;border:1px solid #93a7a7;border-radius:6px;background:white;padding:7px 9px;color:var(--ink);font-variant-numeric:tabular-nums}
+.field.wide{grid-column:1/-1}
+.actions{display:flex;flex-wrap:wrap;gap:8px}
+#apply-experiment{flex:1}
+#run-status{border-left:3px solid var(--teal);padding:9px 11px;background:var(--soft);font-size:.87rem;margin:16px 0 0}
+#run-status.dirty{border-color:#98741d;background:#fbf1cf}
+#run-status.error{border-color:var(--coral);background:#fff0e9}
+.metrics{display:grid;grid-template-columns:.65fr 1.4fr 1fr;gap:10px;border-bottom:1px solid var(--line);padding-bottom:15px;margin-bottom:14px}
+.metric-label{display:block;color:var(--muted);font-size:.77rem;margin-bottom:4px}
+.metric-value{display:block;font-weight:750;font-size:1.14rem;line-height:1.3;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.metric-value.large{font-size:1.6rem}
+#behavior-detail{font-size:.92rem}
+.plot-wrap{width:100%;min-width:0}
+#trace-plot{display:block;width:100%;height:auto;overflow:visible}
+.legend{display:flex;gap:9px 20px;flex-wrap:wrap;font-size:.8rem;margin:3px 0 14px;color:var(--muted)}
+.legend span{display:flex;align-items:center;gap:7px}
+.swatch{display:inline-block;width:24px;border-top:3px solid var(--teal)}
+.swatch.other{border-color:var(--coral);border-top-style:dashed}
+.swatch.reference{border-color:var(--blue);border-top-width:2px;border-top-style:dotted}
+.plot-note{font-size:.79rem;color:var(--muted)}
+.step-header{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-top:20px}
+.step-header label{font-weight:750}
+#step-label{font-variant-numeric:tabular-nums;color:var(--teal)}
+#selected-step{display:block;width:100%;min-height:36px;accent-color:var(--teal);margin:2px 0 10px}
+.step-values{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.step-values div{background:var(--soft);padding:10px;border-radius:6px;min-width:0}
+.step-values dt{font-size:.74rem;color:var(--muted)}
+.step-values dd{margin:3px 0 0;font-weight:700;font-size:.98rem;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+#step-note{font-size:.83rem;color:var(--muted)}
+#applied-settings{font-size:.77rem;color:var(--muted);margin:10px 0 0;overflow-wrap:anywhere}
+.lower{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:18px}
+.learning-list{margin:12px 0 18px;padding-left:22px}
+.learning-list li{padding:0 0 7px 3px}
+.learning-list strong{color:var(--teal)}
+details{border-top:1px solid var(--line);padding:12px 0}
+details:last-child{padding-bottom:0}
+summary{font-weight:700;cursor:pointer;min-height:32px}
+details p{font-size:.92rem;margin:8px 0 3px;color:var(--muted)}
+.table-panel{margin-top:18px}
+.table-panel>summary{font-size:1.03rem}
+.table-scroll{overflow:auto;max-height:390px;border:1px solid var(--line);border-radius:8px;margin-top:12px}
+table{border-collapse:collapse;width:100%;font-size:.8rem;font-variant-numeric:tabular-nums;white-space:nowrap}
+caption{text-align:left;white-space:normal;padding:11px;color:var(--muted)}
+th,td{text-align:right;padding:8px 11px;border-bottom:1px solid #e3e8e3}
+thead th{background:#e7eeea;position:sticky;top:0}
+tbody tr.selected{background:#fbefc6}
+tbody th{font-weight:650}
+footer{font-size:.8rem;color:var(--muted);margin-top:24px;max-width:1050px}
+footer p{margin-bottom:7px}
+noscript{display:block;padding:20px;border:2px solid var(--coral);margin-bottom:20px}
+@media(max-width:920px){main{padding:24px}.workspace{grid-template-columns:250px minmax(0,1fr)}.metrics{grid-template-columns:.6fr 1fr}.metrics>div:last-child{grid-column:1/-1}.step-values{grid-template-columns:1fr 1fr}}
+@media(max-width:700px){main{padding:20px 14px 36px}.equations{grid-template-columns:1fr;gap:7px;margin:20px 0}.equation{padding:11px 14px}.equation small{display:inline;margin-right:10px}.workspace,.lower{grid-template-columns:1fr}.panel{padding:17px}.fields{grid-template-columns:1fr 1fr}.field.wide{grid-column:auto}.metrics{grid-template-columns:.6fr 1.4fr}.presets{gap:7px}.presets button{flex:1 1 135px}.step-values{grid-template-columns:1fr 1fr}.intro{font-size:1rem}}
+@media print{body{background:white}main{padding:0;max-width:none}.presets,.actions,#selected-step,.skip{display:none}.workspace,.lower{display:block}.panel{break-inside:avoid;margin-bottom:12px}.equations{margin:12px 0}.table-scroll{max-height:none;overflow:visible}footer{margin-top:12px}}
+</style>
+</head>
+<body>
+<a class="skip" href="#experiment-form">Skip to experiment</a>
+<main>
+<noscript>The explorer needs JavaScript to compute the recurrence. The equations and explanations below remain readable.</noscript>
+<header>
+<p class="eyebrow">RecallWeave · Dynamics lab</p>
+<h1>When correction overshoots</h1>
+<p class="intro">A correction can settle a system, make it alternate, or send it farther away. Change one rule, compare two starting states, and explain what the next update will do.</p>
+</header>
+<section class="equations" aria-label="The model">
+<div class="equation"><small>Correction from the current state</small><strong>u[n] = k (r − x[n])</strong></div>
+<div class="equation"><small>One state update</small><strong>x[n+1] = a x[n] + u[n] + d</strong></div>
+<div class="equation"><small>The multiplier to watch</small><strong>q = a − k</strong></div>
+</section>
+<section aria-labelledby="preset-heading">
+<h2 id="preset-heading">Start with a behavior</h2>
+<div id="presets" class="presets"></div>
+</section>
+<div class="workspace">
+<section class="panel" aria-labelledby="controls-heading">
+<h2 id="controls-heading">Set the experiment</h2>
+<p class="control-intro">Keep the rule constant during each run. The second run starts at x[0] + δ, with every other input unchanged.</p>
+<form id="experiment-form" novalidate>
+<div class="fields">
+<div class="field"><label for="a">Persistence a</label><input id="a" name="a" type="number" min="0" max="1.25" step="0.25" value="0.75" required><small>0 to 1.25</small></div>
+<div class="field"><label for="gain">Correction k</label><input id="gain" name="gain" type="number" min="0" max="3" step="0.25" value="0.5" required><small>0 to 3</small></div>
+<div class="field"><label for="reference">Reference r</label><input id="reference" name="reference" type="number" min="-2" max="2" step="0.25" value="1" required><small>−2 to 2</small></div>
+<div class="field"><label for="disturbance">Constant input d</label><input id="disturbance" name="disturbance" type="number" min="-0.5" max="0.5" step="0.25" value="0" required><small>−0.5 to 0.5</small></div>
+<div class="field"><label for="initial">Initial state x[0]</label><input id="initial" name="initial" type="number" min="-2" max="2" step="0.25" value="0" required><small>−2 to 2</small></div>
+<div class="field"><label for="offset">Start difference δ</label><input id="offset" name="offset" type="number" min="-1" max="1" step="0.25" value="0.25" required><small>−1 to 1</small></div>
+<div class="field wide"><label for="steps">Number of updates N</label><input id="steps" name="steps" type="number" min="1" max="60" step="1" value="30" required><small>1 to 60 integer updates</small></div>
+</div>
+<div class="actions"><button id="apply-experiment" class="primary" type="submit">Apply settings</button><button id="restore-defaults" type="button">Reset</button></div>
+<p id="run-status" role="status" aria-live="polite">Preparing the default experiment.</p>
+</form>
+</section>
+<section class="panel" aria-labelledby="plot-heading">
+<h2 id="plot-heading">The same rule, two starting states</h2>
+<div class="metrics">
+<div><span class="metric-label">Multiplier q = a − k</span><output class="metric-value large" id="multiplier"></output></div>
+<div><span class="metric-label">Effect of the initial difference</span><output class="metric-value" id="behavior"></output></div>
+<div><span class="metric-label">Fixed point x*</span><output class="metric-value" id="fixed-point"></output></div>
+</div>
+<p id="behavior-detail"></p>
+<div class="plot-wrap"><svg id="trace-plot" role="img" aria-labelledby="trace-title trace-description"></svg></div>
+<div class="legend"><span><i class="swatch" aria-hidden="true"></i>State x[n]</span><span><i class="swatch other" aria-hidden="true"></i>Different start</span><span><i class="swatch reference" aria-hidden="true"></i>Reference r</span></div>
+<p class="plot-note">The vertical scale follows both recorded trajectories and the reference. The update index n has no specified duration in seconds.</p>
+<div class="step-header"><label for="selected-step">Inspect one update</label><output id="step-label" for="selected-step"></output></div>
+<input id="selected-step" type="range" min="0" max="30" step="1" value="0" aria-describedby="step-note">
+<dl class="step-values">
+<div><dt>Current state x[n]</dt><dd id="step-state"></dd></div>
+<div><dt>Reference error r − x[n]</dt><dd id="step-error"></dd></div>
+<div><dt>Applied correction u[n]</dt><dd id="step-control"></dd></div>
+<div><dt>Next state x[n+1]</dt><dd id="step-next"></dd></div>
+</dl>
+<p id="step-note"></p>
+<div class="actions"><button id="download-trace" type="button">Download applied trace CSV</button></div>
+<p id="applied-settings"></p>
+<p class="plot-note" id="download-status" role="status" aria-live="polite"></p>
+</section>
+</div>
+<div class="lower">
+<section class="panel" aria-labelledby="explore-heading">
+<p class="eyebrow">Try · predict · explain</p>
+<h2 id="explore-heading">Explore before answering</h2>
+<ol class="learning-list">
+<li><strong>Predict the first update.</strong> With the default rule and x[0] = 0, calculate the correction, then the next state. Move the inspection control to check.</li>
+<li><strong>Increase correction k.</strong> Compare gentle correction, alternating recovery, the repeating boundary, and growth. Explain each change using q.</li>
+<li><strong>Challenge a flat line.</strong> Open “A flat run can hide instability.” One run stays at zero. What does the different starting state reveal?</li>
+<li><strong>Separate two outcomes.</strong> Reset, then change d to −0.25. Does q change? Does the fixed point equal the reference?</li>
+</ol>
+<button id="download-course" class="primary" type="button">Download the 18-question course</button>
+<p class="plot-note" style="margin-top:12px">Open RecallWeave, choose a local JSON lesson, and select this download. Its six connected concepts include explanations and transfer prompts. The download contains the course questions and their authored explanations; it does not include your experiment.</p>
+</section>
+<section class="panel" aria-labelledby="explain-heading">
+<h2 id="explain-heading">Read the rule</h2>
+<details open><summary>Why q predicts the separation</summary><p>Substitute the correction to get x[n+1] = q x[n] + c, where c = k r + d. Subtract the two runs: their common constant input cancels. In exact arithmetic, a starting difference δ becomes δ qⁿ after n updates.</p></details>
+<details><summary>A fixed point can miss the reference</summary><p>If q ≠ 1, the fixed point is x* = c / (1 − q). At the default settings it is 2/3, while the reference is 1. A stable recurrence can therefore retain a nonzero reference error. A fixed point exists even when perturbations grow.</p></details>
+<details><summary>The boundary needs its own name</summary><p>If |q| &lt; 1, deviations decay. If |q| &gt; 1, nonzero deviations grow. At q = −1 they repeat with alternating sign. At q = 1 the separation persists; c = 0 makes every state fixed, while c ≠ 0 causes drift. These boundary cases do not have decaying perturbations.</p></details>
+<details><summary>What this experiment establishes</summary><p>This is a dimensionless scalar recurrence with constant coefficients, no delay, no saturation and no noise. A finite trace illustrates its behavior; the geometric multiplier supplies the all-update argument. Actual systems and learner outcomes require their own evidence.</p></details>
+<details><summary>Why the last digits can differ</summary><p>Controls use exact quarter increments, and the computer iterates with ordinary finite-precision numbers. Very small differences can round away when two state values become equal. The table and CSV include both computed separation and the analytical value δ qⁿ.</p></details>
+</section>
+</div>
+<details class="panel table-panel" id="trace-details">
+<summary>Inspect all recorded states</summary>
+<p class="plot-note">There are N + 1 state rows for N updates. The final state has no applied correction or recorded next state. Export includes both runs, settings and full numeric values.</p>
+<div class="table-scroll" role="region" aria-label="Computed state table, scroll horizontally for all columns" tabindex="0">
+<table>
+<caption>Values shown here are rounded for reading. The CSV retains the computed numbers.</caption>
+<thead><tr><th scope="col">n</th><th scope="col">x[n]</th><th scope="col">Different start</th><th scope="col">r − x[n]</th><th scope="col">u[n]</th><th scope="col">x[n+1]</th><th scope="col">Computed separation</th><th scope="col">δ qⁿ</th></tr></thead>
+<tbody id="trace-rows"></tbody>
+</table>
+</div>
+</details>
+<footer>
+<p>An original, AI-assisted RecallWeave course and explorer. Course prose and questions are dedicated under CC0-1.0. Background reading: MIT OpenCourseWare, <a href="https://ocw.mit.edu/courses/6-003-signals-and-systems-fall-2011/resources/lecture-2-discrete-time-dt-systems/">Discrete Time Systems</a> and <a href="https://ocw.mit.edu/courses/2-161-signal-processing-continuous-and-discrete-fall-2008/resources/lecture_14/">Discrete-Time Stability</a>. Those materials retain their own terms.</p>
+<p>This file computes locally. It makes no automatic network requests and does not save experiment settings between visits. Downloads occur when you select their buttons.</p>
+</footer>
+</main>
+<script id="course-bytes" type="application/octet-stream">__COURSE_BASE64__</script>
+<script type="module">
+__FEEDBACK_BUNDLE__
+</script>
+</body>
+</html>

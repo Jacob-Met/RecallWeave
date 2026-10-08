@@ -1,0 +1,18 @@
+{
+  "schema": "native-tool-readback-observation.v1",
+  "kind": "Previously returned native tool response; this file is a local serialization of the observed response, not an original native receipt file.",
+  "storeKey": "logic_receiver_v3_commit_raw",
+  "response": {
+    "content": [
+      {
+        "type": "text",
+        "text": "Process started with PID 3306394 (shell: /bin/bash)\nInitial output:\n{\n  \"head\": \"2b9847c5e2f52abc10ceb11e84a142875716ff9c\",\n  \"tree\": \"169dcc8dd902c7a230117b550ece3c25b5691bcc\",\n  \"parent\": \"e8ea72403129c2325a60808eab09e8ddc5f0456a\",\n  \"path\": \"tools/check-boolean-logic-browser.mjs\",\n  \"bytes\": 26232,\n  \"sha256\": \"85e8bb5d9ac02fe301c4fab8afa3ec0e5e7544432033f0a87ad7d7af49ba85b4\",\n  \"blob\": \"3fb64cc129e5c1f1acfe61d6850178fe222c6666\",\n  \"diff\": \"diff --git a/tools/check-boolean-logic-browser.mjs b/tools/check-boolean-logic-browser.mjs\\nindex 9ae18b3..3fb64cc 100644\\n--- a/tools/check-boolean-logic-browser.mjs\\n+++ b/tools/check-boolean-logic-browser.mjs\\n@@ -358,7 +358,17 @@ try {\\n   socket?.close();\\n   if (browser && browser.exitCode === null) { browser.kill('SIGTERM'); await new Promise(resolve => {browser.once('exit', resolve); setTimeout(resolve, 3000);}); }\\n   for (const entry of pending.values()) clearTimeout(entry.timer);\\n-  await rm(profile, {recursive: true, force: true});\\n-  await writeFile(join(output, 'receipt.json'), JSON.stringify(report, null, 2) + '\\\\n');\\n+  // Preserve observations before cleanup: a late Chrome process may briefly hold its own profile open.\\n+  const receiptPath = join(output, 'receipt.json');\\n+  await writeFile(receiptPath, JSON.stringify(report, null, 2) + '\\\\n');\\n+  try {\\n+    await rm(profile, {recursive: true, force: true, maxRetries: 6, retryDelay: 150});\\n+    report.profileCleanup = {status: 'pass'};\\n+  } catch (error) {\\n+    report.profileCleanup = {status: 'fail', error: error.message};\\n+    report.status = 'fail'; process.exitCode = 1;\\n+  }\\n+  report.finishedAt = new Date().toISOString();\\n+  await writeFile(receiptPath, JSON.stringify(report, null, 2) + '\\\\n');\\n   console.log(JSON.stringify({status: report.status, checks: report.checks.length, downloads: report.downloads.length, sourceUnchanged: report.sourceUnchanged, output}));\\n }\",\n  \"productSourceDelta\": \"\",\n  \"status\": \"\"\n}\n"
+      },
+      {
+        "type": "text",
+        "text": "\n[executed on device: hamon-thinkpad (cadafaf3-4d0b-4c4f-a0d3-34a95d2cec90)]"
+      }
+    ],
+    "isError": false
+  }
+}
