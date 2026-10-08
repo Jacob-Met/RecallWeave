@@ -1,0 +1,139 @@
+{
+  "schema": "hamon.recallweave.unit-explorer.independent-ui-build-review.v1",
+  "reviewer": "estate-cd1df0f1ee24/native_qualification",
+  "author": "estate-cd1df0f1ee24/root",
+  "accepted": true,
+  "blocking_findings": [],
+  "scope": [
+    "src/unit-conversion-ui.mjs",
+    "courses/unit-conversion-explorer.template.html",
+    "tools/build-unit-conversion-explorer.mjs"
+  ],
+  "final_source": [
+    {
+      "path": "src/unit-conversion-ui.mjs",
+      "bytes": 8528,
+      "sha256": "014a84beed36d38df3906cd59dfb2d654bd7cca123424600e0c8063ba69a3086",
+      "git_blob": "1315a00196a67923ae3502b9ae8ca3851940a43b"
+    },
+    {
+      "path": "courses/unit-conversion-explorer.template.html",
+      "bytes": 15274,
+      "sha256": "a34c64c322674e178b938316f306990ec9b6872ec615dcb2231e39154f509e67",
+      "git_blob": "a371898f44f2ec50a66ea18d0da37fcb79ff311d"
+    },
+    {
+      "path": "tools/build-unit-conversion-explorer.mjs",
+      "bytes": 2624,
+      "sha256": "a656b634460f9c9ac892e91f714bbf2e7789c945ca41d2596d1174e81232d9e9",
+      "git_blob": "896e59edfb4764b40f19f149fa2b17c401361b25"
+    },
+    {
+      "path": "courses/unit-conversion-explorer.html",
+      "bytes": 48980,
+      "sha256": "7a0d130b04449b1bdc7aa4852fddc7f2ed3c21ea51d7bbdd199ae96d306a06cd",
+      "git_blob": "2b253cf3891cc1c0ba37f04bd67da74b63ec47a8"
+    }
+  ],
+  "final_freeze_manifest": {
+    "path": "/dev/shm/hamon-units-cd1df0f1ee24/explorer-frozen-v2.json",
+    "bytes": 2360,
+    "sha256": "98bf00800071f45235edd0b4197765f73995e6e403ddfd7d649b064d5f7bd5fd",
+    "git_blob": "f5934b96daf804d64f485d085c5b7df454981f58"
+  },
+  "runtime": {
+    "executable": "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node",
+    "version": "v24.19.0",
+    "new_dependency_or_service_installation": false
+  },
+  "resolved_findings": [
+    {
+      "id": "input-boundary-contrast",
+      "severity": "medium",
+      "baseline": {
+        "selector": "input",
+        "path": "courses/unit-conversion-explorer.template.html",
+        "line": 35,
+        "border": "#8da89a",
+        "inner_and_outer_background": "#ffffff",
+        "contrast": 2.560908293060831,
+        "required_boundary_contrast": 3,
+        "passed": false,
+        "classification": "Source-derived text-input boundary contrast defect; not a browser or assistive-technology measurement",
+        "method": "WCAG sRGB relative luminance, (lighter + 0.05) / (darker + 0.05)",
+        "reference": "https://www.w3.org/WAI/WCAG22/Understanding/non-text-contrast.html"
+      },
+      "author_repair": {
+        "input_border": "#647f70",
+        "adjacent_background": "#ffffff",
+        "contrast": 4.364466914039574,
+        "meets_3_to_1": true,
+        "template_change_only_input_border": true,
+        "generated_html_equals_same_color_derivation": true,
+        "template_sha256": "a34c64c322674e178b938316f306990ec9b6872ec615dcb2231e39154f509e67",
+        "html_sha256": "7a0d130b04449b1bdc7aa4852fddc7f2ed3c21ea51d7bbdd199ae96d306a06cd",
+        "other_builder_inputs_unchanged": [
+          "src/unit-conversion-ui.mjs",
+          "src/unit-conversion.mjs",
+          "src/deck.mjs",
+          "courses/units-and-dimensions.json",
+          "tools/build-unit-conversion-explorer.mjs"
+        ],
+        "additional_native_execution": false
+      },
+      "resolution": "The only template change darkens the input border to #647f70. It measures 4.3644669140:1 against white. Generated HTML is exactly the same color-only derivation; UI, builder, arithmetic and course bytes stayed unchanged."
+    }
+  ],
+  "source_review": {
+    "state_and_export_binding": "Each input event synchronously clears any old result and export eligibility before parsing. Unit errors mark the relevant input; dimension mismatch leaves the comparison visible but no numeric result. The download click reparses live values, including changes made without an input event, and returns before creating a download when invalid.",
+    "record_output": "The calculation download serializes the newly returned conversion record with a trailing newline. It is not built from a previous rendered result. The lesson download uses the exact course text embedded at build time; JSON MIME and constant filenames are explicit.",
+    "literal_dom": "User-derived expressions, exact values, labels and errors enter textContent on newly created nodes. The reviewed UI has no innerHTML insertion, eval, dynamic module loading, fetch, storage writes or automatic network request path.",
+    "download_lifecycle": "A temporary Blob URL and hidden anchor request the download. The anchor is removed in finally and the URL is revoked on a bounded timer. Status text accurately calls this a download request rather than claiming the user saved a file.",
+    "accessibility_structure": "All three text inputs have explicit labels; explanatory ID references resolve; static template has no duplicate IDs. Error inputs receive aria-invalid. Status messages use polite live regions. Dimension difference is conveyed with text and numeric cells as well as color; table column/row semantics are provided. Native buttons/form/details and visible focus treatment retain keyboard semantics.",
+    "offline_composition": "The builder validates the course, composes checked local sources in fixed order, verifies the exact UI import seam, refuses unsupported module declarations and closing script tags, and requires each template marker once. Replacements use a function, preventing dollar-substitution corruption. Course less-than characters are escaped in the JavaScript string and recover their original values at runtime.",
+    "build_and_link_scope": "The generated page has one inline script and no automatic external-resource elements. External references and the separate guide/learner are ordinary navigation links. The template accurately distinguishes self-contained calculation/download behavior from links requiring the supplied folder structure."
+  },
+  "independent_build_probes": {
+    "source_boundary": "Frozen v1 template f38aedc5, unchanged UI 014a84be, builder a656b634, core b9822581, course df0c8c8b and deck parser 621438c1; full six-file manifest preserved.",
+    "command": [
+      "node",
+      "/dev/shm/hamon-native-units-ui-review-cd1df0f1ee24/probe-build.mjs"
+    ],
+    "exit_code": 0,
+    "assertions_passed": 11,
+    "assertions_failed": 0,
+    "receipt": {
+      "path": "build-probe-receipt.json",
+      "bytes": 1699,
+      "sha256": "ee5b0111ff0a0c1a3cc4def6ff977c494aa364c751ed2fd557c1cd00c5ad30b5",
+      "git_blob": "8e85c86a8dc9faf5444509cdfb4355d798238b9c"
+    },
+    "probe_source": {
+      "path": "probe-build.mjs",
+      "bytes": 4442,
+      "sha256": "6e7ba6f047cc63584f8191143666126d1607337c2ca9fa17e7b6ff2b34d6d4ba",
+      "git_blob": "29989e10fb210f8e3c1e1f1253ff255000e0b25e"
+    },
+    "controls": [
+      "Generated current output equals frozen 48980-byte SHA1502d8bb; complete inline JavaScript compiles without runtime module declarations.",
+      "Exact 13008-byte course text and all 12 lesson items round trip from the embedded string.",
+      "A valid isolated course title containing </script>, markup, dollar replacement syntax, quotes, U+2028 and U+2029 survives exactly, yields one script element and deterministic output.",
+      "The --check command refuses an intentionally stale generated output with exit 1 and the expected error, while preserving its bytes. Actual stdout/stderr are retained.",
+      "All six source fixture inputs are restored and match their frozen hashes after the sentinel probe."
+    ],
+    "v2_derivation": "No Node or browser test was repeated for the color-only correction. Complete template and generated-output comparisons prove that only the input-border color changed; the five other builder inputs retain their exact hashes."
+  },
+  "static_template_receipt": {
+    "path": "static-template-receipt.json",
+    "bytes": 162,
+    "sha256": "9012fade59891672a975c9422c1b5c9d4c61c83ccdf699eb777b91077882668f",
+    "git_blob": "ee4eff89e3c28ae42a01fbfcfa2fa9256d838a6e"
+  },
+  "limits": [
+    "This is independent source and deterministic-build acceptance for the four final pins above; it does not claim arithmetic qualification or browser/assistive-technology execution.",
+    "Root authored tests were not inspected. Core arithmetic review belongs to estate_source; native browser and learner receiving belong to estate_coordination.",
+    "Contrast findings are calculated from declared CSS colors, following the primary W3C explanation. This is not a claim of full WCAG conformance.",
+    "No product files were edited by this reviewer. Only owned fixtures and evidence were written, and no GitHub mutation or installed-service change was made.",
+    "Later source changes or publication composition require an explicit hash binding; the initial build probes remain labeled v1, with the final v2 color-only derivation recorded separately."
+  ]
+}

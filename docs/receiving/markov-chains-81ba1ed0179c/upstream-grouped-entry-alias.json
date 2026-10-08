@@ -1,0 +1,43 @@
+{
+  "schema": "hamon.recallweave.grouped-builder.entry-alias-observation.v1",
+  "at": "2026-10-08T15:20:09.907984+00:00",
+  "base": "e49aee89dc6ecf579f1c9152f32f826bf6f9d8b7",
+  "source_head": "131129dec201f3fb0237bf6d51087a11390129b3",
+  "unchanged_upstream_files": [
+    "tools/build-grouped-data.mjs",
+    "tests/grouped-data-build.test.mjs"
+  ],
+  "native_node": "v26.3.0",
+  "native_tmp_alias": {
+    "logical": "/tmp",
+    "canonical": "/private/tmp"
+  },
+  "commands": [
+    {
+      "label": "canonical",
+      "command": [
+        "node",
+        "/Users/me/hamon-mcp-lab/recallweave-markov-81ba1ed0179c/source/tools/build-grouped-data.mjs",
+        "--not-an-option"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "Usage: node tools/build-grouped-data.mjs [--check]\n"
+    },
+    {
+      "label": "alias",
+      "command": [
+        "node",
+        "/Users/me/hamon-mcp-lab/recallweave-markov-81ba1ed0179c/evidence/grouped-source-alias/tools/build-grouped-data.mjs",
+        "--not-an-option"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "finding": "Direct entry compares a resolved import.meta.url with a lexical argv path. With a symlinked entry path the CLI body is skipped, exits zero and performs no check. The existing two negative build tests reproduce under the default /tmp alias. Their exact unchanged source passes all five cases with TMPDIR set to an owned canonical directory.",
+  "markov_source_changed": false,
+  "upstream_source_changed": false,
+  "owned_diagnostic_symlink_removed": true
+}
