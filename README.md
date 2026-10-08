@@ -6,6 +6,14 @@
 
 Open `demo.html` directly in a browser—no server, install, build step, internet, login, API key, or user data storage is required. It is a single self-contained file with embedded CSS, JavaScript and deck. The modular source is in `index.html`, `src/`, and `data/`; to test that version locally, serve this directory with `python3 -m http.server 8080` and visit `http://localhost:8080`. Rebuild the direct-open demo with `python3 tools/make_demo.py` after source changes. No hosted endpoint is called by either version.
 
+## Interactive binary-search companion
+
+Open [the binary-search explorer](courses/binary-search-explorer.html) to step through the exact lower-bound loop from the existing **Binary search: precise boundaries** course. The file works directly in a browser without a server or connection. Enter up to 32 sorted integers, choose a target, and inspect each comparison, the classified prefix/suffix, unresolved element indices `[lo, hi)`, and possible answer boundaries `[lo, hi]`. Repeated values, absent targets, empty arrays and the boundary after the last element have explicit examples.
+
+**Build trace**, then use **Next**, **Back**, **First** or **Finish**. Editing either input retires the previous displayed trace until you build again. The final insertion boundary is separate from the equality check for membership. Ordering-comparison counts exclude input validation, rendering, sorting, insertion and that final equality check.
+
+The companion downloads the complete trace with its entered text, plus the original unchanged course JSON and worked guide. To study the course, open RecallWeave, choose the downloaded JSON under **Bring your own lesson**, inspect the preview, then choose **Start this deck**. Downloads do not change an existing learner session. Rebuild the standalone page with `node tools/build-binary-search-explorer.mjs`; verify exact source/course parity with `--check`.
+
 ## Follow recursive calls and returns
 
 Open **[Calls go down. Answers come back.](courses/recursion-call-stack-explorer.html)** directly in a browser to step through factorial, Fibonacci, and memoized Fibonacci. Inspect each caller’s suspended calculation, saved child values, actual return order, and a fresh cache. Previous, Next, and the event selector revisit exact snapshots; the completed-run comparison separates total invocations, computed calls, cache hits, and maximum active depth.
