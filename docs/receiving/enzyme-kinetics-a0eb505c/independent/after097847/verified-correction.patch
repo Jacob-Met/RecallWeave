@@ -1,0 +1,28 @@
+--- a/src/enzyme-kinetics.mjs
++++ b/src/enzyme-kinetics.mjs
+@@ -53,19 +53,19 @@
+   });
+   const alpha = 1 + input.inhibitorRatio;
+   const { vmax, km } = KINETICS_BASELINE;
+-  const uninhibitedRate = vmax * input.substrate / (km + input.substrate);
++  // Analytic fractions avoid dividing rates quantized near the floating-point limit.
+   const definitions = [
+-    [KINETICS_MODES[0], vmax, km],
+-    [KINETICS_MODES[1], vmax, alpha * km],
+-    [KINETICS_MODES[2], vmax / alpha, km],
++    [KINETICS_MODES[0], vmax, km, 1],
++    [KINETICS_MODES[1], vmax, alpha * km, (km + input.substrate) / (alpha * km + input.substrate)],
++    [KINETICS_MODES[2], vmax / alpha, km, 1 / alpha],
+   ];
+   const cases = {};
+-  for (const [mode, limitingRate, apparentKm] of definitions) {
++  for (const [mode, limitingRate, apparentKm, relativeRate] of definitions) {
+     const rate = limitingRate * input.substrate / (apparentKm + input.substrate);
+     cases[mode.id] = Object.freeze({
+       id: mode.id, label: mode.label, rate, limitingRate, apparentKm,
+       // At S=0, both rates are zero. Do not replace the undefined ratio with its limit.
+-      relativeRate: input.substrate === 0 ? null : rate / uninhibitedRate,
++      relativeRate: input.substrate === 0 ? null : relativeRate,
+     });
+   }
+   return Object.freeze({ input, alpha, cases: Object.freeze(cases) });
