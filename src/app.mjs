@@ -1,4 +1,5 @@
 import { DEFAULT_BKT, initialMastery, runLearnerSimulation, selectNextItem, updateMastery } from './knowledge.mjs';
+import { answerPractice, beginPractice, createReview, currentPracticeItem } from './review.mjs';
 
 const root = document.querySelector('#session-content');
 const dataResponse = await fetch('./data/deck.json');
@@ -8,17 +9,25 @@ const concepts = deck.concepts;
 const mastery = initialMastery(concepts);
 const asked = new Set();
 const answers = [];
+let review = null;
+let practice = null;
+let inPractice = false;
 const progressFill = document.querySelector('#progress-fill');
 const progressTrack = document.querySelector('[role="progressbar"]');
 const stepLabel = document.querySelector('#step-label');
 const stepCount = document.querySelector('#step-count');
 
 function setProgress() {
-  const count = answers.length;
-  stepCount.textContent = `${count} / ${deck.items.length}`;
-  progressFill.style.width = `${count / deck.items.length * 100}%`;
+  const count = inPractice ? practice.answers.length : answers.length;
+  const total = inPractice ? practice.items.length : deck.items.length;
+  stepCount.textContent = `${count} / ${total}`;
+  progressFill.style.width = `${total ? count / total * 100 : 0}%`;
+  progressTrack.setAttribute('aria-label', inPractice ? 'Practice progress' : 'Lesson progress');
+  progressTrack.setAttribute('aria-valuemax', String(total));
   progressTrack.setAttribute('aria-valuenow', String(count));
-  stepLabel.textContent = count === deck.items.length ? 'THREAD COMPLETE' : count ? 'FOLLOW THE CONNECTION' : 'READY TO BEGIN';
+  stepLabel.textContent = inPractice
+    ? (count === total ? 'PRACTICE COMPLETE' : 'PRACTICE ROUND')
+    : count === total ? 'THREAD COMPLETE' : count ? 'FOLLOW THE CONNECTION' : 'READY TO BEGIN';
 }
 function renderMastery() {
   const rows = concepts.map(concept => `<div class="mastery-row"><span>${conceptLabel(concept)}</span><div class="mastery-meter" aria-hidden="true"><span style="width:${Math.round(mastery[concept] * 100)}%"></span></div><output aria-label="${conceptLabel(concept)} estimated mastery ${Math.round(mastery[concept] * 100)} percent">${Math.round(mastery[concept] * 100)}%</output></div>`).join('');
@@ -36,8 +45,9 @@ function renderQuestion() {
   setProgress();
 }
 function submitAnswer(item, choice) {
+  if (answers.some(answer => answer.item === item.id)) return;
   const correct = choice === item.answer;
-  answers.push({item: item.id, concept:item.concept, correct});
+  answers.push(Object.freeze({item: item.id, concept:item.concept, choice, correct}));
   mastery[item.concept] = updateMastery(mastery[item.concept] ?? DEFAULT_BKT.initial, correct);
   root.querySelectorAll('[data-choice]').forEach(button => {
     button.disabled = true;
@@ -54,12 +64,73 @@ function submitAnswer(item, choice) {
   feedback.querySelector('button').focus();
 }
 function renderResults() {
+  inPractice = false;
+  review ??= createReview(deck.items, answers);
   const correct = answers.filter(answer => answer.correct).length;
-  const trace = answers.map(answer => `<span class="trace-chip ${answer.correct ? 'is-correct' : 'needs-review'}">${answer.correct ? '✓' : '↺'} ${conceptLabel(answer.concept)}</span>`).join(' ');
-  root.innerHTML = `<article class="result-card"><div class="result-mark" aria-hidden="true">⌁</div><div class="card-kicker">YOUR LEARNING TRACE</div><h2>Notice the links you built.</h2><p>You made ${correct} of ${answers.length} connections on the first try. That count is a snapshot—not a measure of your ability. Review the concept estimates and choose one connection to explain in your own words.</p>${renderMastery()}<div class="reflection"><strong>Apply it:</strong> Trace energy from sunlight to a cell doing work. Where does the form of energy change, and what molecule transfers it to cellular processes?</div><p>${trace}</p><p class="source-note"><strong>Demo deck attribution:</strong> Original question wording adapted from OpenStax, <cite>Biology 2e</cite>, Chapters 7–8, Rice University, CC BY 4.0. ${deck.attribution}</p><button class="reset-button" id="reset-button">Start a fresh local session</button></article>`;
+  root.innerHTML = `<article class="result-card"><div class="result-mark" aria-hidden="true">⌁</div><div class="card-kicker">YOUR LEARNING TRACE</div><h2 tabindex="-1">Notice the links you built.</h2><p id="first-try-summary">You made ${correct} of ${answers.length} connections on the first try. That count is a snapshot—not a measure of your ability. Review the concept estimates and choose one connection to explain in your own words.</p>${renderMastery()}${renderPracticeSummary()}<section class="review-list" aria-labelledby="review-title"><h3 id="review-title">Review the connections</h3><p>Open a question to see your first answer, the explanation, and an idea to apply.</p>${review.map(renderReviewItem).join('')}</section><div class="reflection"><strong>Apply it:</strong> Trace energy from sunlight to a cell doing work. Where does the form of energy change, and what molecule transfers it to cellular processes?</div><p class="source-note"><strong>Demo deck attribution:</strong> Original question wording adapted from OpenStax, <cite>Biology 2e</cite>, Chapters 7–8, Rice University, CC BY 4.0. ${deck.attribution}</p><button class="reset-button" id="reset-button">Start a fresh local session</button></article>`;
   root.querySelector('#reset-button').addEventListener('click', () => location.reload());
-  root.querySelector('h2').focus?.();
+  root.querySelector('#practice-button')?.addEventListener('click', () => {
+    practice ??= beginPractice(review);
+    inPractice = true;
+    renderPracticeQuestion();
+  });
   setProgress();
+  root.querySelector('h2').focus();
+}
+
+function escapeHtml(value) {
+  return String(value).replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[char]);
+}
+
+function renderReviewItem(item, index) {
+  const retry = practice?.answers.find(answer => answer.item === item.id);
+  const practiceAnswer = retry
+    ? `<div class="review-practice-answer"><strong>Practice answer · ${retry.correct ? 'correct on retry' : 'keep reviewing'}</strong><p>${escapeHtml(item.options[retry.choice])}</p></div>`
+    : '';
+  return `<details class="review-item"><summary><span class="review-label">${String(index + 1).padStart(2, '0')} · ${escapeHtml(conceptLabel(item.concept))}</span><span class="review-status ${item.correct ? 'is-correct' : 'needs-review'}">${item.correct ? 'Correct' : 'Needs review'} · first try</span><span class="review-prompt">${escapeHtml(item.prompt)}</span></summary><div class="review-body"><dl class="review-answers"><div><dt>Your first answer</dt><dd>${escapeHtml(item.options[item.choice])}</dd></div><div><dt>Correct answer</dt><dd>${escapeHtml(item.options[item.answer])}</dd></div></dl><p>${escapeHtml(item.explanation)}</p><p class="review-transfer"><strong>Apply the idea:</strong> ${escapeHtml(item.transfer)}</p>${practiceAnswer}</div></details>`;
+}
+
+function renderPracticeSummary() {
+  const missed = review.filter(item => !item.correct).length;
+  if (!missed) return '<section class="practice-summary"><h3>Every connection held on the first try.</h3><p>Revisit any explanation below, then try applying the energy pathway in your own words.</p></section>';
+  const total = practice?.items.length ?? missed;
+  const count = practice?.answers.length ?? 0;
+  const complete = practice && count === total;
+  const status = complete
+    ? `You answered ${practice.answers.filter(answer => answer.correct).length} of ${total} correctly on retry.`
+    : practice ? `Practice paused: ${count} of ${total} answered. Resume with the next unanswered prompt.`
+    : `Try ${missed === 1 ? 'the missed connection' : `each of the ${missed} missed connections`} once more.`;
+  const button = complete ? '' : `<button class="primary-button" id="practice-button">${practice ? 'Resume practice' : `Practice ${missed} missed ${missed === 1 ? 'connection' : 'connections'}`} <span aria-hidden="true">→</span></button>`;
+  return `<section class="practice-summary" aria-labelledby="practice-title"><h3 id="practice-title">${complete ? 'Practice complete' : 'A second pass'}</h3><p id="practice-status">${status}</p><p class="practice-note">You have seen these explanations. Practice is for recall; your first answers and model estimates stay as they were.</p>${button}</section>`;
+}
+
+function renderPracticeQuestion() {
+  const item = currentPracticeItem(practice);
+  if (!item) return renderResults();
+  const number = practice.answers.length + 1;
+  root.innerHTML = `<article class="question-card practice-card"><div class="question-type">PRACTICE ${number} OF ${practice.items.length} · ${escapeHtml(conceptLabel(item.concept).toUpperCase())}</div><h2>${escapeHtml(item.prompt)}</h2><p class="prompt">Recall the explanation. Choose the best answer once more.</p><p class="practice-note">This retry is recorded separately from your first try and model estimates.</p><div class="choices" role="group" aria-label="Practice answer options">${item.options.map((option, i) => `<button class="choice" data-practice-choice="${i}"><span class="choice-key">${String.fromCharCode(65+i)}</span>${escapeHtml(option)}</button>`).join('')}</div><div id="practice-feedback"></div><button class="text-button practice-back" id="back-to-review">Back to learning trace</button></article>`;
+  let submitted = false;
+  root.querySelectorAll('[data-practice-choice]').forEach(button => button.addEventListener('click', () => {
+    if (submitted) return;
+    const choice = Number(button.dataset.practiceChoice);
+    practice = answerPractice(practice, item.id, choice);
+    submitted = true;
+    const correct = choice === item.answer;
+    root.querySelectorAll('[data-practice-choice]').forEach(option => {
+      option.disabled = true;
+      const selected = Number(option.dataset.practiceChoice);
+      if (selected === item.answer) option.classList.add('correct');
+      else if (selected === choice) option.classList.add('incorrect');
+    });
+    const feedback = root.querySelector('#practice-feedback');
+    feedback.innerHTML = `<div class="feedback"><strong>${correct ? 'That connection holds on retry.' : 'Keep this connection in view.'}</strong><p><strong>Correct answer:</strong> ${escapeHtml(item.options[item.answer])}</p>${escapeHtml(item.explanation)}<span class="why">Apply the idea: ${escapeHtml(item.transfer)}</span></div><button class="primary-button next-button" id="practice-next">${currentPracticeItem(practice) ? 'Next practice connection' : 'See practice results'} <span aria-hidden="true">→</span></button>`;
+    feedback.querySelector('button').addEventListener('click', renderPracticeQuestion);
+    setProgress();
+    feedback.querySelector('button').focus();
+  }));
+  root.querySelector('#back-to-review').addEventListener('click', renderResults);
+  setProgress();
+  root.querySelector('[data-practice-choice]').focus({preventScroll:true});
 }
 
 document.querySelector('#simulation-button').addEventListener('click', () => {
