@@ -29,6 +29,12 @@ Each saved HTML file opens and prints offline on its own. The worksheet file con
 
 ## Bring your own lesson
 
+Open the **[Course catalog](catalog.html)** to browse supplied courses, search their
+titles and concepts, read source and permission statements, and download an original
+course file. In the learner, choose that file under **Bring your own lesson**, inspect
+the preview, then select **Start this deck**. The catalog also works directly from
+your files without a server or internet connection.
+
 Use **Download example deck** to get an editable JSON copy of the bundled lesson,
 including its original attribution. Replace the lesson content using the
 [deck format guide](docs/deck-format.md), then choose the file under **Bring your
