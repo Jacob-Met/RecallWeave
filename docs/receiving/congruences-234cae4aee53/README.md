@@ -14,3 +14,12 @@ Cloud disks prevented a normal source checkout. Calculation tests executed the e
 The initial draft remains unqualified until the manifest's pending gates complete. The browser receiver uses the repository's existing installed-Chrome/Node22 hosted pattern, with no application dependency or runtime installation. Its raw packet and any failures will be preserved at the actual executed source identity before final acceptance.
 
 The [exact local evaluation adapter](local-exec-adapter.txt) was supplied to `node --input-type=module -e` with one JSON argument containing the exact `core` and `test` texts. It is preserved as evaluation input, not as a differently indexed file-entry CLI. The emitted source hashes in the raw test output bind both inputs.
+
+
+## First hosted run and mobile correction
+
+The exact initial source head `7c4256ef157646576b7219b6635368b60619c08a` ran in GitHub's composed checkout `97abaf0a1775e4b77cb0b717b1f42af1ba7ae578`, based on `5b9b86fc54e1f7538d05c549b2fab02a98af2b50`. [Node logs](hosted-r1-node.log) record 598/598 passing tests and generated-file parity. The catalog browser job also completed successfully.
+
+The [actual congruence browser log](hosted-r1-browser.log) records five passing groups followed by a real failure: after a 72-digit selection on the 390px viewport, the document overflowed horizontally. The exact integers and successor carry had passed. Remaining browser groups did not execute. [The complete raw browser packet](browser-r1.packet.json) preserves all seventeen original members, including snapshots, screenshots, downloaded JSON and the failure receipt. It is an ASCII JSON container with each original member encoded as base64 and independently checked against its recorded byte count and SHA256; the outer file is preserved without an added newline. Its SHA256 is `c35ca849a346500815c6e9b856ecd2c0291fe406f67f371a8d7b51d0169f3061`.
+
+[Revision 2](revision-2.json) changes only paragraph wrapping in the template and regenerates the self-contained page. The mathematical core, UI logic, questions, guide and receiving script remain byte-identical. The original source manifest above continues to identify revision 1. Revision 2 remains pending actual hosted execution; the same receiver will qualify the fix.
