@@ -1,0 +1,418 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vector geometry explorer — RecallWeave</title>
+<style>
+:root{color-scheme:light;--paper:#f5f3ed;--ink:#292d2a;--muted:#60655e;--edge:#dcded4;--b:#6541a5;--p:#196a53;--r:#ab4a20;--a:#666c73}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.55 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}button,input{font:inherit}button{cursor:pointer}button:focus-visible,input:focus-visible,a:focus-visible{outline:3px solid var(--b);outline-offset:3px}main{max-width:1160px;margin:0 auto;padding:42px 30px 28px}.eyebrow{font-size:12px;font-weight:700;letter-spacing:.14em;color:var(--p);margin:0 0 12px}h1{font-size:clamp(29px,4vw,43px);line-height:1.13;letter-spacing:-.035em;margin:0 0 15px;max-width:800px}.intro{max-width:760px;color:var(--muted);margin:0 0 26px}.workspace{display:grid;grid-template-columns:minmax(280px,350px) minmax(0,1fr);gap:22px;align-items:start}.panel{background:#fffefb;border:1px solid var(--edge);border-radius:18px;padding:24px;min-width:0}h2{font-size:19px;line-height:1.3;margin:0 0 13px}h3{font-size:15px;margin:0 0 10px}.hint,.caption,.footer{color:var(--muted);font-size:13px}.hint{margin:0 0 20px}fieldset{border:0;margin:0 0 22px;padding:0;min-width:0}legend{padding:0;margin:0 0 10px;font-weight:700}.b{color:var(--b)}.p{color:var(--p)}.r{color:var(--r)}.coordinates{display:grid;grid-template-columns:1fr 1fr;gap:12px}.coordinates label{font-size:13px;font-weight:600;color:var(--muted)}input{display:block;width:100%;min-width:0;border:1px solid #bfc4b8;border-radius:8px;background:white;color:var(--ink);padding:9px 10px;margin-top:5px;min-height:45px}input[aria-invalid=true]{border-color:#b03829}.presets{display:grid;grid-template-columns:1fr 1fr;gap:8px}.preset{background:#f4f5ee;color:var(--ink);border:1px solid #d6dacd;border-radius:8px;padding:10px 9px;text-align:left;font-size:13px;line-height:1.35;min-height:48px}.preset[aria-pressed=true]{border-color:var(--p);background:#e9f2ec;box-shadow:inset 0 0 0 1px var(--p)}.preset span{display:block;color:var(--muted);font-size:11px;margin-top:3px}.error{color:#a12d22;font-weight:600;font-size:14px;margin:18px 0 0}.plot-panel{padding:16px 18px 22px}.plot-panel h2{margin:8px 6px 0}.plot{width:100%;height:auto;display:block;overflow:hidden}.plot text{font-family:system-ui,sans-serif;font-size:16px;fill:#656b63}.plot .vector-label{font-size:21px;font-weight:750;paint-order:stroke;stroke:#fffefb;stroke-width:5px;stroke-linejoin:round}.gridline{stroke:#ebece5;stroke-width:1}.axis{stroke:#adb4a8;stroke-width:1.5}.legend{display:flex;flex-wrap:wrap;gap:7px 17px;padding:0 8px;font-size:13px}.legend span{white-space:nowrap}.swatch{display:inline-block;width:22px;height:0;border-top:4px solid;vertical-align:middle;margin-right:6px}.swatch.residual{border-top-style:dashed}.caption{margin:13px 8px 0}.summary{font-size:16px;margin:22px 0 16px;font-weight:600}.facts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.fact{border-top:1px solid var(--edge);padding-top:12px;min-width:0}.fact dt{font-size:12px;color:var(--muted);margin:0 0 5px}.fact dd{font-size:18px;font-weight:650;margin:0;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}.equations{padding:17px 18px;background:#edf3ec;border:1px solid #d9e5d7;border-radius:12px;margin-top:19px;font-size:14px}.equations p{margin:0 0 8px;overflow-wrap:anywhere}.equations p:last-child{margin:0}.reading{display:grid;grid-template-columns:1fr 1fr;gap:26px;margin:25px 0 0}.reading p{font-size:14px;color:var(--muted);margin:0}.reading h2{font-size:18px;margin-bottom:9px}.download{display:inline-block;background:var(--p);color:white;border:0;border-radius:9px;padding:12px 15px;font-weight:650;min-height:46px;margin:16px 0 8px}.download-status{font-size:13px;color:var(--muted);min-height:1.5em;margin:0}footer{border-top:1px solid var(--edge);margin-top:27px;padding-top:18px}.footer a{color:var(--p)}[hidden]{display:none!important}@media(max-width:790px){main{padding:28px 18px}.workspace{grid-template-columns:1fr}.controls{padding:22px}.plot-panel{padding:14px}.facts{grid-template-columns:repeat(2,minmax(0,1fr))}.reading{grid-template-columns:1fr;gap:22px}.coordinates{gap:15px}.presets{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<main>
+  <p class="eyebrow">RECALLWEAVE / VECTOR GEOMETRY</p>
+  <h1>See what a projection keeps.</h1>
+  <p class="intro">Change a vector and the direction of a line through the origin. The projection stays on the line; the residual shows what is left over. Try the course example, then compare a longer direction for the same line.</p>
+  <div class="workspace">
+    <section class="panel controls" aria-labelledby="controls-heading">
+      <h2 id="controls-heading">Choose the geometry</h2>
+      <p class="hint">Coordinates use perpendicular axes with equal units. Enter values from −6 to 6 in steps of 0.25.</p>
+      <form id="geometry-form">
+        <fieldset><legend class="b">Vector b</legend><div class="coordinates"><label for="bx">x component<input id="bx" type="number" min="-6" max="6" step="0.25" value="3" required></label><label for="by">y component<input id="by" type="number" min="-6" max="6" step="0.25" value="4" required></label></div></fieldset>
+        <fieldset><legend>Line direction a</legend><div class="coordinates"><label for="ax">x component<input id="ax" type="number" min="-6" max="6" step="0.25" value="2" required></label><label for="ay">y component<input id="ay" type="number" min="-6" max="6" step="0.25" value="1" required></label></div></fieldset>
+      </form>
+      <h3>Try a relationship</h3>
+      <div class="presets" role="group" aria-label="Example vector relationships">
+        <button class="preset" data-preset="example" aria-pressed="true">Course example<span>b = (3, 4), a = (2, 1)</span></button>
+        <button class="preset" data-preset="same-line" aria-pressed="false">Same line, longer a<span>b = (3, 4), a = (4, 2)</span></button>
+        <button class="preset" data-preset="perpendicular" aria-pressed="false">Perpendicular to a<span>b = (−1, 2), a = (2, 1)</span></button>
+        <button class="preset" data-preset="along" aria-pressed="false">Already on the line<span>b = (4, 2), a = (2, 1)</span></button>
+      </div>
+      <p id="geometry-error" class="error" role="alert" hidden></p>
+    </section>
+    <section class="panel plot-panel" aria-labelledby="plot-heading">
+      <h2 id="plot-heading">One vector, two perpendicular parts</h2>
+      <svg class="plot" id="geometry-plot" viewBox="0 0 600 600" role="img" aria-labelledby="plot-title plot-description">
+        <title id="plot-title">Vector projection on a line through the origin</title>
+        <desc id="plot-description">The current vector, its projection, and its residual are drawn on the same coordinate axes.</desc>
+        <defs>
+          <clipPath id="line-clip"><rect x="50" y="50" width="500" height="500"/></clipPath>
+          <marker id="arrow-b" markerWidth="9" markerHeight="9" refX="7.5" refY="4.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L9,4.5 L0,9 Z" fill="#6541a5"/></marker>
+          <marker id="arrow-p" markerWidth="9" markerHeight="9" refX="7.5" refY="4.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L9,4.5 L0,9 Z" fill="#196a53"/></marker>
+          <marker id="arrow-r" markerWidth="9" markerHeight="9" refX="7.5" refY="4.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L9,4.5 L0,9 Z" fill="#ab4a20"/></marker>
+          <marker id="arrow-a" markerWidth="8" markerHeight="8" refX="6.5" refY="4" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L8,4 L0,8 Z" fill="#666c73"/></marker>
+        </defs>
+        <g id="axes"></g><g id="geometry-lines"></g>
+      </svg>
+      <div class="legend" aria-label="Plot key"><span class="b"><i class="swatch" aria-hidden="true"></i>b: original vector</span><span class="p"><i class="swatch" aria-hidden="true"></i>p: projection</span><span class="r"><i class="swatch residual" aria-hidden="true"></i>r: residual</span></div>
+      <p class="caption">The gray line continues in both directions. The short gray arrow marks a; changing its length alone keeps the line in the same place.</p>
+    </section>
+  </div>
+  <section id="geometry-result" aria-labelledby="result-heading">
+    <h2 id="result-heading" class="summary" aria-live="polite"></h2>
+    <dl class="facts">
+      <div class="fact"><dt>Original vector b</dt><dd id="value-b"></dd></div><div class="fact"><dt>Projection p</dt><dd id="value-p" class="p"></dd></div><div class="fact"><dt>Residual r = b − p</dt><dd id="value-r" class="r"></dd></div>
+      <div class="fact"><dt>Dot product b · a</dt><dd id="value-dot"></dd></div><div class="fact"><dt>Squared direction length a · a</dt><dd id="value-aa"></dd></div><div class="fact"><dt>Residual dot direction r · a</dt><dd id="value-check"></dd></div>
+    </dl>
+    <div class="equations"><p id="projection-equation"></p><p id="reconstruction-equation"></p><p>Shown values are rounded to three decimal places. In the exact geometry, the residual's dot product with the line direction is zero.</p></div>
+  </section>
+  <section class="reading" aria-label="Use the result">
+    <article><h2>Check both parts</h2><p>The projection must lie on the line, and b minus that point must be perpendicular to the line. A perpendicular arrow pointing the other way does not reconstruct b. For a nonzero direction a, the coefficient is (b · a) / (a · a).</p></article>
+    <article><h2>Connect it to the course</h2><p>The twelve-question lesson continues from displacements and unit directions to dot products, projection, matrix actions and operation order. Download the local JSON, choose it in RecallWeave's deck importer, review it, and explicitly start the lesson.</p><button class="download" id="download-course">Download the 12-question course</button><p id="download-status" class="download-status" role="status"></p></article>
+  </section>
+  <footer class="footer">Original RecallWeave teaching material · Coordinates stay in this page; no account, storage or network is needed. Background: <a href="https://ocw.mit.edu/courses/18-06sc-linear-algebra-fall-2011/pages/least-squares-determinants-and-eigenvalues/projections-onto-subspaces/">MIT OpenCourseWare, projections onto subspaces</a>.</footer>
+</main>
+<script id="geometry-core">
+function calculateProjection(b, a) {
+  for (const vector of [b, a]) {
+    if (!Array.isArray(vector) || vector.length !== 2 || vector.some(value =>
+      typeof value !== 'number' || !Number.isFinite(value) || Math.abs(value) > 6 || !Number.isInteger(value * 4))) {
+      throw new RangeError('Use coordinates from -6 to 6 in steps of 0.25.');
+    }
+  }
+  const squaredLength = a[0] * a[0] + a[1] * a[1];
+  if (squaredLength === 0) throw new RangeError('The line direction cannot be (0, 0). Change one direction component to choose a line.');
+  const dot = b[0] * a[0] + b[1] * a[1];
+  const coefficient = dot / squaredLength;
+  const projection = a.map(value => coefficient * value);
+  const residual = b.map((value, index) => value - projection[index]);
+  return { b: b.slice(), a: a.slice(), squaredLength, dot, coefficient, projection, residual,
+    residualDotDirection: residual[0] * a[0] + residual[1] * a[1] };
+}
+</script>
+<script id="course-data" type="application/json">{
+  "format": "recallweave-deck/1",
+  "title": "Vector geometry: moves, projections and transformations",
+  "attribution": "Original questions, distractors, explanations and transfer prompts authored for RecallWeave by the HAMON estate contribution estate-db371a37f4c8. Mathematical background: MIT OpenCourseWare, Calculus with Applications, Chapter 3 (vectors, dot products and matrix multiplication), https://ocw.mit.edu/ans7870/18/18.013a/textbook/HTML/chapter03/contents.html ; MIT 18.06SC Linear Algebra (projections, multiplication and inverse matrices), https://ocw.mit.edu/courses/18-06sc-linear-algebra-fall-2011/ . Reference text, figures and exercises are not included.",
+  "license": "This file makes no separate reuse-license grant. Its question wording, explanations and transfer prompts are newly authored for RecallWeave. Linked reference materials retain their own terms.",
+  "concepts": [
+    "Displacement",
+    "Length and direction",
+    "Dot products",
+    "Projection",
+    "Matrix actions",
+    "Order and information"
+  ],
+  "items": [
+    {
+      "id": "vg-move",
+      "concept": "Displacement",
+      "prerequisites": [],
+      "prompt": "A marker moves from P = (1, -2) to Q = (5, 1) in a Cartesian plane. The first coordinate is x and the second is y. What is the displacement Q - P?",
+      "options": [
+        "(6, -1)",
+        "(4, 3)",
+        "(-4, -3)",
+        "(4, -3)"
+      ],
+      "answer": 1,
+      "explanation": "Subtract the starting coordinate from the ending coordinate in each component: Q - P = (5 - 1, 1 - (-2)) = (4, 3). The marker moves 4 units in the positive x direction and 3 in the positive y direction. Adding the positions gives (6, -1), which is not this displacement. Reversing the subtraction gives the move from Q back to P.",
+      "transfer": "Move the whole diagram by (10, 7): P becomes (11, 5) and Q becomes (15, 8). Find the displacement again. Explain why translating both endpoints leaves the displacement unchanged."
+    },
+    {
+      "id": "vg-combine",
+      "concept": "Displacement",
+      "prerequisites": [],
+      "prompt": "A marker first moves by u = (3, -1), then by v = (-2, 4), using the same fixed coordinate axes. What single displacement has the same final effect?",
+      "options": [
+        "(5, -5)",
+        "(-1, -3)",
+        "(1, 5)",
+        "(1, 3)"
+      ],
+      "answer": 3,
+      "explanation": "Add matching components: u + v = (3 + (-2), -1 + 4) = (1, 3). The second move partly cancels the first move's x component and more than cancels its negative y component. Subtraction would compare the moves instead of combining them. The vector describes the net change in position, not the total distance traveled along both legs.",
+      "transfer": "Start at (4, 2) and apply the two moves. Then apply the single net move to the same starting point. Check that the final positions agree, while the lengths of the traveled paths need not agree."
+    },
+    {
+      "id": "vg-length",
+      "concept": "Length and direction",
+      "prerequisites": [
+        "Displacement"
+      ],
+      "prompt": "In a plane with perpendicular x and y axes measured in the same units, a displacement is v = (-3, 4). What is its Euclidean length, in those units?",
+      "options": [
+        "5",
+        "7",
+        "25",
+        "1"
+      ],
+      "answer": 0,
+      "explanation": "The straight-line length is sqrt((-3)^2 + 4^2) = sqrt(9 + 16) = 5. The sign of an individual component changes direction, not the square used for length. The value 7 is the sum of the absolute components, and 25 is the squared Euclidean length; neither is the Euclidean length asked for.",
+      "transfer": "Compare the length of (-3, 4) with (3, 4) and (6, -8). Which change only reverses a component's direction, and which scales the entire vector's length?"
+    },
+    {
+      "id": "vg-unit",
+      "concept": "Length and direction",
+      "prerequisites": [
+        "Displacement"
+      ],
+      "prompt": "A nonzero vector v = (-3, 4) has Euclidean length 5. Which vector has length 1 and points in the same direction as v?",
+      "options": [
+        "(-3/7, 4/7)",
+        "(3/5, -4/5)",
+        "(-3/5, 4/5)",
+        "(-3, 4)"
+      ],
+      "answer": 2,
+      "explanation": "Divide every component by the positive length: v / 5 = (-3/5, 4/5). Its squared length is 9/25 + 16/25 = 1, and dividing by a positive number preserves direction. The opposite signs point backward. Dividing by 7 uses the wrong length; leaving the components unchanged keeps length 5. A zero vector has no direction to preserve and cannot be normalized this way.",
+      "transfer": "Normalize (6, 8), then multiply the unit vector by 12. What length does the resulting vector have, and why should its direction be unchanged?"
+    },
+    {
+      "id": "vg-dot",
+      "concept": "Dot products",
+      "prerequisites": [
+        "Displacement",
+        "Length and direction"
+      ],
+      "prompt": "Let u = (2, 1) and v = (-1, 2). Their Euclidean dot product is u·v = u_x v_x + u_y v_y. What is u·v?",
+      "options": [
+        "2",
+        "-4",
+        "0",
+        "4"
+      ],
+      "answer": 2,
+      "explanation": "Multiply matching components and add: 2(-1) + 1(2) = -2 + 2 = 0. Because both vectors are nonzero, a zero Euclidean dot product means they are perpendicular. The negative contribution from one axis cancels the positive contribution from the other; taking absolute values first would lose that information.",
+      "transfer": "Replace v with (1, 2). Compute the new dot product and decide whether the two nonzero vectors still meet at a right angle."
+    },
+    {
+      "id": "vg-component",
+      "concept": "Dot products",
+      "prerequisites": [
+        "Length and direction"
+      ],
+      "prompt": "A displacement is v = (4, -3). The unit vector d = (0, 1) points along positive y. The signed component of v along d is v·d. What is that signed component?",
+      "options": [
+        "-3",
+        "3",
+        "4",
+        "5"
+      ],
+      "answer": 0,
+      "explanation": "Compute 4(0) + (-3)(1) = -3. The negative sign says the displacement goes opposite to d in the y direction. A signed component is not the full length: v has length 5, and its x component is 4. The direction vector must have length 1 for this dot product to equal the signed component; using a longer direction vector would scale the dot product.",
+      "transfer": "Use d = (0, -1) instead. Explain why the same physical displacement now has signed component +3 along the new direction, without changing its length."
+    },
+    {
+      "id": "vg-project",
+      "concept": "Projection",
+      "prerequisites": [
+        "Dot products"
+      ],
+      "prompt": "A straight line through the origin has direction a = (2, 1). For b = (3, 4), which point is the orthogonal projection of b onto that line, using Euclidean distance?",
+      "options": [
+        "(3, 4)",
+        "(10, 5)",
+        "(2, 1)",
+        "(4, 2)"
+      ],
+      "answer": 3,
+      "explanation": "For a nonzero direction a, the projection is p = ((b·a)/(a·a))a. Here b·a = 3(2) + 4(1) = 10 and a·a = 2^2 + 1^2 = 5, so p = 2a = (4, 2). This lies on the line. The residual b - p = (-1, 2) has dot product -2 + 2 = 0 with a, confirming that the remaining displacement is perpendicular. Dividing only by a component, or treating a as a unit vector, changes the answer.",
+      "transfer": "Replace the line direction a by (4, 2), which describes the same line. Recompute the formula and explain why the projected point remains (4, 2)."
+    },
+    {
+      "id": "vg-residual",
+      "concept": "Projection",
+      "prerequisites": [
+        "Displacement",
+        "Dot products"
+      ],
+      "prompt": "The orthogonal projection of b = (5, -1) onto the line y = x is p = (2, 2). Which residual b - p is perpendicular to that line?",
+      "options": [
+        "(2, 2)",
+        "(3, -3)",
+        "(-3, 3)",
+        "(7, 1)"
+      ],
+      "answer": 1,
+      "explanation": "Subtract the projected point from the original vector: b - p = (5 - 2, -1 - 2) = (3, -3). Its dot product with line direction (1, 1) is 3 - 3 = 0. Also p + (b - p) reconstructs b. The vector (-3, 3) is perpendicular too, but it is p - b, not the requested residual. Perpendicularity alone does not determine the sign of the residual.",
+      "transfer": "Check both conditions for a proposed projection: the proposed point lies on the line, and the original vector minus that point is perpendicular to the line. Why is checking only one condition insufficient?"
+    },
+    {
+      "id": "vg-matrix",
+      "concept": "Matrix actions",
+      "prerequisites": [
+        "Displacement",
+        "Dot products"
+      ],
+      "prompt": "A matrix M has first row (2, 1) and second row (0, 3). It multiplies the column vector v = (1, -2); each output component is the dot product of one row with v. What is Mv?",
+      "options": [
+        "(0, -6)",
+        "(4, -6)",
+        "(0, 6)",
+        "(2, -5)"
+      ],
+      "answer": 0,
+      "explanation": "The first output is 2(1) + 1(-2) = 0. The second is 0(1) + 3(-2) = -6. Therefore Mv = (0, -6). A matrix acts on both components together; it is not a vector to add to v. Stating that v is a column vector fixes which row products are intended and avoids silently switching conventions.",
+      "transfer": "Apply the same matrix to (1, 0) and to (0, 1). Relate the two outputs to the columns of M, then use them to reconstruct the output for (1, -2)."
+    },
+    {
+      "id": "vg-basis",
+      "concept": "Matrix actions",
+      "prerequisites": [
+        "Displacement"
+      ],
+      "prompt": "A linear map T sends e1 = (1, 0) to (2, 1), and e2 = (0, 1) to (-1, 3). Since (3, 2) = 3e1 + 2e2, what is T(3, 2)?",
+      "options": [
+        "(1, 4)",
+        "(8, 3)",
+        "(4, 9)",
+        "(3, 2)"
+      ],
+      "answer": 2,
+      "explanation": "Linearity preserves the weighted sum: T(3e1 + 2e2) = 3T(e1) + 2T(e2). Thus the output is 3(2, 1) + 2(-1, 3) = (6, 3) + (-2, 6) = (4, 9). Simply adding the two images forgets the coefficients 3 and 2. With column-vector multiplication, the images of e1 and e2 are the matrix's columns, not its rows.",
+      "transfer": "Use the same two basis-vector images to find T(-1, 2). Explain why a linear map's action on a basis determines its action on every vector in that plane."
+    },
+    {
+      "id": "vg-order",
+      "concept": "Order and information",
+      "prerequisites": [
+        "Matrix actions"
+      ],
+      "prompt": "Use +x to the right and +y upward. A quarter-turn counterclockwise about the origin sends (x, y) to (-y, x). A horizontal stretch sends (x, y) to (2x, y). Starting at (1, 2), first apply the quarter-turn, then the stretch. Where does the point end?",
+      "options": [
+        "(-2, 2)",
+        "(-4, 1)",
+        "(4, -1)",
+        "(-2, 1)"
+      ],
+      "answer": 1,
+      "explanation": "The quarter-turn sends (1, 2) to (-2, 1). Applying the stretch to that result gives (-4, 1). Reversing the operations gives a different point: stretch first to (2, 2), then rotate to (-2, 2). With column vectors, the requested composition is S(Rv) = (SR)v: the rightmost operation acts first. Individual linear operations can each be well-defined while their order still matters.",
+      "transfer": "Try the two orders from (2, 1). Then consider a uniform stretch (x, y) → (2x, 2y). Explain why this different stretch commutes with the quarter-turn, although the horizontal-only stretch does not."
+    },
+    {
+      "id": "vg-loss",
+      "concept": "Order and information",
+      "prerequisites": [
+        "Matrix actions",
+        "Projection"
+      ],
+      "prompt": "A flattening map F sends every point (x, y) to (x, 0). Which pair of distinct inputs produces the same output, showing that the original input cannot always be recovered uniquely?",
+      "options": [
+        "(3, 1) and (5, 1)",
+        "(0, 3) and (3, 0)",
+        "(1, 3) and (5, 3)",
+        "(3, 1) and (3, 5)"
+      ],
+      "answer": 3,
+      "explanation": "F(3, 1) = (3, 0) and F(3, 5) = (3, 0). The map keeps x but discards y. In fact every point (3, y) gives that same output, so no inverse function on the whole plane can recover the original point from the output alone. The other proposed pairs have different x values and therefore produce different outputs. This flattening is a projection onto the x axis; being linear does not make a map invertible.",
+      "transfer": "Compare F(x, y) = (x, 0) with G(x, y) = (2x, 3y). Write a rule that reverses G and identify the division that prevents the same kind of rule from reversing F on the whole plane."
+    }
+  ]
+}
+</script>
+<script id="geometry-ui">
+(() => {
+  const get = id => document.getElementById(id);
+  const inputs = ['bx', 'by', 'ax', 'ay'].map(get);
+  const presets = { example: [3, 4, 2, 1], 'same-line': [3, 4, 4, 2], perpendicular: [-1, 2, 2, 1], along: [4, 2, 2, 1] };
+  const namespace = 'http://www.w3.org/2000/svg';
+  const point = ([x, y]) => [300 + x * 250 / 9, 300 - y * 250 / 9];
+  const formatted = number => Number((Math.abs(number) < 1e-10 ? 0 : number).toFixed(3)).toString();
+  const pair = vector => '(' + vector.map(formatted).join(', ') + ')';
+  function svg(tag, attributes, text) {
+    const element = document.createElementNS(namespace, tag);
+    for (const [name, value] of Object.entries(attributes)) element.setAttribute(name, String(value));
+    if (text !== undefined) element.textContent = text;
+    return element;
+  }
+  function segment(from, to, attributes = {}) {
+    const [x1, y1] = point(from), [x2, y2] = point(to);
+    return svg('line', { x1, y1, x2, y2, ...attributes });
+  }
+  const axes = get('axes');
+  for (let n = -9; n <= 9; n++) {
+    axes.append(segment([n, -9], [n, 9], { class: n === 0 ? 'axis' : 'gridline' }));
+    axes.append(segment([-9, n], [9, n], { class: n === 0 ? 'axis' : 'gridline' }));
+    if (n !== 0 && n % 3 === 0 && Math.abs(n) < 9) {
+      const x = point([n, 0]), y = point([0, n]);
+      axes.append(svg('text', { x: x[0], y: 323, 'text-anchor': 'middle' }, n));
+      axes.append(svg('text', { x: 283, y: y[1] + 5, 'text-anchor': 'end' }, n));
+    }
+  }
+  axes.append(svg('text', { x: 564, y: 305 }, '+x'), svg('text', { x: 290, y: 36 }, '+y'));
+  axes.append(svg('circle', { cx: 300, cy: 300, r: 3.5, fill: '#656b63' }));
+  function arrow(from, to, name, color, dashed = false) {
+    const group = get('geometry-lines');
+    if (Math.hypot(to[0] - from[0], to[1] - from[1]) > 1e-10) {
+      group.append(segment(from, to, { stroke: color, 'stroke-width': name === 'a' ? 2 : 4,
+        'stroke-dasharray': dashed ? '8 5' : 'none', 'marker-end': 'url(#arrow-' + name + ')' }));
+    }
+    // Put the direction label beside the middle of its arrow. Its endpoint can
+    // equal the projection, including in the same-line teaching preset.
+    const [x, y] = point(name === 'a' ? to.map((value, index) => (value + from[index]) / 2) : to);
+    const offset = name === 'p' ? [12, 23] : name === 'a' ? [-17, -12] : name === 'r' ? [-24, 22] : [12, -12];
+    const text = svg('text', { x: x + offset[0], y: y + offset[1], class: 'vector-label' }, name);
+    text.style.fill = color;
+    group.append(text);
+  }
+  function draw(result) {
+    const group = get('geometry-lines');
+    group.replaceChildren();
+    const length = Math.sqrt(result.squaredLength), direction = result.a.map(value => 15 * value / length);
+    group.append(segment(direction.map(value => -value), direction, { stroke: '#c4c8c0', 'stroke-width': 2.5, 'clip-path': 'url(#line-clip)' }));
+    arrow([0, 0], result.a, 'a', '#666c73');
+    arrow([0, 0], result.projection, 'p', '#196a53');
+    arrow([0, 0], result.b, 'b', '#6541a5');
+    arrow(result.projection, result.b, 'r', '#ab4a20', true);
+  }
+  function render() {
+    const values = inputs.map(input => input.valueAsNumber);
+    inputs.forEach(input => input.removeAttribute('aria-invalid'));
+    for (const button of document.querySelectorAll('[data-preset]')) {
+      button.setAttribute('aria-pressed', String(presets[button.dataset.preset].every((value, index) => value === values[index])));
+    }
+    try {
+      const invalid = inputs.filter(input => !input.validity.valid || !Number.isFinite(input.valueAsNumber));
+      if (invalid.length) {
+        invalid.forEach(input => input.setAttribute('aria-invalid', 'true'));
+        throw new RangeError('Use coordinates from -6 to 6 in steps of 0.25. Complete all four fields.');
+      }
+      const result = calculateProjection(values.slice(0, 2), values.slice(2));
+      get('geometry-error').hidden = true;
+      get('geometry-error').textContent = '';
+      get('geometry-result').hidden = false;
+      get('result-heading').textContent = 'b = ' + pair(result.b) + ' splits into p = ' + pair(result.projection) + ' and r = ' + pair(result.residual) + '.';
+      for (const [id, value] of [['value-b', pair(result.b)], ['value-p', pair(result.projection)], ['value-r', pair(result.residual)],
+        ['value-dot', formatted(result.dot)], ['value-aa', formatted(result.squaredLength)], ['value-check', formatted(result.residualDotDirection)]]) get(id).textContent = value;
+      get('projection-equation').textContent = 'p = ((b · a) / (a · a))a = (' + formatted(result.dot) + ' / ' + formatted(result.squaredLength) + ')a = ' + pair(result.projection);
+      get('reconstruction-equation').textContent = 'p + r = ' + pair(result.projection) + ' + ' + pair(result.residual) + ' = ' + pair(result.b) + ' = b';
+      get('plot-description').textContent = 'Original b ' + pair(result.b) + ', direction a ' + pair(result.a) + ', projection p ' + pair(result.projection) + ', residual r ' + pair(result.residual) + '. Coordinates use equal units and positive y upward.';
+      draw(result);
+    } catch (error) {
+      if (values[2] === 0 && values[3] === 0) { get('ax').setAttribute('aria-invalid', 'true'); get('ay').setAttribute('aria-invalid', 'true'); }
+      get('geometry-result').hidden = true;
+      get('result-heading').textContent = '';
+      get('geometry-lines').replaceChildren();
+      get('plot-description').textContent = 'No calculated geometry is shown. ' + error.message;
+      get('geometry-error').textContent = error.message;
+      get('geometry-error').hidden = false;
+    }
+  }
+  inputs.forEach(input => input.addEventListener('input', render));
+  get('geometry-form').addEventListener('submit', event => { event.preventDefault(); render(); });
+  for (const button of document.querySelectorAll('[data-preset]')) button.addEventListener('click', () => {
+    presets[button.dataset.preset].forEach((value, index) => { inputs[index].value = value; });
+    render();
+  });
+  get('download-course').addEventListener('click', () => {
+    let url;
+    try {
+      const text = get('course-data').textContent.trim() + '\n';
+      url = URL.createObjectURL(new Blob([text], { type: 'application/json' }));
+      const link = document.createElement('a');
+      link.href = url; link.download = 'vector-geometry.json';
+      document.body.append(link); link.click(); link.remove();
+      get('download-status').textContent = 'Course file prepared. Choose it in RecallWeave to preview and start the lesson.';
+    } catch {
+      get('download-status').textContent = 'The course file could not be prepared. Your geometry is unchanged; try the download again.';
+    } finally {
+      if (url) setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+  });
+  render();
+})();
+</script>
+</body>
+</html>
