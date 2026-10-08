@@ -1,0 +1,91 @@
+name: model-walkthrough-browser
+
+on:
+  pull_request:
+    paths:
+      - 'model-walkthrough/**'
+      - 'model-walkthrough.html'
+      - 'src/model-walkthrough*.mjs'
+      - 'src/knowledge.mjs'
+      - 'index.html'
+      - 'demo.html'
+      - 'tools/make_model_walkthrough.py'
+      - 'tools/make_demo.py'
+      - 'tools/check_model_walkthrough_browser.mjs'
+      - '.github/workflows/model-walkthrough-browser.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'model-walkthrough/**'
+      - 'model-walkthrough.html'
+      - 'src/model-walkthrough*.mjs'
+      - 'src/knowledge.mjs'
+      - 'index.html'
+      - 'demo.html'
+      - 'tools/make_model_walkthrough.py'
+      - 'tools/make_demo.py'
+      - 'tools/check_model_walkthrough_browser.mjs'
+      - '.github/workflows/model-walkthrough-browser.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  receive-walkthrough:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4, inherited project pin
+      - name: Require cached Node 22 and an installed system browser
+        id: native
+        shell: bash
+        run: |
+          set -euo pipefail
+          WALKTHROUGH_NODE_VERSION=
+          for WALKTHROUGH_NODE_DIR in "${RUNNER_TOOL_CACHE}/node"/22.*; do
+            if [[ -x "${WALKTHROUGH_NODE_DIR}/x64/bin/node" && -f "${WALKTHROUGH_NODE_DIR}/x64.complete" ]]; then
+              WALKTHROUGH_NODE_VERSION="${WALKTHROUGH_NODE_DIR##*/}"
+            fi
+          done
+          [[ -n "${WALKTHROUGH_NODE_VERSION}" ]] || { echo "A complete cached Node 22 is required; no runtime will be installed."; exit 1; }
+          printf 'node=%s\n' "${WALKTHROUGH_NODE_VERSION}" >> "${GITHUB_OUTPUT}"
+          WALKTHROUGH_BROWSER=
+          for WALKTHROUGH_BROWSER_NAME in google-chrome google-chrome-stable chromium chromium-browser; do
+            if command -v "${WALKTHROUGH_BROWSER_NAME}" >/dev/null 2>&1; then
+              WALKTHROUGH_BROWSER="$(command -v "${WALKTHROUGH_BROWSER_NAME}")"
+              break
+            fi
+          done
+          [[ -n "${WALKTHROUGH_BROWSER}" ]] || { echo "An installed Chrome/Chromium is required; no browser will be installed."; exit 1; }
+          printf 'browser=%s\n' "${WALKTHROUGH_BROWSER}" >> "${GITHUB_OUTPUT}"
+          "${WALKTHROUGH_BROWSER}" --version
+          command -v python3
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4, inherited project pin
+        with:
+          node-version: ${{ steps.native.outputs.node }}
+      - name: Verify the direct-open walkthrough matches its modular sources
+        run: python3 tools/make_model_walkthrough.py --check
+      - name: Receive served modular arithmetic, editing, downloads and the lesson link
+        shell: bash
+        run: |
+          set -euo pipefail
+          {
+            git show -s --format='source_commit=%H%nsource_tree=%T' HEAD
+            node --version
+            node tools/check_model_walkthrough_browser.mjs --browser "${{ steps.native.outputs.browser }}" --output "${RUNNER_TEMP}/model-walkthrough-receiving" --entry modular
+          } 2>&1 | tee "${RUNNER_TEMP}/model-walkthrough-receiver.log"
+      - name: Preserve original browser evidence without its disposable profile
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4, inherited project pin
+        with:
+          name: model-walkthrough-receiving-${{ github.run_id }}
+          path: |
+            ${{ runner.temp }}/model-walkthrough-receiving/result.json
+            ${{ runner.temp }}/model-walkthrough-receiving/*.png
+            ${{ runner.temp }}/model-walkthrough-receiving/*-download.txt
+            ${{ runner.temp }}/model-walkthrough-receiving/browser-stderr.log
+            ${{ runner.temp }}/model-walkthrough-receiving/downloads/*
+            ${{ runner.temp }}/model-walkthrough-receiver.log
+          if-no-files-found: warn
+          retention-days: 14
+          compression-level: 6

@@ -6,6 +6,12 @@
 
 Open `demo.html` directly in a browser—no server, install, build step, internet, login, API key, or user data storage is required. It is a single self-contained file with embedded CSS, JavaScript and deck. The modular source is in `index.html`, `src/`, and `data/`; to test that version locally, serve this directory with `python3 -m http.server 8080` and visit `http://localhost:8080`. Rebuild the direct-open demo with `python3 tools/make_demo.py` after source changes. No hosted endpoint is called by either version.
 
+## See how the model updates
+
+Open **[How an estimate changes](model-walkthrough.html)** for an optional offline walkthrough of the same update function used by the lesson. Try hypothetical correct and incorrect responses for one concept, edit the four illustrative probabilities, and inspect the evidence and learning contributions for any response. Download the applied walkthrough at full JavaScript precision. It does not read or change a learner session; the estimate is model state, not a grade or a calibrated guarantee of knowledge.
+
+The [walkthrough guide](docs/model-walkthrough.md) explains the arithmetic, zero-likelihood refusals and scope. The modular page is in `model-walkthrough/`; rebuild or verify the standalone file with `python3 tools/make_model_walkthrough.py` or `python3 tools/make_model_walkthrough.py --check`.
+
 ## Follow recursive calls and returns
 
 Open **[Calls go down. Answers come back.](courses/recursion-call-stack-explorer.html)** directly in a browser to step through factorial, Fibonacci, and memoized Fibonacci. Inspect each caller’s suspended calculation, saved child values, actual return order, and a fresh cache. Previous, Next, and the event selector revisit exact snapshots; the completed-run comparison separates total invocations, computed calls, cache hits, and maximum active depth.
