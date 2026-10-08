@@ -1,0 +1,9 @@
+# Final receiving
+
+PR132 merged as 84d5a718c4075107dc2d0e13ba76e7cda4942532 (tree1871b2e6784174db3e16b690dd8f09ffeb49e32f), preserving all35 owned leaves and all2,255 unrelated parent leaves/modes. Source review: https://github.com/Jacob-Met/RecallWeave/pull/132#issuecomment-6066957882.
+
+Actual PR gates: 542/542 Node tests,13/13 feedback checks with2 exact lesson downloads,11 catalog groups with25 exact course downloads. Actual merged source:549/549 Node tests and13/13 feedback checks with2 downloads. The first merge catalog attempt timed out at the last direct-file course after24 verified saves; all evidence remains in merge-attempt1. One ordinary failed-job retry on unchanged source, oracle and timeout passed all11 groups and25 downloads. All24 consumed source hashes match; all25 unique-GUID downloads match the11 original course hashes;58 document audits and all13+1+11 object URLs released exactly once. Both merged browser runs close normally; no page,harness,external-request or cleanup errors. The initial missing completion's cause remains unknown.
+
+The live HTTPS demo was received with normal trusted TLS at2026-10-08T19:11:15Z:97,716bytes,SHA2569dff3fa7343b586bccb1c97e8cc9e270e9be9ceac0e9259af57a8756d451d380, exactly merged demo blob42f991e0ceab6144e24b667f59905777d9659246. See live-demo.json.
+
+The raw logs contain complete indexed lossless base64 packets for all decoded files and screenshots; corresponding receipts record exact lengths and hashes. Baseline five missing-label failures remain in the merged native evidence; no negative result was discarded. This qualification covers visible and accessibility-tree text, keyboard/file actions, source preservation and canonical lesson state; it is not screen-reader certification or a whole-application accessibility claim. Shared question-phase resume issue81 remains outside this change.
