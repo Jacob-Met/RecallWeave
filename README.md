@@ -393,3 +393,13 @@ The [original twelve-question course](courses/momentum-collisions.json) imports 
 Open **[Straight steps. Curved paths.](courses/bezier-curves-explorer.html)** directly in a browser to construct a linear, quadratic or cubic Bézier curve from exact fractions. Inspect each interpolation level, split the curve into two exact subcurves, and compare derivatives with parameter-dependent travel. The tables preserve signed rational coordinates, including stationary and coincident-control cases.
 
 Download the original [sixteen-question lesson](courses/bezier-curves.json) and [worked guide](courses/bezier-curves.md), then use **Bring your own lesson** for the existing learner, review, practice and study-notes flow. The standalone page works offline without installation or automatic storage. Rebuild it with `node tools/build-bezier-curves.mjs`; use `--check` to verify parity with its exact sources and validated course.
+
+## Newton’s method: follow the tangent, inspect the result
+
+Open the **[Newton method explorer](courses/newton-method-explorer.html)** directly in a browser. Choose one of eight examples or enter a polynomial of degree at most three and an exact starting value. Follow each tangent intercept, inspect the exact residual and derivative, and compare an approaching square root, a horizontal tangent, an exact two-cycle and a repeated root. Every completed point is retained in a downloadable exact record.
+
+An exact root, a zero slope away from a root, a repeated cycle, a chosen step limit and an arithmetic limit have separate outcomes. Rounded plotting coordinates never determine those outcomes. Editing any input retires the previous record until the next explicit run.
+
+Download the **[twelve-question lesson](courses/newton-method.json)** from the explorer or this link, then use the existing learner’s file preview and **Start this deck** controls. The **[worked guide](courses/newton-method.md)** derives the tangent update and the original examples, with exact fractions and explicit limits. The explorer includes the exact lesson and guide download bytes and works as a standalone local file.
+
+Build with node tools/build-newton-method.mjs; add --check to verify its generated page. Run the focused checks with node --test tests/newton-method.test.mjs tests/newton-method-course.test.mjs. The [receiving packet](docs/receiving/newton-method-c77045b4/README.md) contains independent mathematical and actual browser/course evidence.
