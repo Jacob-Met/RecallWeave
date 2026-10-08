@@ -1,0 +1,863 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Calls, returns, and remembered work · RecallWeave</title>
+<meta name="description" content="An offline recursion explorer. Step through factorial and Fibonacci, inspect suspended callers, and compare a fresh memoized run.">
+<style>
+:root{color-scheme:light;--paper:#f7f5ee;--ink:#172e2b;--muted:#536761;--line:#d4ddd4;--teal:#135e50;--pale:#e6f1e8;--gold:#ecd6a0;--white:#fffef9;--violet:#674a8b}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+a{color:var(--teal);text-underline-offset:3px}button,input,select{font:inherit}button,a,input,select{touch-action:manipulation}
+button{border:1px solid var(--line);border-radius:9px;padding:.65rem .9rem;background:var(--white);color:var(--ink);cursor:pointer;font-weight:650}
+button:hover:not(:disabled){border-color:var(--teal);background:var(--pale)}
+button:disabled{opacity:.45;cursor:default}
+:focus-visible{outline:3px solid #ce8d2c;outline-offset:3px}
+.primary{background:var(--teal);border-color:var(--teal);color:white}.primary:hover:not(:disabled){background:#0b473b;color:white}
+.skip{position:absolute;left:1rem;top:-5rem;z-index:4;background:white;padding:.7rem}.skip:focus{top:1rem}
+.shell{max-width:1220px;margin:0 auto;padding:0 28px}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:24px 0;border-bottom:1px solid var(--line)}
+.brand{font-weight:800;letter-spacing:-.04em;font-size:1.25rem;text-decoration:none;color:var(--ink)}
+.toplinks{display:flex;gap:1.1rem;align-items:center;font-size:.85rem}
+.offline{display:inline-flex;align-items:center;gap:.4rem;font-size:.73rem;font-weight:750;text-transform:uppercase;letter-spacing:.08em}
+.offline:before{content:"";width:7px;height:7px;border-radius:50%;background:var(--teal)}
+.hero{padding:44px 0 30px;display:grid;grid-template-columns:minmax(0,1.3fr) minmax(260px,.7fr);gap:3rem;align-items:end}
+.eyebrow{font-size:.73rem;letter-spacing:.13em;font-weight:750;text-transform:uppercase;color:var(--teal);margin:0 0 .7rem}
+h1{font-family:Georgia,"Times New Roman",serif;font-weight:500;letter-spacing:-.045em;font-size:clamp(2.4rem,4.8vw,4.1rem);line-height:1.05;margin:0;max-width:700px}
+.hero-copy{font-size:1rem;color:var(--muted);margin:0;max-width:420px}
+.hero-copy strong{color:var(--ink)}
+.setup{background:var(--ink);color:white;border-radius:14px;padding:20px 24px;display:grid;grid-template-columns:minmax(190px,1fr) minmax(110px,.48fr) auto;gap:12px 20px;align-items:end}
+.setup label{font-size:.76rem;font-weight:750;letter-spacing:.04em;display:block;margin-bottom:6px}
+.setup input,.setup select{width:100%;min-width:0;border:1px solid #96b6a9;border-radius:8px;background:#fdfdf7;color:var(--ink);padding:.65rem .7rem}
+.setup .primary{background:var(--gold);color:var(--ink);border-color:var(--gold);min-height:48px}
+.setup .primary:hover{background:#f3e1b9;color:var(--ink)}
+.setup-note{grid-column:1/-1;color:#d4e3dc;font-size:.8rem;margin:0}
+.error{color:#ffe5a7;font-size:.85rem;margin:0;grid-column:1/-1;min-height:0}.error:empty{display:none}
+.workspace{margin:22px 0 26px;background:var(--white);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.toolbar{padding:18px 22px;border-bottom:1px solid var(--line);display:flex;gap:1rem;justify-content:space-between;align-items:center;flex-wrap:wrap}
+.run-heading{display:flex;gap:.8rem;align-items:center;flex-wrap:wrap}.run-heading strong{font-size:1rem}
+.tag{font-size:.66rem;line-height:1.2;font-weight:750;letter-spacing:.03em;background:#eef0e9;color:var(--muted);border:1px solid #dce1d7;border-radius:50px;padding:5px 8px;white-space:nowrap}
+.tag-active{background:var(--pale);border-color:#b2d1bf;color:var(--teal)}
+.controls{display:flex;gap:7px;flex-wrap:wrap}.controls button{font-size:.8rem;padding:.5rem .7rem;min-height:40px}
+.scrubber{display:grid;grid-template-columns:120px 1fr;gap:14px;align-items:center;padding:13px 22px;border-bottom:1px solid var(--line)}
+#step-position{font-size:.8rem;font-variant-numeric:tabular-nums;color:var(--muted)}
+input[type=range]{width:100%;min-width:0;accent-color:var(--teal)}
+.event-banner{display:flex;align-items:flex-start;gap:12px;padding:17px 22px;background:#eff5ef;border-bottom:1px solid var(--line);min-height:89px}
+#event-kind{margin-top:3px;text-transform:uppercase;font-size:.65rem;min-width:62px;text-align:center;background:white;border-color:#b8cfc0}
+#event-message{font-size:.91rem;margin:0;max-width:920px}
+.counters{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));padding:0 22px;border-bottom:1px solid var(--line)}
+.metric{padding:18px 13px 18px 0;min-width:0}.metric+.metric{padding-left:15px;border-left:1px solid #e2e7dd}
+.metric dt{color:var(--muted);font-size:.7rem;font-weight:650;line-height:1.35;min-height:2em}
+.metric dd{font-size:1.7rem;font-weight:700;letter-spacing:-.04em;margin:3px 0 0;font-variant-numeric:tabular-nums}
+.work-grid{display:grid;grid-template-columns:minmax(0,1.07fr) minmax(0,.93fr)}
+.stack-panel{padding:24px 22px;border-right:1px solid var(--line)}
+.panel-heading{display:flex;justify-content:space-between;align-items:baseline;gap:.7rem;flex-wrap:wrap;margin-bottom:6px}
+h2{font-size:1.1rem;letter-spacing:-.025em;margin:0}h3{font-size:.95rem;margin:0 0 .6rem}
+.small{font-size:.77rem;color:var(--muted)}.muted{color:var(--muted);font-size:.86rem}
+.panel-intro{margin:5px 0 17px;color:var(--muted);font-size:.83rem}
+.stack{list-style:none;margin:0;padding:0;display:grid;gap:9px;max-height:580px;overflow-y:auto}
+.empty{border:1px dashed #b9cbbd;padding:27px 20px;color:var(--muted);font-size:.9rem;border-radius:10px;text-align:center;margin:0}
+.frame{padding:13px 15px;border:1px solid #d9e1d5;border-radius:10px;background:#fafbf5}
+.frame-active{border-color:#5a987a;background:#edf7ee;box-shadow:inset 4px 0 0 var(--teal)}
+.frame-hit{border-color:#b298ca;background:#f2edf8;box-shadow:inset 4px 0 0 var(--violet)}
+.frame-heading{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.frame-heading strong{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:.81rem}
+.pending-expression{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:.97rem;font-weight:650;margin:11px 0 5px;overflow-wrap:anywhere}
+.frame-locals{font-size:.74rem;color:var(--muted);margin:0;overflow-wrap:anywhere}
+.aside-panel{padding:24px 22px}
+.code{background:#f2f2e9;border-radius:10px;margin:10px 0 20px;padding:12px 8px 12px 36px;color:#52645a;font: .77rem/1.9 ui-monospace,SFMono-Regular,Consolas,monospace}
+.code-line{padding:0 6px;white-space:pre-wrap;overflow-wrap:anywhere;border-radius:3px}
+.code-active{background:#dcead8;color:#163e2d;font-weight:750;box-shadow:inset 3px 0 0 #467b4d}
+.result-box{display:flex;align-items:center;justify-content:space-between;gap:1rem;background:#172e2b;color:white;border-radius:10px;padding:15px 17px;margin-bottom:19px}
+.result-box p{margin:0;font-size:.76rem;color:#cedecc}.result-box .result-title{color:#fff;font-weight:650;font-size:.85rem;margin-bottom:4px}
+#result{flex-shrink:0;white-space:nowrap;font-family:Georgia,"Times New Roman",serif;font-size:2rem;line-height:1.1;overflow-wrap:anywhere}
+.cache-values{list-style:none;display:flex;flex-wrap:wrap;gap:7px;padding:0;margin:9px 0 0}
+.cache-values p{margin:0}.cache-entry{font: .78rem/1.4 ui-monospace,SFMono-Regular,Consolas,monospace;background:#eeedf2;border:1px solid #ddd9e7;border-radius:6px;padding:7px 9px}
+.cache-new{background:#dfd1f0;border-color:#a487bd}
+.returns-panel{padding:22px;border-top:1px solid var(--line)}
+.returned-values{display:flex;flex-wrap:wrap;gap:7px;list-style:none;padding:0;margin:10px 0 0;max-height:205px;overflow:auto}
+.return-chip{font: .74rem/1.4 ui-monospace,SFMono-Regular,Consolas,monospace;font-weight:500;padding:6px 8px;border-radius:6px}
+.lower-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:22px;margin-bottom:24px}
+.card{background:var(--white);border:1px solid var(--line);border-radius:13px;padding:22px;min-width:0}
+.card p{font-size:.85rem;color:var(--muted)}
+.jump-label{display:block;font-size:.77rem;font-weight:650;margin:12px 0 5px}
+#event-jump{width:100%;min-width:0;max-width:100%;font-size:.8rem;padding:8px;border:1px solid var(--line);background:white;border-radius:7px}
+.recent-events{list-style:none;padding:0;margin:12px 0 0;display:grid;gap:6px}
+.event-button{display:block;text-align:left;width:100%;font-size:.78rem;font-weight:400;padding:8px 10px;line-height:1.45;background:transparent}
+.event-current .event-button{border-color:#90b39d;background:#eef5e9}
+.table-wrap{overflow-x:auto;margin:12px 0;max-width:100%}table{width:100%;border-collapse:collapse;font-size:.72rem;line-height:1.4}
+th,td{text-align:left;padding:9px 7px;border-bottom:1px solid var(--line)}th{font-weight:650}thead th{color:var(--muted);vertical-align:bottom}td{font-variant-numeric:tabular-nums}
+.definition-list{font-size:.8rem;color:var(--muted);margin:12px 0}.definition-list dt{font-weight:700;color:var(--ink);margin-top:9px}.definition-list dd{margin:2px 0 0}
+summary{cursor:pointer;font-size:.85rem;font-weight:650}
+.learn-card{background:var(--pale)}.learn-card h2{font-family:Georgia,"Times New Roman",serif;font-size:1.6rem;font-weight:500}
+.downloads{display:flex;gap:9px;flex-wrap:wrap;margin:17px 0 10px}
+.downloads button{font-size:.8rem}
+#download-status{min-height:2.6em;font-size:.8rem;margin:10px 0 0}
+footer{border-top:1px solid var(--line);padding:19px 0 30px;display:flex;gap:2rem;justify-content:space-between;font-size:.74rem;color:var(--muted)}
+footer p{margin:0;max-width:720px}
+[hidden]{display:none!important}
+@media(max-width:900px){.hero{grid-template-columns:1fr;gap:1rem;padding-top:30px}.hero-copy{max-width:660px}.counters{grid-template-columns:repeat(3,minmax(0,1fr))}.metric:nth-child(4){padding-left:0;border-left:0}.metric:nth-child(-n+3){border-bottom:1px solid #e2e7dd}.work-grid{grid-template-columns:1fr}.stack-panel{border-right:0;border-bottom:1px solid var(--line)}.stack{max-height:490px}.aside-panel{display:grid;grid-template-columns:1fr 1fr;gap:18px}.aside-panel .code-section{grid-row:span 2}.result-box{margin-bottom:0;align-self:start}.cache-section{align-self:start}.lower-grid{grid-template-columns:1fr}.hero h1{max-width:700px}}
+@media(max-width:560px){.shell{padding:0 16px}.topbar{padding:18px 0}.toplinks{font-size:.74rem;gap:.75rem}.offline{display:none}.hero{padding:28px 0 23px}.hero-copy{font-size:.92rem}.setup{grid-template-columns:1fr 100px;padding:17px;gap:12px}.setup .primary{grid-column:1/-1}.setup-note{font-size:.74rem}.toolbar{padding:16px;gap:12px}.controls{width:100%;display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.controls button{padding:.55rem .4rem;min-width:0}.scrubber{padding:12px 16px;grid-template-columns:99px 1fr;gap:7px}.event-banner{padding:15px 16px;flex-direction:column;gap:7px;min-height:145px}#event-kind{margin-top:0}#event-message{font-size:.83rem}.counters{padding:0 16px}.metric{padding-top:13px;padding-bottom:13px}.metric+.metric{padding-left:10px}.metric:nth-child(4){padding-left:0}.metric dt{font-size:.63rem}.metric dd{font-size:1.4rem}.stack-panel,.aside-panel,.returns-panel{padding:19px 16px}.aside-panel{display:block}.result-box{margin:0 0 17px}#result{font-size:1.65rem}.code{font-size:.72rem}.frame{padding:12px}.frame-heading .tag{font-size:.58rem}.frame-heading strong{font-size:.77rem}.pending-expression{font-size:.91rem}.card{padding:19px 16px}.table-wrap{margin-left:-3px;margin-right:-3px}th,td{padding:8px 4px;font-size:.67rem}.downloads{display:grid}.downloads button{width:100%}footer{display:block}footer p+p{margin-top:10px}}
+</style>
+</head>
+<body>
+<a class="skip" href="#explorer">Skip to the explorer</a>
+<div class="shell">
+<header class="topbar">
+<a class="brand" href="../demo.html">RecallWeave</a>
+<nav class="toplinks" aria-label="Course links">
+<span class="offline">Works offline</span>
+<a href="recursion-call-stack.md">Worked guide</a>
+<a href="../demo.html">Open lessons</a>
+</nav>
+</header>
+<section class="hero" aria-labelledby="page-title">
+<div><p class="eyebrow">Computer science / a visible execution</p><h1 id="page-title">Calls go down.<br>Answers come back.</h1></div>
+<p class="hero-copy">A recursive call leaves unfinished work behind. Follow each frame, watch a child return, and see how a <strong>fresh cache</strong> changes repeated Fibonacci calls.</p>
+</section>
+<main id="explorer">
+<form id="setup" class="setup" novalidate aria-label="Trace setup">
+<div><label for="algorithm">Algorithm</label><select id="algorithm"><option value="factorial">Factorial</option><option value="fibonacci">Fibonacci</option><option value="memo-fibonacci">Memoized Fibonacci</option></select></div>
+<div><label for="input-n">Input n</label><input id="input-n" type="text" inputmode="numeric" maxlength="8" value="4" aria-describedby="input-help input-error" autocomplete="off"></div>
+<button class="primary" type="submit">Run trace</button>
+<p class="setup-note" id="input-help">Choose a whole number from 0 to 10. Editing the setup clears the current trace. Every run starts fresh.</p>
+<p class="error" id="input-error" role="alert"></p>
+</form>
+<section class="workspace" aria-label="Trace inspection">
+<div class="toolbar">
+<div class="run-heading"><strong id="run-label">Factorial · n = 4</strong><span class="tag" id="trace-state">Before first call</span></div>
+<div class="controls" aria-label="Trace controls">
+<button id="to-start" type="button">Back to start</button><button id="previous" type="button">Previous</button><button id="next" class="primary" type="button">Next</button><button id="to-end" type="button">Run to end</button>
+</div>
+</div>
+<div class="scrubber"><span id="step-position">Step 0</span><input id="step-slider" type="range" min="0" max="0" value="0" step="1" aria-label="Selected trace step"></div>
+<div class="event-banner" aria-live="polite" aria-atomic="true"><span class="tag" id="event-kind">start</span><p id="event-message">Before the first call.</p></div>
+<dl class="counters" aria-label="Counters through selected step">
+<div class="metric"><dt>Calls entered</dt><dd id="count-calls">0</dd></div><div class="metric"><dt>Computed calls</dt><dd id="count-computedCalls">0</dd></div><div class="metric"><dt>Cache hits</dt><dd id="count-cacheHits">0</dd></div><div class="metric"><dt>Calls returned</dt><dd id="count-returnedCalls">0</dd></div><div class="metric"><dt>Active depth</dt><dd id="count-activeDepth">0</dd></div><div class="metric"><dt>Maximum depth</dt><dd id="count-maxDepth">0</dd></div>
+</dl>
+<div class="work-grid">
+<section class="stack-panel" aria-labelledby="stack-heading">
+<div class="panel-heading"><h2 id="stack-heading">Active call stack</h2><span class="small" id="stack-count">0 active frames</span></div>
+<p class="panel-intro">The newest frame is on top. Each caller keeps its own input and returned child values.</p>
+<ol id="stack" class="stack" aria-label="Active frames, top first"></ol>
+</section>
+<div class="aside-panel">
+<section class="code-section" aria-labelledby="code-heading"><h2 id="code-heading">Traced algorithm</h2><p class="panel-intro">Pseudocode. The highlighted line belongs to the selected event.</p><ol id="algorithm-code" class="code"></ol></section>
+<div class="result-box"><div><p class="result-title">Final result</p><p id="result-note">A result appears when the root returns.</p></div><strong id="result">pending</strong></div>
+<section class="cache-section" aria-labelledby="cache-heading"><h2 id="cache-heading">Cache</h2><p class="panel-intro">Saved results belong to this run only.</p><ul id="cache-values" class="cache-values"></ul></section>
+</div>
+</div>
+<section class="returns-panel" aria-labelledby="returns-heading"><div class="panel-heading"><h2 id="returns-heading">Returned values</h2><span class="small" id="return-count">0 returned</span></div><p class="panel-intro">Actual return order through this step, earliest first. Select a value to inspect that return.</p><ol id="returned-values" class="returned-values"></ol></section>
+</section>
+<div class="lower-grid">
+<section class="card" aria-labelledby="history-heading"><h2 id="history-heading">Follow the execution</h2><label for="event-jump" class="jump-label">Jump to event</label><select id="event-jump"></select><p id="history-note" class="small"></p><ol class="recent-events" id="recent-events"></ol></section>
+<div>
+<section id="comparison" class="card" hidden aria-labelledby="comparison-heading"><h2 id="comparison-heading">Completed-run comparison</h2><p id="comparison-input"></p><div class="table-wrap"><table><caption class="small">Exact totals for the two Fibonacci algorithms</caption><thead><tr><th scope="col">Algorithm</th><th scope="col">Calls</th><th scope="col">Computed</th><th scope="col">Hits</th><th scope="col">Max depth</th><th scope="col">Result</th></tr></thead><tbody id="comparison-rows"></tbody></table></div><p>Memoization reuses completed values. A cache hit still enters and returns from a call; it avoids computing that result again. These are call counts, not a timing benchmark.</p></section>
+<section class="card" style="margin-top:16px" aria-label="Trace conventions"><details><summary>What do the counters mean?</summary><dl class="definition-list"><dt>Calls entered</dt><dd>Every invocation reached through this step, including base cases and cache hits.</dd><dt>Computed calls</dt><dd>Calls entered that are not cache hits, including base cases. This does not count arithmetic operations or measure elapsed time.</dd><dt>Cache hits</dt><dd>Invocations served by a value already saved during this run.</dd><dt>Calls returned</dt><dd>Invocations that have delivered a result and left the stack.</dd><dt>Active / maximum depth</dt><dd>Current / largest number of simultaneous frames through this step, including root and base-case calls.</dd></dl><p>Factorial has only the zero base case: factorial(0) = 1. Fibonacci uses F(0) = 0 and F(1) = 1, evaluates the left child first, and memoized runs cache every computed result including bases. Inputs are bounded to 0–10; result arithmetic is exact.</p></details></section>
+</div>
+</div>
+<section class="card learn-card" aria-labelledby="learn-heading"><p class="eyebrow">Make the connection</p><h2 id="learn-heading">Explain the work a caller keeps.</h2><p>Pause before a child returns. Which operation is unfinished in its caller? Then compare Fibonacci with and without memoization at the same input. The original course asks twelve questions about base cases, suspended work, depth, and reuse.</p><div class="downloads"><button id="download-trace" type="button">Download this trace (.json)</button><button id="download-course" type="button" class="primary">Download course (.json)</button></div><p>The trace file contains the full exact trace plus your selected step and displayed state. It is an inspection record, separate from RecallWeave’s learner-answer archives. The course file opens through <strong>Bring your own lesson</strong> in <a href="../demo.html">RecallWeave</a>; preview it, then select <strong>Start this deck</strong>. The <a href="recursion-call-stack.md">worked guide</a> includes explanations and transfer prompts.</p><p id="download-status" role="status"></p></section>
+</main>
+<footer><p>Original bounded teaching examples. No account, automatic storage, upload, or external service. Previous and Next inspect saved snapshots; Run trace starts a fresh run. Reloading resets this page.</p><p>RecallWeave · Calls &amp; returns</p></footer>
+</div>
+<script type="application/json" id="course-data">{
+  "format": "recallweave-deck/1",
+  "title": "Recursion and the call stack: waiting, returning, reusing",
+  "attribution": "Original questions, distractors, worked examples and transfer explanations authored for Jacob’s RecallWeave project with AI assistance. Background definitions: NIST Dictionary of Algorithms and Data Structures, recursion (https://xlinux.nist.gov/dads/HTML/recursion.html) and memoization (https://xlinux.nist.gov/dads/HTML/memoize.html). This course explicitly uses F(0)=0, F(1)=1 and an initially empty cache that stores base values; its examples and wording are newly authored, not copied reference exercises.",
+  "license": "Original course content authored for Jacob’s RecallWeave project; no additional reuse license is granted in this file. Linked reference material retains its published terms.",
+  "concepts": [
+    "Base cases and progress",
+    "Suspended calls and returns",
+    "Calls and active depth",
+    "Memoized reuse"
+  ],
+  "items": [
+    {
+      "id": "rc-base-zero",
+      "concept": "Base cases and progress",
+      "prerequisites": [],
+      "prompt": "Define factorial(n) for nonnegative integers: if n = 0, return 1; otherwise return n × factorial(n − 1). Count every invocation, including the root and base cases. Maximum stack depth counts simultaneously active invocations, including the root. What happens when the initial call is factorial(0)?",
+      "options": [
+        "It returns 0 after one call, at maximum depth 1.",
+        "It returns 1 without making any call, at maximum depth 0.",
+        "It returns 1 after one call, at maximum depth 1.",
+        "It must call factorial(−1) before it can return."
+      ],
+      "answer": 2,
+      "explanation": "The initial invocation is already a call. Its input is 0, so it returns 1 directly and makes no child call. Its one active frame gives maximum depth 1. The base value 1 is the multiplicative identity: it lets a waiting factorial(1) return 1 × 1.",
+      "transfer": "Trace factorial(1) under exactly this base rule. Which two inputs are called, what does each return, and what are the total call count and maximum active depth?"
+    },
+    {
+      "id": "rc-progress-reachable",
+      "concept": "Base cases and progress",
+      "prerequisites": [],
+      "prompt": "A proposed countdown is walk(n): if n = 0, return \"done\"; otherwise call walk(n − 2). Starting at n = 5, does repeatedly taking the recursive branch reach its stated base case? Ignore finite machine resource limits when reasoning about the input sequence.",
+      "options": [
+        "No. The inputs stay odd: 5, 3, 1, −1, …, so the equality test never sees 0.",
+        "Yes. Any decreasing integer sequence must eventually equal 0.",
+        "Yes. Passing from 1 to −1 is equivalent to calling walk(0).",
+        "No. A recursive function can never return a text value."
+      ],
+      "answer": 0,
+      "explanation": "A base case helps only when the recursive inputs can reach it. Subtracting 2 preserves odd parity, and the sequence passes from 1 to −1 without an invocation at 0. Once below 0, it keeps decreasing away from the only stopping input. A real implementation will encounter its resource limits; that is not successful termination at the specified base case.",
+      "transfer": "Change only the decrement so the countdown reaches 0 from every nonnegative integer. For input 5, list the resulting inputs and count the invocations."
+    },
+    {
+      "id": "rc-fib-bases",
+      "concept": "Base cases and progress",
+      "prerequisites": [],
+      "prompt": "Use F(0) = 0 and F(1) = 1. For n ≥ 2, a naive recursive function returns F(n − 1) + F(n − 2), evaluating the left child completely before the right child. Which trace correctly describes F(2)?",
+      "options": [
+        "It returns 2 because both base cases return 1.",
+        "It returns 0 because encountering F(0) makes the whole sum zero.",
+        "It calls F(1) only, because one child is enough for a sum.",
+        "It calls F(1), then F(0), and returns 1 + 0 = 1."
+      ],
+      "answer": 3,
+      "explanation": "The two base cases have different values. The F(2) invocation first receives 1 from F(1), then receives 0 from F(0), and adds them. Its three invocations are F(2), F(1), and F(0). A zero contribution does not erase the other term of an addition.",
+      "transfer": "Use the same rules for F(3). List the inputs in call-entry order and explain how the root combines its two returned values."
+    },
+    {
+      "id": "rc-suspended-parent",
+      "concept": "Suspended calls and returns",
+      "prerequisites": [
+        "Base cases and progress"
+      ],
+      "prompt": "Define factorial(0) = 1 and factorial(n) = n × factorial(n − 1) for positive integers. During factorial(4), the active child is factorial(2), which has not yet called factorial(1). The factorial(4) and factorial(3) invocations are waiting. What work do those two waiting invocations retain?",
+      "options": [
+        "Only factorial(4) remains; calling factorial(2) overwrote factorial(3).",
+        "factorial(3) must multiply its child's result by 3, then factorial(4) must multiply that result by 4.",
+        "Both parents can return 12 now, before factorial(2) returns.",
+        "Both parents now use n = 2, because n is shared by every invocation."
+      ],
+      "answer": 1,
+      "explanation": "Each invocation retains its own input and continuation. The factorial(3) frame waits for factorial(2), then multiplies the returned value by 3. The factorial(4) frame waits for factorial(3), then multiplies by 4. Calling a child suspends that parent work; it does not replace every parent's n.",
+      "transfer": "Suppose factorial(2) now returns 2. What value does factorial(3) return next, and what does factorial(4) finally return?"
+    },
+    {
+      "id": "rc-return-order",
+      "concept": "Suspended calls and returns",
+      "prerequisites": [
+        "Base cases and progress"
+      ],
+      "prompt": "A factorial function returns 1 only when n = 0; otherwise it returns n × factorial(n − 1). The initial call is factorial(3). In what order do these invocations finish, and what values do they return?",
+      "options": [
+        "factorial(0), factorial(1), factorial(2), factorial(3), returning 1, 1, 2, 6.",
+        "factorial(3), factorial(2), factorial(1), factorial(0), returning 6, 2, 1, 1.",
+        "Only factorial(0) finishes; returning from a base case discards every parent.",
+        "factorial(0), factorial(1), factorial(2), factorial(3), all returning 1."
+      ],
+      "answer": 0,
+      "explanation": "The first child that can finish is the base invocation factorial(0). Its return lets factorial(1) compute 1 × 1; that return lets factorial(2) compute 2 × 1; the last return lets factorial(3) compute 3 × 2. The call-entry order was 3, 2, 1, 0, while the completion order is 0, 1, 2, 3.",
+      "transfer": "The first two returns both carry the value 1. Explain why they still belong to two different invocations, and identify the work performed by each."
+    },
+    {
+      "id": "rc-second-child",
+      "concept": "Suspended calls and returns",
+      "prerequisites": [
+        "Base cases and progress"
+      ],
+      "prompt": "For naive Fibonacci, F(0) = 0, F(1) = 1, and F(n) = F(n − 1) + F(n − 2). The left child finishes before the right child starts. The initial call is F(3). Its frame has just received 1 from its left child F(2), and it has not started its right child. What must it do next?",
+      "options": [
+        "Return 1 immediately, because the left child already finished.",
+        "Return to F(2) and ask it to start over.",
+        "Change its own input to 1 and discard the saved left result.",
+        "Keep the left result 1, call F(1), and then add that child's return."
+      ],
+      "answer": 3,
+      "explanation": "F(3) needs two child results. It retains the left result 1 while its right child F(1) runs. The right child returns 1, so the parent then returns 1 + 1 = 2. These children run in sequence; the completed left child's frame is no longer active while the right child executes.",
+      "transfer": "At the instant that right-hand F(1) is active, which two invocations remain on the active stack? What value is saved in the waiting parent?"
+    },
+    {
+      "id": "rc-chain-cost",
+      "concept": "Calls and active depth",
+      "prerequisites": [
+        "Suspended calls and returns"
+      ],
+      "prompt": "Define factorial(0) = 1 and factorial(n) = n × factorial(n − 1) for n > 0, with no n = 1 shortcut. In factorial(5), count every invocation including the root and base case. Maximum stack depth includes every simultaneously active invocation. Which pair of counts is correct?",
+      "options": [
+        "5 total calls and maximum depth 5.",
+        "6 total calls and maximum depth 6.",
+        "6 total calls and maximum depth 5.",
+        "120 total calls and maximum depth 6."
+      ],
+      "answer": 1,
+      "explanation": "The inputs are 5, 4, 3, 2, 1, 0: six invocations. Before the base returns, all six are active because each parent is waiting for its only child. The numerical result is 120, which is a returned value rather than a number of calls. There are five parent-to-child edges but six frames.",
+      "transfer": "For factorial(6), calculate the result, total invocations, and maximum active depth. Explain why the result grows much faster than either count."
+    },
+    {
+      "id": "rc-tree-cost",
+      "concept": "Calls and active depth",
+      "prerequisites": [
+        "Suspended calls and returns"
+      ],
+      "prompt": "Compute naive F(5), where F(0) = 0, F(1) = 1, and F(n) = F(n − 1) + F(n − 2). Evaluate the left child fully before the right and use no cache. Count every invocation, including root, bases and repeated arguments; maximum stack depth counts simultaneous active invocations including the root. Which pair is correct?",
+      "options": [
+        "5 total calls and maximum depth 5.",
+        "15 total calls and maximum depth 15.",
+        "15 total calls and maximum depth 5.",
+        "9 total calls and maximum depth 5."
+      ],
+      "answer": 2,
+      "explanation": "Let C(0) = C(1) = 1 and C(n) = 1 + C(n − 1) + C(n − 2). This gives C(2) = 3, C(3) = 5, C(4) = 9, and C(5) = 15. The deepest active path is 5 → 4 → 3 → 2 → 1, containing five frames. Later branches add calls after earlier frames have returned, so total calls and maximum active depth measure different things.",
+      "transfer": "Use those call-count values to calculate naive F(6)'s total invocations. Separately find its maximum active depth and its returned value."
+    },
+    {
+      "id": "rc-repeated-subproblem",
+      "concept": "Calls and active depth",
+      "prerequisites": [
+        "Suspended calls and returns"
+      ],
+      "prompt": "Naive Fibonacci uses F(0) = 0, F(1) = 1, and F(n) = F(n − 1) + F(n − 2), with no cache and left child first. How many distinct invocations with input 2 occur during F(4)? Count invocations even when their inputs match.",
+      "options": [
+        "One: an input value can identify only one invocation.",
+        "Three: every base-case result creates another F(2) call.",
+        "Four: the root input determines this count.",
+        "Two: one lies inside the F(3) branch, and the other is the root's right child."
+      ],
+      "answer": 3,
+      "explanation": "F(4) calls F(3) and F(2). The F(3) branch itself calls another F(2), followed by F(1). Thus input 2 occurs in two separate invocations. They return the same mathematical value, 1, but this naive algorithm recomputes that value twice.",
+      "transfer": "During naive F(5), how many invocations have input 2? Split the count between the root's F(4) and F(3) branches."
+    },
+    {
+      "id": "rc-cache-hit",
+      "concept": "Memoized reuse",
+      "prerequisites": [
+        "Calls and active depth"
+      ],
+      "prompt": "Memoized Fibonacci uses F(0) = 0 and F(1) = 1, a fresh empty cache, and left child before right. Every invocation first checks for its input in the cache; a miss computes and stores its result, including base values. During F(4), its left child F(3) has finished. The root now invokes F(2), whose value 1 is already stored. How is this request handled?",
+      "options": [
+        "It adds no call because only uncached requests count as invocations.",
+        "It counts as one call and one cache hit, returns 1, and makes no child calls.",
+        "It counts as a cache hit but must still recompute F(1) and F(0).",
+        "It returns 2 because the cache key is 2."
+      ],
+      "answer": 1,
+      "explanation": "The request for F(2) is an invocation even though its value is already available. It is served by one cache hit, so it contributes no newly computed call and creates no recursive children. The key identifies the input 2; the stored answer is F(2) = 1. The cached invocation has its own active frame until it returns.",
+      "transfer": "If a later request finds a stored entry F(0) = 0, is that a valid hit? Explain why cache membership must distinguish an absent entry from a stored zero."
+    },
+    {
+      "id": "rc-memo-counts",
+      "concept": "Memoized reuse",
+      "prerequisites": [
+        "Calls and active depth"
+      ],
+      "prompt": "Run memoized F(5) with F(0) = 0 and F(1) = 1. Start with an empty cache, check it before each base test, store every completed result including bases, and finish F(n − 1) before F(n − 2). Total calls include hits; computed calls exclude hits; maximum depth counts active frames including root and bases. Which completed-run counts are correct?",
+      "options": [
+        "6 total calls, 6 computed calls, 0 hits, maximum depth 6.",
+        "15 total calls, 6 computed calls, 9 hits, maximum depth 5.",
+        "9 total calls, 6 computed calls, 3 hits, maximum depth 5.",
+        "9 total calls, 9 computed calls, 3 hits, maximum depth 5."
+      ],
+      "answer": 2,
+      "explanation": "Inputs 5, 4, 3, 2, 1, 0 are first encountered as misses, giving six computed calls. The later requests for 1, 2, and 3 find stored values, giving three hits and nine total invocations. The deepest chain still contains inputs 5, 4, 3, 2, 1, so maximum depth is five. The result is 5. Memoization removes repeated work without shortening this first descent.",
+      "transfer": "For a fresh memoized F(6), find total calls, computed calls, hits, maximum depth, and result. Compare its total calls with naive F(6), while keeping the depth definition fixed."
+    },
+    {
+      "id": "rc-fresh-run",
+      "concept": "Memoized reuse",
+      "prerequisites": [
+        "Calls and active depth"
+      ],
+      "prompt": "A completed memoized F(5) run produced result 5 using 9 total calls, 6 computed calls, 3 hits and maximum depth 5. The explorer starts every new run with an empty cache. You start F(5) again with the same left-first algorithm. What should the completed counts be?",
+      "options": [
+        "Again 9 total calls, 6 computed calls, 3 hits and maximum depth 5; the result is again 5.",
+        "1 total call, 0 computed calls, 1 hit and maximum depth 1, because the old cache is retained.",
+        "0 total calls, because the previous result is already displayed.",
+        "15 total calls and no hits, because an empty starting cache disables memoization for the whole run."
+      ],
+      "answer": 0,
+      "explanation": "The second run starts from the same empty-cache state and follows the same deterministic order, so it repeats the same work and counts. Empty at the start still allows this run to store values and reuse them later. A one-call hit would describe deliberately reusing the previous completed cache, which is a different experiment.",
+      "transfer": "Suppose a separate program deliberately retained the completed cache and then invoked F(5) once more. What would that invocation return, and what would its calls, computed calls, hits and maximum active depth be?"
+    }
+  ]
+}
+</script>
+<script type="module">
+/**
+ * Original bounded recursion teaching model. No I/O, random state, or shared cache.
+ * All result arithmetic uses BigInt; public snapshots encode values as decimal strings.
+ * Traces are immutable records created here, not a supported import/restore format.
+ */
+export const TRACE_FORMAT = 'recallweave-recursion-trace/1';
+export const MAX_INPUT = 10;
+export const ALGORITHMS = Object.freeze({
+  factorial: 'Factorial',
+  fibonacci: 'Fibonacci',
+  'memo-fibonacci': 'Memoized Fibonacci'
+});
+export const COUNTER_DEFINITIONS = Object.freeze({
+  calls: 'Invocations entered, including base cases and cache hits.',
+  computedCalls: 'Invocations entered that are not cache hits, including base cases. This is not an arithmetic-operation or timing count.',
+  cacheHits: 'Invocations served by a value already in this run’s cache.',
+  returnedCalls: 'Invocations whose return has been delivered to their caller or the final result.',
+  activeDepth: 'Frames currently on the stack, including root and base-case frames.',
+  maxDepth: 'Largest active stack depth reached through this selected step.'
+});
+const traces = new WeakSet();
+function deepFreeze(value) {
+  if (value && typeof value === 'object' && !Object.isFrozen(value)) {
+    Object.values(value).forEach(deepFreeze);
+    Object.freeze(value);
+  }
+  return value;
+}
+export function parseInput(text) {
+  if (typeof text !== 'string' || !/^(?:[0-9]|10)$/.test(text.trim())) {
+    throw new Error('Enter a whole number from 0 to 10, using digits only.');
+  }
+  return Number(text.trim());
+}
+function requireInput(input) {
+  if (!Number.isInteger(input) || input < 0 || input > MAX_INPUT) {
+    throw new Error('Choose an integer input from 0 to 10.');
+  }
+}
+export function callLabel(algorithm, input) {
+  if (!Object.hasOwn(ALGORITHMS, algorithm)) throw new Error('Choose a supported algorithm.');
+  requireInput(input);
+  return (algorithm === 'factorial' ? 'factorial' : 'F') + '(' + input + ')';
+}
+
+/** Each parent resumes only after its child returns. Fibonacci evaluates the left child first. */
+export function createTrace(algorithm, input) {
+  if (!Object.hasOwn(ALGORITHMS, algorithm)) throw new Error('Choose a supported algorithm.');
+  requireInput(input);
+  input = input === 0 ? 0 : input;
+  const memoized = algorithm === 'memo-fibonacci';
+  const cache = new Map();
+  const stack = [];
+  const steps = [];
+  let nextId = 1, calls = 0, computedCalls = 0, cacheHits = 0, returnedCalls = 0, maxDepth = 0;
+  let finalResult = null;
+  const label = n => callLabel(algorithm, n);
+  function capture(event) {
+    steps.push({
+      index: steps.length,
+      event,
+      stack: stack.map(frame => ({...frame})),
+      cache: [...cache].sort((a, b) => a[0] - b[0]).map(([n, value]) => ({input: n, value: String(value)})),
+      counters: {calls, computedCalls, cacheHits, returnedCalls, activeDepth: stack.length, maxDepth},
+      result: finalResult,
+      complete: returnedCalls > 0 && stack.length === 0
+    });
+  }
+  capture({
+    kind: 'start', frameId: null, input, line: null,
+    text: 'Before the first call. ' + (memoized ? 'This run starts with an empty cache.' : 'This algorithm does not use a cache.')
+  });
+  function invoke(n, slot = null) {
+    const parent = stack.at(-1) ?? null;
+    const cached = memoized && cache.has(n);
+    const frame = {
+      id: nextId++, parentId: parent?.id ?? null, input: n,
+      status: cached ? 'cache-hit' : 'entered',
+      pending: cached ? 'return cached ' + String(cache.get(n)) : 'check the base case',
+      left: null, right: null, result: cached ? String(cache.get(n)) : null
+    };
+    stack.push(frame);
+    calls++;
+    if (cached) cacheHits++; else computedCalls++;
+    maxDepth = Math.max(maxDepth, stack.length);
+    capture({
+      kind: cached ? 'cache-hit' : 'call', frameId: frame.id, input: n,
+      line: cached ? 'cache' : 'entry',
+      ...(cached ? {value: frame.result} : {}),
+      text: '#' + frame.id + ' enters ' + label(n) + (cached
+        ? '; cache hit returns the saved value ' + frame.result + '. This invocation still occupies a frame.'
+        : '. It has its own frame' + (parent ? '; caller #' + parent.id + ' is suspended.' : '; this is the root call.'))
+    });
+    let value;
+    if (cached) {
+      value = cache.get(n);
+    } else {
+      const base = algorithm === 'factorial' ? n === 0 : n <= 1;
+      if (base) {
+        value = algorithm === 'factorial' ? 1n : BigInt(n);
+      } else if (algorithm === 'factorial') {
+        frame.status = 'waiting-child';
+        frame.pending = n + ' × ' + label(n - 1);
+        capture({
+          kind: 'suspend', frameId: frame.id, input: n, line: 'child',
+          text: '#' + frame.id + ' saves n = ' + n + ' and waits for ' + frame.pending + '. Multiplication happens after the child returns.'
+        });
+        const child = invoke(n - 1, 'left');
+        value = BigInt(n) * child;
+      } else {
+        frame.status = 'waiting-left';
+        frame.pending = label(n - 1) + ' + ' + label(n - 2);
+        capture({
+          kind: 'suspend', frameId: frame.id, input: n, line: 'left',
+          text: '#' + frame.id + ' suspends before the addition and calls the left child ' + label(n - 1) + '.'
+        });
+        const left = invoke(n - 1, 'left');
+        frame.status = 'waiting-right';
+        frame.pending = String(left) + ' + ' + label(n - 2);
+        capture({
+          kind: 'suspend', frameId: frame.id, input: n, line: 'right',
+          text: '#' + frame.id + ' keeps left = ' + left + ' in its frame, then calls the right child ' + label(n - 2) + '.'
+        });
+        const right = invoke(n - 2, 'right');
+        value = left + right;
+      }
+      frame.result = String(value);
+      frame.status = 'return-ready';
+      const calculation = base ? label(n) + ' = ' + value + ' is a base case.'
+        : algorithm === 'factorial' ? n + ' × ' + frame.left + ' = ' + value + '.'
+          : frame.left + ' + ' + frame.right + ' = ' + value + '.';
+      frame.pending = 'return ' + value;
+      if (memoized) cache.set(n, value);
+      capture({
+        kind: 'resolve', frameId: frame.id, input: n, line: base ? 'base' : 'combine',
+        value: String(value), ...(memoized ? {cacheWrite: {input: n, value: String(value)}} : {}),
+        text: '#' + frame.id + ' resolves ' + calculation + (memoized ? ' Save F(' + n + ') = ' + value + ' in this run’s cache.' : '')
+      });
+    }
+    stack.pop();
+    returnedCalls++;
+    if (parent) {
+      parent[slot] = String(value);
+      parent.status = slot === 'right' || algorithm === 'factorial' ? 'children-returned' : 'left-returned';
+      parent.pending = algorithm === 'factorial' ? parent.input + ' × ' + value
+        : slot === 'left' ? value + ' + ' + label(parent.input - 2) : parent.left + ' + ' + value;
+    } else {
+      finalResult = String(value);
+    }
+    capture({
+      kind: 'return', frameId: frame.id, input: n, line: 'return',
+      value: String(value), to: parent?.id ?? null, slot,
+      text: '#' + frame.id + ' returns ' + value + (parent
+        ? ' to caller #' + parent.id + ', then leaves the stack. The caller keeps that value.'
+        : ' as the final result, then leaves the stack. The run is complete.')
+    });
+    return value;
+  }
+  const result = String(invoke(input));
+  const trace = deepFreeze({
+    format: TRACE_FORMAT,
+    algorithm,
+    algorithmLabel: ALGORITHMS[algorithm],
+    input,
+    policies: {
+      inputBounds: [0, MAX_INPUT],
+      factorial: 'Only n = 0 is a base case, returning 1; every positive n invokes factorial(n − 1).',
+      fibonacci: 'F(0) = 0; F(1) = 1; fully evaluate F(n − 1) before F(n − 2).',
+      cache: memoized ? 'Fresh empty cache for every run; lookup before base handling; store every completed result, including F(0) and F(1).'
+        : 'No cache.',
+      arithmetic: 'Exact BigInt result arithmetic; result values are encoded as decimal strings.',
+      events: 'Each snapshot is after its named event. Return events have removed the returning frame and delivered its value.',
+      cacheOrder: 'Cached input keys are displayed in numeric order; this order is not insertion order.'
+    },
+    counterDefinitions: COUNTER_DEFINITIONS,
+    steps,
+    result,
+    finalCounters: steps.at(-1).counters
+  });
+  traces.add(trace);
+  return trace;
+}
+function requireTrace(trace) {
+  if (!traces.has(trace)) throw new Error('Create a trace before inspecting it.');
+}
+export function snapshotAt(trace, index) {
+  requireTrace(trace);
+  if (!Number.isInteger(index) || index < 0 || index >= trace.steps.length) {
+    throw new Error('Choose a step in this trace.');
+  }
+  return trace.steps[index];
+}
+/** Full trace plus an explicit inspection cursor. This is not a learner answer archive. */
+export function traceDocument(trace, selectedStep) {
+  const selectedState = snapshotAt(trace, selectedStep);
+  return deepFreeze({
+    ...trace,
+    exportKind: 'Full algorithm trace and selected inspection step; no restore/import support.',
+    selectedStep,
+    selectedState
+  });
+}
+
+
+const element = id => document.getElementById(id);
+const make = (tag, text = '', className = '') => {
+  const node = document.createElement(tag);
+  node.textContent = text;
+  if (className) node.className = className;
+  return node;
+};
+const courseDownload = JSON.stringify(JSON.parse(element('course-data').textContent), null, 2) + '\n';
+let inspectedTrace = null;
+let selectedStep = 0;
+const algorithmCode = {
+  factorial: [
+    ['entry', 'begin factorial(n)'],
+    ['base', '  if n = 0, value ← 1'],
+    ['branch', '  otherwise:'],
+    ['child', '    child ← factorial(n − 1)'],
+    ['combine', '    value ← n × child'],
+    ['return', '  return value']
+  ],
+  fibonacci: [
+    ['entry', 'begin F(n)'],
+    ['base', '  if n ≤ 1, value ← n'],
+    ['branch', '  otherwise:'],
+    ['left', '    left ← F(n − 1)'],
+    ['right', '    right ← F(n − 2)'],
+    ['combine', '    value ← left + right'],
+    ['return', '  return value']
+  ],
+  'memo-fibonacci': [
+    ['setup', 'new run: cache ← empty'],
+    ['entry', 'begin F(n)'],
+    ['cache', '  if n is cached, return cache[n]'],
+    ['base', '  if n ≤ 1, value ← n'],
+    ['branch', '  otherwise:'],
+    ['left', '    left ← F(n − 1)'],
+    ['right', '    right ← F(n − 2)'],
+    ['combine', '    value ← left + right'],
+    ['store', '  save cache[n] ← value'],
+    ['return', '  return value']
+  ]
+};
+function renderCode(algorithm, event = null) {
+  const code = element('algorithm-code');
+  code.replaceChildren();
+  for (const [line, text] of algorithmCode[algorithm]) {
+    const active = event && (event.line === line || (event.cacheWrite && line === 'store'));
+    const row = make('li', text, active ? 'code-line code-active' : 'code-line');
+    if (active) row.setAttribute('aria-current', 'step');
+    code.append(row);
+  }
+}
+function renderComparison() {
+  const show = inspectedTrace && inspectedTrace.algorithm !== 'factorial';
+  element('comparison').hidden = !show;
+  if (!show) return;
+  const rows = element('comparison-rows');
+  rows.replaceChildren();
+  for (const algorithm of ['fibonacci', 'memo-fibonacci']) {
+    const run = inspectedTrace.algorithm === algorithm ? inspectedTrace : createTrace(algorithm, inspectedTrace.input);
+    const row = document.createElement('tr');
+    const heading = make('th', ALGORITHMS[algorithm]);
+    heading.scope = 'row';
+    row.append(heading);
+    for (const value of [run.finalCounters.calls, run.finalCounters.computedCalls, run.finalCounters.cacheHits, run.finalCounters.maxDepth, run.result]) {
+      row.append(make('td', String(value)));
+    }
+    rows.append(row);
+  }
+  element('comparison-input').textContent = 'Both complete runs use n = ' + inspectedTrace.input + '. Each memoized run starts with an empty cache. These totals are separate from the selected-step counters above.';
+}
+function frameHeading(frame, active) {
+  const heading = make('div', '', 'frame-heading');
+  heading.append(make('strong', '#' + frame.id + ' · ' + callLabel(inspectedTrace.algorithm, frame.input)));
+  heading.append(make('span', active ? 'top of stack' : 'suspended caller', active ? 'tag tag-active' : 'tag'));
+  return heading;
+}
+function renderStack(state) {
+  const stack = element('stack');
+  stack.replaceChildren();
+  element('stack-count').textContent = state.stack.length + (state.stack.length === 1 ? ' active frame' : ' active frames');
+  if (!state.stack.length) {
+    stack.append(make('li', state.complete ? 'Every call has returned. The stack is empty.' : 'No call has entered yet. Select Next to create the root frame.', 'empty'));
+    return;
+  }
+  for (const frame of [...state.stack].reverse()) {
+    const active = frame.id === state.stack.at(-1).id;
+    const card = make('li', '', 'frame' + (active ? ' frame-active' : '') + (frame.status === 'cache-hit' ? ' frame-hit' : ''));
+    card.append(frameHeading(frame, active));
+    card.append(make('p', frame.pending, 'pending-expression'));
+    const facts = [];
+    if (frame.left !== null) facts.push((inspectedTrace.algorithm === 'factorial' ? 'child' : 'left') + ' = ' + frame.left);
+    if (frame.right !== null) facts.push('right = ' + frame.right);
+    if (frame.result !== null) facts.push('value = ' + frame.result);
+    card.append(make('p', 'n = ' + frame.input + (facts.length ? ' · ' + facts.join(' · ') : '') + (frame.parentId === null ? ' · root' : ' · returns to #' + frame.parentId), 'frame-locals'));
+    stack.append(card);
+  }
+}
+function renderCache(state) {
+  const cache = element('cache-values');
+  cache.replaceChildren();
+  if (inspectedTrace.algorithm !== 'memo-fibonacci') {
+    cache.append(make('li', inspectedTrace.algorithm === 'factorial'
+      ? 'Factorial follows one chain of calls. This trace does not use a cache.'
+      : 'This algorithm recomputes repeated calls. It does not use a cache.', 'muted'));
+  } else if (!state.cache.length) {
+    cache.append(make('li', 'Empty. Completed values will be saved here, including base cases.', 'muted'));
+  } else {
+    for (const entry of state.cache) {
+      const item = make('li', 'F(' + entry.input + ') = ' + entry.value, 'cache-entry');
+      if (state.event.cacheWrite?.input === entry.input) item.classList.add('cache-new');
+      cache.append(item);
+    }
+  }
+}
+function renderReturns(state) {
+  const returns = element('returned-values');
+  returns.replaceChildren();
+  const returned = inspectedTrace.steps.slice(0, selectedStep + 1).filter(step => step.event.kind === 'return');
+  element('return-count').textContent = returned.length + ' returned';
+  if (!returned.length) {
+    returns.append(make('li', 'No value has returned yet.', 'muted'));
+    return;
+  }
+  for (const step of returned) {
+    const button = make('button', '#' + step.event.frameId + ' ' + callLabel(inspectedTrace.algorithm, step.event.input) + ' → ' + step.event.value, 'return-chip');
+    button.type = 'button';
+    button.title = 'Inspect return event ' + step.index;
+    button.addEventListener('click', () => inspect(step.index));
+    const item = document.createElement('li');
+    item.append(button);
+    returns.append(item);
+  }
+}
+function renderRecentEvents() {
+  const recent = element('recent-events');
+  recent.replaceChildren();
+  const first = Math.max(0, selectedStep - 5);
+  element('history-note').textContent = first === 0 ? 'Events through the selected step.' : 'Showing the latest six events through this step. Use Jump to event for the entire trace.';
+  for (let i = first; i <= selectedStep; i++) {
+    const step = inspectedTrace.steps[i];
+    const row = make('li', '', i === selectedStep ? 'event-row event-current' : 'event-row');
+    const button = make('button', i + ' · ' + step.event.text, 'event-button');
+    button.type = 'button';
+    if (i === selectedStep) button.setAttribute('aria-current', 'step');
+    button.addEventListener('click', () => inspect(i));
+    row.append(button);
+    recent.append(row);
+  }
+}
+function inspect(index) {
+  if (!inspectedTrace) return;
+  const state = snapshotAt(inspectedTrace, index);
+  selectedStep = index;
+  element('step-slider').value = String(index);
+  element('event-jump').value = String(index);
+  element('step-position').textContent = 'Step ' + index + ' of ' + (inspectedTrace.steps.length - 1);
+  element('step-slider').setAttribute('aria-valuetext', 'Step ' + index + ': ' + state.event.text);
+  element('event-kind').textContent = state.event.kind.replace('-', ' ');
+  element('event-message').textContent = state.event.text;
+  element('run-label').textContent = ALGORITHMS[inspectedTrace.algorithm] + ' · n = ' + inspectedTrace.input;
+  element('trace-state').textContent = state.complete ? 'Complete' : index === 0 ? 'Before first call' : 'Paused';
+  element('result').textContent = state.result ?? 'pending';
+  element('result-note').textContent = state.complete ? 'The root returned this exact value.' : 'A result appears when the root call returns.';
+  for (const key of Object.keys(COUNTER_DEFINITIONS)) element('count-' + key).textContent = String(state.counters[key]);
+  element('previous').disabled = index === 0;
+  element('to-start').disabled = index === 0;
+  element('next').disabled = state.complete;
+  element('to-end').disabled = state.complete;
+  element('download-trace').disabled = false;
+  element('download-status').textContent = '';
+  renderCode(inspectedTrace.algorithm, state.event);
+  renderStack(state);
+  renderCache(state);
+  renderReturns(state);
+  renderRecentEvents();
+}
+function clearTrace(message) {
+  inspectedTrace = null;
+  selectedStep = 0;
+  for (const id of ['previous', 'next', 'to-start', 'to-end', 'step-slider', 'event-jump', 'download-trace']) element(id).disabled = true;
+  element('event-jump').replaceChildren();
+  element('step-slider').value = '0';
+  element('step-slider').max = '0';
+  element('step-slider').removeAttribute('aria-valuetext');
+  element('step-position').textContent = 'No active trace';
+  element('event-kind').textContent = 'setup';
+  element('event-message').textContent = message;
+  element('run-label').textContent = 'Start a new trace';
+  element('trace-state').textContent = 'No active trace';
+  element('result').textContent = 'pending';
+  element('result-note').textContent = 'Choose a valid setup, then select Run trace.';
+  element('stack-count').textContent = '0 active frames';
+  element('stack').replaceChildren(make('li', message, 'empty'));
+  element('cache-values').replaceChildren(make('li', 'No active run or retained cache.', 'muted'));
+  element('returned-values').replaceChildren();
+  element('return-count').textContent = '0 returned';
+  element('recent-events').replaceChildren();
+  element('history-note').textContent = 'No events to inspect.';
+  element('download-status').textContent = '';
+  element('comparison').hidden = true;
+  for (const key of Object.keys(COUNTER_DEFINITIONS)) element('count-' + key).textContent = '—';
+  renderCode(element('algorithm').value);
+}
+function buildTrace() {
+  let input;
+  try {
+    input = parseInput(element('input-n').value);
+  } catch (error) {
+    clearTrace('The previous trace is cleared. Fix the input, then select Run trace.');
+    element('input-error').textContent = error.message;
+    element('input-n').setAttribute('aria-invalid', 'true');
+    return;
+  }
+  element('input-error').textContent = '';
+  element('input-n').setAttribute('aria-invalid', 'false');
+  inspectedTrace = createTrace(element('algorithm').value, input);
+  selectedStep = 0;
+  const events = element('event-jump');
+  events.replaceChildren();
+  for (const step of inspectedTrace.steps) {
+    const option = make('option', step.index + ' · ' + step.event.text);
+    option.value = String(step.index);
+    events.append(option);
+  }
+  element('event-jump').disabled = false;
+  element('step-slider').disabled = false;
+  element('step-slider').min = '0';
+  element('step-slider').max = String(inspectedTrace.steps.length - 1);
+  inspect(0);
+  renderComparison();
+}
+function requestDownload(filename, content) {
+  const url = URL.createObjectURL(new Blob([content], {type: 'application/json;charset=utf-8'}));
+  try {
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    document.body.append(link);
+    try { link.click(); } finally { link.remove(); }
+  } finally {
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+}
+element('setup').addEventListener('submit', event => {
+  event.preventDefault();
+  buildTrace();
+});
+for (const id of ['algorithm', 'input-n']) {
+  element(id).addEventListener('input', () => {
+    element('input-error').textContent = '';
+    element('input-n').setAttribute('aria-invalid', 'false');
+    clearTrace('Setup changed. Select Run trace to begin with fresh frames and an empty cache.');
+  });
+}
+element('previous').addEventListener('click', () => inspect(selectedStep - 1));
+element('next').addEventListener('click', () => inspect(selectedStep + 1));
+element('to-start').addEventListener('click', () => inspect(0));
+element('to-end').addEventListener('click', () => inspectedTrace && inspect(inspectedTrace.steps.length - 1));
+element('step-slider').addEventListener('input', event => inspect(Number(event.target.value)));
+element('event-jump').addEventListener('change', event => inspect(Number(event.target.value)));
+element('download-trace').addEventListener('click', () => {
+  if (!inspectedTrace) return;
+  try {
+    requestDownload('recallweave-' + inspectedTrace.algorithm + '-' + inspectedTrace.input + '-step-' + selectedStep + '.json',
+      JSON.stringify(traceDocument(inspectedTrace, selectedStep), null, 2) + '\n');
+    element('download-status').textContent = 'Requested the full exact trace, including selected step ' + selectedStep + ' and its displayed state. Saving is handled by your browser.';
+  } catch (error) {
+    element('download-status').textContent = 'The trace download could not be requested. Your current trace is still available.';
+  }
+});
+element('download-course').addEventListener('click', () => {
+  try {
+    requestDownload('recallweave-recursion-call-stack-course.json', courseDownload);
+    element('download-status').textContent = 'Requested the original 12-question course. Open it with Bring your own lesson in RecallWeave, preview it, then select Start this deck.';
+  } catch (error) {
+    element('download-status').textContent = 'The course download could not be requested. Your current trace is still available.';
+  }
+});
+buildTrace();
+</script>
+</body>
+</html>
