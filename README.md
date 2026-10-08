@@ -372,6 +372,12 @@ Build with `node tools/build_least_squares.mjs`; `--check` verifies the generate
 
 The [original twelve-question course](courses/momentum-collisions.json) imports through the existing learner's preview and **Start this deck** flow, including feedback, separate missed-item practice and study-note downloads. The [worked guide](courses/momentum-collisions.md) derives the formulas, explains the physical assumptions and provides build/check commands. Open the explorer directly from disk; it requires no server or network and saves nothing automatically.
 
+## Build a curve from repeated interpolation
+
+Open **[Straight steps. Curved paths.](courses/bezier-curves-explorer.html)** directly in a browser to construct a linear, quadratic or cubic Bézier curve from exact fractions. Inspect each interpolation level, split the curve into two exact subcurves, and compare derivatives with parameter-dependent travel. The tables preserve signed rational coordinates, including stationary and coincident-control cases.
+
+Download the original [sixteen-question lesson](courses/bezier-curves.json) and [worked guide](courses/bezier-curves.md), then use **Bring your own lesson** for the existing learner, review, practice and study-notes flow. The standalone page works offline without installation or automatic storage. Rebuild it with `node tools/build-bezier-curves.mjs`; use `--check` to verify parity with its exact sources and validated course.
+
 ## Solve two remainder conditions together
 
 Open the [Congruences together lab](courses/congruences-explorer.html) directly from your files. Enter two signed remainders with positive moduli, then inspect an exact gcd/Bézout construction, a compatible solution class or an explicit contradiction. Shared factors, repeated conditions and modulus 1 remain distinct cases. The integer inspector shows every value in a bounded 24-integer window without rounding large integers or confusing an empty window with impossibility.
