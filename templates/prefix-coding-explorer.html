@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src 'none'; base-uri 'none'; form-action 'none'">
+<title>Prefix coding · RecallWeave</title>
+<style>
+:root{color-scheme:light;--paper:#f6f4ed;--ink:#202c35;--muted:#4d5c64;--line:#c6d0ce;--card:#fff;--teal:#0b665e;--soft:#e5f4ec;--purple:#503a83;--red:#982d31;font:16px/1.55 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink)}a{color:var(--teal);text-underline-offset:.2em}button,input,select,textarea{font:inherit}button,select{min-height:44px}button{border:1px solid var(--teal);border-radius:8px;padding:.5rem .8rem;background:var(--card);color:var(--teal);font-weight:650;cursor:pointer}button:hover:enabled{background:var(--soft)}button:disabled{opacity:.5;cursor:default}button.primary{background:var(--teal);color:white}button.primary:hover:enabled{background:#084d47}button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible,[tabindex]:focus-visible,summary:focus-visible{outline:3px solid #b45620;outline-offset:3px}
+input,select,textarea{width:100%;border:1px solid #839693;border-radius:6px;background:white;color:var(--ink);padding:.5rem}input{min-width:0}textarea{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;line-height:1.5;resize:vertical;min-height:90px;overflow-wrap:anywhere}label{display:block;font-size:.85rem;font-weight:650}label input{display:block;margin-top:.25rem}h1,h2,h3,p{margin-top:0}h1{font-size:clamp(2rem,5vw,3.25rem);line-height:1.12;letter-spacing:-.035em;margin-bottom:1rem;max-width:20ch}h2{font-size:1.25rem;line-height:1.3;margin-bottom:.8rem}h3{font-size:1rem;margin-bottom:.5rem}.muted,.hint{color:var(--muted)}.hint{font-size:.86rem}.eyebrow{text-transform:uppercase;letter-spacing:.1em;font-size:.75rem;font-weight:750;color:var(--teal)}.skip{position:absolute;left:1rem;top:-10rem;background:white;padding:.75rem;z-index:4}.skip:focus{top:1rem}
+.topbar{border-bottom:1px solid var(--line);padding:1rem max(1.2rem,calc((100vw - 1200px)/2));display:flex;justify-content:space-between;gap:1rem;align-items:center}.brand{font-weight:800;letter-spacing:-.03em}.topbar a{font-size:.9rem}.page{max-width:1240px;margin:auto;padding:2.5rem 1.25rem 3rem}.intro{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:2rem;align-items:end;margin-bottom:2rem}.intro p{max-width:67ch}.course-card{border-left:4px solid var(--purple);padding:1rem 1.2rem;background:#f0eafa;border-radius:0 12px 12px 0}.course-card p{margin-bottom:.8rem}.course-card button{border-color:var(--purple);color:var(--purple);width:100%}.layout{display:grid;grid-template-columns:320px minmax(0,1fr);gap:1.2rem;align-items:start}.panel{border:1px solid var(--line);border-radius:14px;background:var(--card);padding:1.25rem;margin-bottom:1.2rem;min-width:0}.number{display:inline-grid;place-items:center;width:1.6rem;height:1.6rem;margin-right:.5rem;border-radius:50%;background:var(--soft);color:var(--teal);font-size:.85rem}.symbol-row{display:grid;grid-template-columns:minmax(0,1fr) 82px 38px;gap:.5rem;align-items:end;margin-top:.8rem}.symbol-row .remove{padding:0;min-height:44px;font-size:1.35rem;color:var(--red);border-color:#d6b9ba}.symbol-row .remove:hover:enabled{background:#fff0ee}#add-symbol{width:100%;margin-top:1rem}.limits{border-top:1px solid var(--line);padding-top:1rem;margin-top:1.2rem}.limits p:last-child{margin-bottom:0}.error{color:var(--red);background:#fff0ee;border-left:3px solid var(--red);padding:.7rem;margin-top:1rem;overflow-wrap:anywhere}.error[hidden]{display:none}
+.summary{display:grid;grid-template-columns:1fr 1fr;gap:.8rem}.stat{padding:.9rem 1rem;border-radius:10px;background:var(--soft)}.stat.secondary{background:#f2edf8}.stat strong{font-size:2.1rem;display:block;line-height:1.2;letter-spacing:-.04em;font-variant-numeric:tabular-nums}.stat span{font-size:.8rem;font-weight:700}.average{grid-column:1/-1;border-top:1px solid var(--line);padding-top:.8rem;font-size:.9rem}.average output{font-variant-numeric:tabular-nums;font-weight:700;overflow-wrap:anywhere}#cost-note{margin:1rem 0 0}
+.controls{display:flex;flex-wrap:wrap;gap:.5rem;margin:.8rem 0 1rem}.controls button{font-size:.87rem}.status{font-size:.9rem;min-height:1.4em;color:var(--muted);overflow-wrap:anywhere}#step-status{font-weight:700;color:var(--purple)}.queue-wrap{margin-top:1rem}.table-wrap{overflow:auto;max-width:100%}table{width:100%;border-collapse:collapse;font-size:.88rem}caption{text-align:left;font-weight:700;padding-bottom:.6rem}th{text-align:left;color:var(--muted);font-size:.75rem;line-height:1.35;border-bottom:2px solid var(--line);padding:.6rem .4rem}td{padding:.55rem .4rem;border-bottom:1px solid #e1e7e4;vertical-align:top;overflow-wrap:anywhere}th:first-child,td:first-child{padding-left:0}th:last-child,td:last-child{padding-right:0}.numeric{text-align:right;font-variant-numeric:tabular-nums}.literal,.tree-symbols,.bits{font-family:ui-monospace,SFMono-Regular,Consolas,monospace}.bits{font-weight:700;color:var(--purple);letter-spacing:.06em}.next-pair{font-size:.75rem;color:var(--teal);white-space:nowrap}.tree-wrap{margin-top:1.1rem;border:1px solid var(--line);border-radius:10px;background:#fafcfb}#tree-scroll{overflow:auto;width:100%;max-height:590px}#tree-svg{display:block;max-width:none;margin:auto;font-family:inherit}.tree-edge{fill:none;stroke:#7e9591;stroke-width:2}.edge-bit{fill:var(--purple);font-size:14px;font-weight:700;paint-order:stroke;stroke:#fafcfb;stroke-width:5px;stroke-linejoin:round}.tree-parent{fill:var(--soft);stroke:var(--teal);stroke-width:1.5}.node-count{fill:var(--teal);font-size:15px;font-weight:700}.tree-leaf{fill:#f1ebfb;stroke:#ad9bcd}.leaf-label{fill:var(--purple);font-size:13px;font-weight:700}.leaf-count{fill:var(--muted);font-size:13px}.tree-caption{padding:.6rem .8rem;border-top:1px solid var(--line);margin:0;font-size:.78rem;color:var(--muted)}
+#decoder-result{display:block;min-height:3rem;max-height:190px;overflow:auto;padding:.8rem;border-radius:8px;background:#f3f5f4;font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:.9rem;overflow-wrap:anywhere}#decode-trace{max-height:260px;overflow:auto;padding-left:1.6rem;font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:.85rem}#decode-trace li{padding:.2rem 0;overflow-wrap:anywhere}details{margin-top:1rem}summary{cursor:pointer;font-weight:650}.download-panel{background:#203f3a;color:#fff;border-color:#203f3a}.download-panel p{color:#dceae4}.download-panel button{background:#fff;color:#174c43;border-color:white}.download-panel .status{color:#dceae4;margin-top:.75rem;margin-bottom:0}.sources{border-top:1px solid var(--line);margin-top:1.5rem;padding-top:1.2rem;font-size:.85rem}.sources p{max-width:100ch}.sources li{margin:.5rem 0}noscript p{padding:1rem;background:#fff0ee;color:var(--red)}
+.layout>*{min-width:0}
+@media(max-width:900px){.intro{grid-template-columns:1fr}.course-card{max-width:600px}.layout{grid-template-columns:285px minmax(0,1fr)}.page{padding-top:1.75rem}.panel{padding:1rem}.symbol-row{grid-template-columns:minmax(0,1fr) 75px 35px}}
+@media(max-width:700px){.layout{grid-template-columns:1fr}.page{padding:1.5rem .9rem}.topbar{padding:.9rem;align-items:flex-start}.intro{gap:.5rem}.panel{padding:1rem}.symbol-row{grid-template-columns:minmax(0,1fr) 92px 40px}.stat strong{font-size:1.9rem}.controls button{flex:1 1 42%;font-size:.9rem}td,th{padding:.5rem .3rem;font-size:.78rem}.next-pair{white-space:normal}.course-card{padding:1rem}.summary{gap:.6rem}h1{max-width:18ch}}
+.symbol-row textarea{display:block;margin-top:.25rem;min-height:44px;height:44px;resize:vertical;line-height:1.35;white-space:pre;overflow:auto;font-size:1rem}
+</style>
+</head>
+<body>
+<a class="skip" href="#explorer">Skip to the explorer</a>
+<header class="topbar"><span class="brand">RecallWeave <span class="muted">/ Prefix coding</span></span><a href="../demo.html">Open RecallWeave</a></header>
+<main class="page" id="explorer">
+<section class="intro" aria-labelledby="page-title">
+<div><p class="eyebrow">An offline coding lab</p><h1 id="page-title">Build a code that can be read back.</h1><p>Give frequent symbols shorter paths. Follow Huffman’s two-smallest merge, read the finished codebook, then check how bits become symbols again.</p><p class="hint">These are authored counts for a mathematical example. Nothing is uploaded or saved automatically.</p></div>
+<aside class="course-card" aria-label="Study this topic"><h2>Understand the choices</h2><p class="hint">Study an original twelve-question lesson with explanations, review and practice in RecallWeave.</p><button id="download-course" disabled>Download lesson (.json)</button><p class="status" id="course-download-status" role="status" aria-live="polite"></p><p class="hint">Save the file, then choose <strong>Bring your own lesson</strong> in RecallWeave.</p></aside>
+</section>
+<noscript><p>This explorer needs JavaScript for local calculations. The <a href="prefix-coding.md">worked guide</a> and <a href="prefix-coding.json">lesson JSON</a> are also available in the project.</p></noscript>
+<div class="layout">
+<aside>
+<section class="panel" aria-labelledby="input-heading">
+<h2 id="input-heading"><span class="number">1</span>Choose symbol counts</h2>
+<label for="example-select">Worked example</label>
+<select id="example-select"><option value="uneven" selected>Uneven counts</option><option value="equal">Equal counts</option><option value="skewed">Strongly skewed</option><option value="" disabled>Custom counts</option></select>
+<div id="symbol-rows"></div>
+<button id="add-symbol">Add symbol</button>
+<p id="symbol-help" class="hint">Use 2–8 distinct labels, each with 1–24 Unicode characters and some non-whitespace text. Spaces and letter case remain part of a label. Counts are whole numbers from 1 to 10,000.</p>
+<p id="input-error" class="error" role="alert" hidden></p>
+<div class="limits"><h3>What stays fixed</h3><p class="hint">Left edges are 0; right edges are 1. Equal counts use a reproducible order: original labels in Unicode character order, then combined trees in their creation order. Other tie choices can give different, equally good codes.</p><p class="hint">Editing the counts or labels starts a new tree and clears the bit stream. Your inputs stay here until you change them or close the page.</p></div>
+</section>
+<section class="panel download-panel" aria-labelledby="keep-heading">
+<h2 id="keep-heading">Keep the worked example</h2><p class="hint">The JSON includes these counts, every merge, the finished codebook, exact costs, your inspected step and the completely decoded stream.</p>
+<button id="download-example" disabled>Download worked example (.json)</button>
+<p id="download-status" class="status" role="status" aria-live="polite"></p>
+</section>
+</aside>
+<div>
+<section class="panel" aria-labelledby="cost-heading">
+<h2 id="cost-heading">Count the payload bits</h2>
+<div class="summary"><div class="stat"><strong><output id="payload-bits">—</output></strong><span>Huffman payload bits</span></div><div class="stat secondary"><strong><output id="fixed-payload-bits">—</output></strong><span>Fixed-width payload bits</span></div><div class="average">Average bits per symbol: <output id="average-bits">—</output></div></div>
+<p id="cost-note" class="hint"></p>
+</section>
+<section class="panel" aria-labelledby="merge-heading">
+<h2 id="merge-heading"><span class="number">2</span>Combine the smallest trees</h2>
+<p id="step-status" role="status" aria-live="polite"></p>
+<div class="controls"><button id="step-back" disabled>Previous merge</button><button id="step-next" disabled>Next merge</button><button id="step-reset" disabled>Restart merges</button><button id="step-all" disabled>Show finished tree</button></div>
+<p id="merge-description" class="hint"></p>
+<div class="table-wrap queue-wrap"><table><caption>Current queue · smallest count first</caption><thead><tr><th scope="col">Tree symbols</th><th scope="col" class="numeric">Count</th><th scope="col">Next merge</th></tr></thead><tbody id="queue"></tbody></table></div>
+<div class="tree-wrap"><div id="tree-scroll" tabindex="0" aria-label="Current code forest; scroll horizontally to inspect every branch"><svg id="tree-svg" role="img" aria-labelledby="tree-title tree-description"></svg></div><p class="tree-caption">Each leaf is one literal symbol. Scroll the forest horizontally on a narrow screen. The table below retains complete labels.</p></div>
+</section>
+<section class="panel" aria-labelledby="codebook-heading">
+<h2 id="codebook-heading">Finished codebook</h2><p class="hint">Read each root-to-leaf path as bits. No complete codeword begins another codeword. Cost is the count multiplied by the codeword length.</p>
+<div class="table-wrap"><table><caption>Final symbol codes and exact contribution</caption><thead><tr><th scope="col">Symbol</th><th scope="col" class="numeric">Count</th><th scope="col">Code</th><th scope="col" class="numeric">Length</th><th scope="col" class="numeric">Cost</th></tr></thead><tbody id="codebook"></tbody></table></div>
+</section>
+<section class="panel" aria-labelledby="decode-heading">
+<h2 id="decode-heading"><span class="number">3</span>Read the bits back</h2>
+<label for="bits">Bits to decode</label><textarea id="bits" rows="3" spellcheck="false" aria-describedby="bits-help" placeholder="Only 0 and 1"></textarea>
+<p class="hint" id="bits-help">Use up to 4,096 bits without spaces. An empty stream means no symbols. A stream that ends inside a codeword is incomplete.</p>
+<div class="controls"><button id="decode-button" class="primary" disabled>Decode bits</button><button id="sample-bits" disabled>Use one of each symbol</button></div>
+<p id="decode-error" class="error" role="alert" hidden></p><p id="decoder-status" class="status" role="status" aria-live="polite"></p>
+<output id="decoder-result" aria-label="Decoded symbol sequence"></output>
+<details><summary>Inspect each decoded codeword</summary><ol id="decode-trace"></ol></details>
+</section>
+</div>
+</div>
+<footer class="sources"><h2>Why this works—and what the comparison means</h2><p>Huffman’s greedy construction minimizes the weighted payload length among binary prefix codes for these symbol counts. The decoder also needs the codebook and framing. Their costs are excluded here, so fewer payload bits do not promise a smaller real file. Prefix coding preserves the exact symbols; it does not recover a damaged or incomplete message.</p><p>Read the <a href="prefix-coding.md">original worked guide</a>. Mathematical background was checked against <a href="https://ocw.mit.edu/courses/6-046j-design-and-analysis-of-algorithms-spring-2012/resources/mit6_046js12_lec19/" rel="noreferrer">MIT 6.046J, Lecture 19: Compression and Huffman Coding</a>. All lesson wording, examples and visual layout are original for this project. Linked materials retain their own terms.</p><p class="hint">This page calculates locally. Its JSON records a worked example; it is not an authenticated record, an arbitrary-file compressor or evidence of learning efficacy.</p></footer>
+</main>
+<script>
+/* PREFIX_MODEL */
+/* PREFIX_DECK */
+/* PREFIX_UI */
+</script>
+</body>
+</html>

@@ -1,0 +1,436 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src 'none'; base-uri 'none'; form-action 'none'">
+<title>Prefix coding · RecallWeave</title>
+<style>
+:root{color-scheme:light;--paper:#f6f4ed;--ink:#202c35;--muted:#4d5c64;--line:#c6d0ce;--card:#fff;--teal:#0b665e;--soft:#e5f4ec;--purple:#503a83;--red:#982d31;font:16px/1.55 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink)}a{color:var(--teal);text-underline-offset:.2em}button,input,select,textarea{font:inherit}button,select{min-height:44px}button{border:1px solid var(--teal);border-radius:8px;padding:.5rem .8rem;background:var(--card);color:var(--teal);font-weight:650;cursor:pointer}button:hover:enabled{background:var(--soft)}button:disabled{opacity:.5;cursor:default}button.primary{background:var(--teal);color:white}button.primary:hover:enabled{background:#084d47}button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible,[tabindex]:focus-visible,summary:focus-visible{outline:3px solid #b45620;outline-offset:3px}
+input,select,textarea{width:100%;border:1px solid #839693;border-radius:6px;background:white;color:var(--ink);padding:.5rem}input{min-width:0}textarea{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;line-height:1.5;resize:vertical;min-height:90px;overflow-wrap:anywhere}label{display:block;font-size:.85rem;font-weight:650}label input{display:block;margin-top:.25rem}h1,h2,h3,p{margin-top:0}h1{font-size:clamp(2rem,5vw,3.25rem);line-height:1.12;letter-spacing:-.035em;margin-bottom:1rem;max-width:20ch}h2{font-size:1.25rem;line-height:1.3;margin-bottom:.8rem}h3{font-size:1rem;margin-bottom:.5rem}.muted,.hint{color:var(--muted)}.hint{font-size:.86rem}.eyebrow{text-transform:uppercase;letter-spacing:.1em;font-size:.75rem;font-weight:750;color:var(--teal)}.skip{position:absolute;left:1rem;top:-10rem;background:white;padding:.75rem;z-index:4}.skip:focus{top:1rem}
+.topbar{border-bottom:1px solid var(--line);padding:1rem max(1.2rem,calc((100vw - 1200px)/2));display:flex;justify-content:space-between;gap:1rem;align-items:center}.brand{font-weight:800;letter-spacing:-.03em}.topbar a{font-size:.9rem}.page{max-width:1240px;margin:auto;padding:2.5rem 1.25rem 3rem}.intro{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:2rem;align-items:end;margin-bottom:2rem}.intro p{max-width:67ch}.course-card{border-left:4px solid var(--purple);padding:1rem 1.2rem;background:#f0eafa;border-radius:0 12px 12px 0}.course-card p{margin-bottom:.8rem}.course-card button{border-color:var(--purple);color:var(--purple);width:100%}.layout{display:grid;grid-template-columns:320px minmax(0,1fr);gap:1.2rem;align-items:start}.panel{border:1px solid var(--line);border-radius:14px;background:var(--card);padding:1.25rem;margin-bottom:1.2rem;min-width:0}.number{display:inline-grid;place-items:center;width:1.6rem;height:1.6rem;margin-right:.5rem;border-radius:50%;background:var(--soft);color:var(--teal);font-size:.85rem}.symbol-row{display:grid;grid-template-columns:minmax(0,1fr) 82px 38px;gap:.5rem;align-items:end;margin-top:.8rem}.symbol-row .remove{padding:0;min-height:44px;font-size:1.35rem;color:var(--red);border-color:#d6b9ba}.symbol-row .remove:hover:enabled{background:#fff0ee}#add-symbol{width:100%;margin-top:1rem}.limits{border-top:1px solid var(--line);padding-top:1rem;margin-top:1.2rem}.limits p:last-child{margin-bottom:0}.error{color:var(--red);background:#fff0ee;border-left:3px solid var(--red);padding:.7rem;margin-top:1rem;overflow-wrap:anywhere}.error[hidden]{display:none}
+.summary{display:grid;grid-template-columns:1fr 1fr;gap:.8rem}.stat{padding:.9rem 1rem;border-radius:10px;background:var(--soft)}.stat.secondary{background:#f2edf8}.stat strong{font-size:2.1rem;display:block;line-height:1.2;letter-spacing:-.04em;font-variant-numeric:tabular-nums}.stat span{font-size:.8rem;font-weight:700}.average{grid-column:1/-1;border-top:1px solid var(--line);padding-top:.8rem;font-size:.9rem}.average output{font-variant-numeric:tabular-nums;font-weight:700;overflow-wrap:anywhere}#cost-note{margin:1rem 0 0}
+.controls{display:flex;flex-wrap:wrap;gap:.5rem;margin:.8rem 0 1rem}.controls button{font-size:.87rem}.status{font-size:.9rem;min-height:1.4em;color:var(--muted);overflow-wrap:anywhere}#step-status{font-weight:700;color:var(--purple)}.queue-wrap{margin-top:1rem}.table-wrap{overflow:auto;max-width:100%}table{width:100%;border-collapse:collapse;font-size:.88rem}caption{text-align:left;font-weight:700;padding-bottom:.6rem}th{text-align:left;color:var(--muted);font-size:.75rem;line-height:1.35;border-bottom:2px solid var(--line);padding:.6rem .4rem}td{padding:.55rem .4rem;border-bottom:1px solid #e1e7e4;vertical-align:top;overflow-wrap:anywhere}th:first-child,td:first-child{padding-left:0}th:last-child,td:last-child{padding-right:0}.numeric{text-align:right;font-variant-numeric:tabular-nums}.literal,.tree-symbols,.bits{font-family:ui-monospace,SFMono-Regular,Consolas,monospace}.bits{font-weight:700;color:var(--purple);letter-spacing:.06em}.next-pair{font-size:.75rem;color:var(--teal);white-space:nowrap}.tree-wrap{margin-top:1.1rem;border:1px solid var(--line);border-radius:10px;background:#fafcfb}#tree-scroll{overflow:auto;width:100%;max-height:590px}#tree-svg{display:block;max-width:none;margin:auto;font-family:inherit}.tree-edge{fill:none;stroke:#7e9591;stroke-width:2}.edge-bit{fill:var(--purple);font-size:14px;font-weight:700;paint-order:stroke;stroke:#fafcfb;stroke-width:5px;stroke-linejoin:round}.tree-parent{fill:var(--soft);stroke:var(--teal);stroke-width:1.5}.node-count{fill:var(--teal);font-size:15px;font-weight:700}.tree-leaf{fill:#f1ebfb;stroke:#ad9bcd}.leaf-label{fill:var(--purple);font-size:13px;font-weight:700}.leaf-count{fill:var(--muted);font-size:13px}.tree-caption{padding:.6rem .8rem;border-top:1px solid var(--line);margin:0;font-size:.78rem;color:var(--muted)}
+#decoder-result{display:block;min-height:3rem;max-height:190px;overflow:auto;padding:.8rem;border-radius:8px;background:#f3f5f4;font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:.9rem;overflow-wrap:anywhere}#decode-trace{max-height:260px;overflow:auto;padding-left:1.6rem;font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:.85rem}#decode-trace li{padding:.2rem 0;overflow-wrap:anywhere}details{margin-top:1rem}summary{cursor:pointer;font-weight:650}.download-panel{background:#203f3a;color:#fff;border-color:#203f3a}.download-panel p{color:#dceae4}.download-panel button{background:#fff;color:#174c43;border-color:white}.download-panel .status{color:#dceae4;margin-top:.75rem;margin-bottom:0}.sources{border-top:1px solid var(--line);margin-top:1.5rem;padding-top:1.2rem;font-size:.85rem}.sources p{max-width:100ch}.sources li{margin:.5rem 0}noscript p{padding:1rem;background:#fff0ee;color:var(--red)}
+.layout>*{min-width:0}
+@media(max-width:900px){.intro{grid-template-columns:1fr}.course-card{max-width:600px}.layout{grid-template-columns:285px minmax(0,1fr)}.page{padding-top:1.75rem}.panel{padding:1rem}.symbol-row{grid-template-columns:minmax(0,1fr) 75px 35px}}
+@media(max-width:700px){.layout{grid-template-columns:1fr}.page{padding:1.5rem .9rem}.topbar{padding:.9rem;align-items:flex-start}.intro{gap:.5rem}.panel{padding:1rem}.symbol-row{grid-template-columns:minmax(0,1fr) 92px 40px}.stat strong{font-size:1.9rem}.controls button{flex:1 1 42%;font-size:.9rem}td,th{padding:.5rem .3rem;font-size:.78rem}.next-pair{white-space:normal}.course-card{padding:1rem}.summary{gap:.6rem}h1{max-width:18ch}}
+.symbol-row textarea{display:block;margin-top:.25rem;min-height:44px;height:44px;resize:vertical;line-height:1.35;white-space:pre;overflow:auto;font-size:1rem}
+</style>
+</head>
+<body>
+<a class="skip" href="#explorer">Skip to the explorer</a>
+<header class="topbar"><span class="brand">RecallWeave <span class="muted">/ Prefix coding</span></span><a href="../demo.html">Open RecallWeave</a></header>
+<main class="page" id="explorer">
+<section class="intro" aria-labelledby="page-title">
+<div><p class="eyebrow">An offline coding lab</p><h1 id="page-title">Build a code that can be read back.</h1><p>Give frequent symbols shorter paths. Follow Huffman’s two-smallest merge, read the finished codebook, then check how bits become symbols again.</p><p class="hint">These are authored counts for a mathematical example. Nothing is uploaded or saved automatically.</p></div>
+<aside class="course-card" aria-label="Study this topic"><h2>Understand the choices</h2><p class="hint">Study an original twelve-question lesson with explanations, review and practice in RecallWeave.</p><button id="download-course" disabled>Download lesson (.json)</button><p class="status" id="course-download-status" role="status" aria-live="polite"></p><p class="hint">Save the file, then choose <strong>Bring your own lesson</strong> in RecallWeave.</p></aside>
+</section>
+<noscript><p>This explorer needs JavaScript for local calculations. The <a href="prefix-coding.md">worked guide</a> and <a href="prefix-coding.json">lesson JSON</a> are also available in the project.</p></noscript>
+<div class="layout">
+<aside>
+<section class="panel" aria-labelledby="input-heading">
+<h2 id="input-heading"><span class="number">1</span>Choose symbol counts</h2>
+<label for="example-select">Worked example</label>
+<select id="example-select"><option value="uneven" selected>Uneven counts</option><option value="equal">Equal counts</option><option value="skewed">Strongly skewed</option><option value="" disabled>Custom counts</option></select>
+<div id="symbol-rows"></div>
+<button id="add-symbol">Add symbol</button>
+<p id="symbol-help" class="hint">Use 2–8 distinct labels, each with 1–24 Unicode characters and some non-whitespace text. Spaces and letter case remain part of a label. Counts are whole numbers from 1 to 10,000.</p>
+<p id="input-error" class="error" role="alert" hidden></p>
+<div class="limits"><h3>What stays fixed</h3><p class="hint">Left edges are 0; right edges are 1. Equal counts use a reproducible order: original labels in Unicode character order, then combined trees in their creation order. Other tie choices can give different, equally good codes.</p><p class="hint">Editing the counts or labels starts a new tree and clears the bit stream. Your inputs stay here until you change them or close the page.</p></div>
+</section>
+<section class="panel download-panel" aria-labelledby="keep-heading">
+<h2 id="keep-heading">Keep the worked example</h2><p class="hint">The JSON includes these counts, every merge, the finished codebook, exact costs, your inspected step and the completely decoded stream.</p>
+<button id="download-example" disabled>Download worked example (.json)</button>
+<p id="download-status" class="status" role="status" aria-live="polite"></p>
+</section>
+</aside>
+<div>
+<section class="panel" aria-labelledby="cost-heading">
+<h2 id="cost-heading">Count the payload bits</h2>
+<div class="summary"><div class="stat"><strong><output id="payload-bits">—</output></strong><span>Huffman payload bits</span></div><div class="stat secondary"><strong><output id="fixed-payload-bits">—</output></strong><span>Fixed-width payload bits</span></div><div class="average">Average bits per symbol: <output id="average-bits">—</output></div></div>
+<p id="cost-note" class="hint"></p>
+</section>
+<section class="panel" aria-labelledby="merge-heading">
+<h2 id="merge-heading"><span class="number">2</span>Combine the smallest trees</h2>
+<p id="step-status" role="status" aria-live="polite"></p>
+<div class="controls"><button id="step-back" disabled>Previous merge</button><button id="step-next" disabled>Next merge</button><button id="step-reset" disabled>Restart merges</button><button id="step-all" disabled>Show finished tree</button></div>
+<p id="merge-description" class="hint"></p>
+<div class="table-wrap queue-wrap"><table><caption>Current queue · smallest count first</caption><thead><tr><th scope="col">Tree symbols</th><th scope="col" class="numeric">Count</th><th scope="col">Next merge</th></tr></thead><tbody id="queue"></tbody></table></div>
+<div class="tree-wrap"><div id="tree-scroll" tabindex="0" aria-label="Current code forest; scroll horizontally to inspect every branch"><svg id="tree-svg" role="img" aria-labelledby="tree-title tree-description"></svg></div><p class="tree-caption">Each leaf is one literal symbol. Scroll the forest horizontally on a narrow screen. The table below retains complete labels.</p></div>
+</section>
+<section class="panel" aria-labelledby="codebook-heading">
+<h2 id="codebook-heading">Finished codebook</h2><p class="hint">Read each root-to-leaf path as bits. No complete codeword begins another codeword. Cost is the count multiplied by the codeword length.</p>
+<div class="table-wrap"><table><caption>Final symbol codes and exact contribution</caption><thead><tr><th scope="col">Symbol</th><th scope="col" class="numeric">Count</th><th scope="col">Code</th><th scope="col" class="numeric">Length</th><th scope="col" class="numeric">Cost</th></tr></thead><tbody id="codebook"></tbody></table></div>
+</section>
+<section class="panel" aria-labelledby="decode-heading">
+<h2 id="decode-heading"><span class="number">3</span>Read the bits back</h2>
+<label for="bits">Bits to decode</label><textarea id="bits" rows="3" spellcheck="false" aria-describedby="bits-help" placeholder="Only 0 and 1"></textarea>
+<p class="hint" id="bits-help">Use up to 4,096 bits without spaces. An empty stream means no symbols. A stream that ends inside a codeword is incomplete.</p>
+<div class="controls"><button id="decode-button" class="primary" disabled>Decode bits</button><button id="sample-bits" disabled>Use one of each symbol</button></div>
+<p id="decode-error" class="error" role="alert" hidden></p><p id="decoder-status" class="status" role="status" aria-live="polite"></p>
+<output id="decoder-result" aria-label="Decoded symbol sequence"></output>
+<details><summary>Inspect each decoded codeword</summary><ol id="decode-trace"></ol></details>
+</section>
+</div>
+</div>
+<footer class="sources"><h2>Why this works—and what the comparison means</h2><p>Huffman’s greedy construction minimizes the weighted payload length among binary prefix codes for these symbol counts. The decoder also needs the codebook and framing. Their costs are excluded here, so fewer payload bits do not promise a smaller real file. Prefix coding preserves the exact symbols; it does not recover a damaged or incomplete message.</p><p>Read the <a href="prefix-coding.md">original worked guide</a>. Mathematical background was checked against <a href="https://ocw.mit.edu/courses/6-046j-design-and-analysis-of-algorithms-spring-2012/resources/mit6_046js12_lec19/" rel="noreferrer">MIT 6.046J, Lecture 19: Compression and Huffman Coding</a>. All lesson wording, examples and visual layout are original for this project. Linked materials retain their own terms.</p><p class="hint">This page calculates locally. Its JSON records a worked example; it is not an authenticated record, an arbitrary-file compressor or evidence of learning efficacy.</p></footer>
+</main>
+<script>
+/** Binary prefix codes for bounded, authored symbol counts. No file compression. */
+const MAX_SYMBOLS = 8;
+const MAX_COUNT = 10000;
+function fail(message) { throw new Error(message); }
+function freeze(value) {
+  if (value && typeof value === 'object' && !Object.isFrozen(value)) {
+    Object.values(value).forEach(freeze);
+    Object.freeze(value);
+  }
+  return value;
+}
+function scalarText(value) {
+  if (typeof value !== 'string' || !value.trim()) return false;
+  const points = Array.from(value);
+  return points.length <= 24 && points.every(ch => {
+    const n = ch.codePointAt(0);
+    return n < 0xd800 || n > 0xdfff;
+  });
+}
+function scalarOrder(a, b) {
+  const x = Array.from(a, c => c.codePointAt(0));
+  const y = Array.from(b, c => c.codePointAt(0));
+  for (let i = 0; i < Math.min(x.length, y.length); i++) {
+    if (x[i] !== y[i]) return x[i] - y[i];
+  }
+  return x.length - y.length;
+}
+function validateRows(rows) {
+  if (!Array.isArray(rows) || rows.length < 2 || rows.length > MAX_SYMBOLS) {
+    fail('Use 2–8 symbols.');
+  }
+  for (let i = 0; i < rows.length; i++) {
+    if (!Object.prototype.hasOwnProperty.call(rows, i)) fail('Every symbol row must be present.');
+  }
+  const seen = new Set();
+  const result = rows.map((row, index) => {
+    if (!row || typeof row !== 'object' || Array.isArray(row)) fail('Symbol row ' + (index + 1) + ' must be an object.');
+    if (!scalarText(row.symbol)) fail('Symbol ' + (index + 1) + ' needs 1–24 Unicode characters and some non-whitespace text.');
+    if (seen.has(row.symbol)) fail('Each symbol must be distinct. Labels are compared exactly, including spaces.');
+    seen.add(row.symbol);
+    if (!Number.isInteger(row.count) || row.count < 1 || row.count > MAX_COUNT) {
+      fail('Count ' + (index + 1) + ' must be a whole number from 1 to 10,000.');
+    }
+    return { symbol: row.symbol, count: row.count };
+  });
+  result.sort((a, b) => scalarOrder(a.symbol, b.symbol));
+  return freeze(result);
+}
+function buildCode(input) {
+  const rows = validateRows(input);
+  const nodes = rows.map((row, id) => ({ id, weight: row.count, symbol: row.symbol, left: null, right: null }));
+  const order = (a, b) => nodes[a].weight - nodes[b].weight || a - b;
+  let queue = nodes.map(node => node.id).sort(order);
+  const steps = [];
+  let accumulatedCost = 0;
+  while (queue.length > 1) {
+    const before = queue.slice();
+    const left = queue[0], right = queue[1], parent = nodes.length;
+    const weight = nodes[left].weight + nodes[right].weight;
+    nodes.push({ id: parent, weight, symbol: null, left, right });
+    queue = queue.slice(2).concat(parent).sort(order);
+    accumulatedCost += weight;
+    steps.push({ index: steps.length + 1, before, left, right, parent,
+      after: queue.slice(), addedCost: weight, accumulatedCost });
+  }
+  const root = queue[0], codes = new Map();
+  function visit(id, code) {
+    const node = nodes[id];
+    if (node.symbol !== null) codes.set(node.symbol, code);
+    else { visit(node.left, code + '0'); visit(node.right, code + '1'); }
+  }
+  visit(root, '');
+  const codebook = rows.map(row => {
+    const code = codes.get(row.symbol);
+    return { symbol: row.symbol, count: row.count, code, length: code.length, cost: row.count * code.length };
+  });
+  const totalCount = rows.reduce((n, row) => n + row.count, 0);
+  const payloadBits = codebook.reduce((n, row) => n + row.cost, 0);
+  const fixedWidth = Math.ceil(Math.log2(rows.length));
+  const fixedPayloadBits = fixedWidth * totalCount;
+  return freeze({ rows, nodes, root, steps, codebook, totals: {
+    totalCount, payloadBits, fixedWidth, fixedPayloadBits,
+    averageBits: payloadBits / totalCount,
+    savedPayloadBits: fixedPayloadBits - payloadBits,
+    mergeWeightSum: accumulatedCost
+  } });
+}
+function encodeSymbols(rows, symbols) {
+  const model = buildCode(rows);
+  if (!Array.isArray(symbols) || symbols.length > 512) fail('Encode at most 512 known symbols.');
+  for (let i = 0; i < symbols.length; i++) {
+    if (!Object.prototype.hasOwnProperty.call(symbols, i)) fail('Every message symbol must be present.');
+  }
+  const codes = new Map(model.codebook.map(row => [row.symbol, row.code]));
+  let bits = '';
+  const segments = symbols.map(symbol => {
+    if (typeof symbol !== 'string' || !codes.has(symbol)) fail('The message contains a symbol outside this codebook.');
+    const code = codes.get(symbol), start = bits.length;
+    bits += code;
+    return { symbol, code, start, end: bits.length };
+  });
+  return freeze({ bits, symbols: symbols.slice(), segments });
+}
+function decodeBits(rows, bits) {
+  const model = buildCode(rows);
+  if (typeof bits !== 'string' || bits.length > 4096 || !/^[01]*$/.test(bits)) {
+    fail('Use at most 4,096 bits: only 0 and 1, with no spaces.');
+  }
+  const symbols = [], segments = [];
+  let id = model.root, start = 0;
+  for (let i = 0; i < bits.length; i++) {
+    id = bits[i] === '0' ? model.nodes[id].left : model.nodes[id].right;
+    const node = model.nodes[id];
+    if (node.symbol !== null) {
+      symbols.push(node.symbol);
+      segments.push({ symbol: node.symbol, code: bits.slice(start, i + 1), start, end: i + 1 });
+      id = model.root; start = i + 1;
+    }
+  }
+  if (id !== model.root) fail('The stream ends inside a codeword after bit ' + bits.length + '. Add the remaining bits or remove that incomplete codeword.');
+  return freeze({ bits, symbols, segments });
+}
+function serializeExample(rows, step, bits) {
+  const model = buildCode(rows);
+  if (!Number.isInteger(step) || step < 0 || step > model.steps.length) fail('Choose an existing merge step.');
+  const decoding = decodeBits(rows, bits);
+  return JSON.stringify({ format: 'recallweave.prefix-coding/1', model,
+    inspection: { step }, decoding }, null, 2) + '\n';
+}
+
+const LESSON_JSON = "{\n  \"format\": \"recallweave-deck/1\",\n  \"title\": \"Prefix coding — follow the bits, count the cost\",\n  \"attribution\": \"Original questions, explanations, transfer prompts and examples for Jacob's RecallWeave project. Background consulted: MIT OpenCourseWare, 6.046J Design and Analysis of Algorithms, Spring 2012, Lecture 19, sections 19.1.6–19.2.2 (prefix codes and Huffman coding): https://ocw.mit.edu/courses/6-046j-design-and-analysis-of-algorithms-spring-2012/388115265a456321c4a5d19dc9e05281_MIT6_046JS12_lec19.pdf . No MIT exercises or figures are reproduced.\",\n  \"license\": \"Original course content created for Jacob's RecallWeave project. No additional reuse license is granted by this file. The cited MIT source retains its own terms.\",\n  \"concepts\": [\n    \"prefix-and-decoding\",\n    \"weighted-payload\",\n    \"huffman-merging\",\n    \"ties-and-boundaries\"\n  ],\n  \"items\": [\n    {\n      \"id\": \"pc-prefix-1\",\n      \"concept\": \"prefix-and-decoding\",\n      \"prerequisites\": [],\n      \"prompt\": \"A binary code is prefix-free when no complete codeword is the beginning of another codeword. Which codebook has that property?\",\n      \"options\": [\n        \"{0, 01, 11}\",\n        \"{00, 01, 10}\",\n        \"{0, 10, 101}\",\n        \"{1, 10, 00}\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"The three different two-bit words 00, 01 and 10 cannot begin one another. In the other sets, 0 begins 01, 10 begins 101, or 1 begins 10. Different codewords alone do not guarantee the prefix property; codewords of unequal lengths can also be prefix-free.\",\n      \"transfer\": \"Before using a new codebook, compare every word with the beginnings of the other words. What would go wrong with an immediate left-to-right decoder if one complete word also began another?\"\n    },\n    {\n      \"id\": \"pc-prefix-2\",\n      \"concept\": \"prefix-and-decoding\",\n      \"prerequisites\": [],\n      \"prompt\": \"Codebook: A=0, B=10, C=110, D=111. Starting at the beginning, decode the complete stream 0101110. Which sequence does it represent?\",\n      \"options\": [\n        \"A, B, C, A\",\n        \"B, A, D, A\",\n        \"A, B, D, A\",\n        \"A, D, B, A\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"The unique split is 0 | 10 | 111 | 0, giving A, B, D, A. After a complete codeword, restart the lookup for the next symbol. The vertical bars explain the split; they are not bits stored in this payload.\",\n      \"transfer\": \"Try encoding the decoded sequence again with this same codebook. Why must a receiver know which codebook was used, even when both the sender and receiver use prefix codes?\"\n    },\n    {\n      \"id\": \"pc-prefix-3\",\n      \"concept\": \"prefix-and-decoding\",\n      \"prerequisites\": [],\n      \"prompt\": \"A code uses A=0 and B=01. The end of the complete encoded message is known. Which statement describes this code?\",\n      \"options\": [\n        \"It is prefix-free and uniquely decodable.\",\n        \"It is prefix-free but not uniquely decodable.\",\n        \"It is not prefix-free and not uniquely decodable.\",\n        \"It is not prefix-free but is uniquely decodable.\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"The word 0 begins 01, so this code is not prefix-free. It is nevertheless uniquely decodable: work backward from the known end. A final 1 must finish B=01; a final 0 must be A=0. Remove that word and repeat. This gives one decoding for every valid complete message. Prefix-free coding is sufficient for unique decoding, but it is not necessary.\",\n      \"transfer\": \"Separate two questions: can a complete valid message have two interpretations, and can a decoder emit each symbol immediately while scanning left to right? Explain why this example answers those questions differently.\"\n    },\n    {\n      \"id\": \"pc-cost-1\",\n      \"concept\": \"weighted-payload\",\n      \"prerequisites\": [\n        \"prefix-and-decoding\"\n      ],\n      \"prompt\": \"Counts: A=8, B=3, C=2, D=1. Codebook: A=1, B=00, C=011, D=010. How many payload bits encode these 14 symbol occurrences?\",\n      \"options\": [\n        \"23 bits\",\n        \"14 bits\",\n        \"9 bits\",\n        \"28 bits\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"Multiply each codeword length by its occurrence count: 8×1 + 3×2 + 2×3 + 1×3 = 23 bits. Adding lengths once gives 9, which ignores how often each symbol occurs. Fourteen counts symbols, not bits. No codebook, framing or padding cost is included here.\",\n      \"transfer\": \"If A occurred once more and this codebook stayed fixed, how many bits would be added? If D occurred once more instead, what would change?\"\n    },\n    {\n      \"id\": \"pc-cost-2\",\n      \"concept\": \"weighted-payload\",\n      \"prerequisites\": [\n        \"prefix-and-decoding\"\n      ],\n      \"prompt\": \"Counts: A=8, B=3, C=2, D=1. A reference code must represent these four known symbols with one fixed number of bits per symbol. Using the smallest such width, how many payload bits encode all 14 occurrences?\",\n      \"options\": [\n        \"14 bits\",\n        \"23 bits\",\n        \"28 bits\",\n        \"56 bits\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"Four distinct symbols require at least two bits each: one bit offers only two words, while two bits offer four. The reference payload is therefore 14×2 = 28 bits. This is a fixed-width symbol-code comparison, not an assumption that a source file uses ASCII, UTF-8 or a particular container.\",\n      \"transfer\": \"For five known symbols, what minimum fixed width would be needed? State the number of available binary words at that width before multiplying by any occurrence count.\"\n    },\n    {\n      \"id\": \"pc-cost-3\",\n      \"concept\": \"weighted-payload\",\n      \"prerequisites\": [\n        \"prefix-and-decoding\"\n      ],\n      \"prompt\": \"An encoded payload contains 23 bits for 14 symbol occurrences drawn from four distinct labels. What is the exact average number of payload bits per occurrence?\",\n      \"options\": [\n        \"23/14 bits per symbol\",\n        \"23/4 bits per symbol\",\n        \"14/23 bits per symbol\",\n        \"2 bits per symbol\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"Average payload cost is total payload bits divided by total occurrences: 23/14 bits per symbol. Dividing by four would average over distinct labels rather than over the message. Two bits is the fixed-width reference for four labels, not this variable-length payload average.\",\n      \"transfer\": \"Why can the average be a fraction even though each individual codeword has a whole number of bits? Describe which quantity weights the contribution of each word length.\"\n    },\n    {\n      \"id\": \"pc-merge-1\",\n      \"concept\": \"huffman-merging\",\n      \"prerequisites\": [\n        \"prefix-and-decoding\",\n        \"weighted-payload\"\n      ],\n      \"prompt\": \"Counts: A=8, B=3, C=2, D=1. At the first step of Huffman coding, which pair should be combined into a new subtree?\",\n      \"options\": [\n        \"A=8 with B=3 → weight 11\",\n        \"A=8 with D=1 → weight 9\",\n        \"B=3 with C=2 → weight 5\",\n        \"D=1 with C=2 → weight 3\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"Huffman coding combines the two currently smallest weights. Initially these are D=1 and C=2, so the new subtree weighs 3. Put that subtree back into the queue: the remaining weights are B=3, the new 3, and A=8. Future steps compare subtree weights as well as individual symbol counts.\",\n      \"transfer\": \"After this merge, which two queue entries are smallest? Explain why repeatedly choosing the two rarest original labels would fail to describe the later steps.\"\n    },\n    {\n      \"id\": \"pc-merge-2\",\n      \"concept\": \"huffman-merging\",\n      \"prerequisites\": [\n        \"prefix-and-decoding\",\n        \"weighted-payload\"\n      ],\n      \"prompt\": \"For counts A=8, B=3, C=2, D=1, a Huffman construction creates subtrees of weights 3, 6 and 14. Why does 3+6+14 equal the final weighted payload cost of 23 bits?\",\n      \"options\": [\n        \"Only the final merge adds bits; the earlier subtree weights count the same payload a second time.\",\n        \"Each merge adds one bit to every symbol occurrence represented inside the newly combined subtree.\",\n        \"Each merge adds one bit to every distinct label in the codebook, including labels outside that subtree.\",\n        \"Only a merge of two original leaves adds bits; later internal merges merely rearrange existing words.\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"Joining two subtrees beneath a new parent increases every included leaf depth by one. Each occurrence of those symbols therefore gains one bit, for a total equal to the new subtree weight. A symbol contributes its count once for each level on its path. Summing all merge weights is consequently the same calculation as summing count×codeword length.\",\n      \"transfer\": \"Use the codeword lengths 1, 2, 3 and 3 for A, B, C and D to obtain 23 independently. What would disagreement between that sum and the merge-weight sum tell you about a proposed construction?\"\n    },\n    {\n      \"id\": \"pc-merge-3\",\n      \"concept\": \"huffman-merging\",\n      \"prerequisites\": [\n        \"prefix-and-decoding\",\n        \"weighted-payload\"\n      ],\n      \"prompt\": \"For known positive symbol counts, which argument explains why repeatedly merging the two smallest weights can minimize weighted length among binary prefix codes?\",\n      \"options\": [\n        \"The two least frequent labels must occupy the shallowest leaves; removing them leaves the depth of every other leaf unchanged.\",\n        \"The globally heaviest subtree must be joined first; that choice fixes a unique codeword for every label in the completed tree.\",\n        \"Some optimal tree puts the two lightest labels at deepest sibling leaves; contracting that pair gives a smaller optimal problem.\",\n        \"Every binary tree gives the same weighted leaf depth; joining any available pair therefore yields the same minimum payload cost.\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"There is an optimal full binary tree with the two lightest labels as deepest siblings: moving lighter labels downward need not increase weighted cost. Replace the pair by one label with their combined weight. The reduced tree must also be optimal; a cheaper reduced tree could be expanded to beat the original. Repeating this reduction justifies the greedy merge. It does not establish a unique bit assignment or optimality among every possible file-compression scheme.\",\n      \"transfer\": \"Which part of the argument would be missing if someone only showed that the method worked on one example? Identify the role of the exchange step and the role of the smaller optimal problem.\"\n    },\n    {\n      \"id\": \"pc-limits-1\",\n      \"concept\": \"ties-and-boundaries\",\n      \"prerequisites\": [\n        \"prefix-and-decoding\",\n        \"weighted-payload\",\n        \"huffman-merging\"\n      ],\n      \"prompt\": \"Four labels A, B, C and D each occur once. Two implementations use Huffman coding but may choose different ties and left/right branches. Which result must they share?\",\n      \"options\": [\n        \"Each label has exactly the same bit string under every possible tie-breaking and branch choice.\",\n        \"The tied labels can share a bit string because their equal occurrence counts remove ambiguity.\",\n        \"Some tie choices require a three-bit word and increase this four-symbol payload to nine bits.\",\n        \"All four codewords have length two, so either construction uses eight bits for the payload.\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"The first two merges each combine two weight-1 leaves into weight-2 subtrees; the last merge combines those subtrees. Every leaf has depth two, so the payload is 4×2 = 8 bits. Ties and branch orientation may change which label gets which two-bit word. Here the fixed-width reference also costs 8 bits, so there is no payload saving.\",\n      \"transfer\": \"When comparing two implementations, separate codeword identity, codeword length and weighted cost. Which of those must a decoder agree with its encoder about to recover the intended labels?\"\n    },\n    {\n      \"id\": \"pc-limits-2\",\n      \"concept\": \"ties-and-boundaries\",\n      \"prerequisites\": [\n        \"prefix-and-decoding\",\n        \"weighted-payload\",\n        \"huffman-merging\"\n      ],\n      \"prompt\": \"Codebook: A=0, B=10, C=110, D=111. The received stream 01011 stops here. With no padding or missing-bit convention, what can the decoder conclude?\",\n      \"options\": [\n        \"A and B finish, but the final 11 is incomplete and needs another bit before a third symbol can finish.\",\n        \"A, B and C finish; the last zero of C can be omitted because the preceding bits already identify it.\",\n        \"A and B form the complete message; a prefix decoder may discard the final 11 as automatic padding.\",\n        \"The already completed A and B are ambiguous; adding one bit can change either of those earlier symbols.\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"The scan is 0 | 10 | 11. A and B are complete, but 11 is only a prefix of C=110 or D=111. Ending inside a codeword is incomplete and must not be accepted as a complete stream. A different truncation exactly at a codeword boundary could look like a valid shorter message; prefix coding alone is not an integrity check.\",\n      \"transfer\": \"What extra framing, expected symbol count or integrity check would help distinguish an intended short message from a longer message cut off at a codeword boundary? Do not invent padding unless the format defines it.\"\n    },\n    {\n      \"id\": \"pc-limits-3\",\n      \"concept\": \"ties-and-boundaries\",\n      \"prerequisites\": [\n        \"prefix-and-decoding\",\n        \"weighted-payload\",\n        \"huffman-merging\"\n      ],\n      \"prompt\": \"A toy comparison has a variable-code payload of 23 bits and a fixed-code payload of 28 bits. The variable-code container adds 12 bits of overhead; the fixed-code container adds 3 bits. Counting only these stated costs, what are the two totals?\",\n      \"options\": [\n        \"Variable: 23 bits; fixed: 28 bits.\",\n        \"Variable: 35 bits; fixed: 31 bits.\",\n        \"Variable: 28 bits; fixed: 40 bits.\",\n        \"Variable: 31 bits; fixed: 35 bits.\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"The stated totals are 23+12 = 35 bits and 28+3 = 31 bits. The variable payload saves 5 bits, yet its toy container is 4 bits larger. These deliberately supplied overhead values are an arithmetic example, not measured file sizes. A real format may also store a dictionary, framing, padding or other metadata.\",\n      \"transfer\": \"Before calling a real file smaller, compare the complete encoded outputs, specify which metadata is included, and verify recovery of the original data. Why would downloading the explorer’s example JSON not measure compression of that JSON file?\"\n    }\n  ]\n}\n";
+function mountPrefixExplorer(doc) {
+  const get = id => doc.getElementById(id);
+  const presets = {
+    uneven: [['A',8],['B',3],['C',2],['D',1]],
+    equal: [['A',1],['B',1],['C',1],['D',1]],
+    skewed: [['A',20],['B',2],['C',1],['D',1]]
+  };
+  let model = null, step = 0, decoded = null;
+  const urls = new Set();
+  function element(tag, text, className) {
+    const node = doc.createElement(tag);
+    if (text !== undefined) node.textContent = String(text);
+    if (className) node.className = className;
+    return node;
+  }
+  function readRows() {
+    return Array.from(get('symbol-rows').children, row => ({
+      symbol: row.querySelector('[data-field="symbol"]').value,
+      count: Number(row.querySelector('[data-field="count"]').value)
+    }));
+  }
+  function showError(id, message) {
+    get(id).textContent = message;
+    get(id).hidden = !message;
+  }
+  function renderInputs(rows, focusIndex) {
+    const fragment = doc.createDocumentFragment();
+    rows.forEach((row, index) => {
+      const wrap = element('div', undefined, 'symbol-row');
+      const symbolLabel = element('label', 'Symbol ' + (index + 1));
+      symbolLabel.htmlFor = 'symbol-' + index;
+      const symbol = element('textarea'); symbol.rows = 1;
+      symbol.id = 'symbol-' + index; symbol.dataset.field = 'symbol';
+      symbol.value = row.symbol; symbol.autocomplete = 'off'; symbol.spellcheck = false;
+      symbol.setAttribute('aria-describedby','symbol-help');
+      symbolLabel.append(symbol);
+      const countLabel = element('label', 'Count ' + (index + 1));
+      countLabel.htmlFor = 'count-' + index;
+      const count = element('input');
+      count.id = 'count-' + index; count.dataset.field = 'count';
+      count.type = 'number'; count.min = '1'; count.max = '10000'; count.step = '1';
+      count.value = String(row.count); count.setAttribute('inputmode','numeric');
+      countLabel.append(count);
+      const remove = element('button', '×', 'remove');
+      remove.type = 'button'; remove.setAttribute('aria-label','Remove symbol ' + (index + 1));
+      remove.disabled = rows.length <= 2;
+      remove.addEventListener('click', () => {
+        const current = readRows(); current.splice(index,1);
+        get('example-select').value = '';
+        renderInputs(current,Math.min(index,current.length-1)); rebuild();
+      });
+      wrap.append(symbolLabel,countLabel,remove); fragment.append(wrap);
+    });
+    get('symbol-rows').replaceChildren(fragment);
+    get('add-symbol').disabled = rows.length >= 8;
+    if (focusIndex !== undefined) get('symbol-' + focusIndex).focus();
+  }
+  function clearDerived() {
+    for (const id of ['queue','codebook','tree-svg','decode-trace']) get(id).replaceChildren();
+    for (const id of ['payload-bits','fixed-payload-bits','average-bits']) get(id).textContent = '—';
+    get('cost-note').textContent = 'Repair the inputs to build a new codebook.';
+    get('step-status').textContent = 'Waiting for valid symbol counts';
+    get('merge-description').textContent = '';
+    get('decoder-result').textContent = '';
+    get('decoder-status').textContent = 'Enter valid symbol counts first.';
+    for (const id of ['step-back','step-next','step-reset','step-all','decode-button','sample-bits','download-example']) get(id).disabled = true;
+  }
+  function descendants(id) {
+    const node = model.nodes[id];
+    return node.symbol !== null ? [node.symbol] : descendants(node.left).concat(descendants(node.right));
+  }
+  function queueAtStep() { return step === 0 ? model.steps[0].before : model.steps[step-1].after; }
+  function svgNode(tag, attrs, text) {
+    const node = doc.createElementNS('http://www.w3.org/2000/svg',tag);
+    for (const [key,value] of Object.entries(attrs || {})) node.setAttribute(key,String(value));
+    if (text !== undefined) node.textContent = text;
+    return node;
+  }
+  function renderTree(queue) {
+    const svg = get('tree-svg'); svg.replaceChildren();
+    const positions = new Map(); let cursor = 0, depthMax = 0;
+    function place(id, depth) {
+      const node = model.nodes[id]; depthMax = Math.max(depthMax,depth);
+      let x;
+      if (node.symbol !== null) x = 60 + cursor++ * 110;
+      else { place(node.left,depth+1); place(node.right,depth+1); x = (positions.get(node.left).x + positions.get(node.right).x)/2; }
+      positions.set(id,{x,y:42+depth*84});
+    }
+    queue.forEach(id => place(id,0));
+    const width = Math.max(300,cursor*110+10), height = depthMax*84+110;
+    svg.setAttribute('viewBox','0 0 '+width+' '+height);
+    svg.style.width = width+'px'; svg.style.height = height+'px';
+    svg.append(svgNode('title',{id:'tree-title'},step === 0 ? 'Separate symbol trees before merging' : 'Code forest after merge '+step));
+    function describe(id) {
+      const n=model.nodes[id];
+      return n.symbol!==null ? JSON.stringify(n.symbol)+' count '+n.weight :
+        'count '+n.weight+', zero to ('+describe(n.left)+'), one to ('+describe(n.right)+')';
+    }
+    svg.append(svgNode('desc',{id:'tree-description'},queue.map(describe).join('; ')));
+    for (const [id,pos] of positions) {
+      const n=model.nodes[id];
+      if(n.symbol!==null)continue;
+      for (const [child,bit] of [[n.left,'0'],[n.right,'1']]) {
+        const p=positions.get(child);
+        svg.append(svgNode('path',{d:'M'+pos.x+','+(pos.y+17)+' L'+p.x+','+(p.y-22),class:'tree-edge'}));
+        svg.append(svgNode('text',{x:(pos.x+p.x)/2+(bit==='0'?-9:9),y:(pos.y+p.y)/2+3,class:'edge-bit','text-anchor':'middle'},bit));
+      }
+    }
+    for (const [id,pos] of positions) {
+      const n=model.nodes[id],g=svgNode('g',{'data-node-id':id});
+      g.append(svgNode('title',{},(n.symbol===null?'Combined tree':JSON.stringify(n.symbol))+' · count '+n.weight));
+      if(n.symbol===null) {
+        g.append(svgNode('circle',{cx:pos.x,cy:pos.y,r:23,class:'tree-parent'}));
+        g.append(svgNode('text',{x:pos.x,y:pos.y+5,'text-anchor':'middle',class:'node-count'},String(n.weight)));
+      } else {
+        g.append(svgNode('rect',{x:pos.x-44,y:pos.y-25,width:88,height:56,rx:10,class:'tree-leaf'}));
+        const chars=Array.from(n.symbol),label=chars.slice(0,7).join('')+(chars.length>7?'…':'');
+        g.append(svgNode('text',{x:pos.x,y:pos.y-3,'text-anchor':'middle',class:'leaf-label'},JSON.stringify(label)));
+        g.append(svgNode('text',{x:pos.x,y:pos.y+18,'text-anchor':'middle',class:'leaf-count'},String(n.weight)));
+      }
+      svg.append(g);
+    }
+  }
+  function renderStep() {
+    const queue=queueAtStep(),fragment=doc.createDocumentFragment();
+    queue.forEach((id,index)=>{
+      const node=model.nodes[id],tr=element('tr');
+      tr.dataset.nodeId=String(id);tr.dataset.weight=String(node.weight);
+      tr.append(element('td',JSON.stringify(descendants(id)),'tree-symbols'),element('td',node.weight,'numeric'));
+      tr.append(element('td',queue.length>1&&index<2?'Next pair':'',queue.length>1&&index<2?'next-pair':''));
+      fragment.append(tr);
+    });
+    get('queue').replaceChildren(fragment);
+    get('step-status').textContent=step===0?'Before merging · '+queue.length+' trees':'Merge '+step+' of '+model.steps.length+' · '+queue.length+(queue.length===1?' tree':' trees');
+    if(step===0) get('merge-description').textContent='Combine the two smallest current counts. Each new parent adds one bit to every occurrence below it.';
+    else {
+      const s=model.steps[step-1];
+      get('merge-description').textContent='Combined '+JSON.stringify(descendants(s.left))+' ('+model.nodes[s.left].weight+') and '+JSON.stringify(descendants(s.right))+' ('+model.nodes[s.right].weight+'). This merge adds '+s.addedCost+' payload bits; all merges so far add '+s.accumulatedCost+'.';
+    }
+    get('step-back').disabled=step===0;get('step-reset').disabled=step===0;
+    get('step-next').disabled=step===model.steps.length;get('step-all').disabled=step===model.steps.length;
+    renderTree(queue);get('download-status').textContent='';
+  }
+  function renderCodebook() {
+    const f=doc.createDocumentFragment();
+    for(const row of model.codebook) {
+      const tr=element('tr');tr.dataset.symbol=row.symbol;
+      for(const [value,cls] of [[JSON.stringify(row.symbol),'literal'],[row.count,'numeric'],[row.code,'bits'],[row.length,'numeric'],[row.cost,'numeric']]) tr.append(element('td',value,cls));
+      f.append(tr);
+    }
+    get('codebook').replaceChildren(f);
+    const t=model.totals;
+    get('payload-bits').textContent=String(t.payloadBits);
+    get('fixed-payload-bits').textContent=String(t.fixedPayloadBits);
+    get('average-bits').textContent=t.payloadBits+' / '+t.totalCount+' ≈ '+t.averageBits.toFixed(4);
+    get('cost-note').textContent=t.totalCount+' symbol occurrences · '+t.savedPayloadBits+' fewer payload bits than a '+t.fixedWidth+'-bit fixed-width symbol code. Codebook and framing costs are excluded.';
+  }
+  function renderDecoded() {
+    get('decoder-result').textContent=JSON.stringify(decoded.symbols);
+    const f=doc.createDocumentFragment();
+    for(const segment of decoded.segments) f.append(element('li','Bits '+(segment.start+1)+'–'+segment.end+': '+segment.code+' → '+JSON.stringify(segment.symbol)));
+    get('decode-trace').replaceChildren(f);
+    get('decoder-status').textContent=decoded.bits.length===0?'Empty stream · no symbols.':decoded.bits.length+' bits decoded completely into '+decoded.symbols.length+' symbols.';
+    get('download-example').disabled=false;
+  }
+  function decode() {
+    if(!model)return;
+    try { decoded=decodeBits(model.rows,get('bits').value);showError('decode-error','');renderDecoded(); }
+    catch(error) { decoded=null;get('decoder-result').textContent='';get('decode-trace').replaceChildren();get('decoder-status').textContent='This stream has not been decoded completely.';showError('decode-error',error.message);get('download-example').disabled=true; }
+    get('download-status').textContent='';
+  }
+  function rebuild() {
+    step=0;decoded=null;get('bits').value='';showError('decode-error','');get('download-status').textContent='';
+    try { model=buildCode(readRows());showError('input-error','');renderCodebook();renderStep();get('decode-button').disabled=false;get('sample-bits').disabled=false;decode(); }
+    catch(error) { model=null;clearDerived();showError('input-error',error.message); }
+  }
+  function download(text,name,statusId) {
+    let url;
+    try {
+      url=URL.createObjectURL(new Blob([text],{type:'application/json;charset=utf-8'}));urls.add(url);
+      const a=element('a');a.href=url;a.download=name;a.hidden=true;doc.body.append(a);a.click();a.remove();
+      get(statusId).textContent='Download requested: '+name;
+      setTimeout(()=>{URL.revokeObjectURL(url);urls.delete(url);},1000);
+    } catch(error) {
+      if(url){URL.revokeObjectURL(url);urls.delete(url);}
+      get(statusId).textContent='The file could not be prepared. Try again. '+error.message;
+    }
+  }
+  get('symbol-rows').addEventListener('input',()=>{get('example-select').value='';rebuild();});
+  get('add-symbol').addEventListener('click',()=>{
+    const rows=readRows();if(rows.length>=8)return;
+    const used=new Set(rows.map(x=>x.symbol));let n=1;while(used.has('Symbol '+n))n++;
+    rows.push({symbol:'Symbol '+n,count:1});get('example-select').value='';renderInputs(rows,rows.length-1);rebuild();
+  });
+  get('example-select').addEventListener('change',()=>{
+    if(!presets[get('example-select').value])return;
+    renderInputs(presets[get('example-select').value].map(([symbol,count])=>({symbol,count})));rebuild();
+  });
+  for(const [id,target] of [['step-back',()=>step-1],['step-next',()=>step+1],['step-reset',()=>0],['step-all',()=>model.steps.length]]) get(id).addEventListener('click',()=>{
+    if(!model)return;step=Math.max(0,Math.min(model.steps.length,target()));renderStep();
+  });
+  get('bits').addEventListener('input',()=>{
+    decoded=null;get('decoder-result').textContent='';get('decode-trace').replaceChildren();showError('decode-error','');
+    get('decoder-status').textContent='Edited stream · choose Decode bits to check it.';get('download-example').disabled=true;get('download-status').textContent='';
+  });
+  get('decode-button').addEventListener('click',decode);
+  get('sample-bits').addEventListener('click',()=>{
+    if(!model)return;
+    get('bits').value=encodeSymbols(model.rows,model.rows.map(r=>r.symbol)).bits;decode();
+  });
+  get('download-example').addEventListener('click',()=>{
+    if(!model||!decoded)return;
+    try { download(serializeExample(model.rows,step,get('bits').value),'prefix-coding-example.json','download-status'); }
+    catch(error) { showError('decode-error',error.message);get('download-example').disabled=true; }
+  });
+  get('download-course').addEventListener('click',()=>download(LESSON_JSON,'prefix-coding.json','course-download-status'));
+  get('download-course').disabled=false;
+  globalThis.addEventListener('pagehide',()=>{for(const url of urls)URL.revokeObjectURL(url);urls.clear();},{once:true});
+  renderInputs(presets.uneven.map(([symbol,count])=>({symbol,count})));rebuild();
+}
+mountPrefixExplorer(document);
+
+</script>
+</body>
+</html>
