@@ -6,6 +6,27 @@
 
 Open `demo.html` directly in a browser—no server, install, build step, internet, login, API key, or user data storage is required. It is a single self-contained file with embedded CSS, JavaScript and deck. The modular source is in `index.html`, `src/`, and `data/`; to test that version locally, serve this directory with `python3 -m http.server 8080` and visit `http://localhost:8080`. Rebuild the direct-open demo with `python3 tools/make_demo.py` after source changes. No hosted endpoint is called by either version.
 
+## Find a lesson
+
+Open the **[Lesson catalog](courses/catalog.html)** directly in your browser to
+find original lessons in biology, algorithms, data, measurement and signals. Search titles and concepts or filter by
+subject. Each card shows the lesson's question and concept counts, original
+attribution and permission statement, plus available guides and explorers.
+
+Choose **Download lesson (.json)**, open the learner, and select that file under
+**Bring your own lesson**. Review the preview before **Start this deck**. The
+catalog embeds the exact existing lesson bytes; downloads and search work offline
+even when the catalog is opened on its own. Keep the project folder together to
+use its learner, Deck studio, guide and explorer links.
+
+The explicit `courses/catalog-manifest.json` controls which integrated files are
+included. Rebuild after a listed lesson or catalog source changes with
+`node tools/build-course-catalog.mjs`; `node tools/build-course-catalog.mjs --check`
+checks the generated page without writing. The ordinary test command includes
+catalog source parity and admission tests. An optional system-browser receiver
+checks actual offline downloads, importer previews and a 390px layout:
+`node tools/check_course_catalog_browser.mjs --browser /path/to/chromium --output /tmp/recallweave-catalog-check`.
+
 ## Core and interaction
 
 - `src/knowledge.mjs` implements a transparent BKT update: initial knowledge, learning transition, guess, and slip are explicit probabilities. It also computes binary entropy and expected information gain.
