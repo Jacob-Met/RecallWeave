@@ -1,0 +1,495 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="An offline Hamming(7,4) teaching lab: make a prediction, inspect parity checks and compare a decoder proposal with separately labeled simulation truth.">
+<title>When a repair can be wrong · RecallWeave</title>
+<style>
+:root{color-scheme:light;--ink:#142f3e;--muted:#475e69;--paper:#f5f3e9;--white:#fffef9;--line:#c6d0ce;--teal:#006d68;--teal-pale:#e2f2ec;--amber:#7a4100;--amber-pale:#fff0d7;--blue:#e9f0fb;--focus:#aa4300;font:16px/1.55 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+*{box-sizing:border-box}body{margin:0;color:var(--ink);background:var(--paper)}
+[hidden]{display:none!important}a{color:var(--teal);text-underline-offset:3px}button,input,select{font:inherit}
+button,input,select,a{touch-action:manipulation}:focus-visible{outline:3px solid var(--focus);outline-offset:4px}
+button{border:1px solid var(--teal);border-radius:8px;background:var(--white);color:var(--teal);padding:.65rem 1rem;min-height:44px;cursor:pointer;font-weight:650}
+button:hover{background:var(--teal-pale)}button:disabled{opacity:.48;cursor:default}
+button.primary{background:var(--teal);color:white;border-color:var(--teal)}button.primary:hover{background:#00564f}
+.skip{position:absolute;left:1rem;top:-5rem;background:white;padding:.6rem;z-index:2}.skip:focus{top:1rem}
+header,main,footer{width:min(1120px,calc(100% - 40px));margin-inline:auto}
+header{padding:2rem 0 1.5rem}.brand{font-size:.8rem;letter-spacing:.13em;text-transform:uppercase;color:var(--teal);font-weight:800}
+h1{font-size:clamp(2.1rem,5.5vw,3.7rem);line-height:1.07;letter-spacing:-.045em;max-width:760px;margin:.8rem 0 1rem}
+h2{font-size:1.35rem;line-height:1.25;margin:0 0 .8rem}h3{font-size:1.05rem;margin:1.1rem 0 .5rem}
+p{margin:.65rem 0}.intro{max-width:790px;font-size:1.12rem;color:var(--muted)}.small{font-size:.91rem;color:var(--muted)}
+.pill{display:inline-block;padding:.18rem .55rem;border:1px solid var(--line);border-radius:99px;font-size:.77rem;letter-spacing:.02em;margin:.1rem .4rem .1rem 0}
+.grid{display:grid;grid-template-columns:minmax(0,.88fr) minmax(0,1.12fr);gap:1.25rem;align-items:start}
+.card{background:var(--white);border:1px solid var(--line);border-radius:16px;padding:1.3rem;min-width:0;margin-bottom:1.25rem}
+.step{font-size:.75rem;letter-spacing:.1em;text-transform:uppercase;color:var(--teal);font-weight:800;margin:0 0 .4rem}
+label.field{display:block;font-weight:700;margin-top:1rem}label.field small{display:block;font-weight:400}
+input[type=text],select{width:100%;border:1px solid #728c92;background:white;color:var(--ink);border-radius:7px;padding:.65rem .8rem;min-height:46px;margin:.35rem 0}
+input[type=text]{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:1.2rem;letter-spacing:.16em}
+fieldset{border:0;padding:0;margin:1rem 0}legend{font-weight:700;padding:0;margin-bottom:.45rem}
+.bit-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}
+.flip-cell{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border:1px solid var(--line);padding:7px 1px 5px;border-radius:8px;min-width:0;font-size:.67rem;cursor:pointer}
+.flip-cell.parity{background:var(--teal-pale)}.flip-cell.data{background:var(--blue)}.position{font:700 1rem ui-monospace,SFMono-Regular,Consolas,monospace}.flip-cell input{width:20px;height:20px;margin:2px}
+.actions{display:flex;flex-wrap:wrap;gap:.55rem;margin-top:1rem}.examples{display:flex;gap:.45rem;flex-wrap:wrap}.examples button{font-size:.83rem;padding:.45rem .7rem}
+.note{border-left:4px solid var(--teal);padding:.4rem .8rem;background:var(--teal-pale);font-size:.94rem}
+.error{color:#8e230b;font-weight:650;min-height:1.5em;margin:.6rem 0 0}
+.pending{padding:1.5rem;border:1px dashed #8ea4a6;border-radius:12px;color:var(--muted);background:#f8faf5}
+.word-row{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px;max-width:400px;margin:.5rem 0}
+.word-bit{font:700 clamp(1.05rem,3vw,1.5rem)/1.2 ui-monospace,SFMono-Regular,Consolas,monospace;padding:.6rem .1rem;text-align:center;border:1px solid var(--line);border-radius:7px;background:#f2f6f5}
+.word-bit.marked{background:var(--amber-pale);border:2px solid var(--amber);padding:calc(.6rem - 1px) 0}
+.word-caption{font-size:.85rem;font-weight:700;color:var(--muted);margin-top:.8rem}
+.word-legend{font-size:.85rem;color:var(--muted)}code,.mono{font-family:ui-monospace,SFMono-Regular,Consolas,monospace}
+.big-number{font:800 2.7rem/1 ui-monospace,SFMono-Regular,Consolas,monospace;color:var(--teal)}
+.syndrome{display:flex;align-items:center;gap:1rem;padding:.9rem 0}
+.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:8px;margin:.75rem 0}
+table{border-collapse:collapse;width:100%;font-size:.87rem}th,td{text-align:left;padding:.55rem .5rem;border-bottom:1px solid var(--line);vertical-align:top}
+thead th{background:#edf3ef;font-size:.78rem}tbody tr:last-child>*{border-bottom:0}
+.check-table{min-width:370px}.check-table th:first-child{white-space:nowrap}
+#truth-card{border-top:5px solid var(--teal)}#truth-card[data-outcome=miscorrected],#truth-card[data-outcome=undetected]{border-top-color:var(--amber);background:#fffaf0}
+.metrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.7rem;margin-top:.9rem}
+.metrics div{padding:.7rem;border:1px solid var(--line);border-radius:8px}.metrics dt{font-size:.8rem;color:var(--muted)}.metrics dd{font-size:1.2rem;font-weight:750;margin:.1rem 0 0}
+.full{grid-column:1/-1}.learn-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1.1rem}.learn-grid p{font-size:.94rem}
+.status{min-height:1.5em;font-size:.89rem;color:var(--muted);overflow-wrap:anywhere}
+footer{padding:.2rem 0 2.5rem;font-size:.85rem;color:var(--muted)}
+@media(max-width:760px){header,main,footer{width:calc(100% - 28px)}header{padding-top:1.2rem}.grid,.learn-grid{grid-template-columns:1fr}.card{padding:1rem}.full{grid-column:auto}.bit-grid{gap:4px}.word-row{gap:4px}.intro{font-size:1rem}.metrics{gap:.5rem}}
+@media print{body{background:white}header,main,footer{width:100%}.skip,.examples,.actions,form,#pending,.course-download{display:none!important}.grid,.learn-grid{display:block}.card{break-inside:avoid;border:1px solid #999;margin-bottom:.8rem}h1{font-size:2rem}.table-wrap{overflow:visible}.check-table{min-width:0}.status{display:none}footer{padding-bottom:0}}
+</style>
+</head>
+<body>
+<a class="skip" href="#lab">Skip to the bit lab</a>
+<header>
+<div class="brand">RecallWeave · Coding theory</div>
+<h1>When a repair<br>can be wrong.</h1>
+<p class="intro">Add three parity bits to a four-bit message. Introduce a few errors, make a prediction, and see exactly what a Hamming decoder can—and cannot—know.</p>
+<span class="pill">Hamming(7,4)</span><span class="pill">Even parity</span><span class="pill">Offline · No account</span>
+</header>
+<main id="lab">
+<div class="grid">
+<section class="card">
+<p class="step">01 · Author a scenario</p>
+<h2>What will the receiver see?</h2>
+<p class="small">The sender and error switches belong to this simulation. The decoder receives only the seven bits that arrive.</p>
+<form id="scenario-form" novalidate>
+<label class="field" for="data-bits">Four data bits <small>Exactly four 0s or 1s. Leading zeros matter.</small></label>
+<input id="data-bits" type="text" inputmode="numeric" value="1011" maxlength="4" autocomplete="off" spellcheck="false" aria-describedby="data-help">
+<p id="data-help" class="small">Data fill positions 3, 5, 6 and 7. Positions 1, 2 and 4 hold even-parity checks. Position 1 is always at the left.</p>
+<fieldset><legend>Flip these transmitted positions</legend>
+<div class="bit-grid"><label class="flip-cell parity"><span class="position">1</span><input id="flip-1" type="checkbox" name="flip" value="1"><span>parity</span></label>
+<label class="flip-cell parity"><span class="position">2</span><input id="flip-2" type="checkbox" name="flip" value="2"><span>parity</span></label>
+<label class="flip-cell data"><span class="position">3</span><input id="flip-3" type="checkbox" name="flip" value="3"><span>data</span></label>
+<label class="flip-cell parity"><span class="position">4</span><input id="flip-4" type="checkbox" name="flip" value="4"><span>parity</span></label>
+<label class="flip-cell data"><span class="position">5</span><input id="flip-5" type="checkbox" name="flip" value="5"><span>data</span></label>
+<label class="flip-cell data"><span class="position">6</span><input id="flip-6" type="checkbox" name="flip" value="6" checked><span>data</span></label>
+<label class="flip-cell data"><span class="position">7</span><input id="flip-7" type="checkbox" name="flip" value="7"><span>data</span></label></div>
+<p class="small">A checked box flips that bit once. Try any combination, including none.</p></fieldset>
+<label class="field" for="prediction">Predict the syndrome <small>Optional: which position will the one-error rule suggest?</small></label>
+<select id="prediction"><option value="">I have not predicted yet</option><option value="0">0 · All checks pass</option><option value="1">1 · Suggest position 1</option><option value="2">2 · Suggest position 2</option><option value="3">3 · Suggest position 3</option><option value="4">4 · Suggest position 4</option><option value="5">5 · Suggest position 5</option><option value="6">6 · Suggest position 6</option><option value="7">7 · Suggest position 7</option></select>
+<div class="actions"><button class="primary" type="submit" id="inspect">Inspect decoder</button></div>
+<p id="input-error" class="error" role="alert"></p>
+</form>
+<h3>Try an authored example</h3>
+<div class="examples"><button type="button" data-preset="single">One flip</button><button type="button" data-preset="double">Two flips</button><button type="button" data-preset="hidden">Three hidden flips</button><button type="button" data-preset="clear">No flips</button></div>
+<p class="note">This decoder assumes <strong>at most one error</strong>. The lab lets you exceed that assumption so you can inspect the consequences.</p>
+</section>
+<div>
+<p id="pending" class="pending" aria-live="polite">Choose data and flipped positions, then inspect the decoder. Results appear only after that choice.</p>
+<div id="result" hidden>
+<section class="card">
+<p class="step">02 · Sender and channel · Simulation truth</p><h2>From message to received word</h2>
+<p>Original data: <strong id="original-data" class="mono"></strong></p>
+<p class="word-caption">Encoded word · positions 1 → 7</p><div id="sent-word" class="word-row" role="img"></div>
+<p class="word-caption">Received word · positions 1 → 7</p><div id="received-word" class="word-row" role="img"></div>
+<p class="word-legend">Authored flipped positions: <strong id="flips-summary"></strong>. Amber borders identify those positions.</p>
+</section>
+<section class="card">
+<p class="step">03 · Receiver · Received bits only</p><h2>Check, then propose a repair</h2>
+<p class="small">Count the 1s in each group. Odd parity sets that check to 1. Even parity sets it to 0.</p>
+<div class="table-wrap" tabindex="0" role="region" aria-label="Received parity checks; scroll horizontally on small screens"><table class="check-table"><thead><tr><th scope="col">Check</th><th scope="col">Positions</th><th scope="col">Received sum</th><th scope="col">Result</th></tr></thead><tbody id="check-rows"></tbody></table></div>
+<div class="syndrome"><span id="syndrome-value" class="big-number"></span><div>Syndrome value<br><span class="small">s4s2s1 = <strong id="syndrome-bits" class="mono"></strong><br>value = s1 + 2s2 + 4s4</span></div></div>
+<p id="decoder-proposal"></p><p id="decoder-limit" class="note"></p>
+<p class="word-caption">Decoder candidate · suggested flip highlighted</p><div id="candidate-word" class="word-row" role="img"></div>
+<p>Candidate data: <strong id="candidate-data" class="mono"></strong></p>
+<p id="prediction-feedback" class="small"></p>
+</section>
+<section class="card" id="truth-card">
+<p class="step">04 · Compare with simulation truth</p><h2 id="truth-title"></h2>
+<p id="truth-explanation"></p>
+<p class="small"><strong>The receiver cannot perform this comparison by itself:</strong> the lab kept the original message and the flips you chose.</p>
+<dl class="metrics"><div><dt>Actual flipped bits</dt><dd id="actual-flips"></dd></div><div><dt>One-error assumption</dt><dd id="assumption-status"></dd></div><div><dt>Original codeword recovered</dt><dd id="recovery-status"></dd></div><div><dt>Different codeword positions</dt><dd id="codeword-differences"></dd></div><div><dt>Different data positions</dt><dd id="data-differences"></dd></div></dl>
+</section>
+</div>
+<section class="card">
+<h2>Keep this worked example</h2>
+<p class="small">The text record keeps the exact data, flipped positions, parity arithmetic, decoder proposal, your optional prediction and the simulation comparison.</p>
+<div class="actions"><button id="save-record" type="button" disabled>Download worked record</button></div>
+<p id="record-status" class="status" aria-live="polite"></p>
+</section>
+</div>
+<section class="card full">
+<p class="step">Connect the ideas</p><h2>Three checks, one useful assumption</h2>
+<div class="learn-grid">
+<div><h3>Parity creates structure</h3><p>Only 16 of the 128 seven-bit words pass all three checks. Each four-bit message chooses one of those words. The added bits make some changes observable.</p></div>
+<div><h3>Distance creates a guarantee</h3><p>Distinct valid words are at least three positions apart. After exactly one flip, the original remains closer than every other valid word.</p></div>
+<div><h3>A candidate is not a history</h3><p>Every received word is within one position of a valid word. A decoder can always produce a candidate, even when the actual error pattern exceeds its guarantee.</p></div>
+</div>
+<p class="note">Two flipped positions fail at least one check, so a detector can notice them. The ordinary one-error correction rule cannot distinguish that case from a single error and can miscorrect it. Some three-bit patterns pass all checks.</p>
+<div class="course-download"><h3>Study the twelve-question course</h3><p><strong>Hamming codes: when a repair can be wrong</strong> connects parity, syndromes, distance and the assumptions behind a repair. Download it, then use <strong>Bring your own lesson</strong> in RecallWeave.</p>
+<div class="actions"><button id="save-course" type="button">Download course JSON</button><a href="hamming-codes.md">Read the worked guide</a></div><p id="course-status" class="status" aria-live="polite"></p></div>
+</section>
+</div>
+</main>
+<footer><p>Original teaching scenario and questions. No random channel or probability model is used, and no real communication reliability or measured learning benefit is inferred. Your choices stay in this tab; a refresh clears them. Downloads use your browser's normal file flow.</p><p>Mathematical foundation: R. W. Hamming (1950), <a href="https://doi.org/10.1002/j.1538-7305.1950.tb00463.x" target="_blank" rel="noreferrer">Error Detecting and Error Correcting Codes</a>. Original lesson content: CC BY 4.0. Source links open only if you choose them.</p></footer>
+<script id="course-text" type="application/json">"{\n  \"format\": \"recallweave-deck/1\",\n  \"title\": \"Hamming codes: when a repair can be wrong\",\n  \"attribution\": \"Original questions, examples and explanations by RecallWeave contributors with AI assistance (2026). Mathematical foundation: R. W. Hamming, Error Detecting and Error Correcting Codes, Bell System Technical Journal 29(2), 147–160 (1950), DOI:10.1002/j.1538-7305.1950.tb00463.x. The worked examples use displayed position 1 at the left, even parity at 1/2/4 and data at 3/5/6/7.\",\n  \"license\": \"The original lesson text, worked examples and explorer in this contribution are offered under CC BY 4.0. Attribute RecallWeave contributors and identify changes. The cited historical paper retains its own rights; no paper text or figures are reproduced.\",\n  \"concepts\": [\n    \"parity-and-redundancy\",\n    \"syndrome-reasoning\",\n    \"distance-and-recovery\",\n    \"decoder-assumptions\"\n  ],\n  \"items\": [\n    {\n      \"id\": \"hamming-parity-even\",\n      \"concept\": \"parity-and-redundancy\",\n      \"prerequisites\": [],\n      \"prompt\": \"An even-parity group already contains data bits 1, 0 and 1. Which check bit makes the total number of 1s even?\",\n      \"options\": [\n        \"0\",\n        \"1\",\n        \"Either value\",\n        \"There is no valid check bit\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"The existing data contain two 1s. Adding check bit 0 leaves the total at two, which is even; adding 1 makes it odd. Even parity constrains the total count, not the value of every bit.\",\n      \"transfer\": \"Try the group 1, 1, 1. Which check bit gives even parity? Explain the change by counting 1s.\"\n    },\n    {\n      \"id\": \"hamming-parity-budget\",\n      \"concept\": \"parity-and-redundancy\",\n      \"prerequisites\": [],\n      \"prompt\": \"This Hamming(7,4) code carries four data bits in seven transmitted positions. What fraction of the transmitted positions are data positions?\",\n      \"options\": [\n        \"3/7\",\n        \"4/7\",\n        \"4/3\",\n        \"7/4\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"Four of the seven transmitted positions carry data, so the fraction is 4/7. The remaining 3/7 are parity positions. The reciprocal 7/4 measures transmitted bits per data bit, a different quantity.\",\n      \"transfer\": \"For a hypothetical code carrying eight data bits in twelve positions, write both the data fraction and transmitted bits per data bit.\"\n    },\n    {\n      \"id\": \"hamming-parity-group\",\n      \"concept\": \"parity-and-redundancy\",\n      \"prerequisites\": [],\n      \"prompt\": \"Positions are numbered 1 through 7 from left to right. The parity check at position 2 covers every position whose binary position number has its 2s bit set. Which group is checked?\",\n      \"options\": [\n        \"1, 3, 5, 7\",\n        \"2, 3, 6, 7\",\n        \"4, 5, 6, 7\",\n        \"1, 2, 4\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"The binary position labels 010, 011, 110 and 111 have the 2s bit set. They represent positions 2, 3, 6 and 7. Overlapping groups give different single-error positions different patterns of failed checks.\",\n      \"transfer\": \"List the positions whose binary labels have the 4s bit set, then compare that group with the check at position 1.\"\n    },\n    {\n      \"id\": \"hamming-syndrome-value\",\n      \"concept\": \"syndrome-reasoning\",\n      \"prerequisites\": [\n        \"parity-and-redundancy\"\n      ],\n      \"prompt\": \"The received-word checks give s1 = 1, s2 = 0 and s4 = 1, where 1 means a failed even-parity check. Under the at-most-one-error assumption, which position should the decoder flip?\",\n      \"options\": [\n        \"1\",\n        \"4\",\n        \"5\",\n        \"6\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"The syndrome value is 1 + 2×0 + 4×1 = 5. With at most one error, failed checks s1 and s4 identify position 5. Without that error-count assumption, the same syndrome can have other explanations.\",\n      \"transfer\": \"Which two distinct flipped positions could also give syndrome 5? Explain why the syndrome alone does not reveal how many errors happened.\"\n    },\n    {\n      \"id\": \"hamming-syndrome-checkbit\",\n      \"concept\": \"syndrome-reasoning\",\n      \"prerequisites\": [\n        \"parity-and-redundancy\"\n      ],\n      \"prompt\": \"A valid Hamming(7,4) word suffers exactly one error, at parity position 2. What do the checks and standard one-error decoder do?\",\n      \"options\": [\n        \"All checks pass because data bits are unchanged.\",\n        \"Only s2 fails, and the decoder flips position 2.\",\n        \"All three checks fail, and the decoder flips position 7.\",\n        \"Only s1 fails, and the decoder flips position 1.\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"Position 2 participates in the check at 2 but not the checks at 1 or 4. Flipping it makes s2 = 1 and the other checks 0, so the syndrome is 2. Parity-bit errors are included in the one-error correction guarantee.\",\n      \"transfer\": \"What would happen if only position 4 were flipped? Separate the received data bits from the checks that locate the changed parity bit.\"\n    },\n    {\n      \"id\": \"hamming-syndrome-worked\",\n      \"concept\": \"syndrome-reasoning\",\n      \"prerequisites\": [\n        \"parity-and-redundancy\"\n      ],\n      \"prompt\": \"Use left-to-right positions 1–7, even parity at 1/2/4, and data at 3/5/6/7. The received word is 1011010. What is the syndrome value s1 + 2s2 + 4s4?\",\n      \"options\": [\n        \"0\",\n        \"3\",\n        \"5\",\n        \"7\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"For 1011010, check s1 sees positions 1/3/5/7 as 1/1/0/0: two 1s. Check s2 sees 0/1/1/0: two. Check s4 sees 1/0/1/0: two. All three groups have even parity, so the syndrome is 0. This establishes consistency with the code, not an error-free history.\",\n      \"transfer\": \"Flip its sixth position on paper, recompute the three groups and explain the new syndrome.\"\n    },\n    {\n      \"id\": \"hamming-distance-count\",\n      \"concept\": \"distance-and-recovery\",\n      \"prerequisites\": [\n        \"parity-and-redundancy\",\n        \"syndrome-reasoning\"\n      ],\n      \"prompt\": \"What is the Hamming distance between the equal-length words 0110011 and 0101010?\",\n      \"options\": [\n        \"1\",\n        \"2\",\n        \"3\",\n        \"4\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"The words differ at positions 3, 4 and 7, giving distance 3. Hamming distance counts unequal positions of equal-length words; it does not subtract their numerical values.\",\n      \"transfer\": \"Invent a third seven-bit word one change away from 0110011. Count its distance from each of the original two words.\"\n    },\n    {\n      \"id\": \"hamming-distance-guarantee\",\n      \"concept\": \"distance-and-recovery\",\n      \"prerequisites\": [\n        \"parity-and-redundancy\",\n        \"syndrome-reasoning\"\n      ],\n      \"prompt\": \"A code has minimum distance 3 between distinct valid words. Why can nearest-word decoding recover every single-bit error?\",\n      \"options\": [\n        \"The original is distance 1 away, while every other valid word is at least distance 2 away.\",\n        \"All received words are valid codewords.\",\n        \"The receiver knows which physical bit failed.\",\n        \"A second error always cancels the first.\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"A one-bit error places the received word at distance 1 from the original. For any other valid word, the triangle inequality gives distance at least 3−1 = 2 from the received word. Thus the original is the unique nearest valid word under this assumption.\",\n      \"transfer\": \"What minimum-distance bound would make every two-bit error uniquely correctable by nearest-word decoding? Derive it with the same distance argument.\"\n    },\n    {\n      \"id\": \"hamming-distance-neighborhood\",\n      \"concept\": \"distance-and-recovery\",\n      \"prerequisites\": [\n        \"parity-and-redundancy\",\n        \"syndrome-reasoning\"\n      ],\n      \"prompt\": \"Each valid seven-bit word has itself plus seven one-bit neighbors. The 16 Hamming(7,4) codewords have disjoint such neighborhoods. How many distinct seven-bit received words do they cover?\",\n      \"options\": [\n        \"16\",\n        \"112\",\n        \"128\",\n        \"256\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"Each neighborhood contains 1 + 7 = 8 words, so 16 disjoint neighborhoods cover 16×8 = 128 words. That is every possible seven-bit received word. A nearest valid word is always available, even when the actual channel introduced too many errors for the guarantee.\",\n      \"transfer\": \"Explain why complete coverage is useful for one-error decoding but does not let the decoder certify that its chosen word was actually sent.\"\n    },\n    {\n      \"id\": \"hamming-limit-two\",\n      \"concept\": \"decoder-assumptions\",\n      \"prerequisites\": [\n        \"parity-and-redundancy\",\n        \"syndrome-reasoning\",\n        \"distance-and-recovery\"\n      ],\n      \"prompt\": \"Start with valid word 0000000 and flip positions 1 and 2, receiving 1100000. The one-error decoder sees syndrome 3 and flips position 3. Which interpretation is correct?\",\n      \"options\": [\n        \"It recovers the original word because the syndrome is nonzero.\",\n        \"It produces 1110000, a different valid word; passing checks do not prove that the original was recovered.\",\n        \"It identifies both actual errors and leaves the word unchanged.\",\n        \"It proves that exactly three errors occurred in the channel.\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"The decoder turns 1100000 into 1110000. Its parity groups contain two, two and zero 1s respectively (all even), so that candidate passes all checks, but it differs from the transmitted 0000000 at positions 1, 2 and 3. The actual two-error scenario violates the decoder's one-error assumption.\",\n      \"transfer\": \"Compare the same received word with a different history: 1110000 was sent and only position 3 flipped. What can a receiver observing only 1100000 distinguish?\"\n    },\n    {\n      \"id\": \"hamming-limit-three\",\n      \"concept\": \"decoder-assumptions\",\n      \"prerequisites\": [\n        \"parity-and-redundancy\",\n        \"syndrome-reasoning\",\n        \"distance-and-recovery\"\n      ],\n      \"prompt\": \"Start with valid word 0000000 and flip positions 1, 2 and 3, receiving 1110000. All three even-parity checks pass. What can the seven-bit decoder establish from those checks alone?\",\n      \"options\": [\n        \"No bits changed during transmission.\",\n        \"The sender must have chosen data bits 0000.\",\n        \"The received word is consistent with the checks; these checks cannot identify this nonzero error pattern.\",\n        \"Exactly one error occurred and was corrected.\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"The flipped positions 1, 2 and 3 change each involved check twice, leaving even parity. The decoder sees a valid word and has no evidence in these checks that it differs from the original. The explorer can reveal the error because it separately retains the authored sender and error mask.\",\n      \"transfer\": \"Find another nonzero set of three flipped positions whose binary position labels combine to zero, then check all three parity groups.\"\n    },\n    {\n      \"id\": \"hamming-limit-policy\",\n      \"concept\": \"decoder-assumptions\",\n      \"prerequisites\": [\n        \"parity-and-redundancy\",\n        \"syndrome-reasoning\",\n        \"distance-and-recovery\"\n      ],\n      \"prompt\": \"For a minimum-distance-3 code, two distinct flipped positions always produce a nonzero syndrome. Why does the ordinary Hamming(7,4) one-error correction rule still fail to reliably flag a two-error message as uncorrectable?\",\n      \"options\": [\n        \"Two-bit errors always produce syndrome 0.\",\n        \"The same nonzero syndrome can represent a one-bit error, so the rule flips a third position and can return a different valid word.\",\n        \"Parity checks are not evaluated by the decoder.\",\n        \"The number of data bits changes after an error.\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"Two distinct position labels combine to a nonzero syndrome. That alerts a check-only detector, but the ordinary one-error correction rule interprets the same value as one erroneous position and flips it. The resulting valid word can be wrong. Detecting a nonzero error and deciding that it is safely correctable are different decisions.\",\n      \"transfer\": \"Why can the histories 'one error from one valid word' and 'two errors from another valid word' lead to the same received word? What extra information would be needed to distinguish them?\"\n    }\n  ]\n}\n"</script>
+<script>
+'use strict';
+/** Original Hamming(7,4) teaching model. Position 1 is displayed at the left. */
+const CHECK_GROUPS = Object.freeze([
+  Object.freeze({parityPosition: 1, positions: Object.freeze([1, 3, 5, 7])}),
+  Object.freeze({parityPosition: 2, positions: Object.freeze([2, 3, 6, 7])}),
+  Object.freeze({parityPosition: 4, positions: Object.freeze([4, 5, 6, 7])})
+]);
+const DATA_POSITIONS = Object.freeze([3, 5, 6, 7]);
+
+function binaryWord(value, length, label) {
+  if (typeof value !== 'string' || value.length !== length || !/^[01]+$/.test(value)) {
+    throw new TypeError(label + ' must be exactly ' + length + ' binary digits (0 or 1).');
+  }
+  return value;
+}
+
+function errorPositions(value) {
+  if (!Array.isArray(value) || value.length > 7) {
+    throw new TypeError('Flipped positions must be an array of unique positions 1 through 7.');
+  }
+  const copied = [];
+  for (let index = 0; index < value.length; index++) {
+    if (!Object.hasOwn(value, index)) throw new TypeError('Flipped positions must not contain empty entries.');
+    const position = value[index];
+    if (!Number.isInteger(position) || position < 1 || position > 7 || copied.includes(position)) {
+      throw new TypeError('Each flipped position must be a distinct integer from 1 through 7.');
+    }
+    copied.push(position);
+  }
+  return Object.freeze(copied.sort((left, right) => left - right));
+}
+
+function dataFromWord(word) {
+  return DATA_POSITIONS.map(position => word[position - 1]).join('');
+}
+
+function distance(left, right) {
+  let count = 0;
+  for (let index = 0; index < left.length; index++) if (left[index] !== right[index]) count++;
+  return count;
+}
+
+function encodeHamming74(dataBits) {
+  binaryWord(dataBits, 4, 'Data');
+  const bits = [0, 0, Number(dataBits[0]), 0, Number(dataBits[1]), Number(dataBits[2]), Number(dataBits[3])];
+  for (const group of CHECK_GROUPS) {
+    bits[group.parityPosition - 1] = group.positions.reduce(
+      (parity, position) => parity ^ bits[position - 1], 0
+    );
+  }
+  return bits.join('');
+}
+
+/** The decoder receives only the received word. It never reads simulator truth. */
+function inspectReceived74(receivedWord) {
+  binaryWord(receivedWord, 7, 'Received word');
+  const checks = Object.freeze(CHECK_GROUPS.map(group => {
+    const bits = group.positions.map(position => receivedWord[position - 1]).join('');
+    const ones = [...bits].reduce((total, bit) => total + Number(bit), 0);
+    return Object.freeze({
+      parityPosition: group.parityPosition,
+      positions: group.positions,
+      bits,
+      ones,
+      failed: ones % 2 === 1
+    });
+  }));
+  const syndrome = checks.reduce((total, check) => total + (check.failed ? check.parityPosition : 0), 0);
+  const proposedPosition = syndrome === 0 ? null : syndrome;
+  const candidate = [...receivedWord];
+  if (proposedPosition !== null) {
+    candidate[proposedPosition - 1] = candidate[proposedPosition - 1] === '0' ? '1' : '0';
+  }
+  const candidateWord = candidate.join('');
+  return Object.freeze({
+    receivedWord,
+    checks,
+    syndromeBits: syndrome.toString(2).padStart(3, '0'),
+    syndrome,
+    proposedPosition,
+    candidateWord,
+    candidateData: dataFromWord(candidateWord)
+  });
+}
+
+/** Deterministic authored scenario, not a model of channel error probabilities. */
+function runHamming74(dataBits, flippedPositions, prediction = null) {
+  const codeword = encodeHamming74(dataBits);
+  const positions = errorPositions(flippedPositions);
+  if (prediction !== null && (!Number.isInteger(prediction) || prediction < 0 || prediction > 7)) {
+    throw new TypeError('A prediction must be null or an integer syndrome from 0 through 7.');
+  }
+  const selected = new Set(positions);
+  const receivedWord = [...codeword].map((bit, index) =>
+    selected.has(index + 1) ? (bit === '0' ? '1' : '0') : bit
+  ).join('');
+  const decoder = inspectReceived74(receivedWord);
+  const flipCount = positions.length;
+  const outcome = flipCount === 0 ? 'clean' : flipCount === 1 ? 'corrected' :
+    decoder.syndrome === 0 ? 'undetected' : 'miscorrected';
+  return Object.freeze({
+    dataBits,
+    codeword,
+    errorPositions: positions,
+    receivedWord,
+    decoder,
+    truth: Object.freeze({
+      flipCount,
+      withinSingleErrorAssumption: flipCount <= 1,
+      originalRecovered: decoder.candidateWord === codeword,
+      remainingCodewordErrors: distance(decoder.candidateWord, codeword),
+      remainingDataErrors: distance(decoder.candidateData, dataBits),
+      outcome
+    }),
+    prediction,
+    predictionCorrect: prediction === null ? null : prediction === decoder.syndrome
+  });
+}
+
+function formatHammingRecord(result) {
+  if (!result || typeof result !== 'object') throw new TypeError('Supply a completed Hamming scenario.');
+  const run = runHamming74(result.dataBits, result.errorPositions, result.prediction);
+  const decoder = run.decoder;
+  const truth = run.truth;
+  const yesNo = value => value ? 'yes' : 'no';
+  const labels = {
+    clean: 'Clean transmission in this authored scenario',
+    corrected: 'Single error corrected',
+    undetected: 'Nonzero error pattern undetected',
+    miscorrected: 'Multiple errors miscorrected'
+  };
+  return [
+    'HAMMING(7,4) — WORKED RECORD',
+    '',
+    'Convention: displayed positions run 1 to 7 from left to right.',
+    'Data positions: 3, 5, 6, 7. Even parity positions: 1, 2, 4.',
+    '',
+    'SENDER AND AUTHORED CHANNEL (SIMULATION TRUTH)',
+    'Original data: ' + run.dataBits,
+    'Encoded word: ' + run.codeword,
+    'Flipped positions: ' + (run.errorPositions.length ? run.errorPositions.join(', ') : 'none'),
+    'Received word: ' + run.receivedWord,
+    '',
+    'RECEIVER (RECEIVED BITS ONLY)',
+    ...decoder.checks.map(check => 'Check s' + check.parityPosition + ': positions ' +
+      check.positions.join(', ') + '; bits ' + check.bits + '; ones ' + check.ones +
+      '; ' + (check.failed ? 'FAIL' : 'PASS') + '.'),
+    'Syndrome (s4s2s1): ' + decoder.syndromeBits,
+    'Syndrome value: ' + decoder.syndrome,
+    'One-error decoder proposal: ' + (decoder.proposedPosition === null ?
+      'Keep received word (zero syndrome).' : 'Flip position ' + decoder.proposedPosition + '.'),
+    'Candidate word: ' + decoder.candidateWord,
+    'Candidate data: ' + decoder.candidateData,
+    '',
+    'SIMULATION COMPARISON (NOT INFORMATION AVAILABLE TO THE DECODER)',
+    'Actual flipped bits: ' + truth.flipCount,
+    'At-most-one-error assumption satisfied: ' + yesNo(truth.withinSingleErrorAssumption) + '.',
+    'Original codeword recovered: ' + yesNo(truth.originalRecovered) + '.',
+    'Remaining codeword differences: ' + truth.remainingCodewordErrors + '.',
+    'Remaining data differences: ' + truth.remainingDataErrors + '.',
+    'Outcome: ' + labels[truth.outcome] + '.',
+    '',
+    'LEARNER PREDICTION',
+    run.prediction === null ? 'Prediction: not supplied.' :
+      'Prediction: syndrome ' + run.prediction + '; ' + (run.predictionCorrect ? 'matched' : 'did not match') +
+      ' the received checks.',
+    '',
+    'Limits: The decoder assumes at most one flipped bit. Zero syndrome means the checks pass; ' +
+      'it does not prove unchanged transmission. Two errors are detected by these parity checks, ' +
+      'but the one-error correction rule can miscorrect them. No channel probability or real reliability is inferred.',
+    ''
+  ].join('\n');
+}
+
+
+
+const byId = id => document.getElementById(id);
+const form = byId('scenario-form');
+const result = byId('result');
+const pending = byId('pending');
+const error = byId('input-error');
+const saveRecord = byId('save-record');
+const recordStatus = byId('record-status');
+const courseStatus = byId('course-status');
+const courseText = JSON.parse(byId('course-text').textContent);
+let completed = null;
+
+function retire(message = 'Inputs changed. Inspect the decoder again to create a current result.') {
+  completed = null;
+  result.hidden = true;
+  pending.hidden = false;
+  pending.textContent = message;
+  saveRecord.disabled = true;
+  error.textContent = '';
+  recordStatus.textContent = '';
+}
+
+function text(id, value) {
+  byId(id).textContent = String(value);
+}
+
+function word(id, value, marked = []) {
+  const row = byId(id);
+  row.replaceChildren();
+  const marks = new Set(marked);
+  for (let index = 0; index < value.length; index++) {
+    const bit = document.createElement('span');
+    bit.className = 'word-bit' + (marks.has(index + 1) ? ' marked' : '');
+    bit.textContent = value[index];
+    bit.title = 'Position ' + (index + 1) + (marks.has(index + 1) ? ', changed here' : '');
+    row.append(bit);
+  }
+  row.setAttribute('aria-label', value + (marked.length ? '; highlighted positions ' + marked.join(', ') : ''));
+}
+
+function show(run) {
+  const decoder = run.decoder;
+  const truth = run.truth;
+  word('sent-word', run.codeword);
+  word('received-word', run.receivedWord, run.errorPositions);
+  word('candidate-word', decoder.candidateWord,
+    decoder.proposedPosition === null ? [] : [decoder.proposedPosition]);
+  text('original-data', run.dataBits);
+  text('flips-summary', run.errorPositions.length ? run.errorPositions.join(', ') : 'None');
+  text('candidate-data', decoder.candidateData);
+  text('syndrome-value', decoder.syndrome);
+  text('syndrome-bits', decoder.syndromeBits);
+  text('decoder-proposal', decoder.proposedPosition === null ?
+    'Keep the received word: all three checks pass.' :
+    'Assuming at most one error, flip position ' + decoder.proposedPosition + '.');
+  text('decoder-limit', decoder.syndrome === 0 ?
+    'Zero syndrome means consistent checks. The receiver cannot infer that no errors occurred.' :
+    'The syndrome identifies the single-error hypothesis. It does not reveal the actual number of flipped bits.');
+  const checkBody = byId('check-rows');
+  checkBody.replaceChildren();
+  for (const check of decoder.checks) {
+    const row = document.createElement('tr');
+    const values = [
+      's' + check.parityPosition,
+      check.positions.join(', '),
+      check.bits.split('').join(' + ') + ' = ' + check.ones,
+      check.failed ? '1 · odd · FAIL' : '0 · even · PASS'
+    ];
+    values.forEach((value, index) => {
+      const cell = document.createElement(index === 0 ? 'th' : 'td');
+      if (index === 0) cell.scope = 'row';
+      cell.textContent = value;
+      row.append(cell);
+    });
+    checkBody.append(row);
+  }
+  const outcomes = {
+    clean: ['No error was introduced', 'In this authored scenario, the candidate equals the sent codeword. The receiver itself sees only the consistent checks.'],
+    corrected: ['The single error is corrected', 'The one-error assumption holds here. The candidate equals the original codeword, including its data and parity bits.'],
+    miscorrected: ['The decoder repairs the wrong word', 'More than one bit changed. The one-error rule produces another valid codeword, but it does not recover what the sender transmitted.'],
+    undetected: ['The error pattern passes all checks', 'More than one bit changed and the syndrome is zero. The decoder leaves a different valid word unchanged. Only the authored simulation tells us it is wrong.']
+  };
+  const [title, explanation] = outcomes[truth.outcome];
+  text('truth-title', title);
+  text('truth-explanation', explanation);
+  byId('truth-card').dataset.outcome = truth.outcome;
+  text('actual-flips', truth.flipCount);
+  text('assumption-status', truth.withinSingleErrorAssumption ? 'Satisfied' : 'Exceeded');
+  text('recovery-status', truth.originalRecovered ? 'Yes' : 'No');
+  text('codeword-differences', truth.remainingCodewordErrors);
+  text('data-differences', truth.remainingDataErrors);
+  text('prediction-feedback', run.prediction === null ?
+    'No prediction was supplied. Try predicting a new scenario before inspecting its checks.' :
+    'You predicted syndrome ' + run.prediction + '. The checks give ' + decoder.syndrome + ': ' +
+    (run.predictionCorrect ? 'your prediction matches.' : 'compare the three parity sums to see why.'));
+  pending.hidden = true;
+  result.hidden = false;
+  saveRecord.disabled = false;
+}
+
+form.addEventListener('input', () => retire());
+form.addEventListener('change', () => retire());
+form.addEventListener('submit', event => {
+  event.preventDefault();
+  retire('Inspecting the current scenario…');
+  try {
+    const positions = [...form.querySelectorAll('input[name="flip"]:checked')].map(input => Number(input.value));
+    const prediction = byId('prediction').value === '' ? null : Number(byId('prediction').value);
+    completed = runHamming74(byId('data-bits').value, positions, prediction);
+    show(completed);
+  } catch (caught) {
+    completed = null;
+    error.textContent = caught.message;
+    pending.textContent = 'Correct the input, then inspect the decoder.';
+    byId('data-bits').focus();
+  }
+});
+
+function download(bytes, type, filename) {
+  const blob = new Blob([bytes], {type});
+  let url;
+  let link;
+  try {
+    url = URL.createObjectURL(blob);
+    link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    link.hidden = true;
+    document.body.append(link);
+    link.click();
+  } finally {
+    if (link) link.remove();
+    if (url) setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+}
+
+saveRecord.addEventListener('click', () => {
+  if (!completed) return;
+  try {
+    download(formatHammingRecord(completed), 'text/plain;charset=utf-8', 'hamming-worked-record.txt');
+    recordStatus.textContent = 'Record download requested. This tab cannot confirm whether your browser saved the file.';
+  } catch {
+    recordStatus.textContent = 'The record download could not start. Your current result is still here; try again.';
+  }
+});
+
+byId('save-course').addEventListener('click', () => {
+  try {
+    download(courseText, 'application/json;charset=utf-8', 'hamming-codes.json');
+    courseStatus.textContent = 'Course download requested. Open the saved JSON with Bring your own lesson in RecallWeave.';
+  } catch {
+    courseStatus.textContent = 'The course download could not start. Try again.';
+  }
+});
+
+const presets = {
+  single: {data: '1011', flips: [6]},
+  double: {data: '0000', flips: [1, 2]},
+  hidden: {data: '0000', flips: [1, 2, 3]},
+  clear: {data: '0000', flips: []}
+};
+for (const button of document.querySelectorAll('[data-preset]')) {
+  button.addEventListener('click', () => {
+    const preset = presets[button.dataset.preset];
+    byId('data-bits').value = preset.data;
+    for (const input of form.querySelectorAll('input[name="flip"]')) {
+      input.checked = preset.flips.includes(Number(input.value));
+    }
+    byId('prediction').value = '';
+    retire('Example loaded. Make a prediction, then inspect the decoder.');
+    byId('data-bits').focus();
+  });
+}
+
+</script>
+</body>
+</html>
