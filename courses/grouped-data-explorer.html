@@ -1,0 +1,420 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="referrer" content="no-referrer">
+<title>When groups and totals disagree · RecallWeave</title>
+<style>
+:root{color-scheme:light;--ink:#173b39;--muted:#4a6663;--paper:#f6f5ec;--card:#fffefa;--line:#c7d6ce;--a:#116c64;--b:#90502b;--new:#dde9d6;--experienced:#508576;--focus:#b04413}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:17px/1.55 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}main{max-width:1120px;margin:auto;padding:36px 28px 60px}h1,h2,h3,p{margin-top:0}h1{font-family:Georgia,serif;font-size:clamp(2.2rem,5vw,3.5rem);line-height:1.08;max-width:820px;letter-spacing:-.03em;margin:16px 0 20px}h2{font-size:1.35rem;line-height:1.25}h3{font-size:1rem;margin-bottom:8px}.eyebrow{font-size:.79rem;letter-spacing:.12em;text-transform:uppercase;font-weight:800;color:var(--a)}.intro{max-width:790px;color:var(--muted);font-size:1.1rem}.badge{display:inline-block;font-size:.82rem;background:#e0ece5;border-radius:20px;padding:3px 12px;margin:0 4px 10px 0}.step{color:var(--a);font-variant-numeric:tabular-nums;margin-right:10px}.panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:24px;margin-top:22px}.controls{display:flex;flex-wrap:wrap;align-items:end;gap:14px}.controls label{flex:1;min-width:200px}button,select,input{font:inherit;color:inherit}button,select{border:1px solid #86a59b;border-radius:7px;background:white;padding:10px 14px}button{cursor:pointer;font-weight:650}button:hover{background:#edf4ef}button.primary{background:var(--a);color:white;border-color:var(--a)}button:disabled{opacity:.5;cursor:not-allowed}input[type=text]{width:100%;min-width:0;background:white;border:1px solid #86a59b;border-radius:6px;padding:8px 10px;margin-top:4px;font-variant-numeric:tabular-nums}input[type=range]{width:100%;accent-color:var(--a);min-height:34px}label{display:block;font-size:.89rem;font-weight:650}select{width:100%;margin-top:4px}a{color:var(--a)}:focus-visible{outline:3px solid var(--focus);outline-offset:3px}.skip{position:absolute;left:16px;top:-100px;padding:10px;background:white;z-index:10}.skip:focus{top:10px}.note{font-size:.9rem;color:var(--muted);margin:12px 0 0}.input-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:20px}.group-inputs{min-width:0;border:1px solid var(--line);border-radius:9px;padding:16px}.group-inputs legend{font-weight:750;padding:0 7px}.option-inputs+.option-inputs{margin-top:15px}.input-pair{display:grid;grid-template-columns:1fr 1fr;gap:12px}.two{display:grid;grid-template-columns:1fr 1fr;gap:18px}.metric-card{min-width:0;border:1px solid var(--line);border-radius:9px;padding:18px;margin-top:14px}.metric-card.a{border-top:4px solid var(--a)}.metric-card.b{border-top:4px solid var(--b)}.big{font-size:2.25rem;font-weight:750;line-height:1.2;display:block;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}.count{font-size:.87rem;color:var(--muted);display:block;margin:4px 0 12px}.mix-bar{display:flex;height:15px;border:1px solid var(--line);border-radius:3px;overflow:hidden;background:#eee}.mix-bar span{display:block}.newcomers{background:var(--new)}.experienced{background:var(--experienced)}.bar-track{height:12px;background:#e7eae4;border-radius:3px;margin-top:12px;overflow:hidden}.bar-fill{height:100%;background:var(--a)}.metric-card.b .bar-fill{background:var(--b)}.verdict{font-weight:750;margin:18px 0 3px}.gap{font-size:.94rem;color:var(--muted);margin-bottom:0}.insight{background:#e8f0e7;border-left:4px solid var(--a);padding:15px 18px;margin-top:20px}.table-wrap{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:.94rem}caption{text-align:left;font-weight:700;padding:0 0 10px}th,td{text-align:left;border-bottom:1px solid var(--line);padding:12px 10px;vertical-align:top}th:first-child,td:first-child{padding-left:0}thead th{font-size:.8rem;text-transform:uppercase;letter-spacing:.03em}td{font-variant-numeric:tabular-nums}.error{color:#8a281c;background:#fff0eb;border:1px solid #db9581;border-radius:8px;padding:13px;margin-top:18px}.current{font-size:.85rem;color:var(--muted);margin-top:14px}.download-row{display:flex;gap:12px;flex-wrap:wrap;margin-top:18px}details{margin-top:18px}summary{font-weight:700;cursor:pointer}dl{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px 18px;font-size:.9rem}dt,dd{margin:0;overflow-wrap:anywhere}dd{font-variant-numeric:tabular-nums}footer{margin-top:26px;color:var(--muted);font-size:.85rem;max-width:880px}footer p{margin-bottom:8px}[hidden]{display:none!important}.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
+@media(max-width:700px){main{padding:24px 16px 38px}.panel{padding:18px}.input-grid,.two{grid-template-columns:1fr}.intro{font-size:1rem}.big{font-size:2rem}table{font-size:.83rem}th,td{padding:9px 6px}.controls{align-items:stretch}.controls button{width:100%}.download-row button{width:100%}dl{grid-template-columns:1fr}dd{margin-bottom:6px}.group-inputs{padding:12px}}
+@media(prefers-reduced-motion:no-preference){.bar-fill{transition:width .1s ease}}
+@media print{body{background:white}main{max-width:none;padding:0}.panel{break-inside:avoid}button,.download-row{display:none}a{color:inherit}}
+</style>
+</head>
+<body>
+<a class="skip" href="#explorer">Skip to the explorer</a>
+<main id="explorer">
+<header><div class="eyebrow">RecallWeave · A small data lab</div><h1>When groups and totals disagree</h1><p class="intro">An option can have the higher success rate in each group and the lower rate overall. Follow the denominators, then give both options the same group mix.</p><span class="badge">Fictional examples</span><span class="badge">Works offline</span><span class="badge">No account or upload</span></header>
+<section class="panel" aria-labelledby="counts-heading"><h2 id="counts-heading"><span class="step">01</span>Inspect the recorded counts</h2>
+<div class="controls"><label for="preset">Choose a teaching example<select id="preset"><option value="reversal">Different group mixes</option><option value="balanced">Matching group mixes</option><option value="mixed">Groups disagree</option><option value="empty">One group is unobserved</option></select></label><button id="restore-preset" type="button">Restore this example</button></div>
+<p class="note" id="preset-note"></p><p class="note" id="count-help">Enter whole numbers from 0 to 1,000,000. Successes cannot exceed total attempts. A total of zero means that group's rate is unavailable.</p>
+<form id="counts-form" aria-describedby="count-help"><div class="input-grid"><fieldset class="group-inputs"><legend>Newcomers</legend><div class="option-inputs"><h3>Option A</h3><div class="input-pair"><label for="a-newcomers-successes">Successes<input id="a-newcomers-successes" aria-label="Option A, newcomers, successes" data-count inputmode="numeric" type="text" maxlength="32" autocomplete="off"></label><label for="a-newcomers-total">Total attempts<input id="a-newcomers-total" aria-label="Option A, newcomers, total" data-count inputmode="numeric" type="text" maxlength="32" autocomplete="off"></label></div></div><div class="option-inputs"><h3>Option B</h3><div class="input-pair"><label for="b-newcomers-successes">Successes<input id="b-newcomers-successes" aria-label="Option B, newcomers, successes" data-count inputmode="numeric" type="text" maxlength="32" autocomplete="off"></label><label for="b-newcomers-total">Total attempts<input id="b-newcomers-total" aria-label="Option B, newcomers, total" data-count inputmode="numeric" type="text" maxlength="32" autocomplete="off"></label></div></div></fieldset><fieldset class="group-inputs"><legend>Experienced players</legend><div class="option-inputs"><h3>Option A</h3><div class="input-pair"><label for="a-experienced-successes">Successes<input id="a-experienced-successes" aria-label="Option A, experienced, successes" data-count inputmode="numeric" type="text" maxlength="32" autocomplete="off"></label><label for="a-experienced-total">Total attempts<input id="a-experienced-total" aria-label="Option A, experienced, total" data-count inputmode="numeric" type="text" maxlength="32" autocomplete="off"></label></div></div><div class="option-inputs"><h3>Option B</h3><div class="input-pair"><label for="b-experienced-successes">Successes<input id="b-experienced-successes" aria-label="Option B, experienced, successes" data-count inputmode="numeric" type="text" maxlength="32" autocomplete="off"></label><label for="b-experienced-total">Total attempts<input id="b-experienced-total" aria-label="Option B, experienced, total" data-count inputmode="numeric" type="text" maxlength="32" autocomplete="off"></label></div></div></fieldset></div></form>
+<p id="input-error" class="error" role="alert" hidden></p><p id="current-status" class="current" role="status"></p>
+</section>
+<div id="results">
+<section class="panel" aria-labelledby="groups-heading"><h2 id="groups-heading">Compare like groups</h2><div class="table-wrap"><table><caption>Successes / attempts · success rate</caption><thead><tr><th scope="col">Group</th><th scope="col">Option A</th><th scope="col">Option B</th><th scope="col">Comparison</th></tr></thead><tbody><tr><th scope="row">Newcomers</th><td id="newcomers-a-rate"></td><td id="newcomers-b-rate"></td><td id="newcomers-direction"></td></tr><tr><th scope="row">Experienced</th><td id="experienced-a-rate"></td><td id="experienced-b-rate"></td><td id="experienced-direction"></td></tr></tbody></table></div></section>
+<section class="panel" aria-labelledby="pooled-heading"><h2 id="pooled-heading"><span class="step">02</span>Combine each recorded sample</h2><p>Add successes, then add attempts. Each option keeps its own group proportions.</p><div class="two"><article class="metric-card a"><h3>Option A · pooled</h3><output id="pooled-a" class="big"></output><span id="pooled-a-counts" class="count"></span><div class="mix-bar" aria-hidden="true"><span id="mix-a-newcomers" class="newcomers"></span><span id="mix-a-experienced" class="experienced"></span></div><p id="mix-a-text" class="note"></p></article><article class="metric-card b"><h3>Option B · pooled</h3><output id="pooled-b" class="big"></output><span id="pooled-b-counts" class="count"></span><div class="mix-bar" aria-hidden="true"><span id="mix-b-newcomers" class="newcomers"></span><span id="mix-b-experienced" class="experienced"></span></div><p id="mix-b-text" class="note"></p></article></div><p id="pooled-direction" class="verdict"></p><p id="pooled-gap" class="gap"></p><p id="interpretation" class="insight"></p></section>
+<section class="panel" aria-labelledby="reference-heading"><h2 id="reference-heading"><span class="step">03</span>Ask a same-mix question</h2><p>Keep the observed group rates. Apply one chosen group mix to both options. These reference rates describe a different comparison; they do not change the recorded counts.</p><label for="mix">Shared reference mix: experienced-player percentage</label><input id="mix" type="range" min="0" max="100" step="1" value="50" aria-describedby="mix-label reference-support"><output id="mix-label" for="mix"></output><div class="two"><article class="metric-card a"><h3>Option A · reference</h3><output id="reference-a" class="big"></output><div class="bar-track" aria-hidden="true"><div class="bar-fill" id="reference-bar-a"></div></div></article><article class="metric-card b"><h3>Option B · reference</h3><output id="reference-b" class="big"></output><div class="bar-track" aria-hidden="true"><div class="bar-fill" id="reference-bar-b"></div></div></article></div><p id="reference-direction" class="verdict"></p><p id="reference-gap" class="gap"></p><p id="reference-support" class="note"></p><details><summary>Inspect exact fractions</summary><p class="note">Fractions are proportions, before multiplying by 100 for percentages. Negative differences favor B. Comparison labels use these exact values.</p><dl id="exact-fractions"></dl></details></section>
+</div>
+<section class="panel" aria-labelledby="question-heading"><h2 id="question-heading">Which question are you answering?</h2><p><strong>These recorded attempts?</strong> The pooled fraction describes each option's actual sample. <strong>A chosen common group mix?</strong> Use the stated reference weights. Neither question makes the other arithmetic wrong.</p><p><strong>What would changing the option cause?</strong> The table alone does not answer that. Assignment, common causes, and when groups were measured matter. Grouping by a consequence of the option can change the effect being studied.</p><p class="note">No confidence intervals, significance tests or causal effects are estimated. Rates are displayed to two decimal places; exact comparisons can remain different even when the displayed percentages match.</p><div class="download-row"><button class="primary" id="download-data" type="button">Download this comparison</button><button id="download-course" type="button">Download the course</button></div><p class="note">The comparison file keeps your current counts, reference mix and exact fractions. The separate course contains <span id="course-count"></span> original questions: <span id="course-title"></span>. It uses the RecallWeave deck format; open it through a compatible lesson importer. This explorer does not load or replace a learner session.</p><p id="download-status" role="status" class="note"></p></section>
+<footer><p>Original fictional examples and wording by RecallWeave. The counts remain in this page until you explicitly download a file. The app makes no runtime network or storage calls.</p><p>Conceptual references: <a href="https://ftp.cs.ucla.edu/pub/stat_ser/r414.pdf" rel="noreferrer">Judea Pearl, Understanding Simpson's Paradox</a> and <a href="https://online.stat.psu.edu/stat555/node/10/" rel="noreferrer">Penn State, Tables and Count Data</a>. Links open external reference material only when selected. No source passages, figures or study data are reproduced.</p></footer>
+<noscript><p class="error">This offline explorer needs JavaScript to compute comparisons. The course JSON and written companion remain available in the repository.</p></noscript>
+</main>
+<script>
+(function(){
+"use strict";
+/** Exact descriptive comparisons for the optional grouped-data teaching explorer. */
+const GROUPED_COUNT_LIMIT = 1_000_000;
+const GROUPED_KEYS = Object.freeze(['newcomers', 'experienced']);
+const GROUPED_OPTIONS = Object.freeze(['a', 'b']);
+
+function freezeTree(value) {
+  if (value && typeof value === 'object') {
+    Object.values(value).forEach(freezeTree);
+    Object.freeze(value);
+  }
+  return value;
+}
+
+const GROUPED_PRESETS = freezeTree({
+  reversal: {
+    name: 'Different group mixes',
+    note: 'Fictional puzzle attempts. Each option has a different mix of newcomers and experienced players.',
+    counts: {
+      a: { newcomers: { successes: 42, total: 70 }, experienced: { successes: 18, total: 20 } },
+      b: { newcomers: { successes: 5, total: 10 }, experienced: { successes: 72, total: 90 } }
+    }, experiencedPercent: 50
+  },
+  balanced: {
+    name: 'Matching group mixes',
+    note: 'A second fictional sample: both options contain equally many newcomers and experienced players.',
+    counts: {
+      a: { newcomers: { successes: 30, total: 50 }, experienced: { successes: 45, total: 50 } },
+      b: { newcomers: { successes: 25, total: 50 }, experienced: { successes: 40, total: 50 } }
+    }, experiencedPercent: 50
+  },
+  mixed: {
+    name: 'Groups disagree',
+    note: 'Fictional counts in which the within-group comparisons point in different directions.',
+    counts: {
+      a: { newcomers: { successes: 8, total: 10 }, experienced: { successes: 4, total: 10 } },
+      b: { newcomers: { successes: 6, total: 10 }, experienced: { successes: 9, total: 10 } }
+    }, experiencedPercent: 50
+  },
+  empty: {
+    name: 'One group is unobserved',
+    note: 'No newcomers are recorded for option A. An absent rate is not a zero success rate.',
+    counts: {
+      a: { newcomers: { successes: 0, total: 0 }, experienced: { successes: 9, total: 10 } },
+      b: { newcomers: { successes: 5, total: 10 }, experienced: { successes: 8, total: 10 } }
+    }, experiencedPercent: 50
+  }
+});
+
+/** Text fields accept whole decimal counts, including zero; blank is invalid. */
+function parseGroupedCount(text, label = 'Count') {
+  if (typeof text !== 'string' || text.length > 32 || !/^[0-9]+$/.test(text.trim())) {
+    throw new Error(`${label}: enter a whole number from 0 to ${GROUPED_COUNT_LIMIT.toLocaleString('en-US')}.`);
+  }
+  const value = Number(text.trim());
+  if (!Number.isSafeInteger(value) || value < 0 || value > GROUPED_COUNT_LIMIT) {
+    throw new Error(`${label}: enter a whole number from 0 to ${GROUPED_COUNT_LIMIT.toLocaleString('en-US')}.`);
+  }
+  return value;
+}
+
+function integer(value, label, maximum) {
+  if (!Number.isSafeInteger(value) || value < 0 || value > maximum) {
+    throw new Error(`${label} must be an integer from 0 to ${maximum}.`);
+  }
+  return value;
+}
+
+function admitCounts(input) {
+  if (!input || typeof input !== 'object' || Array.isArray(input)) {
+    throw new Error('Supply counts for options A and B.');
+  }
+  const copy = {};
+  for (const option of GROUPED_OPTIONS) {
+    copy[option] = {};
+    for (const group of GROUPED_KEYS) {
+      const cell = input[option]?.[group];
+      if (!cell || typeof cell !== 'object' || Array.isArray(cell)) {
+        throw new Error(`Missing ${option.toUpperCase()} / ${group} counts.`);
+      }
+      const label = `${option.toUpperCase()} / ${group}`;
+      const successes = integer(cell.successes, `${label} successes`, GROUPED_COUNT_LIMIT);
+      const total = integer(cell.total, `${label} total`, GROUPED_COUNT_LIMIT);
+      if (successes > total) throw new Error(`${label}: successes cannot exceed the total.`);
+      copy[option][group] = { successes, total };
+    }
+  }
+  return copy;
+}
+
+function gcd(a, b) {
+  a = a < 0n ? -a : a;
+  while (b !== 0n) [a, b] = [b, a % b];
+  return a;
+}
+
+/** JSON-safe exact fraction, plus an approximate value used only for display. */
+function fraction(numerator, denominator) {
+  if (denominator === 0n) return null;
+  const divisor = gcd(numerator, denominator);
+  numerator /= divisor;
+  denominator /= divisor;
+  return {
+    numerator: numerator.toString(),
+    denominator: denominator.toString(),
+    value: Number(numerator) / Number(denominator)
+  };
+}
+
+function rate(cell) {
+  return fraction(BigInt(cell.successes), BigInt(cell.total));
+}
+
+function difference(a, b) {
+  if (a === null || b === null) return null;
+  return fraction(
+    BigInt(a.numerator) * BigInt(b.denominator) - BigInt(b.numerator) * BigInt(a.denominator),
+    BigInt(a.denominator) * BigInt(b.denominator)
+  );
+}
+
+function comparison(a, b) {
+  const delta = difference(a, b);
+  if (delta === null) return 'unavailable';
+  const n = BigInt(delta.numerator);
+  return n > 0n ? 'a_higher' : n < 0n ? 'b_higher' : 'equal';
+}
+
+function pooled(cells) {
+  const successes = GROUPED_KEYS.reduce((sum, key) => sum + cells[key].successes, 0);
+  const total = GROUPED_KEYS.reduce((sum, key) => sum + cells[key].total, 0);
+  return {
+    successes, total, rate: rate({ successes, total }),
+    experiencedWeight: fraction(BigInt(cells.experienced.total), BigInt(total))
+  };
+}
+
+function atCommonMix(cells, experiencedPercent) {
+  let n = 0n;
+  let d = 1n;
+  const missing = [];
+  for (const [key, weight] of [['newcomers', 100 - experiencedPercent], ['experienced', experiencedPercent]]) {
+    if (weight === 0) continue;
+    if (cells[key].total === 0) { missing.push(key); continue; }
+    const termN = BigInt(weight) * BigInt(cells[key].successes);
+    const termD = 100n * BigInt(cells[key].total);
+    n = n * termD + termN * d;
+    d *= termD;
+    const divisor = gcd(n, d);
+    n /= divisor; d /= divisor;
+  }
+  return { rate: missing.length ? null : fraction(n, d), missing };
+}
+
+function classify(groups, overall) {
+  const directions = groups.map(group => group.comparison);
+  if (overall === 'unavailable' || directions.includes('unavailable')) return 'unavailable';
+  if (directions.includes('equal')) return 'subgroup_tie';
+  if (directions[0] !== directions[1]) return 'mixed_groups';
+  if (overall === 'equal') return 'pooled_tie';
+  return directions[0] === overall ? 'same_direction' : 'strict_reversal';
+}
+
+function analyzeGroupedData(input, experiencedPercent = 50) {
+  const counts = admitCounts(input);
+  integer(experiencedPercent, 'Experienced-group percentage', 100);
+  const groups = GROUPED_KEYS.map(key => {
+    const a = rate(counts.a[key]); const b = rate(counts.b[key]);
+    return { key, a, b, comparison: comparison(a, b), difference: difference(a, b) };
+  });
+  const a = pooled(counts.a); const b = pooled(counts.b);
+  const aRef = atCommonMix(counts.a, experiencedPercent);
+  const bRef = atCommonMix(counts.b, experiencedPercent);
+  const observedComparison = comparison(a.rate, b.rate);
+  return freezeTree({
+    counts,
+    groups,
+    observed: { a, b, comparison: observedComparison, difference: difference(a.rate, b.rate) },
+    reference: {
+      experiencedPercent, a: aRef.rate, b: bRef.rate,
+      missing: { a: aRef.missing, b: bRef.missing },
+      comparison: comparison(aRef.rate, bRef.rate), difference: difference(aRef.rate, bRef.rate)
+    },
+    classification: classify(groups, observedComparison)
+  });
+}
+
+function serializeGroupedComparison(input, experiencedPercent = 50) {
+  const analysis = analyzeGroupedData(input, experiencedPercent);
+  return JSON.stringify({
+    format: 'recallweave-grouped-data/1',
+    description: 'Locally supplied teaching counts. Example presets are fictional; edited counts have no verified sample provenance.',
+    units: { counts: 'successes and recorded attempts', referenceMix: 'percent experienced, shared by both options', rates: 'proportions from 0 to 1' },
+    interpretation: 'Pooled rates describe each recorded sample. Reference rates apply chosen common group weights; they do not alter the counts or estimate a causal effect. Unavailable quantities are null. Exact fractions determine comparisons; numeric values are display approximations.',
+    ...analysis
+  }, null, 2) + '\n';
+}
+
+
+function rateText(rate) {
+  return rate === null ? 'Unavailable' : (rate.value * 100).toFixed(2) + '%';
+}
+function fractionText(rate) {
+  return rate === null ? 'Unavailable' : rate.numerator + ' / ' + rate.denominator;
+}
+function directionText(direction) {
+  return { a_higher: 'A has the higher rate', b_higher: 'B has the higher rate', equal: 'The rates are exactly equal', unavailable: 'A comparison is unavailable' }[direction];
+}
+function gapText(delta) {
+  if (delta === null) return 'A missing rate prevents this difference.';
+  if (delta.numerator === '0') return 'Difference: 0 percentage points.';
+  const magnitude = Math.abs(delta.value) * 100;
+  const side = BigInt(delta.numerator) > 0n ? 'A' : 'B';
+  return `Difference: ${magnitude < 0.005 ? 'less than 0.01' : magnitude.toFixed(2)} percentage points in favor of ${side}.`;
+}
+
+function mountGroupedDataExplorer(doc, { courseText, saveFile } = {}) {
+  if (typeof courseText !== 'string') throw new Error('The original course is required.');
+  const course = JSON.parse(courseText);
+  const view = doc.defaultView;
+  const $ = id => doc.getElementById(id);
+  const text = (id, value) => { $(id).textContent = value; };
+  let current = null;
+  let edited = false;
+  const save = saveFile || ((filename, content, mime) => {
+    const url = view.URL.createObjectURL(new view.Blob([content], { type: mime }));
+    const link = doc.createElement('a');
+    link.href = url; link.download = filename;
+    doc.body.appendChild(link);
+    try { link.click(); }
+    finally {
+      link.remove();
+      view.setTimeout(() => view.URL.revokeObjectURL(url), 1000);
+    }
+  });
+
+  function read() {
+    const counts = {};
+    for (const option of GROUPED_OPTIONS) {
+      counts[option] = {};
+      for (const group of GROUPED_KEYS) {
+        counts[option][group] = {};
+        for (const field of ['successes', 'total']) {
+          counts[option][group][field] = parseGroupedCount(
+            $(`${option}-${group}-${field}`).value,
+            `Option ${option.toUpperCase()}, ${group}, ${field}`
+          );
+        }
+      }
+    }
+    const mix = parseGroupedCount($('mix').value, 'Experienced-group percentage');
+    return analyzeGroupedData(counts, mix);
+  }
+
+  function insight(result) {
+    const within = result.groups[0].comparison === 'a_higher' ? 'A' : 'B';
+    const overall = result.observed.comparison === 'a_higher' ? 'A' : 'B';
+    const messages = {
+      strict_reversal: `Both groups favor ${within}, while the recorded pooled sample favors ${overall}. The options have different group mixes: this is a strict Simpson reversal.`,
+      same_direction: `${within} is higher in both groups and in the recorded pooled sample. There is no strict reversal here; group composition can still change the size of the gap.`,
+      mixed_groups: 'The groups favor different options. There is no single strict within-group direction for the pooled comparison to reverse.',
+      subgroup_tie: 'At least one within-group comparison is tied. This is not the strict pattern of an advantage in both groups reversing when pooled.',
+      pooled_tie: `Both groups favor ${within}, but the pooled rates tie. The explorer distinguishes this from a strict reversal.`,
+      unavailable: 'A zero total leaves a required group rate unavailable. The strict two-group pattern cannot be classified, but the other available rates are still shown.'
+    };
+    return messages[result.classification];
+  }
+
+  function render() {
+    text('download-status', '');
+    text('mix-label', `Experienced ${$('mix').value}% · newcomers ${100 - Number($('mix').value)}%`);
+    try {
+      current = read();
+      $('input-error').hidden = true;
+      text('input-error', '');
+      $('results').hidden = false;
+      $('download-data').disabled = false;
+      $('download-course').disabled = false;
+      const message = insight(current);
+      text('interpretation', message);
+      text('current-status', 'Current counts are valid. ' + directionText(current.observed.comparison) + ' in the pooled sample.');
+      for (const group of current.groups) {
+        for (const option of GROUPED_OPTIONS) {
+          const cell = current.counts[option][group.key];
+          text(`${group.key}-${option}-rate`, `${cell.successes} / ${cell.total} · ${rateText(group[option])}`);
+        }
+        text(`${group.key}-direction`, directionText(group.comparison));
+      }
+      for (const option of GROUPED_OPTIONS) {
+        const pool = current.observed[option];
+        text('pooled-' + option, rateText(pool.rate));
+        text('pooled-' + option + '-counts', `${pool.successes} successes / ${pool.total} attempts`);
+        const mix = pool.experiencedWeight;
+        const experienced = mix === null ? 0 : mix.value * 100;
+        $('mix-' + option + '-experienced').style.width = experienced + '%';
+        $('mix-' + option + '-newcomers').style.width = (mix === null ? 0 : 100 - experienced) + '%';
+        text('mix-' + option + '-text', mix === null
+          ? 'No recorded attempts: group mix unavailable.'
+          : `${(100 - experienced).toFixed(2)}% newcomers · ${experienced.toFixed(2)}% experienced`);
+        text('reference-' + option, rateText(current.reference[option]));
+        $('reference-bar-' + option).style.width = (current.reference[option]?.value ?? 0) * 100 + '%';
+      }
+      text('pooled-direction', directionText(current.observed.comparison));
+      text('pooled-gap', gapText(current.observed.difference));
+      text('reference-direction', directionText(current.reference.comparison));
+      text('reference-gap', gapText(current.reference.difference));
+      const missing = GROUPED_OPTIONS.filter(option => current.reference.missing[option].length)
+        .map(option => `Option ${option.toUpperCase()}: ${current.reference.missing[option].join(' and ')} rate unavailable at a positive weight.`);
+      text('reference-support', missing.length ? missing.join(' ') : 'All positive-weight group rates are available. The recorded counts above are unchanged.');
+      const list = $('exact-fractions');
+      list.replaceChildren();
+      const pairs = [];
+      for (const group of current.groups) {
+        for (const option of GROUPED_OPTIONS) pairs.push([`${group.key}, option ${option.toUpperCase()}`, group[option]]);
+      }
+      for (const option of GROUPED_OPTIONS) {
+        pairs.push([`Pooled option ${option.toUpperCase()}`, current.observed[option].rate]);
+        pairs.push([`Reference option ${option.toUpperCase()}`, current.reference[option]]);
+      }
+      pairs.push(['Exact reference difference, A minus B', current.reference.difference]);
+      for (const [label, value] of pairs) {
+        const dt = doc.createElement('dt'); const dd = doc.createElement('dd');
+        dt.textContent = label; dd.textContent = fractionText(value);
+        list.append(dt, dd);
+      }
+      return true;
+    } catch (error) {
+      current = null;
+      $('results').hidden = true;
+      $('download-data').disabled = true;
+      $('download-course').disabled = true;
+      $('input-error').hidden = false;
+      text('input-error', error instanceof Error ? error.message : 'Check the count fields.');
+      text('current-status', 'Results are unavailable until every field is valid.');
+      return false;
+    }
+  }
+
+  function preset() {
+    const selected = GROUPED_PRESETS[$('preset').value];
+    if (!selected) throw new Error('Unknown teaching example.');
+    edited = false;
+    for (const option of GROUPED_OPTIONS) for (const group of GROUPED_KEYS) for (const field of ['successes', 'total']) {
+      $(`${option}-${group}-${field}`).value = String(selected.counts[option][group][field]);
+    }
+    $('mix').value = String(selected.experiencedPercent);
+    text('preset-note', selected.note);
+    render();
+  }
+
+  function download(kind) {
+    // Read the actual fields again; even a programmatic edit cannot export an old cached result.
+    if (!render()) return;
+    try {
+      if (kind === 'data') save('grouped-data-comparison.json',
+        serializeGroupedComparison(current.counts, current.reference.experiencedPercent), 'application/json;charset=utf-8');
+      else save('grouped-data-course.json', courseText, 'application/json;charset=utf-8');
+      text('download-status', 'Download requested. Your browser controls where the file is saved.');
+    } catch {
+      text('download-status', 'The download could not be prepared. Your current counts remain available; try again.');
+    }
+  }
+
+  $('counts-form').addEventListener('submit', event => event.preventDefault());
+  $('counts-form').addEventListener('input', event => {
+    if (event.target.matches('[data-count]')) {
+      edited = true;
+      text('preset-note', 'Edited teaching counts. Their sample origin is not verified; nothing is sent or stored.');
+      render();
+    }
+  });
+  $('mix').addEventListener('input', render);
+  $('preset').addEventListener('change', preset);
+  $('restore-preset').addEventListener('click', preset);
+  $('download-data').addEventListener('click', () => download('data'));
+  $('download-course').addEventListener('click', () => download('course'));
+  text('course-title', course.title);
+  text('course-count', String(course.items.length));
+  preset();
+  return Object.freeze({ refresh: render, getCurrent: () => current, isEdited: () => edited });
+}
+
+mountGroupedDataExplorer(document, { courseText: "{\n  \"format\": \"recallweave-deck/1\",\n  \"title\": \"When groups and totals disagree\",\n  \"attribution\": \"Original fictional examples and wording by the RecallWeave project. Conceptual references: Judea Pearl, Understanding Simpson's Paradox, UCLA technical report R-414 (2013), https://ftp.cs.ucla.edu/pub/stat_ser/r414.pdf; Penn State STAT 555, Tables and Count Data, https://online.stat.psu.edu/stat555/node/10/.\",\n  \"license\": \"Original course wording and fictional examples may be used, copied and adapted with attribution to RecallWeave. Linked reference works retain their own licenses; no source passages, figures or study data are reproduced.\",\n  \"concepts\": [\n    \"Denominators\",\n    \"Group composition\",\n    \"Reference mix\",\n    \"Causal questions\"\n  ],\n  \"items\": [\n    {\n      \"id\": \"grouped-denominator\",\n      \"concept\": \"Denominators\",\n      \"prerequisites\": [],\n      \"prompt\": \"In a fictional puzzle log, option A records 42 successes in 70 newcomer attempts and 18 successes in 20 experienced-player attempts. Which fraction gives A's success rate among newcomers?\",\n      \"options\": [\n        \"42 / 90\",\n        \"60 / 90\",\n        \"42 / 70\",\n        \"70 / 90\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"The requested group is newcomers using A, so its successes and attempts are the numerator and denominator: 42/70 = 60%. The other group's 20 attempts do not belong in this conditional rate.\",\n      \"transfer\": \"For a percentage you encounter, name exactly which records belong in its denominator before comparing it with another percentage.\"\n    },\n    {\n      \"id\": \"grouped-pooling\",\n      \"concept\": \"Denominators\",\n      \"prerequisites\": [],\n      \"prompt\": \"Option A has 42 successes in 70 newcomer attempts and 18 in 20 experienced-player attempts. What is its success rate over all 90 recorded attempts?\",\n      \"options\": [\n        \"60 / 90, about 66.67%\",\n        \"75 / 100, exactly 75%\",\n        \"42 / 70, exactly 60%\",\n        \"18 / 20, exactly 90%\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"Add the successes and add the attempts: (42+18)/(70+20) = 60/90 = 2/3. Averaging 60% and 90% equally would answer a different question because the groups contain 70 and 20 attempts.\",\n      \"transfer\": \"Two batches contain 1 success in 2 attempts and 8 in 8. Calculate the pooled rate from counts, then explain why the unweighted average of the two rates differs.\"\n    },\n    {\n      \"id\": \"grouped-points\",\n      \"concept\": \"Denominators\",\n      \"prerequisites\": [],\n      \"prompt\": \"A's pooled rate is exactly 2/3. B's pooled rate is 77/100. By approximately how many percentage points is B higher?\",\n      \"options\": [\n        \"15.50 percentage points\",\n        \"10.33 percentage points\",\n        \"0.1033 percentage points\",\n        \"77.00 percentage points\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"The difference in proportions is 77/100 - 2/3 = 31/300. Multiply by 100 to obtain 10 1/3 percentage points. A relative percentage increase would use a further division by A's rate and is a different quantity.\",\n      \"transfer\": \"A rate changes from 40% to 50%. State the change in percentage points and, separately, the relative percentage increase.\"\n    },\n    {\n      \"id\": \"grouped-weights\",\n      \"concept\": \"Group composition\",\n      \"prerequisites\": [\n        \"Denominators\"\n      ],\n      \"prompt\": \"A has newcomer rate 60% (42/70) and experienced-player rate 90% (18/20). B has newcomer rate 50% (5/10) and experienced-player rate 80% (72/90). Which group-composition statement explains how B can have the higher pooled rate?\",\n      \"options\": [\n        \"A gives greater weight to experienced players, its higher-rate group.\",\n        \"Each pooled rate gives equal weight to the two observed groups.\",\n        \"Both pooled rates use only the larger of the two group denominators.\",\n        \"B gives greater weight to experienced players, its higher-rate group.\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"Experienced players account for 20/90 of A's attempts but 90/100 of B's. B therefore places much more of its own sample weight on a group with higher success rates. A's pooled rate is about 66.67%; B's is 77%. All four conditional rates and both pooled rates can be correct.\",\n      \"transfer\": \"For either option, keep its within-group rates fixed. How would its pooled rate change if a larger share of its attempts came from its higher-rate group? Explain the weighting without claiming new observations.\"\n    },\n    {\n      \"id\": \"grouped-reversal\",\n      \"concept\": \"Group composition\",\n      \"prerequisites\": [\n        \"Denominators\"\n      ],\n      \"prompt\": \"The same fictional logs give A versus B rates of 60% versus 50% among newcomers, 90% versus 80% among experienced players, and about 66.67% versus 77% when pooled. Which statement is supported by those recorded counts?\",\n      \"options\": [\n        \"B has a higher rate in both groups; A has a higher pooled rate.\",\n        \"Choosing A causes every player's chance of success to increase.\",\n        \"At least one of the six descriptive rates is arithmetically impossible.\",\n        \"A has a higher rate in both groups; B has a higher pooled rate.\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"The association reverses direction between both within-group comparisons and the pooled comparison. This is the strict two-group form of Simpson's reversal used in the explorer. The counts describe recorded outcomes; they do not identify what changing an option would cause for a player.\",\n      \"transfer\": \"Describe a reversal using only observed fractions. Then write a separate causal question that those fractions alone do not answer.\"\n    },\n    {\n      \"id\": \"grouped-opposing\",\n      \"concept\": \"Group composition\",\n      \"prerequisites\": [\n        \"Denominators\"\n      ],\n      \"prompt\": \"In another fictional sample, newcomer rates are A: 8/10 and B: 6/10. Experienced-player rates are A: 4/10 and B: 9/10. Does this show the strict pattern of both within-group comparisons reversing when pooled?\",\n      \"options\": [\n        \"Yes, because B has the higher rate after the counts are pooled.\",\n        \"No, because the two within-group comparisons point opposite ways.\",\n        \"No, because equally sized groups can never have different rates.\",\n        \"Yes, because any difference between group rates is a reversal.\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"A is higher among newcomers, while B is higher among experienced players. There is no single strict direction shared by both groups to reverse. B's pooled 15/20 exceeds A's 12/20, but that does not change the conflicting group directions.\",\n      \"transfer\": \"Construct a case where one subgroup is tied. Explain why a tie should not be silently labeled as a strict advantage.\"\n    },\n    {\n      \"id\": \"grouped-common-mix\",\n      \"concept\": \"Reference mix\",\n      \"prerequisites\": [\n        \"Denominators\",\n        \"Group composition\"\n      ],\n      \"prompt\": \"Keep the first sample's group rates fixed: newcomers A 60%, B 50%; experienced players A 90%, B 80%. What are the reference rates if both options use a 50% newcomer / 50% experienced mix?\",\n      \"options\": [\n        \"A 75%; B 65%\",\n        \"A about 66.67%; B 77%\",\n        \"A 90%; B 80%\",\n        \"A 60%; B 50%\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"Apply the same weights to both options: A = 0.5×0.60 + 0.5×0.90 = 0.75, and B = 0.5×0.50 + 0.5×0.80 = 0.65. These reference rates answer a chosen same-mix question. They do not replace the recorded pooled rates or change the original counts.\",\n      \"transfer\": \"Why is selecting a reference population part of defining the comparison, rather than discovering the uniquely correct population from the table?\"\n    },\n    {\n      \"id\": \"grouped-reference-change\",\n      \"concept\": \"Reference mix\",\n      \"prerequisites\": [\n        \"Denominators\",\n        \"Group composition\"\n      ],\n      \"prompt\": \"A's newcomer rate is 60% and experienced-player rate is 90%. Apply a reference mix of 20% newcomers and 80% experienced players. What reference rate results?\",\n      \"options\": [\n        \"72%\",\n        \"75%\",\n        \"84%\",\n        \"80%\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"Use 0.20×0.60 + 0.80×0.90 = 0.84. B's corresponding 50% and 80% group rates would give 74%, retaining A's 10-percentage-point advantage. A weighted average using the same nonnegative weights cannot reverse a strict advantage present in every included group.\",\n      \"transfer\": \"Choose another common mix and compute both reference rates. Keep the original sample counts and pooled rates written alongside the new comparison.\"\n    },\n    {\n      \"id\": \"grouped-empty-support\",\n      \"concept\": \"Reference mix\",\n      \"prerequisites\": [\n        \"Denominators\",\n        \"Group composition\"\n      ],\n      \"prompt\": \"A has no recorded newcomer attempts (0 successes out of 0) and 9 successes in 10 experienced-player attempts. What can the explorer report for A at a reference mix of 50% newcomers and 50% experienced players?\",\n      \"options\": [\n        \"45%: treat unobserved newcomers as having zero successes.\",\n        \"Unavailable: one positive-weight group has no observed rate.\",\n        \"90%: apply the observed experienced rate to both groups.\",\n        \"100%: remove the empty group from every denominator.\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"Zero attempts do not establish a 0% success rate. The newcomer component is needed at this reference mix but unavailable. Assigning it zero or borrowing the other group's rate would add an assumption absent from the data.\",\n      \"transfer\": \"Describe the difference between zero successes in ten attempts and zero successes in zero attempts. Which one establishes an observed rate?\"\n    },\n    {\n      \"id\": \"grouped-zero-weight\",\n      \"concept\": \"Reference mix\",\n      \"prerequisites\": [\n        \"Denominators\",\n        \"Group composition\"\n      ],\n      \"prompt\": \"A still has 0/0 newcomer attempts and 9/10 experienced-player attempts. Now the reference mix contains 0% newcomers and 100% experienced players. What reference rate can be computed without filling in a missing rate?\",\n      \"options\": [\n        \"90%\",\n        \"0%\",\n        \"45%\",\n        \"Unavailable at every reference mix\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"Only the experienced-player rate has positive weight, so the reference rate is 9/10 = 90%. The newcomer rate remains unavailable; it has not been inferred. Any mix assigning newcomers positive weight would require information not present in these counts.\",\n      \"transfer\": \"Move the reference weight from 100% experienced to 99%. Explain why the missing group's small positive weight still prevents this calculation.\"\n    },\n    {\n      \"id\": \"grouped-causal-question\",\n      \"concept\": \"Causal questions\",\n      \"prerequisites\": [\n        \"Group composition\"\n      ],\n      \"prompt\": \"The puzzle counts come from observational logs, with no stated assignment procedure. To investigate whether switching a player from B to A would improve success, which next step addresses the missing causal information?\",\n      \"options\": [\n        \"Pool all attempts and choose the option with the greater fraction.\",\n        \"Split on every recorded variable and choose the strongest subgroup.\",\n        \"Force a fifty-fifty group mix and treat its difference as the effect.\",\n        \"Specify the intervention and examine assignment, timing and common causes.\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"A causal question needs a defined intervention and justified design or assumptions. Assignment, relevant common causes, and the timing of variables matter. Neither a larger pooled rate nor a standardized descriptive rate alone supplies those assumptions.\",\n      \"transfer\": \"For a comparison of two study methods, name one design feature and one pre-method variable you would examine before interpreting a rate difference causally.\"\n    },\n    {\n      \"id\": \"grouped-post-method\",\n      \"concept\": \"Causal questions\",\n      \"prerequisites\": [\n        \"Reference mix\"\n      ],\n      \"prompt\": \"Suppose the chosen method can change whether a player completes optional practice, and practice can affect final puzzle success. The question concerns the method's total effect, including that practice pathway. Should comparing only within post-method practice groups automatically answer it?\",\n      \"options\": [\n        \"Yes; removing any group difference always isolates total effects.\",\n        \"Yes; equal reference weights make post-method grouping harmless.\",\n        \"No; such grouping can remove part of the pathway being studied.\",\n        \"No; every pooled association already equals an intervention effect.\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"A group variable can lie on the pathway from the method to the outcome. Conditioning on it can exclude part of the total effect being asked about. This does not make the raw pooled association automatically causal either; the study design and other causal assumptions still matter.\",\n      \"transfer\": \"Before using a variable to form groups, ask when it was measured, whether the method could change it, and which effect or descriptive population you actually want to compare.\"\n    }\n  ]\n}\n" });
+})();
+</script>
+</body></html>
