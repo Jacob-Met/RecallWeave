@@ -1,0 +1,84 @@
+{
+  "schema": "recallweave-precision-download-transition/1",
+  "from": "v2 importer usage update",
+  "to": "v3 exact source-string download",
+  "diagnosis": {
+    "original_sha256": "7593052ae2eaf3434397d8e733bc0b3538dbfa30b8d274cfd7dd38ff5e48cb09",
+    "original_bytes": 14090,
+    "predicted_download_sha256": "00ed062daaec4316a20db198a9137f8498516fa804ebc47d7daaf55717533481",
+    "observed_download_sha256": "00ed062daaec4316a20db198a9137f8498516fa804ebc47d7daaf55717533481",
+    "predicted_download_bytes": 14095,
+    "semantic_json_equal": true,
+    "positions": [
+      {
+        "offset": 7577,
+        "context": " 0.2 and y = 0.3. A stated policy accepts differences with Math.abs(x - y) <= 1e-12. What are the values of x === y and this acceptance check?\",\n      \"options\": [\n        \"fa"
+      }
+    ],
+    "cause": "The builder HTML-escapes '<' in the JSON source, and the UI downloads that raw escaped textContent instead of restoring the original JSON source text.",
+    "semantic_comparison_method": "The source-to-HTML escape transformation exactly matches the full SHA256 of root's actual downloaded file; parsing that hash-matched text and the authored source yields equal objects."
+  },
+  "changes": [
+    {
+      "path": "src/numerical-precision-ui.mjs",
+      "before": "const deckText = byId('precision-deck-json').textContent;",
+      "after": "const deckText = JSON.parse(byId('precision-deck-json').textContent);",
+      "original_pin": {
+        "sha256": "2f27a63ea1d08cd3c0911e36442baae2a36d83d7ad73c9a26a4b4c501ab687fa",
+        "git_blob": "498b160076ae8e7a200e94269436e25dacddaa35",
+        "bytes": 9106
+      },
+      "final_pin": {
+        "sha256": "532b3e239812bedf583d0ea6ab049c77992b4e931998b3a8a0e69def387474de",
+        "git_blob": "28c9c6ec60912d1221b2d0c691dd01ce81d5f298",
+        "bytes": 9118
+      }
+    },
+    {
+      "path": "tools/build-numerical-precision.mjs",
+      "before": "'@@DECK_JSON@@': values.deck.replaceAll('<', '\\\\u003c'),",
+      "after": "'@@DECK_JSON@@': JSON.stringify(values.deck).replaceAll('<', '\\\\u003c'),",
+      "original_pin": {
+        "sha256": "c883860b097fac93e1a2e82ecc414e6f6848785c5130769f834a302d5f77ac18",
+        "git_blob": "e4b35cc131e4b73d8e03988cef6f657e74829bf7",
+        "bytes": 2863
+      },
+      "final_pin": {
+        "sha256": "c360d9af2f1764179a6c42822e52f42fbe39b4bef63f13cd9fcdddbf5521e25d",
+        "git_blob": "778b88f2dd033a16ec4fabdc7e6c4339b8ed5d2b",
+        "bytes": 2879
+      }
+    },
+    {
+      "path": "tests/numerical-precision.test.mjs",
+      "before": "import { fileURLToPath } from 'node:url';\n",
+      "after": "import { fileURLToPath } from 'node:url';\nimport { runInNewContext } from 'node:vm';\n",
+      "appended_regression": "\ntest('embedded lesson download preserves exact source bytes', async () => {\n  const [html, originalDeck, originalGuide] = await Promise.all([\n    readFile(new URL('../courses/numerical-precision-explorer.html', import.meta.url), 'utf8'),\n    readFile(new URL('../courses/numerical-precision.json', import.meta.url), 'utf8'),\n    readFile(new URL('../courses/numerical-precision.md', import.meta.url), 'utf8')\n  ]);\n  assert.match(originalDeck, /</, 'the authored tolerance prompt exercises HTML-safe escaping');\n  const payload = id => {\n    const match = html.match(new RegExp('<script id=\"' + id + '\" type=\"application/json\">([\\\\s\\\\S]*?)</script>'));\n    assert.ok(match, 'the standalone contains ' + id);\n    return match[1];\n  };\n  const blobs = new Map();\n  const downloaded = [];\n  const elements = new Map();\n  class Element {\n    constructor(name) {\n      this.name = name;\n      this.children = [];\n      this.dataset = {};\n      this.attributes = new Map();\n      this.listeners = new Map();\n      this.textContent = '';\n    }\n    append(...children) { this.children.push(...children); }\n    replaceChildren(...children) { this.children = children; }\n    setAttribute(name, value) { this.attributes.set(name, value); }\n    removeAttribute(name) { this.attributes.delete(name); }\n    addEventListener(name, callback) {\n      const callbacks = this.listeners.get(name) ?? [];\n      callbacks.push(callback);\n      this.listeners.set(name, callbacks);\n    }\n    focus() { document.activeElement = this; }\n    remove() {}\n    click() {\n      if (this.name === 'a') downloaded.push({ name: this.download, blob: blobs.get(this.href) });\n      for (const callback of this.listeners.get('click') ?? []) callback({ preventDefault() {} });\n    }\n  }\n  for (const match of html.matchAll(/\\bid=\"([^\"]+)\"/g)) elements.set(match[1], new Element('existing'));\n  const document = {\n    body: new Element('body'),\n    getElementById(id) {\n      assert.ok(elements.has(id), 'the existing HTML declares ' + id);\n      return elements.get(id);\n    },\n    createElement(name) { return new Element(name); }\n  };\n  document.getElementById('precision-deck-json').textContent = payload('precision-deck-json');\n  document.getElementById('precision-guide-json').textContent = payload('precision-guide-json');\n  assert.equal(payload('precision-deck-json').includes('<'), false, 'HTML-safe escaping remains enabled');\n  const script = html.match(/<script type=\"module\">([\\s\\S]*?)<\\/script>/);\n  assert.ok(script, 'the standalone contains the actual built model and UI');\n  runInNewContext(script[1], {\n    document, Blob,\n    URL: {\n      createObjectURL(blob) {\n        const url = 'blob:receiving-' + blobs.size;\n        blobs.set(url, blob);\n        return url;\n      },\n      revokeObjectURL(url) { blobs.delete(url); }\n    },\n    setTimeout(callback) { callback(); return 0; }\n  }, { timeout: 1000 });\n  assert.equal(document.getElementById('number-result').textContent, '0.30000000000000004');\n  assert.equal(document.getElementById('precision-questions').children.length, 12);\n  document.getElementById('download-guide').click();\n  document.getElementById('download-lesson').click();\n  assert.deepEqual(downloaded.map(row => row.name), ['numerical-precision-guide.md', 'numerical-precision.json']);\n  assert.equal(await downloaded[0].blob.text(), originalGuide, 'the existing guide download remains byte-preserved');\n  const receivedDeck = await downloaded[1].blob.text();\n  assert.deepEqual(JSON.parse(receivedDeck), JSON.parse(originalDeck), 'course semantics remain unchanged');\n  assert.equal(Buffer.byteLength(receivedDeck), Buffer.byteLength(originalDeck),\n    'lesson download preserves literal source bytes after HTML embedding');\n  assert.equal(receivedDeck, originalDeck, 'the actual UI download handler restores all exact JSON source text');\n});\n",
+      "original_pin": {
+        "sha256": "01418b02f99f02b591a7ac83146214e633f26b85d3eda892b66f1a601498ccdb",
+        "git_blob": "060573327334e98fcde2689ec291cd4c4d442cbf",
+        "bytes": 8690
+      },
+      "final_pin": {
+        "sha256": "e86bfb08960838ab347a1ee64f08be8f31d5bdb7e7717b28d46d3a9a4d67873e",
+        "git_blob": "e382d1ace335ac1fd9c76ca7fc8c0c10f94a4e82",
+        "bytes": 12579
+      }
+    }
+  ],
+  "generated_output": "courses/numerical-precision-explorer.html",
+  "original_html_pin": {
+    "sha256": "44947a2c492513d2489d7af8f3738503e3f7a39d39886dba49dc4f8036a13797",
+    "git_blob": "3cc8deb15a8ec88f13415f4910901f54139e5d4d",
+    "bytes": 62037
+  },
+  "final_html_pin": {
+    "sha256": "8c9c710a767d7bd322edc465956183715ba0d6aac6ba02edd365b9af9cf91920",
+    "git_blob": "1c963d6bb3353516a7df8a9a1577e11e970a40ce",
+    "bytes": 62717
+  },
+  "reconstruction": "In an isolated source copy, reverse this transition first: remove the exact appended regression suffix, replace each exact after string with before once, and then reverse importer-wording-transition.json. Run the restored builder once. All fourteen original pins in independent/source-pins.json must match.",
+  "full_original_source_reconstruction_verified_in_memory": true,
+  "original_html_reconstructed_sha256": "6717c9289ecf6acac41593dfc644cc609b31955028fa1ecb1ec279f627e4980e",
+  "reconstruction_is_not_a_new_native_test_run": true
+}
