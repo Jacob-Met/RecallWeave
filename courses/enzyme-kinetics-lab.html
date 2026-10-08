@@ -1,0 +1,508 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Compare substrate saturation and two stated enzyme-inhibition models with the existing RecallWeave enzyme lesson. Works offline.">
+<title>Enzyme kinetics · RecallWeave</title>
+<style>
+:root{color-scheme:light;--paper:#f5f3eb;--ink:#203d36;--muted:#536860;--line:#d9ded3;--panel:#fffef8;--green:#276349;--amber:#a44b25;--purple:#65539a;--soft:#e9eedf}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.5 ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+button,input{font:inherit}
+a{color:var(--green);text-underline-offset:3px}
+button{min-height:44px;border:1px solid var(--green);border-radius:8px;padding:10px 15px;background:var(--green);color:white;font-weight:650;cursor:pointer}
+button:hover{filter:brightness(.94)}
+button.secondary{color:var(--ink);background:var(--panel);border-color:#98aa9c}
+button:disabled{opacity:.48;cursor:not-allowed}
+button:disabled:hover{filter:none}
+:focus-visible{outline:3px solid #8e432a;outline-offset:3px}
+[hidden]{display:none!important}
+.skip{position:absolute;left:16px;top:-100px;padding:10px;background:white;z-index:3}
+.skip:focus{top:12px}
+.shell{width:min(1200px,calc(100% - 48px));margin-inline:auto}
+header{padding:22px 0;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:12px}
+.brand{font-weight:750;letter-spacing:-.04em;font-size:1.2rem}
+.brand-mark{display:inline-grid;place-items:center;width:30px;height:30px;margin-right:8px;border-radius:50%;background:var(--ink);color:#dbe7ac;font:700 20px Georgia,serif}
+.tag{font-size:.74rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+h1,h2,h3,p{margin-top:0}
+h1{font:400 clamp(2.65rem,5.5vw,4.8rem)/1.02 Georgia,serif;letter-spacing:-.045em;margin-bottom:16px}
+h2{font:400 1.65rem/1.2 Georgia,serif;letter-spacing:-.02em}
+h3{font-size:1rem}
+.hero{display:grid;grid-template-columns:1fr 310px;gap:50px;align-items:end;padding:36px 0 30px}
+.hero p:last-child{max-width:630px;color:var(--muted);font-size:1.06rem;margin-bottom:0}
+.eyebrow{font-size:.73rem;text-transform:uppercase;letter-spacing:.15em;font-weight:750;color:var(--green);margin-bottom:12px}
+.baseline{background:var(--soft);border-radius:12px;padding:20px}
+.baseline p{font-size:.83rem!important;margin:0;color:var(--muted)}
+.constants{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0}
+.constants div{border-left:2px solid #a4b68a;padding-left:12px}
+.constants dt{font-size:.8rem;color:var(--muted)}
+.constants dd{margin:0;font:400 1.8rem/1.25 Georgia,serif}
+.constants small{font:12px/1.35 ui-sans-serif,system-ui,sans-serif;display:block;margin-top:4px}
+.workbench{display:grid;grid-template-columns:282px minmax(0,1fr);border:1px solid var(--line);border-radius:15px;overflow:hidden;background:var(--panel)}
+.controls{padding:23px;border-right:1px solid var(--line);background:#edf0e7}
+.controls h2{font-size:1.45rem;margin-bottom:23px}
+.field{margin-bottom:24px}
+.field-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.field label{font-weight:700;font-size:.92rem}
+.field input[type=text]{min-width:0;width:72px;text-align:right;border:1px solid #8fa196;border-radius:6px;background:#fffef8;padding:7px 9px;color:var(--ink);font-variant-numeric:tabular-nums}
+.field input[aria-invalid=true]{border:2px solid #a33326}
+input[type=range]{accent-color:var(--green);width:100%;margin:15px 0 2px;min-height:24px;cursor:pointer}
+.hint{font-size:.79rem;color:var(--muted);line-height:1.45;margin:4px 0 0}
+fieldset{border:0;padding:0;margin:0 0 22px;min-width:0}
+legend{font-weight:700;font-size:.92rem;margin-bottom:10px}
+.model-options{display:grid;gap:8px}
+.model-option{display:flex;align-items:center;gap:8px;padding:8px;border:1px solid #cbd4c3;border-radius:7px;background:#f8f9f1;font-size:.88rem;cursor:pointer;min-height:44px}
+.model-option:has(input:checked){background:#e0e8cf;border-color:#91a280}
+.model-option input{accent-color:var(--green);margin:0;flex:0 0 auto}
+.control-actions{display:grid;gap:8px}
+.control-actions button{font-size:.82rem}
+.status{font-size:.78rem;line-height:1.4;margin:16px 0 0;color:var(--muted)}
+.status.has-error{color:#a33326;font-weight:650}
+.results{padding:24px;min-width:0}
+.figure-heading{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+.figure-heading h2{margin:0;font-size:1.5rem}
+#current-point{margin:0;font-size:.8rem;color:var(--muted);font-variant-numeric:tabular-nums}
+figure{margin:0}
+.legend{display:flex;gap:8px 18px;flex-wrap:wrap;list-style:none;padding:0;margin:14px 0 8px;font-size:.78rem;color:var(--ink)}
+.legend li{display:flex;align-items:center;gap:7px}
+.swatch{display:inline-block;width:25px;border-top:3px solid var(--green);height:0;flex:0 0 auto}
+.swatch.competitive{border-top:3px dashed var(--amber)}
+.swatch.pure_noncompetitive{border-top:3px dotted var(--purple)}
+#plot-wrap{width:100%;min-width:0}
+#kinetics-plot{display:block;width:100%;height:300px;overflow:visible}
+#kinetics-plot text{fill:var(--muted);font:11.5px ui-sans-serif,system-ui,sans-serif}
+.grid-line{stroke:#e2e6da;stroke-width:1}
+.axis-tick{stroke:#819889;stroke-width:1}
+.curve{fill:none;stroke:var(--green);stroke-width:2.7;opacity:.8}
+.curve.competitive{stroke:var(--amber);stroke-dasharray:10 5}
+.curve.pure_noncompetitive{stroke:var(--purple);stroke-dasharray:2 5;stroke-linecap:round}
+.curve.selected{stroke-width:3.5;opacity:1}
+.probe-line{stroke:#87968a;stroke-width:1;stroke-dasharray:3 4}
+.probe{stroke:var(--panel);stroke-width:1.5;fill:var(--green)}
+.probe.competitive{fill:var(--amber)}
+.probe.pure_noncompetitive{fill:var(--purple)}
+.plot-caption{font-size:.76rem;color:var(--muted);margin:2px 0 14px}
+.notice{padding:9px 12px;border-radius:6px;background:#f0ecd9;font-size:.82rem;margin-bottom:12px}
+.table-scroll{max-width:100%;overflow-x:auto;border:1px solid var(--line);border-radius:8px}
+table{width:100%;border-collapse:collapse;font-size:.78rem;font-variant-numeric:tabular-nums;min-width:570px}
+caption{text-align:left;padding:10px 12px;font-size:.84rem;font-weight:700;background:#f1f3e9}
+th,td{text-align:right;padding:10px 9px;border-top:1px solid var(--line)}
+thead th{font-weight:600;color:var(--muted);line-height:1.35;background:#f8f9f2}
+th:first-child{text-align:left}
+tbody th{font-weight:600;white-space:nowrap}
+tbody tr.selected{background:#eef2e4}
+tbody th .swatch{width:15px;margin-right:6px;vertical-align:middle}
+.rounding{font-size:.73rem;color:var(--muted);margin:7px 0 0}
+.explanation{margin-top:18px;padding:16px 18px;background:#edf1e4;border-left:3px solid #8fa271;border-radius:0 8px 8px 0}
+.explanation h3{margin-bottom:7px}
+.explanation p{font-size:.89rem;margin:0;color:#39554b}
+.invalid{padding:40px 24px;display:grid;align-content:center;min-height:460px}
+.invalid h2{font-size:1.6rem}
+.invalid p{color:var(--muted);max-width:450px}
+.download-row{display:flex;justify-content:flex-end;margin:13px 0 30px}
+.download-row button{font-size:.87rem}
+.course-points{display:grid;grid-template-columns:1fr 1.2fr;gap:30px;align-items:center;padding:22px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.course-points h2{margin:0 0 8px}
+.course-points p{font-size:.9rem;color:var(--muted);margin:0}
+.presets{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.presets button{font-size:1rem;text-align:left;background:var(--panel);border-color:#a9b69f;color:var(--ink);padding:13px}
+.presets small{display:block;font-size:.72rem;line-height:1.4;margin-top:5px;color:var(--muted)}
+.prompts{padding:30px 0;display:grid;grid-template-columns:repeat(3,1fr);gap:25px}
+.prompts article{border-top:3px solid #ccd5b9;padding-top:13px}
+.prompts h3{font:400 1.2rem/1.25 Georgia,serif;margin-bottom:9px}
+.prompts p{color:var(--muted);font-size:.87rem;margin:0}
+.step{display:block;font-size:.69rem;letter-spacing:.09em;font-weight:750;color:var(--green);margin-bottom:9px}
+.course{display:flex;align-items:center;justify-content:space-between;gap:24px;padding:25px;background:#e5ecdc;border-radius:12px;margin-bottom:28px}
+.course h2{font-size:1.6rem;margin-bottom:10px}
+.course p{margin:0;color:#435d51;font-size:.89rem;max-width:730px}
+.course button{flex:0 0 215px}
+.assumptions{display:grid;grid-template-columns:1.1fr 1fr;gap:36px;padding:4px 0 28px}
+.assumptions h2{font-size:1.4rem;margin-bottom:12px}
+.assumptions p,.assumptions li{font-size:.83rem;color:var(--muted)}
+.assumptions ul{padding-left:18px}
+.assumptions code{font-size:.83rem;white-space:normal}
+.assumptions summary{cursor:pointer;color:var(--green);font-weight:650;min-height:44px;padding:8px 0}
+.equations{padding:8px 12px;background:#eeefe7;border-radius:7px}
+.equations p{margin-bottom:8px}
+.equations p:last-child{margin-bottom:0}
+footer{border-top:1px solid var(--line);padding:20px 0 30px;font-size:.75rem;color:var(--muted)}
+noscript{display:block;padding:20px;background:#fff2d4;color:#613f24}
+@media(max-width:950px){.hero{grid-template-columns:1fr 260px;gap:24px}.workbench{grid-template-columns:246px minmax(0,1fr)}.controls{padding:18px}.results{padding:18px}.course{align-items:flex-start}.course button{flex-basis:190px}.course-points{gap:20px}}
+@media(max-width:730px){.shell{width:calc(100% - 28px)}.hero{grid-template-columns:1fr;padding-top:27px;gap:20px}.hero h1{font-size:3rem}.baseline{padding:14px 18px}.constants{margin:8px 0}.workbench{grid-template-columns:1fr}.controls{border-right:0;border-bottom:1px solid var(--line);padding:20px}.controls h2{margin-bottom:16px}.field{margin-bottom:19px}.model-options{grid-template-columns:1fr}.control-actions{grid-template-columns:1fr 1fr}.results{padding:18px 12px}.download-row{justify-content:stretch}.download-row button{width:100%}.course-points{grid-template-columns:1fr;gap:18px}.prompts{grid-template-columns:1fr;gap:20px}.course{display:block;padding:22px}.course button{margin-top:18px;width:100%}.assumptions{grid-template-columns:1fr;gap:12px}.tag{font-size:.65rem}.legend{gap:6px 13px}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<a class="skip" href="#workbench-title">Skip to the comparison</a>
+<div class="shell">
+<header><div class="brand"><span class="brand-mark" aria-hidden="true">r</span>RecallWeave</div><span class="tag">Biology · Offline explorer</span></header>
+<main>
+<section class="hero" aria-labelledby="page-title">
+<div><p class="eyebrow">Enzymes / Saturation &amp; regulation</p><h1 id="page-title">More substrate.<br>Same enzyme.</h1><p>See where the initial rate levels off—and when extra substrate can reduce an inhibitor’s fractional effect.</p></div>
+<aside class="baseline" aria-label="Fixed fictional baseline"><p>One fictional enzyme. Fixed baseline.</p><dl class="constants"><div><dt>V<sub>max</sub></dt><dd>10<small>product units/min</small></dd></div><div><dt>K<sub>m</sub></dt><dd>1<small>concentration unit</small></dd></div></dl><p>Three specified rate laws share these uninhibited parameters.</p></aside>
+</section>
+<noscript>This explorer needs JavaScript for its local calculations. You can still read the <a href="enzyme-kinetics.md">model guide</a> and the <a href="enzymes-energy-and-control.md">enzyme course</a>.</noscript>
+<div class="workbench">
+<form id="kinetics-controls" class="controls" novalidate>
+<h2 id="workbench-title" tabindex="-1">Change the conditions</h2>
+<div class="field"><div class="field-head"><label for="substrate">Substrate [S]</label><input id="substrate" type="text" inputmode="decimal" value="1" autocomplete="off" spellcheck="false" aria-describedby="substrate-help lab-status"></div><input id="substrate-slider" type="range" min="0" max="32" step="any" value="1" aria-label="Adjust substrate concentration" aria-describedby="substrate-help"><p id="substrate-help" class="hint">0–32 concentration units. Drag, use arrow keys, or type a decimal.</p></div>
+<div class="field"><div class="field-head"><label for="inhibitor-ratio">Inhibitor I/K<sub>i</sub></label><input id="inhibitor-ratio" type="text" inputmode="decimal" value="3" autocomplete="off" spellcheck="false" aria-describedby="inhibitor-help lab-status"></div><input id="inhibitor-slider" type="range" min="0" max="8" step="any" value="3" aria-label="Adjust inhibitor ratio" aria-describedby="inhibitor-help"><p id="inhibitor-help" class="hint">0–8, dimensionless. A ratio of 3 means inhibitor concentration is three times its inhibition constant. Compare two hypothetical inhibitors at the same ratio.</p></div>
+<fieldset><legend>Explain a curve</legend><div class="model-options">
+<label class="model-option"><input id="explain-uninhibited" type="radio" name="explain-model" value="uninhibited">Uninhibited</label>
+<label class="model-option"><input id="explain-competitive" type="radio" name="explain-model" value="competitive" checked>Competitive</label>
+<label class="model-option"><input id="explain-pure" type="radio" name="explain-model" value="pure_noncompetitive">Pure noncompetitive</label>
+</div></fieldset>
+<div class="control-actions"><button id="no-inhibitor" class="secondary" type="button">Set inhibitor to 0</button><button id="reset-example" class="secondary" type="button">Reset example</button></div>
+<p id="lab-status" class="status" role="status" aria-live="polite" aria-atomic="true">Preparing the local comparison.</p>
+</form>
+<section id="results" class="results" aria-label="Calculated comparison" hidden>
+<figure aria-labelledby="plot-heading">
+<div class="figure-heading"><h2 id="plot-heading">Same inputs. Compare the rates.</h2><p id="current-point"></p></div>
+<ul class="legend" aria-label="Curve styles"><li><span class="swatch" aria-hidden="true"></span>Uninhibited · circle</li><li><span class="swatch competitive" aria-hidden="true"></span>Competitive · square</li><li><span class="swatch pure_noncompetitive" aria-hidden="true"></span>Pure noncompetitive · triangle</li></ul>
+<div id="plot-wrap"><svg id="kinetics-plot" viewBox="0 0 700 300" role="img" aria-labelledby="plot-title plot-description"><title id="plot-title">Initial rate versus substrate concentration</title><desc id="plot-description"></desc><g id="plot-axes"></g><g id="plot-curves"></g><g id="plot-probes"></g></svg></div>
+<figcaption class="plot-caption">The vertical guide marks the current substrate value. Curve styles and marker shapes distinguish the cases; the table gives their current values.</figcaption>
+</figure>
+<p id="coincident-note" class="notice" hidden>With inhibitor ratio 0, all three curves and markers overlap.</p>
+<div class="table-scroll" tabindex="0" role="region" aria-label="Current rates and apparent parameters; scroll horizontally on a narrow screen">
+<table id="comparison-table"><caption>Current rates and apparent parameters</caption><thead><tr><th scope="col">Model</th><th scope="col">Initial rate<br>product units/min</th><th scope="col">Of uninhibited<br>rate</th><th scope="col">Limiting rate<br>product units/min</th><th scope="col">Apparent K<sub>m</sub><br>concentration units</th></tr></thead>
+<tbody>
+<tr data-model="uninhibited"><th scope="row"><span class="swatch" aria-hidden="true"></span>Uninhibited</th><td data-quantity="rate">—</td><td data-quantity="relativeRate">—</td><td data-quantity="limitingRate">—</td><td data-quantity="apparentKm">—</td></tr>
+<tr data-model="competitive"><th scope="row"><span class="swatch competitive" aria-hidden="true"></span>Competitive</th><td data-quantity="rate">—</td><td data-quantity="relativeRate">—</td><td data-quantity="limitingRate">—</td><td data-quantity="apparentKm">—</td></tr>
+<tr data-model="pure_noncompetitive"><th scope="row"><span class="swatch pure_noncompetitive" aria-hidden="true"></span>Pure noncompetitive</th><td data-quantity="rate">—</td><td data-quantity="relativeRate">—</td><td data-quantity="limitingRate">—</td><td data-quantity="apparentKm">—</td></tr>
+</tbody></table></div>
+<p class="rounding">Values are displayed to five significant figures. The CSV retains unrounded calculated values. Scroll the table sideways if its columns do not fit.</p>
+<p id="zero-note" class="notice" hidden>At zero substrate, “of uninhibited rate” is undefined because both rates are zero. Its CSV cell is empty.</p>
+<section class="explanation" aria-labelledby="explanation-title"><h3 id="explanation-title"></h3><p id="explanation-text"></p></section>
+</section>
+<div id="invalid-results" class="invalid" hidden><h2>Enter valid values to compare.</h2><p>The graph, table and comparison download will return when both inputs are within their shown ranges. The unchanged course deck remains available below.</p></div>
+</div>
+<div class="download-row"><button id="download-comparison" type="button" class="secondary" disabled>Download comparison as CSV</button></div>
+<section class="course-points" aria-labelledby="course-points-title"><div><p class="eyebrow">From the existing lesson</p><h2 id="course-points-title">Recreate the saturation example.</h2><p>These buttons change substrate only. Compare the uninhibited rates with question <strong>enz-binding-2</strong>, which rounds to one decimal.</p></div><div class="presets"><button type="button" data-substrate-preset="1">S = 1<small>Course rate: 5.0</small></button><button type="button" data-substrate-preset="4">S = 4<small>Course rate: 8.0</small></button><button type="button" data-substrate-preset="16">S = 16<small>Course rate: 9.4</small></button></div></section>
+<section class="prompts" aria-label="Suggested comparisons">
+<article><span class="step">01 / SATURATION</span><h3>Which increase buys more?</h3><p>Compare S = 1 → 4 with S = 4 → 16. Both changes multiply substrate by four. Why do their uninhibited rate increases differ?</p></article>
+<article><span class="step">02 / COMPETITION</span><h3>Can the fractional loss shrink?</h3><p>Keep inhibitor ratio 3. Move from S = 1 to S = 16 and follow the competitive percentage in the table. Predict what happens as substrate becomes very abundant.</p></article>
+<article><span class="step">03 / A STATED SPECIAL CASE</span><h3>What stays proportional?</h3><p>With the same nonzero inhibitor ratio, follow the pure noncompetitive percentage as you vary positive substrate. Separate a rising rate from recovery of the original limiting rate.</p></article>
+</section>
+<section class="course" aria-labelledby="course-title"><div><p class="eyebrow">Continue in RecallWeave</p><h2 id="course-title">Enzymes: energy, speed and control</h2><p>Download the existing twelve-question deck, then use <strong>Bring your own lesson → Choose a deck file</strong> in RecallWeave and explicitly start the selected deck. Read the <a href="enzymes-energy-and-control.md">worked course</a> or this explorer’s <a href="enzyme-kinetics.md">model guide</a>.</p></div><button id="download-course" type="button">Download the enzyme deck</button></section>
+<section class="assumptions" aria-label="Model assumptions and sources">
+<div><h2>What the curves mean</h2><p>These are fictional initial-rate calculations for a simple, reversible inhibition model: fixed enzyme amount, fixed temperature and pH, negligible substrate depletion and product accumulation during the initial-rate measurement, and inhibition already equilibrated. The curves do not describe reaction progress over time.</p><p><strong>Pure noncompetitive</strong> is the equal-inhibition-constant special case. It is an extension for comparison, not a kinetic label inferred from the course’s allosteric-binding example. Binding at a separate site alone does not identify a rate law.</p><p>No cooperativity, substrate inhibition, irreversible or slow-binding inhibition, pathway feedback dynamics, or equilibrium composition is calculated.</p></div>
+<div><h2>Read the model</h2><details><summary>Equations and parameter meanings</summary><div class="equations"><p>Let <strong>S</strong> be substrate concentration and <strong>r = I/K<sub>i</sub></strong>. With V<sub>max</sub> = 10 and K<sub>m</sub> = 1:</p><p><strong>Uninhibited:</strong> <code>v = 10 S / (1 + S)</code></p><p><strong>Competitive:</strong> <code>v = 10 S / (1 + r + S)</code></p><p><strong>Pure noncompetitive:</strong> <code>v = (10 / (1 + r)) S / (1 + S)</code></p><p>K<sub>m</sub> is the concentration giving half the limiting rate in a Michaelis–Menten curve; it is not generally a binding-equilibrium constant. The listed values use the fictional units shown above.</p></div></details><p>Primary references: IUBMB, <a href="https://iubmb.qmul.ac.uk/kinetics/ek4t6.html">enzyme kinetics §§4.1–4.2 and 6.2–6.4</a>, for rate terminology and the precise inhibition distinction; OpenStax, <a href="https://openstax.org/books/biology-2e/pages/6-5-enzymes">Biology 2e §6.5</a>, for the course’s biological context. The page, graph and examples are original.</p><p>Local calculation and interaction checks establish software behavior. No measured learning benefit is claimed.</p></div>
+</section>
+</main>
+<footer>RecallWeave · Enzyme kinetics explorer · Calculations and downloads work in this file offline. Reference and guide links open only when you choose them.</footer>
+</div>
+<script id="enzyme-course-data" type="application/json">"{\n  \"format\": \"recallweave-deck/1\",\n  \"title\": \"Enzymes: energy, speed and control\",\n  \"attribution\": \"Original questions, fictional numerical profiles and distractors created for RecallWeave, October 2026. Scientific checks: [R1] OpenStax, Biology 2e, §6.2, https://openstax.org/books/biology-2e/pages/6-2-potential-kinetic-free-and-activation-energy ; [R2] OpenStax, Biology 2e, §6.5, https://openstax.org/books/biology-2e/pages/6-5-enzymes ; [R3] Alberts et al., Molecular Biology of the Cell, 4th ed., Catalysis and the Use of Energy by Cells, https://www.ncbi.nlm.nih.gov/books/NBK26838/ ; [R4] Cooper, The Cell: A Molecular Approach, 2nd ed., The Central Role of Enzymes as Biological Catalysts, https://www.ncbi.nlm.nih.gov/books/NBK9921/ . These are concept references, not copied questions or evidence of learning effectiveness.\",\n  \"license\": \"Original wording and fictional scenarios supplied for Jacob's RecallWeave project. No textbook passages, figures or assessment items are reproduced. Reference works retain their own copyright and license terms; this metadata does not grant rights in those works.\",\n  \"concepts\": [\n    \"Reaction energy\",\n    \"Catalytic pathways\",\n    \"Binding and saturation\",\n    \"Enzyme regulation\"\n  ],\n  \"items\": [\n    {\n      \"id\": \"enz-energy-1\",\n      \"concept\": \"Reaction energy\",\n      \"prerequisites\": [],\n      \"prompt\": \"A fictional cellular reaction has a free-energy change ΔG = −12 kJ/mol under the stated conditions, yet product forms slowly. Which explanation fits both observations?\",\n      \"options\": [\n        \"A negative ΔG means each molecule must convert immediately.\",\n        \"Slow conversion proves that the reported ΔG must be positive.\",\n        \"A favorable energy change can coexist with a substantial activation barrier.\",\n        \"The slow rate shows that no enzyme could accelerate conversion.\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"ΔG describes the free-energy difference between the reaction's products and reactants under the stated conditions. It does not specify how quickly the transition occurs. A barrier along the reaction pathway can make a thermodynamically favorable conversion slow. [R1; R3]\",\n      \"transfer\": \"When a pathway is slow, distinguish a question about its energy balance from a question about its rate.\"\n    },\n    {\n      \"id\": \"enz-energy-2\",\n      \"concept\": \"Reaction energy\",\n      \"prerequisites\": [],\n      \"prompt\": \"In an invented energy profile, reactants are at 20, products at 8, and the transition state at 68 kJ/mol, on the same reference scale. What are ΔG and the forward activation barrier?\",\n      \"options\": [\n        \"ΔG = −12 kJ/mol; forward barrier = 48 kJ/mol.\",\n        \"ΔG = +12 kJ/mol; forward barrier = 48 kJ/mol.\",\n        \"ΔG = −12 kJ/mol; forward barrier = 60 kJ/mol.\",\n        \"ΔG = +48 kJ/mol; forward barrier = 12 kJ/mol.\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"The reaction difference is 8 − 20 = −12 kJ/mol. The forward barrier is measured from the reactants to the transition state: 68 − 20 = 48 kJ/mol. The 60 kJ/mol difference uses the products as its starting point and is the reverse barrier in this profile. [R1]\",\n      \"transfer\": \"Sketch the three levels, then label the starting level for each subtraction before calculating.\"\n    },\n    {\n      \"id\": \"enz-energy-3\",\n      \"concept\": \"Reaction energy\",\n      \"prerequisites\": [],\n      \"prompt\": \"A reversible reaction A ⇌ B is away from equilibrium. A catalyst is added without changing temperature or the reaction's reactants and products; binding does not appreciably sequester either species. What can catalysis change?\",\n      \"options\": [\n        \"The equilibrium ratio, so that only B remains at the end.\",\n        \"The reaction's ΔG, by permanently lowering product energy.\",\n        \"The direction of equilibrium, by making the reverse reaction impossible.\",\n        \"The approach rate, while leaving the equilibrium ratio unchanged.\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"A catalyst provides a faster route for interconversion without changing the reaction's energy endpoints. It accelerates approach to the equilibrium set by those conditions rather than selecting a new equilibrium composition. [R3; R4]\",\n      \"transfer\": \"Separate how soon a reversible system approaches equilibrium from the composition it approaches.\"\n    },\n    {\n      \"id\": \"enz-catalysis-1\",\n      \"concept\": \"Catalytic pathways\",\n      \"prerequisites\": [\n        \"Reaction energy\"\n      ],\n      \"prompt\": \"For an invented reaction, reactants are at 5 and products at −3 kJ/mol. An enzyme lowers the transition-state level from 47 to 29 kJ/mol. Which pair describes the catalyzed forward pathway?\",\n      \"options\": [\n        \"The forward barrier is 18 kJ/mol, and ΔG is −8 kJ/mol.\",\n        \"The forward barrier is 24 kJ/mol, and ΔG is −8 kJ/mol.\",\n        \"The forward barrier is 24 kJ/mol, and ΔG is −26 kJ/mol.\",\n        \"The forward barrier is 32 kJ/mol, and ΔG is +8 kJ/mol.\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"The new forward barrier is 29 − 5 = 24 kJ/mol. ΔG remains −3 − 5 = −8 kJ/mol because the endpoints are unchanged. The enzyme reduced the barrier by 18 kJ/mol; that reduction is not the remaining barrier. [R1; R2]\",\n      \"transfer\": \"Compare the barrier before and after catalysis without moving the reactant or product level.\"\n    },\n    {\n      \"id\": \"enz-catalysis-2\",\n      \"concept\": \"Catalytic pathways\",\n      \"prerequisites\": [\n        \"Reaction energy\"\n      ],\n      \"prompt\": \"One enzyme molecule has completed many ordinary catalytic cycles and released each product. No inhibitor, damage or degradation is present. What permits another cycle?\",\n      \"options\": [\n        \"A product must be converted into a new enzyme after every cycle.\",\n        \"The enzyme must supply the net free energy consumed by each reaction.\",\n        \"The enzyme becomes a permanent part of each released product molecule.\",\n        \"The regenerated enzyme can bind another substrate and catalyze again.\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"A catalyst participates in reaction steps but is regenerated across a completed catalytic cycle. Product release allows another cycle under suitable conditions. This does not make an enzyme immortal: damage or degradation could end its activity, but those effects are excluded here. [R4]\",\n      \"transfer\": \"Follow the enzyme separately from the substrate and product when accounting for repeated reaction cycles.\"\n    },\n    {\n      \"id\": \"enz-catalysis-3\",\n      \"concept\": \"Catalytic pathways\",\n      \"prerequisites\": [\n        \"Reaction energy\"\n      ],\n      \"prompt\": \"A folded enzyme variant still binds its substrate tightly, but no longer helps the reacting atoms reach the transition state. Which conclusion is justified?\",\n      \"options\": [\n        \"Tight substrate binding proves that its catalytic rate must stay unchanged.\",\n        \"Substrate binding alone does not establish that the variant catalyzes efficiently.\",\n        \"Any bound substrate must become product, even without a catalytic pathway.\",\n        \"Losing transition-state assistance must change the reaction's equilibrium ratio.\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"Recognition and catalysis are related but distinct. Binding can position a substrate, yet efficient conversion also depends on interactions along the reaction pathway, including transition-state stabilization. The premise therefore does not support an unchanged catalytic rate. [R3; R4]\",\n      \"transfer\": \"When testing an enzyme variant, distinguish evidence for binding from evidence for product formation.\"\n    },\n    {\n      \"id\": \"enz-binding-1\",\n      \"concept\": \"Binding and saturation\",\n      \"prerequisites\": [\n        \"Catalytic pathways\"\n      ],\n      \"prompt\": \"An enzyme recognizes substrate S through complementary shape and charge. A mutation reverses a contact charge while the protein remains folded. What may follow?\",\n      \"options\": [\n        \"Recognition of S and the observed reaction rate may change.\",\n        \"All substrates must now bind equally because the protein is folded.\",\n        \"The same reaction must acquire a different equilibrium constant.\",\n        \"Every catalytic cycle must consume the mutated enzyme permanently.\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"A folded protein can still have altered active-site interactions. Changing a contact charge may affect recognition, orientation or subsequent catalysis. The observation does not establish the direction or size of the rate change; that would require further evidence. [R2; R4]\",\n      \"transfer\": \"Avoid treating 'still folded' as proof that all molecular interactions remain unchanged.\"\n    },\n    {\n      \"id\": \"enz-binding-2\",\n      \"concept\": \"Binding and saturation\",\n      \"prerequisites\": [\n        \"Catalytic pathways\"\n      ],\n      \"prompt\": \"In a fictional initial-rate experiment with fixed enzyme and suitable constant conditions, substrate concentrations of 1, 4 and 16 units give rates of 5.0, 8.0 and 9.4 product units per minute. Assume a simple saturating enzyme with no inhibition. Which reading fits?\",\n      \"options\": [\n        \"The reaction's equilibrium ratio rises whenever substrate concentration rises.\",\n        \"Each fourfold substrate increase must cause a fourfold rate increase.\",\n        \"The rate approaches an enzyme-limited ceiling as substrate becomes abundant.\",\n        \"The enzyme is necessarily being consumed because the rate does not scale.\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"The increases become progressively smaller. In the stated saturating model, the fixed enzyme population spends more time occupied and has a limited turnover capacity. More substrate therefore gives diminishing increases in initial rate. These fictional values do not identify an exact mechanism outside the stated model. [R3; R4]\",\n      \"transfer\": \"Look for a plateau in initial-rate data, then ask which capacity is held fixed.\"\n    },\n    {\n      \"id\": \"enz-binding-3\",\n      \"concept\": \"Binding and saturation\",\n      \"prerequisites\": [\n        \"Catalytic pathways\"\n      ],\n      \"prompt\": \"In a simple initial-rate assay with maintained saturating substrate, 0.10 μmol/L of active enzyme produces 10 μmol/L of product per second. Only active enzyme concentration doubles; turnover and all other conditions stay the same. What rate does this model predict?\",\n      \"options\": [\n        \"5 μmol/L/s\",\n        \"20 μmol/L/s\",\n        \"10 μmol/L/s\",\n        \"40 μmol/L/s\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"At saturating substrate, the stated model's rate scales with the amount of active enzyme when turnover per enzyme is unchanged. Doubling 0.10 to 0.20 μmol/L doubles 10 to 20 μmol/L/s. This is a model prediction, not a measured response for an arbitrary biological system. [R3; R4]\",\n      \"transfer\": \"State what remains constant before using a proportional prediction.\"\n    },\n    {\n      \"id\": \"enz-regulation-1\",\n      \"concept\": \"Enzyme regulation\",\n      \"prerequisites\": [\n        \"Binding and saturation\"\n      ],\n      \"prompt\": \"In a simple reversible competitive-inhibition model, substrate S and inhibitor I cannot occupy the enzyme together. Which change can reduce I's fractional effect on the initial rate?\",\n      \"options\": [\n        \"Lower substrate while keeping inhibitor and active enzyme fixed.\",\n        \"Add enough inhibitor to occupy a larger fraction of the active sites.\",\n        \"Remove active enzyme while keeping substrate and inhibitor fixed.\",\n        \"Raise substrate while keeping inhibitor and active enzyme fixed.\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"In this specified competition, more substrate increases the opportunity for substrate rather than inhibitor to occupy the enzyme. That can reduce inhibition relative to the uninhibited rate at the same substrate concentration. It is not a claim that every inhibitor can be overcome this way. [R2; R4]\",\n      \"transfer\": \"Check the stated binding mechanism before predicting whether additional substrate can offset inhibition.\"\n    },\n    {\n      \"id\": \"enz-regulation-2\",\n      \"concept\": \"Enzyme regulation\",\n      \"prerequisites\": [\n        \"Binding and saturation\"\n      ],\n      \"prompt\": \"A reversible regulator binds away from an enzyme's active site. Substrate can still bind, but catalytic turnover decreases. What does this observation support?\",\n      \"options\": [\n        \"The regulator must compete with substrate for the same binding position.\",\n        \"The regulator has changed the free-energy difference of the reaction endpoints.\",\n        \"Binding at a separate site can change the enzyme's catalytic behavior.\",\n        \"The regulator must have irreversibly destroyed every enzyme it contacts.\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"Binding at a regulatory site can influence enzyme activity without occupying the substrate's site. The observation supports allosteric regulation. It does not by itself determine a complete kinetic inhibition class or imply irreversible damage. [R2; R4]\",\n      \"transfer\": \"Describe what the evidence shows before attaching a more specific kinetic label.\"\n    },\n    {\n      \"id\": \"enz-regulation-3\",\n      \"concept\": \"Enzyme regulation\",\n      \"prerequisites\": [\n        \"Binding and saturation\"\n      ],\n      \"prompt\": \"In the fictional pathway A → B → C → D, product D reversibly inhibits the enzyme for A → B. A is available and other conditions remain fixed. If free D is removed, what immediate regulatory response is expected?\",\n      \"options\": [\n        \"Inhibition can ease, allowing the first enzyme's activity to increase.\",\n        \"The first enzyme must stop because D was its required substrate.\",\n        \"The first reaction's equilibrium constant must reverse its value.\",\n        \"Every downstream reaction must instantly run at the same maximum rate.\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"The pathway's own product suppresses an earlier step: this is feedback inhibition. Lowering free D can relieve reversible inhibition. That predicts a regulatory response of the first enzyme, not an instant final pathway flux or guaranteed downstream production. [R2; R4]\",\n      \"transfer\": \"Identify the regulated step, the feedback molecule and the time scale of the prediction.\"\n    }\n  ]\n}\n"</script>
+<script>
+(function () {
+'use strict';
+/** Fictional initial-rate comparisons, not fitted enzyme data.
+ * Baseline Vmax = 10 product units/min; Km = 1 substrate concentration unit.
+ * I/Ki is dimensionless. Pure noncompetitive uses equal inhibition constants.
+ * References and assumptions: ../courses/enzyme-kinetics.md
+ */
+const KINETICS_BASELINE = Object.freeze({ vmax: 10, km: 1 });
+const KINETICS_LIMITS = Object.freeze({
+  substrate: Object.freeze({ min: 0, max: 32, label: 'Substrate concentration' }),
+  inhibitorRatio: Object.freeze({ min: 0, max: 8, label: 'Inhibitor ratio I/Ki' }),
+});
+const KINETICS_MODES = Object.freeze([
+  Object.freeze({ id: 'uninhibited', label: 'Uninhibited' }),
+  Object.freeze({ id: 'competitive', label: 'Competitive' }),
+  Object.freeze({ id: 'pure_noncompetitive', label: 'Pure noncompetitive' }),
+]);
+
+function bounded(value, key) {
+  const limit = KINETICS_LIMITS[key];
+  if (!limit) throw new RangeError('Unknown kinetics parameter.');
+  if (typeof value !== 'number' || !Number.isFinite(value)) {
+    throw new TypeError(limit.label + ' must be a finite number.');
+  }
+  if (value < limit.min || value > limit.max) {
+    throw new RangeError(limit.label + ' must be from ' + limit.min + ' to ' + limit.max + '.');
+  }
+  return value === 0 ? 0 : value;
+}
+
+/** Explicit decimal input; an empty edit is never interpreted as zero. */
+function parseKineticsNumber(text, key) {
+  if (typeof text !== 'string' || !text.trim()) {
+    throw new TypeError('Enter ' + (KINETICS_LIMITS[key]?.label || 'a value').toLowerCase() + '.');
+  }
+  const value = text.trim();
+  if (!/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?$/i.test(value)) {
+    throw new TypeError((KINETICS_LIMITS[key]?.label || 'Value') + ' must be a decimal number.');
+  }
+  const number = Number(value);
+  if (number === 0 && /[1-9]/.test(value.split(/e/i)[0])) {
+    throw new RangeError('This nonzero value is too small to represent. Enter 0 explicitly or a larger value.');
+  }
+  return bounded(number, key);
+}
+
+/** Three separate hypothetical cases share S and the uninhibited enzyme parameters. */
+function compareKinetics(parameters) {
+  if (!parameters || typeof parameters !== 'object' || Array.isArray(parameters)) {
+    throw new TypeError('Provide substrate concentration and inhibitor ratio.');
+  }
+  const input = Object.freeze({
+    substrate: bounded(parameters.substrate, 'substrate'),
+    inhibitorRatio: bounded(parameters.inhibitorRatio, 'inhibitorRatio'),
+  });
+  const alpha = 1 + input.inhibitorRatio;
+  const { vmax, km } = KINETICS_BASELINE;
+  // Analytic fractions avoid dividing rates quantized near the floating-point limit.
+  const definitions = [
+    [KINETICS_MODES[0], vmax, km, 1],
+    [KINETICS_MODES[1], vmax, alpha * km, (km + input.substrate) / (alpha * km + input.substrate)],
+    [KINETICS_MODES[2], vmax / alpha, km, 1 / alpha],
+  ];
+  const cases = {};
+  for (const [mode, limitingRate, apparentKm, relativeRate] of definitions) {
+    const rate = limitingRate * input.substrate / (apparentKm + input.substrate);
+    cases[mode.id] = Object.freeze({
+      id: mode.id, label: mode.label, rate, limitingRate, apparentKm,
+      // At S=0, both rates are zero. Do not replace the undefined ratio with its limit.
+      relativeRate: input.substrate === 0 ? null : relativeRate,
+    });
+  }
+  return Object.freeze({ input, alpha, cases: Object.freeze(cases) });
+}
+
+/** Fixed graph sampling, including the course's 1, 4 and 16 concentration units. */
+function kineticsCurve(inhibitorRatio) {
+  bounded(inhibitorRatio, 'inhibitorRatio');
+  return Object.freeze(Array.from({ length: 129 }, (_, index) =>
+    compareKinetics({ substrate: index / 4, inhibitorRatio })));
+}
+
+/** Recompute from validated inputs. No caller-supplied output strings enter the file. */
+function kineticsCSV(parameters) {
+  const current = compareKinetics(parameters);
+  const header = [
+    'row_type', 'model', 'substrate_concentration_units', 'inhibitor_ratio_I_over_Ki',
+    'baseline_Vmax_product_units_per_min', 'baseline_Km_concentration_units',
+    'apparent_Vmax_product_units_per_min', 'apparent_Km_concentration_units',
+    'initial_rate_product_units_per_min', 'rate_fraction_of_uninhibited',
+  ].join(',');
+  const rows = [header];
+  for (const [kind, samples] of [
+    ['current', [current]],
+    ['curve_sample', kineticsCurve(current.input.inhibitorRatio)],
+  ]) {
+    for (const sample of samples) {
+      for (const mode of KINETICS_MODES) {
+        const row = sample.cases[mode.id];
+        rows.push([
+          kind, mode.id, sample.input.substrate, sample.input.inhibitorRatio,
+          KINETICS_BASELINE.vmax, KINETICS_BASELINE.km,
+          row.limitingRate, row.apparentKm, row.rate, row.relativeRate ?? '',
+        ].join(','));
+      }
+    }
+  }
+  return rows.join('\r\n') + '\r\n';
+}
+
+
+const byId = id => document.getElementById(id);
+const fields = [
+  ['substrate', byId('substrate'), byId('substrate-slider')],
+  ['inhibitorRatio', byId('inhibitor-ratio'), byId('inhibitor-slider')],
+];
+const results = byId('results');
+const invalid = byId('invalid-results');
+const status = byId('lab-status');
+const csvButton = byId('download-comparison');
+const plot = byId('kinetics-plot');
+const courseText = JSON.parse(byId('enzyme-course-data').textContent);
+let lastComparison = null;
+
+function shown(value) {
+  return value === 0 ? '0' : Number(value.toPrecision(5)).toString();
+}
+function chosenMode() {
+  return document.querySelector('input[name="explain-model"]:checked').value;
+}
+function setNumber(node, value, suffix = '') {
+  node.textContent = shown(value) + suffix;
+  node.dataset.value = String(value);
+}
+
+function drawPlot() {
+  if (!lastComparison) return;
+  const width = Math.max(260, Math.round(byId('plot-wrap').clientWidth));
+  const height = 300;
+  const left = 46, right = width - 18, top = 30, bottom = 254;
+  const x = value => left + value / KINETICS_LIMITS.substrate.max * (right - left);
+  const y = value => bottom - value / KINETICS_BASELINE.vmax * (bottom - top);
+  const position = value => Number(value.toFixed(3));
+  const selected = chosenMode();
+  plot.setAttribute('viewBox', '0 0 ' + width + ' ' + height);
+  let axes = '';
+  for (const value of [0, 2.5, 5, 7.5, 10]) {
+    axes += '<path class="grid-line" d="M' + left + ' ' + y(value) + 'H' + right + '"/>' +
+      '<text x="' + (left - 9) + '" y="' + (y(value) + 4) + '" text-anchor="end">' + value + '</text>';
+  }
+  for (const value of [0, 8, 16, 24, 32]) {
+    axes += '<path class="axis-tick" d="M' + x(value) + ' ' + bottom + 'v5"/>' +
+      '<text x="' + x(value) + '" y="' + (bottom + 20) + '" text-anchor="middle">' + value + '</text>';
+  }
+  axes += '<text x="' + left + '" y="16">Initial rate · product units/min</text>' +
+    '<text x="' + ((left + right) / 2) + '" y="295" text-anchor="middle">Substrate · concentration units</text>';
+  byId('plot-axes').innerHTML = axes;
+  const samples = kineticsCurve(lastComparison.input.inhibitorRatio);
+  const paths = KINETICS_MODES.map(mode => {
+    const d = samples.map((sample, index) =>
+      (index ? 'L' : 'M') + position(x(sample.input.substrate)) + ' ' + position(y(sample.cases[mode.id].rate))).join(' ');
+    return '<path class="curve ' + mode.id + (selected === mode.id ? ' selected' : '') + '" data-model="' +
+      mode.id + '" d="' + d + '"/>';
+  }).join('');
+  const sx = x(lastComparison.input.substrate);
+  let marks = '<path class="probe-line" d="M' + sx + ' ' + top + 'V' + bottom + '"/>';
+  for (const mode of KINETICS_MODES) {
+    const sy = y(lastComparison.cases[mode.id].rate);
+    const attrs = ' class="probe ' + mode.id + '" data-model="' + mode.id + '"';
+    if (mode.id === 'uninhibited') marks += '<circle' + attrs + ' cx="' + sx + '" cy="' + sy + '" r="5"/>';
+    else if (mode.id === 'competitive') marks += '<rect' + attrs + ' x="' + (sx - 5) + '" y="' + (sy - 5) + '" width="10" height="10"/>';
+    else marks += '<path' + attrs + ' d="M' + sx + ' ' + (sy - 6) + 'l6 11h-12Z"/>';
+  }
+  byId('plot-curves').innerHTML = paths;
+  byId('plot-probes').innerHTML = marks;
+  byId('plot-description').textContent = 'Three initial-rate curves over substrate concentrations 0 to 32, with inhibitor ratio ' +
+    shown(lastComparison.input.inhibitorRatio) + '. The current substrate concentration is ' +
+    shown(lastComparison.input.substrate) + '. Exact current values and apparent parameters follow in the table.';
+}
+
+function explain(comparison) {
+  const { substrate, inhibitorRatio } = comparison.input;
+  const selected = comparison.cases[chosenMode()];
+  byId('explanation-title').textContent = selected.label;
+  const text = byId('explanation-text');
+  if (substrate === 0) {
+    text.textContent = 'With no substrate, all three initial rates are zero. A fraction of the uninhibited rate would divide zero by zero, so it is undefined here. The limiting rates and apparent Km values still describe the curves at other substrate concentrations.';
+  } else if (inhibitorRatio === 0) {
+    text.textContent = 'The inhibitor ratio is zero. All three cases coincide: the same rate, the same Km of 1 concentration unit and the same limiting rate of 10 product units/min. Add inhibitor to compare their different responses.';
+  } else if (selected.id === 'competitive') {
+    text.textContent = 'At this substrate concentration, the competitive case retains ' + shown(selected.relativeRate * 100) +
+      '% of the uninhibited rate. More substrate reduces the fractional loss in this model. Its apparent Km is ' +
+      shown(selected.apparentKm) + ', while its limiting rate stays 10. A finite substrate concentration approaches that limit without reaching it.';
+  } else if (selected.id === 'pure_noncompetitive') {
+    text.textContent = 'The pure noncompetitive case retains ' + shown(selected.relativeRate * 100) +
+      '% of the uninhibited rate at every positive substrate concentration. Its apparent Km stays 1; its limiting rate falls to ' +
+      shown(selected.limitingRate) + '. More substrate raises the rate but does not restore the uninhibited limiting rate.';
+  } else {
+    text.textContent = 'The uninhibited rate is ' + shown(selected.rate) +
+      ' product units/min. At substrate 1, the rate is half of its limiting value of 10. As substrate increases, each additional unit gives a smaller gain. The enzyme amount and the baseline parameters stay fixed.';
+  }
+  byId('coincident-note').hidden = inhibitorRatio !== 0;
+  byId('zero-note').hidden = substrate !== 0;
+}
+
+function clearResults(errors) {
+  lastComparison = null;
+  csvButton.disabled = true;
+  results.hidden = true;
+  invalid.hidden = false;
+  for (const id of ['plot-curves', 'plot-probes', 'plot-axes']) byId(id).replaceChildren();
+  for (const cell of results.querySelectorAll('[data-quantity]')) {
+    cell.textContent = '—';
+    delete cell.dataset.value;
+  }
+  for (const id of ['explanation-title', 'explanation-text', 'current-point', 'plot-description']) byId(id).textContent = '';
+  status.textContent = errors.join(' ');
+  status.classList.add('has-error');
+}
+
+function updateResults() {
+  const parameters = {};
+  const errors = [];
+  for (const [key, field, slider] of fields) {
+    try {
+      parameters[key] = parseKineticsNumber(field.value, key);
+      field.removeAttribute('aria-invalid');
+      slider.value = String(parameters[key]);
+      slider.disabled = false;
+    } catch (error) {
+      field.setAttribute('aria-invalid', 'true');
+      errors.push(error.message);
+    }
+  }
+  if (errors.length) {
+    clearResults(errors);
+    return null;
+  }
+  lastComparison = compareKinetics(parameters);
+  results.hidden = false;
+  invalid.hidden = true;
+  for (const mode of KINETICS_MODES) {
+    const row = byId('comparison-table').querySelector('[data-model="' + mode.id + '"]');
+    const data = lastComparison.cases[mode.id];
+    row.classList.toggle('selected', mode.id === chosenMode());
+    for (const cell of row.querySelectorAll('[data-quantity]')) {
+      const value = data[cell.dataset.quantity];
+      if (value === null) {
+        cell.textContent = 'Undefined';
+        delete cell.dataset.value;
+      } else setNumber(cell, cell.dataset.quantity === 'relativeRate' ? value * 100 : value,
+        cell.dataset.quantity === 'relativeRate' ? '%' : '');
+    }
+  }
+  byId('current-point').textContent = 'At substrate ' + shown(parameters.substrate) + ' · inhibitor ratio ' + shown(parameters.inhibitorRatio);
+  explain(lastComparison);
+  drawPlot();
+  csvButton.disabled = false;
+  status.classList.remove('has-error');
+  status.textContent = 'Comparison updated at substrate ' + shown(parameters.substrate) +
+    ' and inhibitor ratio ' + shown(parameters.inhibitorRatio) + '.';
+  return lastComparison;
+}
+
+function setValues(values) {
+  for (const [key, field] of fields) {
+    if (Object.hasOwn(values, key)) field.value = String(values[key]);
+  }
+  updateResults();
+}
+function downloadText(name, mime, text) {
+  const url = URL.createObjectURL(new Blob([text], { type: mime }));
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = name;
+  document.body.append(link);
+  link.click();
+  link.remove();
+  window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+byId('kinetics-controls').addEventListener('submit', event => event.preventDefault());
+for (const [key, field, slider] of fields) {
+  field.addEventListener('input', updateResults);
+  slider.addEventListener('input', () => {
+    // A drag can yield many decimals; retain eight significant figures in both controls.
+    setValues({ [key]: Number(Number(slider.value).toPrecision(8)) });
+  });
+}
+for (const radio of document.querySelectorAll('input[name="explain-model"]')) radio.addEventListener('change', updateResults);
+for (const button of document.querySelectorAll('[data-substrate-preset]')) {
+  button.addEventListener('click', () => setValues({ substrate: Number(button.dataset.substratePreset) }));
+}
+byId('no-inhibitor').addEventListener('click', () => setValues({ inhibitorRatio: 0 }));
+byId('reset-example').addEventListener('click', () => {
+  byId('explain-competitive').checked = true;
+  setValues({ substrate: 1, inhibitorRatio: 3 });
+});
+byId('download-course').addEventListener('click', () =>
+  downloadText('enzymes-energy-and-control.json', 'application/json;charset=utf-8', courseText));
+csvButton.addEventListener('click', () => {
+  // Revalidate even if a field was changed without an input event.
+  const current = updateResults();
+  if (current) downloadText('enzyme-kinetics-comparison.csv', 'text/csv;charset=utf-8', kineticsCSV(current.input));
+});
+new ResizeObserver(drawPlot).observe(byId('plot-wrap'));
+updateResults();
+
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,749 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>Weighted intervals · RecallWeave</title>
+<style>
+:root{font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#193447;background:#f5f3ed;line-height:1.55;--ink:#193447;--muted:#526671;--teal:#096e64;--gold:#edbc55;--border:#d3ddd9;--paper:#fffefa;--soft:#eaf3ee;--error:#98352d}
+*{box-sizing:border-box}body{margin:0}button,input,select{font:inherit}button,a,input,select{touch-action:manipulation}button{cursor:pointer}button:disabled{cursor:default;opacity:.48}button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,[tabindex]:focus-visible{outline:3px solid #c77b06;outline-offset:3px}a{color:var(--teal);text-underline-offset:.2em}button{min-height:44px;border:1px solid var(--border);border-radius:9px;background:var(--paper);color:var(--ink);padding:.55rem .85rem;font-weight:650}button:not(:disabled):hover{background:#edf4f0;border-color:#75998f}.primary{background:var(--teal);border-color:var(--teal);color:white}.primary:not(:disabled):hover{background:#095c55;color:white}.skip{position:absolute;left:1rem;top:-5rem;background:white;padding:.7rem;z-index:4}.skip:focus{top:.5rem}[hidden]{display:none!important}.wrap{width:min(1240px,100%);margin:auto;padding:0 28px}
+header{border-bottom:1px solid #dbe1db;background:#fffdf6}.mast{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding-top:18px;padding-bottom:18px}.brand{font-weight:800;letter-spacing:.015em;color:var(--ink);text-decoration:none}.brand span{font-weight:450;color:var(--muted);font-size:.9rem;margin-left:.6rem}.offline{font-size:.76rem;letter-spacing:.1em;font-weight:700;text-transform:uppercase;color:var(--teal)}.offline::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--teal);margin-right:8px}
+.hero{display:grid;grid-template-columns:1.4fr .75fr;gap:2rem;padding-top:38px;padding-bottom:28px}.eyebrow{color:var(--teal);font-size:.73rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;margin:0 0 .7rem}h1,h2,h3,p{margin-top:0}h1{font-family:Georgia,"Times New Roman",serif;font-size:clamp(2.15rem,4vw,3.35rem);line-height:1.06;letter-spacing:-.035em;margin-bottom:1rem;font-weight:500}h1 em{color:var(--teal);font-style:normal}.lede{font-size:1.02rem;max-width:680px;color:var(--muted);margin-bottom:0}.recipe{align-self:center;border-left:3px solid var(--gold);padding:4px 0 4px 20px}.recipe p{margin:.25rem 0 .8rem;font-weight:650}.recipe ol{margin:0;padding-left:1.3rem;color:var(--muted)}.recipe li{padding:.16rem 0}
+.workspace{display:grid;grid-template-columns:350px minmax(0,1fr);align-items:start;gap:22px;padding-bottom:28px}.card{background:var(--paper);border:1px solid var(--border);border-radius:15px;box-shadow:0 5px 18px #203d3f05;overflow:hidden}.card-body{padding:22px}.card h2{font-size:1.12rem;margin-bottom:.4rem;letter-spacing:-.02em}.small{font-size:.85rem;color:var(--muted)}.muted{color:var(--muted)}.card-head{padding:20px 22px 15px;border-bottom:1px solid #e6eae5;display:flex;justify-content:space-between;align-items:start;gap:1rem}.card-head p{margin:0}.step-number{font-size:.72rem;color:var(--teal);font-weight:800;letter-spacing:.12em}.activity-head,.activity-row{display:grid;grid-template-columns:24px repeat(3,minmax(0,1fr)) 44px;gap:8px;align-items:center}.activity-head{font-size:.64rem;font-weight:750;color:var(--muted);letter-spacing:.06em;margin:16px 0 5px}.activity-row{margin-bottom:8px}.activity-id{font-weight:800;color:var(--teal);font-size:.94rem}.activity-row input{width:100%;min-width:0;border:1px solid #bdcbc4;border-radius:7px;background:white;color:var(--ink);min-height:44px;padding:7px;text-align:center;font-variant-numeric:tabular-nums}.activity-row button{padding:0;font-size:1.3rem;font-weight:400}.activity-row input[aria-invalid=true]{border-color:var(--error);background:#fff0eb}.input-actions{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}.input-actions button{flex:1}.example-block{border-top:1px solid #e4e8e0;padding-top:16px;margin-top:16px}.example-block label{display:block;font-size:.83rem;font-weight:700;margin-bottom:7px}.example-controls{display:flex;gap:8px}.example-controls select{width:100%;min-width:0;border:1px solid #bdcbc4;border-radius:8px;padding:9px;background:white;color:var(--ink)}.example-controls button{flex-shrink:0;font-size:.84rem}#input-status{margin:14px 0 0;font-size:.85rem;color:var(--muted)}#input-error{border-left:3px solid var(--error);background:#fff0eb;color:#822d27;padding:10px 12px;margin-top:14px;font-size:.88rem}.empty-input{padding:10px 0;color:var(--muted);font-size:.87rem}.rule-note{margin:0;padding:18px 22px;background:#edf3ed;border-top:1px solid var(--border);font-size:.83rem;color:#345c56}.rule-note strong{color:var(--ink)}
+.results-column{min-width:0;display:grid;gap:18px}.placeholder{padding:32px;color:var(--muted);text-align:center;background:#f1f4ef}.summary-row{display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid #e6eae5}.metric{padding:18px 22px}.metric+.metric{border-left:1px solid #e6eae5}.metric-label{display:block;color:var(--muted);font-size:.74rem;letter-spacing:.06em;text-transform:uppercase}.metric strong{display:block;font-size:2.05rem;line-height:1.2;font-weight:750;margin:.25rem 0;color:var(--teal);font-variant-numeric:tabular-nums}.metric p{margin:0;font-size:.86rem}#selected-activities{font-size:1.27rem;color:var(--ink);margin:.55rem 0 .3rem;overflow-wrap:anywhere}.timeline-wrap{padding:12px 14px 0;overflow:hidden}#timeline{display:block;width:100%;height:auto;min-height:100px}.legend{display:flex;gap:16px;flex-wrap:wrap;padding:0 22px 14px;font-size:.73rem;color:var(--muted)}.legend span::before{content:"";display:inline-block;width:14px;height:8px;border-radius:2px;margin-right:6px;background:#b9c9c3}.legend .selected::before{background:var(--teal)}.legend .current::before{background:var(--gold)}.view-controls{padding:16px 22px;background:#f6f7f1;border-top:1px solid #e5e9e1;display:flex;gap:8px;align-items:center;flex-wrap:wrap}#row-position{font-size:.82rem;font-weight:750;margin-right:auto;color:var(--teal)}.view-controls button{font-size:.82rem;min-height:40px;padding:.4rem .65rem}.explanation{padding:20px 22px;border-top:1px solid #e5e9e1;background:#fffaf0}.formula{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:.84rem;padding:10px 12px;background:white;border:1px solid #e0dfd2;border-radius:8px;overflow-wrap:anywhere;margin-bottom:12px}.explanation h3{font-size:.92rem;margin-bottom:8px}.explanation p{font-size:.91rem;margin:0}#step-explanation{min-height:3em}
+.table-wrap{overflow:auto;max-width:100%;border-top:1px solid #e5e9e1}.table-wrap:focus-visible{outline-offset:-3px}table{width:100%;border-collapse:collapse;font-size:.8rem;font-variant-numeric:tabular-nums;min-width:585px}th,td{text-align:left;padding:10px 11px;border-bottom:1px solid #edf0e9;white-space:nowrap}thead{background:#f4f5ee}th{color:var(--muted);font-size:.67rem;letter-spacing:.04em;text-transform:uppercase}tbody tr[aria-current=step]{background:#fff0c9}tbody tr[data-pending=true]{color:#87948f}td button{min-height:34px;padding:.2rem .5rem;font-size:.77rem;background:transparent}td[data-choice=take]{font-weight:750;color:var(--teal)}td[data-choice=skip]{color:#6c654c}.table-note{font-size:.76rem;color:var(--muted);padding:12px 22px;margin:0}
+.trace-card .card-body{padding-top:17px}.trace-controls{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}.trace-controls button{font-size:.84rem}.trace-list{margin:0;padding-left:1.35rem;display:grid;gap:10px;font-size:.9rem}.trace-list li::marker{color:var(--teal);font-weight:800}.trace-list code{background:#edf2ed;padding:1px 5px;border-radius:4px;font-size:.85em}.trace-result{margin:16px 0 0;font-weight:750;color:var(--teal);font-size:.93rem}.greedy-block{background:#f2f5ee;padding:17px 22px;border-top:1px solid var(--border)}.greedy-block h3{font-size:.9rem;margin-bottom:6px}.greedy-block p{font-size:.87rem;margin-bottom:8px}.greedy-block p:last-child{margin:0}#greedy-value{font-weight:800}#greedy-note{color:var(--muted)}.download-row{padding:16px 22px;border-top:1px solid #e5e9e1;display:flex;gap:10px;align-items:center;flex-wrap:wrap}.download-row button{font-size:.83rem}.download-row p{font-size:.75rem;flex:1;min-width:180px;margin:0;color:var(--muted)}
+.learning-strip{display:grid;grid-template-columns:1.3fr 1fr;gap:24px;background:#e7efea;border:1px solid #cfddd4;border-radius:15px;padding:25px;margin-bottom:28px}.learning-strip h2{font-size:1.18rem;margin-bottom:8px}.learning-strip p{font-size:.9rem;max-width:660px;margin-bottom:12px}.learning-links{display:flex;align-items:center;gap:14px;flex-wrap:wrap}.learning-links a{font-size:.85rem}.try-this{border-left:1px solid #bccfc5;padding-left:24px}.try-this h3{font-size:.92rem;margin-bottom:9px}.try-this ul{font-size:.87rem;padding-left:1.15rem;margin:0}.try-this li+li{margin-top:8px}
+details{border:1px solid var(--border);border-radius:10px;background:var(--paper);padding:14px 18px;margin-bottom:24px;font-size:.85rem;color:var(--muted)}summary{cursor:pointer;font-weight:750;color:var(--ink)}details p{margin:12px 0 0}footer{padding:0 0 28px;font-size:.76rem;color:var(--muted)}footer p{margin-bottom:.4rem}.sr-only{position:absolute;width:1px;height:1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+@media(max-width:960px){.workspace{grid-template-columns:310px minmax(0,1fr);gap:16px}.card-body{padding:18px}.card-head{padding:18px}.wrap{padding:0 20px}.view-controls{padding:14px 18px}.metric{padding:16px 18px}.activity-head,.activity-row{gap:5px}}
+@media(max-width:760px){.hero{grid-template-columns:1fr;gap:20px;padding-top:28px}.recipe{padding-left:16px}.recipe ol{display:flex;flex-wrap:wrap;gap:0 24px;font-size:.88rem}.recipe li{padding-right:4px}.workspace{grid-template-columns:1fr}.inputs-card{width:100%}.activity-head,.activity-row{grid-template-columns:24px repeat(3,minmax(0,1fr)) 44px;gap:10px}.activity-row input{max-width:none}.learning-strip{grid-template-columns:1fr;gap:18px;padding:21px}.try-this{border-left:0;border-top:1px solid #bccfc5;padding-left:0;padding-top:18px}.brand span{display:none}.offline{font-size:.65rem}.summary-row{grid-template-columns:.8fr 1.2fr}.metric strong{font-size:1.7rem}.view-controls{gap:6px}.view-controls #row-position{flex-basis:100%;margin-bottom:2px}.card-head{padding:18px}.timeline-wrap{padding-left:6px;padding-right:6px}}
+@media(max-width:380px){.wrap{padding:0 12px}.card-body{padding:16px}.activity-head,.activity-row{gap:5px}h1{font-size:2.05rem}.metric{padding:15px}.view-controls button{font-size:.75rem}}
+@media print{header,.input-actions,.example-block,.view-controls,.trace-controls,.download-row,.learning-links,footer{display:none!important}body{background:white}.wrap{width:100%;padding:0}.workspace{display:block}.inputs-card{margin-bottom:16px}.card,.learning-strip{box-shadow:none;break-inside:avoid}.table-wrap{overflow:visible}table{min-width:0}.hero{padding-top:10px}.results-column{gap:12px}}
+</style>
+</head>
+<body>
+<a class="skip" href="#workspace">Skip to the activities</a>
+<header><div class="wrap mast"><a class="brand" href="../demo.html" target="_blank" rel="noopener">RecallWeave <span>/ algorithm studio</span></a><span class="offline">Works offline</span></div></header>
+<main class="wrap">
+<section class="hero" aria-labelledby="page-title">
+<div><p class="eyebrow">Dynamic programming · weighted intervals</p><h1>Some choices fit.<br><em>Which fit best?</em></h1><p class="lede">Give each activity a time window and a value. Compare taking it with leaving it out, then follow the table back to one best schedule.</p></div>
+<div class="recipe"><p>One resource. Fixed times. Additive values.</p><ol><li>Choose compatible activities.</li><li>Compare two smaller problems.</li><li>Reconstruct the choices.</li></ol></div>
+</section>
+<section id="workspace" class="workspace" aria-label="Weighted interval scheduling explorer">
+<section class="card inputs-card" aria-labelledby="activities-title">
+<div class="card-head"><div><p class="eyebrow">01 / set up</p><h2 id="activities-title">Your activities</h2><p class="small">Up to eight activities. Times 0–24, values 0–99, all whole numbers.</p></div></div>
+<form id="activity-form" class="card-body" novalidate>
+<div class="activity-head" aria-hidden="true"><span>ID</span><span>START</span><span>END</span><span>VALUE</span><span></span></div>
+<div id="activities"></div>
+<div class="input-actions"><button id="add-activity" type="button">Add activity</button><button id="solve" type="submit" class="primary">Solve activities</button></div>
+<p id="input-status" role="status" aria-live="polite"></p><div id="input-error" role="alert" tabindex="-1" hidden></div>
+<div class="example-block"><label for="example">Try another example</label><div class="example-controls"><select id="example"><option value="greedy-trap">When greedy misses</option><option value="touching">Touching endpoints</option><option value="tie">Two optimal schedules</option><option value="empty">Start empty</option></select><button id="load-example" type="button">Load example</button></div><p class="small" style="margin:8px 0 0">Loading an example replaces the activity fields.</p></div>
+</form>
+<p class="rule-note"><strong>Touching is allowed.</strong> An activity ending at 4 can be followed by one starting at 4. The notation is <strong>[start, end)</strong>. These are abstract time units.</p>
+</section>
+<div class="results-column">
+<section class="card" aria-labelledby="table-title">
+<div class="card-head"><div><p class="eyebrow">02 / compare</p><h2 id="table-title" tabindex="-1">Read the table</h2><p class="small">Finish order, then start, then ID. Row 0 is the empty prefix.</p></div></div>
+<div id="result-placeholder" class="placeholder" hidden>Solve the current activities to see their table and schedule.</div>
+<div id="result-content">
+<div class="summary-row"><div class="metric"><span id="prefix-label" class="metric-label">Best value · empty prefix</span><strong id="best-value">0</strong><p id="prefix-detail">No activities considered yet.</p></div><div class="metric"><span class="metric-label">Selected in this prefix</span><strong id="selected-activities">None</strong><p id="selection-detail">An empty schedule is allowed.</p></div></div>
+<div class="timeline-wrap"><svg id="timeline" role="img" aria-labelledby="timeline-title timeline-description"></svg></div>
+<div class="legend" aria-hidden="true"><span class="selected">Selected in this prefix</span><span class="current">Row under inspection</span><span>Other activity</span></div>
+<div class="view-controls"><span id="row-position" role="status" aria-live="polite">Row 0</span><button id="previous-row" type="button">Previous row</button><button id="next-row" type="button">Next row</button><button id="show-result" type="button">Show result</button></div>
+<div class="explanation"><h3>Two alternatives for each row</h3><div class="formula">OPT(j) = max(value(j) + OPT(p(j)), OPT(j − 1))</div><p id="step-explanation"></p></div>
+<div class="table-wrap" tabindex="0" role="region" aria-label="Take and skip table; scroll horizontally on small screens"><table><thead><tr><th scope="col">Row</th><th scope="col">Activity</th><th scope="col">p(j)</th><th scope="col">Take</th><th scope="col">Skip</th><th scope="col">OPT(j)</th><th scope="col">Decision</th></tr></thead><tbody id="dp-rows"></tbody></table></div>
+<p class="table-note">p(j) is the last compatible earlier row, or 0. Equal take and skip values keep the skip alternative. Choose a row to inspect that prefix.</p>
+</div>
+</section>
+<section id="trace-card" class="card trace-card" aria-labelledby="trace-title" hidden>
+<div class="card-head"><div><p class="eyebrow">03 / reconstruct</p><h2 id="trace-title">Follow the choices back</h2><p id="trace-caption" class="small"></p></div></div>
+<div class="card-body"><div class="trace-controls"><button id="trace-choices" type="button">Trace choices</button><button id="next-choice" type="button" disabled>Next choice</button></div><p id="trace-prompt" class="small">Start at the row under inspection. A take jumps to p(j); a skip moves back one row.</p><ol id="backtrack-steps" class="trace-list"></ol><p id="trace-result" class="trace-result" hidden></p></div>
+<div class="greedy-block"><h3>Compare with earliest finish</h3><p id="greedy-schedule"></p><p>Greedy value: <span id="greedy-value"></span> · Best prefix value: <strong id="comparison-optimum"></strong></p><p id="greedy-note"></p></div>
+<div class="download-row"><button id="download-trace" type="button">Download worked trace (.json)</button><p>The file keeps these inputs, the full table, both schedules and the inspected prefix. It is a record to read, not a saved-session importer.</p></div>
+</section>
+</div>
+</section>
+<section class="learning-strip" aria-labelledby="learn-title">
+<div><p class="eyebrow">Keep learning</p><h2 id="learn-title">Twelve questions. Worked explanations.</h2><p>Bring the original lesson into RecallWeave. Answer in your own order of discovery, review the explanations, retry missed connections and keep your study notes.</p><div class="learning-links"><button id="download-course" type="button" class="primary">Download course (.json)</button><a href="../demo.html" target="_blank" rel="noopener">Open the learner</a><a href="weighted-interval-scheduling.md" target="_blank" rel="noopener">Read the course guide</a></div><p class="small" style="margin-top:12px;margin-bottom:0">In the learner, choose the downloaded file under “Bring your own lesson”, review its preview, then select “Start this deck”. The links above use the project folder; the downloads work when this page is copied by itself.</p></div>
+<div class="try-this"><h3>Change one thing, then explain it.</h3><ul><li>In the first example, lower D's value from 10 to 7. Which full schedule wins now?</li><li>Load “Touching endpoints”. Move B's start from 2 to 1. Which compatibility link disappears?</li><li>Give every activity value 0. Why can an empty schedule still be optimal?</li></ul></div>
+</section>
+<details><summary>Assumptions, tie rules and what the model leaves out</summary><p>Activities have fixed start/end times, require one shared resource, and contribute independent nonnegative values. You can select any compatible subset, including none. There are no setup gaps, dependencies, multiple rooms or uncertain durations. The page maximizes the stated sum of values, rather than the number of activities or time occupied.</p><p>Rows are ordered by end, start and exact ID. When take and skip are equal, the current row is skipped. This returns one deterministic optimum; another schedule can have the same best value. The earliest-finish schedule is shown as a comparison heuristic for total value and may tie or fall short. The full algorithm uses sorting and predecessor search; this explorer caps inputs at eight activities to keep every step readable.</p><p>Everything runs in this page. Fields stay in tab memory and are not saved automatically. Downloads are explicit local files. This original teaching example does not establish learning efficacy or supply an external scheduling service.</p></details>
+<footer><p>Original course and examples: HAMON contribution 406d0fb04c43, with AI assistance · CC BY 4.0. Retain the course attribution when adapting it.</p><p>Algorithmic background: <a href="https://www.cs.toronto.edu/~lalla/373s16/notes/WIS.pdf" target="_blank" rel="noopener">Toronto, Weighted Interval Scheduling</a> and <a href="https://users.ece.utexas.edu/~garg/publicCompanion/chapter10.html" target="_blank" rel="noopener">UT Austin, Chapter 10</a>. Reference material retains its own terms; all examples and diagrams here are newly authored.</p></footer>
+</main>
+<script id="course-data" type="application/json">{
+  "format": "recallweave-deck/1",
+  "title": "Weighted intervals: choose, compare, reconstruct",
+  "attribution": "Original questions, examples, distractors and worked explanations by HAMON contribution 406d0fb04c43, with AI assistance. Algorithmic background checked against Lalla Mouatadid's University of Toronto CSC373 notes, Dynamic Programming: Weighted Interval Scheduling, and Vijay K. Garg's University of Texas at Austin companion, Chapter 10. The exact sources, assumptions and answer derivations are in courses/weighted-interval-scheduling.md. No source exercises, figures or passages are copied.",
+  "license": "Original course wording and examples: CC BY 4.0. Attribute this course and retain its source note when sharing or adapting it. Linked reference materials retain their own terms.",
+  "concepts": [
+    "compatible-intervals",
+    "prefix-subproblems",
+    "take-or-skip",
+    "reconstruct-and-check"
+  ],
+  "items": [
+    {
+      "id": "wis-compatible-1",
+      "concept": "compatible-intervals",
+      "prerequisites": [],
+      "prompt": "One activity occupies [1, 4). The end is excluded: a second activity may start exactly when the first ends. Which activity can follow it without overlap?",
+      "options": [
+        "[4, 6)",
+        "[3, 5)",
+        "[2, 4)",
+        "[1, 6)"
+      ],
+      "answer": 0,
+      "explanation": "[4, 6) starts at the first activity's end, so the two intervals share no occupied time. The other choices all occupy some time before 4 while the first activity is still running. This lesson uses half-open intervals [start, end), not closed intervals.",
+      "transfer": "Change the rule to require a one-unit setup gap. Explain why [4, 6) would no longer fit after [1, 4), and how the compatibility comparison would need to change."
+    },
+    {
+      "id": "wis-compatible-2",
+      "concept": "compatible-intervals",
+      "prerequisites": [],
+      "prompt": "A uses [0, 2) with value 2; B uses [2, 4) with value 2; C uses [0, 4) with value 7. Only one activity can run at a time, values add, and you may leave time unused. Which schedule maximizes total value?",
+      "options": [
+        "A and B, because two activities always beat one",
+        "C alone, with total value 7",
+        "A and C, with total value 9",
+        "B alone, because it finishes last"
+      ],
+      "answer": 1,
+      "explanation": "A and B are compatible and total 4. C overlaps both, but its value 7 exceeds that pair's value. A and C are not feasible together. Counting activities, filling time or choosing a last finish is a different objective from maximizing the stated sum of values.",
+      "transfer": "Set C's value to 3, leaving every interval unchanged. Identify the new optimum and explain why compatibility did not change even though the best choice did."
+    },
+    {
+      "id": "wis-compatible-3",
+      "concept": "compatible-intervals",
+      "prerequisites": [],
+      "prompt": "The explorer chooses fixed-time activities for one shared resource; each selected value is added once and there are no other constraints. Which added requirement is outside that model and needs a different formulation?",
+      "options": [
+        "Allowing an empty schedule with value 0",
+        "Allowing one activity to start when another ends",
+        "Requiring that selecting activity D must also select activity A",
+        "Giving two different activities the same finish time"
+      ],
+      "answer": 2,
+      "explanation": "An extra dependency between selected activities is not encoded by interval overlap or additive values. The take-or-skip recurrence might otherwise select D without A. Empty schedules, touching endpoints and equal finishes are already covered by the stated interval model. A numerical optimum is only an optimum under its actual constraints.",
+      "transfer": "Write down one rule a real activity plan might need, such as travel time, a prerequisite, or two available rooms. Explain which part of this lesson's feasibility model would no longer describe that situation."
+    },
+    {
+      "id": "wis-prefix-1",
+      "concept": "prefix-subproblems",
+      "prerequisites": [
+        "compatible-intervals"
+      ],
+      "prompt": "Activities are sorted by finish: row 1 is A [0, 2), row 2 is B [1, 3), row 3 is C [3, 5), row 4 is D [2, 6). p(4) is the largest earlier row whose end is at most D's start. What is p(4)?",
+      "options": [
+        "3",
+        "2",
+        "0",
+        "1"
+      ],
+      "answer": 3,
+      "explanation": "D starts at 2. A ends at 2 and is compatible; B ends at 3 and C at 5, so neither is compatible before D. Therefore p(4)=1. The predecessor is an index into the sorted prefix, not the immediately preceding row and not a count of overlapping activities.",
+      "transfer": "Move D's start to 3 while keeping its end at 6. Recompute p(4), and explain why the equality case changes which earlier prefix is available."
+    },
+    {
+      "id": "wis-prefix-2",
+      "concept": "prefix-subproblems",
+      "prerequisites": [
+        "compatible-intervals"
+      ],
+      "prompt": "OPT(j) denotes the value stored for a finish-sorted prefix ending at row j. Which definition is used by the weighted-interval recurrence?",
+      "options": [
+        "The greatest total value of any compatible subset of rows 1 through j",
+        "The value of a schedule that must include row j",
+        "The sum of every value in rows 1 through j",
+        "The number of activities ending before row j starts"
+      ],
+      "answer": 0,
+      "explanation": "OPT(j) considers every feasible subset within the first j rows, including subsets that omit j. Requiring j would discard the skip alternative. Summing all values could include overlaps, while counting earlier activities confuses the objective with an index or cardinality. OPT(0)=0 represents the empty prefix.",
+      "transfer": "Find a row in the explorer where the best value stays the same as the previous row. Explain why that is compatible with OPT(j)'s definition."
+    },
+    {
+      "id": "wis-prefix-3",
+      "concept": "prefix-subproblems",
+      "prerequisites": [
+        "compatible-intervals"
+      ],
+      "prompt": "Consider a feasible schedule that includes activity j. The activities are finish-sorted, each has start \u003c end, and p(j) is the last earlier activity ending at or before j starts. What earlier activities can accompany j?",
+      "options": [
+        "Any earlier row, because sorting removes overlaps",
+        "A compatible subset of rows 1 through p(j)",
+        "Only activity p(j), with no activities before it",
+        "Exactly the schedule with the most activities among rows 1 through j−1"
+      ],
+      "answer": 1,
+      "explanation": "Every selected activity earlier than j must finish by j's start. Those possible activities form the prefix through p(j). We may choose a compatible subset of that prefix, whose best value is OPT(p(j)); we are not forced to choose p(j) itself. This is the smaller subproblem used by the take alternative.",
+      "transfer": "Use a prefix whose last activity is less valuable than an earlier compatible combination. Explain why taking j should reuse OPT(p(j)), rather than adding only the value of activity p(j)."
+    },
+    {
+      "id": "wis-decision-1",
+      "concept": "take-or-skip",
+      "prerequisites": [
+        "prefix-subproblems"
+      ],
+      "prompt": "At row j, the activity has value 4 and p(j)=2. Already computed values are OPT(2)=7 and OPT(j−1)=9. What does the recurrence choose?",
+      "options": [
+        "Skip, giving 9, because earlier choices cannot change",
+        "Take, giving 13 by adding 4 to OPT(j−1)",
+        "Take, giving 11 by adding 4 to OPT(2)",
+        "Skip, giving 7, because p(j)=2"
+      ],
+      "answer": 2,
+      "explanation": "Taking j gives 4+OPT(2)=11; skipping gives OPT(j−1)=9. The larger value is 11. Adding j to OPT(j−1) would be unjustified: that schedule may contain an activity overlapping j. The compatible predecessor prefix is what makes the take alternative feasible.",
+      "transfer": "Keep the two prefix values unchanged and lower j's value to 2. Explain which schedule this explorer keeps under its stated rule for equal take and skip values."
+    },
+    {
+      "id": "wis-decision-2",
+      "concept": "take-or-skip",
+      "prerequisites": [
+        "prefix-subproblems"
+      ],
+      "prompt": "Use the explorer's six-activity example: A [0,3) value 4; B [1,4) value 5; C [3,5) value 4; D [0,6) value 10; E [5,7) value 4; F [6,8) value 5. In finish order, OPT(3)=8. At row 4, D has p(4)=0. What is OPT(4)?",
+      "options": [
+        "18, by adding D to the best first three rows",
+        "8, because D overlaps earlier activities",
+        "4, because this is the fourth row",
+        "10, by taking D instead of the best earlier prefix"
+      ],
+      "answer": 3,
+      "explanation": "The take alternative is 10+OPT(0)=10. The skip alternative is OPT(3)=8, achieved by A and C. D overlaps those earlier activities, so 18 is not feasible. The table stores 10 and records take. This prefix choice can still become part of a later optimal schedule.",
+      "transfer": "Inspect row F in the explorer. Because F starts when D ends, determine how the row-4 value can contribute to a later decision."
+    },
+    {
+      "id": "wis-decision-3",
+      "concept": "take-or-skip",
+      "prerequisites": [
+        "prefix-subproblems"
+      ],
+      "prompt": "Every admitted activity has value 0. OPT(0)=0, and this explorer takes a row only when its take value is strictly greater than its skip value. What final schedule is reconstructed?",
+      "options": [
+        "The empty schedule, with value 0",
+        "Every activity, even if they overlap",
+        "The last activity, because it is processed last",
+        "No result, because a zero-valued activity is invalid"
+      ],
+      "answer": 0,
+      "explanation": "Both alternatives have value 0 at every row, so the declared tie rule records skip each time. Backtracking reaches row 0 without selecting an activity. The empty schedule is feasible and optimal. Other feasible zero-valued schedules are also optimal; the deterministic output does not establish uniqueness.",
+      "transfer": "Give one activity value 1 and keep all others at 0. Predict which activity becomes essential to an optimum and which zero-valued activities the tie rule still leaves out."
+    },
+    {
+      "id": "wis-trace-1",
+      "concept": "reconstruct-and-check",
+      "prerequisites": [
+        "take-or-skip"
+      ],
+      "prompt": "In the six-activity example, row 6 is F with value 5, p(6)=4 and a take decision. Row 4 is D with value 10, p(4)=0 and a take decision. What does backtracking from row 6 reconstruct?",
+      "options": [
+        "A, C and E, because that is the earliest-finish schedule",
+        "D and F, with total value 15",
+        "F alone, because only the final row matters",
+        "All rows 1 through 6, because OPT(6) used the full prefix"
+      ],
+      "answer": 1,
+      "explanation": "Take F, then jump directly to its compatible prefix at row 4. Take D, then jump to row 0 and stop. Reversing those collected IDs gives chronological order D, F, with total 10+5=15. Backtracking does not select every row whose table decision says take: some such rows are skipped by predecessor jumps.",
+      "transfer": "Start backtracking at row 5 instead. Explain why that smaller prefix can choose A, C and E even though the full six-row optimum chooses D and F."
+    },
+    {
+      "id": "wis-trace-2",
+      "concept": "reconstruct-and-check",
+      "prerequisites": [
+        "take-or-skip"
+      ],
+      "prompt": "A and B both occupy [1,3) and both have value 5. Equal end/start times are ordered by ID, so A is row 1 and B is row 2. The rule skips the current row when take and skip tie. Which statement is correct?",
+      "options": [
+        "The only optimal schedule is A",
+        "The optimum contains both A and B, for value 10",
+        "The explorer returns A, but B alone is another optimal schedule",
+        "The explorer must choose randomly because the values tie"
+      ],
+      "answer": 2,
+      "explanation": "At row 2, taking B gives 5 and skipping it retains A's value 5. The rule skips B and returns A. B alone is equally valuable and feasible; A and B together overlap. A consistent tie rule selects one answer without proving that all other optimal schedules are impossible.",
+      "transfer": "Rename the two equal activities X and C. Predict which ID the deterministic ordering retains, while explaining why the optimal value is unchanged."
+    },
+    {
+      "id": "wis-trace-3",
+      "concept": "reconstruct-and-check",
+      "prerequisites": [
+        "take-or-skip"
+      ],
+      "prompt": "For the general algorithm, assume the activities are already finish-sorted and every p(j) has been computed. Each table row stores a value and a take/skip decision. What work remains to fill the n-row table and reconstruct one optimum?",
+      "options": [
+        "Enumerate all 2^n subsets to know which decision to store",
+        "Sort the activities again after every take decision",
+        "Compute only OPT(n), with no earlier table values",
+        "O(n) table work and at most n backtracking steps"
+      ],
+      "answer": 3,
+      "explanation": "Each row compares two already available values in constant work, so the table fill is linear in n. Backtracking moves to a strictly smaller row on every step and therefore visits at most n rows. With finish sorting and binary search for predecessors, the usual complete algorithm takes O(n log n) time and O(n) table space. The explorer deliberately caps the input at eight activities so its entire reasoning remains inspectable.",
+      "transfer": "Connect this to the existing binary-search lesson: in the finish-sorted end times, p(j) comes from the boundary after the last end time less than or equal to j's start. Explain why the equality direction matters."
+    }
+  ]
+}
+</script>
+<script type="module">
+/**
+ * Weighted interval scheduling for the bounded offline teaching page.
+ * Times are half-open [start, end); equal endpoints are compatible.
+ * This module has no DOM, storage, random, clock or network dependency.
+ */
+export const LIMITS = Object.freeze({activities: 8, time: 24, value: 99});
+
+export const EXAMPLES = Object.freeze({
+  'greedy-trap': Object.freeze([
+    Object.freeze({id: 'A', start: 0, end: 3, value: 4}),
+    Object.freeze({id: 'B', start: 1, end: 4, value: 5}),
+    Object.freeze({id: 'C', start: 3, end: 5, value: 4}),
+    Object.freeze({id: 'D', start: 0, end: 6, value: 10}),
+    Object.freeze({id: 'E', start: 5, end: 7, value: 4}),
+    Object.freeze({id: 'F', start: 6, end: 8, value: 5})
+  ]),
+  touching: Object.freeze([
+    Object.freeze({id: 'A', start: 0, end: 2, value: 3}),
+    Object.freeze({id: 'B', start: 2, end: 4, value: 4}),
+    Object.freeze({id: 'C', start: 0, end: 4, value: 6})
+  ]),
+  tie: Object.freeze([
+    Object.freeze({id: 'A', start: 0, end: 2, value: 2}),
+    Object.freeze({id: 'B', start: 2, end: 4, value: 2}),
+    Object.freeze({id: 'C', start: 0, end: 4, value: 4})
+  ]),
+  empty: Object.freeze([])
+});
+
+function integer(value, maximum, label) {
+  if (!Number.isInteger(value) || value < 0 || value > maximum) {
+    throw new RangeError(label + ' must be a whole number from 0 to ' + maximum + '.');
+  }
+  return value;
+}
+
+/** Copy admitted fields so sorting and returning a result cannot change the input. */
+function admit(activities) {
+  if (!Array.isArray(activities) || activities.length > LIMITS.activities) {
+    throw new RangeError('Use an array of zero to eight activities.');
+  }
+  const ids = new Set();
+  return activities.map((activity, index) => {
+    if (!activity || typeof activity !== 'object' || Array.isArray(activity)) {
+      throw new TypeError('Activity ' + (index + 1) + ' must be an object.');
+    }
+    const {id, start, end, value} = activity;
+    if (typeof id !== 'string' || !/^[A-Z][A-Z0-9_-]{0,7}$/.test(id)) {
+      throw new RangeError('Activity IDs need 1–8 characters: an uppercase letter, then uppercase letters, digits, _ or -.');
+    }
+    if (ids.has(id)) throw new RangeError('Activity IDs must be unique.');
+    ids.add(id);
+    integer(start, LIMITS.time, id + ' start');
+    integer(end, LIMITS.time, id + ' end');
+    integer(value, LIMITS.value, id + ' value');
+    if (start >= end) throw new RangeError(id + ' must end after it starts.');
+    return {id, start, end, value};
+  });
+}
+
+function compare(a, b) {
+  return a.end - b.end || a.start - b.start || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0);
+}
+
+/**
+ * Last compatible earlier row, numbered 1..j-1; 0 is the empty prefix.
+ * Search only earlier finish-sorted activities. Upper bound includes equal ends.
+ */
+function predecessor(ordered, index) {
+  let low = 0;
+  let high = index;
+  while (low < high) {
+    const middle = Math.floor((low + high) / 2);
+    if (ordered[middle].end <= ordered[index].start) low = middle + 1;
+    else high = middle;
+  }
+  return low;
+}
+
+function reconstruct(rows) {
+  const selectedIds = [];
+  const backtrack = [];
+  for (let j = rows.length - 1; j > 0;) {
+    const row = rows[j];
+    const next = row.choice === 'take' ? row.p : j - 1;
+    backtrack.push({j, id: row.id, choice: row.choice, next});
+    if (row.choice === 'take') selectedIds.push(row.id);
+    j = next;
+  }
+  selectedIds.reverse();
+  return {selectedIds, backtrack};
+}
+
+/**
+ * Solve one finite, single-resource teaching instance.
+ *
+ * Equal take/skip values skip the current row. With the declared sort order,
+ * this selects one deterministic optimum; it does not assert uniqueness.
+ * The earliest-finish comparison is a separate heuristic for total value.
+ */
+export function solveSchedule(activities) {
+  const ordered = admit(activities).sort(compare);
+  const rows = [{j: 0, id: null, p: 0, take: 0, skip: 0, best: 0, choice: 'base'}];
+  for (let index = 0; index < ordered.length; index++) {
+    const activity = ordered[index];
+    const j = index + 1;
+    const p = predecessor(ordered, index);
+    const take = activity.value + rows[p].best;
+    const skip = rows[j - 1].best;
+    rows.push({j, id: activity.id, p, take, skip, best: Math.max(take, skip),
+      choice: take > skip ? 'take' : 'skip'});
+  }
+  const {selectedIds, backtrack} = reconstruct(rows);
+  const greedy = {selectedIds: [], value: 0};
+  let lastEnd = 0;
+  for (const activity of ordered) {
+    if (activity.start >= lastEnd) {
+      greedy.selectedIds.push(activity.id);
+      greedy.value += activity.value;
+      lastEnd = activity.end;
+    }
+  }
+  return {ordered, rows, bestValue: rows.at(-1).best, selectedIds, backtrack, greedy};
+}
+
+
+const byId = id => document.getElementById(id);
+const courseText = JSON.stringify(JSON.parse(byId('course-data').textContent), null, 2) + '\n';
+const fields = ['start', 'end', 'value'];
+let draft = [];
+let submitted = [];
+let solution = null;
+let prefix = null;
+let rowIndex = 0;
+let traceRevealed = 0;
+let traceStarted = false;
+
+function textNode(tag, text, className) {
+  const node = document.createElement(tag);
+  node.textContent = text;
+  if (className) node.className = className;
+  return node;
+}
+
+function renderInputs(focusId = null) {
+  const container = byId('activities');
+  container.replaceChildren();
+  for (const activity of draft) {
+    const row = document.createElement('div');
+    row.className = 'activity-row';
+    row.append(textNode('span', activity.id, 'activity-id'));
+    for (const field of fields) {
+      const input = document.createElement('input');
+      input.id = 'activity-' + activity.id + '-' + field;
+      input.type = 'text';
+      input.inputMode = 'numeric';
+      input.autocomplete = 'off';
+      input.maxLength = 2;
+      input.value = activity[field];
+      input.dataset.id = activity.id;
+      input.dataset.field = field;
+      input.setAttribute('aria-label', activity.id + ' ' + field);
+      input.setAttribute('aria-describedby', 'activities-title');
+      row.append(input);
+    }
+    const remove = textNode('button', '×');
+    remove.type = 'button';
+    remove.dataset.remove = activity.id;
+    remove.setAttribute('aria-label', 'Remove ' + activity.id);
+    row.append(remove);
+    container.append(row);
+  }
+  if (!draft.length) container.append(textNode('p', 'No activities. You can solve the empty schedule or add one.', 'empty-input'));
+  byId('add-activity').disabled = draft.length >= LIMITS.activities;
+  if (focusId) byId(focusId)?.focus();
+}
+
+function clearError() {
+  byId('input-error').hidden = true;
+  byId('input-error').textContent = '';
+  for (const input of byId('activities').querySelectorAll('input')) input.removeAttribute('aria-invalid');
+}
+
+function invalidate(message) {
+  solution = null;
+  prefix = null;
+  submitted = [];
+  traceRevealed = 0;
+  traceStarted = false;
+  clearError();
+  byId('input-status').textContent = message;
+  byId('result-content').hidden = true;
+  byId('result-placeholder').hidden = false;
+  byId('trace-card').hidden = true;
+  for (const id of ['previous-row', 'next-row', 'show-result', 'trace-choices', 'next-choice', 'download-trace']) byId(id).disabled = true;
+  for (const id of ['best-value', 'selected-activities', 'step-explanation', 'greedy-value', 'greedy-schedule', 'comparison-optimum', 'trace-result']) byId(id).textContent = '';
+  byId('dp-rows').replaceChildren();
+  byId('timeline').replaceChildren();
+  byId('backtrack-steps').replaceChildren();
+}
+
+function readDraft() {
+  return draft.map(activity => {
+    const parsed = {id: activity.id};
+    for (const field of fields) {
+      const raw = activity[field].trim();
+      const maximum = field === 'value' ? LIMITS.value : LIMITS.time;
+      if (!/^\d+$/.test(raw) || !Number.isInteger(Number(raw)) || Number(raw) > maximum) {
+        byId('activity-' + activity.id + '-' + field).setAttribute('aria-invalid', 'true');
+        throw new RangeError(activity.id + ' ' + field + ' needs a whole number from 0 to ' + maximum + '.');
+      }
+      parsed[field] = Number(raw);
+    }
+    if (parsed.start >= parsed.end) {
+      byId('activity-' + activity.id + '-end').setAttribute('aria-invalid', 'true');
+      throw new RangeError(activity.id + ' must end after it starts.');
+    }
+    return parsed;
+  });
+}
+
+function solve(focus = true) {
+  invalidate('Checking the current activities…');
+  try {
+    const input = readDraft();
+    const result = solveSchedule(input);
+    submitted = input;
+    solution = result;
+    rowIndex = 0;
+    traceRevealed = 0;
+    traceStarted = false;
+    byId('input-status').textContent = input.length + ' activities checked. Start at row 0, then inspect each decision.';
+    byId('result-placeholder').hidden = true;
+    byId('result-content').hidden = false;
+    byId('trace-card').hidden = false;
+    renderResult();
+    if (focus) byId('table-title').focus({preventScroll: false});
+  } catch (error) {
+    byId('input-status').textContent = 'No result for this draft. Fix the marked activity and solve again.';
+    byId('input-error').textContent = error.message;
+    byId('input-error').hidden = false;
+    if (focus) byId('input-error').focus({preventScroll: false});
+  }
+}
+
+function svgNode(tag, attributes, text) {
+  const node = document.createElementNS('http://www.w3.org/2000/svg', tag);
+  for (const [name, value] of Object.entries(attributes)) node.setAttribute(name, String(value));
+  if (text !== undefined) node.textContent = text;
+  return node;
+}
+
+function renderTimeline() {
+  if (!solution || !prefix) return;
+  const svg = byId('timeline');
+  const width = Math.max(280, Math.round(svg.getBoundingClientRect().width || 640));
+  const left = 70;
+  const right = width - 17;
+  const top = 31;
+  const height = top + Math.max(1, solution.ordered.length) * 31 + 34;
+  const extent = Math.max(8, Math.ceil(Math.max(0, ...solution.ordered.map(a => a.end)) / 4) * 4);
+  const x = time => left + time / extent * (right - left);
+  const selected = new Set(prefix.selectedIds);
+  const currentId = solution.rows[rowIndex].id;
+  svg.setAttribute('viewBox', '0 0 ' + width + ' ' + height);
+  svg.replaceChildren();
+  svg.append(svgNode('title', {id: 'timeline-title'}, 'Activity windows and the selected prefix schedule'));
+  const descriptions = solution.ordered.map(a => a.id + ': [' + a.start + ', ' + a.end + '), value ' + a.value + (selected.has(a.id) ? ', selected.' : ', not selected in this prefix.'));
+  svg.append(svgNode('desc', {id: 'timeline-description'}, 'Horizontal position is abstract time from 0 to ' + extent + '. Labels show ID and value. ' + descriptions.join(' ')));
+  svg.append(svgNode('text', {x: 4, y: 16, fill: '#526671', 'font-size': 10}, 'ID · VALUE'));
+  for (let time = 0; time <= extent; time += extent <= 8 ? 2 : 4) {
+    svg.append(svgNode('line', {x1: x(time), y1: top - 9, x2: x(time), y2: height - 26, stroke: '#dfe6df', 'stroke-width': 1}));
+    svg.append(svgNode('text', {x: x(time), y: 16, fill: '#526671', 'font-size': 11, 'text-anchor': 'middle'}, String(time)));
+  }
+  solution.ordered.forEach((activity, index) => {
+    const y = top + index * 31;
+    const isSelected = selected.has(activity.id);
+    const isCurrent = activity.id === currentId;
+    svg.append(svgNode('text', {x: 4, y: y + 14, fill: '#193447', 'font-size': 11, 'font-weight': isSelected ? 750 : 500}, activity.id + ' · ' + activity.value));
+    const bar = svgNode('rect', {x: x(activity.start), y, width: x(activity.end) - x(activity.start), height: 20, rx: 3, fill: isSelected ? '#096e64' : '#b9c9c3', stroke: isCurrent ? '#bc7c08' : 'none', 'stroke-width': isCurrent ? 3 : 0});
+    bar.append(svgNode('title', {}, activity.id + ' [' + activity.start + ', ' + activity.end + '), value ' + activity.value));
+    svg.append(bar);
+    svg.append(svgNode('circle', {cx: x(activity.end), cy: y + 10, r: 3, fill: '#fffefa', stroke: isSelected ? '#096e64' : '#738d82', 'stroke-width': 1.5}));
+  });
+  if (!solution.ordered.length) svg.append(svgNode('text', {x: left, y: top + 15, fill: '#526671', 'font-size': 12}, 'Empty schedule · value 0'));
+  svg.append(svgNode('text', {x: right, y: height - 5, fill: '#526671', 'font-size': 10, 'text-anchor': 'end'}, 'TIME UNITS · END EXCLUDED'));
+}
+
+function renderTable() {
+  const body = byId('dp-rows');
+  body.replaceChildren();
+  for (const row of solution.rows) {
+    const tr = document.createElement('tr');
+    tr.dataset.row = String(row.j);
+    tr.dataset.pending = String(row.j > rowIndex);
+    if (row.j === rowIndex) tr.setAttribute('aria-current', 'step');
+    const first = document.createElement('td');
+    const button = textNode('button', 'Row ' + row.j);
+    button.type = 'button';
+    button.dataset.row = String(row.j);
+    button.setAttribute('aria-label', 'Inspect row ' + row.j);
+    first.append(button);
+    tr.append(first, textNode('td', row.id ?? 'Empty'), textNode('td', String(row.p)));
+    for (const field of ['take', 'skip', 'best', 'choice']) {
+      const cell = textNode('td', row.j > rowIndex ? '—' : String(row[field]));
+      if (field === 'choice') cell.dataset.choice = row.choice;
+      tr.append(cell);
+    }
+    body.append(tr);
+  }
+}
+
+function renderBacktrack() {
+  byId('backtrack-steps').replaceChildren();
+  byId('trace-result').hidden = true;
+  byId('trace-result').textContent = '';
+  byId('trace-choices').disabled = false;
+  byId('trace-choices').textContent = traceStarted ? 'Restart trace' : 'Trace choices';
+  byId('next-choice').disabled = !traceStarted || traceRevealed >= prefix.backtrack.length;
+  byId('trace-prompt').hidden = traceStarted;
+  if (!traceStarted) return;
+  for (const step of prefix.backtrack.slice(0, traceRevealed)) {
+    const row = solution.rows[step.j];
+    let sentence;
+    if (step.choice === 'take') sentence = 'Row ' + step.j + ': take ' + step.id + ' (' + row.take + ' > ' + row.skip + '), then jump to p(' + step.j + ') = ' + step.next + '.';
+    else sentence = 'Row ' + step.j + ': skip ' + step.id + ' (' + row.take + (row.take === row.skip ? ' = ' : ' < ') + row.skip + '), then move to row ' + step.next + (row.take === row.skip ? '. The tie keeps the earlier prefix.' : '.');
+    byId('backtrack-steps').append(textNode('li', sentence));
+  }
+  if (traceRevealed >= prefix.backtrack.length) {
+    byId('trace-result').hidden = false;
+    byId('trace-result').textContent = 'Reached row 0. Selected: ' + (prefix.selectedIds.join(' + ') || 'none') + '. Total value: ' + prefix.bestValue + '.';
+  }
+}
+
+function renderResult() {
+  if (!solution) return;
+  // Re-solving the inspected prefix uses the same bounded pure consumer and leaves
+  // the complete solution intact. Its choices are the first rowIndex table rows.
+  prefix = solveSchedule(solution.ordered.slice(0, rowIndex));
+  const row = solution.rows[rowIndex];
+  const total = solution.ordered.length;
+  byId('prefix-label').textContent = rowIndex ? 'Best value · rows 1–' + rowIndex : 'Best value · empty prefix';
+  byId('best-value').textContent = String(prefix.bestValue);
+  byId('prefix-detail').textContent = rowIndex === total ? 'All ' + total + ' activities considered.' : rowIndex + ' of ' + total + ' activities considered.';
+  byId('selected-activities').textContent = prefix.selectedIds.join(' + ') || 'None';
+  byId('selection-detail').textContent = prefix.selectedIds.length ? 'One compatible optimum for this prefix.' : 'An empty schedule is allowed.';
+  byId('row-position').textContent = 'Row ' + rowIndex + ' of ' + total;
+  byId('previous-row').disabled = rowIndex === 0;
+  byId('next-row').disabled = rowIndex === total;
+  byId('show-result').disabled = rowIndex === total;
+  byId('download-trace').disabled = false;
+  if (!rowIndex) byId('step-explanation').textContent = 'OPT(0) = 0. Before considering any activity, the only schedule is empty. Move to the next row to compare taking and skipping it.';
+  else {
+    const activity = solution.ordered[rowIndex - 1];
+    const tie = row.take === row.skip;
+    byId('step-explanation').textContent = 'Row ' + rowIndex + ' (' + row.id + '): take = ' + activity.value + ' + OPT(' + row.p + ') = ' + row.take + '; skip = OPT(' + (rowIndex - 1) + ') = ' + row.skip + '. ' + (tie ? 'The values tie, so keep the earlier prefix by skipping ' + row.id + '.' : row.choice === 'take' ? 'Taking ' + row.id + ' gives the larger value.' : 'Skipping ' + row.id + ' retains the larger value.') + ' OPT(' + rowIndex + ') = ' + row.best + '.';
+  }
+  byId('trace-caption').textContent = 'Reconstruct the optimum for the inspected prefix: row ' + rowIndex + '.';
+  byId('greedy-schedule').textContent = 'Earliest-finish schedule for these ' + rowIndex + ' rows: ' + (prefix.greedy.selectedIds.join(' + ') || 'none') + '.';
+  byId('greedy-value').textContent = String(prefix.greedy.value);
+  byId('comparison-optimum').textContent = String(prefix.bestValue);
+  byId('greedy-note').textContent = prefix.greedy.value < prefix.bestValue
+    ? 'Choosing each next compatible earliest finish misses ' + (prefix.bestValue - prefix.greedy.value) + ' value here.'
+    : 'The values tie for this prefix. One tied example does not prove that earliest finish always maximizes total value.';
+  renderTimeline();
+  renderTable();
+  renderBacktrack();
+}
+
+function inspectRow(row) {
+  if (!solution || !Number.isInteger(row) || row < 0 || row > solution.ordered.length) return;
+  rowIndex = row;
+  traceRevealed = 0;
+  traceStarted = false;
+  renderResult();
+}
+
+function download(text, filename) {
+  const url = URL.createObjectURL(new Blob([text], {type: 'application/json;charset=utf-8'}));
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  document.body.append(link);
+  link.click();
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+byId('activity-form').addEventListener('submit', event => {event.preventDefault(); solve();});
+byId('activities').addEventListener('input', event => {
+  const input = event.target;
+  if (!(input instanceof HTMLInputElement) || !fields.includes(input.dataset.field)) return;
+  const activity = draft.find(a => a.id === input.dataset.id);
+  if (!activity) return;
+  activity[input.dataset.field] = input.value;
+  invalidate('Activities changed. Solve again to inspect this draft.');
+});
+byId('activities').addEventListener('click', event => {
+  const button = event.target.closest('button[data-remove]');
+  if (!button) return;
+  const index = draft.findIndex(a => a.id === button.dataset.remove);
+  draft = draft.filter(a => a.id !== button.dataset.remove);
+  invalidate('Activity removed. Solve again to inspect this draft.');
+  const next = draft[Math.min(index, draft.length - 1)];
+  renderInputs(next ? 'activity-' + next.id + '-start' : 'add-activity');
+});
+byId('add-activity').addEventListener('click', () => {
+  if (draft.length >= LIMITS.activities) return;
+  const id = [...'ABCDEFGH'].find(id => !draft.some(a => a.id === id));
+  draft.push({id, start: '0', end: '1', value: '1'});
+  invalidate('Activity added. Set its times and value, then solve again.');
+  renderInputs('activity-' + id + '-start');
+});
+byId('load-example').addEventListener('click', () => {
+  const chosen = EXAMPLES[byId('example').value];
+  if (!chosen) return;
+  draft = chosen.map(activity => ({id: activity.id, ...Object.fromEntries(fields.map(field => [field, String(activity[field])]))}));
+  renderInputs();
+  solve(false);
+});
+byId('previous-row').addEventListener('click', () => inspectRow(rowIndex - 1));
+byId('next-row').addEventListener('click', () => inspectRow(rowIndex + 1));
+byId('show-result').addEventListener('click', () => {if (solution) inspectRow(solution.ordered.length);});
+byId('dp-rows').addEventListener('click', event => {
+  const button = event.target.closest('button[data-row]');
+  if (!button) return;
+  inspectRow(Number(button.dataset.row));
+  byId('dp-rows').querySelector('button[data-row="' + rowIndex + '"]')?.focus({preventScroll: true});
+});
+byId('trace-choices').addEventListener('click', () => {
+  if (!prefix) return;
+  traceStarted = true;
+  traceRevealed = Math.min(1, prefix.backtrack.length);
+  renderBacktrack();
+});
+byId('next-choice').addEventListener('click', () => {
+  if (!prefix || !traceStarted) return;
+  traceRevealed = Math.min(prefix.backtrack.length, traceRevealed + 1);
+  renderBacktrack();
+});
+byId('download-trace').addEventListener('click', () => {
+  if (!solution || !prefix) return;
+  const trace = {
+    format: 'recallweave-weighted-interval-trace/1',
+    conventions: {interval: '[start,end)', resourceCount: 1, timeUnit: 'abstract', sort: ['end', 'start', 'id-code-units'], tie: 'skip-current'},
+    activities: submitted,
+    solution,
+    view: {row: rowIndex, backtrackRevealed: traceRevealed, prefix: {bestValue: prefix.bestValue, selectedIds: prefix.selectedIds, backtrack: prefix.backtrack, greedy: prefix.greedy}}
+  };
+  download(JSON.stringify(trace, null, 2) + '\n', 'weighted-interval-trace.json');
+});
+byId('download-course').addEventListener('click', () => download(courseText, 'weighted-interval-scheduling.json'));
+byId('backtrack-steps').setAttribute('aria-live', 'polite');
+byId('trace-result').setAttribute('role', 'status');
+draft = EXAMPLES['greedy-trap'].map(activity => ({id: activity.id, ...Object.fromEntries(fields.map(field => [field, String(activity[field])]))}));
+renderInputs();
+solve(false);
+new ResizeObserver(renderTimeline).observe(byId('timeline'));
+
+</script>
+</body>
+</html>

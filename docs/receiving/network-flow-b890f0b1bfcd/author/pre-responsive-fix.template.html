@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>Maximum flow · RecallWeave</title>
+<style>
+:root{--paper:#f5f2e9;--panel:#fffdf8;--ink:#172e31;--muted:#506568;--line:#d0d9ce;--green:#075e52;--mint:#dff0df;--purple:#574397;--orange:#983b17}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.55 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+header,main,footer{max-width:1340px;margin:auto;padding:30px clamp(18px,4vw,56px)}header{padding-bottom:22px;border-bottom:1px solid var(--line)}
+.eyebrow{text-transform:uppercase;letter-spacing:.16em;font-size:.72rem;font-weight:800;color:var(--green)}
+h1{font-size:clamp(2.1rem,4.5vw,3.7rem);line-height:1.08;letter-spacing:-.04em;max-width:850px;margin:15px 0}
+h2{font-size:1.25rem;line-height:1.3;margin:0 0 14px}h3{font-size:1rem;margin:24px 0 8px}
+.lead{font-size:1.08rem;max-width:790px;color:var(--muted)}.shell{display:grid;grid-template-columns:minmax(250px,315px) minmax(0,1fr);gap:24px;align-items:start}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:22px;margin-bottom:20px;min-width:0}
+label{font-weight:700;font-size:.86rem;display:block;margin:15px 0 6px}input,select,textarea,button{font:inherit}
+input,select,textarea{width:100%;color:var(--ink);background:white;border:1px solid #94aaa4;border-radius:8px;padding:10px}
+textarea{font:14px/1.55 ui-monospace,SFMono-Regular,Consolas,monospace;resize:vertical;min-height:210px;tab-size:2}
+input:focus,select:focus,textarea:focus,button:focus-visible,a:focus-visible{outline:3px solid var(--purple);outline-offset:3px}
+button{border:1px solid var(--green);border-radius:8px;padding:10px 15px;color:var(--green);background:white;cursor:pointer;font-weight:700}
+button:hover:enabled{background:var(--mint)}button.primary{background:var(--green);color:white;width:100%;margin-top:18px}
+button.primary:hover{background:#084c44}button:disabled{opacity:.45;cursor:default}.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.row>*{flex:1;min-width:0}
+.help,.small{font-size:.83rem;color:var(--muted)}.help{margin:7px 0 12px}.error{font-weight:600;color:#9b2716;white-space:pre-wrap}.example-note{border-left:3px solid var(--green);padding-left:12px}
+.step-header{display:flex;align-items:center;justify-content:space-between;gap:18px}.metric{font:700 2.8rem/1.05 ui-monospace,monospace;letter-spacing:-.06em}.metric-label{font-size:.8rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}
+.badge{font-size:.76rem;font-weight:800;padding:6px 10px;border-radius:20px;background:var(--mint);color:var(--green)}
+.nav{display:flex;align-items:end;gap:9px;flex-wrap:wrap;margin:18px 0}.nav label{margin:0;flex:1;min-width:180px}.nav select{margin-top:6px}.nav button{flex:0 0 auto}
+.graph{border-radius:12px;background:#f3f7f0;border:1px solid var(--line);overflow:hidden}.graph svg{display:block;width:100%;height:auto}
+.graph .edge{fill:none;stroke:#778e86;stroke-width:1.5}.graph .edge.use{stroke:var(--green);stroke-width:3}.graph .edge.cancel{stroke:var(--orange);stroke-width:3;stroke-dasharray:7 4}
+.graph .edge.cut{stroke:var(--purple);stroke-width:3}.graph text{font-family:ui-monospace,monospace;fill:var(--ink)}.graph .edge-label{font-size:12px}
+.legend{display:flex;flex-wrap:wrap;gap:12px;font-size:.8rem;margin:9px 0;color:var(--muted)}
+.legend b{color:var(--green)}.legend .cancel-key{color:var(--orange)}.legend .cut-key{color:var(--purple)}
+.table-wrap{max-width:100%;overflow:auto;border:1px solid var(--line);border-radius:10px;margin:10px 0 18px}
+table{border-collapse:collapse;width:100%;font-size:.86rem;white-space:nowrap}th,td{text-align:left;padding:9px 12px;border-bottom:1px solid #e2e7dd}
+th{font-size:.75rem;letter-spacing:.03em;background:#edf3e9}tr:last-child td{border:0}.num{font-variant-numeric:tabular-nums}
+.changed-use{background:#e9f6e8}.changed-cancel{background:#fff0e8}.cut-row{background:#efebfa}
+.path-list{padding-left:22px}.path-list li{margin:8px 0}.cancel-text{color:var(--orange);font-weight:700}
+.certificate{border-left:4px solid var(--purple);background:#f1edf9;padding:16px;border-radius:0 10px 10px 0}
+.empty{border:1px dashed #91a69d;padding:40px 25px;border-radius:16px;color:var(--muted);text-align:center}
+details{margin:18px 0}summary{cursor:pointer;font-weight:700;color:var(--green)}.downloads{display:flex;flex-wrap:wrap;gap:9px;margin-top:16px}.downloads button{font-size:.86rem}
+footer{border-top:1px solid var(--line);font-size:.83rem;color:var(--muted)}a{color:var(--purple)}[hidden]{display:none!important}
+@media(max-width:850px){.shell{grid-template-columns:1fr}.editor{display:grid;grid-template-columns:1fr 1fr;gap:20px}.editor .card{margin:0}.step-header{align-items:flex-start}}
+@media(max-width:580px){.editor{display:block}.editor .card{margin-bottom:18px}.card{padding:17px}.nav label{flex-basis:100%}.nav button{flex:1}header,main,footer{padding:24px 16px}.step-header{gap:12px}.metric{font-size:2.3rem}}
+@media print{body{background:white}.shell{display:block}.editor,.nav,.downloads,footer{display:none}.card{break-inside:avoid;border:1px solid #aaa}.table-wrap{overflow:visible}details{display:block}}
+</style>
+</head>
+<body>
+<header>
+<div class="eyebrow">RecallWeave / Graph lab</div>
+<h1>More flow needs a way through.</h1>
+<p class="lead">Follow capacity, reroute an earlier choice, and finish with a cut that proves the answer. Every number comes from the network you enter.</p>
+</header>
+<main class="shell">
+<aside class="editor" aria-label="Network inputs and lesson downloads">
+<section class="card">
+<h2>1. Set the network</h2>
+<label for="preset">Worked example</label>
+<select id="preset"></select>
+<button id="load-example" type="button" style="margin-top:10px">Load example</button>
+<p id="example-note" class="help example-note"></p>
+<form id="network-form">
+<label for="vertices">Vertices, in tie-break order</label>
+<input id="vertices" autocomplete="off" spellcheck="false" aria-describedby="vertex-help">
+<p class="help" id="vertex-help">2–8 names, separated by commas or spaces. Names use 1–12 letters, digits or underscores and start with a letter.</p>
+<div class="row">
+<div><label for="source">Source</label><select id="source"></select></div>
+<div><label for="sink">Sink</label><select id="sink"></select></div>
+</div>
+<label for="edges">Directed edges</label>
+<textarea id="edges" spellcheck="false" aria-describedby="edge-help"></textarea>
+<p class="help" id="edge-help">One <strong>FROM TO CAPACITY</strong> per line. Use integers 0–99. Zero allows no flow. Opposite directions are separate edges; duplicate directions and self-loops are refused.</p>
+<button class="primary" id="build" type="submit">Build the trace</button>
+<p class="error" id="error" role="alert"></p>
+</form>
+</section>
+<section class="card">
+<h2>Take the lesson with you</h2>
+<p class="small">The original 14-question course covers feasible flow, bottlenecks, residual cancellation, augmenting paths and cut certificates.</p>
+<div class="downloads">
+<button id="download-course" type="button">Download course JSON</button>
+<button id="download-guide" type="button">Download worked guide</button>
+</div>
+<p class="help">In RecallWeave, choose this JSON under <strong>Bring your own lesson</strong>, inspect the preview, then choose <strong>Start this deck</strong>. These downloads do not change a learner session.</p>
+</section>
+</aside>
+<div>
+<p id="status" class="small" role="status" aria-live="polite"></p>
+<div id="empty" class="empty" hidden>Inputs changed. Build a trace to inspect the current network.</div>
+<section class="card" id="result">
+<div class="step-header">
+<div><div class="metric-label">Current flow value</div><div class="metric" id="flow-value">0</div></div>
+<span class="badge" id="phase">Start with zero</span>
+</div>
+<div class="nav">
+<label for="step-select">2. Inspect a trace step<select id="step-select"></select></label>
+<button id="first" type="button">First</button>
+<button id="previous" type="button">Back</button>
+<button id="next" type="button">Next</button>
+<button id="last" type="button">Finish</button>
+</div>
+<p id="step-description"></p>
+<div class="graph" id="graph"></div>
+<div class="legend"><span><b>Solid green:</b> add flow</span><span class="cancel-key"><strong>Dashed orange:</strong> cancel flow</span><span class="cut-key"><strong>Purple:</strong> final outward cut</span></div>
+<p class="help" id="graph-help">Original arrows show flow / capacity. Tables preserve every edge identity and number.</p>
+<h3 id="path-heading">The residual path</h3>
+<ol class="path-list" id="path-list"></ol>
+<div id="certificate" class="certificate" hidden></div>
+<h3>Original edge assignments</h3>
+<div class="table-wrap"><table id="edge-table"><thead><tr><th>ID</th><th>Original edge</th><th>Flow / capacity</th><th>Add forward</th><th>Can cancel</th><th>This step</th></tr></thead><tbody id="edge-body"></tbody></table></div>
+<details id="residual-details">
+<summary>See the available residual options</summary>
+<p class="help">A use option adds flow to its original edge. A cancellation option removes flow from its own original edge. Options pointing the same way may belong to different originals.</p>
+<div class="table-wrap"><table><thead><tr><th>Residual direction</th><th>Changes this original edge</th><th>Available</th></tr></thead><tbody id="residual-body"></tbody></table></div>
+<p id="residual-empty" class="small" hidden>No positive residual options remain.</p>
+</details>
+<details>
+<summary>Check flow conservation</summary>
+<div class="table-wrap"><table><thead><tr><th>Vertex</th><th>Incoming</th><th>Outgoing</th><th>Net out</th></tr></thead><tbody id="balance-body"></tbody></table></div>
+<p class="help">Intermediate vertices have net outflow zero. The source’s net outflow equals the sink’s net inflow.</p>
+</details>
+<div class="downloads"><button id="download-observation" type="button">Download this complete trace</button></div>
+<p class="help">The JSON includes the applied network, every trace step, the final cut and your selected inspection step. It is an algorithm observation, separate from a learner-answer archive.</p>
+</section>
+<section class="card">
+<h2>What the proof says</h2>
+<p>A feasible assignment gives a value you can achieve. A cut gives a value you cannot exceed. When they meet, the maximum is known.</p>
+<p class="small">This explorer uses Edmonds–Karp: each augmentation follows a path with the fewest residual edges. It visits neighbors in the entered vertex order, preferring forward use before cancellation to the same next vertex, then original edge order. It does not choose by largest bottleneck or smallest cost.</p>
+<p class="small">All capacities and flows here are exact small integers. The network is a teaching model; its units and behavior are not measurements of pipes, traffic or another physical system.</p>
+</section>
+</div>
+</main>
+<footer>
+<p>Original course and examples for RecallWeave, created with AI assistance. Mathematical background: <a href="https://ocw.mit.edu/courses/6-046j-design-and-analysis-of-algorithms-spring-2015/resources/lecture-13-incremental-improvement-max-flow-min-cut/" rel="noopener noreferrer">MIT OpenCourseWare, 6.046J, Lecture 13</a>. The reference opens only if selected. This page needs no server, account, connection or automatic browser storage.</p>
+</footer>
+<script id="course-data" type="application/octet-stream">@@COURSE_BASE64@@</script>
+<script id="guide-data" type="application/octet-stream">@@GUIDE_BASE64@@</script>
+<script>
+@@SCRIPT@@
+</script>
+</body>
+</html>

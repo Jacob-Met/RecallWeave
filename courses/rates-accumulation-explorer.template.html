@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Rates and accumulation · RecallWeave</title>
+<style>
+:root{color-scheme:light;--paper:#f5f3ed;--card:#fffefa;--ink:#163344;--muted:#536571;--line:#ced8d9;--blue:#165e88;--plus:#087c72;--minus:#b44e35}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:17px/1.55 system-ui,sans-serif}main{max-width:1160px;margin:auto;padding:38px 28px 70px}h1,h2,h3,p{margin:0 0 .8rem}h1{font-size:clamp(2.1rem,5vw,3.8rem);line-height:1.08;letter-spacing:-.04em;max-width:900px}h2{font-size:1.45rem;line-height:1.25}h3{font-size:1.03rem}.eyebrow{text-transform:uppercase;font-size:.8rem;letter-spacing:.16em;font-weight:750;color:var(--blue)}.lede{max-width:850px;font-size:1.14rem;color:var(--muted)}.panel{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:24px;margin-top:22px}.setup{display:grid;grid-template-columns:1fr 1fr;gap:26px}.hint{font-size:.89rem;color:var(--muted)}.callout{padding:16px 20px;border-left:4px solid var(--plus);background:#e9f2ef;border-radius:0 10px 10px 0}.callout p:last-child{margin-bottom:0}label{font-weight:650}button,input,select{font:inherit}button,select,input{border:1px solid #9cacae;border-radius:7px;padding:10px 12px;background:white;color:var(--ink)}button{cursor:pointer;font-weight:650;line-height:1.2;min-height:44px}button.primary{background:var(--blue);border-color:var(--blue);color:white}button:hover:not(:disabled){filter:brightness(.94)}button:disabled{opacity:.5;cursor:default}button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible,[tabindex]:focus-visible{outline:3px solid #c76513;outline-offset:3px}a{color:var(--blue)}.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.row>*{min-width:0}.row select{flex:1;max-width:100%}.point-table{width:100%;border-collapse:collapse;margin:14px 0}.point-table th{text-align:left;font-size:.82rem;color:var(--muted);padding:5px}.point-table td{padding:5px}.point-table input{width:100%;min-width:0;padding:9px}.point-table th:last-child{width:90px}.point-table button{width:100%;font-size:.78rem;padding:8px}.point-table td:nth-child(1),.point-table td:nth-child(2){width:35%}.inspection{display:grid;grid-template-columns:minmax(160px,1fr) 155px;gap:20px;align-items:end;border:0;padding:0;margin:0}.inspection label{display:block;font-size:.9rem}.inspection input{width:100%}input[type=range]{padding:8px 0;accent-color:var(--blue);height:44px}.status{margin:12px 0 0;font-size:.92rem}.error{color:#9e301b;font-weight:650}.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:22px 0}.stat{padding:17px 15px;background:#eef3f4;border-radius:12px}.stat .label{display:block;color:var(--muted);font-size:.81rem;line-height:1.4}.stat strong{display:block;font-size:1.36rem;overflow-wrap:anywhere;margin:.25rem 0}.stat .unit{font-size:.8rem;color:var(--muted)}.plot{border-top:1px solid var(--line);padding-top:20px;margin-top:20px}.plot svg{width:100%;height:auto;display:block;overflow:visible}.plot text{font:13px system-ui,sans-serif;fill:var(--muted)}.legend{display:flex;gap:18px;flex-wrap:wrap;font-size:.86rem;margin-top:6px}.swatch{display:inline-block;width:23px;height:4px;vertical-align:middle;margin-right:6px}.swatch.plus{background:var(--plus)}.swatch.minus{background:var(--minus)}.swatch.distance{border-top:3px dashed var(--minus);height:0}.table-scroll{overflow-x:auto;margin:12px 0;border:1px solid var(--line);border-radius:10px}.breakdown{border-collapse:collapse;width:100%;font-size:.84rem;min-width:710px}.breakdown th,.breakdown td{padding:10px 12px;text-align:left;vertical-align:top;border-bottom:1px solid var(--line)}.breakdown th{background:#edf2f3;color:var(--muted)}.breakdown tr:last-child td{border-bottom:0}.breakdown .partial{background:#fff6db}.breakdown .not-started{color:var(--muted)}.breakdown small{display:block;font-size:.8rem}.formula{font:1rem/1.6 ui-monospace,SFMono-Regular,monospace;overflow-wrap:anywhere}.downloads{margin-top:16px}.lesson{display:grid;grid-template-columns:1.4fr 1fr;gap:26px}.sr-only{position:absolute;width:1px;height:1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}[hidden]{display:none!important}footer{font-size:.82rem;color:var(--muted);margin-top:25px;max-width:950px}details{margin-top:14px}summary{cursor:pointer;font-weight:650;min-height:30px}ol{padding-left:1.4rem}.guide-steps li{margin:.5rem 0}.quiet{font-size:.82rem;color:var(--muted)}
+@media(max-width:740px){main{padding:24px 16px 45px}.panel{padding:18px;border-radius:14px}.setup,.lesson{grid-template-columns:1fr}.stats{grid-template-columns:1fr 1fr}.inspection{grid-template-columns:minmax(100px,1fr) 115px;gap:14px}.stat{padding:13px 12px}.stat strong{font-size:1.14rem}.plot text{font-size:15px}.row select{width:100%}.point-table th:last-child{width:72px}.point-table td{padding:4px}}
+@media print{body{background:white}.setup,.downloads,.inspection,button{display:none}.panel{break-inside:avoid}.table-scroll{overflow:visible}.breakdown{min-width:0}main{padding:0}.stats{grid-template-columns:repeat(4,1fr)}}
+</style>
+</head>
+<body>
+<main>
+<header>
+<p class="eyebrow">RecallWeave · a motion lab</p>
+<h1>Rates become change.</h1>
+<p class="lede">Trace a velocity curve and watch its area become displacement. Then reverse direction: what cancels, and what keeps adding up?</p>
+</header>
+<section class="panel setup" aria-labelledby="curve-heading">
+<div>
+<h2 id="curve-heading">1. Choose a curve</h2>
+<label for="rate-preset" class="hint">Worked example</label>
+<div class="row"><select id="rate-preset"></select><button id="use-example" type="button">Use example</button></div>
+<form id="curve-form" novalidate>
+<table class="point-table"><thead><tr><th scope="col">Time (s)</th><th scope="col">Velocity (m/s)</th><th scope="col"><span class="sr-only">Remove point</span></th></tr></thead><tbody id="curve-points"></tbody></table>
+<div class="row"><button id="add-point" type="button">Add point</button><button id="apply-curve" class="primary" type="submit">Apply curve</button></div>
+</form>
+<p id="curve-status" class="status" role="status"></p>
+<p id="curve-error" class="status error" role="alert"></p>
+</div>
+<div>
+<div class="callout"><h3>A return trip still covers distance.</h3><p>For <strong>Out and back</strong>, inspect 4 s and then 8 s. Predict the final displacement before you look at the distance.</p></div>
+<p class="hint" style="margin-top:16px">Connect 2–8 points with straight lines. Begin at 0 s; use increasing whole seconds through 120 s. Velocity may be −50 to 50 m/s, with one decimal place.</p>
+<p class="hint">These are authored mathematical curves. A point gives an instantaneous velocity; the area over an interval gives a change in position.</p>
+<details><summary>What does editing change?</summary><p class="hint">Any point edit clears the previous result. Apply the whole curve to calculate again. Nothing is saved automatically or sent anywhere.</p></details>
+</div>
+</section>
+<section class="panel" aria-labelledby="inspect-heading">
+<h2 id="inspect-heading">2. Inspect a moment</h2>
+<fieldset id="inspection-controls" class="inspection">
+<div><label for="inspect-slider">Time since the start</label><input id="inspect-slider" type="range" min="0" max="80" step="1" value="80" aria-describedby="time-help"></div>
+<div><label for="inspect-time">Time (s)</label><input id="inspect-time" type="text" inputmode="decimal" maxlength="6" value="8" aria-describedby="time-help"></div>
+</fieldset>
+<p id="time-help" class="hint">Move in tenths of a second. The slider also accepts arrow, Home and End keys.</p>
+<p id="inspection-error" class="error" role="alert"></p>
+<div id="rates-results">
+<p id="moment-heading" class="status" role="status"></p>
+<div class="stats">
+<div class="stat"><span class="label">Velocity at this moment</span><strong id="velocity-value"></strong><span class="unit">metres per second</span></div>
+<div class="stat"><span class="label">Signed displacement so far</span><strong id="displacement-value"></strong><span class="unit">metres from the starting position</span></div>
+<div class="stat"><span class="label">Distance traveled so far</span><strong id="distance-value"></strong><span class="unit">metres along the path</span></div>
+<div class="stat"><span class="label">Average velocity since 0 s</span><strong id="average-value"></strong><span class="unit" id="average-unit">metres per second</span></div>
+</div>
+<p id="acceleration-value" class="hint"></p>
+<div class="plot">
+<h3 id="velocity-plot-title">Velocity and signed area</h3>
+<svg id="velocity-plot" role="img" aria-labelledby="velocity-plot-title velocity-plot-description" viewBox="0 0 780 270"></svg>
+<p id="velocity-plot-description" class="sr-only"></p>
+<div class="legend"><span><i class="swatch plus"></i>Above zero adds displacement</span><span><i class="swatch minus"></i>Below zero subtracts displacement</span></div>
+</div>
+<div class="plot">
+<h3 id="accumulation-plot-title">Two ways of accumulating the same motion</h3>
+<svg id="accumulation-plot" role="img" aria-labelledby="accumulation-plot-title accumulation-plot-description" viewBox="0 0 780 270"></svg>
+<p id="accumulation-plot-description" class="sr-only"></p>
+<div class="legend"><span><i class="swatch plus"></i>Signed displacement</span><span><i class="swatch distance"></i>Total distance</span></div>
+<p class="hint">Curves below the velocity plot use samples 0.1 s apart. Graph coordinates and labels are approximate. Exact fractions are retained in the readout, table and download.</p>
+</div>
+<details id="segment-details"><summary>See every interval's contribution</summary>
+<p class="hint">Rows include all authored intervals. The two “so far” columns stop at the selected time; a shaded row is only partly covered. A zero crossing inside a segment is calculated exactly, even between slider positions.</p>
+<div class="table-scroll" tabindex="0" role="region" aria-label="Interval contributions; scroll horizontally if needed">
+<table class="breakdown"><thead><tr><th>Interval (s)</th><th>Endpoint velocities (m/s)</th><th>Zero inside interval (s)</th><th>Displacement so far (m)</th><th>Distance so far (m)</th><th>Whole interval (m)</th></tr></thead><tbody id="segment-rows"></tbody></table>
+</div></details>
+</div>
+<div class="row downloads"><button id="download-calculation" type="button">Download this calculation</button></div>
+<p id="download-status" class="status" role="status"></p>
+</section>
+<section class="panel lesson" aria-labelledby="lesson-heading">
+<div>
+<p class="eyebrow">Turn the picture into an explanation</p>
+<h2 id="lesson-heading">3. Study the connections</h2>
+<p>Work through twelve original questions about units, signed area, direction changes and local versus average rates.</p>
+<ol class="guide-steps"><li>Download the lesson JSON.</li><li>Open RecallWeave's <a href="../demo.html" target="_blank" rel="noopener">learning page</a> and choose the file under <strong>Bring your own lesson</strong>.</li><li>Review the preview and choose <strong>Start this deck</strong>. First answers, review and later practice stay separate.</li></ol>
+<p class="hint">The explorer is self-contained. To study offline, also keep RecallWeave's separate <code>demo.html</code> file. A script running through the questions does not measure a learning gain.</p>
+<div class="row downloads"><button id="download-lesson" class="primary" type="button">Download lesson</button><button id="download-guide" type="button">Download worked guide</button></div>
+</div>
+<div class="callout">
+<h3>Try a zero between the ticks</h3>
+<p>Set two points: <strong>(0 s, 1 m/s)</strong> and <strong>(1 s, −2 m/s)</strong>.</p>
+<p>The velocity crosses zero at <strong>1/3 s</strong>. At the end, net displacement is <strong>−1/2 m</strong>, but distance is <strong>5/6 m</strong>.</p>
+<p class="hint">Explain why taking the absolute value of the final displacement would miss some of the travel.</p>
+</div>
+</section>
+<footer>
+<p>Original RecallWeave teaching text and examples, October 2026. Mathematical concepts checked against OpenStax <em>Calculus Volume 1</em>, §§3.1, 5.3 and 5.4. Full references and derivations are in the worked guide. This contribution makes no additional reuse-license grant; reference sources retain their own terms.</p>
+<p>Continuous piecewise-linear velocity, initial displacement 0 m. This models an authored curve, not a measured trajectory. Calculations and local downloads use this tab only; no automatic persistence or external service.</p>
+</footer>
+</main>
+<script id="rates-deck-json" type="application/json">@@DECK_JSON@@</script>
+<script id="rates-guide-json" type="application/json">@@GUIDE_JSON@@</script>
+<script type="module">
+@@SCRIPT@@
+</script>
+</body>
+</html>

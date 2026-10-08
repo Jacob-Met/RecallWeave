@@ -1,0 +1,573 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src 'none'; base-uri 'none'; form-action 'none'">
+<title>Least squares · RecallWeave lab</title>
+<style>
+:root{color-scheme:light;--ink:#162e32;--muted:#526b6e;--paper:#f4f6ef;--card:#fff;--line:#ced9d2;--fit:#126761;--trial:#a24918;--pale:#e7f0ea;--error:#8f2721}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.55 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}main{max-width:1192px;margin:auto;padding:32px 28px 56px}a{color:var(--fit);text-underline-offset:3px}a:hover{text-decoration-thickness:2px}button,input,select{font:inherit}button,input,select,summary,a{touch-action:manipulation}button{border:1px solid var(--fit);border-radius:8px;padding:10px 15px;background:var(--fit);color:white;font-weight:650;cursor:pointer;min-height:44px}button.secondary{background:white;color:var(--fit)}button:hover:not(:disabled){filter:brightness(.95)}button:disabled{opacity:.5;cursor:default}button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible,a:focus-visible,.table-scroll:focus-visible{outline:3px solid #bb5b21;outline-offset:3px}input,select{width:100%;min-height:44px;border:1px solid #94aaa5;border-radius:6px;padding:8px 9px;background:white;color:var(--ink)}input[aria-invalid=true]{border:2px solid var(--error);background:#fff6f4}label{display:block;font-weight:650;font-size:.9rem;margin-bottom:5px}h1,h2,h3,p{margin-top:0}h1{font-size:clamp(2.15rem,4.3vw,3.5rem);line-height:1.08;letter-spacing:-.04em;margin-bottom:14px;max-width:850px}h2{font-size:1.2rem;line-height:1.25;margin-bottom:14px}h3{font-size:1rem;line-height:1.3;margin-bottom:8px}.eyebrow{text-transform:uppercase;letter-spacing:.13em;font-size:.75rem;font-weight:750;color:var(--fit);margin-bottom:12px}.intro{max-width:760px;font-size:1.09rem;color:var(--muted);margin-bottom:20px}.topline{display:flex;gap:12px;align-items:center;justify-content:space-between;margin-bottom:24px}.topline .eyebrow{margin:0}.badge{display:inline-block;background:var(--pale);padding:5px 10px;border-radius:50px;font-size:.8rem;font-weight:650;white-space:nowrap}.lab-grid{display:grid;grid-template-columns:340px minmax(0,1fr);gap:20px;align-items:start}.panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px;min-width:0}.controls{grid-row:span 2}.inline{display:flex;gap:9px;align-items:end}.inline>*{min-width:0}.inline .grow{flex:1}.hint{color:var(--muted);font-size:.88rem;margin:8px 0 16px}.divider{border:0;border-top:1px solid var(--line);margin:22px 0}.point-head,.point-row{display:grid;grid-template-columns:25px 1fr 1fr 44px;gap:8px;align-items:center}.point-head{font-size:.8rem;color:var(--muted);margin:13px 0 5px}.point-row{margin-bottom:7px}.point-index{font-variant-numeric:tabular-nums;color:var(--muted);font-size:.9rem}.point-row button{padding:6px;font-size:1.2rem;font-weight:400}.point-row input{min-width:0}.add-row{margin-top:4px}.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}.controls h3{margin-top:19px}.controls .copy{width:100%;margin-top:10px}.status{border-left:4px solid var(--fit);padding:11px 14px;background:var(--pale);font-size:.93rem;margin:0 0 20px;border-radius:0 6px 6px 0}.status.invalid{border-color:var(--error);background:#fff0ed;color:var(--error)}.plot-head{display:flex;justify-content:space-between;align-items:start;gap:18px}.plot-head select{max-width:180px;font-size:.9rem}.plot-head label{font-size:.78rem}.legend{display:flex;flex-wrap:wrap;gap:6px 18px;color:var(--muted);font-size:.8rem;margin:0 0 8px}.legend span{display:inline-flex;align-items:center;gap:6px}.key{display:inline-block;width:22px;border-top:3px solid var(--fit)}.key.trial{border-top-color:var(--trial);border-top-style:dashed}.dot{display:inline-block;width:10px;height:10px;border:2px solid var(--ink);background:white;border-radius:50%}.diamond{display:inline-block;width:9px;height:9px;background:#7854a0;transform:rotate(45deg);margin:0 4px}.plot-frame{width:100%;min-height:290px}.plot-frame svg{display:block;width:100%;height:auto}.plot-note{font-size:.83rem;color:var(--muted);margin:5px 0 0}.empty{padding:45px 16px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:7px}.equation{font-size:1.45rem;font-weight:750;overflow-wrap:anywhere;margin:0 0 6px;font-variant-numeric:tabular-nums}.fit-scope{color:var(--muted);font-size:.9rem;margin-bottom:16px}.metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin:0}.metric{padding-top:12px;border-top:1px solid var(--line);min-width:0}.metric dt{font-size:.79rem;color:var(--muted);margin-bottom:5px}.metric dd{margin:0;line-height:1.35;font-size:1.27rem;font-weight:750;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}.metric dd small{display:block;font-weight:400;color:var(--muted);font-size:.78rem;margin-top:2px}.trial-color{color:var(--trial)}.fit-color{color:var(--fit)}.comparison{font-size:.91rem;margin:15px 0 0}.wide{grid-column:1/-1}.section-gap{margin-top:20px}.table-scroll{overflow:auto;border:1px solid var(--line);border-radius:8px;max-width:100%}table{border-collapse:collapse;width:100%;min-width:820px;font-size:.88rem;font-variant-numeric:tabular-nums}th,td{text-align:right;padding:11px 12px;white-space:nowrap;border-bottom:1px solid #e2e8e3}thead{background:#edf3ee}th:first-child,td:first-child{text-align:left}tbody tr:last-child td{border-bottom:0}caption{text-align:left;font-size:.83rem;color:var(--muted);padding:10px 12px;caption-side:bottom;white-space:normal}th:nth-child(4),th:nth-child(7),td:nth-child(4),td:nth-child(7){border-left:1px solid var(--line)}.reading-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px}.reading-grid p:last-child{margin-bottom:0}.query-wrap{max-width:200px;margin-bottom:12px}.query-result{font-size:1.08rem;font-weight:650;overflow-wrap:anywhere}.query-scope{color:var(--muted);font-size:.91rem}.identity{background:var(--paper);border-radius:7px;padding:13px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}.identity p{margin:0 0 7px}.identity p:last-child{margin:0}.identity strong{color:var(--fit)}details{margin-top:13px}summary{font-weight:650;cursor:pointer;padding:5px 0}details p{font-size:.91rem;margin-top:12px}.course-panel{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:24px;align-items:center;background:#e6eee4}.download-buttons{display:flex;flex-wrap:wrap;gap:10px}.course-panel p{margin-bottom:8px}.download-status{font-size:.88rem;color:var(--muted);margin-top:10px;max-width:330px}.limits{font-size:.88rem;color:var(--muted);margin:20px 0 0}.limits p{margin:8px 0}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}[hidden]{display:none!important}noscript p{background:#fff0ed;color:var(--error);padding:16px}
+@media(max-width:850px){main{padding:24px 18px 44px}.lab-grid{grid-template-columns:300px minmax(0,1fr);gap:14px}.panel{padding:18px}.metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.course-panel{grid-template-columns:1fr}.controls{grid-row:span 2}.plot-head{display:block}.plot-head>div:last-child{margin-bottom:10px}}
+@media(max-width:660px){main{padding:20px 14px 36px}.topline{align-items:start;margin-bottom:20px}.topline a{font-size:.85rem}.badge{font-size:.74rem}.intro{font-size:1rem}.lab-grid{display:block}.panel{margin-bottom:15px;padding:18px}.controls{margin-bottom:15px}.plot-head{display:block}.plot-head select{max-width:190px}.plot-frame{min-height:275px}.metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.reading-grid{grid-template-columns:1fr;gap:22px}.course-panel{display:block}.download-buttons{margin-top:17px}.download-buttons button{flex:1}.point-head,.point-row{grid-template-columns:24px 1fr 1fr 44px}.equation{font-size:1.3rem}.section-gap{margin-top:0}.legend{gap:7px 13px}.wide{margin-top:15px}}
+@media print{body{background:white}main{max-width:none;padding:0}.controls,.download-buttons,.topline a{display:none}.lab-grid{display:block}.panel{break-inside:avoid;border-radius:0;margin:0 0 16px}.table-scroll{overflow:visible}table{min-width:0;font-size:9px}th,td{padding:5px}.course-panel{display:block}}
+</style>
+</head>
+<body>
+<main id="least-squares-lab">
+<div class="topline"><p class="eyebrow">RecallWeave · course lab</p><a href="../demo.html">Open the learner</a></div>
+<h1>Fit a line.<br>Read what it misses.</h1>
+<p class="intro">Move the data, try your own line and inspect every residual. Least squares finds the smallest total squared vertical error for these rows.</p>
+<p><span class="badge">Exact fractions · six fictional examples</span></p>
+<noscript><p>This interactive lab needs JavaScript. The adjacent <a href="least-squares.json">course JSON</a> and <a href="least-squares.md">worked guide</a> can still be opened from the repository.</p></noscript>
+<p id="lab-status" class="status" role="status" aria-live="polite">Starting the lab…</p>
+<div class="lab-grid">
+<section class="panel controls" aria-labelledby="data-heading">
+<h2 id="data-heading">1. Choose or edit the data</h2>
+<label for="example-select">Authored example</label>
+<div class="inline"><div class="grow"><select id="example-select"></select></div><button id="load-example" class="secondary" type="button">Load / reset</button></div>
+<p id="example-note" class="hint"></p>
+<div class="point-head" aria-hidden="true"><span>#</span><span>x</span><span>y</span><span></span></div>
+<div id="point-rows"></div>
+<button id="add-row" class="secondary add-row" type="button">+ Add a point</button>
+<p class="hint">2–12 rows. Whole-number x and y from −20 to 20. Repeated rows count separately.</p>
+<hr class="divider">
+<h2>2. Try a line: ŷ = a + bx</h2>
+<div class="two"><div><label for="trial-a">Intercept a</label><input id="trial-a" type="text" maxlength="32" value="0" spellcheck="false" autocomplete="off" aria-describedby="scalar-help"></div><div><label for="trial-b">Slope b</label><input id="trial-b" type="text" maxlength="32" value="1" spellcheck="false" autocomplete="off" aria-describedby="scalar-help"></div></div>
+<p id="scalar-help" class="hint">Use a number or fraction such as 2/3. Up to three decimal places; magnitude at most 1000.</p>
+<button id="use-fit" class="copy" type="button" disabled>Use fitted line</button>
+<p id="copy-note" class="hint">Copies exact coefficients into your trial.</p>
+</section>
+<section class="panel" aria-labelledby="plot-heading">
+<div class="plot-head"><h2 id="plot-heading">See the vertical errors</h2><div><label for="residual-model">Draw residuals for</label><select id="residual-model"><option value="fit">Fitted values</option><option value="trial">Trial line</option></select></div></div>
+<div class="legend"><span><i class="dot"></i>Point</span><span id="fit-legend"><i class="key"></i>Fitted line</span><span><i class="key trial"></i>Trial line</span><span><i class="diamond"></i>Mean point</span></div>
+<div id="plot" class="plot-frame"></div>
+<p id="plot-note" class="plot-note"></p>
+</section>
+<section class="panel" aria-labelledby="fit-heading">
+<h2 id="fit-heading">Compare the exact result</h2>
+<div id="fit-content" hidden>
+<p id="fit-equation" class="equation"></p><p id="fit-scope" class="fit-scope"></p>
+<dl class="metrics"><div class="metric"><dt>Fitted intercept a</dt><dd id="fit-a"></dd></div><div class="metric"><dt>Fitted slope b</dt><dd id="fit-b"></dd></div><div class="metric"><dt>Mean point (x̄, ȳ)</dt><dd id="mean-point"></dd></div><div class="metric"><dt>Minimum SSE</dt><dd id="fit-sse" class="fit-color"></dd></div><div class="metric"><dt>Trial SSE</dt><dd id="trial-sse" class="trial-color"></dd></div><div class="metric"><dt>Trial's excess SSE</dt><dd id="excess-sse"></dd></div></dl>
+<p id="comparison" class="comparison"></p>
+</div><p id="fit-empty" class="empty">Calculated results will appear after valid input.</p>
+</section>
+<section class="panel wide" aria-labelledby="table-heading">
+<h2 id="table-heading">Every row, without rounding</h2>
+<p id="table-scope" class="hint">Residual r = observed y − predicted ŷ. The table keeps both models visible.</p>
+<div id="table-content" class="table-scroll" tabindex="0" aria-label="Exact residual table; scroll horizontally for all columns" hidden>
+<table><caption id="table-caption"></caption><thead><tr><th scope="col">Point</th><th scope="col">x</th><th scope="col">y</th><th scope="col">Fit ŷ</th><th scope="col">Fit r</th><th scope="col">Fit r²</th><th scope="col">Trial ŷ</th><th scope="col">Trial r</th><th scope="col">Trial r²</th></tr></thead><tbody id="residual-rows"></tbody></table></div>
+<p id="table-empty" class="empty">Correct the input to calculate a new table.</p>
+</section>
+<section class="panel wide reading-grid" aria-label="Interpret the fitted result">
+<div><h2>3. Evaluate the fitted line</h2><div class="query-wrap"><label for="query-x">Query x</label><input id="query-x" type="text" maxlength="32" value="1" spellcheck="false" autocomplete="off" aria-describedby="query-help"></div><p id="query-help" class="hint">Number or fraction from −40 to 40.</p><div id="prediction-content" hidden><p id="prediction-result" class="query-result"></p><p id="prediction-scope" class="query-scope"></p></div><p class="hint">A line evaluation is not a prediction interval. Even an in-range value is not guaranteed accurate.</p></div>
+<div><h2>Why this is a minimum</h2><div id="minimum-content" hidden><div class="identity"><p>Exact excess = mean-point term + slope term</p><p id="identity-values"></p><p id="normal-values"></p></div><details><summary>Read the identity</summary><p id="identity-explanation"></p><p>The terms are nonnegative. This proves the minimum for equal-weight squared vertical errors. It does not establish linearity, causation or generalization to new data.</p></details></div></div>
+</section>
+</div>
+<section class="panel course-panel section-gap" aria-labelledby="course-heading"><div><p class="eyebrow">Try it · explain it · recall it</p><h2 id="course-heading">Take the sixteen-question course</h2><p>Download the fixed lesson, then choose it under <strong>Bring your own lesson</strong> in the <a href="../demo.html">RecallWeave learner</a>. The guide works all six examples and every transfer prompt.</p><p class="hint">Lab edits do not change these downloads. No automatic storage or uploads.</p></div><div><div class="download-buttons"><button id="download-course" type="button" disabled>Course JSON</button><button id="download-guide" class="secondary" type="button" disabled>Worked guide</button></div><p id="download-status" class="download-status" role="status" aria-live="polite">Preparing the embedded course and guide…</p></div></section>
+<footer class="limits"><p><strong>Scope:</strong> newly authored fictional data, equal row weights and a line with an intercept. No confidence intervals, p-values, causal verdicts or claims about a real population. The plot is approximate; the fractions and table are exact. Changes remain in this tab.</p><p>Original RecallWeave course by HAMON contributor estate-db371a37f4c8. Mathematical background: <a href="https://www.itl.nist.gov/div898/handbook/pmd/section4/pmd431.htm" rel="noreferrer">NIST least squares</a> and <a href="https://openstax.org/books/introductory-statistics-2e/pages/12-3-the-regression-equation" rel="noreferrer">OpenStax, The Regression Equation</a>. Full attribution and limitations are in the guide.</p></footer>
+</main>
+<script type="application/json" id="course-text">"{\n  \"format\": \"recallweave-deck/1\",\n  \"title\": \"Least squares: fit a line and read its residuals\",\n  \"attribution\": \"Original questions, distractors, explanations and transfer prompts authored for RecallWeave by HAMON contributor estate-db371a37f4c8. Mathematical background: NIST/SEMATECH e-Handbook of Statistical Methods, sections 4.1.4.1 and 4.4.3.1, https://www.itl.nist.gov/div898/handbook/pmd/section1/pmd141.htm and https://www.itl.nist.gov/div898/handbook/pmd/section4/pmd431.htm ; OpenStax, Introductory Statistics 2e, section 12.3, https://openstax.org/books/introductory-statistics-2e/pages/12-3-the-regression-equation . All datasets are newly authored fictional examples; no reference exercises, figures or passages are included.\",\n  \"license\": \"This file makes no separate reuse-license grant. Its question wording, explanations and transfer prompts are newly authored for RecallWeave. Linked references retain their own terms.\",\n  \"concepts\": [\n    \"Residuals and squared error\",\n    \"The fitted line and the mean\",\n    \"Changing data and units\",\n    \"Interpretation limits\"\n  ],\n  \"items\": [\n    {\n      \"id\": \"ls-residual\",\n      \"concept\": \"Residuals and squared error\",\n      \"prerequisites\": [],\n      \"prompt\": \"For the trial line y-hat = 1 + 2x, an observed point is (2, 4). What is its signed vertical residual y - y-hat?\",\n      \"options\": [\n        \"-1; the observed point is below the line.\",\n        \"1; the observed point is above the line.\",\n        \"-2; subtract the x coordinate from the slope.\",\n        \"5; the fitted value is the residual.\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"At x = 2, the trial line gives y-hat = 1 + 2(2) = 5. The observed y is 4, so the residual is 4 - 5 = -1. Its sign identifies the side of the line; its magnitude is the vertical separation. The squared residual is 1.\",\n      \"transfer\": \"Keep x and the trial line fixed, but change the observed y to 7. Find the new residual and squared residual.\"\n    },\n    {\n      \"id\": \"ls-sse\",\n      \"concept\": \"Residuals and squared error\",\n      \"prerequisites\": [],\n      \"prompt\": \"Three points have residuals -2, 1 and 3 under a trial line. What is the sum of squared residuals, SSE?\",\n      \"options\": [\n        \"2\",\n        \"14\",\n        \"6\",\n        \"12\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"Square each residual before adding: (-2)^2 + 1^2 + 3^2 = 4 + 1 + 9 = 14. Adding the signed residuals gives 2; adding their absolute values gives 6. Neither is the squared-error criterion used here.\",\n      \"transfer\": \"Reverse the sign of every residual. What happens to SSE, and why?\"\n    },\n    {\n      \"id\": \"ls-cancellation\",\n      \"concept\": \"Residuals and squared error\",\n      \"prerequisites\": [],\n      \"prompt\": \"For points (-1, 1) and (1, -1), the trial line y-hat = 0 gives residuals 1 and -1. Their sum is zero. What follows?\",\n      \"options\": [\n        \"The trial line must minimize SSE.\",\n        \"Both points must lie on the trial line.\",\n        \"Signed errors cancel, but this trial still has SSE = 2.\",\n        \"There is no line through both points.\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"A zero signed sum does not force small individual errors. This trial has SSE = 1^2 + (-1)^2 = 2. The line y-hat = -x passes through both points and has SSE = 0, so the zero-sum trial is not the least-squares solution.\",\n      \"transfer\": \"Write the fitted value and residual for each point under y-hat = -x. Compare the two lines' SSE.\"\n    },\n    {\n      \"id\": \"ls-vertical\",\n      \"concept\": \"Residuals and squared error\",\n      \"prerequisites\": [],\n      \"prompt\": \"In this course's ordinary least-squares model y-hat = a + bx, which separation is squared for each observed point?\",\n      \"options\": [\n        \"The horizontal distance to the line at the same y.\",\n        \"The shortest perpendicular distance to the line.\",\n        \"The distance from the point to the sample mean.\",\n        \"The vertical difference between observed y and the line's value at the same x.\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"The criterion is sum((y_i - a - bx_i)^2). Each x stays fixed while observed y is compared with the line's y value at that x. Perpendicular-distance fitting is a different problem and generally gives a different line.\",\n      \"transfer\": \"For point (2, 5) and line y-hat = x, find the vertical residual. Why would squaring the shortest perpendicular distance represent a different criterion?\"\n    },\n    {\n      \"id\": \"ls-exact-fit\",\n      \"concept\": \"The fitted line and the mean\",\n      \"prerequisites\": [\n        \"Residuals and squared error\"\n      ],\n      \"prompt\": \"For the fictional points (-2, -1), (0, 0) and (2, 3), n = 3, sum(x) = 0, sum(y) = 2, sum(x^2) = 8 and sum(xy) = 8. Which least-squares line follows?\",\n      \"options\": [\n        \"y-hat = 2/3 + x\",\n        \"y-hat = 1 + (2/3)x\",\n        \"y-hat = x\",\n        \"y-hat = 2 + 3x\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"The slope is [n sum(xy) - sum(x)sum(y)] / [n sum(x^2) - sum(x)^2] = 24/24 = 1. The mean point is (0, 2/3), so a = mean(y) - b mean(x) = 2/3. The fitted line has residuals 1/3, -2/3 and 1/3, with SSE = 2/3.\",\n      \"transfer\": \"Change only the middle point from (0, 0) to (0, 2). Recalculate the slope, intercept and SSE.\"\n    },\n    {\n      \"id\": \"ls-mean-point\",\n      \"concept\": \"The fitted line and the mean\",\n      \"prerequisites\": [\n        \"Residuals and squared error\"\n      ],\n      \"prompt\": \"A dataset has mean x = 3/2 and mean y = 3, with at least two distinct x values. Which point must its least-squares line with an intercept pass through?\",\n      \"options\": [\n        \"(0, 0)\",\n        \"(3/2, 3)\",\n        \"Every observed point\",\n        \"The point with the largest y\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"For a fitted line with an intercept, a = mean(y) - b mean(x). Substituting x = mean(x) therefore gives y-hat = mean(y). Passing through the mean point does not mean the mean point was observed, or that every observation lies on the line.\",\n      \"transfer\": \"Add 5 to every x while keeping every y unchanged. Where does the mean point move, and how do the slope and intercept transform?\"\n    },\n    {\n      \"id\": \"ls-minimum-not-perfect\",\n      \"concept\": \"The fitted line and the mean\",\n      \"prerequisites\": [\n        \"Residuals and squared error\"\n      ],\n      \"prompt\": \"The noisy three-point example has minimum SSE = 2/3. Which interpretation is correct?\",\n      \"options\": [\n        \"The computation failed because a least-squares line must have SSE = 0.\",\n        \"A different straight line must pass through all three points.\",\n        \"No straight line has a smaller SSE for these rows; some residuals remain nonzero.\",\n        \"Each point has squared residual 2/3.\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"Least squares minimizes the total squared residual within the chosen family of lines. It does not promise an exact fit. These three points are not collinear: the two successive segment slopes are 1/2 and 3/2. Their fitted squared residuals are 1/9, 4/9 and 1/9, totaling 2/3.\",\n      \"transfer\": \"Add 10 to all three y values. Can this vertical translation change the minimum SSE? Explain without refitting each row.\"\n    },\n    {\n      \"id\": \"ls-repeated-x\",\n      \"concept\": \"The fitted line and the mean\",\n      \"prerequisites\": [\n        \"Residuals and squared error\"\n      ],\n      \"prompt\": \"The rows are (0, 0), (0, 2) and (2, 2). How should a least-squares fit with an intercept treat the repeated x value?\",\n      \"options\": [\n        \"Discard one x = 0 row because repeated x values are invalid.\",\n        \"Return no unique line whenever any x value repeats.\",\n        \"Force the line through both x = 0 observations.\",\n        \"Count all three rows; the unique fit is y-hat = 1 + x/2, with SSE = 2.\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"Repeated x values are allowed. The two x = 0 observations contribute separate squared residuals. The distinct x = 2 gives a positive centered x sum of squares, so the line is unique. Its fitted values are 1, 1 and 2; residuals are -1, 1 and 0, and SSE is 2.\",\n      \"transfer\": \"Remove the row at x = 2. What is still determined by the two remaining rows, and what is no longer uniquely determined?\"\n    },\n    {\n      \"id\": \"ls-y-shift\",\n      \"concept\": \"Changing data and units\",\n      \"prerequisites\": [\n        \"The fitted line and the mean\"\n      ],\n      \"prompt\": \"The noisy example fits y-hat = 2/3 + x with SSE = 2/3. Add 7 to every observed y while leaving all x values unchanged. What is the new fit?\",\n      \"options\": [\n        \"y-hat = 23/3 + x, with unchanged SSE = 2/3.\",\n        \"y-hat = 2/3 + 8x, with unchanged SSE.\",\n        \"y-hat = 23/3 + x, with SSE increased by 7.\",\n        \"The original line, because shifting y does not affect a fit.\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"A common vertical translation raises both the mean y and fitted intercept by 7. It leaves the slope and every residual unchanged: (y_i + 7) - (a + 7 + bx_i) = y_i - a - bx_i. The new intercept is 2/3 + 7 = 23/3, and SSE stays 2/3.\",\n      \"transfer\": \"Also replace each x with x' = x + 5. Express the translated fit in terms of x'.\"\n    },\n    {\n      \"id\": \"ls-x-units\",\n      \"concept\": \"Changing data and units\",\n      \"prerequisites\": [\n        \"The fitted line and the mean\"\n      ],\n      \"prompt\": \"Rewrite the noisy example using x' = 2x, keeping the same y values. This changes the numerical x unit. Which equation describes the same fitted values?\",\n      \"options\": [\n        \"y-hat = 4/3 + 2x'\",\n        \"y-hat = 2/3 + x'/2\",\n        \"y-hat = 2/3 + 2x'\",\n        \"y-hat = x'/2\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"Since x = x'/2, substitute into y-hat = 2/3 + x to get y-hat = 2/3 + x'/2. The intercept stays 2/3 and the slope's numerical value halves. Every row retains the same predicted y, residual and squared residual.\",\n      \"transfer\": \"What happens to SSE under this x-unit change? Explain why a changed slope number need not mean a changed fitted relationship.\"\n    },\n    {\n      \"id\": \"ls-duplicate-rows\",\n      \"concept\": \"Changing data and units\",\n      \"prerequisites\": [\n        \"The fitted line and the mean\"\n      ],\n      \"prompt\": \"Make an editing copy of the noisy example in which every original row appears twice. Every row still has equal weight. What happens?\",\n      \"options\": [\n        \"The fitted slope doubles.\",\n        \"The minimum SSE is halved.\",\n        \"The coefficients stay the same and the minimum SSE doubles from 2/3 to 4/3.\",\n        \"The fit becomes undefined because coordinates repeat.\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"Duplicating every row multiplies the whole objective by 2. Its minimizing coefficients therefore stay the same, while its value at that minimum doubles. Copying rows is not new independent evidence. Duplicating just one row instead would change its relative weight and can change the coefficients.\",\n      \"transfer\": \"If every original row appears three times, what are the coefficients and SSE? Does copying the rows establish additional independent observations?\"\n    },\n    {\n      \"id\": \"ls-influential-point\",\n      \"concept\": \"Changing data and units\",\n      \"prerequisites\": [\n        \"The fitted line and the mean\"\n      ],\n      \"prompt\": \"The first three rows (0, 0), (1, 1) and (2, 2) fit y-hat = x exactly. Add a fourth row (10, -10). Which statement matches ordinary least squares?\",\n      \"options\": [\n        \"The positive trend of the first three rows forces the slope to stay positive.\",\n        \"The fourth row is automatically rejected as an outlier.\",\n        \"Only the intercept can change when one row is added.\",\n        \"All rows contribute; the fit becomes y-hat = 500/251 - (289/251)x.\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"With the fourth row, n = 4, sum(x) = 13, sum(y) = -7, sum(x^2) = 105 and sum(xy) = -95. The slope numerator is -289 and denominator is 251; the intercept is 500/251. A point far from the other x values and far from the old line can strongly change the fit. The method does not decide that an unusual observation should be removed.\",\n      \"transfer\": \"Change only the fourth row to (10, 10). Find the fit and SSE. What does this comparison show about the particular y value at the distant x?\"\n    },\n    {\n      \"id\": \"ls-equal-x\",\n      \"concept\": \"Interpretation limits\",\n      \"prerequisites\": [\n        \"The fitted line and the mean\",\n        \"Changing data and units\"\n      ],\n      \"prompt\": \"All three x values equal 3, while the observed y values are 1, 3 and 5. What does minimizing SSE determine?\",\n      \"options\": [\n        \"The family a + 3b = 3, with minimum SSE = 8; a and b are not separately unique.\",\n        \"The unique line y-hat = 3x.\",\n        \"The unique horizontal line y-hat = 3.\",\n        \"No minimum SSE exists.\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"Every row evaluates a line at the same x = 3, so only a + 3b affects the objective. This common fitted value is minimized at mean(y) = 3. Residuals -2, 0 and 2 give SSE = 8. Infinitely many coefficient pairs satisfy a + 3b = 3; a horizontal line is one member, not the uniquely identified answer.\",\n      \"transfer\": \"Compare the minimizing lines (a, b) = (0, 1) and (3, 0) at x = 4. Why is a unique prediction there unsupported by these rows?\"\n    },\n    {\n      \"id\": \"ls-extrapolation\",\n      \"concept\": \"Interpretation limits\",\n      \"prerequisites\": [\n        \"The fitted line and the mean\",\n        \"Changing data and units\"\n      ],\n      \"prompt\": \"The noisy example was observed at x = -2, 0 and 2. Its fitted line gives y-hat = 11/3 at x = 3. What should that value be called?\",\n      \"options\": [\n        \"An observed value because it came from a fitted line.\",\n        \"An extrapolated line value outside the observed x range, with accuracy not established by this calculation.\",\n        \"A guaranteed future observation.\",\n        \"An impossible arithmetic result.\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"Substitution into 2/3 + x gives 11/3, so the arithmetic is defined. However, x = 3 lies outside the observed range [-2, 2]. Extending the fitted line beyond that range adds a modeling assumption that these observations do not establish. Being inside the range would not by itself guarantee accuracy either.\",\n      \"transfer\": \"Evaluate the same line at x = 1. Classify its location relative to the observed range and explain what the calculation still cannot guarantee.\"\n    },\n    {\n      \"id\": \"ls-causation\",\n      \"concept\": \"Interpretation limits\",\n      \"prerequisites\": [\n        \"The fitted line and the mean\",\n        \"Changing data and units\"\n      ],\n      \"prompt\": \"Four fictional observational pairs lie exactly on y = 1 + 2x, giving SSE = 0. What can the fit alone establish about changing x to cause a change in y?\",\n      \"options\": [\n        \"Changing x must cause twice as much change in y.\",\n        \"A zero SSE proves that no other variables matter.\",\n        \"It describes these recorded pairs; a causal effect is not established by the fit alone.\",\n        \"The fitted slope has no mathematical meaning.\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"The coefficients and zero residuals describe the supplied observations. They do not specify how the observations were generated or what would happen under an intervention. A shared cause, selection process or other explanation can produce an association. A mathematical fit and a causal claim require different evidence.\",\n      \"transfer\": \"Describe one possible reason that two observed quantities could follow a line without one causing the other. What additional study information would help evaluate a causal claim?\"\n    },\n    {\n      \"id\": \"ls-curved-pattern\",\n      \"concept\": \"Interpretation limits\",\n      \"prerequisites\": [\n        \"The fitted line and the mean\",\n        \"Changing data and units\"\n      ],\n      \"prompt\": \"For (-2, 4), (-1, 1), (0, 0), (1, 1) and (2, 4), the best straight line is y-hat = 2. Its residuals are 2, -1, -2, -1 and 2. Which interpretation is justified?\",\n      \"options\": [\n        \"The method failed because the fitted slope is zero.\",\n        \"Zero total signed residual means the residual pattern can be ignored.\",\n        \"The fit proves that y is unrelated to x in every possible form.\",\n        \"The line minimizes SSE among lines, while the curved residual pattern remains visible.\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"The centered x-y sum is zero, giving slope 0 and intercept mean(y) = 2. The squared residuals sum to 14. This is the best straight line for these rows, but the residuals form a clear curved pattern. Choosing a line as the candidate family does not make a nonlinear pattern disappear.\",\n      \"transfer\": \"The curve y = x^2 passes through these authored points. Compare its in-sample squared residuals with the line's, and explain why that comparison still does not prove a causal mechanism.\"\n    }\n  ]\n}\n"</script>
+<script type="application/json" id="guide-text">"# Least squares: fit a line and read its residuals\n\nThis original RecallWeave course is a small laboratory for a specific question: **which straight line minimizes the total squared vertical error for these point rows?** The answer is exact for the entered data. It does not establish that a straight line is the right model of a population, that a fitted association is causal, or that a new observation will land on the line.\n\nThe six datasets below are fictional teaching examples. Every row has equal weight. Repeated rows remain separate rows; duplicating a row is not evidence that a new independent observation was made.\n\n## Start with a line you can change\n\n1. Open `courses/least-squares-lab.html` directly in a modern browser. The lab contains its own code, course and guide; it does not need a server, network requests or a provider account.\n2. Load **A noisy trend**. Read the three entered points. Compare the trial line with the fitted line, the signed vertical residuals and the two sums of squared errors (SSE).\n3. Select **Use fitted line**. It copies the exact fractions into the trial controls. The excess SSE becomes exactly zero; displayed rounded decimals never become the calculation inputs.\n4. Change the middle y from 0 to 2. Predict what will happen before reading the new coefficients and residuals. Change the trial line yourself, then try the other examples.\n5. Download **Course JSON** from the lab. In the repository's `demo.html` learner, use **Bring your own lesson** to choose that actual downloaded file, review the import preview and start the lesson. This is a `recallweave-deck/1` course, separate from session, trace and study-note files. The sixteen original questions, explanations and transfer prompts do not change when you edit lab data.\n6. Answer a question, inspect its explanation and use the learner's review/practice flow. Use this guide to work the transfer prompts before checking the answers below. A downloaded course contains lesson content, not your answers or a saved model state.\n\nLab changes last only in the open tab. Loading an example replaces its point rows, trial coefficients and query value. Neither the lab nor its downloads automatically store or upload those edits. The fixed course and this guide remain downloadable when an unfinished or invalid lab value has temporarily retired the calculated results.\n\n## What is being minimized?\n\nWrite a line as **ŷ = a + bx**, where a is the intercept and b is the slope. For row i, the signed residual is\n\n`r_i = y_i − (a + b*x_i)`.\n\nIt is measured vertically: observed y minus the line's y at the **same x**. A positive residual places the point above the line; a negative one places it below. This is not perpendicular distance to the line. The criterion is\n\n`SSE(a,b) = Σ r_i²`.\n\nSquaring prevents positive and negative errors from cancelling and gives large residuals more influence on the total. For example, residuals −2, 1 and 3 have sum 2 but SSE `4 + 1 + 9 = 14`. A sum of zero residuals alone does not identify the best line: for points (−1,1) and (1,−1), the trial line y = 0 has residuals 1 and −1 and SSE 2; the line y = −x has SSE 0.\n\nFor n rows, let x̄ and ȳ be the arithmetic means. If at least two x values differ, define\n\n```text\nSxx = Σ(x_i − x̄)²\nSxy = Σ(x_i − x̄)(y_i − ȳ)\nb* = Sxy / Sxx\na* = ȳ − b* x̄\n```\n\nEquivalently, `b* = (n Σxy − Σx Σy) / (n Σx² − (Σx)²)`. The nonzero denominator identifies a unique slope. The fitted line passes through (x̄,ȳ), and its residuals satisfy both `Σr_i = 0` and `Σx_i r_i = 0`.\n\n### Why this is the minimum\n\nCompare any trial a,b with the fitted a*,b*. Put `δa = a − a*` and `δb = b − b*`. Expanding the squared residuals and using the two zero sums gives\n\n```text\nSSE(a,b) − SSE(a*,b*)\n  = n(δa + x̄ δb)² + Sxx δb².\n```\n\nBoth terms are nonnegative. With distinct x values, Sxx is positive, so equality requires δb = 0 and then δa = 0. This proves uniqueness and the minimum for the stated straight-line criterion. The first term measures how far the trial line misses the mean point; the second measures its slope difference, weighted by the spread in x. The lab reports both exact terms.\n\n**All x equal is a valid, different state.** If every x equals c, then Sxx = 0. The minimum occurs whenever `a + bc = ȳ`, and the observed fitted value is ȳ for every row. Minimum SSE is `Σ(y_i − ȳ)²`, and the trial's excess is `n(a + bc − ȳ)²`. There are infinitely many minimizing lines, so the lab does not choose an arbitrary slope or draw a uniquely fitted line. Only the fitted value at x = c is determined. Ordinary repeated x values cause no such ambiguity when another distinct x is present. Constant y with distinct x has the unique horizontal fit b = 0.\n\n## Six worked examples\n\n### 1. A noisy trend\n\nPoints: (−2,−1), (0,0), (2,3). Here x̄ = 0, ȳ = 2/3, Sxx = 8 and Sxy = 8. Thus **a* = 2/3, b* = 1**.\n\n| Row | Fitted ŷ | Residual y − ŷ | Squared residual |\n| --- | ---: | ---: | ---: |\n| (−2,−1) | −4/3 | 1/3 | 1/9 |\n| (0,0) | 2/3 | −2/3 | 4/9 |\n| (2,3) | 8/3 | 1/3 | 1/9 |\n\nMinimum SSE is **2/3**. The initial trial a = 0, b = 1 has SSE 2, with excess 4/3 entirely from missing the mean point. At x = 1, the fit gives 5/3 inside the observed x range [−2,2]. At x = 3, it gives 11/3 outside that range: this is extrapolation.\n\nChange only the middle y to 2. The new fit is **a* = 4/3, b* = 1**; residuals become −1/3, 2/3, −1/3. Minimum SSE remains 2/3 even though both the intercept and the signed residual pattern changed.\n\n### 2. A perfect line\n\nPoints: (−2,−3), (0,1), (2,5). The line **ŷ = 1 + 2x** reaches every point. All residuals and minimum SSE are zero. That is a statement about these authored rows, not a causal conclusion or a guarantee about unseen rows.\n\n### 3. A curved pattern\n\nPoints: (−2,4), (−1,1), (0,0), (1,1), (2,4). Their mean point is (0,2), and Sxy = 0. The best line is **ŷ = 2**. Its residuals are 2, −1, −2, −1, 2, and minimum SSE is **14**. The flat trial y = 0 has SSE 34, so its excess 20 equals `5 × (0 − 2)²`.\n\nThe residual pattern still curves. The rule y = x² reaches these five points exactly, but it is a different model class. Comparing in-sample SSE does not by itself establish future predictive accuracy or causation.\n\n### 4. Repeated x values\n\nPoints: (0,0), (0,2), (2,2). Both x = 0 rows count. Their distinct y values cannot both be reached by one line at x = 0. The unique fit is **ŷ = 1 + x/2**; its residuals −1, 1, 0 have minimum SSE **2**. The x = 2 row makes the slope identifiable. Removing it leaves only x = 0: the optimum requires a = 1, with arbitrary b and the same minimum SSE 2.\n\n### 5. All x values equal\n\nPoints: (3,1), (3,3), (3,5). Their shared best fitted value is ȳ = 3. Residuals −2, 0, 2 give minimum SSE **8**. Every line satisfying **a + 3b = 3** reaches that minimum.\n\nTrial a = 0, b = 1 and trial a = 3, b = 0 are both minimizers. At x = 3 both give 3. At x = 4 they give 4 and 3 respectively, so a unique fitted value at x = 4 cannot be inferred from these data. Trial a = 0, b = 0 instead has SSE 35; its excess 27 is `3 × (0 − 3)²`.\n\n### 6. One distant point\n\nPoints: (0,0), (1,1), (2,2), (10,−10). The first three lie on y = x. With the fourth row included, n = 4, Σx = 13, Σy = −7, Σx² = 105 and Σxy = −95. Therefore\n\n```text\nb* = [4(−95) − 13(−7)] / [4(105) − 13²] = −289/251\na* = −7/4 − (−289/251)(13/4) = 500/251\nminimum SSE = 2400/251\n```\n\nThe fitted residuals are −500/251, 40/251, 580/251 and −120/251. Their sum and x-weighted sum are both zero. Changing only the final y to 10 restores **ŷ = x**, with SSE 0. The large change illustrates sensitivity to a distant row; it is not a rule that an inconvenient observation should be deleted. Whether a row is erroneous requires information beyond its residual.\n\n## Worked answers to the sixteen transfer prompts\n\nThe question IDs connect these answers to the actual downloaded course.\n\n| Question | Worked transfer answer |\n| --- | --- |\n| `ls-residual` | With x = 2 and line ŷ = 1 + 2x, ŷ = 5. Changing observed y to 7 gives r = 7 − 5 = 2 and r² = 4. The point is above the line. |\n| `ls-sse` | Reversing every residual's sign leaves its square unchanged. Residuals 2, −1, −3 still have SSE 4 + 1 + 9 = 14. |\n| `ls-cancellation` | The trial y = 0 has opposite residuals that sum to zero but SSE 2. The fitted y = −x has two zero residuals and SSE 0. Squared errors, not their signed cancellation, select the fit. |\n| `ls-vertical` | At point (2,5) and line ŷ = x, the vertical residual is 5 − 2 = 3, with square 9. Perpendicular distance is 3/√2, with square 9/2; it describes a different criterion. |\n| `ls-exact-fit` | Replacing the middle y by 2 changes ȳ to 4/3 while x̄ = 0 and b* = 1 remain. The fit is 4/3 + x, residuals are −1/3, 2/3, −1/3, and SSE is 2/3. |\n| `ls-mean-point` | Adding 5 to every x moves the mean from (3/2,3) to (13/2,3). A line expressed in x′ = x + 5 keeps slope b and changes intercept to a − 5b. The fitted y values and residuals remain the same. |\n| `ls-minimum-not-perfect` | Adding 10 to every y adds 10 to the fitted intercept, with unchanged slope and residuals. The noisy example still has minimum SSE 2/3. |\n| `ls-repeated-x` | Removing the x = 2 row leaves (0,0) and (0,2). Their best fitted value is 1 at x = 0, so a = 1 and b is arbitrary. Residuals −1 and 1 give minimum SSE 2. |\n| `ls-y-shift` | First adding 7 to every y gives intercept 23/3 and slope 1. Then using x′ = x + 5 changes the intercept to 23/3 − 5 = 8/3. Fitted values shift by 7 and residuals do not change. |\n| `ls-x-units` | With x′ = 2x, write 2/3 + x as 2/3 + (1/2)x′. The numerical slope halves, while the intercept, fitted y values, residuals and SSE remain unchanged. Slope units must be interpreted with the chosen x units. |\n| `ls-duplicate-rows` | Repeating every original row three times multiplies every candidate line's SSE by three. The fitted coefficients stay 2/3 and 1; minimum SSE becomes 3 × 2/3 = 2. These copies do not demonstrate independent new evidence. |\n| `ls-influential-point` | With final point (10,10), all four points lie on y = x. The fit returns a* = 0, b* = 1 and SSE 0. Restoring y = −10 returns a* = 500/251, b* = −289/251 and SSE = 2400/251. |\n| `ls-equal-x` | At x = 4, the equally minimizing lines a = 0, b = 1 and a = 3, b = 0 give 4 and 3. Agreement at the shared observed x = 3 does not determine a unique prediction elsewhere. |\n| `ls-extrapolation` | Querying x = 1 gives 2/3 + 1 = 5/3, inside [−2,2]. Being inside the range avoids this particular extension beyond observed x, but does not guarantee an accurate new observation or a correct model. |\n| `ls-causation` | A common cause could influence both x and y, or selection could create an association in the recorded sample. Establishing a causal interpretation needs substantive knowledge and an appropriate study or intervention design; a perfect fitted line alone supplies neither. |\n| `ls-curved-pattern` | For the five authored rows, y = x² has in-sample SSE 0, versus the best line's 14. This demonstrates that the model classes differ, not that the quadratic relationship is causal or will generalize. |\n\n## What changes with units or rows?\n\nAdding k to every y adds k to the fitted intercept and leaves the residuals unchanged. Multiplying every y by a nonzero factor q multiplies a*, b* and each residual by q, and multiplies SSE by q². SSE has squared y units, so a smaller numerical SSE after a unit change is not automatically a better fit.\n\nUsing x′ = h + g x with nonzero g changes the slope to b*/g and the intercept to a* − b*h/g, while fitted y values and SSE stay the same. Reordering rows changes their presentation, not the criterion. Repeating all rows k times leaves a unique optimum's coefficients unchanged and multiplies SSE by k. Adding or repeating just one row changes its relative weight and can change the optimum.\n\n## Input and display boundaries\n\n- Use 2–12 ordered point rows. Each x and y is an integer from −20 to 20. Empty, fractional or out-of-range point text remains visible for correction and retires the old results.\n- Trial a and b are bounded to absolute value 1000. Query x is bounded to absolute value 40. Use integers, decimals with at most three places and a leading digit (`0.5`), or fractions such as `2/3`. A fraction's denominator must be nonzero; numerator and denominator each have at most nine digits. Exponent notation is not admitted.\n- Coefficients, predictions, residuals and SSE are reduced fractions calculated with integer arithmetic. Exact fractions are the authoritative values. Secondary decimals and plot coordinates are approximate views only.\n- The point range and fitted line determine the plot scale. A distant trial line is clipped at the plot boundary rather than compressing the data into a tiny region. The exact trial values remain in the table, and the plot says when the trial is wholly off screen. The table can scroll horizontally on a narrow display.\n- A fitted value is a line evaluation, not a prediction interval. This lab estimates no noise distribution, confidence interval, p-value or population effect. It does not assess measurement quality, independence, sampling design or omitted variables.\n\n## Build and check the repository artifact\n\nFrom the repository root, using its existing Node runtime:\n\n```sh\nnode tools/build_least_squares.mjs\nnode tools/build_least_squares.mjs --check\nnode --test tests/least-squares.test.mjs\nnode tools/check_least_squares_browser.mjs\n```\n\nThe builder validates the actual course with `src/deck.mjs` and embeds the exact JSON and guide bytes. `--check` refuses a stale generated HTML file. The browser receiver uses an explicitly supplied existing Chromium executable, the current actual `demo.html`, a fresh private profile and an evidence directory; see its command-line help for the required paths and the 256 MiB native free-space floor. It records actual downloaded files, changed-input outcomes and desktop/mobile captures. It does not install dependencies or change another running browser.\n\n## Attribution and references\n\nOriginal lab, questions, distractors, worked examples, explanations and transfer prompts: HAMON contributor `estate-db371a37f4c8 / capability`, for RecallWeave. All datasets above are newly authored fictional examples. No reference exercises, figures or passages were copied.\n\nMathematical background:\n\n- NIST/SEMATECH, *e-Handbook of Statistical Methods*, [4.4.3.1, Least Squares](https://www.itl.nist.gov/div898/handbook/pmd/section4/pmd431.htm): squared-error criterion and line-fitting formulas.\n- NIST/SEMATECH, [4.1.4.1, Linear Least Squares Regression](https://www.itl.nist.gov/div898/handbook/pmd/section1/pmd141.htm): model scope and sensitivity/extrapolation limitations.\n- OpenStax, *Introductory Statistics 2e*, [12.3, The Regression Equation](https://openstax.org/books/introductory-statistics-2e/pages/12-3-the-regression-equation): vertical residuals, mean-point property and interpretation.\n\nThis course and guide make no separate reuse-license grant. The linked references retain their own terms. The repository's AI disclosure also applies.\n"</script>
+<script>(() => {
+'use strict';
+/** Exact arithmetic for this bounded teaching lab; no statistical-inference model. */
+const LIMITS = Object.freeze({minPoints: 2, maxPoints: 12, coordinate: 20, coefficient: 1000, query: 40});
+
+const abs = value => value < 0n ? -value : value;
+function gcd(a, b) {
+  a = abs(a); b = abs(b);
+  while (b !== 0n) [a, b] = [b, a % b];
+  return a;
+}
+function fraction(n, d = 1n) {
+  if (d === 0n) throw new Error('A fraction cannot have a zero denominator.');
+  if (d < 0n) { n = -n; d = -d; }
+  const divisor = gcd(n, d);
+  return Object.freeze({n: n / divisor, d: d / divisor});
+}
+const add = (a, b) => fraction(a.n * b.d + b.n * a.d, a.d * b.d);
+const subtract = (a, b) => fraction(a.n * b.d - b.n * a.d, a.d * b.d);
+const multiply = (a, b) => fraction(a.n * b.n, a.d * b.d);
+const divide = (a, b) => fraction(a.n * b.d, a.d * b.n);
+const square = a => multiply(a, a);
+const integer = a => fraction(BigInt(a));
+const ZERO = fraction(0n);
+const sum = values => values.reduce(add, ZERO);
+
+function freeze(value) {
+  if (value && typeof value === 'object' && !Object.isFrozen(value)) {
+    Object.values(value).forEach(freeze);
+    Object.freeze(value);
+  }
+  return value;
+}
+
+/** Exact text is the source for copied coefficients; decimals are display only. */
+function rationalText(value) {
+  return value.d === 1n ? String(value.n) : `${value.n}/${value.d}`;
+}
+function rationalNumber(value) { return Number(value.n) / Number(value.d); }
+
+function parseCoordinate(text, label = 'Coordinate') {
+  if (typeof text !== 'string' || text.length > 16 || !/^[+-]?\d{1,3}$/.test(text.trim())) {
+    throw new Error(`${label}: enter a whole number from -20 to 20.`);
+  }
+  const result = Number(text.trim());
+  if (!Number.isInteger(result) || Math.abs(result) > LIMITS.coordinate) {
+    throw new Error(`${label}: enter a whole number from -20 to 20.`);
+  }
+  return result === 0 ? 0 : result;
+}
+
+/** Bounded, written decimal or fraction intent; exponent notation is not admitted. */
+function parseScalar(text, {limit = LIMITS.coefficient, label = 'Value'} = {}) {
+  if (!Number.isSafeInteger(limit) || limit < 0 || limit > LIMITS.coefficient) {
+    throw new Error('Unsupported scalar bound.');
+  }
+  if (typeof text !== 'string' || text.length > 32) throw new Error(`${label}: enter a bounded number or fraction.`);
+  const input = text.trim();
+  let value;
+  const ratio = /^([+-]?\d{1,9})\/([+-]?\d{1,9})$/.exec(input);
+  if (ratio) {
+    if (BigInt(ratio[2]) === 0n) throw new Error(`${label}: the denominator must be nonzero.`);
+    value = fraction(BigInt(ratio[1]), BigInt(ratio[2]));
+  } else {
+    const decimal = /^([+-]?)(\d{1,9})(?:\.(\d{1,3}))?$/.exec(input);
+    if (!decimal) throw new Error(`${label}: use an integer, up to three decimal places, or a fraction such as 2/3.`);
+    const places = decimal[3] ?? '';
+    const sign = decimal[1] === '-' ? -1n : 1n;
+    value = fraction(sign * BigInt(decimal[2] + places), 10n ** BigInt(places.length));
+  }
+  if (abs(value.n) > BigInt(limit) * value.d) throw new Error(`${label}: keep the value between -${limit} and ${limit}.`);
+  return value;
+}
+
+function admitPoints(points) {
+  if (!Array.isArray(points) || points.length < LIMITS.minPoints || points.length > LIMITS.maxPoints) {
+    throw new Error('Use between 2 and 12 point rows.');
+  }
+  return points.map((point, index) => {
+    if (!point || typeof point !== 'object' || Array.isArray(point)) throw new Error(`Point ${index + 1} must have x and y coordinates.`);
+    for (const axis of ['x', 'y']) {
+      if (!Number.isSafeInteger(point[axis]) || Math.abs(point[axis]) > LIMITS.coordinate) {
+        throw new Error(`Point ${index + 1}, ${axis}: use a whole number from -20 to 20.`);
+      }
+    }
+    return {index: index + 1, x: point.x === 0 ? 0 : point.x, y: point.y === 0 ? 0 : point.y};
+  });
+}
+
+function rowsForPredictions(points, predicted) {
+  const rows = points.map((point, index) => {
+    const residual = subtract(integer(point.y), predicted[index]);
+    return {...point, predicted: predicted[index], residual, squared: square(residual)};
+  });
+  return {
+    rows,
+    sse: sum(rows.map(row => row.squared)),
+    residualSum: sum(rows.map(row => row.residual)),
+    xResidualSum: sum(rows.map(row => multiply(integer(row.x), row.residual)))
+  };
+}
+
+function scoreLine(points, intercept, slope) {
+  return rowsForPredictions(points, points.map(point => add(intercept, multiply(slope, integer(point.x)))));
+}
+
+/** Every returned point is copied; the caller's editing data is never changed. */
+function analyze(points, {intercept = '0', slope = '1', query = '1'} = {}) {
+  const admitted = admitPoints(points);
+  const a = parseScalar(intercept, {label: 'Trial intercept a'});
+  const b = parseScalar(slope, {label: 'Trial slope b'});
+  const queryX = parseScalar(query, {limit: LIMITS.query, label: 'Query x'});
+  const n = BigInt(admitted.length);
+  let sx = 0n, sy = 0n, sxx = 0n, sxy = 0n;
+  for (const point of admitted) {
+    const x = BigInt(point.x), y = BigInt(point.y);
+    sx += x; sy += y; sxx += x * x; sxy += x * y;
+  }
+  const denominator = n * sxx - sx * sx;
+  const meanX = fraction(sx, n), meanY = fraction(sy, n);
+  const centeredXX = fraction(denominator, n);
+  const centeredXY = fraction(n * sxy - sx * sy, n);
+  let fit;
+  if (denominator === 0n) {
+    // The observed fitted vector is unique even though its line coefficients are not.
+    fit = {
+      kind: 'underdetermined', intercept: null, slope: null, sharedX: admitted[0].x,
+      ...rowsForPredictions(admitted, admitted.map(() => meanY))
+    };
+  } else {
+    const fittedSlope = divide(centeredXY, centeredXX);
+    const fittedIntercept = subtract(meanY, multiply(fittedSlope, meanX));
+    fit = {kind: 'unique', intercept: fittedIntercept, slope: fittedSlope, sharedX: null,
+      ...scoreLine(admitted, fittedIntercept, fittedSlope)};
+  }
+  const trial = {intercept: a, slope: b, ...scoreLine(admitted, a, b)};
+  const excessSSE = subtract(trial.sse, fit.sse);
+  const meanError = subtract(add(a, multiply(b, meanX)), meanY);
+  const meanTerm = multiply(fraction(n), square(meanError));
+  const slopeTerm = fit.kind === 'unique' ? multiply(centeredXX, square(subtract(b, fit.slope))) : ZERO;
+  const decompositionTotal = add(meanTerm, slopeTerm);
+  if (excessSSE.n < 0n || rationalText(excessSSE) !== rationalText(decompositionTotal)) {
+    throw new Error('The exact least-squares identity did not hold.');
+  }
+  const minX = Math.min(...admitted.map(point => point.x));
+  const maxX = Math.max(...admitted.map(point => point.x));
+  let prediction;
+  if (fit.kind === 'underdetermined') {
+    const atSharedX = queryX.n === BigInt(fit.sharedX) * queryX.d;
+    prediction = {x: queryX, kind: atSharedX ? 'shared_x_only' : 'underdetermined', value: atSharedX ? meanY : null};
+  } else {
+    const outside = queryX.n < BigInt(minX) * queryX.d || queryX.n > BigInt(maxX) * queryX.d;
+    prediction = {x: queryX, kind: outside ? 'extrapolation' : 'in_range', value: add(fit.intercept, multiply(fit.slope, queryX))};
+  }
+  return freeze({
+    points: admitted, count: admitted.length, meanX, meanY, centeredXX, centeredXY,
+    sums: {x: fraction(sx), y: fraction(sy), xx: fraction(sxx), xy: fraction(sxy)},
+    fit, trial, excessSSE, decomposition: {meanError, meanTerm, slopeTerm, total: decompositionTotal},
+    prediction, range: {minX, maxX}
+  });
+}
+
+const points = pairs => pairs.map(([x, y]) => ({x, y}));
+const EXAMPLES = freeze([
+  {id: 'noisy', name: 'A noisy trend', points: points([[-2, -1], [0, 0], [2, 3]]), intercept: '0', slope: '1', query: '1',
+    note: 'Compare your line with the fitted line. Then change the middle y from 0 to 2 and watch the intercept and residuals.'},
+  {id: 'perfect', name: 'A perfect line', points: points([[-2, -3], [0, 1], [2, 5]]), intercept: '0', slope: '1', query: '0',
+    note: 'These authored points lie on one line. A zero SSE describes these points; it does not establish a cause or predict every future observation.'},
+  {id: 'curved', name: 'A curved pattern', points: points([[-2, 4], [-1, 1], [0, 0], [1, 1], [2, 4]]), intercept: '0', slope: '0', query: '1',
+    note: 'Even the best straight line leaves a curved residual pattern. Minimum SSE among lines does not make the underlying pattern linear.'},
+  {id: 'repeated', name: 'Repeated x values', points: points([[0, 0], [0, 2], [2, 2]]), intercept: '0', slope: '1', query: '1',
+    note: 'Two rows share x = 0. They still count separately, and the different x = 2 makes the fitted line unique.'},
+  {id: 'equal-x', name: 'All x values equal', points: points([[3, 1], [3, 3], [3, 5]]), intercept: '0', slope: '1', query: '3',
+    note: 'Only a + 3b is identified. Compare the trial lines a = 0, b = 1 and a = 3, b = 0, then query x = 4.'},
+  {id: 'influential', name: 'One distant point', points: points([[0, 0], [1, 1], [2, 2], [10, -10]]), intercept: '0', slope: '1', query: '4',
+    note: 'The first three points lie on y = x. Change the last point to (10, 10), then back to (10, -10), to see how one row changes the fitted line.'}
+]);
+
+
+
+const byId = id => document.getElementById(id);
+const pointRows = byId('point-rows');
+const trialA = byId('trial-a'), trialB = byId('trial-b'), queryInput = byId('query-x');
+const chooseExample = byId('example-select'), residualModel = byId('residual-model');
+const fitButton = byId('use-fit'), addButton = byId('add-row');
+const plotHost = byId('plot');
+let current = null;
+let activeExample = EXAMPLES[0];
+let dataEdited = false;
+
+const exact = rationalText;
+const approximate = value => Number(rationalNumber(value).toPrecision(6)).toString();
+function showExact(id, value) {
+  const target = byId(id);
+  target.replaceChildren(document.createTextNode(exact(value)));
+  if (value.d !== 1n) {
+    const small = document.createElement('small');
+    small.textContent = `≈ ${approximate(value)} (display only)`;
+    target.append(small);
+  }
+}
+function lineText(a, b) {
+  const magnitude = exact({n: b.n < 0n ? -b.n : b.n, d: b.d});
+  return `ŷ = ${exact(a)} ${b.n < 0n ? '−' : '+'} ${magnitude} × x`;
+}
+function markRead(input, read) {
+  try { return read(input.value); }
+  catch (error) { input.setAttribute('aria-invalid', 'true'); throw error; }
+}
+function readInputs() {
+  document.querySelectorAll('input[aria-invalid]').forEach(input => input.removeAttribute('aria-invalid'));
+  const entered = [...pointRows.children].map((row, i) => ({
+    x: markRead(row.querySelector('[data-axis=x]'), text => parseCoordinate(text, `Point ${i + 1}, x`)),
+    y: markRead(row.querySelector('[data-axis=y]'), text => parseCoordinate(text, `Point ${i + 1}, y`))
+  }));
+  markRead(trialA, text => parseScalar(text, {label: 'Trial intercept a'}));
+  markRead(trialB, text => parseScalar(text, {label: 'Trial slope b'}));
+  markRead(queryInput, text => parseScalar(text, {limit: LIMITS.query, label: 'Query x'}));
+  return analyze(entered, {intercept: trialA.value, slope: trialB.value, query: queryInput.value});
+}
+
+function changeVisibility(valid) {
+  for (const id of ['fit-content', 'table-content', 'prediction-content', 'minimum-content']) byId(id).hidden = !valid;
+  for (const id of ['fit-empty', 'table-empty']) byId(id).hidden = valid;
+}
+function retireResults(message) {
+  current = null;
+  fitButton.disabled = true;
+  byId('copy-note').textContent = 'Correct the input before copying a fitted line.';
+  changeVisibility(false);
+  byId('residual-rows').replaceChildren();
+  for (const id of ['fit-equation', 'fit-scope', 'fit-a', 'fit-b', 'mean-point', 'fit-sse', 'trial-sse',
+    'excess-sse', 'comparison', 'prediction-result', 'prediction-scope', 'identity-values', 'normal-values',
+    'identity-explanation', 'table-caption']) byId(id).replaceChildren();
+  plotHost.replaceChildren();
+  const empty = document.createElement('p'); empty.className = 'empty';
+  empty.textContent = 'No current plot. Correct the input to calculate these visible rows.';
+  plotHost.append(empty);
+  byId('plot-note').textContent = 'The previous result has been retired. The fixed course and guide are still available below.';
+  byId('lab-status').className = 'status invalid';
+  byId('lab-status').textContent = message;
+}
+function update() {
+  try {
+    current = readInputs();
+    showResult(current);
+  } catch (error) {
+    retireResults(error.message);
+  }
+}
+
+function makeRow(x, y, i) {
+  const row = document.createElement('div'); row.className = 'point-row';
+  const index = document.createElement('span'); index.className = 'point-index'; index.textContent = String(i + 1);
+  row.append(index);
+  for (const [axis, value] of [['x', x], ['y', y]]) {
+    const input = document.createElement('input');
+    input.type = 'text'; input.inputMode = 'numeric'; input.maxLength = 16;
+    input.autocomplete = 'off'; input.spellcheck = false;
+    input.dataset.axis = axis; input.value = String(value);
+    input.setAttribute('aria-label', `Point ${i + 1}, ${axis}`);
+    input.addEventListener('input', () => { dataEdited = true; showExampleNote(); update(); });
+    row.append(input);
+  }
+  const remove = document.createElement('button');
+  remove.type = 'button'; remove.className = 'secondary'; remove.textContent = '−';
+  remove.setAttribute('aria-label', `Remove point ${i + 1}`);
+  remove.addEventListener('click', () => {
+    if (pointRows.children.length <= LIMITS.minPoints) return;
+    const remaining = [...pointRows.children].filter(item => item !== row).map(item => [
+      item.querySelector('[data-axis=x]').value, item.querySelector('[data-axis=y]').value
+    ]);
+    renderRows(remaining); dataEdited = true; showExampleNote(); update();
+    pointRows.children[Math.min(i, remaining.length - 1)].querySelector('input').focus();
+  });
+  row.append(remove); return row;
+}
+function renderRows(rows) {
+  pointRows.replaceChildren(...rows.map(([x, y], i) => makeRow(x, y, i)));
+  updateRowButtons();
+}
+function updateRowButtons() {
+  const n = pointRows.children.length;
+  addButton.disabled = n >= LIMITS.maxPoints;
+  pointRows.querySelectorAll('button').forEach(button => { button.disabled = n <= LIMITS.minPoints; });
+}
+function showExampleNote() {
+  byId('example-note').textContent = dataEdited
+    ? `Your edited data began with “${activeExample.name}”. Load / reset restores the authored rows.`
+    : `Loaded: ${activeExample.name}. ${activeExample.note}`;
+}
+function loadExample(moveFocus = false) {
+  activeExample = EXAMPLES.find(example => example.id === chooseExample.value) ?? EXAMPLES[0];
+  dataEdited = false;
+  renderRows(activeExample.points.map(point => [point.x, point.y]));
+  trialA.value = activeExample.intercept; trialB.value = activeExample.slope; queryInput.value = activeExample.query;
+  showExampleNote(); update();
+  if (moveFocus) pointRows.querySelector('input').focus();
+}
+
+function showResult(result) {
+  changeVisibility(true);
+  const unique = result.fit.kind === 'unique';
+  byId('fit-legend').hidden = !unique;
+  fitButton.disabled = !unique;
+  byId('copy-note').textContent = unique ? 'Copies exact coefficients into your trial, including fractions.'
+    : 'No unique coefficients to copy. Try two lines that satisfy the displayed relation.';
+  byId('lab-status').className = 'status';
+  byId('lab-status').textContent = unique
+    ? `${result.count} rows · a unique fitted line. Every row counts equally; calculated fractions are exact.`
+    : `${result.count} rows · all x values equal ${result.fit.sharedX}. A family of lines shares the minimum; no unique slope is identified.`;
+  if (unique) {
+    byId('fit-equation').textContent = lineText(result.fit.intercept, result.fit.slope);
+    byId('fit-scope').textContent = 'The unique line with the smallest SSE for these rows. A minimum can still leave a pattern in the residuals.';
+    showExact('fit-a', result.fit.intercept); showExact('fit-b', result.fit.slope);
+  } else {
+    byId('fit-equation').textContent = `a + (${result.fit.sharedX}) × b = ${exact(result.meanY)}`;
+    byId('fit-scope').textContent = `Every line satisfying this relation is a minimizer. At the shared x = ${result.fit.sharedX}, the fitted value is ${exact(result.meanY)}; no unique line is drawn.`;
+    byId('fit-a').textContent = 'Not unique'; byId('fit-b').textContent = 'Not unique';
+  }
+  byId('mean-point').textContent = `(${exact(result.meanX)}, ${exact(result.meanY)})`;
+  showExact('fit-sse', result.fit.sse); showExact('trial-sse', result.trial.sse); showExact('excess-sse', result.excessSSE);
+  byId('comparison').textContent = result.excessSSE.n === 0n
+    ? 'Your trial line attains the same minimum SSE for these rows.'
+    : `Your trial line adds exactly ${exact(result.excessSSE)} to the minimum SSE.`;
+  showTable(result); showPrediction(result); showMinimum(result); drawPlot(result);
+}
+
+function showTable(result) {
+  const body = byId('residual-rows');
+  body.replaceChildren(...result.fit.rows.map((fitRow, i) => {
+    const trialRow = result.trial.rows[i];
+    const row = document.createElement('tr');
+    const cells = [fitRow.index, fitRow.x, fitRow.y, exact(fitRow.predicted), exact(fitRow.residual), exact(fitRow.squared),
+      exact(trialRow.predicted), exact(trialRow.residual), exact(trialRow.squared)];
+    for (const value of cells) { const cell = document.createElement('td'); cell.textContent = String(value); row.append(cell); }
+    return row;
+  }));
+  byId('table-caption').textContent = result.fit.kind === 'unique'
+    ? 'Exact fractions for all entered rows. Positive residuals are above their line; negative residuals are below. Repeated rows remain separate.'
+    : `The Fit columns show the common minimizing value at the observed x = ${result.fit.sharedX}. They do not select a unique slope or a line elsewhere.`;
+}
+function showPrediction(result) {
+  const prediction = result.prediction;
+  byId('prediction-result').textContent = prediction.value === null
+    ? `At x = ${exact(prediction.x)}: no unique fitted value`
+    : `At x = ${exact(prediction.x)}: ŷ = ${exact(prediction.value)}`;
+  const descriptions = {
+    in_range: `Inside the observed x range [${result.range.minX}, ${result.range.maxX}]. This is an evaluation of the fitted line, not a guarantee about a new observation.`,
+    extrapolation: `Extrapolation: outside the observed x range [${result.range.minX}, ${result.range.maxX}]. Extending the fitted line beyond these rows is not supported by observations there.`,
+    shared_x_only: 'This is the shared observed x. All minimizing lines agree here, but they can disagree at every other x.',
+    underdetermined: `All observations share x = ${result.fit.sharedX}. The minimizing lines can disagree at this query, so the lab does not invent one prediction.`
+  };
+  byId('prediction-scope').textContent = descriptions[prediction.kind];
+}
+function showMinimum(result) {
+  byId('identity-values').textContent = `${exact(result.excessSSE)} = ${exact(result.decomposition.meanTerm)} + ${exact(result.decomposition.slopeTerm)}`;
+  byId('normal-values').textContent = `Fitted residual checks: Σr = ${exact(result.fit.residualSum)}; Σ(xr) = ${exact(result.fit.xResidualSum)}.`;
+  byId('identity-explanation').textContent = result.fit.kind === 'unique'
+    ? `For trial a,b and fitted a*,b*, the excess is n[(a − a*) + x̄(b − b*)]² + Sxx(b − b*)². Here n = ${result.count}, x̄ = ${exact(result.meanX)} and Sxx = ${exact(result.centeredXX)}. The first term measures the trial's miss at the mean point; the second measures its slope difference.`
+    : `All x equal ${result.fit.sharedX}, so Sxx = 0 and there is no identified slope to subtract. The excess is n[a + b × (${result.fit.sharedX}) − ȳ]², with n = ${result.count} and ȳ = ${exact(result.meanY)}. Any coefficients satisfying the displayed relation give zero excess.`;
+}
+
+const svgNS = 'http://www.w3.org/2000/svg';
+function svgNode(tag, attributes = {}, content) {
+  const node = document.createElementNS(svgNS, tag);
+  for (const [key, value] of Object.entries(attributes)) node.setAttribute(key, String(value));
+  if (content !== undefined) node.textContent = content;
+  return node;
+}
+function clippedLine(a, b, bounds) {
+  let lo = bounds.xMin, hi = bounds.xMax;
+  if (b === 0) {
+    if (a < bounds.yMin || a > bounds.yMax) return null;
+  } else {
+    const first = (bounds.yMin - a) / b, second = (bounds.yMax - a) / b;
+    lo = Math.max(lo, Math.min(first, second)); hi = Math.min(hi, Math.max(first, second));
+    if (lo > hi) return null;
+  }
+  return [lo, Math.max(bounds.yMin, Math.min(bounds.yMax, a + b * lo)),
+    hi, Math.max(bounds.yMin, Math.min(bounds.yMax, a + b * hi))];
+}
+function drawPlot(result) {
+  const width = Math.max(260, plotHost.clientWidth);
+  const height = width < 430 ? 280 : 330;
+  const left = 52, right = width - 16, top = 20, bottom = height - 42;
+  const xSpan = result.range.maxX - result.range.minX;
+  const xPadding = xSpan === 0 ? 3 : Math.max(0.5, xSpan * 0.12);
+  const bounds = {xMin: result.range.minX - xPadding, xMax: result.range.maxX + xPadding};
+  const yValues = result.points.map(point => point.y);
+  const fitA = result.fit.kind === 'unique' ? rationalNumber(result.fit.intercept) : null;
+  const fitB = result.fit.kind === 'unique' ? rationalNumber(result.fit.slope) : null;
+  if (fitA !== null) yValues.push(fitA + fitB * bounds.xMin, fitA + fitB * bounds.xMax);
+  const minY = Math.min(...yValues), maxY = Math.max(...yValues);
+  const yPadding = maxY === minY ? 2 : Math.max(0.5, (maxY - minY) * 0.13);
+  bounds.yMin = minY - yPadding; bounds.yMax = maxY + yPadding;
+  const px = x => left + (x - bounds.xMin) / (bounds.xMax - bounds.xMin) * (right - left);
+  const py = y => bottom - (y - bounds.yMin) / (bounds.yMax - bounds.yMin) * (bottom - top);
+  const tick = number => Number(number.toFixed(2)).toString();
+  const svg = svgNode('svg', {viewBox: `0 0 ${width} ${height}`, width, height, role: 'img', 'aria-labelledby': 'plot-title plot-description'});
+  svg.append(svgNode('title', {id: 'plot-title'}, 'Entered points, trial line and least-squares fitted values'));
+  svg.append(svgNode('desc', {id: 'plot-description'}, `${result.count} point rows. ${result.fit.kind === 'unique' ? 'A solid fitted line and dashed trial line.' : 'No unique fitted line exists; the mean diamond shows the common observed fit.'} Dotted vertical segments show ${residualModel.value === 'fit' ? 'fitted' : 'trial'} residuals. All exact values are in the table below.`));
+  const definitions = svgNode('defs'), clip = svgNode('clipPath', {id: 'least-squares-plot-clip'});
+  clip.append(svgNode('rect', {x: left, y: top, width: right - left, height: bottom - top}));
+  definitions.append(clip); svg.append(definitions);
+  svg.append(svgNode('rect', {x: left, y: top, width: right - left, height: bottom - top, fill: '#f8faf6', stroke: '#d6dfd8'}));
+  for (let i = 0; i <= 4; i++) {
+    const x = bounds.xMin + (bounds.xMax - bounds.xMin) * i / 4;
+    const y = bounds.yMin + (bounds.yMax - bounds.yMin) * i / 4;
+    svg.append(svgNode('line', {x1: px(x), x2: px(x), y1: top, y2: bottom, stroke: '#e0e8e1'}));
+    svg.append(svgNode('line', {x1: left, x2: right, y1: py(y), y2: py(y), stroke: '#e0e8e1'}));
+    svg.append(svgNode('text', {x: px(x), y: bottom + 20, 'text-anchor': 'middle', 'font-size': 12, fill: '#526b6e'}, tick(x)));
+    svg.append(svgNode('text', {x: left - 9, y: py(y) + 4, 'text-anchor': 'end', 'font-size': 12, fill: '#526b6e'}, tick(y)));
+  }
+  svg.append(svgNode('text', {x: (left + right) / 2, y: height - 3, 'text-anchor': 'middle', 'font-size': 13, fill: '#162e32'}, 'x'));
+  svg.append(svgNode('text', {x: 16, y: 14, 'font-size': 13, fill: '#162e32'}, 'y'));
+  const marks = svgNode('g', {'clip-path': 'url(#least-squares-plot-clip)'});
+  const chosenRows = residualModel.value === 'fit' ? result.fit.rows : result.trial.rows;
+  for (const row of chosenRows) {
+    marks.append(svgNode('line', {x1: px(row.x), x2: px(row.x), y1: py(row.y), y2: py(rationalNumber(row.predicted)),
+      stroke: residualModel.value === 'fit' ? '#126761' : '#a24918', 'stroke-width': 2, 'stroke-dasharray': '2 3', 'data-kind': 'residual'}));
+  }
+  function addLine(a, b, kind, color, dashed) {
+    const segment = clippedLine(a, b, bounds);
+    if (!segment) return false;
+    const attrs = {x1: px(segment[0]), y1: py(segment[1]), x2: px(segment[2]), y2: py(segment[3]), stroke: color,
+      'stroke-width': 2.5, 'data-kind': kind};
+    if (dashed) attrs['stroke-dasharray'] = '8 5';
+    marks.append(svgNode('line', attrs)); return true;
+  }
+  if (fitA !== null) addLine(fitA, fitB, 'fit-line', '#126761', false);
+  const trialVisible = addLine(rationalNumber(result.trial.intercept), rationalNumber(result.trial.slope), 'trial-line', '#a24918', true);
+  for (const point of result.points) {
+    const circle = svgNode('circle', {cx: px(point.x), cy: py(point.y), r: 4.5, fill: '#fff', stroke: '#162e32', 'stroke-width': 2, 'data-kind': 'point'});
+    circle.append(svgNode('title', {}, `Point ${point.index}: (${point.x}, ${point.y})`)); marks.append(circle);
+  }
+  const mx = px(rationalNumber(result.meanX)), my = py(rationalNumber(result.meanY));
+  const mean = svgNode('polygon', {points: `${mx},${my - 6} ${mx + 6},${my} ${mx},${my + 6} ${mx - 6},${my}`, fill: '#7854a0', stroke: '#fff', 'stroke-width': 1, 'data-kind': 'mean'});
+  mean.append(svgNode('title', {}, `Mean point: (${exact(result.meanX)}, ${exact(result.meanY)})`)); marks.append(mean);
+  svg.append(marks); plotHost.replaceChildren(svg);
+  byId('plot-note').textContent = [
+    'Approximate drawing; exact values are below. Dotted segments are vertical residuals.',
+    result.fit.kind === 'underdetermined' ? 'All x are equal: the mean diamond is the shared fitted value, and no unique fitted line is drawn.' : '',
+    trialVisible ? 'Lines and residual segments are clipped to the shown axes.' : 'The trial line is entirely off screen. Its exact predictions and errors remain in the table.'
+  ].filter(Boolean).join(' ');
+}
+
+function prepareDownloads() {
+  const status = byId('download-status');
+  let course, guide;
+  try {
+    course = JSON.parse(byId('course-text').textContent); guide = JSON.parse(byId('guide-text').textContent);
+    if (typeof course !== 'string' || typeof guide !== 'string' || !course || !guide) throw new Error('Missing embedded file.');
+  } catch {
+    status.textContent = 'The embedded files could not be read. Use the original course and guide files from the repository.'; return;
+  }
+  for (const [id, name, content, type] of [
+    ['download-course', 'least-squares.json', course, 'application/json;charset=utf-8'],
+    ['download-guide', 'least-squares.md', guide, 'text/markdown;charset=utf-8']
+  ]) {
+    const button = byId(id); button.disabled = false;
+    button.addEventListener('click', () => {
+      let url, anchor;
+      try {
+        url = URL.createObjectURL(new Blob([content], {type}));
+        anchor = document.createElement('a'); anchor.href = url; anchor.download = name; anchor.hidden = true;
+        document.body.append(anchor); anchor.click();
+        status.textContent = `${name} was prepared for download. It contains the fixed authored ${id === 'download-course' ? 'course' : 'guide'}, not your edited lab data.`;
+      } catch {
+        status.textContent = 'The download could not be prepared. The embedded file is still available; try the button again.';
+      } finally {
+        if (anchor) anchor.remove();
+        if (url) setTimeout(() => URL.revokeObjectURL(url), 1000);
+      }
+    });
+  }
+  status.textContent = 'Sixteen original questions · four concepts · worked transfer answers.';
+}
+
+for (const example of EXAMPLES) {
+  const option = document.createElement('option'); option.value = example.id; option.textContent = example.name; chooseExample.append(option);
+}
+byId('load-example').addEventListener('click', () => loadExample(true));
+addButton.addEventListener('click', () => {
+  const n = pointRows.children.length;
+  if (n >= LIMITS.maxPoints) return;
+  const row = makeRow(0, 0, n); pointRows.append(row); updateRowButtons();
+  dataEdited = true; showExampleNote(); update(); row.querySelector('input').focus();
+});
+for (const input of [trialA, trialB, queryInput]) input.addEventListener('input', update);
+fitButton.addEventListener('click', () => {
+  if (!current || current.fit.kind !== 'unique') return;
+  trialA.value = exact(current.fit.intercept); trialB.value = exact(current.fit.slope); update();
+});
+residualModel.addEventListener('change', () => { if (current) drawPlot(current); });
+if (typeof ResizeObserver === 'function') new ResizeObserver(() => { if (current) drawPlot(current); }).observe(plotHost);
+else window.addEventListener('resize', () => { if (current) drawPlot(current); });
+prepareDownloads(); loadExample();
+
+})();</script>
+</body>
+</html>
