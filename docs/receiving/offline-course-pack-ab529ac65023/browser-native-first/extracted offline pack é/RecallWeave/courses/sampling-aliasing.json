@@ -1,0 +1,129 @@
+{
+  "format": "recallweave-deck/1",
+  "title": "Sampling: different signals, identical observations",
+  "attribution": "Original questions, distractors, explanations and worked examples for RecallWeave, with AI assistance. Mathematical background: MIT 6.300 Signal Processing, Sampling and Aliasing (Fall 2025), https://sigproc.mit.edu/_static/fall25/lectures/Sampling_and_Aliasing-handout.pdf; Dennis Freeman, MIT 6.003 Signals and Systems, Lecture 21: Sampling (Fall 2011), https://ocw.mit.edu/courses/6-003-signals-and-systems-fall-2011/resources/mit6_003f11_lec21/. Original examples use ideal uniform samples and fully stated assumptions; no source exercises, passages or figures are copied.",
+  "license": "Original question wording, explanations and worked examples in this course: CC0-1.0. Referenced MIT teaching materials retain their own licenses. No license change is made to other repository content.",
+  "concepts": ["sample-clock", "frequency-aliases", "recovery-assumptions", "acquisition-choices"],
+  "items": [
+    {
+      "id": "sampling-clock-interval",
+      "concept": "sample-clock",
+      "prerequisites": [],
+      "prompt": "An ideal uniform sampler records 8 samples per second. How much time separates consecutive samples?",
+      "options": ["0.125 seconds", "8 seconds", "0.25 seconds", "0.0625 seconds"],
+      "answer": 0,
+      "explanation": "The interval is the reciprocal of the rate: 1 / 8 = 0.125 seconds. Eight is a rate, not an interval. The other intervals would produce 4 or 16 samples per second.",
+      "transfer": "A second sampler records 20 samples per second. Calculate its interval and explain why it is shorter."
+    },
+    {
+      "id": "sampling-clock-count",
+      "concept": "sample-clock",
+      "prerequisites": [],
+      "prompt": "A one-second display includes both t = 0 and t = 1 second. Uniform samples arrive at t = n / 6 seconds for integer n. How many displayed samples are there?",
+      "options": ["6 samples", "7 samples", "5 samples", "12 samples"],
+      "answer": 1,
+      "explanation": "The included indices are 0, 1, 2, 3, 4, 5 and 6: seven samples across six intervals. The phrase '6 samples per second' specifies spacing. Including both endpoints adds one observation to this displayed interval count.",
+      "transfer": "At 10 samples per second, count the observations from t = 0 through t = 0.4 seconds, including both endpoints."
+    },
+    {
+      "id": "sampling-clock-phase",
+      "concept": "sample-clock",
+      "prerequisites": [],
+      "prompt": "The reference signal is x(t) = cos(2π × 3t), with t in seconds. It is sampled at 12 samples per second. What phase advance separates adjacent samples of this reference?",
+      "options": ["π radians", "π/4 radians", "π/2 radians", "2π/3 radians"],
+      "answer": 2,
+      "explanation": "One sample interval is 1/12 second. Multiplying it by 2π × 3 radians per second gives π/2 radians, or one quarter of a cycle. A time interval and an angular advance have different units.",
+      "transfer": "Calculate the phase advance for a 5 Hz cosine sampled at 20 samples per second."
+    },
+    {
+      "id": "sampling-alias-nine",
+      "concept": "frequency-aliases",
+      "prerequisites": ["sample-clock"],
+      "prompt": "A unit-amplitude, zero-phase 9 Hz cosine is sampled at t = n/8 seconds for every integer n. Which is the lowest nonnegative frequency of a zero-phase cosine with exactly the same samples?",
+      "options": ["7 Hz", "4 Hz", "9 Hz", "1 Hz"],
+      "answer": 3,
+      "explanation": "At sample times, the 9 Hz phase is 2π × 9n/8 = 2πn + 2πn/8. The whole-cycle term does not change cosine. A 1 Hz cosine therefore has the same samples. The 9 Hz reference is compatible too, but is not the lowest representative; 7 Hz also folds to 1 Hz.",
+      "transfer": "Find the lowest nonnegative alias of a 17 Hz zero-phase cosine sampled at 12 samples per second."
+    },
+    {
+      "id": "sampling-alias-fold",
+      "concept": "frequency-aliases",
+      "prerequisites": ["sample-clock"],
+      "prompt": "A unit-amplitude, zero-phase 13 Hz cosine is uniformly sampled at 10 samples per second. Which frequency is its lowest nonnegative zero-phase cosine alias?",
+      "options": ["3 Hz", "1 Hz", "7 Hz", "13 Hz"],
+      "answer": 0,
+      "explanation": "Subtract one sample rate: 13 − 10 = 3 Hz. Three lies between 0 and the half-rate, 5 Hz. A 7 Hz cosine produces the same samples by cosine's evenness, but folds to the lower 3 Hz representative. Merely choosing any matching frequency does not answer 'lowest'.",
+      "transfer": "At 8 samples per second, an 11 Hz cosine subtracts to 3 Hz. What does a 7 Hz cosine fold to, and why?"
+    },
+    {
+      "id": "sampling-alias-family",
+      "concept": "frequency-aliases",
+      "prerequisites": ["sample-clock"],
+      "prompt": "A zero-phase 2 Hz cosine is sampled at t = n/10 seconds for every integer n. Which different zero-phase cosine must agree at every one of those sample times?",
+      "options": ["A 7 Hz cosine", "A 12 Hz cosine", "A 5 Hz cosine", "A 3 Hz cosine"],
+      "answer": 1,
+      "explanation": "The 12 Hz signal adds 10 Hz, one entire sample rate. Its phase differs by 2πn at each sample, so all values agree. This equality holds for every integer sample index, not just the one-second plot.",
+      "transfer": "Give another matching frequency for a zero-phase 7 Hz cosine sampled at 10 samples per second. Explain it using whole cycles."
+    },
+    {
+      "id": "sampling-assumption-rate",
+      "concept": "recovery-assumptions",
+      "prerequisites": ["sample-clock", "frequency-aliases"],
+      "prompt": "Assume an ideal continuous signal has no frequency content above 5 Hz. Which listed uniform sample rate satisfies the strict sampling condition fs > 2 × 5 Hz?",
+      "options": ["8 samples per second", "10 samples per second", "12 samples per second", "5 samples per second"],
+      "answer": 2,
+      "explanation": "The stated condition requires a rate strictly greater than 10 samples per second; 12 qualifies. Equality is excluded by this condition. Ideal reconstruction also presumes the band limit and a complete ideal sample sequence; a finite graph alone is not such a reconstruction guarantee.",
+      "transfer": "For a known 7 Hz band limit, compare 14 and 15 samples per second against the same strict condition."
+    },
+    {
+      "id": "sampling-assumption-boundary",
+      "concept": "recovery-assumptions",
+      "prerequisites": ["sample-clock", "frequency-aliases"],
+      "prompt": "At the boundary fs = 8 samples per second, sample x(t) = sin(2π × 4t) at t = n/8. What demonstrates why equality at twice a frequency is insufficient for an arbitrary phase?",
+      "options": ["Sampling cancels the sine before it reaches the sampler.", "The original sine is zero at every continuous time.", "Eight samples determine every possible signal up to 8 Hz.", "Every sample is zero while the sine varies between samples."],
+      "answer": 3,
+      "explanation": "The sample values are sin(πn) = 0 for every integer n. The continuous sine is not identically zero, so these readings cannot distinguish it from a zero signal. The lab's zero-phase cosine is one specified phase; it cannot prove arbitrary-phase recovery at the boundary.",
+      "transfer": "At the same times, what values does cos(2π × 4t) produce? Compare the two phases."
+    },
+    {
+      "id": "sampling-assumption-evidence",
+      "concept": "recovery-assumptions",
+      "prerequisites": ["frequency-aliases"],
+      "prompt": "Two different continuous cosines agree with every displayed sample in the lab. No bandwidth information about an unknown physical source is supplied. What can the displayed measurements alone establish?",
+      "options": ["Both curves remain compatible with these observations.", "The lower frequency must be the physical original.", "The higher frequency cannot have produced the samples.", "The smoothest curve is proven to be the original signal."],
+      "answer": 0,
+      "explanation": "Matching the measurements establishes compatibility, not which physical source generated them. Choosing a baseband representative is a convention. Additional assumptions, such as a justified input band limit, can rule out alternatives; the sampled values alone do not supply that assumption.",
+      "transfer": "Explain how a known input band limit could exclude one displayed alternative without changing the sample values."
+    },
+    {
+      "id": "sampling-acquisition-filter",
+      "concept": "acquisition-choices",
+      "prerequisites": ["frequency-aliases", "recovery-assumptions"],
+      "prompt": "An ideal input contains wanted content from 0 to 3 Hz and an unwanted 11 Hz component. Before sampling at 8 samples per second, which ordering can prevent that 11 Hz component from folding into the wanted band?",
+      "options": ["Sample first, then remove digital frequencies above 4 Hz.", "Attenuate 11 Hz before sampling while retaining 0–3 Hz.", "Connect more display points after the samples are taken.", "Collect a longer record at the unchanged sampling rate."],
+      "answer": 1,
+      "explanation": "At 8 samples per second, the 11 Hz component aliases to 3 Hz. An appropriate analog anti-alias filter acts before sampling, separating it from the wanted 0–3 Hz input band. Once it has folded onto 3 Hz, removing only higher digital frequencies cannot separate the two causes. This is an ideal ordering example, not a physical filter design.",
+      "transfer": "At 12 samples per second, what lower frequency would an unwanted 15 Hz cosine share? Where must attenuation occur to prevent that alias?"
+    },
+    {
+      "id": "sampling-acquisition-after",
+      "concept": "acquisition-choices",
+      "prerequisites": ["frequency-aliases", "recovery-assumptions"],
+      "prompt": "A zero-phase 9 Hz cosine and a zero-phase 1 Hz cosine give the same samples at 8 samples per second. Can a deterministic digital filter that receives only those samples distinguish which cosine was originally present?",
+      "options": ["Yes, by drawing a smoother curve between the samples.", "Yes, by removing digital frequencies above 4 Hz.", "No, because the filter receives identical input sequences.", "No, because every possible digital filter returns zeros."],
+      "answer": 2,
+      "explanation": "A deterministic filter supplied with identical input sequences produces identical outputs. It cannot recover the missing distinction without additional information. Filtering can still serve other purposes; the limitation is the ambiguity already present in these sampled inputs.",
+      "transfer": "Would extending both recordings to more integer sample times at the same rate separate these two specified cosines? Explain."
+    },
+    {
+      "id": "sampling-acquisition-rate",
+      "concept": "acquisition-choices",
+      "prerequisites": ["recovery-assumptions"],
+      "prompt": "Keep the lab's authored 9 Hz cosine fixed. Which listed sample rate puts 9 Hz strictly below half the sample rate?",
+      "options": ["8 samples per second", "12 samples per second", "18 samples per second", "24 samples per second"],
+      "answer": 3,
+      "explanation": "Half of 24 is 12 Hz, so 9 < 12. At 18 samples per second, 9 Hz is exactly the half-rate and does not satisfy 'strictly below'. Changing the acquisition rate can move this known reference inside baseband; it does not retrospectively repair an earlier ambiguous recording.",
+      "transfer": "Would 20 samples per second also put this 9 Hz reference below the half-rate? State the comparison."
+    }
+  ]
+}
