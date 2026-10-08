@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src 'none'; base-uri 'none'; form-action 'none'">
+<meta name="description" content="An original offline lesson and step-by-step integer hash-table explorer. Follow collisions, wraparound, deletion and duplicate checks with exact probe traces.">
+<title>Hash tables: follow the probe · RecallWeave</title>
+<style>
+:root{color-scheme:light;--paper:#f6f4ec;--card:#fffef9;--ink:#193a37;--muted:#526761;--line:#c9d4c9;--teal:#116b63;--wash:#e4f0e9;--amber:#9a4b08;--amber-wash:#fff0cf;--red:#a12b20;--shadow:0 8px 28px #163b3410}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+a{color:var(--teal);text-underline-offset:.2em;overflow-wrap:anywhere}
+a:hover{text-decoration-thickness:2px}
+button,input,textarea,select{font:inherit}
+button,select,input{min-height:44px}
+button{border:1px solid var(--teal);border-radius:8px;background:var(--card);color:var(--teal);font-weight:650;padding:.55rem .85rem;cursor:pointer}
+button:hover:not(:disabled){background:var(--wash)}
+button.primary{background:var(--teal);color:white}
+button.primary:hover:not(:disabled){background:#0b544e}
+button:disabled{opacity:.46;cursor:default}
+button:focus-visible,a:focus-visible,summary:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:3px solid var(--amber);outline-offset:3px}
+input,select,textarea{border:1px solid #8fa79e;border-radius:7px;background:white;color:var(--ink);padding:.5rem .65rem;max-width:100%}
+textarea{width:100%;resize:vertical;min-height:12.3rem;font:15px/1.65 ui-monospace,SFMono-Regular,Consolas,monospace}
+[aria-invalid="true"]{border:2px solid var(--red)}
+label{display:block;font-weight:650;margin-bottom:.3rem}
+h1,h2,h3,p{margin-top:0}
+h1{font:650 clamp(2.15rem,4.5vw,3.8rem)/1.08 Georgia,"Times New Roman",serif;letter-spacing:-.045em;max-width:13ch;margin:.5rem 0 1rem}
+h2{font:650 1.55rem/1.25 Georgia,"Times New Roman",serif;letter-spacing:-.015em}
+h3{font-size:1rem;line-height:1.4}
+p:last-child{margin-bottom:0}
+small,.small{font-size:.88rem;color:var(--muted)}
+code{font: .94em ui-monospace,SFMono-Regular,Consolas,monospace}
+.skip{position:absolute;left:1rem;top:-6rem;background:white;padding:.7rem;z-index:5}
+.skip:focus{top:1rem}
+.page{max-width:1200px;margin:auto;padding:1.7rem 2rem 3rem}
+.topline{display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap;border-bottom:1px solid var(--line);padding-bottom:1rem;margin-bottom:2rem;font-size:.83rem;font-weight:700;letter-spacing:.04em}
+.eyebrow{text-transform:uppercase;letter-spacing:.12em;font-size:.75rem;font-weight:750;color:var(--teal);margin-bottom:.5rem}
+.hero{display:grid;grid-template-columns:1.1fr 1fr;gap:3rem;align-items:end;margin-bottom:2rem}
+.hero-copy{max-width:55ch;font-size:1.05rem;color:var(--muted)}
+.rule-card{border-left:3px solid var(--teal);padding:.2rem 0 .2rem 1.3rem}
+.rule-card p{margin-bottom:.55rem}
+.rule-card strong{font-size:1.08rem}
+.rule-card .formula{font:600 1.35rem ui-monospace,SFMono-Regular,Consolas,monospace}
+.workspace{display:grid;grid-template-columns:minmax(270px,.78fr) minmax(0,1.65fr);gap:1.2rem;align-items:start}
+.card{border:1px solid var(--line);border-radius:13px;background:var(--card);padding:1.35rem;box-shadow:var(--shadow);min-width:0}
+.editor h2,.trace h2{margin-bottom:.7rem}
+.field{margin-bottom:1rem}
+.example-row{display:grid;gap:.6rem}
+.example-row select{width:100%}
+.divider{border-top:1px solid var(--line);margin:1.15rem 0}
+.capacity-row{display:flex;align-items:center;gap:1rem}
+.capacity-row input{width:6rem}
+.actions{display:flex;flex-wrap:wrap;gap:.6rem}
+.draft-status{border-left:3px solid var(--line);padding-left:.7rem;margin-top:1rem;font-size:.87rem;color:var(--muted)}
+.draft-status.dirty{border-color:var(--amber);color:#794212}
+.error{background:#fff0e9;color:#842c22;border:1px solid #d59280;border-radius:8px;padding:.7rem;margin:1rem 0}
+.trace-top{display:flex;align-items:baseline;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+.step-counter{color:var(--teal);font-size:.86rem;font-weight:700;white-space:nowrap}
+.step-controls{display:flex;gap:.5rem;flex-wrap:wrap;margin:1rem 0}
+.step-controls button{flex:1 1 auto}
+.table{list-style:none;padding:0;margin:1.35rem 0 .7rem;display:grid;grid-template-columns:repeat(auto-fit,minmax(75px,1fr));gap:.5rem}
+.slot{border:1px solid var(--line);border-radius:9px;min-height:112px;padding:.6rem .25rem;display:flex;align-items:center;flex-direction:column;justify-content:space-between;text-align:center;background:#f9faf5;position:relative}
+.slot.occupied{background:var(--wash);border-color:#a9c7b7}
+.slot.deleted{background:repeating-linear-gradient(135deg,#faf3e8,#faf3e8 7px,#f3e9d8 7px,#f3e9d8 8px);border-color:#cab489}
+.slot.focused{outline:3px solid var(--amber);outline-offset:1px;z-index:1}
+.slot.remembered{box-shadow:inset 0 0 0 2px var(--teal)}
+.slot-index{font-size:.74rem;color:var(--muted);font-weight:650}
+.slot strong{font-size:1.02rem;line-height:1.35}
+.slot-state{font-size:.67rem;color:var(--muted)}
+.legend{display:flex;flex-wrap:wrap;gap:.6rem 1.1rem;font-size:.78rem;color:var(--muted);margin:.8rem 0}
+.legend span{display:inline-flex;align-items:center;gap:.35rem}
+.swatch{width:.9rem;height:.9rem;display:inline-block;border:1px solid var(--line);border-radius:3px;background:#f9faf5}
+.swatch.live{background:var(--wash)}
+.swatch.gone{background:#f3e9d8;border-style:dashed;border-color:#aa9272}
+.swatch.focus{border:2px solid var(--amber)}
+.counts{font-size:.83rem;color:var(--muted);margin-bottom:1rem}
+.step-box{background:#edf3ee;border-radius:9px;padding:1rem 1.1rem}
+.step-box h3{font-size:1.07rem;margin-bottom:.45rem}
+.step-box p{font-size:.92rem}
+.candidate{font-size:.82rem;font-weight:650;color:var(--teal);margin:.65rem 0 0}
+.probes{padding-left:1.4rem;font-size:.86rem;margin:1rem 0}
+.probes li{padding-left:.2rem;margin-bottom:.5rem}
+.jump{display:flex;align-items:center;gap:.75rem;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:1rem;margin-top:1rem}
+.jump label{font-size:.88rem;margin:0}
+.jump select{flex:1 1 160px;min-width:0}
+.explanation-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1rem;margin:1.2rem 0}
+.explanation-grid article{box-shadow:none}
+.explanation-grid h3{color:var(--teal)}
+.explanation-grid p{font-size:.9rem;color:var(--muted)}
+.result-card{margin-top:1.2rem}
+summary{cursor:pointer;font-weight:650;min-height:44px;padding:.45rem 0}
+.table-scroll{overflow:auto;max-width:100%;margin:.7rem 0 1rem}
+table{border-collapse:collapse;width:100%;font-size:.88rem;text-align:left}
+th,td{border-bottom:1px solid var(--line);padding:.65rem .6rem;vertical-align:top}
+th{font-size:.76rem;color:var(--muted)}
+td:nth-child(3){min-width:9rem}
+.lesson{display:grid;grid-template-columns:1fr 1fr;gap:2rem;margin-top:1.2rem;background:#e7efe6}
+.lesson h2{margin-bottom:.55rem}
+.lesson-actions{margin-top:1rem}
+.source-credit{overflow-wrap:anywhere;font-size:.81rem;color:var(--muted)}
+.footer{margin-top:1.5rem;display:flex;gap:1rem;flex-wrap:wrap;justify-content:space-between;font-size:.82rem;color:var(--muted)}
+.js-only{display:none}
+.ready .js-only{display:block}
+.ready .js-note{display:none}
+@media(max-width:900px){.page{padding:1.1rem 1.1rem 2rem}.workspace{grid-template-columns:1fr}.hero{gap:1.5rem}.editor-layout{display:grid;grid-template-columns:1fr 1.3fr;gap:1.5rem}.editor-layout .divider{display:none}.explanation-grid{gap:.75rem}.table{grid-template-columns:repeat(auto-fit,minmax(76px,1fr))}}
+@media(max-width:580px){.page{padding:.9rem .75rem 2rem}.topline{margin-bottom:1.3rem}.hero,.lesson,.editor-layout{grid-template-columns:1fr;gap:1.1rem}.hero{margin-bottom:1.25rem}h1{font-size:2.65rem}.rule-card{font-size:.88rem}.card{padding:1rem}.editor-layout .divider{display:block}.editor-layout{display:block}.explanation-grid{grid-template-columns:1fr}.table{grid-template-columns:repeat(auto-fit,minmax(68px,1fr));gap:.45rem}.slot{min-height:98px}.step-controls button{flex:1 1 42%}.trace-top{gap:.3rem}.lesson{gap:1rem}.topline{font-size:.74rem}.hero-copy{font-size:1rem}.result-card .table-scroll{margin-left:-.25rem;margin-right:-.25rem}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+@media print{body{background:white}.page{max-width:none;padding:0}.topline,.editor,.step-controls,.jump,.actions,.lesson-actions,.skip,.js-note{display:none}.hero{display:block}.rule-card{margin:1rem 0}.workspace{display:block}.card{box-shadow:none;break-inside:avoid}.explanation-grid{display:block}.explanation-grid article{margin:.5rem 0}.lesson{display:block}.result-card{break-inside:auto}.table-scroll{overflow:visible}details>summary{display:none}details>*:not(summary){display:block}a{color:inherit}}
+</style>
+</head>
+<body>
+<a class="skip" href="#trace">Skip to the probe trace</a>
+<div class="page">
+<header class="topline"><a href="../demo.html">RecallWeave</a><span>ORIGINAL COURSE · OFFLINE EXPLORER</span></header>
+<section class="hero" aria-labelledby="page-title">
+<div><p class="eyebrow">Algorithms / Hash tables</p><h1 id="page-title">Follow the probe.</h1><p class="hero-copy">A home slot is a starting point. Insert, find and delete integer keys, then inspect the exact evidence behind each result.</p></div>
+<div class="rule-card"><p class="formula">home = key mod capacity</p><p><strong>One slot forward. Wrap at the end.</strong></p><p class="small">The remainder is always nonnegative. Each operation inspects at most one complete cycle. This is a fixed-capacity integer set: no duplicate keys and no resizing.</p></div>
+</section>
+<p class="js-note card">Enable JavaScript to run the explorer. The original twelve-question lesson is available as <a href="hash-tables.json">hash-tables.json</a>, with a <a href="hash-tables.md">worked guide</a>. The controls calculate locally; no connection is used.</p>
+<noscript><p class="card">Example: with capacity 7, insert 10, 17 and 24 into slots 3, 4 and 5. Deleting 17 leaves a tombstone at 4. Finding 24 must pass it to reach slot 5; marking it never-used empty would incorrectly stop the search.</p></noscript>
+<main class="js-only">
+<div class="workspace">
+<section class="card editor" aria-labelledby="editor-title">
+<h2 id="editor-title">Choose the operations</h2>
+<div class="editor-layout">
+<div>
+<div class="field example-row"><label for="example">Worked example</label><select id="example"><option value="tombstone">Deletion keeps a search alive</option><option value="duplicate">A tombstone before a duplicate</option><option value="wrap">Wrap from the last slot to zero</option><option value="full">A full table, then a reusable slot</option><option value="negative">Negative keys, valid home slots</option></select><button id="load-example" type="button">Load example</button></div>
+<p class="small">Loading an example replaces the draft and restarts its trace.</p>
+<div class="divider"></div>
+</div>
+<form id="scenario-form" novalidate>
+<div class="field"><label for="capacity">Capacity</label><div class="capacity-row"><input id="capacity" inputmode="numeric" maxlength="8" value="7" aria-describedby="capacity-help error"><span id="capacity-help" class="small">3–17 slots</span></div></div>
+<div class="field"><label for="operations">Operations, in order</label><textarea id="operations" spellcheck="false" maxlength="2048" aria-describedby="operations-help error"></textarea><p id="operations-help" class="small">One per line: <code>insert 10</code>, <code>find 10</code> or <code>delete 10</code>. Up to 24 operations; integer keys −9999 to 9999. Blank lines are ignored.</p></div>
+<div class="actions"><button id="apply" class="primary" type="submit">Apply operations</button><button id="revert" type="button" disabled>Revert edits</button></div>
+<p id="error" class="error" role="alert" hidden></p>
+<p id="draft-status" class="draft-status" role="status"></p>
+</form>
+</div>
+</section>
+<section id="trace" class="card trace" aria-labelledby="trace-title" tabindex="-1">
+<div class="trace-top"><h2 id="trace-title">Inspect the table</h2><span id="step-counter" class="step-counter">Step 0</span></div>
+<p id="applied-summary" class="small"></p>
+<div class="step-controls" aria-label="Trace controls"><button id="previous" type="button">Previous step</button><button id="next" class="primary" type="button">Next step</button><button id="restart" type="button">Restart trace</button><button id="final" type="button">Show final table</button></div>
+<ol id="table" class="table" aria-label="Table slots in index order"></ol>
+<div class="legend" aria-label="Slot legend"><span><i class="swatch"></i>Never-used empty</span><span><i class="swatch live"></i>Occupied</span><span><i class="swatch gone"></i>Deleted</span><span><i class="swatch focus"></i>Current slot</span></div>
+<p id="counts" class="counts"></p>
+<div class="step-box"><h3 id="step-heading" aria-live="polite" aria-atomic="true">Start with an empty table</h3><p id="step-detail"></p><p id="candidate" class="candidate"></p></div>
+<h3 class="small" style="margin:1rem 0 .3rem">This operation’s probes so far</h3>
+<ol id="probe-list" class="probes"></ol>
+<div class="jump"><label for="operation-picker">Inspect operation</label><select id="operation-picker"><option value="-1">Empty table</option></select></div>
+</section>
+</div>
+<section class="explanation-grid" aria-label="Three rules to keep in view">
+<article class="card"><h3>Empty proves absence.</h3><p>A never-used empty slot ends the search. A key previously inserted on this path would not have passed it.</p></article>
+<article class="card"><h3>Deleted means keep looking.</h3><p>A tombstone holds no key, but preserves a path to keys stored farther along. It can be a later insertion candidate.</p></article>
+<article class="card"><h3>Check before you reuse.</h3><p>Insertion remembers the first tombstone, then proves absence. An existing equal key leaves the table unchanged.</p></article>
+</section>
+<section class="card result-card" aria-label="Complete applied results">
+<details><summary>See every operation result</summary><p class="small">Each arrow is one inspected slot, including empty and deleted slots. Results describe the applied operations, even while editor changes are unapplied.</p><div class="table-scroll" tabindex="0" role="region" aria-label="Operation results; scroll horizontally on a small screen"><table><thead><tr><th scope="col">Operation</th><th scope="col">Home</th><th scope="col">Probe order</th><th scope="col">Result</th></tr></thead><tbody id="result-body"></tbody></table></div><button id="download-trace" type="button">Download applied trace (.json)</button><p class="small" style="margin-top:.6rem">This is a readable result record, not a saved lesson or a file the explorer imports.</p></details>
+</section>
+<section class="card lesson" aria-labelledby="lesson-heading">
+<div><p class="eyebrow">Connect the ideas</p><h2 id="lesson-heading">Study the twelve-question lesson</h2><p id="lesson-title"></p><p class="small">Download the original deck, open RecallWeave, choose the JSON under <strong>Bring your own lesson</strong>, inspect its preview and select <strong>Start this deck</strong>. Your answers, review, practice and study notes use the existing learner.</p><div class="actions lesson-actions"><button id="download-course" class="primary" type="button">Download lesson (.json)</button><a href="../demo.html" target="_blank" rel="noopener">Open RecallWeave</a></div></div>
+<div><details><summary>Sources and permission</summary><p id="lesson-credit" class="source-credit"></p><p id="lesson-license" class="source-credit"></p><p class="source-credit">Primary references: <a href="https://xlinux.nist.gov/dads/HTML/hashtab.html">NIST: hash table</a> and <a href="https://opendatastructures.org/ods-python/5_2_LinearHashTable_Linear_.html">Open Data Structures §5.2</a>. Examples, questions and diagrams here are original.</p></details><p class="small">This small model uses a simple remainder hash and deliberately keeps its capacity fixed. It displays exact work for a chosen history; it does not establish average performance, security or learning efficacy.</p><p class="small"><a href="hash-tables.md">Read the worked guide and source instructions</a></p></div>
+</section>
+</main>
+<footer class="footer"><span>Local computation · No account, storage or network calls</span><span>Indices start at 0 · One full cycle is the limit</span></footer>
+</div>
+<script type="module">
+/*__MODEL__*/
+/*__COURSE__*/
+/*__UI__*/
+</script>
+</body>
+</html>

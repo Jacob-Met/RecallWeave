@@ -14,6 +14,10 @@ Inputs are whole numbers from 0 to 10. Every invocation counts, including base c
 
 The explorer needs no server or account and keeps no automatic browser storage. Its trace is an algorithm inspection record, separate from learner-answer archives. Rebuild it with `node tools/build_recursion_call_stack.mjs`; add `--check` to verify that the checked-in page matches its exact sources and validated deck.
 
+## Explore hash-table probes
+
+Open **[Hash tables: follow the probe](courses/hash-tables-explorer.html)** for an original offline integer-set explorer. Edit insert, find and delete operations, inspect exact slot visits, and compare collisions, wraparound, tombstones, duplicate checks and full-table results. The [worked guide](courses/hash-tables.md) explains the fixed-capacity model. Download its [twelve-question lesson](courses/hash-tables.json) and start it through **Bring your own lesson** to use the existing learner, review and study notes.
+
 ## Explore grouped rates
 
 Open **[When groups and totals disagree](courses/grouped-data-explorer.html)** for a separate offline lesson about group rates, pooled samples and a chosen common mix. Edit the recorded counts, inspect exact fractions and download the current comparison. The worked examples explain why both groups can favor one option while the pooled sample favors the other, and why this alone does not establish a causal effect.
