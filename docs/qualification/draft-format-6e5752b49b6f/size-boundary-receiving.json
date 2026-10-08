@@ -1,0 +1,27 @@
+{
+  "original_commit": "b5b905ca8d5363e5974aa96419cd51b256609f43",
+  "original_module_sha256": "47257b88ae5538b093987a8d5356fdfe3986dc9312695d27cd4e1f78cb903a66",
+  "corrected_module_sha256": "32ad1cf04b6aacf26de9b1e5a73646586fcd79c666a160e60c6c085faac1a0ac",
+  "corrected_tests_sha256": "9b04ec8caa091aa31680616ce4f40c397490b9a5fc8cbb8bb2212898dff08d3d",
+  "receiver": "node --test tests/deck-author-draft.test.mjs",
+  "baseline": {
+    "tests": 11,
+    "passed": 9,
+    "failed": 2,
+    "exit_code": 1
+  },
+  "corrected": {
+    "tests": 11,
+    "passed": 11,
+    "failed": 0,
+    "exit_code": 0
+  },
+  "findings": [
+    "A valid compact canonical draft at 2097024 or 2097152 bytes exceeded the limit when pretty printed and could not be saved unchanged.",
+    "Private-key canonicalization can enlarge a compact input beyond the saved-file cap, so raw input size alone cannot guarantee resave."
+  ],
+  "correction": "Use pretty JSON with newline when it fits; otherwise compact canonical JSON without optional whitespace. Check canonical saved size before parse returns a frozen editor draft.",
+  "preserved": "All original nine admission/content tests still pass. Existing small pretty exports stay byte-identical. Live editor state is never mutated by saving or admission.",
+  "environment_failure": "Initial test-file patch hit ENOSPC and wrote a partial file. Restored the exact original 10714-byte test (SHA de5a4a26...) from b5b905c before applying the full regression; baseline and fixed runs occurred only after restoration. No source recovery or cleanup of another worker's files was performed.",
+  "verification_scope": "Focused module regression only; current-main browser and hosted CI receiving are separate."
+}

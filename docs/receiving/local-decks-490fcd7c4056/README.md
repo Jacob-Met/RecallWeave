@@ -1,5 +1,7 @@
 # Local lesson import — receiving packet
 
+**Latest receiving:** [d22b5ef composition](receiving-d22b5ef.md) preserves the newly merged author drafts and measurement course/lab, resolves the studio-control README overlap, and passes 111 current Node tests plus author standalone parity. All learner, validator, trace, notes, answer-order, bundled-data and standalone bytes remain identical to the final a1ec browser qualification below.
+
 ## Outcome and scope
 
 The learner can select a local JSON course, inspect its title, concepts, questions, prerequisites and supplied attribution, then explicitly start it. A preview, cancellation, read failure or superseded read leaves the current lesson in place. Starting a course creates its own fresh answers, mastery state and per-question option order. Reset keeps the selected course; reloading returns to the bundled lesson.

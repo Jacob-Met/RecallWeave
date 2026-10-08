@@ -2,6 +2,7 @@ import { AUTHOR_LIMITS, createDraft, draftFromDeck, addConcept, removeConcept, a
   removeQuestion, restoreQuestion, moveQuestion, addOption, removeOption, moveOption,
   setQuestionConcept, checkDraft, downloadName } from './deck-author.mjs';
 import { mountAuthorDeckLoader } from './deck-author-loader.mjs';
+import { serializeAuthorDraft } from './deck-author-draft.mjs';
 
 const byId = id => document.getElementById(id);
 const node = (tag, attributes = {}, text = null) => {
@@ -38,10 +39,11 @@ function changed(message = '') {
   byId('download-deck').disabled = true;
   byId('author-preview').hidden = true;
   byId('preview-content').replaceChildren();
-  byId('download-help').textContent = 'Check and preview before downloading. Edits require a fresh check.';
+  byId('download-help').textContent = 'Check and preview before downloading a checked deck. Save draft keeps unfinished work.';
+  byId('draft-save-status').textContent = '';
   clearError();
   if (message) status(message);
-  else if (hadPreview) status('Draft changed. Check and preview again before downloading.');
+  else if (hadPreview) status('Draft changed. Save draft to keep writing, or check again for a lesson file.');
 }
 function showError(message, target) {
   issue = target;
@@ -110,9 +112,10 @@ function renderConceptChoices() {
   draft.concepts.forEach((concept, index) => select.append(node('option', { value: concept.key }, concept.name || `Unnamed concept ${index + 1}`)));
   select.value = item.conceptKey ?? '';
   prerequisites.replaceChildren();
-  const choices = draft.concepts.filter(concept => concept.key !== item.conceptKey);
+  const choices = draft.concepts.filter(concept => concept.key !== item.conceptKey || item.prerequisiteKeys.includes(concept.key));
   if (!choices.length) prerequisites.append(node('p', { class: 'hint' }, 'Add another concept if this question needs an earlier idea.'));
   choices.forEach(concept => {
+    const selfLink = concept.key === item.conceptKey;
     const id = `prerequisite-${concept.key}`;
     const label = node('label', { for: id, class: 'check-label' });
     const input = node('input', { id, type: 'checkbox' });
@@ -120,9 +123,11 @@ function renderConceptChoices() {
     input.addEventListener('change', () => {
       item.prerequisiteKeys = item.prerequisiteKeys.filter(value => value !== concept.key);
       if (input.checked) item.prerequisiteKeys.push(concept.key);
-      changed();
+      changed(selfLink ? 'Self prerequisite removed. The question text is unchanged.' : '');
+      if (selfLink) { renderConceptChoices(); focus('question-concept'); }
     });
-    label.append(input, node('span', {}, concept.name || 'Unnamed concept'));
+    const name = concept.name || 'Unnamed concept';
+    label.append(input, node('span', {}, selfLink ? `${name} (same concept; remove this prerequisite)` : name));
     prerequisites.append(label);
   });
 }
@@ -306,9 +311,17 @@ byId('remove-question').addEventListener('click', () => {
 });
 byId('undo-question').addEventListener('click', () => {
   if (!removedQuestion) return;
+  const previousConcept = removedQuestion.item.conceptKey;
+  const previousLinks = removedQuestion.item.prerequisiteKeys.length;
   try { currentKey = restoreQuestion(draft, removedQuestion).key; }
   catch (error) { status(error.message); return; }
-  removedQuestion = null; changed('Removed question restored.'); renderNavigation(); renderQuestion(); focus('question-prompt');
+  const restored = currentQuestion();
+  const changes = [];
+  if (previousConcept !== null && restored.conceptKey === null) changes.push('Its deleted concept was cleared; choose a concept.');
+  if (restored.prerequisiteKeys.length < previousLinks) changes.push('Deleted prerequisite links were removed.');
+  removedQuestion = null;
+  changed(['Removed question restored.', ...changes, 'All question text and answer choices are kept.'].join(' '));
+  renderNavigation(); renderQuestion(); focus('question-prompt');
 });
 for (const [id, offset] of [['move-question-up', -1], ['move-question-down', 1]]) byId(id).addEventListener('click', () => {
   moveQuestion(draft, currentKey, offset); changed('Question order updated.'); renderNavigation(); renderQuestion(); focus(id);
@@ -335,7 +348,28 @@ byId('download-deck').addEventListener('click', () => {
     document.body.append(link); link.click();
     clearError(); status('Deck download started. Keep the JSON file to share or reopen it here.');
   } catch {
-    showError('The download could not be prepared. Your checked draft is still here; try Download deck again.', { field: 'download' });
+    showError('The download could not be prepared. Your checked draft is still here; try Download checked deck again.', { field: 'download' });
+  } finally {
+    link?.remove();
+    if (url) setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+});
+
+byId('save-draft').addEventListener('click', () => {
+  let url = null;
+  let link = null;
+  const output = byId('draft-save-status');
+  try {
+    const json = serializeAuthorDraft(draft);
+    const name = draft.title.trim() ? downloadName(draft.title).replace(/\.json$/, '.draft.json') : 'recallweave.draft.json';
+    url = URL.createObjectURL(new Blob([json], { type: 'application/json;charset=utf-8' }));
+    link = node('a', { href: url, download: name });
+    document.body.append(link); link.click();
+    output.textContent = 'Draft download started. Reopen this editable file here to continue; check the deck separately when the lesson is complete.';
+    output.removeAttribute('data-error');
+  } catch (error) {
+    output.textContent = `The draft download could not be prepared. ${error.message} Your writing and any checked preview are still here. Try Save draft again after resolving the problem.`;
+    output.setAttribute('data-error', 'true');
   } finally {
     link?.remove();
     if (url) setTimeout(() => URL.revokeObjectURL(url), 1000);
@@ -343,7 +377,9 @@ byId('download-deck').addEventListener('click', () => {
 });
 
 renderAll();
-mountAuthorDeckLoader(document, deck => {
-  draft = draftFromDeck(deck); currentKey = draft.questions[0].key; removedQuestion = null;
-  changed('Deck opened for editing. Check it again after your changes.'); renderAll(); focus('deck-title');
+mountAuthorDeckLoader(document, (content, kind) => {
+  draft = kind === 'draft' ? structuredClone(content) : draftFromDeck(content);
+  currentKey = draft.questions[0]?.key ?? null; removedQuestion = null;
+  changed(kind === 'draft' ? 'Editable draft opened. Its unfinished content is preserved. Check it when the lesson is complete.' : 'Deck opened for editing. Check it again after your changes.');
+  renderAll(); focus('deck-title');
 });

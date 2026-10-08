@@ -1,0 +1,208 @@
+{
+  "source_root": "/workspace/scratch/6e5752b49b6f/agents/github_integration/recallweave-drafts",
+  "source_commit": "d64565556a8a90bc08c8f6d4f9ab6763867b93e2",
+  "source_sha256": {
+    "author/index.html": "d6007c4fd34e5c59f1d56505652eacd6e549a5080d79fab2addf3bab5de90b4d",
+    "author/author.css": "9c83c7b39c8745de60a8ea0367bd451376c5b3fce4f87faf19e9109d2780ce19",
+    "author.html": "dbe83e7fe3b136d0f118660e262d41da41dddfefc3ebeca614fb4df655e0fc10",
+    "src/deck.mjs": "621438c166ec4bfafd9d87c698a1d46cb1722f4fb92dcbb8d9f52fce682c338b",
+    "src/deck-author.mjs": "d443977f51db94d9bbdacd123e3316d6aa2a7b21a39ef97ed0b3fa1ada854719",
+    "src/deck-author-draft.mjs": "47257b88ae5538b093987a8d5356fdfe3986dc9312695d27cd4e1f78cb903a66",
+    "src/deck-author-loader.mjs": "62e9259767ad7a9e1627b7637958394ed91810b2f6c72646cb088831d32a4b7f",
+    "src/deck-author-ui.mjs": "3d649d32d212871c28fc2cce41561fb3dedc4e496ac161825db4716555237e09",
+    "tools/make_author.py": "6b8fd01642439bc6a949a27a286ee3923519840539c1661db3258b3506b9c16d"
+  },
+  "input_deck_sha256": "6b6aafa39048d22be31a8d3221bce5e6ba320e3754de447a88e02b5953a7b0a9",
+  "cases": [
+    {
+      "name": "save incomplete writing and completely empty lists, then reopen and continue editing",
+      "passed": true,
+      "detail": {
+        "unfinishedSha256": "cc865bb04c3023f45a262d5cfffcb2db7b030642bb4322b8b0ff4eba467f04a9",
+        "emptySha256": "811cbbb424164c4398da4014cfe29a468045190c0aa48c64713e7d20238c4ba8",
+        "errorPreserved": true
+      }
+    },
+    {
+      "name": "saving and download failure preserve a checked lesson and its pending incoming draft",
+      "passed": true,
+      "detail": {
+        "checkedDeckUnchanged": true,
+        "stagedFileUnchangedBySave": true,
+        "actualRetrySha256": "c94140bd7875445856337715c6d42ee3288e1155e1f281a1d97ac8539c481f60"
+      }
+    },
+    {
+      "name": "malformed, unsupported and oversized draft files preserve checked work; newest format wins",
+      "passed": true,
+      "detail": {
+        "oversizedBytes": 2097153,
+        "oversizedReads": 0,
+        "staleDraftAndDeckReadsIgnored": true
+      }
+    },
+    {
+      "name": "cyclic and self-linked unfinished lessons reopen intact and can be repaired through controls",
+      "passed": true,
+      "detail": {
+        "cyclicDraftSha256": "2f4a6b9c927d9bce4f58b4e858900386ab92211cb42c970623f149404cda9ba3",
+        "canonicalAnswersPreserved": true,
+        "selfLinkVisibleAndRepairable": true
+      }
+    },
+    {
+      "name": "a UTF-8 lesson over 256 KiB can be saved as a draft and shortened after reopening",
+      "passed": true,
+      "detail": {
+        "editableBytes": 275398,
+        "checkedFileRefusedAt256KiB": true,
+        "repairedBytes": 8350
+      }
+    },
+    {
+      "name": "undo after deliberate concept deletion retains writing and creates an admissible repairable draft",
+      "passed": true,
+      "detail": {
+        "savedDraftSha256": "ec606613622782199ef77a448167e99ae02da2ba8261d9285f7b479e802a6c8f",
+        "deletedConceptsRemainAbsent": true,
+        "allQuestionContentPreserved": true
+      }
+    },
+    {
+      "name": "offline standalone at 390 px saves, reopens and finishes a draft with keyboard actions",
+      "passed": true,
+      "detail": {
+        "offline": true,
+        "viewport": {
+          "viewport": 390,
+          "document": 390
+        },
+        "unfinishedSha256": "931a8802ab23826fd69b72121e4655feb9424794a2ecffaf5b07162f313814e5",
+        "lessonSha256": "ecf66a5ee9a23b299c7b6291350fe545d0f779e4b0a976919d072dec1ee56030",
+        "literalTextPreserved": true
+      }
+    }
+  ],
+  "downloads": [
+    {
+      "path": "unfinished.draft.json",
+      "kind": "draft",
+      "filename": "Unfinished-cafe-notes.draft.json",
+      "bytes": 772,
+      "sha256": "cc865bb04c3023f45a262d5cfffcb2db7b030642bb4322b8b0ff4eba467f04a9"
+    },
+    {
+      "path": "unfinished-repeat.draft.json",
+      "kind": "draft",
+      "filename": "Unfinished-cafe-notes.draft.json",
+      "bytes": 772,
+      "sha256": "cc865bb04c3023f45a262d5cfffcb2db7b030642bb4322b8b0ff4eba467f04a9"
+    },
+    {
+      "path": "empty.draft.json",
+      "kind": "draft",
+      "filename": "Unfinished-cafe-notes.draft.json",
+      "bytes": 208,
+      "sha256": "811cbbb424164c4398da4014cfe29a468045190c0aa48c64713e7d20238c4ba8"
+    },
+    {
+      "path": "continued-empty.draft.json",
+      "kind": "draft",
+      "filename": "Unfinished-cafe-notes.draft.json",
+      "bytes": 755,
+      "sha256": "087ea4cdf2a14574e8ce798537a6d062bdcc40d32106f51adc150e7af7d36d67"
+    },
+    {
+      "path": "existing-checked-deck.json",
+      "kind": "deck",
+      "filename": "A-later-title-kept-after-undo.json",
+      "bytes": 1642,
+      "sha256": "6b6aafa39048d22be31a8d3221bce5e6ba320e3754de447a88e02b5953a7b0a9"
+    },
+    {
+      "path": "checked-state.draft.json",
+      "kind": "draft",
+      "filename": "A-later-title-kept-after-undo.draft.json",
+      "bytes": 2604,
+      "sha256": "c94140bd7875445856337715c6d42ee3288e1155e1f281a1d97ac8539c481f60"
+    },
+    {
+      "path": "checked-state-retry.draft.json",
+      "kind": "draft",
+      "filename": "A-later-title-kept-after-undo.draft.json",
+      "bytes": 2604,
+      "sha256": "c94140bd7875445856337715c6d42ee3288e1155e1f281a1d97ac8539c481f60"
+    },
+    {
+      "path": "checked-deck-after-retry.json",
+      "kind": "deck",
+      "filename": "A-later-title-kept-after-undo.json",
+      "bytes": 1642,
+      "sha256": "6b6aafa39048d22be31a8d3221bce5e6ba320e3754de447a88e02b5953a7b0a9"
+    },
+    {
+      "path": "cyclic.draft.json",
+      "kind": "draft",
+      "filename": "Work-to-finish-later.draft.json",
+      "bytes": 1686,
+      "sha256": "2f4a6b9c927d9bce4f58b4e858900386ab92211cb42c970623f149404cda9ba3"
+    },
+    {
+      "path": "repaired-cycle-deck.json",
+      "kind": "deck",
+      "filename": "Work-to-finish-later.json",
+      "bytes": 1072,
+      "sha256": "9d2d4785c5ffacbb3c41650f7ac7681c6a7b65b7ca72548834a7b931cf2dd3da"
+    },
+    {
+      "path": "large-editable.draft.json",
+      "kind": "draft",
+      "filename": "A-longer-lesson-to-shorten.draft.json",
+      "bytes": 275398,
+      "sha256": "7d7703a47ddbfb8c5cf093613151883a46718621093bc3a6499940d4bf95a53f"
+    },
+    {
+      "path": "shortened-checked-deck.json",
+      "kind": "deck",
+      "filename": "A-longer-lesson-to-shorten.json",
+      "bytes": 8350,
+      "sha256": "02885a8965fba039927e3d835a736c4c93dfd15922bb0e0b44f9e2c055f7ec98"
+    },
+    {
+      "path": "undo-repaired-references.draft.json",
+      "kind": "draft",
+      "filename": "Work-to-finish-later.draft.json",
+      "bytes": 1578,
+      "sha256": "ec606613622782199ef77a448167e99ae02da2ba8261d9285f7b479e802a6c8f"
+    },
+    {
+      "path": "undo-then-repaired-deck.json",
+      "kind": "deck",
+      "filename": "Work-to-finish-later.json",
+      "bytes": 1039,
+      "sha256": "ce7901dece3e2ab3a2d193f9c529ae518accaa73d1bdd7d48f9ab16fd1aaf7f2"
+    },
+    {
+      "path": "phone-unfinished.draft.json",
+      "kind": "draft",
+      "filename": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX.draft.json",
+      "bytes": 910,
+      "sha256": "931a8802ab23826fd69b72121e4655feb9424794a2ecffaf5b07162f313814e5"
+    },
+    {
+      "path": "phone-completed-deck.json",
+      "kind": "deck",
+      "filename": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX.json",
+      "bytes": 740,
+      "sha256": "ecf66a5ee9a23b299c7b6291350fe545d0f779e4b0a976919d072dec1ee56030"
+    }
+  ],
+  "screenshots": [
+    "phone-incoming-draft.png",
+    "phone-completed-draft.png"
+  ],
+  "external_requests": [],
+  "page_errors": [],
+  "browser_version": "153.0.8010.0",
+  "passed": true
+}
