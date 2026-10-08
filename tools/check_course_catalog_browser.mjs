@@ -60,6 +60,7 @@ const OBSERVER = `(() => {
   const observed = window.__catalogReceiving = {
     storageCalls: [], blockedApis: [], setupErrors: [],
     objectUrlAttempts: 0, objectUrlsCreated: 0, failNextObjectUrl: false,
+    createdObjectUrls: [], revokedObjectUrls: [],
   };
   const originalUrl = URL.createObjectURL;
   URL.createObjectURL = function(...args) {
@@ -70,7 +71,14 @@ const OBSERVER = `(() => {
     }
     const url = originalUrl.apply(this, args);
     observed.objectUrlsCreated++;
+    observed.createdObjectUrls.push(url);
     return url;
+  };
+  const originalRevoke = URL.revokeObjectURL;
+  URL.revokeObjectURL = function(...args) {
+    const result = originalRevoke.apply(this, args);
+    observed.revokedObjectUrls.push(args[0]);
+    return result;
   };
   function observe(object, name, label) {
     if (!object || typeof object[name] !== 'function') return;
@@ -143,6 +151,7 @@ async function emitBundle(output) {
       sha256: sha256(bytes), base64: bytes.toString('base64')});
   }
   const payload = Buffer.from(JSON.stringify({version: 1, files}));
+  assert.ok(payload.length <= PACKET_LIMIT, 'Decoded evidence packet exceeds 2 MiB; refusing incomplete export');
   const encoded = payload.toString('base64');
   const chunks = Math.ceil(encoded.length / 4096);
   console.log('RECALLWEAVE_CATALOG_BUNDLE_BEGIN ' + JSON.stringify({
@@ -165,7 +174,7 @@ async function main(settings) {
     version: 1, status: 'running', root, executable, node: process.version,
     platform: process.platform, architecture: process.arch, checks: [], downloads: [],
     screenshots: [], sourceSha256: {}, pageErrors: [], unexpectedRequests: [],
-    networkRequests: [], documentAudits: [], harnessErrors: [],
+    networkRequests: [], documentAudits: [], objectUrlCleanup: [], harnessErrors: [],
   };
   let server, browser, socket, profile;
   let browserLog = '';
@@ -291,6 +300,20 @@ async function main(settings) {
     report.documentAudits.push({name, url: snapshot.url, observed: snapshot.observed,
       courseDataSha256: snapshot.courseData === null ? null : sha256(Buffer.from(snapshot.courseData)), overflow: snapshot.overflow});
     return snapshot;
+  }
+  async function releasedObjectUrls(page, name) {
+    const result = await waitFor(async () => {
+      const urls = await inPage(page, () => ({
+        created: window.__catalogReceiving.createdObjectUrls,
+        revoked: window.__catalogReceiving.revokedObjectUrls,
+      }));
+      assert.equal(new Set(urls.created).size, urls.created.length, 'Created object URLs must be distinct');
+      if (urls.revoked.length < urls.created.length) return null;
+      assert.deepEqual([...urls.revoked].sort(), [...urls.created].sort(),
+        'Each created object URL must be passed once to the native revoke API');
+      return urls;
+    }, 'delayed object-URL cleanup: ' + name, 5000);
+    report.objectUrlCleanup.push({name, ...result});
   }
   async function cards(page) {
     return inPage(page, () => [...document.querySelectorAll('#catalog-results .course-card')]
@@ -545,6 +568,7 @@ async function main(settings) {
     await download(catalog, failureName, 'http-explicit-retry', () => click(catalog, failureSelector + ' button[data-download]'));
     passed('Synchronous object-URL failure preserves source and explicit retry downloads exact bytes');
 
+    await releasedObjectUrls(catalog, 'http-before-reload');
     await audit(catalog, 'before-keyboard-reload');
     await navigate(catalog, base + '/catalog.html');
     const tabPath = [];
@@ -641,6 +665,9 @@ async function main(settings) {
     assert.ok(directRequests.every(request => request.url.startsWith('file:') || request.url.startsWith('blob:') || request.url.startsWith('data:')),
       'Offline direct-file catalog must not request any hosted resource');
     passed('Direct-file catalog works with network offline, all four exact downloads and 390px layout');
+    await releasedObjectUrls(catalog, 'http-keyboard-before-close');
+    await releasedObjectUrls(offline, 'direct-file-before-close');
+    passed('Every created catalog object URL is released once after download, before reload or close');
 
     for (const [path, bytes] of sourceBytes)
       assert.deepEqual(await readFile(join(root, path)), bytes, 'Receiving must not modify source: ' + path);
