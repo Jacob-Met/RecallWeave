@@ -1,0 +1,325 @@
+{
+  "format": "recallweave-deck/1",
+  "title": "Feedback control: correction, fixed points and stability",
+  "attribution": "Original model examples, worked questions and explanations for RecallWeave, 2026. Background references: MIT OpenCourseWare, Dennis Freeman, 6.003 Lecture 2, Discrete-Time Systems (https://ocw.mit.edu/courses/6-003-signals-and-systems-fall-2011/resources/lecture-2-discrete-time-dt-systems/); Derek Rowell, 2.161 Lecture 14, discrete-time stability (https://ocw.mit.edu/courses/2-161-signal-processing-continuous-and-discrete-fall-2008/resources/lecture_14/). All calculations here follow the explicitly stated one-state model. Source exercises, passages and figures are not reproduced.",
+  "license": "CC0-1.0 for this original course content. The linked MIT materials retain their own license and are not bundled. AI assistance was used to author and verify the original material.",
+  "concepts": [
+    "Read one update",
+    "Close the loop",
+    "Find the fixed point",
+    "Test decay and growth",
+    "Separate tracking and disturbance",
+    "Read the model's limits"
+  ],
+  "items": [
+    {
+      "id": "fc-read-order",
+      "concept": "Read one update",
+      "prerequisites": [],
+      "prompt": "At update n, the model uses u[n] = k(r − x[n]) and x[n+1] = a x[n] + u[n] + d. Here r and d stay constant. Which sequence matches this definition?",
+      "options": [
+        "Compute u[n] from x[n+1], then solve an unstated simultaneous equation.",
+        "Replace x[n] by r before computing the correction.",
+        "Read x[n], compute its correction u[n], then compute the next state x[n+1].",
+        "Add the correction directly to the reference and leave the state unchanged."
+      ],
+      "answer": 2,
+      "explanation": "The controller observes the current state x[n]. Its correction is an input to the following state update. The definition does not use the next state to compute the current correction. This one-step ordering makes the model an explicit recurrence.",
+      "transfer": "With a = 0.75, k = 0.5, r = 1, d = 0 and x[0] = 0, calculate u[0] before calculating x[1]."
+    },
+    {
+      "id": "fc-read-number",
+      "concept": "Read one update",
+      "prerequisites": [],
+      "prompt": "Use a = 0.75, k = 0.5, r = 1, d = 0 and x[0] = 0.5. With u[0] = k(r − x[0]) and x[1] = a x[0] + u[0] + d, what is x[1]?",
+      "options": [
+        "0.25",
+        "0.625",
+        "0.75",
+        "1.25"
+      ],
+      "answer": 1,
+      "explanation": "The error is 1 − 0.5 = 0.5, so the correction is 0.5 × 0.5 = 0.25. The retained part of the state is 0.75 × 0.5 = 0.375. Adding the two gives x[1] = 0.625. The correction alone is not the next state.",
+      "transfer": "Repeat the calculation with d = −0.25. Identify which term changes and which two terms stay the same."
+    },
+    {
+      "id": "fc-read-sign",
+      "concept": "Read one update",
+      "prerequisites": [],
+      "prompt": "In u[n] = k(r − x[n]), let k > 0 and let the current state be above the reference: x[n] > r. What sign does the controller's correction have?",
+      "options": [
+        "Positive, because k is positive.",
+        "Zero, because the reference is constant.",
+        "Its sign cannot be determined without knowing a.",
+        "Negative, because r − x[n] is negative."
+      ],
+      "answer": 3,
+      "explanation": "A positive gain preserves the sign of the error. Above the reference, the error is negative, so the correction is negative. This describes the correction term, not a guarantee that the whole next state will decrease: the retained state and disturbance also contribute.",
+      "transfer": "Explain why a negative correction does not, by itself, prove that the whole feedback system is stable."
+    },
+    {
+      "id": "fc-loop-coefficient",
+      "concept": "Close the loop",
+      "prerequisites": [
+        "Read one update"
+      ],
+      "prompt": "Substitute u[n] = k(r − x[n]) into x[n+1] = a x[n] + u[n] + d. Which pair gives the equivalent form x[n+1] = q x[n] + c?",
+      "options": [
+        "q = a − k and c = k r + d.",
+        "q = a + k and c = k r + d.",
+        "q = a − k and c = r + d.",
+        "q = k and c = a r − d."
+      ],
+      "answer": 0,
+      "explanation": "Expand k(r − x[n]) as k r − k x[n]. Collecting the state terms gives (a − k)x[n], and the constant terms give k r + d. Therefore q = a − k and c = k r + d. Both the plant retention and the feedback gain affect the state multiplier.",
+      "transfer": "For a = 0.75 and k = 1.25, calculate q. Predict whether a deviation will keep its sign after one update."
+    },
+    {
+      "id": "fc-loop-two-starts",
+      "concept": "Close the loop",
+      "prerequisites": [
+        "Read one update"
+      ],
+      "prompt": "Two runs use the same q and c in x[n+1] = q x[n] + c, but start at different states. Define their separation as Δ[n] = xB[n] − xA[n]. Which equation follows?",
+      "options": [
+        "Δ[n+1] = q Δ[n] + 2c.",
+        "Δ[n+1] = c Δ[n].",
+        "Δ[n+1] = q Δ[n].",
+        "Δ[n+1] = Δ[n] regardless of q."
+      ],
+      "answer": 2,
+      "explanation": "Subtract the two update equations. Their identical constant terms cancel: (q xB[n] + c) − (q xA[n] + c) = q(xB[n] − xA[n]). Thus Δ[n+1] = q Δ[n]. This comparison separates the response to different initial states from the common forcing.",
+      "transfer": "If the runs instead use different constant disturbances, write the extra term that remains when you subtract their updates."
+    },
+    {
+      "id": "fc-loop-three-steps",
+      "concept": "Close the loop",
+      "prerequisites": [
+        "Read one update"
+      ],
+      "prompt": "For two runs with identical constant inputs, the initial separation is Δ[0] = 1 and the multiplier is q = −0.5. What is their separation after three updates?",
+      "options": [
+        "0.125",
+        "−0.125",
+        "−1.5",
+        "0.5"
+      ],
+      "answer": 1,
+      "explanation": "Apply the multiplier once per update: Δ[1] = −0.5, Δ[2] = 0.25 and Δ[3] = −0.125. Equivalently, Δ[3] = (−0.5)^3 × 1. A negative multiplier alternates the sign; its magnitude below one makes the separation shrink.",
+      "transfer": "Calculate Δ[4], then compare |Δ[4]| with |Δ[3]|. Which part of q controls the ratio?"
+    },
+    {
+      "id": "fc-fixed-point",
+      "concept": "Find the fixed point",
+      "prerequisites": [
+        "Close the loop"
+      ],
+      "prompt": "The update is x[n+1] = q x[n] + c, with q ≠ 1. A fixed point x* is a state that reproduces itself after one update. What is x*?",
+      "options": [
+        "c / (1 + q)",
+        "q / (1 − c)",
+        "c − q",
+        "c / (1 − q)"
+      ],
+      "answer": 3,
+      "explanation": "Set the next state equal to the current state: x* = q x* + c. Rearranging gives (1 − q)x* = c, so x* = c/(1 − q). This is an algebraic fixed point. Its existence alone does not establish that nearby states approach it.",
+      "transfer": "Find the fixed point of x[n+1] = 1.25 x[n] − 0.5. Then ask separately whether nearby states approach it."
+    },
+    {
+      "id": "fc-fixed-reference",
+      "concept": "Find the fixed point",
+      "prerequisites": [
+        "Close the loop"
+      ],
+      "prompt": "Let a = 0.75, k = 0.5, r = 1 and d = 0. Then q = 0.25 and c = 0.5. The response approaches its fixed point. What are that fixed point and the remaining reference error r − x*?",
+      "options": [
+        "x* = 2/3 and r − x* = 1/3.",
+        "x* = 1 and r − x* = 0.",
+        "x* = 1/2 and r − x* = 1/2.",
+        "x* = 2 and r − x* = −1."
+      ],
+      "answer": 0,
+      "explanation": "The fixed point is 0.5/(1 − 0.25) = 0.5/0.75 = 2/3. The reference is 1, so the remaining error is 1/3. Proportional correction in this model can produce a stable response with a nonzero tracking error. Stability and exact reference tracking are different questions.",
+      "transfer": "Keeping k = 0.5, r = 1 and d = 0, change a to 1. Calculate the new fixed point and check |q|."
+    },
+    {
+      "id": "fc-fixed-exception",
+      "concept": "Find the fixed point",
+      "prerequisites": [
+        "Close the loop"
+      ],
+      "prompt": "A recurrence has q = 1 and c = 0.25, so x[n+1] = x[n] + 0.25. Which statement is correct?",
+      "options": [
+        "Its unique fixed point is 0.25.",
+        "Every state is a fixed point.",
+        "It has no fixed point; the state increases by 0.25 on every update.",
+        "It approaches zero because the increment is less than one."
+      ],
+      "answer": 2,
+      "explanation": "A fixed point would require x* = x* + 0.25, which is impossible. The state drifts by a constant amount. The formula c/(1 − q) is inapplicable because its denominator is zero. In the separate case q = 1 and c = 0, every state would be a fixed point, with no attraction between different starting states.",
+      "transfer": "Compare the separation of two starting states when q = 1, c = 0.25 with their separation when q = 1, c = 0. What stays the same?"
+    },
+    {
+      "id": "fc-stability-alternation",
+      "concept": "Test decay and growth",
+      "prerequisites": [
+        "Close the loop",
+        "Find the fixed point"
+      ],
+      "prompt": "A unique fixed point exists, and deviations from it follow z[n+1] = q z[n]. Which value makes a nonzero deviation alternate in sign while shrinking?",
+      "options": [
+        "q = 0.5",
+        "q = −0.5",
+        "q = −1.25",
+        "q = 1"
+      ],
+      "answer": 1,
+      "explanation": "With q = −0.5, every deviation is multiplied by a negative number of magnitude less than one. Its sign alternates and its magnitude halves. q = 0.5 shrinks without alternating; q = −1.25 alternates but grows; q = 1 preserves the deviation.",
+      "transfer": "Starting with z[0] = 2, write z[1] through z[4] for q = −0.5."
+    },
+    {
+      "id": "fc-stability-gain",
+      "concept": "Test decay and growth",
+      "prerequisites": [
+        "Close the loop",
+        "Find the fixed point"
+      ],
+      "prompt": "Keep a = 0.75 and use nonnegative gain k. For this one-state model, initial-state perturbations decay exactly when |a − k| < 1. Which full range of k satisfies that condition?",
+      "options": [
+        "Every k ≥ 0.",
+        "0 ≤ k ≤ 1.75, including the upper endpoint.",
+        "Only 0.75 < k < 1.75.",
+        "0 ≤ k < 1.75."
+      ],
+      "answer": 3,
+      "explanation": "Solve −1 < 0.75 − k < 1. This gives −0.25 < k < 1.75. Restricting to the stated nonnegative gains leaves 0 ≤ k < 1.75. The upper endpoint produces q = −1, where nonzero deviations repeat rather than decay. A larger gain is not automatically a better correction.",
+      "transfer": "Compare k = 1.25, 1.75 and 2 by computing q and describing what happens to a small initial offset."
+    },
+    {
+      "id": "fc-stability-boundary",
+      "concept": "Test decay and growth",
+      "prerequisites": [
+        "Close the loop",
+        "Find the fixed point"
+      ],
+      "prompt": "Suppose q = −1 and the initial deviation from the fixed point is z[0] = 0.25. What happens in exact arithmetic?",
+      "options": [
+        "The deviation repeats as 0.25, −0.25, 0.25, −0.25, …; it does not approach zero.",
+        "The deviation becomes zero after two updates.",
+        "Its magnitude doubles on each update.",
+        "It approaches the fixed point without changing sign."
+      ],
+      "answer": 0,
+      "explanation": "Multiplying by −1 reverses the sign without changing the magnitude. The response can remain bounded while failing to approach the fixed point. This course calls the boundary non-decaying; it does not combine all uses of the word 'stable' into one label.",
+      "transfer": "Explain the difference between 'bounded for this initial state' and 'all nearby states converge to the fixed point'."
+    },
+    {
+      "id": "fc-stability-flat",
+      "concept": "Test decay and growth",
+      "prerequisites": [
+        "Close the loop",
+        "Find the fixed point"
+      ],
+      "prompt": "For x[n+1] = −1.25 x[n], a run starting at x[0] = 0 stays exactly at zero. Does that flat trace establish that small initial-state perturbations decay?",
+      "options": [
+        "Yes; every observed value is zero.",
+        "Yes; the multiplier is negative.",
+        "No; a nonzero initial perturbation is multiplied by −1.25, so its magnitude grows.",
+        "No; the fixed point does not exist."
+      ],
+      "answer": 2,
+      "explanation": "Zero is a fixed point, so starting exactly there gives a flat special run. A nearby initial state instead follows z[n] = (−1.25)^n z[0]. Its magnitude grows when z[0] is nonzero. Inspecting a single exact-equilibrium trajectory can hide this behavior.",
+      "transfer": "Use the explorer's flat-run preset. Compare the zero starting state with the separate run beginning 0.25 units away."
+    },
+    {
+      "id": "fc-disturbance-offset",
+      "concept": "Separate tracking and disturbance",
+      "prerequisites": [
+        "Find the fixed point",
+        "Test decay and growth"
+      ],
+      "prompt": "Start with a = 0.75, k = 0.5 and r = 1. Change the constant disturbance from d = 0 to d = −0.25, leaving everything else fixed. What happens to q and the attracting fixed point?",
+      "options": [
+        "q changes from 0.25 to 0; the fixed point stays 2/3.",
+        "q stays 0.25; the fixed point changes from 2/3 to 1/3.",
+        "q stays 0.25; the fixed point changes from 2/3 to 1.",
+        "q changes to −0.25; the fixed point becomes zero."
+      ],
+      "answer": 1,
+      "explanation": "The disturbance appears only in c = k r + d. The multiplier remains q = 0.75 − 0.5 = 0.25. The constant term falls from 0.5 to 0.25, so the fixed point changes from 0.5/0.75 = 2/3 to 0.25/0.75 = 1/3. The rate at which initial deviations decay is unchanged.",
+      "transfer": "For this same q, calculate the change in fixed point caused by an added disturbance of +0.25."
+    },
+    {
+      "id": "fc-reference-vs-rate",
+      "concept": "Separate tracking and disturbance",
+      "prerequisites": [
+        "Find the fixed point",
+        "Test decay and growth"
+      ],
+      "prompt": "Two runs use the same a and k, but different constant references r. Which statement must hold for the model x[n+1] = (a − k)x[n] + k r + d?",
+      "options": [
+        "The multiplier q is unchanged; changing r can move the fixed point.",
+        "The runs must approach the same fixed point.",
+        "A larger reference necessarily makes initial perturbations grow faster.",
+        "The gain k is automatically changed by the new reference."
+      ],
+      "answer": 0,
+      "explanation": "The multiplier q = a − k does not include r. A different reference changes the forcing term k r + d and can move the fixed point when k is nonzero. It does not change the multiplier that governs deviations under each run's constant inputs. Comparing two runs with different references is different from comparing two initial states under identical forcing.",
+      "transfer": "Give an example with k = 0. Does changing the reference affect the state update in that special case?"
+    },
+    {
+      "id": "fc-limit-time",
+      "concept": "Read the model's limits",
+      "prerequisites": [
+        "Test decay and growth",
+        "Separate tracking and disturbance"
+      ],
+      "prompt": "The horizontal axis in the explorer is update index n. No physical sampling interval has been specified. Which interpretation is justified?",
+      "options": [
+        "One update always means one second.",
+        "Doubling the number of updates doubles a validated physical duration.",
+        "The same a and k can be copied unchanged to any device sampling rate.",
+        "The plot describes discrete updates; physical time requires a separately specified model and sampling interval."
+      ],
+      "answer": 3,
+      "explanation": "The recurrence defines one mathematical update, not a duration in seconds. Mapping it to a physical process requires a sampling interval and a model whose coefficients apply at that interval. Changing the interval can change the appropriate coefficients. The explorer does not establish that mapping.",
+      "transfer": "If a real model is identified for a 20 ms interval, what extra work is needed before reusing its parameters at 5 ms?"
+    },
+    {
+      "id": "fc-limit-horizon",
+      "concept": "Read the model's limits",
+      "prerequisites": [
+        "Test decay and growth",
+        "Separate tracking and disturbance"
+      ],
+      "prompt": "A finite plotted run looks close to its fixed point. What gives an analytical test that every initial deviation decays in this stated scalar, constant-coefficient model?",
+      "options": [
+        "The last displayed point appears near the reference.",
+        "Every sampled control input in the visible table is positive.",
+        "The derived multiplier satisfies |q| < 1, because z[n] = q^n z[0].",
+        "The run contains at least 30 updates."
+      ],
+      "answer": 2,
+      "explanation": "The deviation formula applies for every update count. If |q| < 1, its powers tend to zero, so every initial deviation decays. A short trace can be suggestive, but a particular starting state or a short horizon can conceal non-decaying or growing behavior. This conclusion is specific to the stated scalar recurrence.",
+      "transfer": "For q = 1.25 and z[0] = 0, explain why the visible trace and the general perturbation test answer different questions."
+    },
+    {
+      "id": "fc-limit-transfer",
+      "concept": "Read the model's limits",
+      "prerequisites": [
+        "Test decay and growth",
+        "Separate tracking and disturbance"
+      ],
+      "prompt": "The explorer predicts decaying perturbations for its chosen settings. Which conclusion can be carried directly from that result?",
+      "options": [
+        "A physical actuator with delay and saturation will have the same response.",
+        "The stated ideal recurrence has decaying initial-state perturbations; additional physical effects require a model and checks that include them.",
+        "The proportional controller eliminates every constant tracking error.",
+        "Completing the lesson demonstrates that a person can safely tune a physical controller."
+      ],
+      "answer": 1,
+      "explanation": "The calculation concerns the explicit one-state recurrence with fixed coefficients and constant inputs. It omits effects such as delay, saturation, measurement noise and changing dynamics. A physical design must represent and verify the effects relevant to that system. The course also makes no validated assessment of a learner's ability.",
+      "transfer": "Name one omitted effect that could change a real response, and describe what information would be needed to include it in a model."
+    }
+  ]
+}
