@@ -1,0 +1,25 @@
+# Counting principles: course, explorer and receiving overview
+
+The contribution supplies an original twelve-question lesson, a worked companion and an offline explorer for four counting models: ordered or unordered selection, each with or without reuse. Inputs are 0–8 label types and 0–6 selected items. Counts use exact integers; complete lexicographic outcomes are addressable in 24-row pages. Unordered rows show their ordered-representation multiplicities. The explorer distinguishes empty from impossible selections, retires stale numeric/model drafts and labels each page export as that applied page only.
+
+Eight additive source files plus one README insertion form the product change. The shared deck parser, learner, model, defaults, importer, catalog and all other courses retain their receiving-base bytes.
+
+## Qualified source and evidence
+
+The original nine-input author manifest is [preserved with the browser packet](../counting-principles-browser-3dab-20261008/SOURCE_PINS.json). It covers the eight new paths plus unchanged published src/deck.mjs. The core is SHA256 7997430fe73448c67f7ee1bb58c76534606d2499c1cec2e44234039eb9e4f55b; the course is 1d5e55d9d24383c47626a38096133c74f4592beba124cd55c842ad41b8bf01fc; the standalone explorer is 2e06ddc732e0177a3294f61f051f576e944ffac2c81ceb0920ce3f90c09ae4e1. These product bytes remain unchanged throughout receiving.
+
+- **Independent content/source review:** Root solved all twelve question and transfer answers before seeing the key, then read every new source file and reviewed the rendered frames. [The retained content review](../counting-principles-browser-3dab-20261008/review/REVIEW-v2.md) records unique correct options, assumptions and exact source pins.
+- **Independent mathematics:** The [independent review](../counting-principles-independent-3dab-20261008/REVIEW.md) preserves the preimplementation Python itertools/math oracle for all 252 cases and 565,986 enumerated rows. The newly dated native Node22 receiver passes 5,890 checks, including exact counts, 391 selected pages, 4,986 page rows, 962 addressed outcomes and 4,032 required RangeError refusals. The unchanged blind fixture retains zero-based page indices; the separately documented mapping checks the API's one-based returned display label.
+- **Author browser receiving and independent review:** [The browser packet](../counting-principles-browser-3dab-20261008/README.md) retains seven completed stages from the original run and a separate passing two-stage learner continuation. It includes physical exact course/page downloads, desktop and 390px frames, all twelve preview prompts, explicit Start and canonical feedback, exact source guards and owned-profile cleanup. [Root's browser disposition](../counting-principles-browser-3dab-20261008/review/BROWSER_REVIEW.md) independently reads those exact receipts and frames.
+
+The original browser command remains FAILED: its learner fixture expected the bundled phrase “12 short challenges,” whereas the current imported-course label is “12 challenges.” The correction changed only the receiver's specific assertion. No product bytes changed, the seven completed stages were not replayed, and the old failed report is not relabeled as a passing command.
+
+## Custody and current-main composition
+
+The original Mac author run passed nine committed test methods, but its raw logs and receipt remain on the offline Mac. The original observed receipt SHA256 is df8aa60f73ebb6f6851e78cb7de421f5120ef8362dff162477cabd369a653a33. The packet does not claim those unavailable original bytes are included. Normal PR CI receives the committed tests on the final combined source.
+
+An earlier in-memory Node24 mathematical receiving was observed to pass, but its full raw receipt/archive disappeared with volatile tool storage. Its observed hashes remain historical. The unchanged blind oracle survived as an exact Git blob and was recovered without regeneration. Root authorized one new native Node22 receiving whose actual raw output, guards and final archive are now included. The new result is separately dated and does not reconstruct or relabel the lost execution.
+
+Native learner receiving uses exact demo.html blob cf7eea3792deacc3eb98a22aef539b920fb66746, current at main48611be. Before publication, main84d5a718 added escaped “Your answer” / “Correct answer” feedback labels and generated demo42f991e0ceab6144e24b667f59905777d9659246. Root reviewed that later presentation delta; it is preserved in the final base and is not claimed as execution by the earlier native receipt. Subsequent main567425f2 adds only three trace-comparison receiving-evidence files. composition.json records the exact current base and unchanged shared blobs; normal PR CI checks the final composition.
+
+The README edit is one insertion. Removing it restores every incoming README byte. The full receiving tree preserves all unrelated base leaves, including the later learner markup and peer evidence. No installed app, automatic browser storage, model service or live account is used by this contribution.
