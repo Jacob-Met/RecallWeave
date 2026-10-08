@@ -1,0 +1,212 @@
+{
+  "format": "recallweave-deck/1",
+  "title": "Finite automata: small memory, exact recognition",
+  "attribution": "Original questions, distractors, worked explanations and transfer prompts by the HAMON autonomous cohort (52e56ea8fcca), with AI assistance, 2026-10-08. Standard DFA definitions and decision procedures were checked against the primary course references linked in courses/finite-automata.md. No source exercises, figures or passages are reproduced.",
+  "license": "Original lesson text: Creative Commons Attribution 4.0 International (CC BY 4.0). Reference links retain their own terms; they are not included in this license.",
+  "concepts": [
+    "Complete transition rules",
+    "Tracing a word",
+    "Recognizing a language",
+    "Proving equivalence"
+  ],
+  "items": [
+    {
+      "id": "dfa-complete-rules",
+      "concept": "Complete transition rules",
+      "prerequisites": [],
+      "prompt": "A binary scanner has three states. What makes its transition table a complete deterministic machine over {0, 1}?",
+      "options": [
+        "Each state has exactly one destination for 0 and exactly one destination for 1.",
+        "Every state must be accepting.",
+        "Each symbol must lead to a different state.",
+        "The table may leave a cell blank when that input seems unlikely."
+      ],
+      "answer": 0,
+      "explanation": "Determinism gives one next state for a state and symbol. Completeness supplies that choice for both symbols in every state, including states a chosen example never visits. Self-loops and shared destinations are allowed.",
+      "transfer": "Sketch a two-state machine in which all four table cells point to the same state. Explain why it is still deterministic and complete."
+    },
+    {
+      "id": "dfa-empty-word",
+      "concept": "Complete transition rules",
+      "prerequisites": [],
+      "prompt": "A complete machine starts in q2, and q2 is accepting. No symbols arrive. What happens on the empty word ε?",
+      "options": [
+        "It is rejected because every run must take an edge.",
+        "It is accepted because the final state is still the accepting initial state q2.",
+        "The machine follows the transition labeled 0.",
+        "The machine searches for an accepting state elsewhere."
+      ],
+      "answer": 1,
+      "explanation": "The empty word has length zero. The run begins and ends in q2 without using a transition. Acceptance depends on that final state, so an accepting initial state accepts ε. The glyph ε denotes no input; it is not an extra alphabet symbol.",
+      "transfer": "Change only the initial state to a nonaccepting one. Which empty-word outcome changes, even if every transition stays the same?"
+    },
+    {
+      "id": "dfa-alphabet-boundary",
+      "concept": "Complete transition rules",
+      "prerequisites": [],
+      "prompt": "An explorer admits only complete machines over {0, 1}. A learner enters 102. Which response preserves that stated contract?",
+      "options": [
+        "Skip the 2 and run 10.",
+        "Interpret 2 as two copies of 1.",
+        "Refuse the word and explain that 2 is outside the alphabet.",
+        "Try both transitions at 2 and accept if either works."
+      ],
+      "answer": 2,
+      "explanation": "A deterministic run applies a transition for each symbol in the declared alphabet. There is no transition rule for 2 here. Deleting or reinterpreting it would silently change the supplied word; trying alternatives would change the model.",
+      "transfer": "How would the table and validator need to change if 2 became a genuine third alphabet symbol?"
+    },
+    {
+      "id": "dfa-parity-trace",
+      "concept": "Tracing a word",
+      "prerequisites": [
+        "Complete transition rules"
+      ],
+      "prompt": "Start in accepting q0. On 0, either state stays put; on 1, q0 and q1 swap. Only q0 accepts. Where does the word 1011 end?",
+      "options": [
+        "In q0, accepted, because its first and last symbols are 1.",
+        "In q0, accepted, because it contains a 0.",
+        "In q1, accepted, because q1 was visited.",
+        "In q1, rejected, because it contains three 1s."
+      ],
+      "answer": 3,
+      "explanation": "The states after each consumed symbol are q1, q1, q0, q1. Each 1 flips parity and each 0 preserves it. Three flips leave the run in nonaccepting q1. Acceptance is checked after the complete word.",
+      "transfer": "Insert any number of 0s into 1011. Predict whether the final state can change, and justify it using the transition rules."
+    },
+    {
+      "id": "dfa-suffix-trace",
+      "concept": "Tracing a word",
+      "prerequisites": [
+        "Complete transition rules"
+      ],
+      "prompt": "A machine starts in q0. Its 0/1 destinations are q0→(q1,q0), q1→(q1,q2), q2→(q1,q0); only q2 accepts. What is the result for 010?",
+      "options": [
+        "q0→q1→q2→q1, rejected: the whole word ends in 10.",
+        "q0→q1→q2, accepted: stop as soon as q2 is reached.",
+        "q0→q0→q1→q2, accepted: read the word from right to left.",
+        "q0→q1→q2→q2, accepted: accepting states must absorb later symbols."
+      ],
+      "answer": 0,
+      "explanation": "All three symbols must be consumed in order. The prefix 01 reaches accepting q2, but the final 0 follows q2’s 0-transition to q1. This machine recognizes words ending in 01; containing that suffix earlier is insufficient.",
+      "transfer": "Append 1 to 010 and trace only the new transition. Why can the earlier trace be reused?"
+    },
+    {
+      "id": "dfa-accepting-prefix",
+      "concept": "Tracing a word",
+      "prerequisites": [
+        "Complete transition rules"
+      ],
+      "prompt": "The even-1s machine starts in accepting q0, flips between q0 and q1 on 1, and stays put on 0. A learner says every word is accepted because every run visits q0 at the start. What fixes the reasoning?",
+      "options": [
+        "Acceptance is decided by the most frequently visited state.",
+        "Acceptance is decided by the state after the entire word, so the word 1 is rejected.",
+        "The initial state cannot be accepting.",
+        "A visit to q0 accepts only if it happens after a 0."
+      ],
+      "answer": 1,
+      "explanation": "Visiting an accepting state is not an instruction to stop a DFA run. For the word 1, the accepting start q0 moves to nonaccepting q1, where the input ends. The empty word is accepted, but that says nothing by itself about every nonempty word.",
+      "transfer": "Find one accepted and one rejected word that both start with 1. Explain the distinction without listing all their intermediate states."
+    },
+    {
+      "id": "dfa-redundant-state",
+      "concept": "Recognizing a language",
+      "prerequisites": [
+        "Tracing a word"
+      ],
+      "prompt": "Machine A has one nonaccepting state looping on 0 and 1. Machine B has two nonaccepting states with complete transitions between them. Can their recognized languages differ?",
+      "options": [
+        "Yes: two states always recognize more words than one.",
+        "Yes: taking a transition itself counts as acceptance.",
+        "No: neither machine can finish in an accepting state, so both recognize the empty language.",
+        "No: both recognize every binary word."
+      ],
+      "answer": 2,
+      "explanation": "With no accepting states, every possible final state is nonaccepting. Both languages contain no words, regardless of B’s transition pattern. The empty language ∅ is different from the language {ε}, which contains one word of length zero.",
+      "transfer": "Build a complete one-state machine for every binary word. Which single acceptance flag differs from Machine A?"
+    },
+    {
+      "id": "dfa-permanent-violation",
+      "concept": "Recognizing a language",
+      "prerequisites": [
+        "Tracing a word"
+      ],
+      "prompt": "To reject words containing 11, use accepting q0 (no trailing 1), accepting q1 (one trailing 1), and nonaccepting q2 (violation). The 0/1 rows are q0→(q0,q1), q1→(q0,q2), q2→(q2,q2). What does the final 0 in 10110 do?",
+      "options": [
+        "It repairs the earlier 11 and returns to q0.",
+        "It makes the word empty, so the initial state decides.",
+        "It returns to q1 because 0 always changes the state.",
+        "It leaves the run in q2: a later symbol cannot erase the earlier violation."
+      ],
+      "answer": 3,
+      "explanation": "The run is q0→q1→q0→q1→q2→q2. The adjacent 11 has already occurred when q2 is reached. Both transitions from q2 loop there, retaining exactly the memory needed to reject any continuation.",
+      "transfer": "Compare “contains no 11” with “does not end in 11.” Why does the second language need to allow recovery after some later symbols?"
+    },
+    {
+      "id": "dfa-short-witness",
+      "concept": "Recognizing a language",
+      "prerequisites": [
+        "Tracing a word"
+      ],
+      "prompt": "Compare the even-number-of-1s machine with a one-state machine that accepts every binary word. What is a shortest word on which they disagree?",
+      "options": [
+        "1",
+        "ε",
+        "0",
+        "11"
+      ],
+      "answer": 0,
+      "explanation": "Both accept ε. Both accept the one-symbol word 0. On 1, the parity machine ends in its odd, nonaccepting state while the all-words machine accepts. Thus 1 is a witness of length one, and no shorter witness exists.",
+      "transfer": "What is the shortest distinguishing word if the parity machine’s accepting flags are reversed, while the other machine still accepts every word?"
+    },
+    {
+      "id": "dfa-empty-witness",
+      "concept": "Proving equivalence",
+      "prerequisites": [
+        "Recognizing a language"
+      ],
+      "prompt": "Two complete binary machines have different acceptance flags at their initial states. Before following any product-graph edge, what can a comparison conclude?",
+      "options": [
+        "They are equivalent if their first transitions match.",
+        "They differ on ε, which is already a shortest distinguishing word.",
+        "It must test all words of length one before reaching a conclusion.",
+        "They differ only if they have the same number of states."
+      ],
+      "answer": 1,
+      "explanation": "The start pair describes both runs after zero consumed symbols. If exactly one state accepts, ε belongs to exactly one language. A word cannot have negative length, so this witness is shortest.",
+      "transfer": "Choose two presets with different empty-word outcomes. Verify the result before tracing a nonempty word."
+    },
+    {
+      "id": "dfa-product-proof",
+      "concept": "Proving equivalence",
+      "prerequisites": [
+        "Recognizing a language"
+      ],
+      "prompt": "An exact comparison follows paired states: (state of A, state of B) after the same word. It has exhausted every reachable pair, and both states agree on acceptance in every pair. What follows?",
+      "options": [
+        "Only the empty word has been checked.",
+        "The machines are equivalent only for words shorter than the longest displayed trace.",
+        "The machines recognize the same language for every finite binary word.",
+        "The machines must have identical tables and state names."
+      ],
+      "answer": 2,
+      "explanation": "Every word traces a path from the start pair using the two product transitions. Exhausting reachable pairs therefore covers every possible joint final state, including those reached by arbitrarily long words. If all those pairs agree, no distinguishing word exists. Table identity is unnecessary.",
+      "transfer": "Add an unreachable state with different transitions to one machine. Explain why it need not change the language or the set of reachable product pairs."
+    },
+    {
+      "id": "dfa-witness-bound",
+      "concept": "Proving equivalence",
+      "prerequisites": [
+        "Recognizing a language"
+      ],
+      "prompt": "Machine A has 2 states and B has 3. They are complete over the same binary alphabet and are not equivalent. What upper bound is guaranteed for the length of a shortest distinguishing word?",
+      "options": [
+        "Exactly 6 symbols: every product pair must be visited.",
+        "At most 2 symbols, because the smaller machine has 2 states.",
+        "There is no finite bound unless a word length is chosen in advance.",
+        "At most 5 symbols: a shortest path to a disagreeing pair need not repeat any of the 6 product pairs."
+      ],
+      "answer": 3,
+      "explanation": "There are at most 2×3=6 pairs. If a shortest path repeated a pair, the loop between those visits could be removed and the same suffix would still reach a disagreement. A simple path through at most 6 vertices has at most 5 edges. The witness may be shorter, including ε.",
+      "transfer": "For two six-state machines, derive the corresponding bound. Why is an exact reachable-pair search stronger than merely trying a few favorite examples?"
+    }
+  ]
+}
