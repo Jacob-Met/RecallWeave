@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lesson focus · RecallWeave</title>
+  <meta name="description" content="Make a focused RecallWeave lesson while retaining its authored prerequisite links.">
+  <link rel="stylesheet" href="./focus.css">
+</head>
+<body>
+  <a class="skip-link" href="#course-focus">Skip to Lesson focus</a>
+  <header class="site-header">
+    <a class="wordmark" href="../demo.html" target="_blank" rel="noopener">RecallWeave <span>↗</span></a>
+    <nav aria-label="Other tools">
+      <a href="../demo.html" target="_blank" rel="noopener">Learning app ↗</a>
+      <a href="../author.html" target="_blank" rel="noopener">Deck studio ↗</a>
+    </nav>
+  </header>
+
+  <main id="course-focus" tabindex="-1">
+    <section class="hero" aria-labelledby="page-title">
+      <p class="eyebrow">RECALLWEAVE / LESSON TOOLS</p>
+      <h1 id="page-title">Give one topic<br><em>room to connect.</em></h1>
+      <p class="lede">Make a focused lesson from a checked course. Choose the concepts you want; keep the questions and prerequisite concepts that support them.</p>
+      <div class="hero-notes"><span>Local files</span><span>Works offline</span><span>Your source stays intact</span></div>
+    </section>
+
+    <section class="source-card" aria-labelledby="open-heading">
+      <div class="section-label"><span class="step-number">01</span><h2 id="open-heading">Choose a source lesson</h2></div>
+      <p>Open a checked RecallWeave deck JSON, up to 256 KiB. An editable draft needs to be checked in Deck studio first.</p>
+      <button type="button" id="open-source" class="primary">Open checked deck <span aria-hidden="true">↗</span></button>
+      <input id="source-file" type="file" accept=".json,application/json" hidden>
+      <p id="file-status" class="status" role="status" aria-live="polite">The file stays in this tab. Nothing is uploaded or saved automatically.</p>
+
+      <section id="source-preview" class="incoming" aria-labelledby="source-preview-title" hidden>
+        <p class="eyebrow">LOCAL FILE PREVIEW</p>
+        <h3 id="source-preview-title" tabindex="-1"></h3>
+        <p id="source-preview-summary"></p>
+        <dl class="metadata"><dt>Author / source</dt><dd id="source-preview-attribution"></dd><dt>Permission / license</dt><dd id="source-preview-license"></dd></dl>
+        <p>Use this deck to replace the current source, target choices and lesson title. Until then, your current selection stays in place.</p>
+        <div class="actions"><button type="button" id="use-source" class="primary">Use this deck</button><button type="button" id="cancel-source" class="quiet">Cancel preview</button></div>
+      </section>
+    </section>
+
+    <div id="focus-editor" hidden>
+      <section class="active-source" aria-labelledby="source-title">
+        <div><p class="eyebrow">CURRENT SOURCE</p><h2 id="source-title"></h2><p id="source-summary" class="hint"></p></div>
+        <details class="source-credits"><summary>Source and permission</summary><dl class="metadata"><dt>Author / source</dt><dd id="source-attribution"></dd><dt>Permission / license</dt><dd id="source-license"></dd></dl></details>
+      </section>
+
+      <div class="workspace-grid">
+        <section class="selection-panel" aria-labelledby="targets-heading">
+          <div class="section-label"><span class="step-number">02</span><h2 id="targets-heading" tabindex="-1">Choose your focus</h2></div>
+          <p>Select target concepts. All their questions stay, together with every prerequisite concept linked from those questions.</p>
+          <fieldset class="targets-fieldset"><legend>Target concepts</legend><div id="target-concepts" class="target-list"></div></fieldset>
+          <div class="actions compact"><button type="button" id="select-all" class="quiet">Select all targets</button><button type="button" id="clear-targets" class="quiet" disabled>Clear targets</button></div>
+          <div class="title-field"><label for="focus-title">Title for the focused lesson</label><input id="focus-title" type="text" maxlength="160" autocomplete="off" placeholder="Give this lesson its own title" aria-describedby="title-help"><p id="title-help" class="hint">Required for download. The source title and original attribution remain visible here.</p></div>
+          <p class="selection-note">These are the author's prerequisite links. Keeping them does not verify the subject matter or prescribe a teaching order. The learner keeps its existing question-selection behavior.</p>
+        </section>
+
+        <section class="preview-panel" aria-labelledby="focus-preview-heading">
+          <div class="section-label"><span class="step-number">03</span><h2 id="focus-preview-heading">Inspect the lesson</h2></div>
+          <p id="selection-summary" class="selection-summary" role="status" aria-live="polite">Choose at least one target concept to see what stays.</p>
+          <ul id="included-concepts" class="inclusions" aria-label="Included concepts"></ul>
+          <section id="question-preview" aria-labelledby="questions-heading" hidden><h3 id="questions-heading">Questions that stay</h3><p class="hint">Original source order, answer choices and explanations are preserved. Expand a question to inspect its answer key.</p><div id="included-questions"></div></section>
+          <div class="download-panel"><p id="download-help" class="hint">Choose a target concept and add a lesson title before downloading.</p><button type="button" id="download-focus" class="primary" disabled>Download focused lesson (.json)</button><p id="download-status" class="status" role="status" aria-live="polite"></p></div>
+        </section>
+      </div>
+      <section class="next-step" aria-labelledby="next-heading"><h2 id="next-heading">Take it into a lesson.</h2><p>In the learning app, choose the downloaded JSON under <strong>Bring your own lesson</strong>, inspect the preview, then select <strong>Start this deck</strong>. That starts a fresh lesson; this page does not transfer or change existing answers.</p><p>You can also reopen the checked file in Deck studio to edit it. Keep the original course file for its full content.</p></section>
+    </div>
+  </main>
+  <footer><span>RecallWeave / Lesson focus</span><p>Source wording, answer identities and permission statements stay with the selected questions. Download explicitly before closing this tab; nothing is saved automatically.</p></footer>
+  <script type="module" src="../src/course-focus-ui.mjs"></script>
+</body>
+</html>
