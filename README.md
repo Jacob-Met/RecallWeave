@@ -325,3 +325,13 @@ The [worked guide](courses/cache-replacement.md) explains the empty-start, equal
 ## Weighted interval scheduling
 
 The [weighted-intervals explorer](courses/weighted-intervals-explorer.html) is a self-contained offline lab for choosing compatible activities by total value. Edit a small schedule, inspect take/skip decisions, reconstruct the chosen prefix, and compare it with earliest finish. Download its [twelve-question course](courses/weighted-interval-scheduling.json) into the existing learner, or use the [course guide](courses/weighted-interval-scheduling.md) for the worked table, answer derivations, assumptions and build/check commands.
+
+## Fit a line and inspect its residuals
+
+Open the **[least-squares lab](courses/least-squares-lab.html)** directly in a browser. Edit paired points, try a line, and compare exact fitted coefficients, signed vertical residuals, every squared residual, the mean point and total squared error. Six original fictional examples cover a noisy trend, a perfect line, a curved pattern, ordinary repeated x, all-equal x and an influential distant row.
+
+The fit minimizes equal-weight squared vertical errors for the entered rows. Repeated rows count separately. If all x values are equal, the lab shows the family of minimizing lines and the one observed fitted value; it does not invent unique coefficients or a prediction elsewhere. Query values distinguish the observed x range from extrapolation. A minimum SSE does not establish linearity, predictive accuracy or causation.
+
+Download the fixed **[sixteen-question course](courses/least-squares.json)** from the lab or this link, then use **Bring your own lesson**, preview it and choose **Start this deck** in the existing learner. The **[worked guide](courses/least-squares.md)** derives the six examples, the minimum identity and all sixteen transfer answers. Editing the lab never changes the course download; tab changes are not automatically saved or uploaded.
+
+Build with `node tools/build_least_squares.mjs`; `--check` verifies the generated standalone file. Run the focused native tests with `node --test tests/least-squares.test.mjs`. The [receiving packet](docs/receiving/least-squares-db371a37f4c8/README.md) records the separate independent mathematical review, actual course download/import/review flow and responsive browser checks. The shared learner, importer and catalog are unchanged.
