@@ -1,0 +1,212 @@
+{
+  "format": "recallweave-deck/1",
+  "title": "Numerical precision: decimal intent, binary Number and exact comparisons",
+  "attribution": "Original questions, numerical examples and worked explanations prepared for RecallWeave, 2026. Technical reference: Ecma International, ECMAScript language specification, Number type, Number arithmetic, Number.isSafeInteger, Number.EPSILON and Number.prototype.toFixed: https://tc39.es/ecma262/ .",
+  "license": "Original teaching text and examples. This contribution makes no additional reuse-license grant. The linked specification is a technical reference; no standard prose, exercise or figure is copied.",
+  "concepts": [
+    "Exact representations",
+    "Conversion and arithmetic",
+    "Comparison and order",
+    "Integer guarantees"
+  ],
+  "items": [
+    {
+      "id": "np-01",
+      "concept": "Exact representations",
+      "prerequisites": [],
+      "prompt": "Which exact decimal value is representable by a finite binary fraction?",
+      "options": [
+        "0.1",
+        "0.125",
+        "0.2",
+        "0.3"
+      ],
+      "answer": 1,
+      "explanation": "0.125 = 1/8 = 0.001 in base two, so this small value is exactly representable. The other choices reduce to 1/10, 1/5 and 3/10; each denominator retains a factor of 5, so its binary expansion does not terminate. This is a claim about these particular values, not a claim that every decimal fraction is inexact.",
+      "transfer": "Write 0.375 as a reduced fraction. Does its denominator permit a finite binary expansion?"
+    },
+    {
+      "id": "np-02",
+      "concept": "Exact representations",
+      "prerequisites": [],
+      "prompt": "For a rational number reduced to lowest terms, which denominator condition gives a finite binary expansion?",
+      "options": [
+        "Its denominator is any even integer.",
+        "Its denominator is a power of 10.",
+        "Its denominator is any prime number.",
+        "Its denominator is a power of 2, including 1."
+      ],
+      "answer": 3,
+      "explanation": "A finite binary fractional expansion has an integer numerator over 2^k. After reduction, its denominator can therefore contain only factors of 2. Being even is insufficient: 1/6 retains a factor of 3. A power of 10 usually retains factors of 5, and an arbitrary prime need not be 2. The criterion concerns a finite mathematical binary expansion; a specific floating-point format also imposes precision and range limits.",
+      "transfer": "Decide whether 3/40 and 7/16 have finite binary expansions, explaining the denominator test."
+    },
+    {
+      "id": "np-03",
+      "concept": "Exact representations",
+      "prerequisites": [],
+      "prompt": "JavaScript displays String(Number('0.1')) as '0.1'. What does that display establish about the stored value?",
+      "options": [
+        "The short display alone does not prove that the stored value equals the exact fraction 1/10.",
+        "The stored binary value must equal the exact fraction 1/10.",
+        "Number preserves the original input string as its numeric representation.",
+        "Displaying a value converts its stored representation to exact decimal arithmetic."
+      ],
+      "answer": 0,
+      "explanation": "The displayed text is short, while the stored value can be inspected separately. For this Number, the exact fraction is 3602879701896397/36028797018963968, slightly greater than 1/10. The text '0.1' therefore does not prove exact equality to the written decimal. A Number is not the original input string, and displaying it does not replace binary arithmetic with decimal arithmetic.",
+      "transfer": "Explain why inspecting an exact fraction of the stored value answers a different question from reading its shortest displayed decimal."
+    },
+    {
+      "id": "np-04",
+      "concept": "Conversion and arithmetic",
+      "prerequisites": [
+        "Exact representations"
+      ],
+      "prompt": "In JavaScript using Number values, what is String(0.1 + 0.2)?",
+      "options": [
+        "'0.3'",
+        "'0.29999999999999999'",
+        "'0.30000000000000004'",
+        "'NaN'"
+      ],
+      "answer": 2,
+      "explanation": "The expression displays '0.30000000000000004'. The exact written-decimal sum is 3/10, while the stored result exceeds that reference by 1/22517998136852480. For this example, operand conversion and addition rounding both contribute. '0.3' is not the displayed result of this expression; the smaller proposed value has the wrong direction, and both inputs are finite numbers, so NaN does not arise. Formatting can change the label, but it does not undo those operations.",
+      "transfer": "Compare the exact decimal sum with the exact stored result. Is formatting the result a way to undo the earlier arithmetic?"
+    },
+    {
+      "id": "np-05",
+      "concept": "Conversion and arithmetic",
+      "prerequisites": [
+        "Exact representations"
+      ],
+      "prompt": "Let a = Number('1.0000000000000001') and b = Number('1'). JavaScript computes a - b as 0, while the exact decimal-text difference is 0.0000000000000001. Where was that difference lost?",
+      "options": [
+        "Both inputs were exact, but subtraction necessarily rounds every sufficiently small difference to zero.",
+        "Conversion rounded a to 1; subtracting the two stored values then gives exactly zero.",
+        "The exact decimal-text difference is also zero, so there is no discrepancy.",
+        "Number converts the first input to NaN, and subtraction changes NaN to zero."
+      ],
+      "answer": 1,
+      "explanation": "Number('1.0000000000000001') is already 1 after conversion. The written difference is 1/10000000000000000, but the stored operands are both exactly 1. Their subtraction is exactly zero: the combined conversion contribution is -1/10000000000000000, and the arithmetic contribution is zero. It is inaccurate to attribute this example's discrepancy to new rounding during subtraction, to a zero written-decimal difference, or to NaN.",
+      "transfer": "Would subtracting stored 1 from stored 1 introduce an arithmetic rounding discrepancy? Keep this separate from the earlier input conversion."
+    },
+    {
+      "id": "np-06",
+      "concept": "Conversion and arithmetic",
+      "prerequisites": [
+        "Exact representations"
+      ],
+      "prompt": "For the exact decimal inputs 0.125 and 0.25, JavaScript Number addition returns 0.375. Which account is correct?",
+      "options": [
+        "Every decimal input has already rounded, even in this example.",
+        "The inputs are exact, but the result must be inexact because addition uses Number.",
+        "The displayed result is exact only after converting it to a string.",
+        "Both operands and their sum are exactly representable; no discrepancy is introduced in this example."
+      ],
+      "answer": 3,
+      "explanation": "The operands are 1/8 and 1/4, and their sum is 3/8. All three fit exactly in this small binary calculation. There is no input-conversion discrepancy and no arithmetic discrepancy. Number operations do not introduce an error in every example, and a string conversion is not what makes this example exact.",
+      "transfer": "Give another pair of small dyadic fractions whose sum is exactly representable, and show their exact fraction arithmetic."
+    },
+    {
+      "id": "np-07",
+      "concept": "Comparison and order",
+      "prerequisites": [
+        "Conversion and arithmetic"
+      ],
+      "prompt": "Let x = 0.1 + 0.2 and y = 0.3. A stated policy accepts differences with Math.abs(x - y) <= 1e-12. What are the values of x === y and this acceptance check?",
+      "options": [
+        "false; true",
+        "true; true",
+        "false; false",
+        "true; false"
+      ],
+      "answer": 0,
+      "explanation": "The strict equality check is false. The two stored Numbers differ by 1/18014398509481984, approximately 5.55 × 10^-17, which satisfies the explicitly chosen 10^-12 absolute bound. Thus the acceptance check is true. The other pairs disagree with one or both tests. This policy accepts a small difference; it does not make the values exactly equal or establish a tolerance suitable for every unit and application.",
+      "transfer": "Why does passing this explicitly chosen tolerance not prove exact equality, and why would another application need to choose its own tolerance?"
+    },
+    {
+      "id": "np-08",
+      "concept": "Comparison and order",
+      "prerequisites": [
+        "Conversion and arithmetic"
+      ],
+      "prompt": "Run const x = 0.1 + 0.2; const label = x.toFixed(2). Which statement is correct?",
+      "options": [
+        "label is '0.30', and x is changed to the exact decimal value 0.3.",
+        "label is '0.3', and x is changed to a string.",
+        "label is '0.30', while x remains the same Number and still differs from the Number value 0.3.",
+        "label is '0.30000000000000004', because formatting cannot round displayed text."
+      ],
+      "answer": 2,
+      "explanation": "toFixed(2) returns the string '0.30'. It formats a value for display without changing x, which remains the original Number and still differs from the Number value 0.3. The alternatives incorrectly change x, omit a requested fractional digit, or ignore the formatting operation. Converting the label back to Number would be another operation with its own result; that conversion has not occurred in the stated code.",
+      "transfer": "What would need to be recorded if a worked example must preserve the computed Number as well as a two-decimal display?"
+    },
+    {
+      "id": "np-09",
+      "concept": "Comparison and order",
+      "prerequisites": [
+        "Conversion and arithmetic"
+      ],
+      "prompt": "Let a = 10000000000000000, b = -10000000000000000 and c = 1, all JavaScript Number values. What are (a + b) + c and a + (b + c), respectively?",
+      "options": [
+        "0 and 0",
+        "1 and 1",
+        "0 and 1",
+        "1 and 0"
+      ],
+      "answer": 3,
+      "explanation": "In the left grouping, a + b is exactly zero, then adding c gives 1. In the right grouping, the exact integer b + c would be -9999999999999999. That intermediate rounds to -10000000000000000 under Number arithmetic, so the final sum is zero. Exact integer arithmetic gives 1 with either grouping. The alternatives either change the exact first cancellation or assume reassociation preserves the rounded intermediates.",
+      "transfer": "Compute the exact integer result for each parenthesization, then identify the rounded intermediate in the Number calculation."
+    },
+    {
+      "id": "np-10",
+      "concept": "Integer guarantees",
+      "prerequisites": [
+        "Exact representations"
+      ],
+      "prompt": "Which value is Number.MAX_SAFE_INTEGER, the positive end of JavaScript's guaranteed safe-integer interval?",
+      "options": [
+        "9007199254740991 (2^53 - 1)",
+        "9007199254740992 (2^53)",
+        "4503599627370496 (2^52)",
+        "18446744073709551615 (2^64 - 1)"
+      ],
+      "answer": 0,
+      "explanation": "Number.MAX_SAFE_INTEGER is 2^53 - 1, or 9007199254740991. The API's safe-integer interval is symmetric, from -9007199254740991 to +9007199254740991 inclusive. The value 2^52 is safely inside it but is not the maximum; 2^53 is representable but outside the interval; 2^64 - 1 is not its bound. The interval must not be confused with the entire set of representable integers or finite Numbers.",
+      "transfer": "State the corresponding negative endpoint. Does a value outside this interval automatically have to be non-integer?"
+    },
+    {
+      "id": "np-11",
+      "concept": "Integer guarantees",
+      "prerequisites": [
+        "Exact representations"
+      ],
+      "prompt": "Let s = '9007199254740992' and t = '9007199254740993'. What are Number(s) === Number(t) and BigInt(s) === BigInt(t), respectively?",
+      "options": [
+        "false; false",
+        "false; true",
+        "true; false",
+        "true; true"
+      ],
+      "answer": 2,
+      "explanation": "Both Number conversions produce 9007199254740992, so their strict equality is true. Direct BigInt conversion preserves the two distinct integer strings, so that equality is false. The other answer pairs lose one of those distinctions. BigInt(Number(t)) cannot recover the original integer after Number(t) has already rounded; the exact integer text must reach BigInt directly when that is the intended representation.",
+      "transfer": "If these strings are exact integer counts that must stay distinct, explain why converting through Number before BigInt would lose information."
+    },
+    {
+      "id": "np-12",
+      "concept": "Integer guarantees",
+      "prerequisites": [
+        "Exact representations"
+      ],
+      "prompt": "JavaScript evaluates 9007199254740992 + 2 as 9007199254740994, and Number.isSafeInteger of that result is false. How should these facts be interpreted?",
+      "options": [
+        "The reported sum must be numerically wrong because the result is outside the safe interval.",
+        "This particular sum is exactly representable; isSafeInteger reports the guaranteed interval, not exactness of every individual value.",
+        "Number.isSafeInteger is true for every exactly represented integer, so the reported false is impossible.",
+        "Every integer greater than Number.MAX_SAFE_INTEGER is stored as Infinity."
+      ],
+      "answer": 1,
+      "explanation": "This particular addition is exact: both operands and the result 9007199254740994 are representable. Number.isSafeInteger is nevertheless false because the result is beyond its guaranteed interval. An outside value is not automatically inexact or infinite, and the API is not a test of exactness for every individual integer. Nearby integer text such as '9007199254740993' does round during conversion, demonstrating why the interval and per-value exactness are different questions.",
+      "transfer": "Contrast this exact result with converting the distinct integer text '9007199254740993' to Number."
+    }
+  ]
+}

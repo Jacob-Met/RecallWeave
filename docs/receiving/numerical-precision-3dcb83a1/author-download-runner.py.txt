@@ -1,0 +1,73 @@
+import datetime, hashlib, json, pathlib, shutil, subprocess, sys
+ROOT = pathlib.Path("/dev/shm/recallweave-precision-3dcb83a1")
+V1, V2 = ROOT / "source", ROOT / "source-v2"
+BASELINE, CANDIDATE = ROOT / "download-baseline", ROOT / "source-v3"
+def pin(data):
+    return {"sha256": hashlib.sha256(data).hexdigest(), "git_blob": hashlib.sha1(b"blob " + str(len(data)).encode() + b"\0" + data).hexdigest(), "bytes": len(data)}
+def inventory(root):
+    return {str(p.relative_to(root)): pin(p.read_bytes()) for p in sorted(root.rglob("*")) if p.is_file()}
+def guard():
+    row = {"free_bytes": shutil.disk_usage(ROOT).free, "owned_bytes": sum(p.stat().st_size for p in ROOT.rglob("*") if p.is_file()), "minimum_free_bytes": 512 * 1024 * 1024, "maximum_owned_bytes": 16 * 1024 * 1024}
+    if row["free_bytes"] < row["minimum_free_bytes"] or row["owned_bytes"] > row["maximum_owned_bytes"]: raise RuntimeError("resource guard refused: " + str(row))
+    return row
+def copy_source(target, expected):
+    if target.exists(): raise RuntimeError("Refuse to replace existing source " + str(target))
+    target.mkdir()
+    for name, expected_pin in expected.items():
+        p = target / name
+        p.parent.mkdir(parents=True, exist_ok=True)
+        data = (V2 / name).read_bytes()
+        if pin(data) != expected_pin: raise RuntimeError("Frozen source pin mismatch " + name)
+        p.write_bytes(data)
+        p.chmod(0o644)
+def command(root, args):
+    before = inventory(root)
+    run = subprocess.run(args, cwd=root, text=True, capture_output=True, timeout=45)
+    after = inventory(root)
+    return {"command": args, "cwd": str(root), "returncode": run.returncode, "stdout": run.stdout, "stderr": run.stderr, "source_before": before, "source_after": after}
+receipt = {"at": datetime.datetime.now(datetime.timezone.utc).isoformat(), "guards": [], "commands": [], "boundary": "A focused native consumer runs the actual built script and UI download handlers against minimal DOM/URL ports and real native Blob bytes. It is not real browser/file-system receiving; root separately owns that continuation. Only the new regression is selected; prior12 arithmetic/content tests are not rerun."}
+try:
+    receipt["guards"].append(guard())
+    payload = json.loads((ROOT / "incoming-download-v3.json").read_text())
+    original_v1, original_v2 = inventory(V1), inventory(V2)
+    if original_v1 != payload["original_v1_pins"] or original_v2 != payload["original_pins"]: raise RuntimeError("Earlier frozen source changed")
+    if BASELINE.exists() or CANDIDATE.exists(): raise RuntimeError("New receiving roots already exist")
+    copy_source(BASELINE, original_v2)
+    copy_source(CANDIDATE, original_v2)
+    for row in payload["candidate_changes"]:
+        if pin(row["content"].encode()) != {k: row[k] for k in ("sha256", "git_blob", "bytes")}: raise RuntimeError("Candidate payload mismatch")
+        if row["path"] == "tests/numerical-precision.test.mjs": (BASELINE / row["path"]).write_bytes(row["content"].encode())
+        (CANDIDATE / row["path"]).write_bytes(row["content"].encode())
+    focused = ["/usr/bin/node", "--test", "--test-name-pattern=embedded lesson download preserves exact source bytes", "tests/numerical-precision.test.mjs"]
+    old_run = command(BASELINE, focused)
+    receipt["commands"].append(old_run)
+    if old_run["source_before"] != old_run["source_after"]: raise RuntimeError("Baseline regression mutated source")
+    expected_failure = old_run["returncode"] != 0 and "lesson download preserves literal source bytes after HTML embedding" in old_run["stdout"] and "14095" in old_run["stdout"] and "14090" in old_run["stdout"]
+    receipt["original_expected_byte_failure"] = expected_failure
+    if not expected_failure: raise RuntimeError("Original receiver failed outside the diagnosed byte boundary")
+    receipt["guards"].append(guard())
+    build = command(CANDIDATE, ["/usr/bin/node", "tools/build-numerical-precision.mjs"])
+    receipt["commands"].append(build)
+    if build["returncode"] or inventory(CANDIDATE) != payload["candidate_pins"]: raise RuntimeError("Candidate build did not match exact source")
+    if any(build["source_after"].get(p) != value for p, value in build["source_before"].items() if p != "courses/numerical-precision-explorer.html"): raise RuntimeError("Builder changed an input")
+    new_run = command(CANDIDATE, focused)
+    receipt["commands"].append(new_run)
+    if new_run["returncode"]: raise RuntimeError("Corrected receiver failed")
+    if new_run["source_before"] != new_run["source_after"]: raise RuntimeError("Corrected regression mutated source")
+    if inventory(V1) != original_v1 or inventory(V2) != original_v2: raise RuntimeError("Earlier frozen source changed")
+    receipt["original_v1_and_v2_sources_unchanged"] = True
+    receipt["candidate_source"] = inventory(CANDIDATE)
+    receipt["unchanged_v2_files"] = [p for p, value in receipt["candidate_source"].items() if value == original_v2[p]]
+    receipt["diagnosis"] = payload["diagnosis"]
+    receipt["scope_record"] = payload["scope_record"]
+    receipt["guards"].append(guard())
+    receipt["outcome"] = "pass"
+except Exception as error:
+    receipt["outcome"] = "refused_or_failed"
+    receipt["error_type"] = type(error).__name__
+    receipt["error"] = str(error)
+finally:
+    receipt["runner_sha256"] = hashlib.sha256(pathlib.Path(__file__).read_bytes()).hexdigest()
+    (ROOT / "download-serialization-receiving.json").write_text(json.dumps(receipt, ensure_ascii=False, indent=2) + "\n")
+print(json.dumps({"outcome": receipt["outcome"], "original_expected_byte_failure": receipt.get("original_expected_byte_failure"), "commands": [{"command": r["command"], "returncode": r["returncode"], "stdout_tail": r["stdout"][-2300:], "stderr_tail": r["stderr"][-800:]} for r in receipt["commands"]], "guards": receipt["guards"], "error": receipt.get("error")}))
+sys.exit(0 if receipt["outcome"] == "pass" else 1)
