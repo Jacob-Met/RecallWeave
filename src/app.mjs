@@ -1,12 +1,14 @@
 import { DEFAULT_BKT, initialMastery, runLearnerSimulation, selectNextItem, updateMastery } from './knowledge.mjs';
 import { answerPractice, beginPractice, createReview, currentPracticeItem } from './review.mjs';
 import { createStudyNotes } from './session-export.mjs';
+import { orderOptions } from './answer-order.mjs';
 
 const root = document.querySelector('#session-content');
 const dataResponse = await fetch('./data/deck.json');
 if (!dataResponse.ok) throw new Error('The local demo deck could not be loaded.');
 const deck = await dataResponse.json();
 const concepts = deck.concepts;
+const optionOrders = new Map(deck.items.map(item => [item.id, orderOptions(item.options.length)]));
 const mastery = initialMastery(concepts);
 const asked = new Set();
 const answers = [];
@@ -39,7 +41,7 @@ function renderQuestion() {
   const item = selectNextItem(deck.items, asked, mastery);
   if (!item) return renderResults();
   asked.add(item.id);
-  root.innerHTML = `<article class="question-card"><div class="question-type">CONNECTION ${String(answers.length + 1).padStart(2, '0')} · ${conceptLabel(item.concept).toUpperCase()}</div><h2>${item.prompt}</h2><p class="prompt">Choose the best explanation, then connect it to the larger idea.</p><div class="choices" role="group" aria-label="Answer options">${item.options.map((option, i) => `<button class="choice" data-choice="${i}"><span class="choice-key">${String.fromCharCode(65+i)}</span>${option}</button>`).join('')}</div><div id="feedback-slot"></div>${renderMastery()}</article>`;
+  root.innerHTML = `<article class="question-card"><div class="question-type">CONNECTION ${String(answers.length + 1).padStart(2, '0')} · ${conceptLabel(item.concept).toUpperCase()}</div><h2>${item.prompt}</h2><p class="prompt">Choose the best explanation, then connect it to the larger idea.</p><div class="choices" role="group" aria-label="Answer options">${optionOrders.get(item.id).map((choice, position) => `<button class="choice" data-choice="${choice}"><span class="choice-key">${String.fromCharCode(65+position)}</span>${item.options[choice]}</button>`).join('')}</div><div id="feedback-slot"></div>${renderMastery()}</article>`;
   root.querySelectorAll('[data-choice]').forEach(button => button.addEventListener('click', () => submitAnswer(item, Number(button.dataset.choice))));
   const first = root.querySelector('[data-choice]');
   first?.focus({preventScroll:true});
@@ -131,7 +133,7 @@ function renderPracticeQuestion() {
   const item = currentPracticeItem(practice);
   if (!item) return renderResults();
   const number = practice.answers.length + 1;
-  root.innerHTML = `<article class="question-card practice-card"><div class="question-type">PRACTICE ${number} OF ${practice.items.length} · ${escapeHtml(conceptLabel(item.concept).toUpperCase())}</div><h2>${escapeHtml(item.prompt)}</h2><p class="prompt">Recall the explanation. Choose the best answer once more.</p><p class="practice-note">This retry is recorded separately from your first try and model estimates.</p><div class="choices" role="group" aria-label="Practice answer options">${item.options.map((option, i) => `<button class="choice" data-practice-choice="${i}"><span class="choice-key">${String.fromCharCode(65+i)}</span>${escapeHtml(option)}</button>`).join('')}</div><div id="practice-feedback"></div><button class="text-button practice-back" id="back-to-review">Back to learning trace</button></article>`;
+  root.innerHTML = `<article class="question-card practice-card"><div class="question-type">PRACTICE ${number} OF ${practice.items.length} · ${escapeHtml(conceptLabel(item.concept).toUpperCase())}</div><h2>${escapeHtml(item.prompt)}</h2><p class="prompt">Recall the explanation. Choose the best answer once more.</p><p class="practice-note">This retry is recorded separately from your first try and model estimates.</p><div class="choices" role="group" aria-label="Practice answer options">${optionOrders.get(item.id).map((choice, position) => `<button class="choice" data-practice-choice="${choice}"><span class="choice-key">${String.fromCharCode(65+position)}</span>${escapeHtml(item.options[choice])}</button>`).join('')}</div><div id="practice-feedback"></div><button class="text-button practice-back" id="back-to-review">Back to learning trace</button></article>`;
   let submitted = false;
   root.querySelectorAll('[data-practice-choice]').forEach(button => button.addEventListener('click', () => {
     if (submitted) return;

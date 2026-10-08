@@ -19,7 +19,7 @@ await mkdir(downloadPath, {recursive: true});
 const downloads = new Map();
 const profile = await mkdtemp(join(output, 'profile-'));
 const report = {status: 'running', project, executable, checks: [], screenshots: [], downloads: [], sourceSha256: {}};
-for (const path of ['src/app.mjs', 'src/knowledge.mjs', 'src/review.mjs', 'src/session-export.mjs', 'data/deck.json', 'demo.html', 'styles.css', 'tools/make_demo.py']) {
+for (const path of ['src/app.mjs', 'src/knowledge.mjs', 'src/review.mjs', 'src/answer-order.mjs', 'src/session-export.mjs', 'data/deck.json', 'demo.html', 'styles.css', 'tools/make_demo.py']) {
   try { report.sourceSha256[path] = createHash('sha256').update(await readFile(join(project, path))).digest('hex'); }
   catch (error) { if (error.code !== 'ENOENT') throw error; }
 }
@@ -84,6 +84,24 @@ async function activate(selector) {
   await evaluate(`document.querySelector(${JSON.stringify(selector)}).focus()`);
   await key('Enter');
 }
+async function displayedOrder(practice = false) {
+  const attribute = practice ? 'data-practice-choice' : 'data-choice';
+  return evaluate(`[...document.querySelectorAll('[${attribute}]')].map(button => Number(button.getAttribute('${attribute}')))`);
+}
+async function chooseCanonical(choice, practice = false) {
+  const order = await displayedOrder(practice);
+  const attribute = practice ? 'data-practice-choice' : 'data-choice';
+  assert.equal(await evaluate(`document.activeElement.getAttribute('${attribute}')`), String(order[0]), 'First displayed choice receives keyboard focus');
+  const position = order.indexOf(choice);
+  assert.ok(position >= 0, 'Requested canonical choice is displayed');
+  for (let step = 0; step < position; step++) await key('Tab');
+  await key('Enter');
+}
+let orderScript;
+async function setOrderSeed(seed) {
+  if (orderScript) await command('Page.removeScriptToEvaluateOnNewDocument', {identifier: orderScript});
+  ({identifier: orderScript} = await command('Page.addScriptToEvaluateOnNewDocument', {source: `(() => { let state = ${seed} >>> 0; Math.random = () => { state = (Math.imul(state, 1664525) + 1013904223) >>> 0; return state / 4294967296; }; })();`}));
+}
 async function navigate(url, width = 1280, height = 1000) {
   await command('Emulation.setDeviceMetricsOverride', {width, height, deviceScaleFactor: 1, mobile: false});
   pageRequests = [];
@@ -103,20 +121,23 @@ async function snapshot() {
 async function lesson(mode) {
   await activate('#start-button');
   await waitFor(() => evaluate(`!!document.querySelector('.question-card h2')`), 'first question after keyboard start');
+  if (mode === 'mixed') await screenshot('answer-order-question.png', '.question-card');
   const firstAnswers = [];
   const estimates = initialMastery(deck.concepts);
   for (let index = 0; index < deck.items.length; index++) {
     const prompt = await evaluate(`document.querySelector('.question-card h2').textContent`);
     const item = deck.items.find(item => item.prompt === prompt);
     assert.ok(item, 'Question must come from the existing deck');
-    assert.equal(await evaluate(`document.activeElement.dataset.choice`), '0', 'First answer receives keyboard focus');
+    const order = await displayedOrder();
+    assert.deepEqual([...order].sort((a, b) => a - b), item.options.map((_, index) => index));
+    const labels = await evaluate(`[...document.querySelectorAll('[data-choice]')].map(button => ({key: button.querySelector('.choice-key').textContent, text: button.textContent.slice(button.querySelector('.choice-key').textContent.length)}))`);
+    assert.deepEqual(labels, order.map((choice, position) => ({key: String.fromCharCode(65 + position), text: item.options[choice]})));
     const correct = mode === 'correct' || (mode === 'mixed' && index % 2 === 1);
     const choice = correct ? item.answer : (item.answer + 1 + index % (item.options.length - 1)) % item.options.length;
-    for (let step = 0; step < choice; step++) await key('Tab');
-    await key('Enter');
+    await chooseCanonical(choice);
     assert.equal(await evaluate('document.activeElement.id'), 'next-button');
     estimates[item.concept] = updateMastery(estimates[item.concept], correct);
-    firstAnswers.push({item, choice, correct});
+    firstAnswers.push({item, choice, correct, order});
     await key('Enter');
   }
   const state = await snapshot();
@@ -217,6 +238,7 @@ try {
   await command('Runtime.enable');
   await command('Network.enable');
 
+  await setOrderSeed(41);
   await navigate(`${base}/index.html`);
   const {firstAnswers, state: original} = await lesson('mixed');
   report.firstTry = original;
@@ -246,8 +268,8 @@ try {
   const missed = firstAnswers.filter(answer => !answer.correct);
   assert.equal(await evaluate(`document.querySelector('.practice-card h2').textContent`), missed[0].item.prompt);
   assert.equal(await evaluate(`document.querySelector('[role="progressbar"]').getAttribute('aria-valuemax')`), String(missed.length));
-  assert.equal(await evaluate(`document.activeElement.dataset.practiceChoice`), '0');
-  await key('Enter');
+  assert.deepEqual(await displayedOrder(true), missed[0].order, 'Practice reuses the first-session order');
+  await chooseCanonical(missed[0].item.answer, true);
   assert.equal(await evaluate('document.activeElement.id'), 'practice-next');
   await key('Tab');
   assert.equal(await evaluate('document.activeElement.id'), 'back-to-review');
@@ -268,11 +290,12 @@ try {
   assert.equal(await evaluate(`document.querySelector('.practice-card h2').textContent`), missed[1].item.prompt);
   passed('leaving before answering resumes the same unanswered practice question');
 
-  await key('Tab');
-  await key('Enter');
+  assert.deepEqual(await displayedOrder(true), missed[1].order);
+  await chooseCanonical((missed[1].item.answer + 1) % missed[1].item.options.length, true);
   await key('Enter');
   assert.equal(await evaluate(`document.querySelector('.practice-card h2').textContent`), missed[2].item.prompt);
-  await key('Enter');
+  assert.deepEqual(await displayedOrder(true), missed[2].order);
+  await chooseCanonical(missed[2].item.answer, true);
   await key('Enter');
   const completed = await snapshot();
   assert.equal(completed.score, original.score);
@@ -308,14 +331,18 @@ try {
   await savedNotes('mobile-all-correct.txt', allCorrect.firstAnswers, /No missed connections/);
   await screenshot('study-notes-mobile.png', '#save-notes-title');
 
+  await setOrderSeed(83);
   await navigate(pathToFileURL(join(project, 'demo.html')).href);
   const direct = await lesson('missed');
+  assert.ok(direct.firstAnswers.some(({item, order}) => JSON.stringify(order) !== JSON.stringify(firstAnswers.find(row => row.item.id === item.id).order)), 'Changed session input changes the deck presentation in this deterministic fixture');
+  report.answerPresentation = {testOnlySeeds: [41, 83], initialOrders: firstAnswers.map(({item, order}) => ({id: item.id, order})), changedOrders: direct.firstAnswers.map(({item, order}) => ({id: item.id, order}))};
   assert.equal(direct.state.reviewCount, 6);
   assert.match(await evaluate(`document.querySelector('#practice-button').textContent`), /Practice 6 missed connections/);
   await activate('#practice-button');
   for (let index = 0; index < 6; index++) {
-    assert.equal(await evaluate(`document.activeElement.dataset.practiceChoice`), '0');
-    await key('Enter');
+    const originalItem = direct.firstAnswers[index];
+    assert.deepEqual(await displayedOrder(true), originalItem.order);
+    await chooseCanonical(originalItem.item.answer, true);
     await key('Enter');
   }
   assert.equal((await snapshot()).score, direct.state.score);
