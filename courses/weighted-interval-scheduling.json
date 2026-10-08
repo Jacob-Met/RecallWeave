@@ -1,0 +1,212 @@
+{
+  "format": "recallweave-deck/1",
+  "title": "Weighted intervals: choose, compare, reconstruct",
+  "attribution": "Original questions, examples, distractors and worked explanations by HAMON contribution 406d0fb04c43, with AI assistance. Algorithmic background checked against Lalla Mouatadid's University of Toronto CSC373 notes, Dynamic Programming: Weighted Interval Scheduling, and Vijay K. Garg's University of Texas at Austin companion, Chapter 10. The exact sources, assumptions and answer derivations are in courses/weighted-interval-scheduling.md. No source exercises, figures or passages are copied.",
+  "license": "Original course wording and examples: CC BY 4.0. Attribute this course and retain its source note when sharing or adapting it. Linked reference materials retain their own terms.",
+  "concepts": [
+    "compatible-intervals",
+    "prefix-subproblems",
+    "take-or-skip",
+    "reconstruct-and-check"
+  ],
+  "items": [
+    {
+      "id": "wis-compatible-1",
+      "concept": "compatible-intervals",
+      "prerequisites": [],
+      "prompt": "One activity occupies [1, 4). The end is excluded: a second activity may start exactly when the first ends. Which activity can follow it without overlap?",
+      "options": [
+        "[4, 6)",
+        "[3, 5)",
+        "[2, 4)",
+        "[1, 6)"
+      ],
+      "answer": 0,
+      "explanation": "[4, 6) starts at the first activity's end, so the two intervals share no occupied time. The other choices all occupy some time before 4 while the first activity is still running. This lesson uses half-open intervals [start, end), not closed intervals.",
+      "transfer": "Change the rule to require a one-unit setup gap. Explain why [4, 6) would no longer fit after [1, 4), and how the compatibility comparison would need to change."
+    },
+    {
+      "id": "wis-compatible-2",
+      "concept": "compatible-intervals",
+      "prerequisites": [],
+      "prompt": "A uses [0, 2) with value 2; B uses [2, 4) with value 2; C uses [0, 4) with value 7. Only one activity can run at a time, values add, and you may leave time unused. Which schedule maximizes total value?",
+      "options": [
+        "A and B, because two activities always beat one",
+        "C alone, with total value 7",
+        "A and C, with total value 9",
+        "B alone, because it finishes last"
+      ],
+      "answer": 1,
+      "explanation": "A and B are compatible and total 4. C overlaps both, but its value 7 exceeds that pair's value. A and C are not feasible together. Counting activities, filling time or choosing a last finish is a different objective from maximizing the stated sum of values.",
+      "transfer": "Set C's value to 3, leaving every interval unchanged. Identify the new optimum and explain why compatibility did not change even though the best choice did."
+    },
+    {
+      "id": "wis-compatible-3",
+      "concept": "compatible-intervals",
+      "prerequisites": [],
+      "prompt": "The explorer chooses fixed-time activities for one shared resource; each selected value is added once and there are no other constraints. Which added requirement is outside that model and needs a different formulation?",
+      "options": [
+        "Allowing an empty schedule with value 0",
+        "Allowing one activity to start when another ends",
+        "Requiring that selecting activity D must also select activity A",
+        "Giving two different activities the same finish time"
+      ],
+      "answer": 2,
+      "explanation": "An extra dependency between selected activities is not encoded by interval overlap or additive values. The take-or-skip recurrence might otherwise select D without A. Empty schedules, touching endpoints and equal finishes are already covered by the stated interval model. A numerical optimum is only an optimum under its actual constraints.",
+      "transfer": "Write down one rule a real activity plan might need, such as travel time, a prerequisite, or two available rooms. Explain which part of this lesson's feasibility model would no longer describe that situation."
+    },
+    {
+      "id": "wis-prefix-1",
+      "concept": "prefix-subproblems",
+      "prerequisites": [
+        "compatible-intervals"
+      ],
+      "prompt": "Activities are sorted by finish: row 1 is A [0, 2), row 2 is B [1, 3), row 3 is C [3, 5), row 4 is D [2, 6). p(4) is the largest earlier row whose end is at most D's start. What is p(4)?",
+      "options": [
+        "3",
+        "2",
+        "0",
+        "1"
+      ],
+      "answer": 3,
+      "explanation": "D starts at 2. A ends at 2 and is compatible; B ends at 3 and C at 5, so neither is compatible before D. Therefore p(4)=1. The predecessor is an index into the sorted prefix, not the immediately preceding row and not a count of overlapping activities.",
+      "transfer": "Move D's start to 3 while keeping its end at 6. Recompute p(4), and explain why the equality case changes which earlier prefix is available."
+    },
+    {
+      "id": "wis-prefix-2",
+      "concept": "prefix-subproblems",
+      "prerequisites": [
+        "compatible-intervals"
+      ],
+      "prompt": "OPT(j) denotes the value stored for a finish-sorted prefix ending at row j. Which definition is used by the weighted-interval recurrence?",
+      "options": [
+        "The greatest total value of any compatible subset of rows 1 through j",
+        "The value of a schedule that must include row j",
+        "The sum of every value in rows 1 through j",
+        "The number of activities ending before row j starts"
+      ],
+      "answer": 0,
+      "explanation": "OPT(j) considers every feasible subset within the first j rows, including subsets that omit j. Requiring j would discard the skip alternative. Summing all values could include overlaps, while counting earlier activities confuses the objective with an index or cardinality. OPT(0)=0 represents the empty prefix.",
+      "transfer": "Find a row in the explorer where the best value stays the same as the previous row. Explain why that is compatible with OPT(j)'s definition."
+    },
+    {
+      "id": "wis-prefix-3",
+      "concept": "prefix-subproblems",
+      "prerequisites": [
+        "compatible-intervals"
+      ],
+      "prompt": "Consider a feasible schedule that includes activity j. The activities are finish-sorted, each has start < end, and p(j) is the last earlier activity ending at or before j starts. What earlier activities can accompany j?",
+      "options": [
+        "Any earlier row, because sorting removes overlaps",
+        "A compatible subset of rows 1 through p(j)",
+        "Only activity p(j), with no activities before it",
+        "Exactly the schedule with the most activities among rows 1 through j−1"
+      ],
+      "answer": 1,
+      "explanation": "Every selected activity earlier than j must finish by j's start. Those possible activities form the prefix through p(j). We may choose a compatible subset of that prefix, whose best value is OPT(p(j)); we are not forced to choose p(j) itself. This is the smaller subproblem used by the take alternative.",
+      "transfer": "Use a prefix whose last activity is less valuable than an earlier compatible combination. Explain why taking j should reuse OPT(p(j)), rather than adding only the value of activity p(j)."
+    },
+    {
+      "id": "wis-decision-1",
+      "concept": "take-or-skip",
+      "prerequisites": [
+        "prefix-subproblems"
+      ],
+      "prompt": "At row j, the activity has value 4 and p(j)=2. Already computed values are OPT(2)=7 and OPT(j−1)=9. What does the recurrence choose?",
+      "options": [
+        "Skip, giving 9, because earlier choices cannot change",
+        "Take, giving 13 by adding 4 to OPT(j−1)",
+        "Take, giving 11 by adding 4 to OPT(2)",
+        "Skip, giving 7, because p(j)=2"
+      ],
+      "answer": 2,
+      "explanation": "Taking j gives 4+OPT(2)=11; skipping gives OPT(j−1)=9. The larger value is 11. Adding j to OPT(j−1) would be unjustified: that schedule may contain an activity overlapping j. The compatible predecessor prefix is what makes the take alternative feasible.",
+      "transfer": "Keep the two prefix values unchanged and lower j's value to 2. Explain which schedule this explorer keeps under its stated rule for equal take and skip values."
+    },
+    {
+      "id": "wis-decision-2",
+      "concept": "take-or-skip",
+      "prerequisites": [
+        "prefix-subproblems"
+      ],
+      "prompt": "Use the explorer's six-activity example: A [0,3) value 4; B [1,4) value 5; C [3,5) value 4; D [0,6) value 10; E [5,7) value 4; F [6,8) value 5. In finish order, OPT(3)=8. At row 4, D has p(4)=0. What is OPT(4)?",
+      "options": [
+        "18, by adding D to the best first three rows",
+        "8, because D overlaps earlier activities",
+        "4, because this is the fourth row",
+        "10, by taking D instead of the best earlier prefix"
+      ],
+      "answer": 3,
+      "explanation": "The take alternative is 10+OPT(0)=10. The skip alternative is OPT(3)=8, achieved by A and C. D overlaps those earlier activities, so 18 is not feasible. The table stores 10 and records take. This prefix choice can still become part of a later optimal schedule.",
+      "transfer": "Inspect row F in the explorer. Because F starts when D ends, determine how the row-4 value can contribute to a later decision."
+    },
+    {
+      "id": "wis-decision-3",
+      "concept": "take-or-skip",
+      "prerequisites": [
+        "prefix-subproblems"
+      ],
+      "prompt": "Every admitted activity has value 0. OPT(0)=0, and this explorer takes a row only when its take value is strictly greater than its skip value. What final schedule is reconstructed?",
+      "options": [
+        "The empty schedule, with value 0",
+        "Every activity, even if they overlap",
+        "The last activity, because it is processed last",
+        "No result, because a zero-valued activity is invalid"
+      ],
+      "answer": 0,
+      "explanation": "Both alternatives have value 0 at every row, so the declared tie rule records skip each time. Backtracking reaches row 0 without selecting an activity. The empty schedule is feasible and optimal. Other feasible zero-valued schedules are also optimal; the deterministic output does not establish uniqueness.",
+      "transfer": "Give one activity value 1 and keep all others at 0. Predict which activity becomes essential to an optimum and which zero-valued activities the tie rule still leaves out."
+    },
+    {
+      "id": "wis-trace-1",
+      "concept": "reconstruct-and-check",
+      "prerequisites": [
+        "take-or-skip"
+      ],
+      "prompt": "In the six-activity example, row 6 is F with value 5, p(6)=4 and a take decision. Row 4 is D with value 10, p(4)=0 and a take decision. What does backtracking from row 6 reconstruct?",
+      "options": [
+        "A, C and E, because that is the earliest-finish schedule",
+        "D and F, with total value 15",
+        "F alone, because only the final row matters",
+        "All rows 1 through 6, because OPT(6) used the full prefix"
+      ],
+      "answer": 1,
+      "explanation": "Take F, then jump directly to its compatible prefix at row 4. Take D, then jump to row 0 and stop. Reversing those collected IDs gives chronological order D, F, with total 10+5=15. Backtracking does not select every row whose table decision says take: some such rows are skipped by predecessor jumps.",
+      "transfer": "Start backtracking at row 5 instead. Explain why that smaller prefix can choose A, C and E even though the full six-row optimum chooses D and F."
+    },
+    {
+      "id": "wis-trace-2",
+      "concept": "reconstruct-and-check",
+      "prerequisites": [
+        "take-or-skip"
+      ],
+      "prompt": "A and B both occupy [1,3) and both have value 5. Equal end/start times are ordered by ID, so A is row 1 and B is row 2. The rule skips the current row when take and skip tie. Which statement is correct?",
+      "options": [
+        "The only optimal schedule is A",
+        "The optimum contains both A and B, for value 10",
+        "The explorer returns A, but B alone is another optimal schedule",
+        "The explorer must choose randomly because the values tie"
+      ],
+      "answer": 2,
+      "explanation": "At row 2, taking B gives 5 and skipping it retains A's value 5. The rule skips B and returns A. B alone is equally valuable and feasible; A and B together overlap. A consistent tie rule selects one answer without proving that all other optimal schedules are impossible.",
+      "transfer": "Rename the two equal activities X and C. Predict which ID the deterministic ordering retains, while explaining why the optimal value is unchanged."
+    },
+    {
+      "id": "wis-trace-3",
+      "concept": "reconstruct-and-check",
+      "prerequisites": [
+        "take-or-skip"
+      ],
+      "prompt": "For the general algorithm, assume the activities are already finish-sorted and every p(j) has been computed. Each table row stores a value and a take/skip decision. What work remains to fill the n-row table and reconstruct one optimum?",
+      "options": [
+        "Enumerate all 2^n subsets to know which decision to store",
+        "Sort the activities again after every take decision",
+        "Compute only OPT(n), with no earlier table values",
+        "O(n) table work and at most n backtracking steps"
+      ],
+      "answer": 3,
+      "explanation": "Each row compares two already available values in constant work, so the table fill is linear in n. Backtracking moves to a strictly smaller row on every step and therefore visits at most n rows. With finish sorting and binary search for predecessors, the usual complete algorithm takes O(n log n) time and O(n) table space. The explorer deliberately caps the input at eight activities so its entire reasoning remains inspectable.",
+      "transfer": "Connect this to the existing binary-search lesson: in the finish-sorted end times, p(j) comes from the boundary after the last end time less than or equal to j's start. Explain why the equality direction matters."
+    }
+  ]
+}
