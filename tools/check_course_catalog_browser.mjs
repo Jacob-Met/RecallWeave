@@ -16,6 +16,13 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 const COURSE_FILES = [
   'binary-search.json', 'dependency-graphs.json',
   'measurement-uncertainty.json', 'sql-query-foundations.json',
+  'enzymes-energy-and-control.json',
+  'numerical-precision.json',
+  'reading-data-and-evidence.json',
+  'sampling-aliasing.json',
+  'shortest-paths.json',
+  'stoichiometry-foundations.json',
+  'vector-geometry.json',
 ];
 const MIN_DISK_BYTES = 1024n ** 3n;
 const MIN_MEMORY_BYTES = 512 * 1024 * 1024;
@@ -525,7 +532,7 @@ async function main(settings) {
     const firstAudit = await audit(catalog, 'http-initial');
     assert.equal(firstAudit.overflow, false);
     assert.equal(firstAudit.observed.objectUrlAttempts, 0, 'Opening the catalog must not download anything');
-    passed('HTTP catalog renders all four original course metadata records');
+    passed('HTTP catalog renders all ' + COURSE_FILES.length + ' original course metadata records');
     await discloseSource(catalog, COURSE_FILES[0]);
     passed('Source and permissions disclosure opens with Enter and exposes original statements');
     await screenshot(catalog, 'catalog-desktop.png');
@@ -533,7 +540,7 @@ async function main(settings) {
     for (const filename of COURSE_FILES)
       await download(catalog, filename, 'http-' + filename.slice(0, -5),
         () => click(catalog, 'button[data-download="' + filename + '"]'));
-    passed('All four HTTP downloads preserve exact source bytes and requested filenames');
+    passed('All ' + COURSE_FILES.length + ' HTTP downloads preserve exact source bytes and requested filenames');
     const learnerFile = await download(catalog, COURSE_FILES[0], 'http-repeat',
       () => click(catalog, 'button[data-download="' + COURSE_FILES[0] + '"]'));
     passed('Repeated explicit download retains the same original bytes');
@@ -670,7 +677,7 @@ async function main(settings) {
     const directRequests = report.networkRequests.slice(requestStart).filter(request => request.sessionId === offline.sessionId);
     assert.ok(directRequests.every(request => request.url.startsWith('file:') || request.url.startsWith('blob:') || request.url.startsWith('data:')),
       'Offline direct-file catalog must not request any hosted resource');
-    passed('Direct-file catalog works with network offline, all four exact downloads and 390px layout');
+    passed('Direct-file catalog works with network offline, all ' + COURSE_FILES.length + ' exact downloads and 390px layout');
     await releasedObjectUrls(catalog, 'http-keyboard-before-close');
     await releasedObjectUrls(offline, 'direct-file-before-close');
     passed('Every created catalog object URL is released once after download, before reload or close');
