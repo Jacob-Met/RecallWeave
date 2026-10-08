@@ -1,0 +1,126 @@
+import assert from 'node:assert/strict';
+import { readFile, writeFile } from 'node:fs/promises';
+import { resolve } from 'node:path';
+import { pathToFileURL } from 'node:url';
+import { createHash } from 'node:crypto';
+import { exhaustiveGraphs, seededGraphs, handGraphs, inspectTrace } from './independent-forest-oracle.mjs';
+
+const [candidatePath, reportPath] = process.argv.slice(2);
+if (!candidatePath || !reportPath || process.argv.length !== 4)
+  throw new Error('Use candidate-helper.mjs output-report.json');
+const sha = bytes => createHash('sha256').update(bytes).digest('hex');
+const source = await readFile(resolve(candidatePath));
+const report = {
+  schema: 'recallweave.independent-minimum-spanning-forest-receiving/1',
+  started_at: new Date().toISOString(), node: process.version,
+  candidate: { path: resolve(candidatePath), bytes: source.length, sha256: sha(source) },
+  controls: { oracle: sha(await readFile(new URL('./independent-forest-oracle.mjs', import.meta.url))),
+    adapter: sha(await readFile(new URL(import.meta.url))) },
+  counts: { exhaustive: 0, seededLarger: 0, hand: 0, helperRefusals: 0,
+    parserAccepted: 0, parserRefused: 0, detachedCaller: 0, frozenCaller: 0 },
+  enumeratedSubsets: 0, completed_cases: [], status: 'RUNNING'
+};
+let current = 'import';
+try {
+  const { traceMinimumSpanningForest: trace, parseForestInput: parse } =
+    await import(pathToFileURL(resolve(candidatePath)).href);
+  assert.equal(typeof trace, 'function');
+  assert.equal(typeof parse, 'function');
+  function runGraph(item, category) {
+    current = item.label;
+    const before = structuredClone(item.edges);
+    const result = trace(item.n, item.edges);
+    report.enumeratedSubsets += inspectTrace(item.n, item.edges, result);
+    assert.deepEqual(item.edges, before, 'The caller graph must remain unchanged');
+    if ('weight' in item) assert.equal(result.totalWeight, item.weight, item.label);
+    if ('ids' in item) assert.deepEqual(result.forestEdgeIds, item.ids, item.label);
+    report.counts[category]++;
+  }
+  for (const item of exhaustiveGraphs()) runGraph(item, 'exhaustive');
+  for (const item of seededGraphs()) runGraph(item, 'seededLarger');
+  for (const item of handGraphs) runGraph(item, 'hand');
+
+  current = 'detached-caller';
+  const extra = { note: 'keep this object mutable' };
+  const caller = [{ from: 1, to: 0, weight: 4, extra }];
+  const snapshot = trace(2, caller);
+  inspectTrace(2, caller, snapshot);
+  assert.equal(Object.isFrozen(caller), false);
+  assert.equal(Object.isFrozen(caller[0]), false);
+  assert.equal(Object.isFrozen(extra), false);
+  caller[0].weight = 9; caller.push({ from: 0, to: 1, weight: -99 });
+  assert.equal(snapshot.edges.length, 1); assert.equal(snapshot.edges[0].weight, 4);
+  report.counts.detachedCaller++;
+
+  current = 'frozen-caller';
+  const frozen = Object.freeze([Object.freeze({ from: 1, to: 0, weight: -99 })]);
+  inspectTrace(2, frozen, trace(2, frozen));
+  report.counts.frozenCaller++;
+
+  const helperInvalid = [
+    [0, []], [9, []], [1.5, []], [NaN, []], [Infinity, []], ['3', []], [true, []],
+    [3, null], [3, {}], [3, new Array(1)], [3, [null]], [3, [42]], [3, [[]]],
+    [3, [{ from: 0, to: 1 }]], [3, [{ from: '0', to: 1, weight: 0 }]],
+    [3, [{ from: 0, to: 1.2, weight: 0 }]], [3, [{ from: -1, to: 1, weight: 0 }]],
+    [3, [{ from: 0, to: 3, weight: 0 }]], [3, [{ from: 1, to: 1, weight: 0 }]],
+    [3, [{ from: 0, to: 1, weight: -100 }]], [3, [{ from: 0, to: 1, weight: 100 }]],
+    [3, [{ from: 0, to: 1, weight: 0.5 }]], [3, [{ from: 0, to: 1, weight: NaN }]],
+    [3, [{ from: 0, to: 1, weight: Infinity }]], [3, [{ from: 0, to: 1, weight: '2' }]],
+    [3, [{ from: 0, to: 1, weight: 1 }, { from: 1, to: 0, weight: 2 }]],
+    [3, [{ from: 0, to: 1, weight: 1 }, { from: 0, to: 1, weight: 1 }]],
+    [2, [{ from: 0, to: 1, weight: 1 }, { from: 1, to: 0, weight: 2 }]]
+  ];
+  for (let i = 0; i < helperInvalid.length; i++) {
+    current = 'helper-refusal-' + i;
+    const args = helperInvalid[i], before = structuredClone(args);
+    assert.throws(() => trace(...args), Error);
+    assert.deepEqual(args, before);
+    report.counts.helperRefusals++;
+  }
+
+  const goodParse = [
+    ['1', '', { vertexCount: 1, edges: [] }],
+    [' 8\n', ' \n\t\n', { vertexCount: 8, edges: [] }],
+    ['2', 'b A -03', { vertexCount: 2, edges: [{ from: 1, to: 0, weight: -3 }] }],
+    ['3', ' A\tB\t+0 \r\n\r\nc b 00099\n', { vertexCount: 3, edges:
+      [{ from: 0, to: 1, weight: 0 }, { from: 2, to: 1, weight: 99 }] }],
+    ['8', 'h a -99', { vertexCount: 8, edges: [{ from: 7, to: 0, weight: -99 }] }],
+    ['2', 'A B +00001', { vertexCount: 2, edges: [{ from: 0, to: 1, weight: 1 }] }],
+    ['2', 'A B -0', { vertexCount: 2, edges: [{ from: 0, to: 1, weight: -0 }] }]
+  ];
+  for (let i = 0; i < goodParse.length; i++) {
+    current = 'parser-accepted-' + i;
+    const [countText, edgeText, expected] = goodParse[i];
+    const actual = parse(countText, edgeText);
+    assert.deepEqual(actual, expected);
+    inspectTrace(actual.vertexCount, actual.edges, trace(actual.vertexCount, actual.edges));
+    report.counts.parserAccepted++;
+  }
+  const badParse = [
+    ['0', ''], ['9', ''], ['01', ''], ['+2', ''], ['2.0', ''], ['2e0', ''], ['', ''],
+    [2, ''], [null, ''], ['2', null], ['2', 3],
+    ['3', 'A B'], ['3', 'A B 1 extra'], ['3', 'A,B,1'], ['3', '# comment'],
+    ['3', 'A B 1 # comment'], ['3', 'AA B 1'], ['3', 'A Z 1'], ['3', 'A A 1'],
+    ['3', 'A B 1.0'], ['3', 'A B 1e1'], ['3', 'A B --1'], ['3', 'A B +-1'],
+    ['3', 'A B 100'], ['3', 'A B -100'], ['3', 'A B Infinity'], ['3', 'A B NaN'],
+    ['3', 'A B 1_0'], ['3', 'A\u00a0B 1'], ['3', 'A B 1\nB A 2'],
+    ['3', 'A B 1\nA B 2'], ['2', 'A C 1']
+  ];
+  for (let i = 0; i < badParse.length; i++) {
+    current = 'parser-refused-' + i;
+    assert.throws(() => parse(...badParse[i]), Error);
+    report.counts.parserRefused++;
+  }
+  assert.equal(sha(await readFile(resolve(candidatePath))), report.candidate.sha256);
+  report.status = 'PASS';
+} catch (error) {
+  report.status = 'FAIL';
+  report.failed_case = current;
+  report.error = error.stack || String(error);
+  process.exitCode = 1;
+}
+report.completed_at = new Date().toISOString();
+await writeFile(resolve(reportPath), JSON.stringify(report, null, 2) + '\n', { flag: 'wx' });
+console.log(JSON.stringify({ status: report.status, counts: report.counts,
+  enumeratedSubsets: report.enumeratedSubsets, failed_case: report.failed_case,
+  candidate_sha256: report.candidate.sha256 }));
