@@ -1,0 +1,556 @@
+{
+  "source": "/Users/me/recallweave-recursion-a219f250962c/source",
+  "sourceHashes": {
+    "courses/recursion-call-stack-core.mjs": "81abcc2c232e27e69410d51a2c004d6cc0ffe0f0fee82fbac715c2ab8bb0cf93",
+    "courses/recursion-call-stack-ui.mjs": "a28999cf8539fc3cd19940d86c2671421d07d4e155cb1c465352dec610462db6",
+    "courses/recursion-call-stack-explorer.template.html": "0c0010724d5a68e8fe2a078fcad0ac981591b9109cadf500aee68dbc2e04e6c6",
+    "courses/recursion-call-stack-explorer.html": "525c20445713bfbc6bc0d0b8ee8580378410524cf044916c22d5385337d5de36",
+    "courses/recursion-call-stack.json": "7a59b4a76f24307e223798bc20006f4f02f755c4163350535fad93aff1002c88",
+    "tools/build_recursion_call_stack.mjs": "fb40ff08645d615f5d749385b8d555934c6bca9971d936934656dac479011076"
+  },
+  "cases": [
+    {
+      "name": "desktop direct-file factorial: suspended work, keyboard step, reversal and actual trace download",
+      "status": "pass",
+      "data": {
+        "initial": {
+          "label": "Factorial · n = 4",
+          "step": "Step 0 of 19",
+          "event": "Before the first call. This algorithm does not use a cache.",
+          "result": "pending",
+          "counters": {
+            "calls": "0",
+            "computedCalls": "0",
+            "cacheHits": "0",
+            "returnedCalls": "0",
+            "activeDepth": "0",
+            "maxDepth": "0"
+          },
+          "frames": [],
+          "cache": "This algorithm recomputes repeated calls. It does not use a cache.",
+          "returns": []
+        },
+        "suspended": {
+          "label": "Factorial · n = 4",
+          "step": "Step 2 of 19",
+          "event": "#1 saves n = 4 and waits for 4 × factorial(3). Multiplication happens after the child returns.",
+          "result": "pending",
+          "counters": {
+            "calls": "1",
+            "computedCalls": "1",
+            "cacheHits": "0",
+            "returnedCalls": "0",
+            "activeDepth": "1",
+            "maxDepth": "1"
+          },
+          "frames": [
+            "#1 · factorial(4)top of stack4 × factorial(3)n = 4 · root"
+          ],
+          "cache": "This algorithm recomputes repeated calls. It does not use a cache.",
+          "returns": []
+        },
+        "enteredChild": {
+          "label": "Factorial · n = 4",
+          "step": "Step 3 of 19",
+          "event": "#2 enters factorial(3). It has its own frame; caller #1 is suspended.",
+          "result": "pending",
+          "counters": {
+            "calls": "2",
+            "computedCalls": "2",
+            "cacheHits": "0",
+            "returnedCalls": "0",
+            "activeDepth": "2",
+            "maxDepth": "2"
+          },
+          "frames": [
+            "#2 · factorial(3)top of stackcheck the base casen = 3 · returns to #1",
+            "#1 · factorial(4)suspended caller4 × factorial(3)n = 4 · root"
+          ],
+          "cache": "This algorithm recomputes repeated calls. It does not use a cache.",
+          "returns": []
+        },
+        "completed": {
+          "label": "Factorial · n = 4",
+          "step": "Step 19 of 19",
+          "event": "#1 returns 24 as the final result, then leaves the stack. The run is complete.",
+          "result": "24",
+          "counters": {
+            "calls": "5",
+            "computedCalls": "5",
+            "cacheHits": "0",
+            "returnedCalls": "5",
+            "activeDepth": "0",
+            "maxDepth": "5"
+          },
+          "frames": [],
+          "cache": "This algorithm recomputes repeated calls. It does not use a cache.",
+          "returns": [
+            "#5 factorial(0) → 1",
+            "#4 factorial(1) → 1",
+            "#3 factorial(2) → 2",
+            "#2 factorial(3) → 6",
+            "#1 factorial(4) → 24"
+          ]
+        },
+        "exportedSelectedStep": 19
+      }
+    },
+    {
+      "name": "memoized Fibonacci: exact completed comparison, cache-hit frame, backward identity and fresh run",
+      "status": "pass",
+      "data": {
+        "completed": {
+          "label": "Memoized Fibonacci · n = 5",
+          "step": "Step 32 of 32",
+          "event": "#1 returns 5 as the final result, then leaves the stack. The run is complete.",
+          "result": "5",
+          "counters": {
+            "calls": "9",
+            "computedCalls": "6",
+            "cacheHits": "3",
+            "returnedCalls": "9",
+            "activeDepth": "0",
+            "maxDepth": "5"
+          },
+          "frames": [],
+          "cache": "F(0) = 0F(1) = 1F(2) = 1F(3) = 2F(4) = 3F(5) = 5",
+          "returns": [
+            "#5 F(1) → 1",
+            "#6 F(0) → 0",
+            "#4 F(2) → 1",
+            "#7 F(1) → 1",
+            "#3 F(3) → 2",
+            "#8 F(2) → 1",
+            "#2 F(4) → 3",
+            "#9 F(3) → 2",
+            "#1 F(5) → 5"
+          ]
+        },
+        "comparison": [
+          "Fibonacci1515055",
+          "Memoized Fibonacci96355"
+        ],
+        "selectedCacheHit": {
+          "label": "Memoized Fibonacci · n = 5",
+          "step": "Step 19 of 32",
+          "event": "#7 enters F(1); cache hit returns the saved value 1. This invocation still occupies a frame.",
+          "result": "pending",
+          "counters": {
+            "calls": "7",
+            "computedCalls": "6",
+            "cacheHits": "1",
+            "returnedCalls": "3",
+            "activeDepth": "4",
+            "maxDepth": "5"
+          },
+          "frames": [
+            "#7 · F(1)top of stackreturn cached 1n = 1 · value = 1 · returns to #3",
+            "#3 · F(3)suspended caller1 + F(1)n = 3 · left = 1 · returns to #2",
+            "#2 · F(4)suspended callerF(3) + F(2)n = 4 · returns to #1",
+            "#1 · F(5)suspended callerF(4) + F(3)n = 5 · root"
+          ],
+          "cache": "F(0) = 0F(1) = 1F(2) = 1",
+          "returns": [
+            "#5 F(1) → 1",
+            "#6 F(0) → 0",
+            "#4 F(2) → 1"
+          ]
+        },
+        "fresh": {
+          "label": "Memoized Fibonacci · n = 5",
+          "step": "Step 0 of 32",
+          "event": "Before the first call. This run starts with an empty cache.",
+          "result": "pending",
+          "counters": {
+            "calls": "0",
+            "computedCalls": "0",
+            "cacheHits": "0",
+            "returnedCalls": "0",
+            "activeDepth": "0",
+            "maxDepth": "0"
+          },
+          "frames": [],
+          "cache": "Empty. Completed values will be saved here, including base cases.",
+          "returns": []
+        }
+      }
+    },
+    {
+      "name": "invalid setup clears prior trace; both base conventions and maximum input work in actual UI",
+      "status": "pass",
+      "data": {
+        "invalid": [
+          "",
+          "11",
+          "-1",
+          "1.5",
+          "1e1",
+          "01",
+          "1x"
+        ],
+        "cases": [
+          {
+            "label": "Factorial · n = 0",
+            "step": "Step 3 of 3",
+            "event": "#1 returns 1 as the final result, then leaves the stack. The run is complete.",
+            "result": "1",
+            "counters": {
+              "calls": "1",
+              "computedCalls": "1",
+              "cacheHits": "0",
+              "returnedCalls": "1",
+              "activeDepth": "0",
+              "maxDepth": "1"
+            },
+            "frames": [],
+            "cache": "This algorithm recomputes repeated calls. It does not use a cache.",
+            "returns": [
+              "#1 factorial(0) → 1"
+            ]
+          },
+          {
+            "label": "Fibonacci · n = 0",
+            "step": "Step 3 of 3",
+            "event": "#1 returns 0 as the final result, then leaves the stack. The run is complete.",
+            "result": "0",
+            "counters": {
+              "calls": "1",
+              "computedCalls": "1",
+              "cacheHits": "0",
+              "returnedCalls": "1",
+              "activeDepth": "0",
+              "maxDepth": "1"
+            },
+            "frames": [],
+            "cache": "This algorithm recomputes repeated calls. It does not use a cache.",
+            "returns": [
+              "#1 F(0) → 0"
+            ]
+          },
+          {
+            "label": "Memoized Fibonacci · n = 1",
+            "step": "Step 3 of 3",
+            "event": "#1 returns 1 as the final result, then leaves the stack. The run is complete.",
+            "result": "1",
+            "counters": {
+              "calls": "1",
+              "computedCalls": "1",
+              "cacheHits": "0",
+              "returnedCalls": "1",
+              "activeDepth": "0",
+              "maxDepth": "1"
+            },
+            "frames": [],
+            "cache": "F(1) = 1",
+            "returns": [
+              "#1 F(1) → 1"
+            ]
+          },
+          {
+            "label": "Fibonacci · n = 10",
+            "step": "Step 707 of 707",
+            "event": "#1 returns 55 as the final result, then leaves the stack. The run is complete.",
+            "result": "55",
+            "counters": {
+              "calls": "177",
+              "computedCalls": "177",
+              "cacheHits": "0",
+              "returnedCalls": "177",
+              "activeDepth": "0",
+              "maxDepth": "10"
+            },
+            "frames": [],
+            "cache": "This algorithm recomputes repeated calls. It does not use a cache.",
+            "returns": [
+              "#10 F(1) → 1",
+              "#11 F(0) → 0",
+              "#9 F(2) → 1",
+              "#12 F(1) → 1",
+              "#8 F(3) → 2",
+              "#14 F(1) → 1",
+              "#15 F(0) → 0",
+              "#13 F(2) → 1",
+              "#7 F(4) → 3",
+              "#18 F(1) → 1",
+              "#19 F(0) → 0",
+              "#17 F(2) → 1",
+              "#20 F(1) → 1",
+              "#16 F(3) → 2",
+              "#6 F(5) → 5",
+              "#24 F(1) → 1",
+              "#25 F(0) → 0",
+              "#23 F(2) → 1",
+              "#26 F(1) → 1",
+              "#22 F(3) → 2",
+              "#28 F(1) → 1",
+              "#29 F(0) → 0",
+              "#27 F(2) → 1",
+              "#21 F(4) → 3",
+              "#5 F(6) → 8",
+              "#34 F(1) → 1",
+              "#35 F(0) → 0",
+              "#33 F(2) → 1",
+              "#36 F(1) → 1",
+              "#32 F(3) → 2",
+              "#38 F(1) → 1",
+              "#39 F(0) → 0",
+              "#37 F(2) → 1",
+              "#31 F(4) → 3",
+              "#42 F(1) → 1",
+              "#43 F(0) → 0",
+              "#41 F(2) → 1",
+              "#44 F(1) → 1",
+              "#40 F(3) → 2",
+              "#30 F(5) → 5",
+              "#4 F(7) → 13",
+              "#50 F(1) → 1",
+              "#51 F(0) → 0",
+              "#49 F(2) → 1",
+              "#52 F(1) → 1",
+              "#48 F(3) → 2",
+              "#54 F(1) → 1",
+              "#55 F(0) → 0",
+              "#53 F(2) → 1",
+              "#47 F(4) → 3",
+              "#58 F(1) → 1",
+              "#59 F(0) → 0",
+              "#57 F(2) → 1",
+              "#60 F(1) → 1",
+              "#56 F(3) → 2",
+              "#46 F(5) → 5",
+              "#64 F(1) → 1",
+              "#65 F(0) → 0",
+              "#63 F(2) → 1",
+              "#66 F(1) → 1",
+              "#62 F(3) → 2",
+              "#68 F(1) → 1",
+              "#69 F(0) → 0",
+              "#67 F(2) → 1",
+              "#61 F(4) → 3",
+              "#45 F(6) → 8",
+              "#3 F(8) → 21",
+              "#76 F(1) → 1",
+              "#77 F(0) → 0",
+              "#75 F(2) → 1",
+              "#78 F(1) → 1",
+              "#74 F(3) → 2",
+              "#80 F(1) → 1",
+              "#81 F(0) → 0",
+              "#79 F(2) → 1",
+              "#73 F(4) → 3",
+              "#84 F(1) → 1",
+              "#85 F(0) → 0",
+              "#83 F(2) → 1",
+              "#86 F(1) → 1",
+              "#82 F(3) → 2",
+              "#72 F(5) → 5",
+              "#90 F(1) → 1",
+              "#91 F(0) → 0",
+              "#89 F(2) → 1",
+              "#92 F(1) → 1",
+              "#88 F(3) → 2",
+              "#94 F(1) → 1",
+              "#95 F(0) → 0",
+              "#93 F(2) → 1",
+              "#87 F(4) → 3",
+              "#71 F(6) → 8",
+              "#100 F(1) → 1",
+              "#101 F(0) → 0",
+              "#99 F(2) → 1",
+              "#102 F(1) → 1",
+              "#98 F(3) → 2",
+              "#104 F(1) → 1",
+              "#105 F(0) → 0",
+              "#103 F(2) → 1",
+              "#97 F(4) → 3",
+              "#108 F(1) → 1",
+              "#109 F(0) → 0",
+              "#107 F(2) → 1",
+              "#110 F(1) → 1",
+              "#106 F(3) → 2",
+              "#96 F(5) → 5",
+              "#70 F(7) → 13",
+              "#2 F(9) → 34",
+              "#118 F(1) → 1",
+              "#119 F(0) → 0",
+              "#117 F(2) → 1",
+              "#120 F(1) → 1",
+              "#116 F(3) → 2",
+              "#122 F(1) → 1",
+              "#123 F(0) → 0",
+              "#121 F(2) → 1",
+              "#115 F(4) → 3",
+              "#126 F(1) → 1",
+              "#127 F(0) → 0",
+              "#125 F(2) → 1",
+              "#128 F(1) → 1",
+              "#124 F(3) → 2",
+              "#114 F(5) → 5",
+              "#132 F(1) → 1",
+              "#133 F(0) → 0",
+              "#131 F(2) → 1",
+              "#134 F(1) → 1",
+              "#130 F(3) → 2",
+              "#136 F(1) → 1",
+              "#137 F(0) → 0",
+              "#135 F(2) → 1",
+              "#129 F(4) → 3",
+              "#113 F(6) → 8",
+              "#142 F(1) → 1",
+              "#143 F(0) → 0",
+              "#141 F(2) → 1",
+              "#144 F(1) → 1",
+              "#140 F(3) → 2",
+              "#146 F(1) → 1",
+              "#147 F(0) → 0",
+              "#145 F(2) → 1",
+              "#139 F(4) → 3",
+              "#150 F(1) → 1",
+              "#151 F(0) → 0",
+              "#149 F(2) → 1",
+              "#152 F(1) → 1",
+              "#148 F(3) → 2",
+              "#138 F(5) → 5",
+              "#112 F(7) → 13",
+              "#158 F(1) → 1",
+              "#159 F(0) → 0",
+              "#157 F(2) → 1",
+              "#160 F(1) → 1",
+              "#156 F(3) → 2",
+              "#162 F(1) → 1",
+              "#163 F(0) → 0",
+              "#161 F(2) → 1",
+              "#155 F(4) → 3",
+              "#166 F(1) → 1",
+              "#167 F(0) → 0",
+              "#165 F(2) → 1",
+              "#168 F(1) → 1",
+              "#164 F(3) → 2",
+              "#154 F(5) → 5",
+              "#172 F(1) → 1",
+              "#173 F(0) → 0",
+              "#171 F(2) → 1",
+              "#174 F(1) → 1",
+              "#170 F(3) → 2",
+              "#176 F(1) → 1",
+              "#177 F(0) → 0",
+              "#175 F(2) → 1",
+              "#169 F(4) → 3",
+              "#153 F(6) → 8",
+              "#111 F(8) → 21",
+              "#1 F(10) → 55"
+            ]
+          }
+        ],
+        "largestSnapshots": 708
+      }
+    },
+    {
+      "name": "390px file layout, exact course download and no persistent run after reload",
+      "status": "pass",
+      "data": {
+        "phone": {
+          "label": "Memoized Fibonacci · n = 5",
+          "step": "Step 7 of 32",
+          "event": "#4 enters F(2). It has its own frame; caller #3 is suspended.",
+          "result": "pending",
+          "counters": {
+            "calls": "4",
+            "computedCalls": "4",
+            "cacheHits": "0",
+            "returnedCalls": "0",
+            "activeDepth": "4",
+            "maxDepth": "4"
+          },
+          "frames": [
+            "#4 · F(2)top of stackcheck the base casen = 2 · returns to #3",
+            "#3 · F(3)suspended callerF(2) + F(1)n = 3 · returns to #2",
+            "#2 · F(4)suspended callerF(3) + F(2)n = 4 · returns to #1",
+            "#1 · F(5)suspended callerF(4) + F(3)n = 5 · root"
+          ],
+          "cache": "Empty. Completed values will be saved here, including base cases.",
+          "returns": []
+        },
+        "dimensions": {
+          "width": 390,
+          "scrollWidth": 390
+        },
+        "courseTitle": "Recursion and the call stack: waiting, returning, reusing",
+        "questionCount": 12,
+        "reload": {
+          "label": "Factorial · n = 4",
+          "step": "Step 0 of 19",
+          "event": "Before the first call. This algorithm does not use a cache.",
+          "result": "pending",
+          "counters": {
+            "calls": "0",
+            "computedCalls": "0",
+            "cacheHits": "0",
+            "returnedCalls": "0",
+            "activeDepth": "0",
+            "maxDepth": "0"
+          },
+          "frames": [],
+          "cache": "This algorithm recomputes repeated calls. It does not use a cache.",
+          "returns": []
+        }
+      }
+    }
+  ],
+  "requests": [],
+  "pageErrors": [],
+  "downloads": [
+    {
+      "filename": "factorial4-complete.json",
+      "suggestedFilename": "recallweave-factorial-4-step-19.json",
+      "bytes": 24600,
+      "sha256": "6c557f4767e54c21a66ef202b9cab1fa1faa4170aaa18b304cb0e058e19ade7d"
+    },
+    {
+      "filename": "memo5-complete.json",
+      "suggestedFilename": "recallweave-memo-fibonacci-5-step-32.json",
+      "bytes": 46797,
+      "sha256": "a7ae92798b90f4a0f1ea0a623183b084aa8208ffbda60abcb714c288d0b54513"
+    },
+    {
+      "filename": "memo5-cache-hit.json",
+      "suggestedFilename": "recallweave-memo-fibonacci-5-step-19.json",
+      "bytes": 47460,
+      "sha256": "182d20f803d967bd72ffb297c30bdb7a7ae9bbb8331d06b994d9aa6352398c35"
+    },
+    {
+      "filename": "memo5-fresh-cursor.json",
+      "suggestedFilename": "recallweave-memo-fibonacci-5-step-0.json",
+      "bytes": 46367,
+      "sha256": "ce7a9657153b109792e0b8df902f40e9283c2161f8a5f97c970c0ad224cffd49"
+    },
+    {
+      "filename": "fibonacci10-complete.json",
+      "suggestedFilename": "recallweave-fibonacci-10-step-707.json",
+      "bytes": 1417602,
+      "sha256": "9e59a68a893eb1f91b74dc2718f63ae8b344f6218a854e71575e7876001dbbc7"
+    },
+    {
+      "filename": "recursion-course.json",
+      "suggestedFilename": "recallweave-recursion-call-stack-course.json",
+      "bytes": 16099,
+      "sha256": "7a59b4a76f24307e223798bc20006f4f02f755c4163350535fad93aff1002c88"
+    }
+  ],
+  "screenshotHashes": {
+    "desktop-stack.png": "f2f2f33f6498c14ba6c0e4b647c8c2feab8b0c6cfc596d5cec79784e38d69034",
+    "phone-stack.png": "6c39cf77378cc7fc31cb6da2a39af0cd954e906be4a92b6c7103897fdfecda41"
+  },
+  "startedAt": "2026-10-08T15:16:24.244Z",
+  "profileRemoved": true,
+  "completedAt": "2026-10-08T15:16:26.896Z",
+  "sourceAfter": {
+    "courses/recursion-call-stack-core.mjs": "81abcc2c232e27e69410d51a2c004d6cc0ffe0f0fee82fbac715c2ab8bb0cf93",
+    "courses/recursion-call-stack-ui.mjs": "a28999cf8539fc3cd19940d86c2671421d07d4e155cb1c465352dec610462db6",
+    "courses/recursion-call-stack-explorer.template.html": "0c0010724d5a68e8fe2a078fcad0ac981591b9109cadf500aee68dbc2e04e6c6",
+    "courses/recursion-call-stack-explorer.html": "525c20445713bfbc6bc0d0b8ee8580378410524cf044916c22d5385337d5de36",
+    "courses/recursion-call-stack.json": "7a59b4a76f24307e223798bc20006f4f02f755c4163350535fad93aff1002c88",
+    "tools/build_recursion_call_stack.mjs": "fb40ff08645d615f5d749385b8d555934c6bca9971d936934656dac479011076"
+  },
+  "passed": true
+}

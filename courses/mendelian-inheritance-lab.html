@@ -1,0 +1,385 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src 'none'; base-uri 'none'; form-action 'none'">
+<title>Inheritance lab — RecallWeave</title>
+<style>
+:root{color-scheme:light;--paper:#f5f3e9;--white:#fffef8;--ink:#18352b;--muted:#466458;--line:#c6d2bc;--leaf:#245c3e;--soft:#e6ecd9;--lime:#d8ed95;--error:#9d3428}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.55 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}a{color:var(--leaf);text-underline-offset:.2em}button,select{font:inherit}button,a,select{touch-action:manipulation}button{cursor:pointer;border:1px solid var(--leaf);border-radius:8px;padding:11px 16px;color:var(--leaf);background:var(--white);line-height:1.3}button:hover{background:var(--soft)}button:disabled{cursor:default;opacity:.5}button.primary{background:var(--leaf);color:white;font-weight:700}button.primary:hover{background:#17472e}button:focus-visible,a:focus-visible,select:focus-visible{outline:3px solid #b66119;outline-offset:3px}h1,h2,h3,p{margin-top:0}h1,h2{font-family:Georgia,"Times New Roman",serif;font-weight:500;line-height:1.08}h1{font-size:clamp(2.6rem,5vw,4.5rem);max-width:790px;margin-bottom:20px}h2{font-size:2rem;margin-bottom:18px}h3{font-size:1.02rem;margin-bottom:8px}p{margin-bottom:14px}small,.small{font-size:.88rem}.muted{color:var(--muted)}[hidden]{display:none!important}.skip{position:absolute;top:-100px;left:16px;z-index:3;background:white;padding:10px}.skip:focus{top:10px}.wrap{max-width:1220px;margin:auto;padding:0 28px}.masthead{background:var(--ink);color:var(--paper);padding:24px 0 42px}.brand{display:flex;justify-content:space-between;gap:24px;border-bottom:1px solid #58735f;padding-bottom:16px;margin-bottom:30px;font-size:.85rem;letter-spacing:.06em}.brand a{color:var(--lime)}.eyebrow{text-transform:uppercase;letter-spacing:.13em;font-size:.75rem;font-weight:750;color:var(--lime);margin-bottom:15px}.intro{max-width:740px;color:#dfe9d9;font-size:1.08rem;margin-bottom:0}.boundary{display:flex;align-items:start;gap:22px;padding:23px 0;border-bottom:1px solid var(--line)}.boundary strong{white-space:nowrap;color:var(--leaf)}.boundary p{margin:0;color:var(--muted)}main{padding-bottom:50px}.workspace{display:grid;grid-template-columns:310px minmax(0,1fr);gap:26px;padding-top:28px;align-items:start}.card{border:1px solid var(--line);border-radius:15px;background:var(--white);padding:24px;min-width:0}.step{color:var(--muted);font-size:.75rem;letter-spacing:.1em;text-transform:uppercase;font-weight:750;margin-bottom:12px}.controls h2{font-size:1.65rem}.field{margin:16px 0}label{display:block;font-weight:650;font-size:.9rem;margin-bottom:6px}select{width:100%;min-height:44px;padding:8px 10px;border:1px solid #9aaf98;border-radius:7px;background:white;color:var(--ink)}.parent-fields{display:grid;grid-template-columns:1fr 1fr;gap:12px}.full{width:100%}.preset-list{display:flex;flex-direction:column;gap:8px}.preset{text-align:left;font-size:.84rem;padding:10px 11px;border-color:var(--line)}.presets-title{margin-top:27px;padding-top:22px;border-top:1px solid var(--line)}.error{color:var(--error);font-weight:600;font-size:.9rem;margin-top:12px}.status{font-size:.85rem;color:var(--muted);margin:9px 0 0}.empty{padding:60px 32px;background:var(--soft);border:1px dashed #99b080;border-radius:12px;min-height:285px;display:grid;align-content:center}.empty-mark{font-family:Georgia,serif;font-size:3rem;margin-bottom:12px}.empty p{max-width:430px}.gamete-pools{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin:22px 0}.gametes{display:flex;flex-wrap:wrap;gap:6px;list-style:none;padding:0;margin:0}.gametes li{border:1px solid var(--line);border-radius:6px;background:var(--soft);padding:5px 8px;font-size:.88rem;font-family:ui-monospace,monospace}.table-frame{border:1px solid var(--line);border-radius:10px;overflow:hidden}table{width:100%;border-collapse:collapse;font-size:.9rem}caption{caption-side:top;text-align:left;padding:13px 14px;color:var(--muted);font-size:.85rem;background:var(--paper)}th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line)}th{font-weight:650}thead{background:var(--soft)}tbody tr:last-child>*{border-bottom:0}.punnett{text-align:center;table-layout:fixed}.punnett th,.punnett td{text-align:center;padding:6px}.punnett thead th:first-child{font-size:.68rem}.punnett tbody th{background:var(--soft);font-family:ui-monospace,monospace}.punnett button{font-family:ui-monospace,monospace;width:100%;padding:13px 4px;font-size:1rem;min-height:44px;background:var(--white);border-color:var(--line)}.punnett button[aria-pressed=true]{background:var(--leaf);border-color:var(--leaf);color:white}.route-detail{background:#eef1e1;border-left:4px solid var(--leaf);padding:18px;margin:18px 0 25px;min-height:135px}.route-detail p{font-size:.9rem;margin-bottom:8px}.route-detail p:last-child{margin-bottom:0}.summaries{display:grid;grid-template-columns:1fr 1fr;gap:18px}.summaries table{font-variant-numeric:tabular-nums}.summaries td:last-child{white-space:nowrap;font-size:.84rem}.summaries th,.summaries td{padding:9px 8px}.summaries tbody th{font-family:ui-monospace,monospace}.record{display:flex;flex-wrap:wrap;align-items:center;gap:12px;padding-top:20px;margin-top:22px;border-top:1px solid var(--line)}.record p{margin:0;max-width:320px}.learn{margin-top:28px;display:grid;grid-template-columns:1.1fr 1fr;gap:28px}.learn ol{padding-left:23px}.learn li{margin:7px 0}.course-actions{display:flex;gap:13px;flex-wrap:wrap;align-items:center;margin-top:20px}.assumptions{margin-top:25px;padding:20px 24px}.assumptions summary{font-weight:700;cursor:pointer}.assumptions li{margin:8px 0}.footer{border-top:1px solid var(--line);padding:24px 0;font-size:.82rem;color:var(--muted)}
+@media(max-width:920px){.workspace{grid-template-columns:260px minmax(0,1fr);gap:18px}.card{padding:19px}.summaries{grid-template-columns:1fr}.learn{grid-template-columns:1fr 1fr;gap:18px}.punnett button{font-size:.88rem}}
+@media(max-width:680px){.wrap{padding:0 16px}.masthead{padding:20px 0 30px}.brand{font-size:.75rem;gap:12px;margin-bottom:25px}.boundary{display:block;padding:20px 0}.boundary strong{display:block;margin-bottom:6px}.workspace,.learn{grid-template-columns:1fr;gap:18px}.workspace{padding-top:20px}.card{padding:18px}h2{font-size:1.8rem}.controls h2{font-size:1.65rem}.presets-title{margin-top:22px}.preset-list{gap:6px}.empty{padding:30px 22px;min-height:240px}.gamete-pools{gap:12px}.gametes li{font-size:.79rem;padding:5px 7px}.punnett th,.punnett td{padding:4px}.punnett button{font-size:.78rem;padding:12px 1px}.punnett thead th:first-child{font-size:.59rem}.route-detail{padding:14px}.learn{margin-top:18px}.assumptions{padding:17px}.summaries table{font-size:.85rem}}
+</style>
+</head>
+<body>
+<a class="skip" href="#cross-form">Skip to the cross controls</a>
+<header class="masthead">
+<div class="wrap">
+<div class="brand"><span>RECALLWEAVE / FIELD LAB 01</span><a href="../demo.html">Open the learner ↗</a></div>
+<p class="eyebrow">Mendelian inheritance</p>
+<h1>Follow the alleles.<br>See the possibilities.</h1>
+<p class="intro">Choose two parents, trace their gametes, and build offspring probabilities one fertilization at a time. Then test the connections in a twelve-question lesson.</p>
+</div>
+</header>
+<div class="wrap">
+<div class="boundary"><strong>A model, with boundaries</strong><p>Hypothetical plant traits with complete dominance. Two-locus crosses assume independent assortment. These are probabilities for each zygote, not a promised ratio in a small group of offspring.</p></div>
+<main>
+<div class="workspace">
+<section class="card controls" aria-labelledby="parents-title">
+<p class="step">01 / Choose the parents</p>
+<h2 id="parents-title">Start with a cross</h2>
+<form id="cross-form">
+<div class="field"><label for="loci">Loci to follow</label><select id="loci"><option value="1">One locus · A / a</option><option value="2">Two independent loci · A / a and B / b</option></select></div>
+<div class="parent-fields">
+<div class="field"><label for="parent-1">Parent 1 genotype</label><select id="parent-1"></select></div>
+<div class="field"><label for="parent-2">Parent 2 genotype</label><select id="parent-2"></select></div>
+</div>
+<button class="primary full" type="submit" id="explore-cross">Explore this cross →</button>
+<p id="cross-error" class="error" role="alert" tabindex="-1"></p>
+</form>
+<h3 class="presets-title">Try a different pattern</h3>
+<div id="presets" class="preset-list"></div>
+<p class="small muted" style="margin:15px 0 0">A is an allele label, not a measure of strength or frequency. Aa has one copy of each allele; a gamete has one allele per locus.</p>
+</section>
+<section class="card" aria-labelledby="possibilities-title">
+<p class="step">02 / Follow the routes</p>
+<h2 id="possibilities-title">From gametes to offspring</h2>
+<div id="pending" class="empty" role="status"><div class="empty-mark" aria-hidden="true">A + a</div><p>Select <strong>Explore this cross</strong> to see the gametes, fertilization routes and exact probabilities.</p></div>
+<div id="results" hidden>
+<h3 id="cross-heading" tabindex="-1"></h3>
+<p id="route-count" class="small muted"></p>
+<div class="gamete-pools">
+<div><h3>Parent 1 gametes</h3><ul id="gametes-1" class="gametes"></ul></div>
+<div><h3>Parent 2 gametes</h3><ul id="gametes-2" class="gametes"></ul></div>
+</div>
+<div class="table-frame"><table id="punnett" class="punnett" aria-label="Fertilization routes"></table></div>
+<div id="route-detail" class="route-detail" aria-live="polite"></div>
+<p class="step">03 / Add routes, compare meanings</p>
+<div class="summaries">
+<section aria-labelledby="genotype-title"><h3 id="genotype-title">Genotypes</h3><div class="table-frame"><table><thead><tr><th scope="col">Genotype</th><th scope="col">Routes</th><th scope="col">Probability</th></tr></thead><tbody id="genotype-summary"></tbody></table></div></section>
+<section aria-labelledby="phenotype-title"><h3 id="phenotype-title">Phenotypes</h3><div class="table-frame"><table><thead><tr><th scope="col">Traits</th><th scope="col">Routes</th><th scope="col">Probability</th></tr></thead><tbody id="phenotype-summary"></tbody></table></div></section>
+</div>
+<p id="phenotype-key" class="small muted" style="margin-top:14px"></p>
+</div>
+<div class="record">
+<button type="button" id="download-cross" disabled>Save this cross (.json)</button>
+<p class="small muted">Keep the parent genotypes, every gamete route, exact fractions and the model assumptions.</p>
+</div>
+<p id="cross-status" class="status" role="status"></p>
+</section>
+</div>
+<div class="learn">
+<section class="card" aria-labelledby="lesson-title">
+<p class="step">04 / Make the connection</p>
+<h2 id="lesson-title">Take the lesson with you</h2>
+<p>Twelve original questions connect allele segregation, genotype and phenotype, one-locus crosses and independent two-locus crosses. Worked explanations and transfer prompts help you check your reasoning.</p>
+<ol><li>Download the course JSON below.</li><li>Open RecallWeave and choose the local course file.</li><li>Review the preview, then select <strong>Start this deck</strong>. Your current lesson changes only when you choose to start it.</li><li>Complete the lesson, retry missed connections, and download your study notes.</li></ol>
+<div class="course-actions"><button type="button" class="primary" id="download-course">Download the course (.json)</button><a href="../demo.html">Open RecallWeave ↗</a></div>
+<p id="course-status" class="status" role="status"></p>
+</section>
+<section class="card" aria-labelledby="thinking-title">
+<p class="step">A question to carry forward</p>
+<h2 id="thinking-title">One label can hide two routes.</h2>
+<p>For <strong>Aa × Aa</strong>, choose each cell that produces Aa. One parent can supply A and the other a, or the contributions can be reversed.</p>
+<p>Now compare the genotype and phenotype summaries. Why do the two summaries group the same cells differently?</p>
+<p class="muted">Try <strong>AABb × Aabb</strong> next. Derive its probabilities from its own gametes before reaching for a familiar ratio.</p>
+<a href="mendelian-inheritance.md">Read the worked course guide and references ↗</a>
+</section>
+</div>
+<details class="card assumptions"><summary>What this model assumes — and what it leaves out</summary><ul id="assumptions"></ul><p class="small muted">Linked-locus gamete weights, incomplete dominance, interactions between genes, environmental effects and survival differences require a suitable model. The course includes questions about these boundaries. This explorer stays within the assumptions listed here.</p></details>
+</main>
+<footer class="footer">Original RecallWeave learning material · Course text: CC0-1.0 · No account or network service is needed by this lab. Inputs stay in this page unless you explicitly download a file. Reloading resets the cross.</footer>
+</div>
+<script>
+const INHERITANCE_DECK_TEXT = "{\n  \"format\": \"recallweave-deck/1\",\n  \"title\": \"Inheritance: from gametes to probabilities\",\n  \"attribution\": \"Original RecallWeave lesson, scenarios and explanations (2026). Hypothetical diploid plant crosses: autosomal loci, normal equal segregation, random fertilization and no mutation. Complete dominance and independent assortment apply only where stated; the lab also assumes no interaction between the two trait mappings. Probabilities describe zygotes, not guaranteed finite offspring counts or survival. R1: OpenStax Biology 2e §12.3, https://openstax.org/books/biology-2e/pages/12-3-laws-of-inheritance ; R2: §12.2, https://openstax.org/books/biology-2e/pages/12-2-characteristics-and-traits ; R3: NHGRI Meiosis, https://www.genome.gov/genetics-glossary/Meiosis ; R4: NHGRI Genotype, https://www.genome.gov/genetics-glossary/genotype ; R5: NHGRI Phenotype, https://www.genome.gov/genetics-glossary/Phenotype . Sources checked 2026-10-08. Companion guide contains worked transfers and scope limits.\",\n  \"license\": \"Original course text and questions: CC0-1.0. Reference sources retain their own terms. No source passages, figures or exercises are reproduced.\",\n  \"concepts\": [\n    \"Alleles and segregation\",\n    \"Genotype and phenotype\",\n    \"One-locus crosses\",\n    \"Independent two-locus crosses\"\n  ],\n  \"items\": [\n    {\n      \"id\": \"mi-segregation-1\",\n      \"concept\": \"Alleles and segregation\",\n      \"prerequisites\": [],\n      \"prompt\": \"A hypothetical diploid plant has genotype Aa at one autosomal locus. With normal segregation and no mutation, which allele content can a gamete carry at this locus?\",\n      \"options\": [\n        \"One allele: either A or a\",\n        \"Both A and a together\",\n        \"Only A, because A is dominant\",\n        \"Neither allele, because the gamete is haploid\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"A gamete has one allele at this locus. The two alternatives are A and a; haploid does not mean that the locus disappears. Dominance does not decide which allele enters a gamete. [R1, R3]\",\n      \"transfer\": \"Replace Aa with AA. What changes about the possible gamete alleles, and what stays the same about the number of alleles per gamete?\"\n    },\n    {\n      \"id\": \"mi-segregation-2\",\n      \"concept\": \"Alleles and segregation\",\n      \"prerequisites\": [],\n      \"prompt\": \"Assume equal segregation in an Aa plant. What is the probability that a randomly chosen gamete carries a?\",\n      \"options\": [\n        \"0\",\n        \"1/4\",\n        \"1/2\",\n        \"1\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"The two allele alternatives have equal probability, so P(a) = 1/2. This describes the model for a random gamete; it does not require every small collected sample to contain equal counts. [R1]\",\n      \"transfer\": \"If a source pool contains only gametes from an aa plant, what is P(a)? Explain why the plant's two a copies do not give a gamete two alleles.\"\n    },\n    {\n      \"id\": \"mi-segregation-3\",\n      \"concept\": \"Alleles and segregation\",\n      \"prerequisites\": [],\n      \"prompt\": \"A learner claims: “Because A is dominant, an a allele in an Aa plant turns into A when gametes form.” Which correction fits the model?\",\n      \"options\": [\n        \"Dominance makes only the a allele enter gametes.\",\n        \"Dominance describes the Aa phenotype; either allele can be transmitted without changing into the other.\",\n        \"The two alleles blend into an intermediate allele in every gamete.\",\n        \"Both alleles must remain together so the dominant one can act.\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"The claim confuses expression with transmission. Under this model, an Aa plant transmits A or a; the allele symbol is not rewritten by dominance. A dominant phenotype in the parent therefore does not imply A-only gametes. [R1, R2]\",\n      \"transfer\": \"How could an Aa plant show the dominant phenotype yet contribute a to an aa offspring? Name the contribution needed from the other parent.\"\n    },\n    {\n      \"id\": \"mi-phenotype-1\",\n      \"concept\": \"Genotype and phenotype\",\n      \"prerequisites\": [\n        \"Alleles and segregation\"\n      ],\n      \"prompt\": \"In a hypothetical plant trait with complete dominance of A over a, which genotypes share the A-dominant phenotype?\",\n      \"options\": [\n        \"AA and aa\",\n        \"Aa and aa\",\n        \"All three genotypes must have different phenotypes\",\n        \"AA and Aa\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"Complete dominance maps both AA and Aa to the A-dominant phenotype; aa maps to the recessive phenotype. These are still three distinct genotypes. The explorer uses this specified mapping, not a rule that applies to every trait. [R2, R4, R5]\",\n      \"transfer\": \"Could two plants with the same phenotype produce different gamete types at this locus? Give their possible genotypes.\"\n    },\n    {\n      \"id\": \"mi-phenotype-2\",\n      \"concept\": \"Genotype and phenotype\",\n      \"prerequisites\": [\n        \"Alleles and segregation\"\n      ],\n      \"prompt\": \"A plant has the A-dominant phenotype under complete dominance. No parental or offspring information is available. Which genotype conclusion is justified?\",\n      \"options\": [\n        \"It must be AA.\",\n        \"It could be AA or Aa.\",\n        \"It must be Aa.\",\n        \"It must be aa.\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"The observed phenotype is compatible with both AA and Aa. One observation cannot distinguish two genotypes that this model maps to the same phenotype. Recessive aa would instead have the recessive phenotype. [R2, R4, R5]\",\n      \"transfer\": \"Propose a cross partner that could reveal whether this plant can transmit a. What observation would be decisive, and what observation would leave uncertainty?\"\n    },\n    {\n      \"id\": \"mi-phenotype-3\",\n      \"concept\": \"Genotype and phenotype\",\n      \"prerequisites\": [\n        \"Alleles and segregation\"\n      ],\n      \"prompt\": \"Consider a different trait in which AA, Aa and aa have three distinguishable phenotypes. Equal segregation and random fertilization still hold. An Aa × Aa cross has genotype probabilities 1/4 AA, 1/2 Aa and 1/4 aa. What follows?\",\n      \"options\": [\n        \"The genotype probabilities can stay the same while the phenotypes form three categories with probabilities 1/4, 1/2 and 1/4.\",\n        \"Equal segregation must fail because Aa looks different.\",\n        \"All offspring must now have genotype Aa.\",\n        \"The phenotype probabilities must still be 3/4 dominant and 1/4 recessive.\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"The stated genotype distribution already follows from the gamete combinations. A different genotype-to-phenotype mapping does not by itself change those combinations. Here all three genotypes are distinguishable, so their probabilities give three phenotype categories. The lab's complete-dominance phenotype display does not represent this trait. [R2]\",\n      \"transfer\": \"Which part of a cross calculation would you replace for this new trait: the gamete combinations, the phenotype mapping, or both? State what additional evidence could require changing the gamete model too.\"\n    },\n    {\n      \"id\": \"mi-cross-1\",\n      \"concept\": \"One-locus crosses\",\n      \"prerequisites\": [\n        \"Alleles and segregation\",\n        \"Genotype and phenotype\"\n      ],\n      \"prompt\": \"Under equal segregation and random fertilization, what is P(Aa) for an Aa × Aa cross?\",\n      \"options\": [\n        \"1/4\",\n        \"3/4\",\n        \"1/2\",\n        \"1\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"A from parent 1 with a from parent 2 gives Aa, and a from parent 1 with A from parent 2 also gives Aa. Each route has probability 1/4, so P(Aa) = 1/4 + 1/4 = 1/2. Genotype Aa has two routes even though it is written only once in the summary.\",\n      \"transfer\": \"In the lab, select each route to Aa. Then explain why listing the three genotype names AA, Aa and aa does not make them equally probable.\"\n    },\n    {\n      \"id\": \"mi-cross-2\",\n      \"concept\": \"One-locus crosses\",\n      \"prerequisites\": [\n        \"Alleles and segregation\",\n        \"Genotype and phenotype\"\n      ],\n      \"prompt\": \"A plant known to be either AA or Aa is crossed with aa. At least one offspring is aa. Assume the stated parents are correct, inheritance follows this model and there is no mutation. What must the unknown parent be?\",\n      \"options\": [\n        \"AA, because its phenotype was dominant.\",\n        \"Either AA or Aa; an AA parent can supply a.\",\n        \"aa, because an offspring is aa.\",\n        \"Aa, because it supplied a and AA cannot do so.\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"The aa partner supplies a. An aa offspring also needs a from the unknown parent. That parent cannot be AA under the assumptions, so the allowed alternative is Aa. This uses an impossible-versus-possible distinction; it does not require guessing a prior probability.\",\n      \"transfer\": \"If this cross instead produced only A-dominant offspring in a small sample, would that prove the unknown parent is AA? Explain using a possible Aa route.\"\n    },\n    {\n      \"id\": \"mi-cross-3\",\n      \"concept\": \"One-locus crosses\",\n      \"prerequisites\": [\n        \"Alleles and segregation\",\n        \"Genotype and phenotype\"\n      ],\n      \"prompt\": \"Two independently formed seeds from Aa × Aa are labeled left and right before their phenotypes are known. Assume complete dominance. What is the probability that the left seed has the A-dominant phenotype AND the right seed has the recessive phenotype?\",\n      \"options\": [\n        \"3/4\",\n        \"1/4\",\n        \"1/16\",\n        \"3/16\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"One seed has P(A-dominant) = 3/4 and P(recessive) = 1/4. The requested ordered outcome uses both independent events: (3/4) × (1/4) = 3/16. The four gamete routes are probabilities for each fertilization, not a quota that every small group of seeds must meet.\",\n      \"transfer\": \"What if the question asks for one dominant and one recessive seed in either order? List the two disjoint orders before adding their probabilities.\"\n    },\n    {\n      \"id\": \"mi-independent-1\",\n      \"concept\": \"Independent two-locus crosses\",\n      \"prerequisites\": [\n        \"One-locus crosses\"\n      ],\n      \"prompt\": \"An AaBb plant has two independently assorting autosomal loci with equal segregation. Which gamete distribution follows?\",\n      \"options\": [\n        \"AB and ab only, each with probability 1/2\",\n        \"AB, Ab, aB and ab, each with probability 1/4\",\n        \"Aa and Bb only, each with probability 1/2\",\n        \"AABB, AaBb and aabb, each with probability 1/3\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"A gamete carries one allele from the A locus and one from the B locus. Independent choices give A/B, A/b, a/B and a/b. Each route has probability (1/2) × (1/2) = 1/4. The independence assumption is needed for these four equal probabilities. [R1]\",\n      \"transfer\": \"For AABb, list the possible gametes and their probabilities. Which two choices from AaBb disappear, and why?\"\n    },\n    {\n      \"id\": \"mi-independent-2\",\n      \"concept\": \"Independent two-locus crosses\",\n      \"prerequisites\": [\n        \"One-locus crosses\"\n      ],\n      \"prompt\": \"For AABb × Aabb, assume independent assortment, random fertilization and complete dominance at each locus with no interaction between the traits. What is the probability of an offspring with the A-dominant phenotype AND genotype bb?\",\n      \"options\": [\n        \"1/2\",\n        \"1/4\",\n        \"3/4\",\n        \"9/16\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"At the A locus, AA × Aa always contributes at least one A, so P(A-dominant) = 1. At the B locus, Bb × bb gives bb with probability 1/2. Independence gives 1 × 1/2 = 1/2. For AaBb × AaBb, 9/16 describes A-dominant AND B-dominant offspring; A-dominant AND bb has probability 3/16 in that cross. Neither number answers the given AABb × Aabb cross.\",\n      \"transfer\": \"Use the lab to find the two genotypes included in this requested outcome. What is the probability of each, and how do they add to the phenotype probability?\"\n    },\n    {\n      \"id\": \"mi-independent-3\",\n      \"concept\": \"Independent two-locus crosses\",\n      \"prerequisites\": [\n        \"One-locus crosses\"\n      ],\n      \"prompt\": \"A proposed inheritance model assigns an AaBb parent's gamete probabilities as AB = 0.40, ab = 0.40, Ab = 0.10 and aB = 0.10. These are stipulated probabilities, not noisy sample counts. Can the lab's equal-gamete independent-assortment model represent this distribution exactly?\",\n      \"options\": [\n        \"Yes; four possible gamete names always means four equal probabilities.\",\n        \"Yes; the 9:3:3:1 phenotype ratio applies to every two-locus cross.\",\n        \"No; this distribution needs a model with the stated unequal gamete probabilities.\",\n        \"No; the genotype AaBb is impossible.\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"The four probabilities sum to 1, but they are not the equal 1/4 probabilities assumed for AaBb in this lab. Retaining the names while replacing the weights with 1/4 would answer a different question. Linked loci are one reason independence may be unsuitable; this exercise does not diagnose a mechanism from sample counts. [R1]\",\n      \"transfer\": \"What information would you need about the other parent's gametes before computing offspring probabilities for this unequal distribution? Explain why a larger Punnett table alone does not supply the missing weights.\"\n    }\n  ]\n}\n";
+/** Exact, bounded Mendelian crosses for the companion plant-inheritance lesson. */
+const INHERITANCE_ASSUMPTIONS = Object.freeze([
+  'Hypothetical diploid plants; one or two autosomal loci with two alleles per locus.',
+  'Normal equal segregation, no mutation, and random fertilization.',
+  'Two-locus gametes use independent assortment: allele choices at A and B are independent.',
+  'Complete dominance: AA and Aa share the A-dominant phenotype; BB and Bb share the B-dominant phenotype.',
+  'The two trait mappings do not interact; environmental effects and differential survival are not modeled.',
+  'Fractions are probabilities of zygote outcomes, not guaranteed counts in a finite group of offspring.'
+]);
+
+const INHERITANCE_PRESETS = Object.freeze([
+  Object.freeze({id: 'one-heterozygous', label: 'Aa × Aa · two routes to Aa', parent1: 'Aa', parent2: 'Aa'}),
+  Object.freeze({id: 'one-test', label: 'Aa × aa · a test cross', parent1: 'Aa', parent2: 'aa'}),
+  Object.freeze({id: 'two-asymmetric', label: 'AABb × Aabb · derive the ratio', parent1: 'AABb', parent2: 'Aabb'}),
+  Object.freeze({id: 'two-heterozygous', label: 'AaBb × AaBb · sixteen routes', parent1: 'AaBb', parent2: 'AaBb'}),
+  Object.freeze({id: 'two-complementary', label: 'AAbb × aaBB · one outcome', parent1: 'AAbb', parent2: 'aaBB'})
+]);
+
+function parentGenotypes(loci) {
+  if (loci !== 1 && loci !== 2) throw new RangeError('Choose one or two loci.');
+  const first = ['AA', 'Aa', 'aa'];
+  return Object.freeze(loci === 1 ? first : first.flatMap(a => ['BB', 'Bb', 'bb'].map(b => a + b)));
+}
+
+function pairs(genotype) {
+  if (typeof genotype !== 'string') throw new TypeError('A parental genotype must be text.');
+  if (!/^(AA|Aa|aa)(BB|Bb|bb)?$/.test(genotype)) {
+    throw new RangeError('Choose AA, Aa or aa, optionally followed by BB, Bb or bb.');
+  }
+  return [genotype.slice(0, 2), ...(genotype.length === 4 ? [genotype.slice(2)] : [])];
+}
+
+function fraction(numerator, denominator) {
+  let a = numerator, b = denominator;
+  while (b) [a, b] = [b, a % b];
+  return {numerator: numerator / a, denominator: denominator / a};
+}
+
+function freeze(value) {
+  if (value && typeof value === 'object') {
+    Object.values(value).forEach(freeze);
+    Object.freeze(value);
+  }
+  return value;
+}
+
+/** Unique gametes are equiprobable under the explicit equal/independent assumptions. */
+function parentGametes(genotype) {
+  let routes = [''];
+  for (const pair of pairs(genotype)) {
+    const alleles = [...new Set(pair)];
+    routes = routes.flatMap(prefix => alleles.map(allele => prefix + allele));
+  }
+  return freeze(routes.map(alleles => ({alleles, numerator: 1, denominator: routes.length})));
+}
+
+function offspring(first, second) {
+  return [...first].map((allele, locus) => {
+    const other = second[locus];
+    return allele === other ? allele + other : allele.toUpperCase() + allele.toLowerCase();
+  }).join('');
+}
+
+function phenotype(genotype) {
+  return pairs(genotype).map((pair, locus) => {
+    const dominant = locus === 0 ? 'A' : 'B';
+    return pair.includes(dominant) ? dominant + '_' : dominant.toLowerCase().repeat(2);
+  }).join('');
+}
+
+function summarize(cells, field) {
+  const counts = new Map();
+  for (const cell of cells) counts.set(cell[field], (counts.get(cell[field]) ?? 0) + 1);
+  return [...counts].sort(([a], [b]) => a < b ? -1 : a > b ? 1 : 0)
+    .map(([label, routes]) => ({label, routes, ...fraction(routes, cells.length)}));
+}
+
+/** Cartesian fertilization routes; each cell retains its distinct parental contributions. */
+function crossGenotypes(parent1, parent2) {
+  const loci = pairs(parent1).length;
+  if (pairs(parent2).length !== loci) throw new RangeError('Both parents must use the same one or two loci.');
+  const first = parentGametes(parent1), second = parentGametes(parent2);
+  const totalRoutes = first.length * second.length;
+  const cells = first.flatMap((left, row) => second.map((right, column) => {
+    const genotype = offspring(left.alleles, right.alleles);
+    return {
+      row, column, parent1Gamete: left.alleles, parent2Gamete: right.alleles,
+      genotype, phenotype: phenotype(genotype), numerator: 1, denominator: totalRoutes
+    };
+  }));
+  return freeze({
+    format: 'recallweave-mendelian-cross/1', loci, parent1, parent2,
+    assumptions: INHERITANCE_ASSUMPTIONS, gametes: {parent1: first, parent2: second},
+    totalRoutes, cells, genotypes: summarize(cells, 'genotype'), phenotypes: summarize(cells, 'phenotype')
+  });
+}
+
+
+/** The standalone builder embeds this same UI and exact validated course bytes. */
+const element = id => document.getElementById(id);
+const form = element('cross-form');
+const lociField = element('loci');
+const parent1Field = element('parent-1');
+const parent2Field = element('parent-2');
+let current = null;
+const ratio = value => value.denominator === 1 ? String(value.numerator) : value.numerator + '/' + value.denominator;
+const chance = value => ratio(value) + ' · ' + (100 * value.numerator / value.denominator) + '%';
+
+function textElement(tag, text, className) {
+  const node = document.createElement(tag);
+  node.textContent = text;
+  if (className) node.className = className;
+  return node;
+}
+
+function choices(field, values, selected) {
+  field.replaceChildren(...values.map(value => {
+    const option = textElement('option', value);
+    option.value = value;
+    return option;
+  }));
+  field.value = values.includes(selected) ? selected : values[0];
+}
+
+function retire() {
+  current = null;
+  element('results').hidden = true;
+  element('pending').hidden = false;
+  element('download-cross').disabled = true;
+  element('cross-status').textContent = '';
+  element('cross-error').textContent = '';
+  element('route-detail').replaceChildren();
+}
+
+function setParents(loci, first, second) {
+  lociField.value = String(loci);
+  const values = parentGenotypes(loci);
+  choices(parent1Field, values, first);
+  choices(parent2Field, values, second);
+  retire();
+}
+
+function summary(target, values) {
+  target.replaceChildren(...values.map(value => {
+    const row = document.createElement('tr');
+    const label = textElement('th', value.label);
+    label.scope = 'row';
+    row.append(label, textElement('td', String(value.routes)), textElement('td', chance(value)));
+    return row;
+  }));
+}
+
+function inspect(cell) {
+  if (!current) return;
+  for (const button of element('punnett').querySelectorAll('button')) {
+    const selected = Number(button.dataset.row) === cell.row && Number(button.dataset.column) === cell.column;
+    button.setAttribute('aria-pressed', String(selected));
+  }
+  const routes = current.cells.filter(route => route.genotype === cell.genotype);
+  const total = current.genotypes.find(row => row.label === cell.genotype);
+  const heading = textElement('h3', 'Follow one fertilization');
+  const selected = textElement('p',
+    'Parent 1 supplies ' + cell.parent1Gamete + '; parent 2 supplies ' + cell.parent2Gamete +
+    '. This route produces ' + cell.genotype + ' with probability ' + ratio(cell) + '.');
+  const combined = textElement('p',
+    'All routes to ' + cell.genotype + ': ' + routes.map(route => route.parent1Gamete + ' + ' + route.parent2Gamete).join('; ') +
+    '. Add their probabilities: ' + routes.length + ' of ' + current.totalRoutes + ' equally likely routes = ' + ratio(total) + '.');
+  element('route-detail').replaceChildren(heading, selected, combined);
+}
+
+function show(result) {
+  current = result;
+  element('cross-heading').textContent = result.parent1 + ' × ' + result.parent2;
+  element('route-count').textContent = result.totalRoutes + ' equally likely fertilization ' +
+    (result.totalRoutes === 1 ? 'route' : 'routes') + '. Each cell has probability 1/' + result.totalRoutes + '.';
+  for (const [id, gametes, label] of [
+    ['gametes-1', result.gametes.parent1, 'Parent 1'],
+    ['gametes-2', result.gametes.parent2, 'Parent 2']
+  ]) {
+    element(id).replaceChildren(...gametes.map(gamete => {
+      const chip = textElement('li', gamete.alleles + ' · ' + ratio(gamete));
+      chip.setAttribute('aria-label', label + ' gamete ' + gamete.alleles + ', probability ' + ratio(gamete));
+      return chip;
+    }));
+  }
+  const table = element('punnett');
+  const caption = textElement('caption', 'Parent 1 gametes form the rows; parent 2 gametes form the columns. Select a cell to trace its contributions.');
+  const head = document.createElement('thead'), header = document.createElement('tr');
+  const corner = textElement('th', 'P1 ↓ / P2 →'); corner.scope = 'col'; header.append(corner);
+  for (const gamete of result.gametes.parent2) {
+    const th = textElement('th', gamete.alleles); th.scope = 'col'; header.append(th);
+  }
+  head.append(header);
+  const body = document.createElement('tbody');
+  result.gametes.parent1.forEach((gamete, row) => {
+    const tr = document.createElement('tr'), label = textElement('th', gamete.alleles); label.scope = 'row'; tr.append(label);
+    result.gametes.parent2.forEach((_, column) => {
+      const cell = result.cells.find(candidate => candidate.row === row && candidate.column === column);
+      const td = document.createElement('td');
+      const button = textElement('button', cell.genotype);
+      button.type = 'button';
+      button.dataset.row = String(row);
+      button.dataset.column = String(column);
+      button.setAttribute('aria-pressed', 'false');
+      button.setAttribute('aria-label', 'Parent 1 ' + cell.parent1Gamete + ' plus parent 2 ' + cell.parent2Gamete + ' gives ' + cell.genotype + ', probability ' + ratio(cell));
+      button.addEventListener('click', () => inspect(cell));
+      td.append(button); tr.append(td);
+    });
+    body.append(tr);
+  });
+  table.replaceChildren(caption, head, body);
+  summary(element('genotype-summary'), result.genotypes);
+  summary(element('phenotype-summary'), result.phenotypes);
+  element('phenotype-key').textContent = result.loci === 1
+    ? 'A_ means the A-dominant phenotype (AA or Aa). aa means the recessive phenotype.'
+    : 'A_ means the A-dominant phenotype (AA or Aa); B_ means the B-dominant phenotype (BB or Bb). Combine the two labels for the two traits.';
+  element('pending').hidden = true;
+  element('results').hidden = false;
+  element('download-cross').disabled = false;
+  inspect(result.cells[0]);
+  element('cross-heading').focus();
+}
+
+form.addEventListener('submit', event => {
+  event.preventDefault();
+  retire();
+  try {
+    const result = crossGenotypes(parent1Field.value, parent2Field.value);
+    if (String(result.loci) !== lociField.value) throw new Error('Choose matching parental genotypes for the selected number of loci.');
+    show(result);
+  } catch (error) {
+    element('cross-error').textContent = error.message;
+    element('cross-error').focus();
+  }
+});
+for (const field of [parent1Field, parent2Field]) {
+  field.addEventListener('input', retire);
+  field.addEventListener('change', retire);
+}
+lociField.addEventListener('change', () => {
+  try {
+    const loci = Number(lociField.value);
+    const first = loci === 1 ? parent1Field.value.slice(0, 2) : parent1Field.value.slice(0, 2) + 'Bb';
+    const second = loci === 1 ? parent2Field.value.slice(0, 2) : parent2Field.value.slice(0, 2) + 'Bb';
+    setParents(loci, first, second);
+  } catch (error) {
+    retire();
+    element('cross-error').textContent = error.message;
+  }
+});
+
+element('presets').replaceChildren(...INHERITANCE_PRESETS.map(preset => {
+  const button = textElement('button', preset.label);
+  button.type = 'button'; button.className = 'preset'; button.id = 'preset-' + preset.id;
+  button.addEventListener('click', () => {
+    setParents(preset.parent1.length / 2, preset.parent1, preset.parent2);
+    element('pending').textContent = 'Parents selected. Explore this cross to compute its probabilities.';
+    element('explore-cross').focus();
+  });
+  return button;
+}));
+element('assumptions').replaceChildren(...INHERITANCE_ASSUMPTIONS.map(text => textElement('li', text)));
+
+function download(text, filename, type, statusId) {
+  let url;
+  try {
+    url = URL.createObjectURL(new Blob([text], {type}));
+    const link = document.createElement('a');
+    link.href = url; link.download = filename;
+    document.body.append(link);
+    try { link.click(); } finally { link.remove(); }
+    element(statusId).textContent = 'Download requested. Check your browser downloads; this page is still here.';
+  } catch {
+    element(statusId).textContent = 'The download could not start. Your current inputs and results are still here; try again.';
+  } finally {
+    if (url) setTimeout(() => URL.revokeObjectURL(url), 10000);
+  }
+}
+element('download-cross').addEventListener('click', () => {
+  if (!current) return;
+  download(JSON.stringify(current, null, 2) + '\n', 'recallweave-cross-' + current.parent1 + '-x-' + current.parent2 + '.json', 'application/json;charset=utf-8', 'cross-status');
+});
+element('download-course').addEventListener('click', () => {
+  download(INHERITANCE_DECK_TEXT, 'mendelian-inheritance.json', 'application/json;charset=utf-8', 'course-status');
+});
+setParents(1, 'Aa', 'Aa');
+
+</script>
+</body>
+</html>

@@ -1,0 +1,406 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#f4f3ed">
+<title>Finite convolution lab · RecallWeave</title>
+<style>
+:root{color-scheme:light;--paper:#f4f3ed;--ink:#23362e;--green:#236b57;--line:#d8dfd6;--muted:#54665b}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.55 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+a{color:var(--green);text-underline-offset:3px}button,input,textarea{font:inherit}button,a,input,textarea{touch-action:manipulation}
+button{border:1px solid #a8baad;border-radius:8px;padding:10px 15px;background:#fff;color:var(--ink);cursor:pointer;min-height:44px}
+button:hover:not(:disabled){background:#e9eee6}button:disabled{opacity:.5;cursor:default}
+button.primary{background:var(--green);color:#fff;border-color:var(--green)}button.primary:hover{background:#19523f}
+:focus-visible{outline:3px solid #b65436;outline-offset:4px}
+.skip{position:absolute;top:-100px;left:12px;background:white;padding:12px;z-index:2}.skip:focus{top:12px}
+header,main,footer{max-width:1160px;margin:auto;padding:24px}
+header{display:flex;align-items:center;justify-content:space-between;gap:16px;border-bottom:1px solid var(--line)}
+.brand{font-weight:750;font-size:23px;letter-spacing:-1px;text-decoration:none}.brand span{font-weight:400}
+.badge,.eyebrow{font-size:11px;letter-spacing:1.5px;font-weight:700}.badge{border:1px solid var(--line);border-radius:20px;padding:6px 12px}
+.hero{max-width:810px;margin:22px 0 26px}h1{font:500 clamp(34px,4.5vw,54px)/1.08 Georgia,serif;letter-spacing:-1.5px;margin:14px 0 18px}h1 em{color:var(--green);font-weight:400}
+h2{font-size:21px;line-height:1.3;margin:0 0 12px}h3{font-size:17px;margin:0 0 10px}p{margin:10px 0}.muted{color:var(--muted)}
+.formula{font:21px/1.5 Georgia,serif;margin-top:20px}.formula small{font:14px system-ui;display:block;margin-top:7px;color:var(--muted)}
+.panel{background:#fffdf7;border:1px solid var(--line);border-radius:14px;padding:22px;margin:20px 0;min-width:0}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:22px}.grid>*{min-width:0}
+label{display:block;font-weight:700;margin-bottom:7px}textarea{display:block;width:100%;resize:vertical;min-height:76px;border:1px solid #a1b2a5;border-radius:8px;background:white;padding:12px;font-family:ui-monospace,SFMono-Regular,Consolas,monospace}
+.help{font-size:14px;color:var(--muted)}.presets,.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+#calculation-status{padding:12px 0;margin:0;font-size:14px}.error{color:#9a352a}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;border-bottom:1px solid var(--line);padding-bottom:18px;margin-bottom:18px}.stats dt{font-size:12px;color:var(--muted)}.stats dd{margin:4px 0 0;font-size:25px;font-weight:650}
+figure{margin:0;min-width:0}figcaption{font-weight:650;margin:4px 0 9px}.input-legend{color:var(--green)}.kernel-legend{color:#9e3f2a}.output-legend{color:#465eac}
+.plot{overflow-x:auto;max-width:100%;padding-bottom:5px}.plot svg{display:block}.plot-tick{font:12px system-ui;fill:#455b4d}
+.output-figure{margin-top:15px;padding-top:15px;border-top:1px solid var(--line)}
+#output-values{font:16px/1.7 ui-monospace,SFMono-Regular,Consolas,monospace;overflow-wrap:anywhere;color:#35498e;margin:10px 0}
+.index-controls{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:16px;margin:18px 0}
+#output-index{width:100%;accent-color:var(--green);min-height:34px}.index-middle{min-width:0}.index-middle label{text-align:center;font-size:15px;margin:0}.index-middle p{text-align:center;font-size:13px;margin:0;color:var(--muted)}
+#selected-output{font:30px Georgia,serif;color:#35498e}.legend{display:flex;flex-wrap:wrap;gap:18px;font-size:14px;margin-bottom:6px}.dot{display:inline-block;width:11px;height:11px;border-radius:50%;margin-right:7px}
+.table-wrap{overflow:auto;margin-top:14px}table{width:100%;border-collapse:collapse;min-width:460px;font-variant-numeric:tabular-nums}caption{text-align:left;font-size:14px;margin-bottom:10px;color:var(--muted)}th,td{text-align:right;padding:11px 12px;border-bottom:1px solid var(--line)}thead th{font-size:13px;color:var(--muted);font-weight:600}tbody th{font-weight:500}tfoot th,tfoot td{font-weight:750;border-bottom:0}.outside-kernel{background:#f4f5ef}.zero-note{font-size:11px;display:block;color:var(--muted)}
+#sum-expression{font:15px/1.7 ui-monospace,SFMono-Regular,Consolas,monospace;overflow-wrap:anywhere;background:#edf0e6;border-radius:8px;padding:14px}
+.lesson{display:grid;grid-template-columns:1fr auto;align-items:start;gap:22px}.lesson h2{font-family:Georgia,serif;font-size:25px}.lesson ol{padding-left:21px;font-size:14px}.lesson .actions{margin-top:0}
+details{font-size:14px}summary{cursor:pointer;padding:8px 0;font-weight:650}details p{overflow-wrap:anywhere}
+footer{font-size:12px;color:var(--muted);border-top:1px solid var(--line);margin-top:16px}.footer-row{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+[hidden]{display:none!important}
+@media(max-width:660px){header,main,footer{padding:18px}.badge{font-size:9px;letter-spacing:1px}.grid,.lesson{grid-template-columns:1fr}.panel{padding:16px}.hero{margin-top:16px}.stats{gap:8px}.stats dd{font-size:20px}.index-controls{gap:8px}.index-controls button{padding:9px 11px}.formula{font-size:19px}.lesson .actions{margin-top:0}.brand{font-size:21px}}
+</style>
+</head>
+<body>
+<a class="skip" href="#lab">Skip to convolution lab</a>
+<header><a class="brand" href="../demo.html">recall<span>weave</span></a><span class="badge">OFFLINE · ON THIS DEVICE</span></header>
+<main id="lab">
+<section class="hero" aria-labelledby="page-title">
+<div class="eyebrow">SIGNALS / FINITE CONVOLUTION</div>
+<h1>See every term<br>in <em>the sum.</em></h1>
+<p>Edit a short input and a short kernel. Follow how each output is built from shifted products, including the zeros at the boundaries.</p>
+<div class="formula">y[n] = Σ<sub>k</sub> x[k] h[n − k]<small>Each list starts at index 0 and is zero elsewhere. Keep the full N + M − 1 output.</small></div>
+</section>
+
+<section class="panel" aria-labelledby="inputs-title">
+<h2 id="inputs-title">Choose two sequences</h2>
+<form id="sequence-form">
+<div class="grid">
+<div><label for="sequence-x">Input x[k]</label><textarea id="sequence-x" rows="2" spellcheck="false" aria-describedby="sequence-help calculation-status">2, -1, 3</textarea></div>
+<div><label for="sequence-h">Kernel h[j]</label><textarea id="sequence-h" rows="2" spellcheck="false" aria-describedby="sequence-help calculation-status">1, 2</textarea></div>
+</div>
+<p class="help" id="sequence-help">1–24 decimal numbers per list, from −100 to 100, with up to four decimal places. Use commas or spaces. A minus sign is written as <strong>-</strong>. Results update as you edit.</p>
+</form>
+<div class="presets" aria-label="Authored examples">
+<button type="button" data-preset="signed">Signed example</button>
+<button type="button" data-preset="delay">One-sample delay</button>
+<button type="button" data-preset="average">Two-tap average</button>
+<button type="button" data-preset="difference">Finite difference</button>
+</div>
+<p id="calculation-status" role="status"></p>
+</section>
+
+<div id="calculation">
+<section class="panel" aria-labelledby="full-title">
+<h2 id="full-title">The complete output</h2>
+<dl class="stats"><div><dt>Input length N</dt><dd id="input-length"></dd></div><div><dt>Kernel length M</dt><dd id="kernel-length"></dd></div><div><dt>Output entries</dt><dd id="output-length"></dd></div><div><dt>Output indices</dt><dd id="output-range"></dd></div></dl>
+<div class="grid">
+<figure><figcaption class="input-legend">Input x[k]</figcaption><div id="input-plot" class="plot"></div></figure>
+<figure><figcaption class="kernel-legend">Kernel h[j]</figcaption><div id="kernel-plot" class="plot"></div></figure>
+</div>
+<figure class="output-figure"><figcaption class="output-legend">Full output y[n]</figcaption><div id="output-plot" class="plot"></div></figure>
+<p id="output-values"></p>
+<p class="help">Dots are samples; stems show signed values. Each plot labels its own vertical scale. Long sequences scroll inside the plot.</p>
+</section>
+
+<section class="panel" aria-labelledby="step-title">
+<h2 id="step-title">Build one output at a time</h2>
+<p id="selected-output"></p>
+<div class="index-controls">
+<button id="previous-index" type="button" aria-label="Previous output index">← Previous</button>
+<div class="index-middle"><label for="output-index">Output index n</label><input id="output-index" type="range" min="0" max="3" value="0" step="1" aria-describedby="step-range"><p id="step-range"></p></div>
+<button id="next-index" type="button" aria-label="Next output index">Next →</button>
+</div>
+<p class="help">At this n, align x[k] with h[n−k]. As k increases, the kernel index decreases. The dashed kernel below is shifted and reversed; it is zero outside its list.</p>
+<div class="legend"><span><span class="dot" style="background:#236b57"></span>x[k]</span><span><span class="dot" style="background:#b34b32"></span>h[n−k] · dashed stems</span></div>
+<div id="overlap-plot" class="plot"></div>
+<div class="table-wrap"><table><caption id="contribution-caption"></caption><thead><tr><th scope="col">k</th><th scope="col">x[k]</th><th scope="col">n−k</th><th scope="col">h[n−k]</th><th scope="col">Product</th></tr></thead><tbody id="contribution-rows"></tbody><tfoot><tr><th scope="row" colspan="4">Sum</th><td id="sum-value"></td></tr></tfoot></table></div>
+<p id="sum-expression"></p>
+<details><summary>Why a matching-index dot product is different</summary><p>Convolution pairs x[k] with h[n−k]. For real lists, the separately defined zero-lag correlation r[0] pairs x[k] with h[k]. For x = [1, 2] and h = [3, 4], convolution gives y[0] = 3, while r[0] = 11. Always state the index convention.</p></details>
+</section>
+</div>
+
+<section class="panel lesson" aria-labelledby="lesson-title">
+<div><div class="eyebrow">KEEP EXPLORING</div><h2 id="lesson-title">Take the twelve-question lesson</h2><p id="course-title"></p><ol><li>Download the lesson JSON.</li><li>Open <a href="../demo.html">RecallWeave</a> and choose it under <strong>Bring your own lesson</strong>.</li><li>Inspect the preview, then select <strong>Start this deck</strong>.</li></ol><p class="help">The lesson uses RecallWeave's existing review and practice. The calculation download keeps your numerical example and every product; it is not a learner record.</p></div>
+<div><div class="actions"><button id="download-course" class="primary" type="button">Download lesson (.json)</button><button id="download-calculation" type="button">Download calculation (.json)</button></div><p id="download-status" class="help" role="status"></p></div>
+</section>
+<details class="panel"><summary>Model, source, and attribution</summary><p>This lab uses finite real lists and full zero-extended linear convolution. It does not wrap indices, crop the result, simulate a continuous signal, or process a recording. Decimal input has four-place precision; output is displayed to at most eight places. All examples are authored teaching inputs.</p><p id="course-attribution"></p><p id="course-license"></p><p>Read <a href="https://ocw.mit.edu/courses/res-6-007-signals-and-systems-spring-2011/resources/lecture-4-convolution/">MIT's convolution lecture</a> or <a href="https://ocw.mit.edu/courses/2-161-signal-processing-continuous-and-discrete-fall-2008/14f29be83ac38f11eb1a1bd5fdb6f5ea_lecture_18.pdf">the finite-filter notes</a>. The <a href="finite-convolution.md">worked course guide</a> accompanies this page.</p></details>
+</main>
+<footer><div class="footer-row"><span>RECALLWEAVE · FINITE CONVOLUTION LAB</span><span>No upload, account, or automatic saving.</span></div></footer>
+<script>
+(() => {
+'use strict';
+const FINITE_CONVOLUTION_DECK_TEXT = "{\n  \"format\": \"recallweave-deck/1\",\n  \"title\": \"Finite convolution: indices, contributions, and filters\",\n  \"attribution\": \"Original questions, numbers, worked examples and diagrams by RecallWeave contributors (2026). Mathematical background: Alan V. Oppenheim, MIT OpenCourseWare RES.6.007, Lecture 4, Convolution, https://ocw.mit.edu/courses/res-6-007-signals-and-systems-spring-2011/resources/lecture-4-convolution/ ; D. Rowell, MIT 2.161, Lecture 18, pp. 18–1 to 18–2, https://ocw.mit.edu/courses/2-161-signal-processing-continuous-and-discrete-fall-2008/14f29be83ac38f11eb1a1bd5fdb6f5ea_lecture_18.pdf . No source questions, passages or figures are reproduced.\",\n  \"license\": \"Original course wording, worked examples and diagrams: CC BY 4.0. Cited MIT reference materials retain their own licenses; this course does not reproduce them.\",\n  \"concepts\": [\n    \"Indices and support\",\n    \"Shift and sum\",\n    \"Finite filter responses\",\n    \"Properties and operation choice\"\n  ],\n  \"items\": [\n    {\n      \"id\": \"fc01\",\n      \"concept\": \"Indices and support\",\n      \"prerequisites\": [],\n      \"prompt\": \"A finite sequence is x = [3, −2, 4], with its first entry at index 0 and zero at every index outside the list. What is x[−1]?\",\n      \"options\": [\n        \"−2\",\n        \"3\",\n        \"0\",\n        \"4\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"Index 0 contains 3, index 1 contains −2, and index 2 contains 4. The index −1 is outside the declared list, so zero extension makes x[−1] = 0. A negative index is not a request to count backward from the end.\",\n      \"transfer\": \"Write the values of x[0], x[2], and x[3]. Explain which are listed samples and which use zero extension.\"\n    },\n    {\n      \"id\": \"fc02\",\n      \"concept\": \"Indices and support\",\n      \"prerequisites\": [],\n      \"prompt\": \"Two lists have lengths 4 and 3. Both begin at index 0 and are zero elsewhere. Which index range is retained by their full linear convolution, including possible zero entries at the ends?\",\n      \"options\": [\n        \"0 through 5: six entries\",\n        \"0 through 6: seven entries\",\n        \"0 through 3: four entries\",\n        \"−2 through 3: six entries\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"Nonzero contributions can occur when an input index k in 0…3 and a kernel index j in 0…2 add to n. The first retained index is 0+0=0 and the last is 3+2=5, giving 4+3−1=6 entries. The full convention keeps this range even when some values are zero.\",\n      \"transfer\": \"Choose input lengths 2 and 5. State the first index, last index, and full output length before doing any multiplication.\"\n    },\n    {\n      \"id\": \"fc03\",\n      \"concept\": \"Indices and support\",\n      \"prerequisites\": [],\n      \"prompt\": \"Let x = [2, −1, 3] and h = [0, 1]. Both lists begin at index 0 and are zero elsewhere. For y[n] = Σₖ x[k]h[n−k], what is the full output?\",\n      \"options\": [\n        \"[2, −1, 3, 0]\",\n        \"[0, 4, −2, 6]\",\n        \"[2, −1, 3]\",\n        \"[0, 2, −1, 3]\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"Only h[1] is nonzero, so y[n]=x[n−1]. Evaluating indices 0…3 gives [0,2,−1,3]. This is a one-sample delay, with no change in amplitude; the leading zero and final sample both belong to the full result.\",\n      \"transfer\": \"Replace h with [0,0,1] in the lab. Predict the output before checking, and explain the two initial zeros.\"\n    },\n    {\n      \"id\": \"fc04\",\n      \"concept\": \"Shift and sum\",\n      \"prerequisites\": [\n        \"Indices and support\"\n      ],\n      \"prompt\": \"Let x = [2, −1, 3] and h = [1, 2], both starting at index 0 and zero elsewhere. For y[n] = Σₖ x[k]h[n−k], what is y[1]?\",\n      \"options\": [\n        \"0\",\n        \"3\",\n        \"5\",\n        \"−1\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"At n=1, the terms are x[0]h[1]=2×2=4, x[1]h[0]=(−1)×1=−1, and x[2]h[−1]=3×0=0. Their sum is 3. The kernel index is n−k, so its order reverses as k increases.\",\n      \"transfer\": \"Move the lab from output index 1 to index 2. Identify which kernel index each input sample meets and which terms become zero.\"\n    },\n    {\n      \"id\": \"fc05\",\n      \"concept\": \"Shift and sum\",\n      \"prerequisites\": [\n        \"Indices and support\"\n      ],\n      \"prompt\": \"Let x = [2, −1, 3] and h = [1, 2], both starting at index 0 and zero elsewhere. Which list is the full linear convolution y[n] = Σₖ x[k]h[n−k]?\",\n      \"options\": [\n        \"[2, −2, 3]\",\n        \"[2, 3, 6]\",\n        \"[2, 3, 1, 6]\",\n        \"[4, 1, 5, 3]\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"The four sums are y[0]=2×1=2; y[1]=2×2+(−1)×1=3; y[2]=(−1)×2+3×1=1; and y[3]=3×2=6. Zero extension supplies all omitted terms. The result is [2,3,1,6], with length 3+2−1=4.\",\n      \"transfer\": \"Change only the middle input sample from −1 to 0. Predict every output that changes and the amount of each change.\"\n    },\n    {\n      \"id\": \"fc06\",\n      \"concept\": \"Shift and sum\",\n      \"prerequisites\": [\n        \"Indices and support\"\n      ],\n      \"prompt\": \"Let x = [1, 2] and h = [3, −1, 2], both starting at index 0 and zero elsewhere. At n = 2, which sum correctly computes y[2] = Σₖ x[k]h[2−k]?\",\n      \"options\": [\n        \"1 × 2 + 2 × (−1) = 0\",\n        \"1 × 3 + 2 × (−1) = 1\",\n        \"1 × (−1) + 2 × 2 = 3\",\n        \"1 × 2 + 2 × 3 = 8\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"At n=2, the two input indices pair with h[2] and h[1]: 1×2 + 2×(−1)=0. The terms cancel. Pairing x[0] with h[0], or keeping the kernel in forward order, computes a different quantity.\",\n      \"transfer\": \"Try x=[1,2] and h=[3,−1,2] in the lab. Inspect all four output positions and locate the cancellation at n=2.\"\n    },\n    {\n      \"id\": \"fc07\",\n      \"concept\": \"Finite filter responses\",\n      \"prerequisites\": [\n        \"Shift and sum\"\n      ],\n      \"prompt\": \"An averaging kernel is h = [0.5, 0.5] and a finite input is x = [0, 4, 0]. Both start at index 0 and are zero elsewhere. What is their full linear convolution?\",\n      \"options\": [\n        \"[0, 4, 0]\",\n        \"[0, 2, 0, 0]\",\n        \"[2, 2, 2]\",\n        \"[0, 2, 2, 0]\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"The filter computes y[n]=0.5x[n]+0.5x[n−1]. The four retained values are 0, 2, 2, and 0. The single nonzero input contributes to two consecutive outputs. No claim about removing real-world noise follows from this one authored example.\",\n      \"transfer\": \"Compare h=[0.5,0.5] with h=[1,1] for the same input. Describe the change in output values without making a claim about an unknown signal.\"\n    },\n    {\n      \"id\": \"fc08\",\n      \"concept\": \"Finite filter responses\",\n      \"prerequisites\": [\n        \"Shift and sum\"\n      ],\n      \"prompt\": \"A first-difference kernel is h = [1, −1]. The finite input x = [2, 2, 2] begins at index 0 and is zero elsewhere. What is the full output y[n] = x[n] − x[n−1]?\",\n      \"options\": [\n        \"[0, 0, 0, 0]\",\n        \"[2, 0, 0, −2]\",\n        \"[2, 2, 2, 0]\",\n        \"[−2, 0, 0, 2]\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"Inside the constant part of the finite input, adjacent values cancel. At the start, y[0]=2−0=2; at the end, y[3]=0−2=−2. Thus the complete output is [2,0,0,−2]. Assuming the value 2 continues forever would describe a different input.\",\n      \"transfer\": \"Replace the finite input with [2,2,2,2]. Predict how the two nonzero boundary outputs move, then verify the full result.\"\n    },\n    {\n      \"id\": \"fc09\",\n      \"concept\": \"Finite filter responses\",\n      \"prerequisites\": [\n        \"Shift and sum\"\n      ],\n      \"prompt\": \"An input list x = [1, 0, 0] and a kernel h = [2, −1] both begin at index 0 and are zero elsewhere. Which list retains the complete full linear convolution, including the declared trailing zeros?\",\n      \"options\": [\n        \"[2, −1, 0, 0]\",\n        \"[2, −1]\",\n        \"[2, 1, 0, 0]\",\n        \"[0, 2, −1, 0]\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"The input has an impulse at index 0 followed by two declared zeros, so the output copies h and retains the complete 3+2−1=4-entry range: [2,−1,0,0]. The shorter list [2,−1] has the same nonzero support but is not the requested full representation.\",\n      \"transfer\": \"Use x=[0,1,0] with the same h. Explain both the shifted nonzero samples and the retained zero entries.\"\n    },\n    {\n      \"id\": \"fc10\",\n      \"concept\": \"Properties and operation choice\",\n      \"prerequisites\": [\n        \"Shift and sum\"\n      ],\n      \"prompt\": \"For zero-extended lists indexed from 0, let x = [1, 2], z = [3, −1], and h = [1, 1]. Their full convolutions are x*h = [1, 3, 2] and z*h = [3, 2, −1]. What is (x+z)*h?\",\n      \"options\": [\n        \"[3, 6, −2]\",\n        \"[4, 1]\",\n        \"[4, 5, 1]\",\n        \"[1, 3, 2, 3, 2, −1]\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"Convolution with the fixed h is linear: (x+z)*h = x*h + z*h. Adding the given output lists entry by entry gives [1+3,3+2,2+(−1)] = [4,5,1]. Directly convolving x+z=[4,1] with [1,1] gives the same result.\",\n      \"transfer\": \"Pick two equal-length input lists and one fixed kernel. Verify one output index of the sum in two ways and explain why it agrees.\"\n    },\n    {\n      \"id\": \"fc11\",\n      \"concept\": \"Properties and operation choice\",\n      \"prerequisites\": [\n        \"Shift and sum\"\n      ],\n      \"prompt\": \"Let x = [1, 2] and h = [3, 4], both starting at 0 and zero elsewhere. Define convolution y[n] = Σₖ x[k]h[n−k], and define the real zero-lag correlation r[0] = Σₖ x[k]h[k]. What are y[0] and r[0]?\",\n      \"options\": [\n        \"y[0] = 11 and r[0] = 3\",\n        \"y[0] = 3 and r[0] = 11\",\n        \"y[0] = 4 and r[0] = 10\",\n        \"y[0] = 3 and r[0] = 3\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"At n=0, zero extension leaves only x[0]h[0]=1×3=3 in the convolution sum. The separately defined zero-lag correlation is the aligned dot product 1×3+2×4=11. The formulas use different index pairings; a matching-index dot product is not generally y[0].\",\n      \"transfer\": \"For the same x and h, calculate y[1] by listing its kernel indices. Contrast this with a matching-index product sum.\"\n    },\n    {\n      \"id\": \"fc12\",\n      \"concept\": \"Properties and operation choice\",\n      \"prerequisites\": [\n        \"Shift and sum\"\n      ],\n      \"prompt\": \"For finite lists indexed from 0 and zero elsewhere, x = [1, 0, 2] and h = [−1, 3] have full convolution x*h = [−1, 3, −2, 6]. What is the full convolution h*x?\",\n      \"options\": [\n        \"[6, −2, 3, −1]\",\n        \"[1, −3, 2, −6]\",\n        \"[−1, 0, 6]\",\n        \"[−1, 3, −2, 6]\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"Finite linear convolution is commutative under the same indexing and zero-extension convention. Swapping x and h therefore gives [−1,3,−2,6] again. It does not reverse or negate the result. Direct expansion is −1×[1,0,2] plus a one-index-shifted 3×[1,0,2].\",\n      \"transfer\": \"Swap the input and kernel in the lab. Compare the complete output and explain why the per-index contribution table can look different.\"\n    }\n  ]\n}\n";
+/** Finite linear convolution with zero extension and sample index zero at each list's start. */
+const MAX_CONVOLUTION_SAMPLES = 24;
+const MAX_CONVOLUTION_VALUE = 100;
+const SCALE = 10000;
+const PRODUCT_SCALE = SCALE * SCALE;
+
+function samples(values, name) {
+  if (!Array.isArray(values) || values.length < 1 || values.length > MAX_CONVOLUTION_SAMPLES) {
+    throw new RangeError(name + ' needs 1–24 numbers.');
+  }
+  const ticks = values.map(value => {
+    if (typeof value !== 'number' || !Number.isFinite(value) || Math.abs(value) > MAX_CONVOLUTION_VALUE) {
+      throw new RangeError(name + ' values must be finite numbers from −100 to 100.');
+    }
+    const integer = Math.round(value * SCALE);
+    if (integer / SCALE !== value) throw new RangeError(name + ' values may have at most four decimal places.');
+    return integer === 0 ? 0 : integer;
+  });
+  return { ticks, values: ticks.map(value => value / SCALE) };
+}
+
+/** Admit decimal literals separated by whitespace or commas; empty comma fields are errors. */
+function parseConvolutionSequence(text, name = 'Sequence') {
+  if (typeof text !== 'string' || text.length > 4096 || !text.trim()) {
+    throw new RangeError(name + ' needs 1–24 numbers.');
+  }
+  const fields = text.trim().split(',');
+  if (fields.some(field => !field.trim())) throw new RangeError(name + ' has an empty comma-separated value.');
+  const tokens = fields.flatMap(field => field.trim().split(/\s+/));
+  if (tokens.some(token => !/^[+-]?(?:\d+(?:\.\d{0,4})?|\.\d{1,4})$/.test(token))) {
+    throw new RangeError(name + ' accepts decimal numbers with at most four decimal places; use commas or spaces.');
+  }
+  return Object.freeze(samples(tokens.map(Number), name).values);
+}
+
+function fullOutput(x, h) {
+  // The largest integer accumulation is 24 × 1,000,000², safely below 2^53.
+  const numerators = Array(x.length + h.length - 1).fill(0);
+  for (let k = 0; k < x.length; k++) {
+    for (let j = 0; j < h.length; j++) numerators[k + j] += x[k] * h[j];
+  }
+  return Object.freeze(numerators.map(value => value / PRODUCT_SCALE));
+}
+
+/** Keep the full N+M−1 output, including any leading or trailing zero values. */
+function finiteConvolution(x, h) {
+  return fullOutput(samples(x, 'Input x').ticks, samples(h, 'Kernel h').ticks);
+}
+
+function stepWithSamples(x, h, n) {
+  const length = x.ticks.length + h.ticks.length - 1;
+  if (!Number.isInteger(n) || n < 0 || n >= length) {
+    throw new RangeError('Choose an output index from 0 to ' + (length - 1) + '.');
+  }
+  let numerator = 0;
+  const terms = x.ticks.map((value, k) => {
+    const kernelIndex = n - k;
+    const inKernel = kernelIndex >= 0 && kernelIndex < h.ticks.length;
+    const kernelTick = inKernel ? h.ticks[kernelIndex] : 0;
+    const product = value * kernelTick;
+    numerator += product;
+    return Object.freeze({
+      k, input: x.values[k], kernelIndex, inKernel,
+      kernel: kernelTick / SCALE, product: product / PRODUCT_SCALE
+    });
+  });
+  return Object.freeze({ n, terms: Object.freeze(terms), value: numerator / PRODUCT_SCALE });
+}
+
+/** Inspect every input term x[k]h[n−k], including out-of-kernel zero contributions. */
+function convolutionStep(x, h, n) {
+  return stepWithSamples(samples(x, 'Input x'), samples(h, 'Kernel h'), n);
+}
+
+/** A self-contained, immutable record of the displayed finite calculation. */
+function createConvolutionRecord(x, h) {
+  const input = samples(x, 'Input x');
+  const kernel = samples(h, 'Kernel h');
+  const y = fullOutput(input.ticks, kernel.ticks);
+  return Object.freeze({
+    format: 'recallweave-finite-convolution/1',
+    convention: 'y[n] = sum_k x[k] h[n-k]; each list begins at index 0 and is zero elsewhere; full linear output',
+    x: Object.freeze(input.values), h: Object.freeze(kernel.values), y,
+    steps: Object.freeze(y.map((_, n) => stepWithSamples(input, kernel, n)))
+  });
+}
+
+/** Product sums have at most eight decimal places under this lab's admitted number domain. */
+function formatConvolutionValue(value) {
+  if (typeof value !== 'number' || !Number.isFinite(value)) throw new RangeError('Display needs a finite value.');
+  const text = value.toFixed(8).replace(/\.?0+$/, '');
+  return text === '' || text === '-0' ? '0' : text;
+}
+
+
+const byId = id => document.getElementById(id);
+const xInput = byId('sequence-x');
+const hInput = byId('sequence-h');
+const indexInput = byId('output-index');
+const status = byId('calculation-status');
+const svgNS = 'http://www.w3.org/2000/svg';
+const presets = {
+  signed: { x: '2, -1, 3', h: '1, 2' },
+  delay: { x: '2, -1, 3', h: '0, 1' },
+  average: { x: '0, 4, 0', h: '0.5, 0.5' },
+  difference: { x: '2, 2, 2', h: '1, -1' }
+};
+let current = null;
+
+function node(name, attrs = {}, text = null) {
+  const element = document.createElementNS(svgNS, name);
+  for (const [key, value] of Object.entries(attrs)) element.setAttribute(key, String(value));
+  if (text !== null) element.textContent = text;
+  return element;
+}
+
+function drawPlot(id, series, selected = null) {
+  const host = byId(id);
+  const count = series[0].values.length;
+  const minimumWidth = Math.max(300, 76 + count * 32);
+  const width = Math.max(minimumWidth, host.clientWidth);
+  const height = 184;
+  const left = 58, right = width - 24, top = 24, bottom = 148, zero = (top + bottom) / 2;
+  const peak = Math.max(1, ...series.flatMap(item => item.values.map(Math.abs)));
+  const x = index => count === 1 ? (left + right) / 2 : left + index * (right - left) / (count - 1);
+  const y = value => zero - value / peak * (bottom - top) / 2;
+  const svg = node('svg', { viewBox: '0 0 ' + width + ' ' + height, role: 'img', height });
+  svg.style.width = '100%';
+  svg.style.minWidth = minimumWidth + 'px';
+  svg.append(node('title', {}, series.map(item => item.label + ': [' + item.values.map(formatConvolutionValue).join(', ') + ']').join('; ')));
+  for (const value of [-peak, 0, peak]) {
+    svg.append(node('line', { x1: left, y1: y(value), x2: right, y2: y(value), stroke: value === 0 ? '#727f77' : '#dce3dc', 'stroke-width': 1 }));
+    svg.append(node('text', { x: left - 9, y: y(value) + 4, 'text-anchor': 'end', class: 'plot-tick' }, formatConvolutionValue(value)));
+  }
+  const labelEvery = Math.max(1, Math.ceil(count / 16));
+  for (let k = 0; k < count; k++) {
+    if (selected === k) svg.append(node('rect', { x: x(k) - 12, y: top - 7, width: 24, height: bottom - top + 15, rx: 5, fill: '#e7eafb' }));
+    if (k % labelEvery === 0 || k === count - 1) {
+      svg.append(node('text', { x: x(k), y: 171, 'text-anchor': 'middle', class: 'plot-tick' }, String(k)));
+    }
+    series.forEach((item, position) => {
+      const offset = series.length > 1 ? (position === 0 ? -4 : 4) : 0;
+      const cx = x(k) + offset;
+      svg.append(node('line', { x1: cx, y1: zero, x2: cx, y2: y(item.values[k]), stroke: item.color, 'stroke-width': 2.5, ...(position ? { 'stroke-dasharray': '4 2' } : {}) }));
+      svg.append(node('circle', { cx, cy: y(item.values[k]), r: 4, fill: item.color, stroke: 'white', 'stroke-width': 1 }));
+    });
+  }
+  host.replaceChildren(svg);
+}
+
+function renderStep() {
+  if (!current) return;
+  const n = Number(indexInput.value);
+  const step = current.steps[n];
+  const formatted = formatConvolutionValue(step.value);
+  byId('selected-output').textContent = 'y[' + n + '] = ' + formatted;
+  byId('step-range').textContent = 'Index ' + n + ' of 0…' + (current.y.length - 1);
+  indexInput.setAttribute('aria-valuetext', 'Output index ' + n + ', value ' + formatted);
+  byId('previous-index').disabled = n === 0;
+  byId('next-index').disabled = n === current.y.length - 1;
+  const rows = step.terms.map(term => {
+    const row = document.createElement('tr');
+    if (!term.inKernel) row.className = 'outside-kernel';
+    const entries = [term.k, formatConvolutionValue(term.input), term.kernelIndex,
+      formatConvolutionValue(term.kernel), formatConvolutionValue(term.product)];
+    entries.forEach((value, index) => {
+      const cell = document.createElement(index === 0 ? 'th' : 'td');
+      if (index === 0) cell.scope = 'row';
+      cell.textContent = String(value);
+      if (index === 3 && !term.inKernel) {
+        const note = document.createElement('span');
+        note.className = 'zero-note';
+        note.textContent = 'outside h';
+        cell.append(note);
+      }
+      row.append(cell);
+    });
+    return row;
+  });
+  byId('contribution-rows').replaceChildren(...rows);
+  byId('sum-value').textContent = formatted;
+  byId('sum-expression').textContent = 'y[' + n + '] = ' +
+    step.terms.map(term => '(' + formatConvolutionValue(term.input) + ' × ' + formatConvolutionValue(term.kernel) + ')').join(' + ') +
+    ' = ' + formatted;
+  byId('contribution-caption').textContent = 'Contributions to y[' + n + ']: the kernel index is ' + n + ' − k.';
+  drawPlot('overlap-plot', [
+    { label: 'x[k]', values: current.x, color: '#236b57' },
+    { label: 'h[' + n + '−k]', values: step.terms.map(term => term.kernel), color: '#b34b32' }
+  ]);
+  drawPlot('output-plot', [{ label: 'Output y[n]', values: current.y, color: '#465eac' }], n);
+}
+
+function renderCalculation() {
+  byId('input-length').textContent = String(current.x.length);
+  byId('kernel-length').textContent = String(current.h.length);
+  byId('output-length').textContent = String(current.y.length);
+  byId('output-range').textContent = '0…' + (current.y.length - 1);
+  byId('output-values').textContent = '[' + current.y.map(formatConvolutionValue).join(', ') + ']';
+  drawPlot('input-plot', [{ label: 'Input x[k]', values: current.x, color: '#236b57' }]);
+  drawPlot('kernel-plot', [{ label: 'Kernel h[j]', values: current.h, color: '#b34b32' }]);
+  renderStep();
+}
+
+function calculate() {
+  try {
+    const x = parseConvolutionSequence(xInput.value, 'Input x');
+    const h = parseConvolutionSequence(hInput.value, 'Kernel h');
+    const selected = Number(indexInput.value);
+    current = createConvolutionRecord(x, h);
+    indexInput.max = String(current.y.length - 1);
+    indexInput.value = String(Math.min(Number.isInteger(selected) && selected >= 0 ? selected : 0, current.y.length - 1));
+    indexInput.disabled = false;
+    byId('download-calculation').disabled = false;
+    byId('calculation').hidden = false;
+    xInput.removeAttribute('aria-invalid');
+    hInput.removeAttribute('aria-invalid');
+    status.classList.remove('error');
+    status.setAttribute('role', 'status');
+    status.textContent = 'Full result ready: ' + current.x.length + ' + ' + current.h.length + ' − 1 = ' + current.y.length + ' output entries. Outside each list, values are zero.';
+    renderCalculation();
+  } catch (error) {
+    current = null;
+    byId('calculation').hidden = true;
+    indexInput.disabled = true;
+    byId('previous-index').disabled = true;
+    byId('next-index').disabled = true;
+    byId('download-calculation').disabled = true;
+    for (const id of ['input-plot', 'kernel-plot', 'output-plot', 'overlap-plot', 'contribution-rows']) byId(id).replaceChildren();
+    for (const id of ['output-values', 'selected-output', 'sum-expression', 'sum-value', 'step-range']) byId(id).textContent = '';
+    xInput.setAttribute('aria-invalid', 'true');
+    hInput.setAttribute('aria-invalid', 'true');
+    status.classList.add('error');
+    status.setAttribute('role', 'alert');
+    status.textContent = error.message + ' The previous calculation is cleared. Correct the input or choose an example.';
+  }
+}
+
+function download(filename, text) {
+  let url;
+  try {
+    url = URL.createObjectURL(new Blob([text], { type: 'application/json;charset=utf-8' }));
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    document.body.append(link);
+    link.click();
+    link.remove();
+    byId('download-status').textContent = 'Requested ' + filename + ' through the browser download flow.';
+  } catch {
+    byId('download-status').textContent = 'The download could not be started. Your inputs are unchanged; try again.';
+  } finally {
+    if (url) setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+}
+
+xInput.addEventListener('input', calculate);
+hInput.addEventListener('input', calculate);
+byId('sequence-form').addEventListener('submit', event => { event.preventDefault(); calculate(); });
+indexInput.addEventListener('input', renderStep);
+for (const [id, change] of [['previous-index', -1], ['next-index', 1]]) {
+  byId(id).addEventListener('click', () => {
+    if (!current) return;
+    indexInput.value = String(Math.max(0, Math.min(current.y.length - 1, Number(indexInput.value) + change)));
+    renderStep();
+  });
+}
+for (const button of document.querySelectorAll('[data-preset]')) {
+  button.addEventListener('click', () => {
+    const preset = presets[button.dataset.preset];
+    xInput.value = preset.x;
+    hInput.value = preset.h;
+    indexInput.value = '0';
+    calculate();
+  });
+}
+byId('download-course').addEventListener('click', () => download('recallweave-finite-convolution.json', FINITE_CONVOLUTION_DECK_TEXT));
+byId('download-calculation').addEventListener('click', () => {
+  if (current) download('recallweave-finite-convolution-calculation.json', JSON.stringify(current, null, 2) + '\n');
+});
+const course = JSON.parse(FINITE_CONVOLUTION_DECK_TEXT);
+byId('course-title').textContent = course.title;
+byId('course-attribution').textContent = course.attribution;
+byId('course-license').textContent = course.license;
+window.addEventListener('resize', () => { if (current) renderCalculation(); });
+calculate();
+
+})();
+</script>
+</body>
+</html>
