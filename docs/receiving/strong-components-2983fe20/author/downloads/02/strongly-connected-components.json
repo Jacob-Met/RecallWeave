@@ -1,0 +1,215 @@
+{
+  "format": "recallweave-deck/1",
+  "title": "Return paths: strongly connected components",
+  "attribution": "Original graphs, questions, distractors and worked explanations for RecallWeave. Algorithm background: Cornell University CS 2112, Graph traversals (2022), https://www.cs.cornell.edu/courses/cs2112/2022fa/lectures/traversals/. Definitions and condensation background: MIT OpenCourseWare 6.1200J, Lecture 14: Digraphs and DAGs (Spring 2024), https://ocw.mit.edu/courses/6-1200j-mathematics-for-computer-science-spring-2024/mit6_1200j_s24_lec14.pdf. No reference exercise, figure or passage is copied. AI assistance was used in drafting and implementation.",
+  "license": "Original course content authored for Jacob’s RecallWeave project; no additional reuse license is granted here. Linked reference material retains its published terms.",
+  "concepts": [
+    "mutual-reachability",
+    "dfs-finish-order",
+    "transpose-search",
+    "condensation"
+  ],
+  "items": [
+    {
+      "id": "scc-return",
+      "concept": "mutual-reachability",
+      "prerequisites": [],
+      "prompt": "The directed edges are exactly A → B, B → A and B → C. Which partition gives the strongly connected components?",
+      "options": [
+        "One component containing A, B and C",
+        "Three components: {A}, {B}, {C}",
+        "Two components: {A, B} and {C}",
+        "Two components: {A} and {B, C}"
+      ],
+      "answer": 2,
+      "explanation": "A and B can reach one another. Both can reach C, but C has no outgoing edge and cannot return to either of them. Therefore {A, B} is one maximal mutually reachable group, and {C} is another. One-way reachability is insufficient.",
+      "transfer": "Add one directed edge that makes all three nodes strongly connected. Explain both the new return path and an existing forward path."
+    },
+    {
+      "id": "scc-join",
+      "concept": "mutual-reachability",
+      "prerequisites": [],
+      "prompt": "A ↔ B and C ↔ D are two directed two-node cycles. There is also an edge B → C and no other edge. Which single added edge joins all four nodes into one strongly connected component?",
+      "options": [
+        "D → A",
+        "A → C",
+        "B → D",
+        "A → A"
+      ],
+      "answer": 0,
+      "explanation": "B → C already lets the first cycle reach the second. D → A supplies a route back. Internal cycle paths connect every member to the bridge endpoints, so every node can now reach every other. The other proposed edges add no return route from {C, D} to {A, B}.",
+      "transfer": "In the explorer’s two-cycles example, add F → A. Which previously separate groups join, and why does the terminal node F join too?"
+    },
+    {
+      "id": "scc-singleton",
+      "concept": "mutual-reachability",
+      "prerequisites": [],
+      "prompt": "Z is an isolated node with no incoming edge, outgoing edge or self-loop. How is it treated when partitioning a directed graph into strongly connected components?",
+      "options": [
+        "It is omitted because it has no edges",
+        "It belongs to every component because no edge forbids it",
+        "It needs a self-loop before it can form a component",
+        "It forms the singleton component {Z}"
+      ],
+      "answer": 3,
+      "explanation": "Reachability includes the length-zero path from a node to itself. Z is therefore mutually reachable with itself, and with no other node. It forms its own component without needing a self-loop. Components partition all vertices, including isolated ones.",
+      "transfer": "Compare an isolated node with a node that has only a self-loop. Does their component membership rule differ? What differs in the edge-inspection count?"
+    },
+    {
+      "id": "scc-finish",
+      "concept": "dfs-finish-order",
+      "prerequisites": [
+        "mutual-reachability"
+      ],
+      "prompt": "A DFS starts at A in the chain A → B → C. A node is appended only when its call finishes. What is the resulting finish list?",
+      "options": [
+        "A, B, C",
+        "C, B, A",
+        "B, A, C",
+        "A, C, B"
+      ],
+      "answer": 1,
+      "explanation": "The calls enter A, then B, then C. C has no outgoing edge, so it finishes first. Its return allows B to finish, then A. Discovery order and finish order describe different moments. The reverse finish list is A, B, C.",
+      "transfer": "Add A → D after A → B in the edge order. With D otherwise isolated, write the discovery list and the finish list separately."
+    },
+    {
+      "id": "scc-root-order",
+      "concept": "dfs-finish-order",
+      "prerequisites": [
+        "mutual-reachability"
+      ],
+      "prompt": "Nodes are declared A, B, C. Edges are B → A and A → C. Pass 1 tries roots in declared order and follows original arrows. Which reverse finish list should pass 2 use?",
+      "options": [
+        "A, B, C",
+        "C, A, B",
+        "B, A, C",
+        "C, B, A"
+      ],
+      "answer": 2,
+      "explanation": "The DFS rooted at A visits C, so C finishes before A. B remains unseen and becomes the next root; its destination A is already finished, so B finishes last. The finish list is C, A, B, whose reverse is B, A, C. Declared order alone is not the second-pass root order.",
+      "transfer": "Use the explorer’s root-order example. Why would starting at A first in the transpose incorrectly let that search include B?"
+    },
+    {
+      "id": "scc-finish-meaning",
+      "concept": "dfs-finish-order",
+      "prerequisites": [
+        "mutual-reachability"
+      ],
+      "prompt": "A DFS call has just discovered a new node. What must happen before that node is appended to the finish list?",
+      "options": [
+        "Its outgoing edges must be inspected and any recursive searches it starts must return",
+        "Every node in the entire graph must already be visited",
+        "It must be assigned to a strongly connected component immediately",
+        "Its incoming edges must be deleted"
+      ],
+      "answer": 0,
+      "explanation": "Finishing closes that DFS call after its work and its descendants’ work are complete. Other disconnected roots may still be unseen. In this two-pass method, the first pass records ordering information; the second pass assigns components. Neither pass deletes the authored graph’s edges.",
+      "transfer": "At a finish event in the explorer, compare the node being finished with the remaining DFS path. Which caller is ready to continue?"
+    },
+    {
+      "id": "scc-transpose",
+      "concept": "transpose-search",
+      "prerequisites": [
+        "dfs-finish-order"
+      ],
+      "prompt": "The transpose reverses every directed edge. What happens to the graph’s strongly connected groups?",
+      "options": [
+        "Every group necessarily splits into singletons",
+        "The groups stay the same, while reachability between different groups can reverse",
+        "Every node with an incoming edge joins the same group",
+        "Only groups with self-loops survive"
+      ],
+      "answer": 1,
+      "explanation": "A path from u to v reverses into a path from v to u. If both directions existed originally, both still exist after all edges reverse. Thus mutual reachability, and therefore the groups, are preserved. A one-way path between different groups changes direction instead of creating a return path.",
+      "transfer": "For {A, B} → {C}, draw the original edges and all reversed edges. Identify a reachability statement that changes and a mutual-reachability statement that does not."
+    },
+    {
+      "id": "scc-second-pass",
+      "concept": "transpose-search",
+      "prerequisites": [
+        "dfs-finish-order"
+      ],
+      "prompt": "For original edges B → A and A → C, pass 1 supplies root order B, A, C. The transpose has A → B and C → A. With fresh visited marks, what components does pass 2 discover in that order?",
+      "options": [
+        "{A, B, C}",
+        "{A, B}, then {C}",
+        "{B}, then {A, C}",
+        "{B}, then {A}, then {C}"
+      ],
+      "answer": 3,
+      "explanation": "B has no outgoing edge in the transpose, so the first search assigns only B. A then encounters the already assigned B and remains a singleton. C similarly encounters the assigned A. Starting fresh searches only at still-unassigned roots separates all three correctly.",
+      "transfer": "Add C → B to the original graph. Predict the new component partition before rebuilding the trace."
+    },
+    {
+      "id": "scc-reset",
+      "concept": "transpose-search",
+      "prerequisites": [
+        "dfs-finish-order"
+      ],
+      "prompt": "Pass 1 has visited every node. Why does pass 2 use fresh visited marks instead of treating those first-pass marks as second-pass assignments?",
+      "options": [
+        "To change the declared order of the nodes",
+        "To erase the finish list and compute a random order",
+        "Because first-pass discovery did not assign components; fresh transpose searches must still run",
+        "Because all first-pass edges were removed from the graph"
+      ],
+      "answer": 2,
+      "explanation": "First-pass marks prevent repeated work while recording finishing order. They do not identify component membership. Reusing them as second-pass marks would skip every root and produce no component searches. The finishing order is retained; only the search marks are reset for the transpose pass.",
+      "transfer": "Explain why keeping the finish list and resetting visited marks are compatible actions. What does each piece of state represent?"
+    },
+    {
+      "id": "scc-collapse",
+      "concept": "condensation",
+      "prerequisites": [
+        "mutual-reachability",
+        "transpose-search"
+      ],
+      "prompt": "The components are C1 = {A, B}, C2 = {C, D}, C3 = {E}. Cross-component edges are A → C, B → D and D → E. What edges appear when each component is collapsed to one node and repeated component edges are combined?",
+      "options": [
+        "C1 → C2 and C2 → C3",
+        "C1 → C2, C2 → C1 and C2 → C3",
+        "Only C1 → C3",
+        "No edges, because components have no connections"
+      ],
+      "answer": 0,
+      "explanation": "A → C and B → D both connect C1 to C2, so they produce one condensation edge with two original witnesses. D → E produces C2 → C3. The route C1 → C2 → C3 exists, but it does not imply a direct C1 → C3 edge. Internal component edges are omitted from this graph.",
+      "transfer": "Add an original edge B → E. Which new condensation edge appears? Does that edge merge any components by itself?"
+    },
+    {
+      "id": "scc-no-cycle",
+      "concept": "condensation",
+      "prerequisites": [
+        "mutual-reachability",
+        "transpose-search"
+      ],
+      "prompt": "Why can the condensation graph not contain a directed cycle through several distinct components?",
+      "options": [
+        "All cycles have exactly two nodes",
+        "A transpose always deletes cycles",
+        "The component labels are sorted alphabetically",
+        "Such a cycle would make those groups mutually reachable, so they would be one component"
+      ],
+      "answer": 3,
+      "explanation": "Following a supposed cycle of groups would provide routes forward and back between them. Within each group, every member can reach the relevant edge endpoints. Combining those routes would make all of the groups mutually reachable, contradicting that they are distinct maximal components. Original graphs may have cycles; condensation graphs are acyclic.",
+      "transfer": "A diagram claims to show separate components C1 → C2 → C3 → C1. Explain the inconsistency without referring to how the algorithm numbered them."
+    },
+    {
+      "id": "scc-edge-work",
+      "concept": "condensation",
+      "prerequisites": [
+        "mutual-reachability",
+        "transpose-search"
+      ],
+      "prompt": "A graph has 7 nodes and 9 directed edges. Both complete DFS passes inspect each adjacency entry once. Counting only these edge inspections, how many occur across the original and transpose passes together?",
+      "options": [
+        "9",
+        "18",
+        "63",
+        "81"
+      ],
+      "answer": 1,
+      "explanation": "The original pass inspects 9 directed edges, and the transpose has exactly one reversed edge for each original edge, so its pass also inspects 9. The total is 18. The underlying adjacency-list algorithm takes O(V + E) time. Copying trace snapshots, drawing the diagram, parsing text and exporting files add separate work in this teaching explorer.",
+      "transfer": "If the graph has 7 nodes and no edges, how many edge inspections occur? Why does the algorithm still have work to do?"
+    }
+  ]
+}
