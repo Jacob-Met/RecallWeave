@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<title>Congruences together — RecallWeave</title>
+<style>
+:root{color-scheme:light;--ink:#142d33;--muted:#496369;--paper:#f5f5ed;--card:#fff;--line:#cad6ce;--accent:#12695b;--wash:#e3f1e7;--danger:#962b34}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:17px/1.55 system-ui,sans-serif}
+main{max-width:1120px;margin:auto;padding:28px 24px 64px}header{border-bottom:2px solid var(--ink);padding-bottom:24px;margin-bottom:28px}
+.eyebrow{font-size:.8rem;text-transform:uppercase;letter-spacing:.13em;font-weight:800;color:var(--accent)}h1{font-size:clamp(2rem,5vw,3.25rem);line-height:1.12;letter-spacing:-.025em;margin:.5rem 0 1rem}h2{font-size:1.35rem;margin-top:0}h3{font-size:1.06rem;margin:.75rem 0}
+p{max-width:78ch}.lead{font-size:1.12rem;color:var(--muted)}.muted,.hint{color:var(--muted)}.hint{font-size:.9rem}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:24px;margin:22px 0;min-width:0}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:18px}.condition{border:1px solid var(--line);border-radius:8px;padding:18px;min-width:0}
+label{display:block;font-weight:700;margin:12px 0 5px}input{width:100%;min-width:0;border:1px solid #718c85;border-radius:6px;padding:11px;font:inherit;background:white;color:var(--ink)}
+input:disabled{background:#eef1ed}button{font:inherit;font-weight:700;background:var(--accent);color:white;border:1px solid var(--accent);border-radius:7px;padding:10px 14px;cursor:pointer}
+button.secondary{background:white;color:var(--accent)}button:disabled{opacity:.48;cursor:not-allowed}
+button:focus-visible,input:focus-visible,a:focus-visible,summary:focus-visible{outline:3px solid #c85a05;outline-offset:3px}
+.actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:17px}.examples{display:flex;flex-wrap:wrap;gap:8px}.examples button{font-size:.88rem;padding:7px 10px}
+.notice{min-height:1.5em;font-weight:650}.error{color:var(--danger);min-height:1.5em}.formula,#selected-integer{font:700 1.2rem/1.5 ui-monospace,monospace;overflow-wrap:anywhere}
+#result[data-compatible="true"]{border-left:5px solid var(--accent)}#result[data-compatible="false"]{border-left:5px solid var(--danger)}
+ol{padding-left:1.4rem}li{margin:0 0 12px;overflow-wrap:anywhere}.scroll{overflow-x:auto;max-width:100%;border:1px solid var(--line);border-radius:6px}
+#lanes{min-width:680px;padding:8px}#lanes svg{display:block;width:100%;height:auto}svg text{font:15px system-ui;fill:var(--ink)}.match{fill:var(--accent);stroke:var(--ink);stroke-width:1}.miss{fill:#c5d4d0}
+table{border-collapse:collapse;min-width:720px;width:100%;font-size:.9rem}th,td{text-align:left;padding:10px;border-bottom:1px solid var(--line);overflow-wrap:anywhere;max-width:280px}
+thead{background:#edf3ed}tr[data-both="true"]{background:var(--wash)}tbody th{font:650 .9rem/1.45 ui-monospace,monospace}
+details{margin:18px 0}summary{cursor:pointer;font-weight:750;margin-bottom:12px}footer{border-top:1px solid var(--line);padding-top:20px;font-size:.92rem}
+a{color:var(--accent)}[hidden]{display:none!important}
+@media(max-width:600px){main{padding:20px 16px 40px}.pair{grid-template-columns:1fr}.card{padding:18px}.condition{padding:14px}.actions button{max-width:100%}h1{font-size:2.15rem}}
+@media print{button,form,.examples{display:none}main{max-width:none}.card{break-inside:avoid}details{display:block}.scroll{overflow:visible}table{min-width:0}#lanes{min-width:0}}
+</style>
+</head>
+<body>
+<main>
+<header>
+<div class="eyebrow">RecallWeave · exact integer lab</div>
+<h1>Two remainders.<br>One common class.</h1>
+<p class="lead">Use gcd and integer combinations to find when two remainder conditions agree. Inspect the construction, a particular integer, and all 24 values in a chosen window.</p>
+<p class="hint">Works directly from this file. No connection, account or automatic storage. This is a bounded mathematical teaching tool.</p>
+</header>
+
+<section class="card" aria-labelledby="input-title">
+<h2 id="input-title">Write the two conditions</h2>
+<p>For integers x, the statement x ≡ a (mod m) means that m divides x − a. Enter a signed whole residue and a positive whole modulus, each with at most 18 decimal digits excluding its sign. Leading and trailing whitespace is allowed; leading zeros count toward the limit.</p>
+<form id="pair-form">
+<div class="pair">
+<div class="condition"><h3>Condition A · x ≡ a (mod m)</h3>
+<label for="a">Residue a</label><input id="a" name="a" value="3" maxlength="50" required spellcheck="false" autocomplete="off">
+<label for="m">Positive modulus m</label><input id="m" name="m" value="4" maxlength="50" required spellcheck="false" autocomplete="off"></div>
+<div class="condition"><h3>Condition B · x ≡ b (mod n)</h3>
+<label for="b">Residue b</label><input id="b" name="b" value="2" maxlength="50" required spellcheck="false" autocomplete="off">
+<label for="n">Positive modulus n</label><input id="n" name="n" value="5" maxlength="50" required spellcheck="false" autocomplete="off"></div>
+</div>
+<div class="actions"><button id="compute" type="submit">Compute both conditions</button></div>
+</form>
+<h3>Load an example, then compute</h3>
+<div class="examples">
+<button type="button" class="secondary" data-example="coprime">Coprime moduli</button>
+<button type="button" class="secondary" data-example="shared">Compatible shared factors</button>
+<button type="button" class="secondary" data-example="contradiction">A contradiction</button>
+<button type="button" class="secondary" data-example="negative">Negative residues</button>
+<button type="button" class="secondary" data-example="redundant">One redundant condition</button>
+<button type="button" class="secondary" data-example="large">Beyond Number precision</button>
+</div>
+<p id="status" class="notice" role="status"></p>
+<p id="error" class="error" role="alert"></p>
+</section>
+
+<section id="result" class="card" hidden aria-labelledby="outcome">
+<h2 id="outcome" class="formula"></h2>
+<p id="outcome-detail"></p>
+<h3>The exact construction</h3>
+<ol id="proof"></ol>
+<p class="hint">All arithmetic above uses exact integers. A canonical representative is one name for a whole class. The parameter j ranges over every integer, including negative integers.</p>
+</section>
+
+<section class="card" aria-labelledby="inspect-title">
+<h2 id="inspect-title">Inspect one integer</h2>
+<form id="probe-form">
+<label for="probe">Integer x · at most 72 decimal digits excluding sign</label>
+<input id="probe" name="probe" value="0" maxlength="104" required spellcheck="false" autocomplete="off" disabled>
+<div class="actions">
+<button id="inspect-button" type="submit" disabled>Inspect</button>
+<button id="use-solution" type="button" class="secondary" disabled>Inspect least nonnegative solution</button>
+</div>
+</form>
+<p id="inspection-status" role="status" class="hint"></p>
+<div id="inspection" hidden>
+<h3>Selected integer</h3><p id="selected-integer"></p><p id="selected-result"></p>
+<h3>A bounded window, with every integer retained</h3>
+<p id="window-caption"></p>
+<p class="hint">Large filled dots mark matches; small dots mark nonmatches. Lane A tests the first condition, B the second, and Both their intersection. Horizontal numbers are integer offsets 0–23. The exact table also states each match in words.</p>
+<div class="scroll" tabindex="0" aria-label="Scrollable residue match lanes"><div id="lanes"></div></div>
+<details id="exact-table"><summary>Inspect all 24 exact rows</summary>
+<div class="scroll" tabindex="0" aria-label="Scrollable exact integer table">
+<table><caption>Each selected integer and its two canonical remainders</caption>
+<thead><tr><th scope="col">Offset</th><th scope="col">Integer x</th><th scope="col">Remainder A</th><th scope="col">Condition A</th><th scope="col">Remainder B</th><th scope="col">Condition B</th><th scope="col">Together</th></tr></thead>
+<tbody id="window-body"></tbody></table></div></details>
+</div>
+<div class="actions"><button id="download-observation" type="button" disabled>Download exact observation</button></div>
+</section>
+
+<section class="card" aria-labelledby="learn-title">
+<h2 id="learn-title">Practice the connections</h2>
+<p>The original fourteen-question lesson connects residue classes, inverses, compatibility, the construction and the complete solution class. Download it and choose it under <strong>Bring your own lesson</strong> in RecallWeave, then review the preview and explicitly start the deck. Its ordinary feedback, review and separate practice remain available.</p>
+<div class="actions"><button id="download-course" type="button" class="secondary">Download course JSON</button><button id="download-guide" type="button" class="secondary">Download worked guide</button></div>
+<p><a href="../demo.html">Open the existing RecallWeave learner</a> · <a href="euclidean-algorithm-explorer.html">Revisit Euclid and integer combinations</a></p>
+</section>
+<footer>
+<p>Compatible means an integer exists, not that one falls inside every chosen window. No approximation, period sampling or search cutoff decides compatibility. The integer lab does not establish real-world schedules, security suitability or learning effectiveness.</p>
+<p>Original lesson and examples by RecallWeave contributors. Mathematical background: <a href="https://ocw.mit.edu/courses/18-781-theory-of-numbers-spring-2012/resources/mit18_781s12_lec5/">MIT OpenCourseWare, Theory of Numbers, Lecture 5</a>. Opening that optional source link leaves this offline file.</p>
+</footer>
+</main>
+<script>
+'use strict';
+const CONGRUENCES_COURSE_TEXT = __CONGRUENCES_COURSE_LITERAL__;
+const CONGRUENCES_GUIDE_TEXT = __CONGRUENCES_GUIDE_LITERAL__;
+__CONGRUENCES_CODE__
+startCongruences(document, CONGRUENCES_COURSE_TEXT, CONGRUENCES_GUIDE_TEXT);
+</script>
+</body>
+</html>

@@ -1,0 +1,423 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<title>Congruences together — RecallWeave</title>
+<style>
+:root{color-scheme:light;--ink:#142d33;--muted:#496369;--paper:#f5f5ed;--card:#fff;--line:#cad6ce;--accent:#12695b;--wash:#e3f1e7;--danger:#962b34}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:17px/1.55 system-ui,sans-serif}
+main{max-width:1120px;margin:auto;padding:28px 24px 64px}header{border-bottom:2px solid var(--ink);padding-bottom:24px;margin-bottom:28px}
+.eyebrow{font-size:.8rem;text-transform:uppercase;letter-spacing:.13em;font-weight:800;color:var(--accent)}h1{font-size:clamp(2rem,5vw,3.25rem);line-height:1.12;letter-spacing:-.025em;margin:.5rem 0 1rem}h2{font-size:1.35rem;margin-top:0}h3{font-size:1.06rem;margin:.75rem 0}
+p{max-width:78ch}.lead{font-size:1.12rem;color:var(--muted)}.muted,.hint{color:var(--muted)}.hint{font-size:.9rem}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:24px;margin:22px 0;min-width:0}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:18px}.condition{border:1px solid var(--line);border-radius:8px;padding:18px;min-width:0}
+label{display:block;font-weight:700;margin:12px 0 5px}input{width:100%;min-width:0;border:1px solid #718c85;border-radius:6px;padding:11px;font:inherit;background:white;color:var(--ink)}
+input:disabled{background:#eef1ed}button{font:inherit;font-weight:700;background:var(--accent);color:white;border:1px solid var(--accent);border-radius:7px;padding:10px 14px;cursor:pointer}
+button.secondary{background:white;color:var(--accent)}button:disabled{opacity:.48;cursor:not-allowed}
+button:focus-visible,input:focus-visible,a:focus-visible,summary:focus-visible{outline:3px solid #c85a05;outline-offset:3px}
+.actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:17px}.examples{display:flex;flex-wrap:wrap;gap:8px}.examples button{font-size:.88rem;padding:7px 10px}
+.notice{min-height:1.5em;font-weight:650}.error{color:var(--danger);min-height:1.5em}.formula,#selected-integer{font:700 1.2rem/1.5 ui-monospace,monospace;overflow-wrap:anywhere}
+#result[data-compatible="true"]{border-left:5px solid var(--accent)}#result[data-compatible="false"]{border-left:5px solid var(--danger)}
+ol{padding-left:1.4rem}li{margin:0 0 12px;overflow-wrap:anywhere}.scroll{overflow-x:auto;max-width:100%;border:1px solid var(--line);border-radius:6px}
+#lanes{min-width:680px;padding:8px}#lanes svg{display:block;width:100%;height:auto}svg text{font:15px system-ui;fill:var(--ink)}.match{fill:var(--accent);stroke:var(--ink);stroke-width:1}.miss{fill:#c5d4d0}
+table{border-collapse:collapse;min-width:720px;width:100%;font-size:.9rem}th,td{text-align:left;padding:10px;border-bottom:1px solid var(--line);overflow-wrap:anywhere;max-width:280px}
+thead{background:#edf3ed}tr[data-both="true"]{background:var(--wash)}tbody th{font:650 .9rem/1.45 ui-monospace,monospace}
+details{margin:18px 0}summary{cursor:pointer;font-weight:750;margin-bottom:12px}footer{border-top:1px solid var(--line);padding-top:20px;font-size:.92rem}
+a{color:var(--accent)}[hidden]{display:none!important}
+@media(max-width:600px){main{padding:20px 16px 40px}.pair{grid-template-columns:1fr}.card{padding:18px}.condition{padding:14px}.actions button{max-width:100%}h1{font-size:2.15rem}}
+@media print{button,form,.examples{display:none}main{max-width:none}.card{break-inside:avoid}details{display:block}.scroll{overflow:visible}table{min-width:0}#lanes{min-width:0}}
+</style>
+</head>
+<body>
+<main>
+<header>
+<div class="eyebrow">RecallWeave · exact integer lab</div>
+<h1>Two remainders.<br>One common class.</h1>
+<p class="lead">Use gcd and integer combinations to find when two remainder conditions agree. Inspect the construction, a particular integer, and all 24 values in a chosen window.</p>
+<p class="hint">Works directly from this file. No connection, account or automatic storage. This is a bounded mathematical teaching tool.</p>
+</header>
+
+<section class="card" aria-labelledby="input-title">
+<h2 id="input-title">Write the two conditions</h2>
+<p>For integers x, the statement x ≡ a (mod m) means that m divides x − a. Enter a signed whole residue and a positive whole modulus, each with at most 18 decimal digits excluding its sign. Leading and trailing whitespace is allowed; leading zeros count toward the limit.</p>
+<form id="pair-form">
+<div class="pair">
+<div class="condition"><h3>Condition A · x ≡ a (mod m)</h3>
+<label for="a">Residue a</label><input id="a" name="a" value="3" maxlength="50" required spellcheck="false" autocomplete="off">
+<label for="m">Positive modulus m</label><input id="m" name="m" value="4" maxlength="50" required spellcheck="false" autocomplete="off"></div>
+<div class="condition"><h3>Condition B · x ≡ b (mod n)</h3>
+<label for="b">Residue b</label><input id="b" name="b" value="2" maxlength="50" required spellcheck="false" autocomplete="off">
+<label for="n">Positive modulus n</label><input id="n" name="n" value="5" maxlength="50" required spellcheck="false" autocomplete="off"></div>
+</div>
+<div class="actions"><button id="compute" type="submit">Compute both conditions</button></div>
+</form>
+<h3>Load an example, then compute</h3>
+<div class="examples">
+<button type="button" class="secondary" data-example="coprime">Coprime moduli</button>
+<button type="button" class="secondary" data-example="shared">Compatible shared factors</button>
+<button type="button" class="secondary" data-example="contradiction">A contradiction</button>
+<button type="button" class="secondary" data-example="negative">Negative residues</button>
+<button type="button" class="secondary" data-example="redundant">One redundant condition</button>
+<button type="button" class="secondary" data-example="large">Beyond Number precision</button>
+</div>
+<p id="status" class="notice" role="status"></p>
+<p id="error" class="error" role="alert"></p>
+</section>
+
+<section id="result" class="card" hidden aria-labelledby="outcome">
+<h2 id="outcome" class="formula"></h2>
+<p id="outcome-detail"></p>
+<h3>The exact construction</h3>
+<ol id="proof"></ol>
+<p class="hint">All arithmetic above uses exact integers. A canonical representative is one name for a whole class. The parameter j ranges over every integer, including negative integers.</p>
+</section>
+
+<section class="card" aria-labelledby="inspect-title">
+<h2 id="inspect-title">Inspect one integer</h2>
+<form id="probe-form">
+<label for="probe">Integer x · at most 72 decimal digits excluding sign</label>
+<input id="probe" name="probe" value="0" maxlength="104" required spellcheck="false" autocomplete="off" disabled>
+<div class="actions">
+<button id="inspect-button" type="submit" disabled>Inspect</button>
+<button id="use-solution" type="button" class="secondary" disabled>Inspect least nonnegative solution</button>
+</div>
+</form>
+<p id="inspection-status" role="status" class="hint"></p>
+<div id="inspection" hidden>
+<h3>Selected integer</h3><p id="selected-integer"></p><p id="selected-result"></p>
+<h3>A bounded window, with every integer retained</h3>
+<p id="window-caption"></p>
+<p class="hint">Large filled dots mark matches; small dots mark nonmatches. Lane A tests the first condition, B the second, and Both their intersection. Horizontal numbers are integer offsets 0–23. The exact table also states each match in words.</p>
+<div class="scroll" tabindex="0" aria-label="Scrollable residue match lanes"><div id="lanes"></div></div>
+<details id="exact-table"><summary>Inspect all 24 exact rows</summary>
+<div class="scroll" tabindex="0" aria-label="Scrollable exact integer table">
+<table><caption>Each selected integer and its two canonical remainders</caption>
+<thead><tr><th scope="col">Offset</th><th scope="col">Integer x</th><th scope="col">Remainder A</th><th scope="col">Condition A</th><th scope="col">Remainder B</th><th scope="col">Condition B</th><th scope="col">Together</th></tr></thead>
+<tbody id="window-body"></tbody></table></div></details>
+</div>
+<div class="actions"><button id="download-observation" type="button" disabled>Download exact observation</button></div>
+</section>
+
+<section class="card" aria-labelledby="learn-title">
+<h2 id="learn-title">Practice the connections</h2>
+<p>The original fourteen-question lesson connects residue classes, inverses, compatibility, the construction and the complete solution class. Download it and choose it under <strong>Bring your own lesson</strong> in RecallWeave, then review the preview and explicitly start the deck. Its ordinary feedback, review and separate practice remain available.</p>
+<div class="actions"><button id="download-course" type="button" class="secondary">Download course JSON</button><button id="download-guide" type="button" class="secondary">Download worked guide</button></div>
+<p><a href="../demo.html">Open the existing RecallWeave learner</a> · <a href="euclidean-algorithm-explorer.html">Revisit Euclid and integer combinations</a></p>
+</section>
+<footer>
+<p>Compatible means an integer exists, not that one falls inside every chosen window. No approximation, period sampling or search cutoff decides compatibility. The integer lab does not establish real-world schedules, security suitability or learning effectiveness.</p>
+<p>Original lesson and examples by RecallWeave contributors. Mathematical background: <a href="https://ocw.mit.edu/courses/18-781-theory-of-numbers-spring-2012/resources/mit18_781s12_lec5/">MIT OpenCourseWare, Theory of Numbers, Lecture 5</a>. Opening that optional source link leaves this offline file.</p>
+</footer>
+</main>
+<script>
+'use strict';
+const CONGRUENCES_COURSE_TEXT = "{\n  \"format\": \"recallweave-deck/1\",\n  \"title\": \"Congruences together: when two remainder conditions agree\",\n  \"attribution\": \"RecallWeave contributors. Original questions, explanations, numerical examples and presentation. Mathematical background: MIT OpenCourseWare, Abhinav Kumar, 18.781 Theory of Numbers, Spring 2012, Lecture 5, Linear Congruences and the Chinese Remainder Theorem (https://ocw.mit.edu/courses/18-781-theory-of-numbers-spring-2012/7b36e2ada32c5ed0638783d4e66af60c_MIT18_781S12_lec5.pdf). No source exercise, passage or figure is reproduced.\",\n  \"license\": \"Original lesson material may be used, adapted and redistributed with attribution to RecallWeave contributors. The linked MIT material retains its own terms and is not reproduced.\",\n  \"concepts\": [\n    \"Residue classes\",\n    \"Modular inverses\",\n    \"Compatibility\",\n    \"Constructing a solution\",\n    \"Complete solution classes\"\n  ],\n  \"items\": [\n    {\n      \"id\": \"congruences-residue-1\",\n      \"concept\": \"Residue classes\",\n      \"prerequisites\": [],\n      \"prompt\": \"Which number is the canonical remainder of −14 modulo 5? A canonical remainder r satisfies 0 ≤ r \u003c 5.\",\n      \"options\": [\n        \"−4\",\n        \"4\",\n        \"1\",\n        \"0\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"The identity −14 = (−3) × 5 + 1 has remainder 1 in the required range. The negative remainder −4 also differs from −14 by a multiple of 5, but is not the canonical representative. Neither 4 nor 0 is congruent to −14 modulo 5.\",\n      \"transfer\": \"Find the canonical remainder of −23 modulo 6. Verify it by writing −23 = 6q + r.\"\n    },\n    {\n      \"id\": \"congruences-residue-2\",\n      \"concept\": \"Residue classes\",\n      \"prerequisites\": [],\n      \"prompt\": \"Which list contains only integers congruent to 3 modulo 7?\",\n      \"options\": [\n        \"−11, 3, 17\",\n        \"−7, 0, 7\",\n        \"−4, 4, 11\",\n        \"3, 7, 10\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"Subtracting 3 from −11, 3 and 17 gives −14, 0 and 14, each divisible by 7. A congruence describes infinitely many integers, including negative ones; it is not an equation that forces x = 3.\",\n      \"transfer\": \"Write three other members of this residue class, including a negative integer, and check their differences from 3.\"\n    },\n    {\n      \"id\": \"congruences-residue-3\",\n      \"concept\": \"Residue classes\",\n      \"prerequisites\": [],\n      \"prompt\": \"What restriction does x ≡ 4 (mod 1) impose on an integer x?\",\n      \"options\": [\n        \"x must equal 4.\",\n        \"x must be positive.\",\n        \"x must be a multiple of 4.\",\n        \"It imposes no restriction.\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"Every integer difference x − 4 is divisible by 1. The sole canonical residue modulo 1 is zero, so normalizing the written residue 4 gives 0. Modulus 1 is valid and does not discard any integer candidate.\",\n      \"transfer\": \"Combine x ≡ 4 (mod 1) with x ≡ 3 (mod 8). Give the least nonnegative solution and the period.\"\n    },\n    {\n      \"id\": \"congruences-inverse-1\",\n      \"concept\": \"Modular inverses\",\n      \"prerequisites\": [\n        \"Residue classes\"\n      ],\n      \"prompt\": \"Which integer is the multiplicative inverse of 7 modulo 11?\",\n      \"options\": [\n        \"4\",\n        \"8\",\n        \"7\",\n        \"3\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"7 × 8 = 56 = 5 × 11 + 1, so 8 is an inverse. The other products have remainders 6, 5 and 10. An inverse is a multiplicative identity witness modulo the modulus, not an ordinary fraction.\",\n      \"transfer\": \"Use the inverse to solve 7k ≡ 2 (mod 11), and check your k in the original congruence.\"\n    },\n    {\n      \"id\": \"congruences-inverse-2\",\n      \"concept\": \"Modular inverses\",\n      \"prerequisites\": [\n        \"Residue classes\"\n      ],\n      \"prompt\": \"Does 6 have a multiplicative inverse modulo 9?\",\n      \"options\": [\n        \"Yes: the inverse is 6.\",\n        \"Yes: the inverse is 3.\",\n        \"No: every 6k is divisible by 3.\",\n        \"No: inverses require a prime input.\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"If 6k were congruent to 1 modulo 9, then 6k − 1 would be divisible by 9 and hence by 3. But 6k is divisible by 3 and 1 is not. The obstruction is gcd(6, 9) = 3, not whether the input is prime.\",\n      \"transfer\": \"Explain why 8 does have an inverse modulo 15 although both numbers are composite. Find one witness.\"\n    },\n    {\n      \"id\": \"congruences-compatible-1\",\n      \"concept\": \"Compatibility\",\n      \"prerequisites\": [\n        \"Residue classes\"\n      ],\n      \"prompt\": \"For x ≡ 2 (mod 6) and x ≡ 5 (mod 9), which compatibility check is correct?\",\n      \"options\": [\n        \"gcd 3 divides difference 3, so a solution exists.\",\n        \"gcd 3 differs from 1, so no solution exists.\",\n        \"Product 54 divides difference 3, so a solution exists.\",\n        \"Residues 2 and 5 differ, so no solution exists.\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"The gcd is 3 and the normalized residue difference is 5 − 2 = 3. Divisibility by the gcd is the condition. Shared factors do not automatically cause a contradiction; here 14 leaves remainders 2 and 5. Coprime moduli guarantee compatibility for every residue pair, but they are not necessary for this particular pair.\",\n      \"transfer\": \"Change only the second residue so the system becomes incompatible. State the new difference and its remainder modulo the gcd.\"\n    },\n    {\n      \"id\": \"congruences-compatible-2\",\n      \"concept\": \"Compatibility\",\n      \"prerequisites\": [\n        \"Residue classes\"\n      ],\n      \"prompt\": \"Why is there no integer satisfying x ≡ 1 (mod 4) and x ≡ 2 (mod 6)?\",\n      \"options\": [\n        \"The two moduli are different.\",\n        \"The product of the moduli is too large.\",\n        \"Every nonzero pair of residues is incompatible.\",\n        \"The first condition requires odd x; the second requires even x.\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"The first class consists of odd integers and the second of even integers. Equivalently, gcd(4, 6) = 2 does not divide the difference 2 − 1 = 1. This is an exact contradiction, not a failed search within a small displayed range.\",\n      \"transfer\": \"Replace the second residue with an odd one and determine whether the two constraints become compatible.\"\n    },\n    {\n      \"id\": \"congruences-compatible-3\",\n      \"concept\": \"Compatibility\",\n      \"prerequisites\": [\n        \"Residue classes\"\n      ],\n      \"prompt\": \"How do x ≡ 6 (mod 7) and x ≡ −1 (mod 7) combine?\",\n      \"options\": [\n        \"They contradict because the written residues differ.\",\n        \"They are the same class, x ≡ 6 (mod 7).\",\n        \"They give the single integer x = 6.\",\n        \"They repeat only every 49 integers.\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"−1 normalizes to 6 modulo 7. Both conditions select the same integers. Repeating an identical condition adds no restriction and does not multiply its period. The complete class is 6 + 7k for integer k.\",\n      \"transfer\": \"Give two differently written residues modulo 9 that describe the same class, then two that describe incompatible classes.\"\n    },\n    {\n      \"id\": \"congruences-construct-1\",\n      \"concept\": \"Constructing a solution\",\n      \"prerequisites\": [\n        \"Modular inverses\",\n        \"Compatibility\"\n      ],\n      \"prompt\": \"What is the least nonnegative integer satisfying x ≡ 3 (mod 4) and x ≡ 2 (mod 5)?\",\n      \"options\": [\n        \"3\",\n        \"12\",\n        \"7\",\n        \"17\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"The integers 3, 7, 11, 15, 19 are the first representatives of the first class below 20. Only 7 has remainder 2 modulo 5. Check both equations: 7 = 1 × 4 + 3 and 7 = 1 × 5 + 2. The integer 17 meets the second condition but not the first.\",\n      \"transfer\": \"Find the next positive solution and one negative solution. Verify both remainders using nonnegative canonical residues.\"\n    },\n    {\n      \"id\": \"congruences-construct-2\",\n      \"concept\": \"Constructing a solution\",\n      \"prerequisites\": [\n        \"Modular inverses\",\n        \"Compatibility\"\n      ],\n      \"prompt\": \"For x = 2 + 6k to also satisfy x ≡ 5 (mod 9), divide 6k ≡ 3 (mod 9) by gcd 3. The reduced equation is 2k ≡ 1 (mod 3). Which k is its canonical solution?\",\n      \"options\": [\n        \"0\",\n        \"1\",\n        \"3\",\n        \"2\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"Modulo 3, the inverse of 2 is 2 because 2 × 2 = 4 ≡ 1. Thus k ≡ 2, producing x = 2 + 6 × 2 = 14. Dividing the coefficient, target and modulus by their common gcd preserves the appropriate solution class for k; dividing only the target would not.\",\n      \"transfer\": \"Starting from the identity (−1) × 6 + 1 × 9 = 3, explain how the coefficient −1 becomes the inverse 2 of 6/3 modulo 9/3.\"\n    },\n    {\n      \"id\": \"congruences-construct-3\",\n      \"concept\": \"Constructing a solution\",\n      \"prerequisites\": [\n        \"Modular inverses\",\n        \"Compatibility\"\n      ],\n      \"prompt\": \"For x ≡ 5 (mod 12) and x ≡ 1 (mod 4), the reduced second modulus is 4/gcd(12, 4) = 1. What does this mean?\",\n      \"options\": [\n        \"The second condition adds no restriction; x = 5 + 12k.\",\n        \"The input is invalid because a reduced modulus is 1.\",\n        \"The system has no solution because inverse modulo 1 is missing.\",\n        \"The period becomes 48 because both moduli must be multiplied.\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"Every integer 5 + 12k has remainder 1 modulo 4. The canonical multiplier modulo 1 is zero, so no inverse operation is needed. The least nonnegative solution is 5 and the period remains 12. The explorer labels this case directly rather than inventing an ordinary inverse modulo 1.\",\n      \"transfer\": \"Reverse the order of the two congruences and show that the least nonnegative solution and period are unchanged.\"\n    },\n    {\n      \"id\": \"congruences-class-1\",\n      \"concept\": \"Complete solution classes\",\n      \"prerequisites\": [\n        \"Constructing a solution\"\n      ],\n      \"prompt\": \"For the solution x ≡ 7 (mod 20), which description gives every integer solution?\",\n      \"options\": [\n        \"Only x = 7.\",\n        \"x = 7 + 20k for any integer k.\",\n        \"x = 7k for any integer k.\",\n        \"x = 20 + 7k for any integer k.\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"The integer parameter k may be positive, zero or negative. For example, k = −1, 0, 1 gives −13, 7 and 27. A least nonnegative representative names a whole class; it is not the only solution and is not a promise about a physical schedule.\",\n      \"transfer\": \"If you want only solutions in the integer interval [0, 100], list them and explain why restricting the interval is a separate condition.\"\n    },\n    {\n      \"id\": \"congruences-class-2\",\n      \"concept\": \"Complete solution classes\",\n      \"prerequisites\": [\n        \"Compatibility\",\n        \"Constructing a solution\"\n      ],\n      \"prompt\": \"Compatible conditions with moduli 6 and 9 repeat together after what least positive period?\",\n      \"options\": [\n        \"54\",\n        \"3\",\n        \"18\",\n        \"15\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"A difference between common solutions must be divisible by both moduli, so it must be a multiple of lcm(6, 9) = 6 × 9 / 3 = 18. The product 54 repeats but is not least; gcd 3 does not preserve either remainder in general. For the residues 2 and 5, the class is 14 + 18k.\",\n      \"transfer\": \"Give the least period for compatible constraints with moduli 8 and 12. Explain why their product is unnecessarily large.\"\n    },\n    {\n      \"id\": \"congruences-class-3\",\n      \"concept\": \"Complete solution classes\",\n      \"prerequisites\": [\n        \"Constructing a solution\"\n      ],\n      \"prompt\": \"An inspector displays 24 consecutive integers and none matches both residue conditions. What can you conclude from that display alone?\",\n      \"options\": [\n        \"The whole system is incompatible.\",\n        \"The least solution must be negative.\",\n        \"The period must be less than 24.\",\n        \"That particular 24-integer window contains no solution.\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"A compatible system may have a period much larger than the displayed window and its first solution may lie elsewhere. The exact gcd/difference test establishes compatibility; a bounded display only illustrates its chosen integers. For example, x ≡ 40 (mod 101) with a redundant modulus-1 condition has no solution among 0 through 23.\",\n      \"transfer\": \"Choose a compatible system whose first solution lies beyond 23. Explain how the exact result and the bounded display can agree.\"\n    }\n  ]\n}\n";
+const CONGRUENCES_GUIDE_TEXT = "# Congruences together: a common integer class\n\nOpen [the congruence lab](congruences-explorer.html) directly in a browser. The file is self-contained and needs no server, dependency, connection or account. Enter two conditions, choose **Compute both conditions**, and inspect the exact proof and a selected integer. The original [fourteen-question lesson](congruences.json) works through RecallWeave's existing **Bring your own lesson** preview and explicit start, feedback, review, separate practice and saved notes.\n\nThe preceding [Euclid course](euclidean-algorithm.md) develops gcd and integer combinations. This new lesson uses those ideas without modifying that course or the learner. It covers exactly two remainder conditions, not arbitrary systems or an inferred real-world schedule.\n\n## Remainders and the complete class\n\nFor a positive integer modulus m, x ≡ a (mod m) means that m divides x − a. The canonical representative is the unique r in 0 ≤ r \u003c m. Thus −14 and 1 describe the same class modulo 5. A class includes negative integers: x ≡ 7 (mod 20) means x = 7 + 20j for every integer j, including −1.\n\nModulo 1 every integer has canonical remainder zero, so that condition imposes no restriction. The lab accepts modulus 1 explicitly. Zero or negative moduli refuse rather than silently choosing a different convention.\n\n## From two conditions to one exact construction\n\nNormalize the supplied residues to a and b. A common solution has the form x = a + mk, and its second condition becomes\n\n    mk ≡ b − a (mod n).\n\nLet g = gcd(m, n). If a solution exists, g divides m, n and therefore b − a. When g does divide that difference, set M = m/g, N = n/g and d = (b − a)/g. The reduced equation is\n\n    Mk ≡ d (mod N).\n\nThe exact extended Euclidean calculation produces integers s and t satisfying sm + tn = g. Dividing by g gives sM + tN = 1. When N > 1, the canonical residue of s modulo N is an inverse of M. Then k = sd modulo N solves the reduced equation. When N = 1, every multiplier satisfies the reduced condition; the lab chooses k = 0 and explicitly records no inverse.\n\nSubstitute x = a + mk and normalize modulo L = mN = lcm(m, n). This produces the least nonnegative solution x0. Every x0 + Lj is a solution. Conversely, the difference between any two common solutions is divisible by both m and n and hence by L. Therefore this single class contains every integer solution, and L is its least positive period.\n\nIf the gcd fails to divide the residue difference, the lab presents that contradiction. It does not invent a solution, rely on a finite search, or interpret an empty displayed window as impossibility.\n\nThis derivation applies the linear-congruence reduction and inverse construction discussed in [MIT OpenCourseWare, Abhinav Kumar, Theory of Numbers, Lecture 5](https://ocw.mit.edu/courses/18-781-theory-of-numbers-spring-2012/7b36e2ada32c5ed0638783d4e66af60c_MIT18_781S12_lec5.pdf). The pairwise-coprime Chinese remainder theorem is the special case g = 1, which guarantees compatibility for every pair of residues. Shared factors require the compatibility check; they do not automatically imply failure. All examples, questions and presentation here are original.\n\n## Worked contrasts\n\n| Conditions | Compatibility and result |\n| --- | --- |\n| x ≡ 3 (mod 4), x ≡ 2 (mod 5) | g = 1. The least solution is 7; every solution is 7 + 20j. |\n| x ≡ 2 (mod 6), x ≡ 5 (mod 9) | g = 3 divides difference 3. Reduced 2k ≡ 1 (mod 3) gives k = 2, x0 = 14, period 18. |\n| x ≡ 1 (mod 4), x ≡ 2 (mod 6) | g = 2 does not divide difference 1. One condition is odd, the other even: no solution. |\n| x ≡ −14 (mod 5), x ≡ −1 (mod 7) | Normalize to 1 and 6. The least solution is 6, period 35. |\n| x ≡ 5 (mod 12), x ≡ 1 (mod 4) | The second condition is redundant. Reduced N = 1; x0 = 5, period 12, no inverse needed. |\n| x ≡ 6 (mod 7), x ≡ −1 (mod 7) | Identical classes after normalization. x0 = 6 and period 7. |\n| x ≡ 0 (mod 1), x ≡ 9007199254740993 (mod 999999999999999999) | Modulus 1 removes no integers. The exact first solution is 9007199254740993, beyond Number's safe-integer range; period 999999999999999999. |\n\nReversing the order of the two conditions can change the displayed multiplier and Bézout coefficients. It cannot change compatibility, x0 or L. A Bézout witness is not unique; its exact identity is what matters.\n\n## Input, precision and interaction boundaries\n\nResidues and moduli are decimal text, at most 18 digits excluding an optional + or − sign, and moduli must be positive. Leading zeros count toward the digit bound. Whitespace is trimmed for parsing, while the applied raw text is retained in the observation. Each input also has a total-text bound of 50 characters. Empty input, fractions, scientific notation, hexadecimal text and nondecimal characters refuse.\n\nEvery arithmetic identity, remainder, coefficient, solution and period uses JavaScript BigInt. The serialized integer values are decimal strings, so JSON does not round them. Only bounded row offsets and diagram positions use Number. A large least common multiple is never expanded into all of its members.\n\nThe inspector accepts a signed whole integer of at most 72 digits excluding sign and a total-text bound of 104 characters. It displays that integer and its next 23 successors. A successor may have an additional digit: it is computed exactly, not reread through an input bound. The lane diagram's horizontal coordinates are offsets 0–23 from the chosen start. The accompanying exact table retains all 24 integers, both canonical remainders and textual match states. Large values remain literal; the graph is not a floating-point picture of a whole period.\n\nComputing a compatible pair initially inspects x0. An incompatible pair initially inspects zero, with the contradiction separately visible. **Inspect least nonnegative solution** is unavailable for an incompatible pair. Loading an example changes the input fields and retires the old result; computing is explicit. Editing a condition retires both its old proof and inspection. Editing only the inspected integer retires that window and observation download until **Inspect** succeeds. No stale calculation is presented as current input.\n\n## Keep an observation or a lesson\n\n**Download exact observation** records format `recallweave-congruence-observation/1`, the applied input text, normalized conditions, gcd/Bézout witness, compatibility remainder, solution (or null), and the entire selected 24-row window. It is a mathematical inspection record, separate from RecallWeave's learner-answer archives. The lab does not import observations or treat edited JSON as independently verified evidence.\n\n**Download course JSON** and **Download worked guide** save the exact embedded source texts. In RecallWeave, preview the JSON then explicitly start the deck. The existing learner may shuffle displayed answer letters; answer identity is tied to the original option, not its shown letter. These downloads do not change a learning session, write browser storage or make a network request.\n\nKeep a downloaded file before reloading if you want to retain the observation. A prepared browser download still needs the browser's ordinary save outcome; the page does not claim it has verified your destination filesystem.\n\n## Original answer and transfer guide\n\nThe correct option text below is canonical; the learner may display different letters.\n\n### 1. congruences-residue-1\n\n**1**\n\nThe identity −14 = (−3) × 5 + 1 has remainder 1 in the required range. The negative remainder −4 also differs from −14 by a multiple of 5, but is not the canonical representative. Neither 4 nor 0 is congruent to −14 modulo 5.\n\nExample transfer response: −23 = (−4) × 6 + 1, so the canonical remainder is 1.\n\n### 2. congruences-residue-2\n\n**−11, 3, 17**\n\nSubtracting 3 from −11, 3 and 17 gives −14, 0 and 14, each divisible by 7. A congruence describes infinitely many integers, including negative ones; it is not an equation that forces x = 3.\n\nExample transfer response: Examples are −18, 10 and 24. Their differences from 3 are −21, 7 and 21.\n\n### 3. congruences-residue-3\n\n**It imposes no restriction.**\n\nEvery integer difference x − 4 is divisible by 1. The sole canonical residue modulo 1 is zero, so normalizing the written residue 4 gives 0. Modulus 1 is valid and does not discard any integer candidate.\n\nExample transfer response: The modulo-1 condition adds no restriction. The first solution is 3 and the period is 8.\n\n### 4. congruences-inverse-1\n\n**8**\n\n7 × 8 = 56 = 5 × 11 + 1, so 8 is an inverse. The other products have remainders 6, 5 and 10. An inverse is a multiplicative identity witness modulo the modulus, not an ordinary fraction.\n\nExample transfer response: k ≡ 8 × 2 ≡ 5 (mod 11). Check 7 × 5 = 35 ≡ 2.\n\n### 5. congruences-inverse-2\n\n**No: every 6k is divisible by 3.**\n\nIf 6k were congruent to 1 modulo 9, then 6k − 1 would be divisible by 9 and hence by 3. But 6k is divisible by 3 and 1 is not. The obstruction is gcd(6, 9) = 3, not whether the input is prime.\n\nExample transfer response: 8 × 2 = 16 ≡ 1 (mod 15); gcd(8, 15) = 1 although both are composite.\n\n### 6. congruences-compatible-1\n\n**gcd 3 divides difference 3, so a solution exists.**\n\nThe gcd is 3 and the normalized residue difference is 5 − 2 = 3. Divisibility by the gcd is the condition. Shared factors do not automatically cause a contradiction; here 14 leaves remainders 2 and 5. Coprime moduli guarantee compatibility for every residue pair, but they are not necessary for this particular pair.\n\nExample transfer response: Choose second residue 4. Difference 4 − 2 = 2 has remainder 2 modulo gcd 3, so no solution exists.\n\n### 7. congruences-compatible-2\n\n**The first condition requires odd x; the second requires even x.**\n\nThe first class consists of odd integers and the second of even integers. Equivalently, gcd(4, 6) = 2 does not divide the difference 2 − 1 = 1. This is an exact contradiction, not a failed search within a small displayed range.\n\nExample transfer response: Choose second residue 3. Difference 3 − 1 = 2 is divisible by gcd 2; x = 9 is a witness.\n\n### 8. congruences-compatible-3\n\n**They are the same class, x ≡ 6 (mod 7).**\n\n−1 normalizes to 6 modulo 7. Both conditions select the same integers. Repeating an identical condition adds no restriction and does not multiply its period. The complete class is 6 + 7k for integer k.\n\nExample transfer response: −2 and 7 are the same class modulo 9. Residues 7 and 8 are distinct and cannot hold together for one modulus.\n\n### 9. congruences-construct-1\n\n**7**\n\nThe integers 3, 7, 11, 15, 19 are the first representatives of the first class below 20. Only 7 has remainder 2 modulo 5. Check both equations: 7 = 1 × 4 + 3 and 7 = 1 × 5 + 2. The integer 17 meets the second condition but not the first.\n\nExample transfer response: The next positive solution is 27 and a negative one is −13. Both retain remainders 3 modulo 4 and 2 modulo 5.\n\n### 10. congruences-construct-2\n\n**2**\n\nModulo 3, the inverse of 2 is 2 because 2 × 2 = 4 ≡ 1. Thus k ≡ 2, producing x = 2 + 6 × 2 = 14. Dividing the coefficient, target and modulus by their common gcd preserves the appropriate solution class for k; dividing only the target would not.\n\nExample transfer response: Dividing −6 + 9 = 3 by 3 gives −2 + 3 = 1. Thus −1 is an inverse of 2 modulo 3, with canonical representative 2.\n\n### 11. congruences-construct-3\n\n**The second condition adds no restriction; x = 5 + 12k.**\n\nEvery integer 5 + 12k has remainder 1 modulo 4. The canonical multiplier modulo 1 is zero, so no inverse operation is needed. The least nonnegative solution is 5 and the period remains 12. The explorer labels this case directly rather than inventing an ordinary inverse modulo 1.\n\nExample transfer response: Begin with x = 1 + 4k. Requiring remainder 5 modulo 12 gives 4k ≡ 4, hence k ≡ 1 (mod 3), x0 = 5 and period 12.\n\n### 12. congruences-class-1\n\n**x = 7 + 20k for any integer k.**\n\nThe integer parameter k may be positive, zero or negative. For example, k = −1, 0, 1 gives −13, 7 and 27. A least nonnegative representative names a whole class; it is not the only solution and is not a promise about a physical schedule.\n\nExample transfer response: The integers are 7, 27, 47, 67 and 87. The interval condition excludes the rest of the infinite class.\n\n### 13. congruences-class-2\n\n**18**\n\nA difference between common solutions must be divisible by both moduli, so it must be a multiple of lcm(6, 9) = 6 × 9 / 3 = 18. The product 54 repeats but is not least; gcd 3 does not preserve either remainder in general. For the residues 2 and 5, the class is 14 + 18k.\n\nExample transfer response: lcm(8, 12) = 24. The product 96 repeats but skips three intermediate repetitions.\n\n### 14. congruences-class-3\n\n**That particular 24-integer window contains no solution.**\n\nA compatible system may have a period much larger than the displayed window and its first solution may lie elsewhere. The exact gcd/difference test establishes compatibility; a bounded display only illustrates its chosen integers. For example, x ≡ 40 (mod 101) with a redundant modulus-1 condition has no solution among 0 through 23.\n\nExample transfer response: Use x ≡ 40 (mod 101) and x ≡ 0 (mod 1). The first solution is 40, so none occurs in the window 0–23.\n\n## Source and verification\n\nRebuild the self-contained file with `node tools/build-congruences.mjs`, or use `--check` to require exact model/UI/template/course/guide parity. The original Node test workflow discovers `tests/congruences*.test.mjs`. The dedicated browser receiver uses the repository's established Node 22 and already installed hosted Chrome environment, with fresh local files and no application dependency.\n\nThe course parser validates structure, not mathematical truth or educational effectiveness. Independent question-only and mathematical receiving, exact hosted test results and real browser receipts are retained separately at their source identities. This guide describes the intended contract; it is not itself an execution receipt.\n\nThis is a bounded mathematics lesson. It does not qualify a cryptographic implementation, business schedule, scientific instrument or learning-effectiveness claim.\n";
+/** Exact two-congruence teaching model. No Number arithmetic enters a result. */
+const CONGRUENCES_FORMAT = 'recallweave-congruences/1';
+const INPUT_DIGITS = 18;
+const PROBE_DIGITS = 72;
+const WINDOW_LENGTH = 24;
+
+function integer(text, name, digits, positive = false) {
+  if (typeof text !== 'string' || text.length > digits + 32) {
+    throw new Error(name + ' must be decimal text, at most ' + digits + ' digits excluding sign.');
+  }
+  const value = text.trim();
+  if (!new RegExp('^[+-]?\\d{1,' + digits + '}$').test(value)) {
+    throw new Error(name + ' must be a whole decimal integer, at most ' + digits + ' digits excluding sign.');
+  }
+  const parsed = BigInt(value);
+  if (positive && parsed <= 0n) throw new Error(name + ' must be positive.');
+  return parsed;
+}
+
+function mod(value, modulus) {
+  return ((value % modulus) + modulus) % modulus;
+}
+
+function bezout(a, b) {
+  let [r0, r1, s0, s1, t0, t1] = [a, b, 1n, 0n, 0n, 1n];
+  while (r1 !== 0n) {
+    const q = r0 / r1;
+    [r0, r1] = [r1, r0 - q * r1];
+    [s0, s1] = [s1, s0 - q * s1];
+    [t0, t1] = [t1, t0 - q * t1];
+  }
+  return {g: r0, s: s0, t: t0};
+}
+
+function freeze(value) {
+  if (value && typeof value === 'object') {
+    Object.values(value).forEach(freeze);
+    Object.freeze(value);
+  }
+  return value;
+}
+
+/** All four inputs are decimal strings; returned integer values are decimal strings. */
+function solveCongruences(aText, mText, bText, nText) {
+  const aInput = integer(aText, 'First residue', INPUT_DIGITS);
+  const m = integer(mText, 'First modulus', INPUT_DIGITS, true);
+  const bInput = integer(bText, 'Second residue', INPUT_DIGITS);
+  const n = integer(nText, 'Second modulus', INPUT_DIGITS, true);
+  const a = mod(aInput, m), b = mod(bInput, n);
+  const {g, s, t} = bezout(m, n);
+  const difference = b - a;
+  const remainder = mod(difference, g);
+  const compatible = remainder === 0n;
+  const reducedM = m / g, reducedN = n / g;
+  const period = m * reducedN;
+  let solution = null;
+  if (compatible) {
+    const quotient = difference / g;
+    const inverse = reducedN === 1n ? null : mod(s, reducedN);
+    const multiplier = mod(quotient * s, reducedN);
+    const unreduced = a + m * multiplier;
+    const first = mod(unreduced, period);
+    solution = {
+      first: String(first), period: String(period),
+      differenceQuotient: String(quotient),
+      reducedInverse: inverse === null ? null : String(inverse),
+      multiplier: String(multiplier), unreduced: String(unreduced),
+      residueChecks: [String(mod(first, m)), String(mod(first, n))],
+    };
+  }
+  return freeze({
+    format: CONGRUENCES_FORMAT,
+    entered: {a: aText, m: mText, b: bText, n: nText},
+    normalized: {a: String(a), m: String(m), b: String(b), n: String(n)},
+    compatibility: {
+      gcd: String(g), bezout: {s: String(s), t: String(t)},
+      difference: String(difference), differenceRemainder: String(remainder),
+      reducedM: String(reducedM), reducedN: String(reducedN), compatible,
+    },
+    solution,
+  });
+}
+
+/** Inspect one exact integer and the next 23; no period enumeration or floating plot. */
+function inspectCongruences(result, probeText) {
+  if (!result || result.format !== CONGRUENCES_FORMAT || !result.normalized) {
+    throw new Error('Compute a pair of congruences before inspecting an integer.');
+  }
+  const start = integer(probeText, 'Inspected integer', PROBE_DIGITS);
+  const {a, m, b, n} = Object.fromEntries(
+    Object.entries(result.normalized).map(([key, value]) => [key, BigInt(value)]));
+  const rows = [];
+  for (let offset = 0; offset < WINDOW_LENGTH; offset++) {
+    const x = start + BigInt(offset), first = mod(x, m), second = mod(x, n);
+    const matchesA = first === a, matchesB = second === b;
+    rows.push({
+      offset, x: String(x), remainderA: String(first), remainderB: String(second),
+      matchesA, matchesB, matchesBoth: matchesA && matchesB,
+    });
+  }
+  return freeze({entered: probeText, start: String(start), count: WINDOW_LENGTH, rows});
+}
+
+function serializeObservation(result, inspection) {
+  if (!result || result.format !== CONGRUENCES_FORMAT) throw new Error('No computed pair is available.');
+  // Recompute inspection from its admitted text rather than accepting altered row data.
+  const checked = inspectCongruences(result, inspection?.entered);
+  return JSON.stringify({format: 'recallweave-congruence-observation/1',
+    result, inspection: checked,
+    convention: 'All solutions are integers. Positive moduli; canonical residues and first solution are nonnegative. The 24-row window is consecutive, not a complete period.',
+  }, null, 2) + '\n';
+}
+
+
+function startCongruences(document, courseText, guideText) {
+  const byId = id => document.getElementById(id);
+  const fields = ['a', 'm', 'b', 'n'].map(byId);
+  const pairForm = byId('pair-form'), probeForm = byId('probe-form');
+  const probe = byId('probe'), status = byId('status'), error = byId('error');
+  const resultArea = byId('result'), proof = byId('proof');
+  const inspectArea = byId('inspection'), windowBody = byId('window-body');
+  const observationButton = byId('download-observation');
+  let applied = null, inspection = null;
+
+  const text = (tag, value, className) => {
+    const element = document.createElement(tag);
+    element.textContent = value;
+    if (className) element.className = className;
+    return element;
+  };
+  function invalidateInspection(message) {
+    inspection = null;
+    inspectArea.hidden = true;
+    windowBody.replaceChildren();
+    byId('lanes').replaceChildren();
+    observationButton.disabled = true;
+    byId('inspection-status').textContent = message;
+  }
+  function invalidatePair(message = 'Inputs changed. Choose Compute both conditions to apply them.') {
+    applied = null;
+    resultArea.hidden = true;
+    proof.replaceChildren();
+    probe.disabled = true;
+    byId('inspect-button').disabled = true;
+    byId('use-solution').disabled = true;
+    error.textContent = '';
+    invalidateInspection('No computed pair is selected.');
+    status.textContent = message;
+  }
+  function showProof(result) {
+    const {a, m, b, n} = result.normalized;
+    const c = result.compatibility, s = result.solution;
+    const steps = [
+      `Normalize: x ≡ ${a} (mod ${m}) and x ≡ ${b} (mod ${n}).`,
+      `Shared divisor: gcd(${m}, ${n}) = ${c.gcd}.`,
+      `Bézout witness: (${c.bezout.s}) × ${m} + (${c.bezout.t}) × ${n} = ${c.gcd}.`,
+      `Difference: ${b} − ${a} = ${c.difference}; its canonical remainder modulo ${c.gcd} is ${c.differenceRemainder}.`,
+    ];
+    if (s) {
+      steps.push(`Write x = ${a} + ${m}k. Divide the condition by the gcd: ${c.reducedM}k ≡ ${s.differenceQuotient} (mod ${c.reducedN}).`);
+      steps.push(s.reducedInverse === null
+        ? 'The reduced modulus is 1: every integer multiplier works. Choose canonical k = 0; no inverse is needed.'
+        : `The inverse of ${c.reducedM} modulo ${c.reducedN} is ${s.reducedInverse}. Canonical k = ${s.multiplier}.`);
+      steps.push(`Substitute: ${a} + ${m} × ${s.multiplier} = ${s.unreduced}. Reduce modulo lcm = ${m} × ${c.reducedN} = ${s.period} to get ${s.first}.`);
+      steps.push(`Check: ${s.first} mod ${m} = ${s.residueChecks[0]}; ${s.first} mod ${n} = ${s.residueChecks[1]}. Every solution is ${s.first} + ${s.period}j for an integer j.`);
+    } else {
+      steps.push(`No integer solution: the shared divisor ${c.gcd} does not divide the difference ${c.difference}. This is an exact contradiction, independent of the displayed window.`);
+    }
+    proof.replaceChildren(...steps.map(value => text('li', value)));
+    byId('outcome').textContent = s ? `x ≡ ${s.first} (mod ${s.period})` : 'These two conditions have no common integer.';
+    byId('outcome-detail').textContent = s
+      ? `Least nonnegative solution: ${s.first}. Least positive period: ${s.period}. Negative solutions are included by taking negative integer j.`
+      : 'Each condition separately has infinitely many solutions, but no integer belongs to both.';
+    resultArea.dataset.compatible = String(c.compatible);
+    resultArea.hidden = false;
+    byId('use-solution').disabled = !s;
+  }
+  function drawLanes(rows) {
+    const namespace = 'http://www.w3.org/2000/svg';
+    const svg = document.createElementNS(namespace, 'svg');
+    svg.setAttribute('viewBox', '0 0 840 160');
+    svg.setAttribute('role', 'img');
+    const title = document.createElementNS(namespace, 'title');
+    title.textContent = 'Matches among 24 consecutive integers. Horizontal labels are offsets from the inspected integer. Exact values and statuses are in the table below.';
+    svg.append(title);
+    for (const [index, label, field] of [[0, 'A', 'matchesA'], [1, 'B', 'matchesB'], [2, 'Both', 'matchesBoth']]) {
+      const caption = document.createElementNS(namespace, 'text');
+      caption.setAttribute('x', '8'); caption.setAttribute('y', String(34 + index * 42));
+      caption.textContent = label; svg.append(caption);
+      for (const row of rows) {
+        const circle = document.createElementNS(namespace, 'circle');
+        circle.setAttribute('cx', String(90 + row.offset * 31));
+        circle.setAttribute('cy', String(29 + index * 42));
+        circle.setAttribute('r', row[field] ? '8' : '3');
+        circle.setAttribute('class', row[field] ? 'match' : 'miss');
+        svg.append(circle);
+      }
+    }
+    for (const row of rows) {
+      const label = document.createElementNS(namespace, 'text');
+      label.setAttribute('x', String(90 + row.offset * 31));
+      label.setAttribute('y', '150'); label.setAttribute('text-anchor', 'middle');
+      label.textContent = String(row.offset); svg.append(label);
+    }
+    byId('lanes').replaceChildren(svg);
+  }
+  function inspect() {
+    error.textContent = '';
+    if (!applied) return invalidateInspection('Compute the pair first.');
+    try {
+      inspection = inspectCongruences(applied, probe.value);
+      const first = inspection.rows[0], {a, m, b, n} = applied.normalized;
+      byId('selected-integer').textContent = first.x;
+      byId('selected-result').textContent = `A: remainder ${first.remainderA}, needs ${a} modulo ${m} — ${first.matchesA ? 'matches' : 'does not match'}. B: remainder ${first.remainderB}, needs ${b} modulo ${n} — ${first.matchesB ? 'matches' : 'does not match'}. ${first.matchesBoth ? 'This integer satisfies both.' : 'This integer does not satisfy both.'}`;
+      byId('window-caption').textContent = `Exactly 24 consecutive integers, ${first.x} through ${inspection.rows.at(-1).x}. This is a bounded window, not a complete period. Lane labels are offsets from ${first.x}.`;
+      windowBody.replaceChildren(...inspection.rows.map(row => {
+        const tr = document.createElement('tr');
+        tr.dataset.both = String(row.matchesBoth);
+        const values = [row.offset, row.x, row.remainderA, row.matchesA ? 'A matches' : 'A does not match',
+          row.remainderB, row.matchesB ? 'B matches' : 'B does not match',
+          row.matchesBoth ? 'Both match' : 'Not both'];
+        values.forEach((value, index) => {
+          const cell = text(index === 1 ? 'th' : 'td', String(value));
+          if (index === 1) cell.scope = 'row';
+          tr.append(cell);
+        });
+        return tr;
+      }));
+      drawLanes(inspection.rows);
+      inspectArea.hidden = false;
+      observationButton.disabled = false;
+      byId('inspection-status').textContent = `Inspected integer ${first.x}; all 24 window rows are shown.`;
+    } catch (failure) {
+      invalidateInspection('Inspection refused; correct the integer and choose Inspect.');
+      error.textContent = failure.message;
+    }
+  }
+  function compute() {
+    invalidatePair('Computing both conditions.');
+    try {
+      applied = solveCongruences(...fields.map(field => field.value));
+      showProof(applied);
+      probe.disabled = false;
+      byId('inspect-button').disabled = false;
+      probe.value = applied.solution?.first ?? '0';
+      inspect();
+      status.textContent = applied.solution ? 'Compatible pair computed exactly.' : 'Incompatible pair proved exactly.';
+    } catch (failure) {
+      invalidatePair('No applied result. Correct the inputs and compute again.');
+      error.textContent = failure.message;
+    }
+  }
+  function download(name, content, type) {
+    let url;
+    try {
+      url = URL.createObjectURL(new Blob([content], {type}));
+      const anchor = document.createElement('a');
+      anchor.href = url; anchor.download = name;
+      document.body.append(anchor);
+      try { anchor.click(); } finally { anchor.remove(); }
+      setTimeout(() => URL.revokeObjectURL(url), 3000);
+      status.textContent = 'Prepared ' + name + '. Keep the saved file to retain it.';
+    } catch (failure) {
+      if (url) URL.revokeObjectURL(url);
+      error.textContent = 'Download could not be prepared: ' + failure.message;
+    }
+  }
+  fields.forEach(field => field.addEventListener('input', () => invalidatePair()));
+  probe.addEventListener('input', () => {
+    error.textContent = '';
+    invalidateInspection('Integer changed. Choose Inspect to apply it.');
+  });
+  pairForm.addEventListener('submit', event => { event.preventDefault(); compute(); });
+  probeForm.addEventListener('submit', event => { event.preventDefault(); inspect(); });
+  byId('use-solution').addEventListener('click', () => {
+    if (!applied?.solution) return;
+    probe.value = applied.solution.first;
+    inspect();
+    probe.focus();
+  });
+  const examples = {
+    coprime: ['3', '4', '2', '5'], shared: ['2', '6', '5', '9'],
+    contradiction: ['1', '4', '2', '6'], negative: ['-14', '5', '-1', '7'],
+    redundant: ['5', '12', '1', '4'],
+    large: ['0', '1', '9007199254740993', '999999999999999999'],
+  };
+  document.querySelectorAll('[data-example]').forEach(button => button.addEventListener('click', () => {
+    const values = examples[button.dataset.example];
+    fields.forEach((field, index) => { field.value = values[index]; });
+    invalidatePair('Example loaded. Choose Compute both conditions to apply it.');
+    fields[0].focus();
+  }));
+  observationButton.addEventListener('click', () => {
+    if (!applied || !inspection) return;
+    try { download('recallweave-congruence-observation.json', serializeObservation(applied, inspection), 'application/json;charset=utf-8'); }
+    catch (failure) { error.textContent = failure.message; }
+  });
+  byId('download-course').addEventListener('click', () => download('congruences.json', courseText, 'application/json;charset=utf-8'));
+  byId('download-guide').addEventListener('click', () => download('congruences.md', guideText, 'text/markdown;charset=utf-8'));
+  invalidatePair('Enter two remainder conditions, then compute their common integer solutions.');
+}
+
+startCongruences(document, CONGRUENCES_COURSE_TEXT, CONGRUENCES_GUIDE_TEXT);
+</script>
+</body>
+</html>

@@ -353,3 +353,9 @@ Build with `node tools/build_least_squares.mjs`; `--check` verifies the generate
 ## Mathematical induction: a base, a bridge, every integer
 
 [Open the offline proof lab](courses/mathematical-induction-lab.html), download the [twelve-question lesson](courses/mathematical-induction.json), or read the [worked guide](courses/mathematical-induction.md). Compare an arithmetic sum with a proposed formula, inspect the exact base and symbolic successor step, and see why a few matching values do not prove every case. The lab keeps its finite examples separate from the induction argument and saves an explicit proof record. Import its lesson JSON through the existing learner preview and Start this deck controls.
+
+## Solve two remainder conditions together
+
+Open the [Congruences together lab](courses/congruences-explorer.html) directly from your files. Enter two signed remainders with positive moduli, then inspect an exact gcd/Bézout construction, a compatible solution class or an explicit contradiction. Shared factors, repeated conditions and modulus 1 remain distinct cases. The integer inspector shows every value in a bounded 24-integer window without rounding large integers or confusing an empty window with impossibility.
+
+Download the exact applied observation, the original [fourteen-question course](courses/congruences.json), or its [worked guide](courses/congruences.md). Import the course through **Bring your own lesson** for the existing feedback, review, separate practice and notes flow. The lab needs no connection or automatic browser storage. Rebuild with `node tools/build-congruences.mjs`, or add `--check` to verify source parity.
