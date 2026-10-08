@@ -20,6 +20,7 @@ const original = () => ({
   ]
 });
 const file = (deck = original(), name = 'workshop.json') => new File([JSON.stringify(deck)], name, { type: 'application/json' });
+const bytes = text => new TextEncoder().encode(text).buffer;
 const settle = async () => { await setImmediate(); await setImmediate(); };
 const deferred = () => {
   let resolve, reject;
@@ -73,8 +74,8 @@ test('invalid JSON, invalid answer, oversized file and unreadable file preserve 
   const badAnswer = original(); badAnswer.items[0].answer = 3;
   const oversized = new File(['x'.repeat(MAX_DRAFT_BYTES + 1)], 'large.json');
   let oversizedRead = false;
-  oversized.text = () => { oversizedRead = true; throw new Error('Should not read oversized file'); };
-  const unreadable = file(); unreadable.text = () => Promise.reject(new Error('Private implementation detail'));
+  oversized.arrayBuffer = () => { oversizedRead = true; throw new Error('Should not read oversized file'); };
+  const unreadable = file(); unreadable.arrayBuffer = () => Promise.reject(new Error('Private implementation detail'));
   for (const [selected, error] of [[new File(['{'], 'broken.json'), /not valid JSON/], [file(badAnswer), /zero-based index/],
     [oversized, /2 MiB/], [unreadable, /could not be read/]]) {
     const root = editorFixture();
@@ -156,12 +157,12 @@ test('newest selected format wins across slow draft-to-deck and deck-to-draft re
   const deckText = JSON.stringify(original());
   for (const [first, latest, kind] of [[draftText, deckText, 'deck'], [deckText, draftText, 'draft']]) {
     const root = editorFixture(); const slow = deferred();
-    const selected = new File([first], 'earlier.json'); selected.text = () => slow.promise;
+    const selected = new File([first], 'earlier.json'); selected.arrayBuffer = () => slow.promise;
     root.select(selected);
     root.select(new File([latest], 'latest.json')); await settle();
     const label = root.control('open-preview-kind').textContent;
     const summary = root.control('open-preview-summary').textContent;
-    slow.resolve(first); await settle();
+    slow.resolve(bytes(first)); await settle();
     assert.equal(root.control('open-preview-kind').textContent, label);
     assert.equal(root.control('open-preview-summary').textContent, summary);
     root.control('replace-draft').click();
@@ -202,12 +203,12 @@ test('opening another chooser invalidates its old preview even when the chooser 
 test('a newer valid choice wins over an earlier slow success or failure', async () => {
   for (const completion of ['resolve', 'reject']) {
     const root = editorFixture();
-    const slow = deferred(); const first = file(); first.text = () => slow.promise;
+    const slow = deferred(); const first = file(); first.arrayBuffer = () => slow.promise;
     root.select(first);
     const latest = original(); latest.title = 'Latest deck'; latest.items[0].answer = 2;
     root.select(file(latest, 'latest.json')); await settle();
     const before = root.control('author-status').textContent;
-    if (completion === 'resolve') slow.resolve(JSON.stringify(original()));
+    if (completion === 'resolve') slow.resolve(bytes(JSON.stringify(original())));
     else slow.reject(new Error('Late failure'));
     await settle();
     assert.equal(root.control('author-status').textContent, before);
@@ -221,12 +222,12 @@ test('a newer valid choice wins over an earlier slow success or failure', async 
 test('cancelled or empty file selection prevents a late read from reopening a preview', async () => {
   for (const cancelledBy of ['native cancel', 'empty change']) {
     const root = editorFixture(); const before = root.draft;
-    const slow = deferred(); const selected = file(); selected.text = () => slow.promise;
+    const slow = deferred(); const selected = file(); selected.arrayBuffer = () => slow.promise;
     root.select(selected);
     if (cancelledBy === 'native cancel') root.control('open-deck').dispatchEvent(new Event('cancel'));
     else root.select(null);
     const status = root.control('author-status').textContent;
-    slow.resolve(JSON.stringify(original())); await settle();
+    slow.resolve(bytes(JSON.stringify(original()))); await settle();
     assert.equal(root.draft, before);
     assert.equal(root.calls.length, 0);
     assert.equal(root.control('open-preview').hidden, true);
@@ -238,14 +239,122 @@ test('invalid newer files invalidate an earlier pending or staged valid deck', a
   for (const slowFirst of [false, true]) {
     const root = editorFixture(); const before = root.draft;
     const slow = deferred(); const selected = file();
-    if (slowFirst) selected.text = () => slow.promise;
+    if (slowFirst) selected.arrayBuffer = () => slow.promise;
     root.select(selected); if (!slowFirst) await settle();
     root.select(new File(['not JSON'], 'invalid.json')); await settle();
-    if (slowFirst) { slow.resolve(JSON.stringify(original())); await settle(); }
+    if (slowFirst) { slow.resolve(bytes(JSON.stringify(original()))); await settle(); }
     root.control('replace-draft').click();
     assert.equal(root.draft, before);
     assert.equal(root.calls.length, 0);
     assert.equal(root.control('open-preview').hidden, true);
     assert.match(root.control('author-status').textContent, /not valid JSON/);
+  }
+});
+
+
+// Exercise actual File bytes, not replacement characters in already-decoded text.
+const rawTitleFile = (document, raw, name = 'raw-title.json') => {
+  const text = JSON.stringify(document);
+  const marker = '"BYTE_MARKER"';
+  const at = text.indexOf(marker);
+  assert.notEqual(at, -1);
+  return new File([text.slice(0, at + 1), new Uint8Array(raw), text.slice(at + marker.length - 1)], name);
+};
+const admissionDocuments = () => {
+  const draft = createDraft(); draft.title = 'BYTE_MARKER';
+  const deck = original(); deck.title = 'BYTE_MARKER';
+  return [JSON.parse(serializeAuthorDraft(draft)), deck];
+};
+
+test('malformed UTF-8 in either format refuses atomically, retires an earlier preview and allows retry', async () => {
+  const malformed = [[0x80], [0xff], [0xc0, 0xaf], [0xc2], [0xe2, 0x82], [0xf0, 0x9f, 0x92],
+    [0xe2, 0x28, 0xa1], [0xed, 0xa0, 0x80], [0xf4, 0x90, 0x80, 0x80], [0xf5, 0x80, 0x80, 0x80]];
+  for (const document of admissionDocuments()) {
+    for (const raw of malformed) {
+      const root = editorFixture(); const before = root.draft;
+      root.select(file()); await settle();
+      assert.equal(root.control('open-preview').hidden, false);
+      root.select(rawTitleFile(document, raw)); await settle();
+      root.control('replace-draft').click();
+      assert.equal(root.draft, before);
+      assert.equal(root.calls.length, 0);
+      assert.equal(root.control('open-preview').hidden, true);
+      assert.equal(root.control('replace-draft').disabled, true);
+      assert.match(root.control('author-status').textContent, /not valid UTF-8/);
+      assert.match(root.control('author-status').textContent, /current draft is unchanged/);
+      assert.equal(root.activeElement.id, 'open-deck-button');
+      root.select(file()); await settle(); root.control('replace-draft').click();
+      assert.equal(root.calls.length, 1);
+    }
+  }
+});
+
+test('literal replacement, accented, decomposed, astral and embedded BOM characters remain exact', async () => {
+  const title = 'Literal \uFFFD \u00E9 e\u0301 \uD83D\uDE80 \uFEFF text';
+  for (const document of admissionDocuments()) {
+    for (const leadingBOM of [false, true]) {
+      const selected = rawTitleFile(document, new TextEncoder().encode(title), 'literal-\u00E9.json');
+      const withBOM = leadingBOM ? new File([new Uint8Array([0xef,0xbb,0xbf]), await selected.arrayBuffer()], selected.name) : selected;
+      const root = editorFixture(); const before = root.draft;
+      root.select(withBOM); await settle();
+      assert.equal(root.draft, before);
+      assert.equal(root.calls.length, 0);
+      assert.equal(root.control('open-preview').hidden, false);
+      assert.match(root.control('open-preview-summary').textContent, /literal-\u00E9\.json/);
+      root.control('replace-draft').click();
+      assert.equal(root.draft.title, title);
+      assert.equal(root.calls.length, 1);
+    }
+  }
+});
+
+test('a second leading BOM remains JSON content and is refused as before', async () => {
+  const root = editorFixture(); const before = root.draft;
+  root.select(new File(['\uFEFF\uFEFF', JSON.stringify(original())], 'double-bom.json')); await settle();
+  assert.equal(root.draft, before);
+  assert.equal(root.calls.length, 0);
+  assert.match(root.control('author-status').textContent, /not valid JSON/);
+});
+
+test('raw bytes retain exact two-MiB admission and pre-read and post-read overflow refusal', async () => {
+  const text = serializeAuthorDraft(createDraft());
+  const exact = new File([text, ' '.repeat(MAX_DRAFT_BYTES - new TextEncoder().encode(text).byteLength)], 'exact.json');
+  assert.equal(exact.size, MAX_DRAFT_BYTES);
+  const root = editorFixture(); root.select(exact); await settle();
+  assert.equal(root.control('open-preview').hidden, false);
+  root.control('replace-draft').click();
+  assert.equal(root.calls.length, 1);
+  let reads = 0;
+  const oversized = new File([new Uint8Array(MAX_DRAFT_BYTES + 1)], 'over.json');
+  oversized.arrayBuffer = () => { reads++; throw new Error('must not read'); };
+  const dishonestSize = file(); dishonestSize.arrayBuffer = async () => new ArrayBuffer(MAX_DRAFT_BYTES + 1);
+  for (const selected of [oversized, dishonestSize]) {
+    const before = root.draft;
+    root.select(selected); await settle(); root.control('replace-draft').click();
+    assert.equal(root.draft, before);
+    assert.equal(root.calls.length, 1);
+    assert.equal(root.control('open-preview').hidden, true);
+    assert.match(root.control('author-status').textContent, /2 MiB/);
+  }
+  assert.equal(reads, 0);
+});
+
+test('late malformed bytes cannot replace a newer valid preview or overwrite a cancellation status', async () => {
+  for (const cancelLatest of [false, true]) {
+    const root = editorFixture(); const before = root.draft;
+    const slow = deferred(); const selected = file(); selected.arrayBuffer = () => slow.promise;
+    root.select(selected);
+    if (cancelLatest) root.control('open-deck').dispatchEvent(new Event('cancel'));
+    else { root.select(file()); await settle(); }
+    const status = root.control('author-status').textContent;
+    slow.resolve(new Uint8Array([0xff]).buffer); await settle();
+    assert.equal(root.control('author-status').textContent, status);
+    if (cancelLatest) {
+      root.control('replace-draft').click();
+      assert.equal(root.draft, before); assert.equal(root.calls.length, 0);
+    } else {
+      assert.equal(root.control('open-preview').hidden, false);
+      root.control('replace-draft').click(); assert.equal(root.calls.length, 1);
+    }
   }
 });

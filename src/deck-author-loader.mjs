@@ -54,10 +54,15 @@ export function mountAuthorDeckLoader(root, onReplace) {
     status.textContent = 'Reading the local file… Your current draft is unchanged.';
     try {
       if (file.size > MAX_DRAFT_BYTES) throw new Error('Choose a JSON draft or deck no larger than 2 MiB.');
-      let text;
-      try { text = await file.text(); }
+      let bytes;
+      try { bytes = await file.arrayBuffer(); }
       catch { throw new Error('The file could not be read. Choose it again.'); }
       if (request !== revision) return;
+      if (bytes.byteLength > MAX_DRAFT_BYTES) throw new Error('Choose a JSON draft or deck no larger than 2 MiB.');
+      let text;
+      // Fatal decoding refuses damaged writing; the default BOM handling matches File.text().
+      try { text = new TextDecoder('utf-8', { fatal: true }).decode(bytes); }
+      catch { throw new Error('This file is not valid UTF-8. Save it as UTF-8 JSON and choose it again.'); }
       if (text.length > MAX_DRAFT_BYTES || new TextEncoder().encode(text).byteLength > MAX_DRAFT_BYTES) {
         throw new Error('Choose a JSON draft or deck no larger than 2 MiB.');
       }
