@@ -1,0 +1,278 @@
+{
+  "format": "recallweave-deck/1",
+  "title": "Parallel plans: critical paths, slack and what a delay changes",
+  "attribution": "Original questions, examples, distractors, explanations and transfer prompts by the HAMON estate contribution 60b2c08feb01 with AI assistance. Mathematical background: Olivier de Weck, MIT OpenCourseWare ESD.36 (Fall 2012), Lecture 2, Critical Path Method; Robert Sedgewick and Kevin Wayne, Algorithms, 4th edition, CPM documentation. Exact references, assumptions and worked examples are in courses/critical-path-timing.md. No reference exercise, figure or passage is copied.",
+  "license": "Original course wording and examples: CC BY 4.0. Attribute this course and retain its source note when sharing or adapting it. Referenced materials retain their own terms.",
+  "concepts": [
+    "earliest-finish",
+    "latest-times-and-slack",
+    "critical-branches",
+    "scope-and-changes"
+  ],
+  "items": [
+    {
+      "id": "ct-early-1",
+      "concept": "earliest-finish",
+      "prerequisites": [],
+      "prompt": "Use fixed durations in abstract time units, time 0 as the earliest start, unlimited parallelism and no extra waits unless stated. X → Y means X must finish before Y starts. The project finishes when every job finishes. Jobs Scan=2 and Notes=3 have no edges. What is the earliest project finish?",
+      "options": [
+        "5 units",
+        "3 units",
+        "2 units",
+        "1 unit"
+      ],
+      "answer": 1,
+      "explanation": "Scan and Notes may both start at 0 because there is no edge between them and parallelism is unlimited. They finish at 2 and 3, so all work is complete at 3. Adding their durations would impose a serial constraint that the problem did not supply; taking the shorter duration would leave Notes unfinished.",
+      "transfer": "If one worker could do only one job at a time, this answer would no longer follow from the same assumptions. Name the missing resource constraint before proposing a different schedule."
+    },
+    {
+      "id": "ct-early-2",
+      "concept": "earliest-finish",
+      "prerequisites": [],
+      "prompt": "Use fixed durations in abstract time units, time 0 as the earliest start, unlimited parallelism and no extra waits unless stated. X → Y means X must finish before Y starts. The project finishes when every job finishes. Jobs and durations: Prep=2, Draft=3, Review=4, Pack=1. Only edges: Prep → Draft, Prep → Review, Draft → Pack, Review → Pack. What is the earliest project finish?",
+      "options": [
+        "6 units",
+        "10 units",
+        "7 units",
+        "8 units"
+      ],
+      "answer": 2,
+      "explanation": "Prep runs from 0 to 2. Draft then runs from 2 to 5 while Review runs from 2 to 6. Pack must wait for both and runs from 6 to 7. The two source-to-finish branch totals are 2+3+1=6 and 2+4+1=7; the longer requirement determines the earliest finish. The sum of all durations, 10, counts parallel work as if it were serial.",
+      "transfer": "If Draft alone took 5 rather than 3 units, recompute both branch totals. Do not assume the branch that was longest must remain the longest after an edit."
+    },
+    {
+      "id": "ct-early-3",
+      "concept": "earliest-finish",
+      "prerequisites": [],
+      "prompt": "Use fixed durations in abstract time units, time 0 as the earliest start, unlimited parallelism and no extra waits unless stated. X → Y means X must finish before Y starts. The project finishes when every job finishes. Jobs and durations: Prep=2, Draft=3, Review=4, Pack=1. Only edges: Prep → Draft, Prep → Review, Draft → Pack, Review → Pack. At what time may Pack start in an earliest-start schedule?",
+      "options": [
+        "Time 6",
+        "Time 5",
+        "Time 7",
+        "Time 9"
+      ],
+      "answer": 0,
+      "explanation": "Draft finishes at 2+3=5 and Review finishes at 2+4=6. Pack needs both, so its earliest start is max(5,6)=6. Time 5 waits for only Draft; time 7 is Pack's finish, not its start; time 9 adds Prep and both branch durations as if Draft and Review were serial.",
+      "transfer": "At a join with several prerequisites, identify the latest prerequisite finish. A predecessor finishing earlier does not release the join while another required predecessor is still running."
+    },
+    {
+      "id": "ct-early-4",
+      "concept": "earliest-finish",
+      "prerequisites": [],
+      "prompt": "Use fixed durations in abstract time units, time 0 as the earliest start, unlimited parallelism and no extra waits unless stated. X → Y means X must finish before Y starts. The project finishes when every job finishes. Jobs Load=2, Check=3 and Seal=1 have only edges Load → Check and Check → Seal. What is the earliest project finish?",
+      "options": [
+        "3 units",
+        "5 units",
+        "2 units",
+        "6 units"
+      ],
+      "answer": 3,
+      "explanation": "The arrows require a complete serial chain: Load 0–2, Check 2–5, then Seal 5–6. Unlimited parallelism does not remove dependencies, so the three durations add to 6 along this path. Taking only the largest duration would incorrectly overlap jobs that must wait for one another.",
+      "transfer": "A spare worker cannot start Check before Load finishes under this graph. To overlap those jobs, the dependency itself would need a justified change."
+    },
+    {
+      "id": "ct-slack-1",
+      "concept": "latest-times-and-slack",
+      "prerequisites": [
+        "earliest-finish"
+      ],
+      "prompt": "Use fixed durations in abstract time units, time 0 as the earliest start, unlimited parallelism and no extra waits unless stated. X → Y means X must finish before Y starts. The project finishes when every job finishes. Jobs and durations: Prep=2, Draft=3, Review=4, Pack=1. Only edges: Prep → Draft, Prep → Review, Draft → Pack, Review → Pack. Latest times use the earliest possible project finish as the deadline; total slack is latest start minus earliest start. What is Draft's latest start?",
+      "options": [
+        "Time 2",
+        "Time 4",
+        "Time 3",
+        "Time 6"
+      ],
+      "answer": 2,
+      "explanation": "The earliest project finish is 7, so Pack must start no later than 6. Draft must therefore finish by 6; subtracting its duration 3 gives latest start 3. Its earliest start is 2, which is a different quantity. Starting at 4 would make Draft finish at 7 and push Pack's finish to 8.",
+      "transfer": "Work backward from a stated deadline and subtract the job's own duration. If the allowed finish deadline changes, latest times and total slack must be recalculated."
+    },
+    {
+      "id": "ct-slack-2",
+      "concept": "latest-times-and-slack",
+      "prerequisites": [
+        "earliest-finish"
+      ],
+      "prompt": "Use fixed durations in abstract time units, time 0 as the earliest start, unlimited parallelism and no extra waits unless stated. X → Y means X must finish before Y starts. The project finishes when every job finishes. Jobs and durations: Prep=2, Draft=3, Review=4, Pack=1. Only edges: Prep → Draft, Prep → Review, Draft → Pack, Review → Pack. Latest times use the earliest possible project finish as the deadline; total slack is latest start minus earliest start. What is Draft's total slack?",
+      "options": [
+        "1 unit",
+        "3 units",
+        "0 units",
+        "2 units"
+      ],
+      "answer": 0,
+      "explanation": "Draft's earliest start is 2. To keep the project finished by 7, it may finish by 6 and start as late as 3. Total slack is therefore 3−2=1, equivalently latest finish 6 minus earliest finish 5. The job's duration 3 is not its slack; zero would describe a critical job, while 2 exceeds this branch's margin.",
+      "transfer": "Delay Draft's start from 2 to 3 while keeping its duration 3: it finishes at 6 and Pack still finishes at 7. A further one-unit delay would move the project finish."
+    },
+    {
+      "id": "ct-slack-3",
+      "concept": "latest-times-and-slack",
+      "prerequisites": [
+        "earliest-finish"
+      ],
+      "prompt": "Use fixed durations in abstract time units, time 0 as the earliest start, unlimited parallelism and no extra waits unless stated. X → Y means X must finish before Y starts. The project finishes when every job finishes. Jobs and durations: Long=5, First=1, Second=1, Join=1. Only edges: Long → Join, First → Second, Second → Join. Latest times use the earliest possible project finish as the deadline; total slack is latest start minus earliest start. Which pair gives (First's latest start, Second's latest start)?",
+      "options": [
+        "(3, 1)",
+        "(0, 4)",
+        "(3, 7)",
+        "(3, 4)"
+      ],
+      "answer": 3,
+      "explanation": "Long finishes at 5, so the earliest Join interval is 5–6 and the common deadline is 6. Working backward, Second must finish by 5 and may start at 4. First must finish by 4 and may start at 3. These latest starts are compatible with the edge First → Second; they are not independent added waiting allowances.",
+      "transfer": "Compare this latest-start schedule with First 0–1 and Second 1–2. Both starts move three units, but that describes one inherited shift of their branch, not two extra three-unit waits."
+    },
+    {
+      "id": "ct-slack-4",
+      "concept": "latest-times-and-slack",
+      "prerequisites": [
+        "earliest-finish"
+      ],
+      "prompt": "Use fixed durations in abstract time units, time 0 as the earliest start, unlimited parallelism and no extra waits unless stated. X → Y means X must finish before Y starts. The project finishes when every job finishes. Jobs and durations: Long=5, First=1, Second=1, Join=1. Only edges: Long → Join, First → Second, Second → Join. Long starts at time 0. Add a three-unit wait before First, so First starts at time 3. After First finishes, add a separate three-unit wait before Second starts. Join starts as soon as both prerequisites finish. What is the resulting project finish?",
+      "options": [
+        "6 units",
+        "9 units",
+        "12 units",
+        "8 units"
+      ],
+      "answer": 1,
+      "explanation": "First waits until 3 and runs 3–4. The separate three-unit wait after it finishes occupies 4–7, so Second runs 7–8. Long has already finished at 5; Join now runs 8–9. The project finishes at 9. With only the first wait, Second would run 4–5 and the finish would remain 6. The prompt adds a second wait rather than merely shifting both original start times by three.",
+      "transfer": "Write each added wait on the timeline before adding durations. The native companion has no arbitrary-wait input: inspect the original durations there, and reason about these two explicitly added waits separately."
+    },
+    {
+      "id": "ct-critical-1",
+      "concept": "critical-branches",
+      "prerequisites": [
+        "latest-times-and-slack"
+      ],
+      "prompt": "Use fixed durations in abstract time units, time 0 as the earliest start, unlimited parallelism and no extra waits unless stated. X → Y means X must finish before Y starts. The project finishes when every job finishes. Jobs and durations: Prep=2, Draft=4, Review=4, Pack=1. Only edges: Prep → Draft, Prep → Review, Draft → Pack, Review → Pack. Latest times use the earliest possible project finish as the deadline; total slack is latest start minus earliest start. A critical job has zero total slack. Which set contains every critical job?",
+      "options": [
+        "{Prep, Pack}",
+        "{Prep, Draft, Pack}",
+        "{Prep, Review, Pack}",
+        "{Prep, Draft, Review, Pack}"
+      ],
+      "answer": 3,
+      "explanation": "Both complete branches have duration 2+4+1=7. Prep is shared, Draft and Review each constrain Pack's start at 6, and Pack finishes at 7. Every job has equal earliest and latest start, so all four have zero slack. Choosing only one tied branch would omit another equally binding requirement.",
+      "transfer": "When two branches tie, keep both visible. A list containing one longest route is enough to show the finish value, but not enough to describe every critical job."
+    },
+    {
+      "id": "ct-critical-2",
+      "concept": "critical-branches",
+      "prerequisites": [
+        "latest-times-and-slack"
+      ],
+      "prompt": "Use fixed durations in abstract time units, time 0 as the earliest start, unlimited parallelism and no extra waits unless stated. X → Y means X must finish before Y starts. The project finishes when every job finishes. Jobs and durations: Prep=2, Draft=4, Review=4, Pack=1. Only edges: Prep → Draft, Prep → Review, Draft → Pack, Review → Pack. Change only Draft's duration from 4 to 3; keep every edge and other duration. What is the new earliest project finish?",
+      "options": [
+        "7 units",
+        "6 units",
+        "8 units",
+        "5 units"
+      ],
+      "answer": 0,
+      "explanation": "After the edit, the Draft branch lasts 2+3+1=6 while the unchanged Review branch lasts 2+4+1=7. Pack still waits for Review, so the earliest project finish stays 7. Draft now has one unit of slack. Shortening a job on one of several tied branches does not by itself shorten every limiting branch.",
+      "transfer": "To reach finish 6 in this example, reducing both Draft and Review to 3 would work. Reducing a shared critical job is a different change and should be analyzed separately."
+    },
+    {
+      "id": "ct-critical-3",
+      "concept": "critical-branches",
+      "prerequisites": [
+        "latest-times-and-slack"
+      ],
+      "prompt": "Use fixed durations in abstract time units, time 0 as the earliest start, unlimited parallelism and no extra waits unless stated. X → Y means X must finish before Y starts. The project finishes when every job finishes. Jobs and durations: Start=0, Left=2, Right=2, Done=3, Note=0. Only edges: Start → Left, Start → Right, Left → Done, Right → Done, Start → Done. Note is disconnected. Latest times use the earliest possible project finish as the deadline; total slack is latest start minus earliest start. An arrow is tight critical when both endpoints have zero slack and the source's earliest finish equals the destination's earliest start. Which statement about Start → Done is correct?",
+      "options": [
+        "It is tight critical because both endpoints have zero slack.",
+        "It is not tight critical: Start finishes at 0, while Done starts at 2.",
+        "It is not a prerequisite because Start has zero duration.",
+        "It forces Done to start at 0, regardless of Left and Right."
+      ],
+      "answer": 1,
+      "explanation": "Start has earliest finish 0. Left and Right each finish at 2, so Done cannot start before 2 despite its direct arrow from Start. Start and Done are both zero-slack jobs, but 0 is not equal to 2; therefore their direct arrow is not tight critical. The arrow remains a valid prerequisite and introduces no two-unit lag.",
+      "transfer": "Check both conditions for a tight critical arrow: critical endpoints and equality across the arrow. A redundant dependency can remain true without lying on a longest-duration route."
+    },
+    {
+      "id": "ct-critical-4",
+      "concept": "critical-branches",
+      "prerequisites": [
+        "latest-times-and-slack"
+      ],
+      "prompt": "Use fixed durations in abstract time units, time 0 as the earliest start, unlimited parallelism and no extra waits unless stated. X → Y means X must finish before Y starts. The project finishes when every job finishes. Jobs and durations: Start=0, Left=2, Right=2, Done=3, Note=0. Only edges: Start → Left, Start → Right, Left → Done, Right → Done, Start → Done. Note is disconnected. Latest times use the earliest possible project finish as the deadline; total slack is latest start minus earliest start. Which statement correctly distinguishes the two zero-duration jobs?",
+      "options": [
+        "Start and Note both have zero slack because both take no time.",
+        "Neither Start nor Note can be critical because both take no time.",
+        "Start has zero slack; disconnected Note has five units of slack.",
+        "Note has zero slack; Start has five units of slack."
+      ],
+      "answer": 2,
+      "explanation": "Start is needed before the two length-2 branches, so delaying that milestone would delay Done; its earliest and latest times are both 0. Note has no links and takes no time. It may occur anywhere from 0 through the common finish 5, giving total slack 5. Zero duration alone therefore does not determine criticality.",
+      "transfer": "If every duration in an acyclic graph were zero, the common earliest finish would also be zero, and every job's total slack would be zero under that same deadline. The deadline and dependencies matter as well as duration."
+    },
+    {
+      "id": "ct-change-1",
+      "concept": "scope-and-changes",
+      "prerequisites": [
+        "critical-branches"
+      ],
+      "prompt": "Use fixed durations in abstract time units, time 0 as the earliest start, unlimited parallelism and no extra waits unless stated. X → Y means X must finish before Y starts. The project finishes when every job finishes. Jobs and durations: Prep=2, Draft=3, Review=4, Pack=1. Only edges: Prep → Draft, Prep → Review, Draft → Pack, Review → Pack. Latest times use the earliest possible project finish as the deadline; total slack is latest start minus earliest start. Increase only Draft's duration from 3 to 4. What changes?",
+      "options": [
+        "Finish remains 7; Draft and Review now both have zero slack.",
+        "Finish becomes 8; only Draft has zero slack among the two branches.",
+        "Finish remains 7; Draft still has one unit of slack.",
+        "Finish becomes 6; both branches have one unit of slack."
+      ],
+      "answer": 0,
+      "explanation": "With Draft increased to 4, both branches last 2+4+1=7. The project still finishes at 7, but Draft has used its former one-unit margin and now has zero slack, like Review. The critical set changes even though the finish value does not. Increasing a duration cannot explain the proposed earlier finish of 6.",
+      "transfer": "A change can alter which jobs are critical without altering the total finish. Inspect the rows and critical set after an edit rather than comparing only one headline number."
+    },
+    {
+      "id": "ct-change-2",
+      "concept": "scope-and-changes",
+      "prerequisites": [
+        "critical-branches"
+      ],
+      "prompt": "Use fixed durations in abstract time units, time 0 as the earliest start, unlimited parallelism and no extra waits unless stated. X → Y means X must finish before Y starts. The project finishes when every job finishes. Jobs and durations: Prep=2, Draft=3, Review=4, Pack=1. Only edges: Prep → Draft, Prep → Review, Draft → Pack, Review → Pack. Increase only Draft's duration from 3 to 5. Recompute latest times against the new earliest project finish. Which result is correct?",
+      "options": [
+        "Finish 7; Draft and Review both have zero slack.",
+        "Finish 9; Review has two units of slack.",
+        "Finish 8; Draft and Review both have zero slack.",
+        "Finish 8; Draft has zero slack and Review has one unit."
+      ],
+      "answer": 3,
+      "explanation": "Draft now finishes at 2+5=7, so Pack runs 7–8. The new deadline is 8. Draft's latest start is still 2, giving zero slack; Review may finish by 7 and start at 3, compared with earliest start 2, so Review now has one unit of slack. The formerly critical Review branch becomes shorter than the new limiting branch.",
+      "transfer": "Latest times are measured against the specified deadline. Recompute them after a changed earliest project finish; carrying the old deadline 7 into this new calculation would answer a different question."
+    },
+    {
+      "id": "ct-change-3",
+      "concept": "scope-and-changes",
+      "prerequisites": [
+        "critical-branches"
+      ],
+      "prompt": "Use fixed durations in abstract time units, time 0 as the earliest start, unlimited parallelism and no extra waits unless stated. X → Y means X must finish before Y starts. The project finishes when every job finishes. Jobs X=1, Y=1, Z=1 and Free=2 have only edges X → Y, Y → X and Y → Z. The timing model requires a directed acyclic graph. Which report respects that model and the actual arrows?",
+      "options": [
+        "Give finish 3 by ignoring the two arrows between X and Y.",
+        "Refuse whole-plan timing: X and Y are cycle members, Z is blocked downstream, and Free is independently ready.",
+        "Refuse timing and label X, Y and Z as members of the same directed cycle.",
+        "Refuse timing and say every job is blocked, including disconnected Free."
+      ],
+      "answer": 1,
+      "explanation": "X and Y form a directed cycle because each can reach the other. Z is reachable from that cycle but has no route back, so Z is blocked downstream rather than a cycle member. Free has no incoming edge and is independently ready. The declared timing model refuses a whole-plan timing table for this cyclic graph; it neither deletes constraints nor treats the independent job as blocked.",
+      "transfer": "Separate a cyclic component from its downstream effects. Completing an unrelated ready job does not remove the cycle, and a refusal is not a numeric project finish of zero."
+    },
+    {
+      "id": "ct-change-4",
+      "concept": "scope-and-changes",
+      "prerequisites": [
+        "critical-branches"
+      ],
+      "prompt": "Use fixed durations in abstract time units, time 0 as the earliest start, unlimited parallelism and no extra waits unless stated. X → Y means X must finish before Y starts. The project finishes when every job finishes. Jobs and durations: Prep=2, Draft=3, Review=4, Pack=1. Only edges: Prep → Draft, Prep → Review, Draft → Pack, Review → Pack. The model gives an earliest finish of 7. A real team may have limited workers, calendar closures and uncertain durations, none of which was entered. Which conclusion is justified by this calculation alone?",
+      "options": [
+        "Every real team is guaranteed to finish in seven calendar days.",
+        "The result determines the exact number of workers the real team needs.",
+        "Seven is the earliest finish under the stated model; the omitted constraints need separate analysis.",
+        "Seven remains the finish even if one worker must perform all four jobs sequentially."
+      ],
+      "answer": 2,
+      "explanation": "Seven is a result of the stated deterministic durations, precedence constraints, time origin and unlimited parallelism. The calculation contains no working-day calendar, staff capacity or duration uncertainty, so it cannot guarantee a real deadline or determine required headcount. In particular, replacing unlimited parallelism with one worker changes the scheduling constraints.",
+      "transfer": "State what an input model omits before using its result elsewhere. The lesson's exact arithmetic establishes an answer for the supplied mathematical plan, not measured accuracy for a real project."
+    }
+  ]
+}

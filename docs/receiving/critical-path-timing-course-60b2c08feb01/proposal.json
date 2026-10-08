@@ -1,0 +1,436 @@
+{
+  "schema": "recallweave-critical-path-course-contract/1",
+  "frozenAt": "2026-10-08T21:24:58Z",
+  "authorLane": "estate-60b2c08feb01/repository_discovery",
+  "status": "PROPOSED_SOURCE_FENCE_NO_CANDIDATE_CONTENT_OR_SOURCE_EDITS",
+  "base": {
+    "commit": "698902f9c9c1d5c5023092b85b3632a7cb7a01ed",
+    "tree": "d6d3707b691850af7928299242631534cff89aa8",
+    "leaves": 2915
+  },
+  "gap": "The native timing explorer exists, but current main has no timing lesson JSON. The existing twelve-question graph course explicitly describes timing as an extension beyond its questions; its four concepts cover links, reachability, dependency orders and cycles/updates.",
+  "beneficiary": "A learner can predict timing outcomes, inspect the same examples in the unchanged companion, and study original timing questions through the existing import, feedback, review, practice and study-note flows.",
+  "title": "Parallel plans: critical paths, slack and what a delay changes",
+  "format": "recallweave-deck/1",
+  "size": {
+    "questions": 16,
+    "concepts": 4,
+    "questionsPerConcept": 4,
+    "optionsPerQuestion": 4
+  },
+  "concepts": [
+    {
+      "name": "earliest-finish",
+      "outcomes": [
+        "Translate finish-to-start arrows into maximum predecessor finish, not a sum of concurrent work.",
+        "Compute earliest starts/finishes and common project finish under explicit unlimited parallelism."
+      ]
+    },
+    {
+      "name": "latest-times-and-slack",
+      "outcomes": [
+        "Work backward from the earliest project finish and calculate total slack.",
+        "Distinguish an individual allowed delay from independently spendable slack along several sequential jobs."
+      ]
+    },
+    {
+      "name": "critical-branches",
+      "outcomes": [
+        "Identify all zero-slack jobs and tight critical arrows, including tied branches.",
+        "Explain why shortening one tied branch alone need not shorten project finish; separate zero-duration milestones from disconnected slack."
+      ]
+    },
+    {
+      "name": "scope-and-changes",
+      "outcomes": [
+        "Predict when a duration change exhausts slack and changes the critical set.",
+        "Refuse cyclic timing under the declared DAG model, and state that calendar, staffing, probabilistic duration and real-project guarantees are outside scope."
+      ]
+    }
+  ],
+  "assumptions": {
+    "durations": "fixed nonnegative integer abstract units",
+    "start": 0,
+    "parallelism": "unlimited",
+    "edge": "X -> Y means X must finish before Y starts",
+    "lag": 0,
+    "latestReference": "earliest project finish",
+    "timingDomain": "DAG; cycles produce no timing result"
+  },
+  "handComputedExamples": [
+    {
+      "id": "unequal-branches",
+      "jobs": [
+        "Prep",
+        "Draft",
+        "Review",
+        "Pack"
+      ],
+      "durations": [
+        2,
+        3,
+        4,
+        1
+      ],
+      "edges": [
+        [
+          "Prep",
+          "Draft"
+        ],
+        [
+          "Prep",
+          "Review"
+        ],
+        [
+          "Draft",
+          "Pack"
+        ],
+        [
+          "Review",
+          "Pack"
+        ]
+      ],
+      "rowsES_EF_LS_LF_slack": [
+        [
+          0,
+          2,
+          0,
+          2,
+          0
+        ],
+        [
+          2,
+          5,
+          3,
+          6,
+          1
+        ],
+        [
+          2,
+          6,
+          2,
+          6,
+          0
+        ],
+        [
+          6,
+          7,
+          6,
+          7,
+          0
+        ]
+      ],
+      "finish": 7,
+      "critical": [
+        "Prep",
+        "Review",
+        "Pack"
+      ],
+      "changes": [
+        "Draft 3 -> 4 makes both branches critical while finish stays 7.",
+        "Draft 3 -> 5 moves finish to 8.",
+        "Summing all four durations gives 10 and is not the earliest parallel finish."
+      ]
+    },
+    {
+      "id": "tied-branches",
+      "jobs": [
+        "Prep",
+        "Draft",
+        "Review",
+        "Pack"
+      ],
+      "durations": [
+        2,
+        4,
+        4,
+        1
+      ],
+      "edges": [
+        [
+          "Prep",
+          "Draft"
+        ],
+        [
+          "Prep",
+          "Review"
+        ],
+        [
+          "Draft",
+          "Pack"
+        ],
+        [
+          "Review",
+          "Pack"
+        ]
+      ],
+      "finish": 7,
+      "critical": [
+        "Prep",
+        "Draft",
+        "Review",
+        "Pack"
+      ],
+      "changes": [
+        "Shorten Draft alone from 4 to 3: finish remains 7.",
+        "Shorten both Draft and Review from 4 to 3: finish becomes 6."
+      ]
+    },
+    {
+      "id": "zero-milestone-and-shortcut",
+      "jobs": [
+        "Start",
+        "Left",
+        "Right",
+        "Done",
+        "Note"
+      ],
+      "durations": [
+        0,
+        2,
+        2,
+        3,
+        0
+      ],
+      "edges": [
+        [
+          "Start",
+          "Left"
+        ],
+        [
+          "Start",
+          "Right"
+        ],
+        [
+          "Left",
+          "Done"
+        ],
+        [
+          "Right",
+          "Done"
+        ],
+        [
+          "Start",
+          "Done"
+        ]
+      ],
+      "rowsES_EF_LS_LF_slack": [
+        [
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          2,
+          0,
+          2,
+          0
+        ],
+        [
+          0,
+          2,
+          0,
+          2,
+          0
+        ],
+        [
+          2,
+          5,
+          2,
+          5,
+          0
+        ],
+        [
+          0,
+          0,
+          5,
+          5,
+          5
+        ]
+      ],
+      "finish": 5,
+      "critical": [
+        "Start",
+        "Left",
+        "Right",
+        "Done"
+      ],
+      "tightCriticalEdges": [
+        [
+          "Start",
+          "Left"
+        ],
+        [
+          "Start",
+          "Right"
+        ],
+        [
+          "Left",
+          "Done"
+        ],
+        [
+          "Right",
+          "Done"
+        ]
+      ],
+      "note": "Start -> Done is a true prerequisite but not tight; the disconnected zero-duration Note has slack 5. An all-zero DAG instead has finish and slack zero for every job."
+    },
+    {
+      "id": "shared-slack-is-not-additive",
+      "jobs": [
+        "Long",
+        "First",
+        "Second",
+        "Join"
+      ],
+      "durations": [
+        5,
+        1,
+        1,
+        1
+      ],
+      "edges": [
+        [
+          "Long",
+          "Join"
+        ],
+        [
+          "First",
+          "Second"
+        ],
+        [
+          "Second",
+          "Join"
+        ]
+      ],
+      "rowsES_EF_LS_LF_slack": [
+        [
+          0,
+          5,
+          0,
+          5,
+          0
+        ],
+        [
+          0,
+          1,
+          3,
+          4,
+          3
+        ],
+        [
+          1,
+          2,
+          4,
+          5,
+          3
+        ],
+        [
+          5,
+          6,
+          5,
+          6,
+          0
+        ]
+      ],
+      "finish": 6,
+      "note": "A delay of 3 before First consumes the branch margin; adding another 3-unit wait before Second would delay Join. The two reported slacks cannot simply be summed as independent budget."
+    },
+    {
+      "id": "cycle-refusal",
+      "jobs": [
+        "X",
+        "Y",
+        "Z",
+        "Free"
+      ],
+      "durations": [
+        1,
+        1,
+        1,
+        2
+      ],
+      "edges": [
+        [
+          "X",
+          "Y"
+        ],
+        [
+          "Y",
+          "X"
+        ],
+        [
+          "Y",
+          "Z"
+        ]
+      ],
+      "cycleMembers": [
+        "X",
+        "Y"
+      ],
+      "blockedNonmembers": [
+        "Z"
+      ],
+      "independentReady": [
+        "Free"
+      ],
+      "timing": null,
+      "note": "The model refuses a whole-plan timing table; it still distinguishes cycle members, blocked descendants and the independent ready job."
+    }
+  ],
+  "negativeControls": [
+    "A copy with the unequal-branches earliest finish changed from 7 to 6 must remain schema-valid but fail the independently solved answer check.",
+    "A copy that labels Start -> Done a tight critical arrow must remain schema-valid but fail the tight-edge explanation/answer check.",
+    "Do not accept an answer solely because it agrees with an implementation; independent blind prompt solving and hand computations precede answer-key review."
+  ],
+  "proposedFence": {
+    "new": [
+      "courses/critical-path-timing.json",
+      "courses/critical-path-timing.md",
+      "tests/critical-path-timing-course.test.mjs",
+      "docs/receiving/critical-path-timing-course-60b2c08feb01/"
+    ],
+    "conditionalRootComposition": [
+      "One additive README course link"
+    ],
+    "preserve": [
+      "All existing model, explorer, template and generated page bytes",
+      "The dependency-graphs course and guide",
+      "Learner/importer/selector/reflection/archive/authoring/handout source",
+      "Catalog/offline-pack source and registrations, retained with existing owners",
+      "All workflows and runtime dependencies"
+    ]
+  },
+  "receiving": [
+    "Parse exact final deck using unchanged parseDeck; independently review every answer, distractor and transfer prompt before acceptance.",
+    "Check scenario calculations independently through exhaustive small-DAG paths or a separately authored exact schedule oracle, then compare unchanged analyzeTiming only as a distinct native compatibility check.",
+    "Run focused maintained content tests and changed-answer controls; record exact literal JSON/source pins.",
+    "Use current exact demo.html, actual file selection, preview and explicit Start this deck; cover correct/incorrect responses, complete review, practice and exact study-note export.",
+    "Demonstrate the authored examples in the existing unchanged timing companion; inspect keyboard and 375px learner behavior. No provider, account or storage action.",
+    "Ordinary hosted gates remain required but must not be triggered while the no-Actions hold is active."
+  ],
+  "sourcePins": {
+    "timingModel": "f45e8d7abbc4a2d84e2142a8094afba939d5452a",
+    "timingPage": "a955954c7d7d900612ee8111cfd29c39febc1723",
+    "graphCourse": "6e36d7113308540eb923fe5f5c83f1ba0b0ac537",
+    "graphGuide": "fedb1704e6c14b01cbf03864ac53a65ea5465d31",
+    "deckValidator": "f0f8a4b234489c2388f427633f548d56c6ed4c03",
+    "learner": "ef7bc3e27e7f161d917ced6a457fad8822802f3f",
+    "app": "df26efead1e231ce458f3ae83fa2b9d755d27982"
+  },
+  "ownership": {
+    "currentOpenIssueTitlesAndBodies": "50 original entries plus refreshed issues through #170: no critical-path/timing/slack overlap",
+    "currentCoordination": "All 104 comments after 19:00 in hamon #140 and 38 in #143 read and filtered; no new matching course claim",
+    "existingTiming": "PR114 merged b1b8a0b0 on 2026-10-08T17:46:59Z; explicitly teaching extension beyond original twelve questions; no active thread comments",
+    "limitations": "Negative searches are observations at freeze time; root must recheck just before reservation."
+  },
+  "workflowAdmission": {
+    "readAllFiveAtExactBase": true,
+    "events": "Every checked-in workflow uses pull_request and/or push main; no issues or issue_comment subscriber.",
+    "plainClaim": "A plain issue/comment is not a declared checked-in Actions trigger at this base; this does not assert external integrations disabled.",
+    "hold": "No dispatch, rerun, branch/ref/PR/merge or workflow changes by this lane."
+  }
+}

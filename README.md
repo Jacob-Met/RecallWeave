@@ -6,6 +6,25 @@
 
 Open `demo.html` directly in a browser—no server, install, build step, internet, login, API key, or user data storage is required. It is a single self-contained file with embedded CSS, JavaScript and deck. The modular source is in `index.html`, `src/`, and `data/`; to test that version locally, serve this directory with `python3 -m http.server 8080` and visit `http://localhost:8080`. Rebuild the direct-open demo with `python3 tools/make_demo.py` after source changes. No hosted endpoint is called by either version.
 
+## Understand critical paths and slack
+
+The original [sixteen-question course](courses/critical-path-timing.json) and
+[worked guide](courses/critical-path-timing.md) explain earliest and latest times,
+shared slack, tied critical branches, zero-duration milestones and the effects
+of changing a duration. Each question states its own small plan and assumptions.
+
+Download the course JSON, open `demo.html`, and choose the file under **Bring your
+own lesson**. Preview it, then select **Start this deck** to replace the current
+lesson and practice state. The existing learner supports answer explanations,
+separate practice for missed questions, reflections and **Download study notes
+(.txt)**.
+
+Open the [offline timing companion](courses/dependency-timing.html) to inspect the
+worked dependency graphs. Its fixed durations, unlimited parallel work and
+zero-lag prerequisites are a model for reasoning; the results do not account for
+staffing, calendars or uncertainty. The guide also works through extra waits by
+hand, since the companion does not accept arbitrary waits.
+
 ## Explore RC transients
 
 Open **[RC transients: where the energy goes](courses/rc-transients-lab.html)** directly in a browser to follow the response of one resistor and capacitor after an ideal source step. Compare charging, discharge, reversed polarity, a precharged capacitor returning energy to the source, resistance scaling and equilibrium. Voltage, signed current, charge, stored energy, resistor heat and source work share the same applied circuit and time cursor.
