@@ -1,0 +1,251 @@
+{
+  "format": "recallweave-deck/1",
+  "title": "Floating point: when stored coordinates change the answer",
+  "attribution": "Original RecallWeave lesson and experiments by the HAMON estate. The triangle is an observed hamon-engine precision regression, preserved here as a teaching example. The guide names the numerical and language specifications used to check the explanations.",
+  "license": "Original teaching text and examples. This contribution makes no additional reuse-license grant. The linked specifications are technical references; no standard prose, exercise or figure is copied.",
+  "concepts": [
+    "Binary representation",
+    "Spacing and ties",
+    "Range limits",
+    "Rounded arithmetic",
+    "Stored geometry",
+    "Coordinate choices",
+    "Sensitivity and scale"
+  ],
+  "items": [
+    {
+      "id": "fp-binary-eighth",
+      "concept": "Binary representation",
+      "prerequisites": [],
+      "prompt": "Which fraction has a finite binary expansion and is represented exactly by binary32?",
+      "options": [
+        "1/8",
+        "1/10",
+        "1/3",
+        "1/5"
+      ],
+      "answer": 0,
+      "explanation": "1/8 is 2^-3, so its binary expansion is 0.001. After reducing a fraction, a denominator that is a power of two permits a finite binary expansion. The other denominators contain an odd prime factor. Exact representability also needs enough precision and exponent range; 1/8 fits both.",
+      "transfer": "Reduce 6/40 and 6/48. Which reduced denominator is a power of two? Predict the exact one before checking it in the explorer."
+    },
+    {
+      "id": "fp-number-to-fround",
+      "concept": "Binary representation",
+      "prerequisites": [],
+      "prompt": "The explorer applies Math.fround to the JavaScript Number written as 0.1. Which statement describes its reference correctly?",
+      "options": [
+        "The input is the exact rational 1/10 because it was typed in decimal.",
+        "Math.fround keeps all binary64 precision and changes only the display.",
+        "The input is already a binary64 approximation; the explorer compares its exact value with the binary32 result.",
+        "Every non-integer input becomes zero."
+      ],
+      "answer": 2,
+      "explanation": "JavaScript Number supplies a binary64 value before this conversion. Math.fround produces the nearest binary32 value using ties to even, then returns that value as a Number. The explorer decodes exact fractions from the input and stored bits. Its input-to-storage error is distinct from the decimal author's original representation error.",
+      "transfer": "For 0.125 and 0.1, compare the input fraction, stored fraction, and signed error. Explain why two displayed decimals alone can hide the distinction."
+    },
+    {
+      "id": "fp-neighbors-power-two",
+      "concept": "Spacing and ties",
+      "prerequisites": [
+        "Binary representation"
+      ],
+      "prompt": "The binary32 value 16,777,216 is 2^24. Its immediate finite neighbors are 16,777,215 and 16,777,218. What follows?",
+      "options": [
+        "Both gaps must be 1 because all three values are integers.",
+        "The gap below is 1 and the gap above is 2; spacing changes at this power of two.",
+        "Every binary32 value has the same absolute gap to its neighbors.",
+        "16,777,217 is the immediate next binary32 value."
+      ],
+      "answer": 1,
+      "explanation": "Binary32 has 24 bits of precision for normal values, including the leading bit. In the interval starting at 2^24, consecutive values are two units apart. Immediately below that boundary the gap is one. A statement about spacing should identify the relevant side or interval.",
+      "transfer": "Inspect -16,777,216. Name its neighbors in increasing numerical order and explain why the gap directions swap."
+    },
+    {
+      "id": "fp-two-halfway-cases",
+      "concept": "Spacing and ties",
+      "prerequisites": [
+        "Binary representation"
+      ],
+      "prompt": "Both 16,777,217 and 16,777,219 are halfway between adjacent binary32 values. With ties to even, where do they round?",
+      "options": [
+        "16,777,216 and 16,777,218",
+        "16,777,218 and 16,777,220",
+        "Both remain unchanged",
+        "16,777,216 and 16,777,220"
+      ],
+      "answer": 3,
+      "explanation": "The tie chooses the neighbor whose retained significand ends in a zero bit. At this spacing, that selects the lower neighbor for the first input and the upper neighbor for the second. Ties to even is not a rule to always round down, toward zero, or toward the smaller absolute error: the two nearest errors tie.",
+      "transfer": "Move the first halfway input just above the midpoint. Which neighbor should win once it is no longer a tie?"
+    },
+    {
+      "id": "fp-subnormal-half",
+      "concept": "Range limits",
+      "prerequisites": [
+        "Binary representation"
+      ],
+      "prompt": "The smallest positive binary32 subnormal is 2^-149. What does the exactly representable binary64 input 2^-150 become under Math.fround?",
+      "options": [
+        "2^-149: every positive input must stay positive after conversion.",
+        "Positive zero: it is halfway between zero and 2^-149, and the tie selects zero.",
+        "Negative zero: all underflow changes the sign.",
+        "Infinity: small exponents overflow."
+      ],
+      "answer": 1,
+      "explanation": "Subnormal values provide nonzero values below the smallest normal binary32 value, but the representable set still has a smallest positive member. Half of that member is a tie with zero. A value just above this midpoint rounds to 2^-149 instead. The negative midpoint produces negative zero.",
+      "transfer": "Compare the smallest and half-smallest presets. Read the exponent and fraction bits rather than treating all tiny values as zero."
+    },
+    {
+      "id": "fp-overflow-distinction",
+      "concept": "Range limits",
+      "prerequisites": [
+        "Binary representation"
+      ],
+      "prompt": "The finite JavaScript Number 2^128 becomes positive infinity in binary32. What does this observation establish?",
+      "options": [
+        "The mathematical problem is necessarily ill-conditioned.",
+        "The input was already infinite in binary64.",
+        "The conversion has exceeded binary32's finite range.",
+        "Changing the order of any two later additions will restore the original value."
+      ],
+      "answer": 2,
+      "explanation": "The two formats have different exponent ranges. This conversion is a range failure, not by itself a diagnosis of how sensitive a mathematical problem is to perturbations. The explorer reports infinity explicitly and does not manufacture a finite error fraction for it.",
+      "transfer": "Describe a case where rescaling an intermediate could avoid overflow. What separate question would you still ask about the problem's sensitivity?"
+    },
+    {
+      "id": "fp-association-cancellation",
+      "concept": "Rounded arithmetic",
+      "prerequisites": [
+        "Spacing and ties"
+      ],
+      "prompt": "Round to binary32 after each addition. For a=100,000,000, b=-100,000,000, c=1, what are (a+b)+c and a+(b+c)?",
+      "options": [
+        "1 and 0",
+        "0 and 1",
+        "1 and 1",
+        "0 and 0"
+      ],
+      "answer": 0,
+      "explanation": "a+b cancels exactly to zero, so adding c gives 1. In the other order, b+c rounds back to -100,000,000: the contribution of 1 is lost before the outer addition. Adding a then gives zero. The exact sum of the stored inputs is 1, which is computed separately from both rounded paths.",
+      "transfer": "Use the 8 + (-8) + 1 control. Why does the same parenthesis change cause no error there?"
+    },
+    {
+      "id": "fp-widening-time",
+      "concept": "Rounded arithmetic",
+      "prerequisites": [
+        "Spacing and ties"
+      ],
+      "prompt": "An intermediate has already been rounded to binary32 and lost a small contribution. What can copying that result into binary64 do?",
+      "options": [
+        "Recover the exact original input automatically.",
+        "Guarantee that all later results are mathematically exact.",
+        "Change the binary32 result to the other nearest neighbor.",
+        "Represent the rounded value exactly; it cannot reconstruct the lost contribution."
+      ],
+      "answer": 3,
+      "explanation": "Widening preserves the information that remains. Performing an operation in a wider format before rounding can avoid some additional arithmetic error. Widening an already rounded output has a different starting point and cannot infer which of many original inputs produced it.",
+      "transfer": "Sketch two pipelines: widen before addition, and round the sum before widening. Mark the irreversible rounding boundary in each."
+    },
+    {
+      "id": "fp-triangle-counterexample",
+      "concept": "Stored geometry",
+      "prerequisites": [
+        "Rounded arithmetic"
+      ],
+      "prompt": "The triangle a=(0,0), b=(1.4,1.6), c=(2.6,3.4) has positive signed double area. After translating by (10,000,000,10,000,000) and storing binary32 coordinates, its relative vertices are (0,0), (1,2), (3,3). What is the stored signed double area?",
+      "options": [
+        "0, so the triangle has collapsed",
+        "+3, so the stored winding is unchanged",
+        "-3, so the stored winding is reversed",
+        "+0.6, because translations preserve area in exact arithmetic"
+      ],
+      "answer": 2,
+      "explanation": "The determinant is 1*3 - 2*3 = -3. Exact translation preserves the source area, but rounding the translated vertices is an additional operation. The intended decimal triangle's double area is 0.6; its binary32 source vertices differ slightly and still have positive double area. A test that rejects only zero area would miss this reversal.",
+      "transfer": "Explain why a positive determinant for the affine transform alone is insufficient to certify the orientation of the stored output vertices."
+    },
+    {
+      "id": "fp-sign-not-fidelity",
+      "concept": "Stored geometry",
+      "prerequisites": [
+        "Rounded arithmetic"
+      ],
+      "prompt": "At translation 2^24, the explorer reports relative stored vertices (0,0), (2,2), (2,4), with positive double area 4. What is justified?",
+      "options": [
+        "All geometric detail is preserved because the area is nonzero.",
+        "The winding is preserved, but the stored shape and area have changed.",
+        "A larger translation always produces the same kind of failure as a smaller one.",
+        "The intended decimal triangle also has double area 4."
+      ],
+      "answer": 1,
+      "explanation": "A sign check answers an orientation question. It does not establish accurate positions, lengths, angles, or area. Rounding depends on the individual coordinates and their neighbors; the labels preserved, reversed, and collapsed do not form a monotonic quality scale as the origin increases.",
+      "transfer": "Compare the source and stored outlines at translation zero, 10,000,000, and 2^24. State separately what happened to the sign and to the geometry."
+    },
+    {
+      "id": "fp-local-origin-boundary",
+      "concept": "Coordinate choices",
+      "prerequisites": [
+        "Stored geometry"
+      ],
+      "prompt": "Which change retains the example's local binary32 edges while allowing a large world origin?",
+      "options": [
+        "First bake the large global binary32 coordinates, then subtract the origin in binary64.",
+        "Keep only each coordinate's printed decimal label.",
+        "Check that the translation matrix has determinant one and skip output checks.",
+        "Keep the local vertices and the origin separate through the operations that need those edges."
+      ],
+      "answer": 3,
+      "explanation": "Local storage keeps the original nearby vertex differences available. If large global coordinates are rounded first, subtracting the origin later reveals differences between the rounded coordinates, including the wrong ones in this example. The local strategy stops protecting those edges if a later step bakes the same large global binary32 coordinates again.",
+      "transfer": "Identify where an application would finally combine local geometry with its world origin. Which output checks would be appropriate at that boundary?"
+    },
+    {
+      "id": "fp-source-vs-intention",
+      "concept": "Coordinate choices",
+      "prerequisites": [
+        "Stored geometry"
+      ],
+      "prompt": "An exact area calculation on the local binary32 source vertices gives a value slightly different from 3/5. Is the exact calculation necessarily wrong?",
+      "options": [
+        "No. It is exact for the quantized source vertices, which differ from the intended decimal vertices.",
+        "Yes. Exact arithmetic must always recover the author's original decimal values.",
+        "No. The difference proves that translating the source already occurred.",
+        "Yes. Binary32 values cannot be represented as exact fractions."
+      ],
+      "answer": 0,
+      "explanation": "A reference must identify its inputs. The intended decimals, the quantized local vertices, and the quantized global vertices are three different data sets. Each finite binary value is an exact rational number. Exact arithmetic on one data set cannot substitute for another without accounting for the input change.",
+      "transfer": "In the explorer, name the three double-area values and the precise coordinates each one describes."
+    },
+    {
+      "id": "fp-unit-invariant",
+      "concept": "Sensitivity and scale",
+      "prerequisites": [
+        "Stored geometry"
+      ],
+      "prompt": "In the bounded unit experiment, all coordinates and the origin are multiplied by 2^k without entering overflow or underflow. The normalized stored shape and reversal remain the same. What does this control show?",
+      "options": [
+        "Any scaling always preserves every floating-point computation.",
+        "A smaller raw area necessarily means worse conditioning.",
+        "Changing numerical units alone does not diagnose or cure this rounding failure.",
+        "The triangle's winding must reverse back when k is negative."
+      ],
+      "answer": 2,
+      "explanation": "Within this tested range, a power-of-two change of all units shifts exponents while preserving the relevant rounding pattern. Raw double area scales by 2^(2k), while the normalized geometry stays the same. General rescaling can affect range and rounding, so this controlled invariant should not be extended to all scales or all algorithms.",
+      "transfer": "Compare k=-2 and k=2. Which displayed quantities change with units, and which dimensionless or normalized quantities stay fixed?"
+    },
+    {
+      "id": "fp-sensitivity-interpretation",
+      "concept": "Sensitivity and scale",
+      "prerequisites": [
+        "Stored geometry"
+      ],
+      "prompt": "Why should the explorer's angle measure |sin(theta)| not be presented as a complete condition number for the entire coordinate pipeline?",
+      "options": [
+        "A dimensionless quantity cannot describe any geometric property.",
+        "It describes the local edges' angle, while sensitivity also depends on the problem, perturbation model, and coordinate representation.",
+        "Every triangle with small coordinates is well-conditioned.",
+        "Overflow and near-parallel edges are the same phenomenon."
+      ],
+      "answer": 1,
+      "explanation": "Nearly parallel edges make a signed area small relative to the product of edge lengths, which helps explain sensitivity of orientation to some perturbations. A full conditioning claim must specify what inputs vary, how their changes are measured, and which output is considered. Large-origin quantization, cancellation, and finite range are related practical concerns with distinct mechanisms.",
+      "transfer": "For a geometry workflow, state the output you need to trust, the allowed input perturbation, and the storage boundary. Then decide what a useful verification would measure."
+    }
+  ]
+}
