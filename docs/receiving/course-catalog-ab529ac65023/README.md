@@ -102,3 +102,46 @@ The complete log is `hosted-node-3490a7fc.log`; its exact identities
 and source pins are in `hosted-node-3490a7fc.json`.
 Real Chrome downloads, layout and learner-file admission remain a separate
 pending acceptance gate.
+
+## First composed browser attempt and preserved repair
+
+Full source e215c559 composed current main 8b82cf5b and independent receiver
+c5eaea83. Its existing Node gate, run37792122079/job113361974985, passed all218
+tests and existing demo parity on actual temporary merge
+`b4d2ca9414c1d311083f2c033809488cc94b4d0c`,
+tree `4deac13aa6809d49613777ddff2b9a3de903ce85`.
+The complete additional Node log and receipt are hosted-node-e215c559.log/json.
+
+Chrome154.0.8037.97 ran the independent driver in run37792122291/job113361975667
+on that same actual checkout. Literal metadata, all four exact HTTP downloads,
+repeat, search, injected synchronous object-URL failure with explicit retry,
+and genuine Tab/Enter passed. Seven real saved files match the raw source.
+The first delayed URL cleanup check also completed.
+
+That attempt stopped at the receiver's serial Page.enable acknowledgement for
+the actual noopener learner popup. The resume command had not yet been sent.
+The application recorded no page errors; the harness recorded the popup setup
+timeout. The learner-file handoff and direct-file/mobile stages did not run.
+
+The entire raw job log, all10 packet files (including both actual screenshots)
+and a source/hash manifest are preserved under browser-first-failure/. Root
+independently verified the552870-byte packet SHA256, every file hash and the
+complete log, and visually inspected the desktop image. These earlier results
+are retained without relabeling the attempt as successful.
+
+Receiver commit ed56c4c0 changes only configure scheduling: queue the same eight
+setup commands and the same resume command in the same order on the same
+session, then await all replies. The observer, network interception, literal
+source/byte oracles, real popup and file-input actions, no-effect checks and
+cleanup assertions remain intact. Both root and the Mac sibling independently
+checked the exact function-only delta. The packet manifest records the primary
+Playwright/Puppeteer source comparison. Actual repaired-browser execution
+remains pending at this source boundary.
+
+The temporary merge also included the independently merged reflections feature.
+Root read the exact old/current app delta: notebook creation/reset, editable
+unscored completion fields and notes export; the existing picker and explicit
+resetSession → renderQuestion callback remain. The current app47c43bbb and
+standalonefc782277 are preserved, along with the unchanged parser, picker and
+four original decks. Existing Node parity passed against that actual learner.
+Current-main README additions are retained around the exact catalog pointer.

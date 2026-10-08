@@ -245,18 +245,24 @@ async function main(settings) {
     await onPage(page, 'Input.dispatchMouseEvent', {type: 'mouseReleased', button: 'left', clickCount: 1, ...point});
   }
   async function configure(page) {
-    await onPage(page, 'Page.enable');
-    await onPage(page, 'Runtime.enable');
-    await onPage(page, 'Network.enable');
-    await onPage(page, 'Network.setCacheDisabled', {cacheDisabled: true});
-    await onPage(page, 'Network.setBypassServiceWorker', {bypass: true});
-    await onPage(page, 'Network.setBlockedURLs', {urls: ['ws://*', 'wss://*']});
-    await onPage(page, 'Fetch.enable', {patterns: [
-      {urlPattern: 'http://*', requestStage: 'Request'},
-      {urlPattern: 'https://*', requestStage: 'Request'},
-    ]});
-    await onPage(page, 'Page.addScriptToEvaluateOnNewDocument', {source: OBSERVER});
-    await onPage(page, 'Runtime.runIfWaitingForDebugger');
+    // Queue setup on the paused target before resume, then await all replies.
+    // A noopener popup can withhold Page.enable's reply until it is resumed.
+    // Interception and the init script still precede resume on this session.
+    const setup = [
+      onPage(page, 'Page.enable'),
+      onPage(page, 'Runtime.enable'),
+      onPage(page, 'Network.enable'),
+      onPage(page, 'Network.setCacheDisabled', {cacheDisabled: true}),
+      onPage(page, 'Network.setBypassServiceWorker', {bypass: true}),
+      onPage(page, 'Network.setBlockedURLs', {urls: ['ws://*', 'wss://*']}),
+      onPage(page, 'Fetch.enable', {patterns: [
+        {urlPattern: 'http://*', requestStage: 'Request'},
+        {urlPattern: 'https://*', requestStage: 'Request'},
+      ]}),
+      onPage(page, 'Page.addScriptToEvaluateOnNewDocument', {source: OBSERVER}),
+    ];
+    setup.push(onPage(page, 'Runtime.runIfWaitingForDebugger'));
+    await Promise.all(setup);
   }
   async function readyPage(targetId) {
     const page = await waitFor(() => pages.get(targetId), 'CDP page attachment');

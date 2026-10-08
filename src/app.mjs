@@ -4,6 +4,7 @@ import { validateDeck } from './deck.mjs';
 import { mountDeckPicker } from './deck-picker.mjs';
 import { createStudyNotes } from './session-export.mjs';
 import { mountTraceArchive } from './trace-archive-ui.mjs';
+import { APPLICATION_PROMPT, createReflections, itemReflection, updateReflection, updateApplicationReflection } from './reflections.mjs';
 import { orderOptions } from './answer-order.mjs';
 
 const root = document.querySelector('#session-content');
@@ -12,6 +13,7 @@ if (!dataResponse.ok) throw new Error('The local demo deck could not be loaded.'
 const bundledSource = await dataResponse.json();
 const bundledDeck = validateDeck(bundledSource);
 let deck = bundledDeck;
+let reflections = createReflections(deck.items);
 let concepts = deck.concepts;
 let optionOrders = new Map(deck.items.map(item => [item.id, orderOptions(item.options.length)]));
 let mastery = initialMastery(concepts);
@@ -56,6 +58,7 @@ function renderDeckContext() {
 
 function resetSession(nextDeck = deck) {
   deck = nextDeck;
+  reflections = createReflections(deck.items);
   concepts = deck.concepts;
   optionOrders = new Map(deck.items.map(item => [item.id, orderOptions(item.options.length)]));
   mastery = initialMastery(concepts);
@@ -124,16 +127,31 @@ function submitAnswer(item, choice) {
   setProgress();
   feedback.querySelector('button').focus();
 }
+function applicationPrompt() {
+  return deck === bundledDeck
+    ? APPLICATION_PROMPT
+    : 'Choose one connection from this deck and explain how it relates to another idea in your own words.';
+}
+
 function renderResults() {
   inPractice = false;
   review ??= createReview(deck.items, answers);
   const correct = answers.filter(answer => answer.correct).length;
-  const reflection = deck === bundledDeck
-    ? 'Trace energy from sunlight to a cell doing work. Where does the form of energy change, and what molecule transfers it to cellular processes?'
-    : 'Choose one connection from this deck and explain how it relates to another idea in your own words.';
-  root.innerHTML = `<article class="result-card"><div class="result-mark" aria-hidden="true">⌁</div><div class="card-kicker">YOUR LEARNING TRACE</div><h2 tabindex="-1">Notice the links you built.</h2><p id="first-try-summary">You made ${correct} of ${answers.length} connections on the first try. That count is a snapshot—not a measure of your ability. Review the concept estimates and choose one connection to explain in your own words.</p>${renderMastery()}${renderPracticeSummary()}<section class="review-list" aria-labelledby="review-title"><h3 id="review-title">Review the connections</h3><p>Open a question to see your first answer, the explanation, and an idea to apply.</p>${review.map(renderReviewItem).join('')}</section><div class="reflection"><strong>Apply it:</strong> ${reflection}</div><p class="source-note"><strong>${deck === bundledDeck ? 'Demo deck attribution' : 'Attribution supplied in the deck'}:</strong> ${escapeHtml(deck.attribution)}<br><strong>License supplied in the deck:</strong> ${escapeHtml(deck.license)}</p><button class="reset-button" id="reset-button">Start a fresh local session</button></article>`;
+  const reflection = applicationPrompt();
+  root.innerHTML = `<article class="result-card"><div class="result-mark" aria-hidden="true">⌁</div><div class="card-kicker">YOUR LEARNING TRACE</div><h2 tabindex="-1">Notice the links you built.</h2><p id="first-try-summary">You made ${correct} of ${answers.length} connections on the first try. That count is a snapshot—not a measure of your ability. Review the concept estimates and choose one connection to explain in your own words.</p>${renderMastery()}${renderPracticeSummary()}<section class="review-list" aria-labelledby="review-title"><h3 id="review-title">Review the connections</h3><p>Open a question to see your first answer and explanation, then write how you would apply the idea.</p>${review.map(renderReviewItem).join('')}</section><section class="reflection reflection-field" aria-labelledby="application-label"><label id="application-label" for="application-reflection">Apply it in your own words</label><p id="application-prompt">${escapeHtml(reflection)}</p><textarea id="application-reflection" rows="4" aria-describedby="application-prompt application-hint"></textarea><p id="application-hint" class="reflection-hint">Your writing is not scored. Download study notes to keep it. Starting a fresh session or another deck clears this writing.</p></section><p class="source-note"><strong>${deck === bundledDeck ? 'Demo deck attribution' : 'Attribution supplied in the deck'}:</strong> ${escapeHtml(deck.attribution)}<br><strong>License supplied in the deck:</strong> ${escapeHtml(deck.license)}</p><button class="reset-button" id="reset-button">Start a fresh local session</button></article>`;
+  root.querySelectorAll('[data-reflection-item]').forEach(field => {
+    field.value = itemReflection(reflections, field.dataset.reflectionItem);
+    field.addEventListener('input', () => {
+      reflections = updateReflection(reflections, field.dataset.reflectionItem, field.value);
+    });
+  });
+  const application = root.querySelector('#application-reflection');
+  application.value = reflections.application;
+  application.addEventListener('input', () => {
+    reflections = updateApplicationReflection(reflections, application.value);
+  });
   const resetButton = root.querySelector('#reset-button');
-  resetButton.insertAdjacentHTML('beforebegin', '<section class="practice-summary" aria-labelledby="save-notes-title"><h3 id="save-notes-title">Keep these connections</h3><p>Save your questions, first answers, explanations, and any practice answers as a text file.</p><button class="reset-button" id="save-notes-button" aria-describedby="save-notes-status">Download study notes (.txt)</button><p id="save-notes-status" role="status">Your session stays in this tab until you refresh. Download notes to keep a copy.</p></section>');
+  resetButton.insertAdjacentHTML('beforebegin', '<section class="practice-summary" aria-labelledby="save-notes-title"><h3 id="save-notes-title">Keep these connections</h3><p>Save your questions, first answers, explanations, reflections, and any practice answers as a text file.</p><button class="reset-button" id="save-notes-button" aria-describedby="save-notes-status">Download study notes (.txt)</button><p id="save-notes-status" role="status">Your session stays in this tab until you refresh. Download notes to keep a copy.</p></section>');
   root.querySelector('#save-notes-button').addEventListener('click', downloadStudyNotes);
   resetButton.addEventListener('click', () => resetSession());
   root.querySelector('#practice-button')?.addEventListener('click', () => {
@@ -149,7 +167,7 @@ function downloadStudyNotes() {
   const status = root.querySelector('#save-notes-status');
   let url;
   try {
-    const notes = createStudyNotes({deck, review, mastery, practice, conceptLabel});
+    const notes = createStudyNotes({deck, review, mastery, practice, reflections, conceptLabel, applicationPrompt: applicationPrompt()});
     url = URL.createObjectURL(new Blob([notes.text], {type: notes.mediaType}));
     const link = document.createElement('a');
     link.href = url;
@@ -173,7 +191,7 @@ function renderReviewItem(item, index) {
   const practiceAnswer = retry
     ? `<div class="review-practice-answer"><strong>Practice answer · ${retry.correct ? 'correct on retry' : 'keep reviewing'}</strong><p>${escapeHtml(item.options[retry.choice])}</p></div>`
     : '';
-  return `<details class="review-item"><summary><span class="review-label">${String(index + 1).padStart(2, '0')} · ${escapeHtml(conceptLabel(item.concept))}</span><span class="review-status ${item.correct ? 'is-correct' : 'needs-review'}">${item.correct ? 'Correct' : 'Needs review'} · first try</span><span class="review-prompt">${escapeHtml(item.prompt)}</span></summary><div class="review-body"><dl class="review-answers"><div><dt>Your first answer</dt><dd>${escapeHtml(item.options[item.choice])}</dd></div><div><dt>Correct answer</dt><dd>${escapeHtml(item.options[item.answer])}</dd></div></dl><p>${escapeHtml(item.explanation)}</p><p class="review-transfer"><strong>Apply the idea:</strong> ${escapeHtml(item.transfer)}</p>${practiceAnswer}</div></details>`;
+  return `<details class="review-item"><summary><span class="review-label">${String(index + 1).padStart(2, '0')} · ${escapeHtml(conceptLabel(item.concept))}</span><span class="review-status ${item.correct ? 'is-correct' : 'needs-review'}">${item.correct ? 'Correct' : 'Needs review'} · first try</span><span class="review-prompt">${escapeHtml(item.prompt)}</span></summary><div class="review-body"><dl class="review-answers"><div><dt>Your first answer</dt><dd>${escapeHtml(item.options[item.choice])}</dd></div><div><dt>Correct answer</dt><dd>${escapeHtml(item.options[item.answer])}</dd></div></dl><p>${escapeHtml(item.explanation)}</p><p class="review-transfer"><strong>Apply the idea:</strong> ${escapeHtml(item.transfer)}</p><div class="reflection-field"><label for="reflection-${index}">Your explanation</label><p id="reflection-hint-${index}" class="reflection-hint">Connect the idea in your own words. These notes are not scored.</p><textarea id="reflection-${index}" rows="3" data-reflection-item="${escapeHtml(item.id)}" aria-describedby="reflection-hint-${index}"></textarea></div>${practiceAnswer}</div></details>`;
 }
 
 function renderPracticeSummary() {

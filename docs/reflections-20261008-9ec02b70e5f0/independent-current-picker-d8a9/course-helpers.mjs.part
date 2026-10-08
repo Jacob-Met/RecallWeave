@@ -1,0 +1,159 @@
+// Independently added course-receiving helpers. Existing six trace helpers remain unchanged.
+const importedPrompt = 'Choose one connection from this deck and explain how it relates to another idea in your own words.';
+const bundledPrompt = 'Trace energy from sunlight to a cell doing work. Where does the form of energy change, and what molecule transfers it to cellular processes?';
+const emptyCourseWriting = course => ({notes:Object.fromEntries(course.items.map(item=>[item.id,''])),application:''});
+
+async function pickerView(page) {
+  return evaluate(page, `({hidden:document.querySelector('#deck-preview').hidden,
+    title:document.querySelector('#deck-preview-title')?.textContent ?? null,
+    status:document.querySelector('#deck-status').textContent,
+    error:document.querySelector('#deck-status').classList.contains('deck-error'),
+    fileNames:[...document.querySelector('#deck-file').files].map(file=>file.name)})`);
+}
+async function selectCourse(page, path, expectedTitle = null) {
+  await command('Page.bringToFront', {}, page);
+  const {root} = await command('DOM.getDocument', {depth:1}, page);
+  const {nodeId} = await command('DOM.querySelector', {nodeId:root.nodeId,selector:'#deck-file'}, page);
+  assert.ok(nodeId, 'The landed native deck file receiver must exist');
+  await command('DOM.setFileInputFiles', {nodeId,files:[path]}, page);
+  await waitFor(async()=> {
+    const value=await pickerView(page);
+    return expectedTitle===null ? value.error && value.hidden : !value.hidden && value.title===expectedTitle;
+  }, `${page.name} ${expectedTitle===null?'refused':'previewed'} course input`);
+  const value=await pickerView(page);
+  report.courseInputs.push({page:page.name,path,expectedTitle,...value});
+  return value;
+}
+async function startCourse(page, course) {
+  await activate(page,'#start-deck');
+  await waitFor(()=>evaluate(page,`!!document.querySelector('.question-card h2')`), `${page.name} explicit course activation`);
+  const value=await evaluate(page,`({progress:document.querySelector('#step-count').textContent,
+    current:Number(document.querySelector('[role="progressbar"]').getAttribute('aria-valuenow')),
+    total:Number(document.querySelector('[role="progressbar"]').getAttribute('aria-valuemax')),
+    notes:document.querySelectorAll('[data-reflection-item]').length,
+    application:!!document.querySelector('#application-reflection'),
+    feedback:document.querySelector('#feedback-slot').textContent,
+    traceDisabled:document.querySelector('#save-trace-button').disabled})`);
+  assert.deepEqual(value,{progress:`0 / ${course.items.length}`,current:0,total:course.items.length,notes:0,application:false,feedback:'',traceDisabled:true});
+  const picker=await pickerView(page);
+  assert.equal(picker.hidden,true);
+  assert.deepEqual(picker.fileNames,[]);
+  return value;
+}
+async function completeCourse(page, course, correctness) {
+  const trace=[];
+  for(let ordinal=0;ordinal<course.items.length;ordinal++) {
+    const prompt=await evaluate(page,`document.querySelector('.question-card h2').textContent`);
+    const item=course.items.find(value=>value.prompt===prompt);
+    assert.ok(item,'Every imported prompt must resolve to its own canonical deck');
+    assert.ok(!trace.some(row=>row.id===item.id),'Imported first answers cannot repeat an ID');
+    const correct=correctness(item,ordinal);
+    const choice=correct?item.answer:(item.answer+1)%item.options.length;
+    await chooseText(page,item,choice);
+    trace.push({id:item.id,choice,correct});
+    await activate(page,'#next-button');
+  }
+  const fields=await evaluate(page,`[...document.querySelectorAll('[data-reflection-item]')].map(node=>node.dataset.reflectionItem)`);
+  assert.deepEqual(fields,trace.map(row=>row.id));
+  assert.deepEqual([...fields].sort(),course.items.map(item=>item.id).sort());
+  return {trace,state:await firstState(page),retries:[]};
+}
+async function fillCourseWriting(page, course, prefix) {
+  const expected=emptyCourseWriting(course);
+  for(const item of [...course.items].reverse()) {
+    expected.notes[item.id]=`${prefix}/${item.id}: ${item.prompt}\nOwn course writing e\u0301 → 🧑🏽‍🔬`;
+    await editNote(page,item.id,expected.notes[item.id]);
+  }
+  expected.application=`${prefix}/application\nThis explanation belongs to the selected local course.`;
+  await replaceWriting(page,'#application-reflection',expected.application);
+  assert.deepEqual(await writing(page),expected);
+  return expected;
+}
+async function downloadCourseNotes(page,name,course,record,expected,practiceStatus,prompt) {
+  const before={first:await firstState(page),writing:await writing(page)};
+  assert.deepEqual(before.writing,expected);
+  assert.equal(await evaluate(page,`document.querySelector('#application-prompt').textContent`),prompt);
+  const old=new Set(downloads.keys());
+  await activate(page,'#save-notes-button');
+  let saved;
+  await waitFor(()=> {
+    saved=[...downloads.values()].find(value=>!old.has(value.guid)&&value.state==='completed');
+    return !!saved;
+  },name);
+  const bytes=await readFile(join(downloadPath,saved.guid));
+  const text=new TextDecoder('utf-8',{fatal:true}).decode(bytes);
+  await writeFile(join(output,name),bytes);
+  assert.match(saved.suggestedFilename,/^recallweave-study-notes-\d{4}-\d{2}-\d{2}\.txt$/);
+  assert.equal(text.split('\n')[1],course.title);
+  assert.ok(text.includes(`\n${record.trace.filter(row=>row.correct).length} of ${course.items.length} connections correct on the first try.\n`));
+  exactLine(text,'This count ','describes this session; it is not a measure of your ability.');
+  assert.ok(text.includes(`\nPRACTICE\n${practiceStatus}\n`));
+  const byId=new Map(course.items.map(item=>[item.id,item]));
+  const quoted=value=>value.split('\n').map(line=>`  > ${line}`).join('\n');
+  const paragraphs=[];
+  for(const [ordinal,row] of record.trace.entries()) {
+    const item=byId.get(row.id);
+    const marker=`\n\n${ordinal+1}. ${item.prompt}\n`;
+    const start=text.indexOf(marker);
+    assert.ok(start>=0 && text.indexOf(marker,start+1)===-1,`One actual exported paragraph for ${row.id}`);
+    const next=ordinal+1<record.trace.length?`\n\n${ordinal+2}. ${byId.get(record.trace[ordinal+1].id).prompt}\n`:'\n\nYOUR APPLICATION REFLECTION — NOT SCORED\n';
+    const end=text.indexOf(next,start+marker.length);
+    assert.ok(end>start);
+    const block=text.slice(start+marker.length,end);
+    exactLine(block,'Concept: ',item.concept);
+    exactLine(block,'Your first answer: ',item.options[row.choice]);
+    exactLine(block,'First try: ',row.correct?'correct':'needs review');
+    exactLine(block,'Correct answer: ',item.options[item.answer]);
+    exactLine(block,'Explanation: ',item.explanation);
+    exactLine(block,'Apply the idea: ',item.transfer);
+    const note=expected.notes[row.id];
+    assert.ok(block.includes(`Your explanation — reflection, not scored:\n${note?quoted(note):'  Not written.'}`));
+    for(const [id,value] of Object.entries(expected.notes)) {
+      if(id!==row.id && value) assert.ok(!block.includes(quoted(value)),`No note crossover from reused ${id}`);
+    }
+    const retry=record.retries.find(value=>value.id===row.id);
+    if(retry) {
+      exactLine(block,'Practice answer: ',item.options[retry.choice]);
+      exactLine(block,'Practice result: ',retry.choice===item.answer?'correct on retry':'keep reviewing');
+    } else if(!row.correct) exactLine(block,'Practice answer: ','not recorded.');
+    else assert.equal(block.split('\n').some(line=>line.startsWith('Practice answer: ')),false);
+    paragraphs.push({id:row.id,choice:row.choice,note,retry:retry??null});
+  }
+  const application=text.split('\n\nYOUR APPLICATION REFLECTION — NOT SCORED\n')[1].split('\n\nDECK ATTRIBUTION\n')[0];
+  assert.equal(application,`Prompt: ${prompt}\n${expected.application?quoted(expected.application):'Not written.'}`);
+  assert.ok(text.includes(`\n\nDECK ATTRIBUTION\n${course.attribution}\n${course.license}\n`));
+  if(prompt===importedPrompt) {
+    assert.ok(!text.includes(bundledPrompt),'No energy-specific prompt may leak into imported study notes');
+    assert.ok(!text.includes(deck.attribution),'Imported notes must retain their own supplied attribution');
+  }
+  assert.deepEqual({first:await firstState(page),writing:await writing(page)},before);
+  report.downloads.push({name,page:page.name,bytes:bytes.length,sha256:digest(bytes),filename:saved.suggestedFilename,
+    courseTitle:course.title,canonicalParagraphs:paragraphs,application:expected.application,prompt,practiceStatus});
+  return text;
+}
+async function downloadCourseTrace(page,name,course,record) {
+  await tracePanel(page);
+  const before={first:await firstState(page),writing:await writing(page)};
+  const old=new Set(downloads.keys());
+  await activate(page,'#save-trace-button');
+  let saved;
+  await waitFor(()=> {
+    saved=[...downloads.values()].find(value=>!old.has(value.guid)&&value.state==='completed');
+    return !!saved;
+  },name);
+  const bytes=await readFile(join(downloadPath,saved.guid));
+  const value=JSON.parse(new TextDecoder('utf-8',{fatal:true}).decode(bytes));
+  await writeFile(join(output,name),bytes);
+  assert.deepEqual(Object.keys(value).sort(),['format','version','savedAt','deck','model','firstAnswers','mastery','practice'].sort());
+  assert.deepEqual(value.deck,course);
+  assert.deepEqual(value.firstAnswers,record.trace.map(row=>({item:row.id,choice:row.choice})));
+  assert.deepEqual(value.practice,{answers:record.retries.map(row=>({item:row.id,choice:row.choice}))});
+  for(const note of [...Object.values(before.writing.notes),before.writing.application]) {
+    if(note) assert.ok(!bytes.toString('utf8').includes(note));
+  }
+  assert.deepEqual({first:await firstState(page),writing:await writing(page)},before);
+  report.traces.push({name,page:page.name,bytes:bytes.length,sha256:digest(bytes),filename:saved.suggestedFilename,
+    courseTitle:course.title,firstAnswers:value.firstAnswers,mastery:value.mastery,practice:value.practice});
+  return {value,bytes,path:join(output,name)};
+}
+

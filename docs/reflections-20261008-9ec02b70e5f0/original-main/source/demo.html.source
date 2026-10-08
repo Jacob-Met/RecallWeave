@@ -1,0 +1,581 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f4f3ed">
+  <meta name="description" content="RecallWeave helps learners connect, retrieve, and apply what they understand.">
+  <title>RecallWeave — learn the links</title>
+<style>
+:root{--paper:#f4f3ed;--ink:#202b28;--muted:#64726d;--line:#d9ddd4;--green:#245d4c;--mint:#dbe8df;--lime:#d9ef94;--orange:#bd6846;--white:#fffefa;font-family:'DM Sans',system-ui,sans-serif;color:var(--ink);background:var(--paper);font-synthesis:none}*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 7% 20%,#e9ede0 0,transparent 38%),var(--paper)}button,a,summary{font:inherit}button:focus-visible,a:focus-visible,summary:focus-visible{outline:3px solid #bd6846;outline-offset:3px}.skip-link{position:absolute;left:-999px;top:0;background:var(--white);padding:1rem;z-index:9}.skip-link:focus{left:1rem}.topbar{height:78px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 clamp(22px,6vw,94px)}.brand{color:var(--ink);text-decoration:none;font-weight:700;letter-spacing:-.06em;font-size:21px;display:flex;align-items:center;gap:8px}.brand>span:last-child{font-weight:400;color:#75817a;margin-left:-8px}.brand-mark{width:27px;height:27px;border-radius:50% 50% 50% 8px;background:var(--green);color:#fff;display:grid;place-items:center;font-family:Georgia,serif;font-size:21px;font-style:italic}.local-badge,.eyebrow,.card-kicker,.progress-label,footer,.concept-map .map-node span{font-family:'DM Mono',monospace;letter-spacing:.09em}.local-badge{font-size:10px;color:#4f6a5e}.local-badge span{font-size:8px;color:#5e9a69;margin-right:7px}.layout{max-width:1220px;margin:0 auto;padding:72px 34px 90px;display:grid;grid-template-columns:.88fr 1.12fr;gap:clamp(40px,8vw,120px);align-items:start}.intro{padding-top:23px}.eyebrow{font-size:10px;color:var(--orange);font-weight:500}.intro h1{font-family:Newsreader,Georgia,serif;font-size:clamp(48px,5.3vw,73px);line-height:.98;letter-spacing:-.045em;font-weight:500;margin:29px 0 22px}.intro h1 em{font-weight:500;color:var(--green)}.intro>p{max-width:420px;color:var(--muted);font-size:15px;line-height:1.75;margin:0}.lesson-meta{display:flex;align-items:center;gap:11px;margin-top:25px;color:#475951;font-size:12px}.meta-icon{background:var(--lime);width:24px;height:24px;display:grid;place-items:center;border-radius:50%;font-weight:700}.dot{color:#a7b0a7}.concept-map{display:flex;align-items:center;margin-top:67px;max-width:440px}.map-node{display:flex;flex-direction:column;gap:8px;font-size:11px;color:#748078;white-space:nowrap}.map-node span{font-size:9px;color:#9aa59c}.map-node.active{color:var(--green);font-weight:700}.map-node.active span{color:var(--orange)}.map-line{height:1px;background:#c5cdc2;flex:1;margin:0 12px 18px}.map-caption{font-size:11px!important;line-height:1.6!important;margin-top:14px!important;color:#87918a!important;max-width:380px}.workbench{background:var(--white);border:1px solid #e1e3da;border-radius:8px;padding:28px 30px 20px;box-shadow:0 20px 55px #263b2c0d;min-height:470px}.progress-label{display:flex;justify-content:space-between;color:#78857d;font-size:9px}.progress-track{height:3px;background:#e7e9e2;margin-top:11px;border-radius:5px;overflow:hidden}.progress-track span{display:block;height:100%;width:0;background:var(--green);transition:width .3s}.welcome-card{padding:42px 11px 22px}.card-kicker{font-size:9px;color:var(--orange)}.welcome-card h2,.question-card h2,.result-card h2{font-family:Newsreader,Georgia,serif;font-weight:500;letter-spacing:-.025em;font-size:35px;line-height:1.1;margin:14px 0}.welcome-card>p,.question-card>p,.result-card>p{color:var(--muted);font-size:13px;line-height:1.75;max-width:490px}.principle{display:flex;gap:12px;background:#f1f5ed;border-left:2px solid var(--green);padding:14px;margin:25px 0 27px;color:#5b6b60;font-size:11px;line-height:1.6}.principle>span:first-child{font-size:17px;color:var(--green)}.principle strong{color:var(--ink)}.primary-button{background:var(--green);border:0;color:white;border-radius:4px;padding:14px 18px;font-weight:600;font-size:12px;cursor:pointer}.primary-button span{padding-left:22px;font-size:16px}.primary-button:hover{background:#174736}.model-note{border-top:1px solid #ebede6;padding:14px 2px 0;color:#77827a;font-size:10px;line-height:1.7}.model-note summary{cursor:pointer;color:#647269;list-style:none}.model-note summary:after{content:'+';float:right;font-size:15px}.model-note[open] summary:after{content:'−'}.model-note p{max-width:650px;margin:10px 0 2px}.question-card{padding:26px 8px 18px}.question-type{font-family:'DM Mono',monospace;font-size:9px;color:var(--orange);letter-spacing:.08em}.question-card h2{font-size:29px;margin-top:13px}.question-card .prompt{font-size:14px;color:#485750;margin:0 0 22px}.choices{display:grid;gap:9px}.choice{width:100%;background:#fff;border:1px solid #dfe4dc;padding:13px 14px;text-align:left;border-radius:4px;color:#33413b;font-size:12px;line-height:1.5;cursor:pointer}.choice:hover:not(:disabled){border-color:#648473;background:#f5f8f2}.choice:disabled{cursor:default}.choice.correct{border-color:#4d8b64;background:#edf6ec}.choice.incorrect{border-color:#cb8163;background:#fbf0eb}.choice .choice-key{font-family:'DM Mono',monospace;color:#8b968e;margin-right:9px}.feedback{margin-top:17px;padding:14px 15px;background:#f3f5ef;border-radius:4px;font-size:11px;line-height:1.65;color:#52625a}.feedback strong{color:var(--green)}.feedback .why{display:block;margin-top:4px;color:#6c7972}.next-button{margin-top:15px}.mastery-box{margin:18px 0;background:#f3f5ef;padding:14px;border-radius:4px}.mastery-box h3{font-size:11px;margin:0 0 12px}.mastery-row{display:grid;grid-template-columns:92px 1fr 36px;gap:10px;align-items:center;font-size:10px;color:#68766e;margin-top:9px}.mastery-meter{height:5px;background:#dfe5dc;border-radius:9px;overflow:hidden}.mastery-meter span{display:block;height:100%;background:#54816b}.mastery-row output{text-align:right;font-family:'DM Mono',monospace}.result-card{padding:28px 8px}.result-mark{width:48px;height:48px;background:var(--lime);border-radius:50%;display:grid;place-items:center;font-size:23px;color:var(--green)}.result-card h2{font-size:32px}.reflection{border-left:2px solid var(--orange);padding:9px 13px;margin:20px 0;color:#58665e;font-size:11px;line-height:1.65}.source-note{font-size:10px!important;color:#7a857e!important;border-top:1px solid #e7e9e2;padding-top:13px;margin-top:20px}.reset-button{background:transparent;color:var(--green);border:1px solid #9fb1a4;border-radius:4px;padding:11px 15px;font-size:11px;font-weight:600;cursor:pointer}.reset-button:hover{background:#f1f5ed}footer{max-width:1220px;padding:22px 34px;margin:0 auto;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:14px;color:#87918a;font-size:8px;line-height:1.5}footer span:last-child{text-align:right;font-family:'DM Sans',sans-serif;letter-spacing:0;font-size:10px}
+.simulation-launch{margin-top:17px;border-top:1px solid #e8ebe3;padding-top:12px}.text-button{border:0;padding:0;background:none;color:var(--green);font-size:10px;text-align:left;text-decoration:underline;text-underline-offset:3px;cursor:pointer}.simulation-launch>p{font-size:9px;color:#849087;margin:6px 0}.simulation-result{background:#f2f5ef;border-radius:4px;padding:12px;font-size:10px;line-height:1.55;color:#5c6a61}.simulation-result>strong{color:var(--green)}.simulation-result p{margin:7px 0}.simulation-compare{display:grid;gap:5px;color:#354a3f;font-family:'DM Mono',monospace;font-size:9px}
+.practice-summary{margin:22px 0;padding:18px;background:#eef3e9;border:1px solid #d9e4d2;border-radius:5px}
+.practice-summary h3,.review-list h3{margin:0 0 9px;font-size:15px;color:var(--green)}
+.practice-summary p,.review-list>p{font-size:12px;line-height:1.65;color:#56685c;margin:8px 0}
+.practice-summary .primary-button{margin-top:9px}
+.practice-note{font-size:11px!important;line-height:1.6!important;color:#607064!important}
+.practice-back{display:block;margin-top:24px;padding:8px 0;font-size:12px}
+.review-list{margin-top:26px}
+.review-item{border:1px solid #dce2d6;border-radius:5px;margin-top:10px;overflow-wrap:anywhere}
+.review-item summary{padding:14px;cursor:pointer;line-height:1.5;color:var(--green)}
+.review-label{font-size:10px;font-weight:600}
+.review-status{display:block;margin:5px 0 0;font-size:10px;color:#476647}
+.review-status.needs-review{color:#924423}
+.review-prompt{display:block;margin-top:8px;font-size:12px;color:var(--ink)}
+.review-item[open] summary{background:#f5f7f1;border-bottom:1px solid #e1e6da;border-radius:5px 5px 0 0}
+.review-body{padding:14px;font-size:12px;line-height:1.65;color:#52635a}
+.review-body>p{margin:12px 0 0}
+.review-answers{margin:0}
+.review-answers>div{margin:0 0 12px;padding-left:11px;border-left:2px solid #bbcbbb}
+.review-answers>div:last-child{border-color:var(--green)}
+.review-answers dt{font-weight:600;color:var(--ink);font-size:11px}
+.review-answers dd{margin:3px 0 0}
+.review-transfer,.review-practice-answer{padding:12px;background:#f2f5ed;border-radius:4px}
+.review-practice-answer{margin-top:12px;border-left:2px solid var(--orange)}
+.review-practice-answer strong{font-size:11px;color:#6d482f}
+.review-practice-answer p{margin:5px 0 0}
+.reflection-field{margin-top:18px}
+.reflection-field label{display:block;font-size:12px;font-weight:600;color:var(--green)}
+.reflection-field p{margin:7px 0;font-size:11px;line-height:1.65}
+.reflection-field textarea{display:block;width:100%;min-height:90px;padding:10px 12px;border:1px solid #9fb1a4;border-radius:4px;background:#fff;color:var(--ink);font:inherit;font-size:12px;line-height:1.6;resize:vertical}
+.reflection-field textarea:focus-visible{outline:3px solid var(--orange);outline-offset:3px}
+.reflection-field .reflection-hint{color:var(--muted)}
+.result-card h2:focus{outline:2px solid var(--orange);outline-offset:5px}
+@media(max-width:800px){.layout{grid-template-columns:1fr;gap:35px;padding-top:42px}.intro{padding-top:0}.intro h1{font-size:57px;margin-top:20px}.concept-map{margin-top:35px}.workbench{min-height:0}.topbar{height:64px}.local-badge{font-size:8px}}@media(max-width:480px){.topbar{padding:0 18px}.layout{padding:32px 18px 52px;gap:26px}.intro h1{font-size:49px}.intro>p{font-size:13px}.concept-map{max-width:100%}.map-node{font-size:9px}.map-line{margin-left:7px;margin-right:7px}.workbench{padding:22px 18px 16px}.welcome-card{padding:30px 2px 18px}.welcome-card h2{font-size:30px}.question-card{padding:24px 0 14px}.question-card h2{font-size:26px}.mastery-row{grid-template-columns:78px 1fr 35px}footer{padding:18px;flex-direction:column}footer span:last-child{text-align:left}}
+
+</style>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to lesson</a>
+  <header class="topbar">
+    <a class="brand" href="#" aria-label="RecallWeave home"><span class="brand-mark" aria-hidden="true">r</span> recall<span>weave</span></a>
+    <div class="local-badge"><span aria-hidden="true">●</span> PRIVATE · RUNS ON THIS DEVICE</div>
+  </header>
+  <main id="main" class="layout">
+    <section class="intro" aria-labelledby="page-title">
+      <div class="eyebrow">FIELD NOTES  /  BIOLOGY 01</div>
+      <h1 id="page-title">Learn the <em>links,</em><br>not just the labels.</h1>
+      <p>Build a mental model of how cells move energy—from sunlight to usable work. Each next prompt is chosen from your learning state, not a fixed quiz order.</p>
+      <div class="lesson-meta"><span class="meta-icon" aria-hidden="true">↗</span><span>6 short challenges</span><span class="dot">·</span><span>about 4 minutes</span></div>
+      <div class="concept-map" aria-label="Concept pathway: light energy to glucose to ATP">
+        <div class="map-node active"><span>01</span>Light energy</div><div class="map-line"></div><div class="map-node"><span>02</span>Glucose</div><div class="map-line"></div><div class="map-node"><span>03</span>ATP</div>
+      </div>
+      <p class="map-caption">A concept pathway. The selector can revisit a prerequisite when evidence suggests a useful review.</p>
+    </section>
+
+    <section class="workbench" aria-label="Interactive learning session">
+      <div class="progress-row"><div class="progress-label"><span id="step-label">READY TO BEGIN</span><span id="step-count">0 / 6</span></div><div class="progress-track" role="progressbar" aria-label="Lesson progress" aria-valuemin="0" aria-valuemax="6" aria-valuenow="0"><span id="progress-fill"></span></div></div>
+      <div id="session-content" aria-live="polite">
+        <div class="welcome-card">
+          <div class="card-kicker">YOUR STARTING POINT</div>
+          <h2>What do you already know?</h2>
+          <p>No score to protect. Your answers only help choose the next useful connection. You’ll see why each answer is right, then put the idea to work.</p>
+          <div class="principle"><span aria-hidden="true">✳</span><span><strong>Transparent by design</strong><br>The model shows its assumptions and updates. It is a learning aid, not a diagnosis.</span></div>
+          <button id="start-button" class="primary-button">Start the thread <span aria-hidden="true">→</span></button>
+          <div class="simulation-launch"><button id="simulation-button" class="text-button">Or inspect a scripted learner simulation ↗</button><p>Clearly synthetic; compares the adaptive selector with fixed deck order.</p><div id="simulation-output" aria-live="polite"></div></div>
+        </div>
+      </div>
+      <details class="model-note"><summary>How the adaptive model works</summary><p>Bayesian Knowledge Tracing estimates mastery per concept using explicit initial-knowledge, guess, slip, and learning-transition probabilities. After each response, the selector scores unasked items by expected information gain, weighted toward prerequisite concepts. The values are illustrative defaults, not a validated assessment.</p></details>
+    </section>
+  </main>
+  <footer><span>RECALLWEAVE · DEMO BUILD</span><span>Original demo deck · OpenStax Biology 2e attribution in the wrap-up</span></footer>
+<script id="deck-json" type="application/json">{
+  "title": "Energy in cells: from light to ATP",
+  "license": "CC BY 4.0 for source material; all question wording and distractors in this demo are original, adapted from the cited open textbook concepts.",
+  "attribution": "OpenStax, Biology 2e, Chapters 7–8 (Cellular Respiration and Photosynthesis), Rice University, CC BY 4.0. https://openstax.org/details/books/biology-2e",
+  "concepts": ["photosynthesis", "glucose", "cellular-respiration", "atp"],
+  "items": [
+    {"id":"p1","concept":"photosynthesis","prerequisites":[],"prompt":"A plant is kept in light but cannot make a key photosynthetic pigment. Which first-order change is most likely?","options":["Less light energy is captured for the light reactions","More ATP is made directly from stored glucose","Carbon dioxide becomes the main energy source","Oxygen is consumed to split water"],"answer":0,"explanation":"Photosynthetic pigments absorb light energy that drives the light-dependent reactions. Blocking pigment function reduces that energy capture.","transfer":"This links a visible input (light) to the first energy-conversion step."},
+    {"id":"p2","concept":"photosynthesis","prerequisites":[],"prompt":"Which statement best describes the role of the Calvin cycle?","options":["It uses ATP and NADPH to help build carbohydrate from carbon dioxide","It splits glucose to release energy for muscle contraction","It captures light directly to make oxygen","It transfers electrons from food to oxygen"],"answer":0,"explanation":"The Calvin cycle uses energy carriers produced by the light reactions to fix carbon dioxide into carbohydrate building blocks; it does not capture light directly.","transfer":"Keep the two linked stages distinct: light capture supplies chemical energy; carbon fixation uses it."},
+    {"id":"g1","concept":"glucose","prerequisites":["photosynthesis"],"prompt":"A learner says, “Plants get their usable energy from soil.” Which correction best connects photosynthesis to stored chemical energy?","options":["Light energy can be stored in energy-rich molecules such as sugars made from carbon dioxide","Minerals in soil are converted directly into ATP","Plants absorb glucose through roots as their only fuel","Soil provides the electrons that power the Calvin cycle"],"answer":0,"explanation":"Photosynthesis uses light energy to build energy-rich carbohydrates from carbon dioxide (with water involved in the overall process). Soil minerals support growth but are not the energy source for sugar synthesis.","transfer":"Explain the energy path: light → chemical energy in sugars; nutrients and energy are different things."},
+    {"id":"r1","concept":"cellular-respiration","prerequisites":["glucose"],"prompt":"A cell has glucose available but its oxygen supply drops sharply. What is the strongest prediction for aerobic cellular respiration?","options":["The electron transport chain is constrained because oxygen is its terminal electron acceptor","Photosynthesis starts inside the mitochondrion","Glucose can no longer enter any metabolic pathway","The Calvin cycle speeds up to make ATP"],"answer":0,"explanation":"In aerobic respiration, oxygen accepts electrons at the end of the mitochondrial electron transport chain. Limited oxygen constrains that pathway; cells may use other processes, but those are not the same as aerobic respiration.","transfer":"The stored energy in glucose is released through linked pathways; oxygen's role is at the chain's end."},
+    {"id":"a1","concept":"atp","prerequisites":["cellular-respiration"],"prompt":"Why is ATP useful as an immediate energy carrier even though cells store much more energy in fuel molecules?","options":["Its hydrolysis can be coupled to cellular work in manageable transfers","It permanently stores all energy without being recycled","It is the main molecule that captures sunlight","It contains more total energy than a glucose molecule"],"answer":0,"explanation":"ATP hydrolysis can be coupled to endergonic cellular processes. Cells continually regenerate ATP; it is an immediate transferable energy currency, not a long-term bulk store.","transfer":"Distinguish the fuel reservoir (for example, glucose) from the frequently regenerated spendable carrier (ATP)."},
+    {"id":"x1","concept":"atp","prerequisites":["photosynthesis","cellular-respiration"],"prompt":"Which comparison best connects photosynthesis and cellular respiration?","options":["They are complementary energy transformations: photosynthesis stores energy in organic molecules, while respiration transfers energy from those molecules to ATP","They are the same pathway running in opposite directions in the same organelle","Photosynthesis consumes ATP and respiration makes sunlight","Both processes only occur in plants"],"answer":0,"explanation":"Photosynthesis stores captured light energy in organic molecules; cellular respiration transfers energy from organic molecules into ATP. The pathways are connected but are not simply identical reverse reactions.","transfer":"Use the model to explain why food webs depend on photosynthetic energy capture and why cells need respiration."}
+  ]
+}
+</script>
+<script>
+/**
+ * Transparent Bayesian Knowledge Tracing and adaptive item selection.
+ * Parameters are pedagogical defaults, not fitted or validated estimates.
+ * @typedef {{id:string, concept:string, prerequisites:string[], options:string[], answer:number, prompt:string, explanation:string, transfer:string}} Item
+ * @typedef {{initial:number, learn:number, guess:number, slip:number}} BktParameters
+ */
+const DEFAULT_BKT = Object.freeze({ initial: 0.22, learn: 0.18, guess: 0.2, slip: 0.1 });
+const clamp = (value, min = 0, max = 1) => Math.min(max, Math.max(min, value));
+
+/** Bernoulli entropy in bits. @param {number} p */
+function entropy(p) {
+  const q = clamp(p);
+  if (q === 0 || q === 1) return 0;
+  return -q * Math.log2(q) - (1 - q) * Math.log2(1 - q);
+}
+
+/**
+ * One BKT update. Correctness is evidence, not certainty; a guess and a slip remain possible.
+ * @param {number} prior
+ * @param {boolean} correct
+ * @param {BktParameters} parameters
+ */
+function updateMastery(prior, correct, parameters = DEFAULT_BKT) {
+  const p = clamp(prior);
+  const { guess, slip, learn } = parameters;
+  for (const [key, value] of Object.entries(parameters)) {
+    if (!Number.isFinite(value) || value < 0 || value > 1) throw new RangeError(`${key} must be in [0,1]`);
+  }
+  const pCorrect = p * (1 - slip) + (1 - p) * guess;
+  const posterior = correct ? p * (1 - slip) / pCorrect : p * slip / (p * slip + (1 - p) * (1 - guess));
+  return clamp(posterior + (1 - posterior) * learn);
+}
+
+/** Expected reduction in uncertainty from an item response under its concept mastery.
+ * @param {number} mastery
+ * @param {BktParameters} parameters
+ */
+function expectedInformationGain(mastery, parameters = DEFAULT_BKT) {
+  const p = clamp(mastery);
+  const { guess, slip } = parameters;
+  const pCorrect = p * (1 - slip) + (1 - p) * guess;
+  const correctPosterior = p * (1 - slip) / pCorrect;
+  const wrongPosterior = p * slip / (p * slip + (1 - p) * (1 - guess));
+  return Math.max(0, entropy(p) - pCorrect * entropy(correctPosterior) - (1 - pCorrect) * entropy(wrongPosterior));
+}
+
+/**
+ * Select an unseen item maximizing uncertainty reduction plus prerequisite repair.
+ * Tie-break is stable by item id, making the choice reproducible.
+ * @param {Item[]} items
+ * @param {Set<string>} asked
+ * @param {Record<string,number>} mastery
+ * @param {BktParameters} parameters
+ * @returns {Item|null}
+ */
+function selectNextItem(items, asked, mastery, parameters = DEFAULT_BKT) {
+  const candidates = items.filter(item => !asked.has(item.id));
+  if (!candidates.length) return null;
+  const score = item => {
+    const m = mastery[item.concept] ?? parameters.initial;
+    // Prefer a weak concept that unlocks several still-unanswered downstream ideas.
+    const downstream = candidates.filter(next => next.id !== item.id && next.prerequisites.includes(item.concept)).length;
+    const prerequisiteRepair = (1 - m) * Math.min(3, downstream) * 0.12;
+    return expectedInformationGain(m, parameters) + prerequisiteRepair;
+  };
+  return candidates.sort((a, b) => score(b) - score(a) || a.id.localeCompare(b.id))[0];
+}
+
+/** Clone session probabilities so learners' local run has no shared state. */
+function initialMastery(concepts, parameters = DEFAULT_BKT) {
+  return Object.fromEntries(concepts.map(concept => [concept, parameters.initial]));
+}
+
+/**
+ * Reproducible toy learner run; simulated evidence is never real learner data.
+ * @param {Item[]} items
+ * @param {string[]} concepts
+ * @param {Record<string,number>} latentKnowledge simulated probability of knowing each concept
+ * @param {boolean} adaptive use the information-gain selector, or fixed deck order
+ * @param {number} seed deterministic pseudo-random seed
+ */
+function runLearnerSimulation(items, concepts, latentKnowledge, adaptive = true, seed = 20261005) {
+  let state = seed >>> 0 || 1;
+  const random = () => {
+    state ^= state << 13; state ^= state >>> 17; state ^= state << 5;
+    return (state >>> 0) / 4294967296;
+  };
+  const stateByConcept = initialMastery(concepts);
+  const asked = new Set();
+  const trace = [];
+  while (asked.size < items.length) {
+    const item = adaptive ? selectNextItem(items, asked, stateByConcept) : items.find(candidate => !asked.has(candidate.id));
+    const knowledge = clamp(latentKnowledge[item.concept] ?? 0.5);
+    const correct = random() < 0.18 + knowledge * 0.72;
+    asked.add(item.id);
+    stateByConcept[item.concept] = updateMastery(stateByConcept[item.concept], correct);
+    trace.push({ item: item.id, concept: item.concept, correct });
+  }
+  const meanEstimatedMastery = concepts.reduce((sum, concept) => sum + stateByConcept[concept], 0) / concepts.length;
+  return { trace, mastery: stateByConcept, meanEstimatedMastery };
+}
+
+/**
+ * A local review snapshot and one bounded practice round.
+ * Practice never updates the original answers or the knowledge model.
+ */
+
+function validChoice(item, choice) {
+  if (!Number.isInteger(choice) || choice < 0 || choice >= item.options.length) {
+    throw new RangeError('Choose one of this question’s answer options.');
+  }
+}
+
+/** Keep the first-attempt order, chosen answer and explanation available for review. */
+function createReview(items, answers) {
+  const byId = new Map(items.map(item => [item.id, item]));
+  const seen = new Set();
+  return Object.freeze(answers.map(answer => {
+    const item = byId.get(answer.item);
+    if (!item || seen.has(item.id)) throw new RangeError('Review needs one first answer per known question.');
+    seen.add(item.id);
+    validChoice(item, answer.choice);
+    return Object.freeze({
+      id: item.id,
+      concept: item.concept,
+      prompt: item.prompt,
+      options: Object.freeze([...item.options]),
+      answer: item.answer,
+      choice: answer.choice,
+      correct: answer.choice === item.answer,
+      explanation: item.explanation,
+      transfer: item.transfer
+    });
+  }));
+}
+
+/** Each initially missed question gets one retry, in its original session order. */
+function beginPractice(review) {
+  return Object.freeze({
+    items: Object.freeze(review.filter(item => !item.correct)),
+    answers: Object.freeze([])
+  });
+}
+
+function currentPracticeItem(round) {
+  return round.items[round.answers.length] ?? null;
+}
+
+/** Return new practice state; both the review and earlier round states stay intact. */
+function answerPractice(round, itemId, choice) {
+  const item = currentPracticeItem(round);
+  if (!item || item.id !== itemId) throw new RangeError('Only the current unanswered practice question can be answered.');
+  validChoice(item, choice);
+  return Object.freeze({
+    items: round.items,
+    answers: Object.freeze([...round.answers, Object.freeze({item: item.id, choice, correct: choice === item.answer})])
+  });
+}
+
+/** Learner-authored notes for this session, separate from answers and model state. */
+const APPLICATION_PROMPT = 'Trace energy from sunlight to a cell doing work. Where does the form of energy change, and what molecule transfers it to cellular processes?';
+
+function freezeReflections(notes, application) {
+  return Object.freeze({
+    notes: Object.freeze(notes.map(note => Object.freeze({...note}))),
+    application
+  });
+}
+
+function createReflections(items) {
+  const ids = items.map(item => item.id);
+  if (ids.some(id => typeof id !== 'string' || !id.trim()) || new Set(ids).size !== ids.length) {
+    throw new RangeError('Reflections need a distinct identity for every question.');
+  }
+  return freezeReflections(ids.map(item => ({item, text: ''})), '');
+}
+
+function itemReflection(reflections, itemId) {
+  const note = reflections.notes.find(note => note.item === itemId);
+  if (!note) throw new RangeError('Choose a question from this session.');
+  return note.text;
+}
+
+function updateReflection(reflections, itemId, text) {
+  if (typeof text !== 'string') throw new TypeError('A reflection must be text.');
+  itemReflection(reflections, itemId);
+  return freezeReflections(reflections.notes.map(note =>
+    note.item === itemId ? {item: itemId, text} : note), reflections.application);
+}
+
+function updateApplicationReflection(reflections, text) {
+  if (typeof text !== 'string') throw new TypeError('A reflection must be text.');
+  return freezeReflections(reflections.notes, text);
+}
+
+/** Bind exported notes to question identities, regardless of the adaptive review order. */
+function reflectionSnapshot(reflections, items) {
+  const expected = createReflections(items);
+  if (!Array.isArray(reflections?.notes) || typeof reflections?.application !== 'string') {
+    throw new RangeError('Study notes need the reflections from this session.');
+  }
+  const byId = new Map();
+  for (const note of reflections.notes) {
+    if (!note || typeof note.item !== 'string' || typeof note.text !== 'string' || byId.has(note.item)) {
+      throw new RangeError('Study notes need one reflection field per question.');
+    }
+    byId.set(note.item, note.text);
+  }
+  if (byId.size !== expected.notes.length || expected.notes.some(note => !byId.has(note.item))) {
+    throw new RangeError('Study notes need the reflections from this session’s questions.');
+  }
+  return freezeReflections(expected.notes.map(({item}) => ({item, text: byId.get(item)})), reflections.application);
+}
+
+
+/** Build local, readable study notes from a completed first session and separate practice. */
+function createStudyNotes({ deck, review, mastery, practice = null, reflections = null, exportedAt = new Date(), conceptLabel = id => id }) {
+  if (!Array.isArray(review) || review.length !== deck.items.length || review.length === 0) {
+    throw new RangeError('Finish the learning session before saving study notes.');
+  }
+  const known = new Set(deck.items.map(item => item.id));
+  const seen = new Set();
+  for (const item of review) {
+    if (!known.has(item.id) || seen.has(item.id)) throw new RangeError('Study notes need every first answer exactly once.');
+    seen.add(item.id);
+    for (const choice of [item.choice, item.answer]) {
+      if (!Number.isInteger(choice) || choice < 0 || choice >= item.options.length) {
+        throw new RangeError('Study notes need the recorded answer choice.');
+      }
+    }
+  }
+  const missed = review.filter(item => item.choice !== item.answer);
+  const retries = practice?.answers ?? [];
+  if (retries.length > missed.length) throw new RangeError('Practice must remain separate from the first session.');
+  retries.forEach((retry, index) => {
+    const item = missed[index];
+    if (retry.item !== item.id || !Number.isInteger(retry.choice) || retry.choice < 0 || retry.choice >= item.options.length) {
+      throw new RangeError('Study notes need the recorded practice order and choices.');
+    }
+  });
+  const savedAt = new Date(exportedAt);
+  if (!Number.isFinite(savedAt.getTime())) throw new RangeError('Study notes need a valid save time.');
+  const notebook = reflections === null ? null : reflectionSnapshot(reflections, deck.items);
+  const reflectionById = new Map(notebook?.notes.map(note => [note.item, note.text]));
+  const lines = [
+    'RecallWeave — study notes',
+    deck.title,
+    `Saved: ${savedAt.toISOString()}`,
+    '',
+    'FIRST SESSION',
+    `${review.length - missed.length} of ${review.length} connections correct on the first try.`,
+    'This count describes this session; it is not a measure of your ability.',
+    '',
+    'ESTIMATED MASTERY — MODEL STATE, NOT A GRADE',
+    'These estimates come from the demo’s learning model. They are not a validated assessment.',
+    'Practice does not change the first-session estimates.'
+  ];
+  for (const concept of deck.concepts) {
+    const value = mastery[concept];
+    if (typeof value !== 'number' || !Number.isFinite(value) || value < 0 || value > 1) {
+      throw new RangeError('Study notes need the original model estimates.');
+    }
+    lines.push(`${conceptLabel(concept)}: ${Math.round(value * 100)}%`);
+  }
+  lines.push('', 'PRACTICE');
+  if (!missed.length) lines.push('No missed connections in the first session.');
+  else if (!practice) lines.push(`Not started. ${missed.length} missed ${missed.length === 1 ? 'connection is' : 'connections are'} available for practice.`);
+  else {
+    const correct = retries.filter((retry, index) => retry.choice === missed[index].answer).length;
+    lines.push(`${retries.length === missed.length ? 'Complete' : 'Paused'}: ${retries.length} of ${missed.length} practice answers recorded; ${correct} correct on retry.`);
+  }
+  lines.push('Practice follows the explanations and is recorded separately from the first answers.', '', 'REVIEW THE CONNECTIONS');
+  const retryById = new Map(retries.map(retry => [retry.item, retry]));
+  review.forEach((item, index) => {
+    const retry = retryById.get(item.id);
+    lines.push(
+      '',
+      `${index + 1}. ${item.prompt}`,
+      `Concept: ${conceptLabel(item.concept)}`,
+      `Your first answer: ${item.options[item.choice]}`,
+      `First try: ${item.choice === item.answer ? 'correct' : 'needs review'}`,
+      `Correct answer: ${item.options[item.answer]}`,
+      `Explanation: ${item.explanation}`,
+      `Apply the idea: ${item.transfer}`
+    );
+    if (notebook) {
+      const text = reflectionById.get(item.id);
+      lines.push('Your explanation — reflection, not scored:');
+      lines.push(...(text ? text.split('\n').map(line => `  > ${line}`) : ['  Not written.']));
+    }
+    if (retry) {
+      lines.push(`Practice answer: ${item.options[retry.choice]}`, `Practice result: ${retry.choice === item.answer ? 'correct on retry' : 'keep reviewing'}`);
+    } else if (item.choice !== item.answer) lines.push('Practice answer: not recorded.');
+  });
+  if (notebook) {
+    lines.push('', 'YOUR APPLICATION REFLECTION — NOT SCORED');
+    lines.push(`Prompt: ${APPLICATION_PROMPT}`);
+    lines.push(...(notebook.application ? notebook.application.split('\n').map(line => `  > ${line}`) : ['Not written.']));
+  }
+  lines.push('', 'DECK ATTRIBUTION', deck.attribution, deck.license, '', 'Saved from this browser session. The download does not upload the session or restore it after a refresh.');
+  return Object.freeze({
+    filename: `recallweave-study-notes-${savedAt.toISOString().slice(0, 10)}.txt`,
+    mediaType: 'text/plain;charset=utf-8',
+    text: `${lines.join('\n')}\n`
+  });
+}
+
+const root = document.querySelector('#session-content');
+const deck = JSON.parse(document.querySelector('#deck-json').textContent);
+let reflections = createReflections(deck.items);
+const concepts = deck.concepts;
+const mastery = initialMastery(concepts);
+const asked = new Set();
+const answers = [];
+let review = null;
+let practice = null;
+let inPractice = false;
+const progressFill = document.querySelector('#progress-fill');
+const progressTrack = document.querySelector('[role="progressbar"]');
+const stepLabel = document.querySelector('#step-label');
+const stepCount = document.querySelector('#step-count');
+
+function setProgress() {
+  const count = inPractice ? practice.answers.length : answers.length;
+  const total = inPractice ? practice.items.length : deck.items.length;
+  stepCount.textContent = `${count} / ${total}`;
+  progressFill.style.width = `${total ? count / total * 100 : 0}%`;
+  progressTrack.setAttribute('aria-label', inPractice ? 'Practice progress' : 'Lesson progress');
+  progressTrack.setAttribute('aria-valuemax', String(total));
+  progressTrack.setAttribute('aria-valuenow', String(count));
+  stepLabel.textContent = inPractice
+    ? (count === total ? 'PRACTICE COMPLETE' : 'PRACTICE ROUND')
+    : count === total ? 'THREAD COMPLETE' : count ? 'FOLLOW THE CONNECTION' : 'READY TO BEGIN';
+}
+function renderMastery() {
+  const rows = concepts.map(concept => `<div class="mastery-row"><span>${conceptLabel(concept)}</span><div class="mastery-meter" aria-hidden="true"><span style="width:${Math.round(mastery[concept] * 100)}%"></span></div><output aria-label="${conceptLabel(concept)} estimated mastery ${Math.round(mastery[concept] * 100)} percent">${Math.round(mastery[concept] * 100)}%</output></div>`).join('');
+  return `<div class="mastery-box"><h3>Estimated mastery · model state, not a grade</h3>${rows}</div>`;
+}
+function conceptLabel(concept) { return ({'photosynthesis':'Light capture','glucose':'Stored sugar','cellular-respiration':'Respiration','atp':'ATP transfer'})[concept] ?? concept; }
+function renderQuestion() {
+  const item = selectNextItem(deck.items, asked, mastery);
+  if (!item) return renderResults();
+  asked.add(item.id);
+  root.innerHTML = `<article class="question-card"><div class="question-type">CONNECTION ${String(answers.length + 1).padStart(2, '0')} · ${conceptLabel(item.concept).toUpperCase()}</div><h2>${item.prompt}</h2><p class="prompt">Choose the best explanation, then connect it to the larger idea.</p><div class="choices" role="group" aria-label="Answer options">${item.options.map((option, i) => `<button class="choice" data-choice="${i}"><span class="choice-key">${String.fromCharCode(65+i)}</span>${option}</button>`).join('')}</div><div id="feedback-slot"></div>${renderMastery()}</article>`;
+  root.querySelectorAll('[data-choice]').forEach(button => button.addEventListener('click', () => submitAnswer(item, Number(button.dataset.choice))));
+  const first = root.querySelector('[data-choice]');
+  first?.focus({preventScroll:true});
+  setProgress();
+}
+function submitAnswer(item, choice) {
+  if (answers.some(answer => answer.item === item.id)) return;
+  const correct = choice === item.answer;
+  answers.push(Object.freeze({item: item.id, concept:item.concept, choice, correct}));
+  mastery[item.concept] = updateMastery(mastery[item.concept] ?? DEFAULT_BKT.initial, correct);
+  root.querySelectorAll('[data-choice]').forEach(button => {
+    button.disabled = true;
+    const selected = Number(button.dataset.choice);
+    if (selected === item.answer) button.classList.add('correct');
+    else if (selected === choice) button.classList.add('incorrect');
+  });
+  const feedback = document.querySelector('#feedback-slot');
+  feedback.innerHTML = `<div class="feedback"><strong>${correct ? 'That connection holds.' : 'Here’s the correction.'}</strong> ${item.explanation}<span class="why">Try this transfer: ${item.transfer}</span></div><button class="primary-button next-button" id="next-button">${answers.length === deck.items.length ? 'See your learning trace' : 'Follow the next thread'} <span aria-hidden="true">→</span></button>`;
+  feedback.querySelector('button').addEventListener('click', renderQuestion);
+  const state = root.querySelector('.mastery-box');
+  state.outerHTML = renderMastery();
+  setProgress();
+  feedback.querySelector('button').focus();
+}
+function renderResults() {
+  inPractice = false;
+  review ??= createReview(deck.items, answers);
+  const correct = answers.filter(answer => answer.correct).length;
+  root.innerHTML = `<article class="result-card"><div class="result-mark" aria-hidden="true">⌁</div><div class="card-kicker">YOUR LEARNING TRACE</div><h2 tabindex="-1">Notice the links you built.</h2><p id="first-try-summary">You made ${correct} of ${answers.length} connections on the first try. That count is a snapshot—not a measure of your ability. Review the concept estimates and choose one connection to explain in your own words.</p>${renderMastery()}${renderPracticeSummary()}<section class="review-list" aria-labelledby="review-title"><h3 id="review-title">Review the connections</h3><p>Open a question to see your first answer and explanation, then write how you would apply the idea.</p>${review.map(renderReviewItem).join('')}</section><section class="reflection reflection-field" aria-labelledby="application-label"><label id="application-label" for="application-reflection">Apply it in your own words</label><p id="application-prompt">${escapeHtml(APPLICATION_PROMPT)}</p><textarea id="application-reflection" rows="4" aria-describedby="application-prompt application-hint"></textarea><p id="application-hint" class="reflection-hint">Your writing is not scored. It stays in this tab and is included when you download study notes.</p></section><p class="source-note"><strong>Demo deck attribution:</strong> Original question wording adapted from OpenStax, <cite>Biology 2e</cite>, Chapters 7–8, Rice University, CC BY 4.0. ${deck.attribution}</p><button class="reset-button" id="reset-button">Start a fresh local session</button></article>`;
+  root.querySelectorAll('[data-reflection-item]').forEach(field => {
+    field.value = itemReflection(reflections, field.dataset.reflectionItem);
+    field.addEventListener('input', () => {
+      reflections = updateReflection(reflections, field.dataset.reflectionItem, field.value);
+    });
+  });
+  const application = root.querySelector('#application-reflection');
+  application.value = reflections.application;
+  application.addEventListener('input', () => {
+    reflections = updateApplicationReflection(reflections, application.value);
+  });
+  const resetButton = root.querySelector('#reset-button');
+  resetButton.insertAdjacentHTML('beforebegin', '<section class="practice-summary" aria-labelledby="save-notes-title"><h3 id="save-notes-title">Keep these connections</h3><p>Save your questions, first answers, explanations, reflections, and any practice answers as a text file.</p><button class="reset-button" id="save-notes-button" aria-describedby="save-notes-status">Download study notes (.txt)</button><p id="save-notes-status" role="status">Your session stays in this tab until you refresh. Download notes to keep a copy.</p></section>');
+  root.querySelector('#save-notes-button').addEventListener('click', downloadStudyNotes);
+  resetButton.addEventListener('click', () => location.reload());
+  root.querySelector('#practice-button')?.addEventListener('click', () => {
+    practice ??= beginPractice(review);
+    inPractice = true;
+    renderPracticeQuestion();
+  });
+  setProgress();
+  root.querySelector('h2').focus();
+}
+
+function downloadStudyNotes() {
+  const status = root.querySelector('#save-notes-status');
+  let url;
+  try {
+    const notes = createStudyNotes({deck, review, mastery, practice, reflections, conceptLabel});
+    url = URL.createObjectURL(new Blob([notes.text], {type: notes.mediaType}));
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = notes.filename;
+    document.body.append(link);
+    try { link.click(); } finally { link.remove(); }
+    status.textContent = 'Download requested. Check your browser’s downloads for the study notes. Your session is still here.';
+  } catch {
+    status.textContent = 'The notes could not be prepared. Your answers are still available in this learning trace; try the download again.';
+  } finally {
+    if (url) setTimeout(() => URL.revokeObjectURL(url), 10000);
+  }
+}
+
+function escapeHtml(value) {
+  return String(value).replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[char]);
+}
+
+function renderReviewItem(item, index) {
+  const retry = practice?.answers.find(answer => answer.item === item.id);
+  const practiceAnswer = retry
+    ? `<div class="review-practice-answer"><strong>Practice answer · ${retry.correct ? 'correct on retry' : 'keep reviewing'}</strong><p>${escapeHtml(item.options[retry.choice])}</p></div>`
+    : '';
+  return `<details class="review-item"><summary><span class="review-label">${String(index + 1).padStart(2, '0')} · ${escapeHtml(conceptLabel(item.concept))}</span><span class="review-status ${item.correct ? 'is-correct' : 'needs-review'}">${item.correct ? 'Correct' : 'Needs review'} · first try</span><span class="review-prompt">${escapeHtml(item.prompt)}</span></summary><div class="review-body"><dl class="review-answers"><div><dt>Your first answer</dt><dd>${escapeHtml(item.options[item.choice])}</dd></div><div><dt>Correct answer</dt><dd>${escapeHtml(item.options[item.answer])}</dd></div></dl><p>${escapeHtml(item.explanation)}</p><p class="review-transfer"><strong>Apply the idea:</strong> ${escapeHtml(item.transfer)}</p><div class="reflection-field"><label for="reflection-${index}">Your explanation</label><p id="reflection-hint-${index}" class="reflection-hint">Connect the idea in your own words. These notes are not scored.</p><textarea id="reflection-${index}" rows="3" data-reflection-item="${escapeHtml(item.id)}" aria-describedby="reflection-hint-${index}"></textarea></div>${practiceAnswer}</div></details>`;
+}
+
+function renderPracticeSummary() {
+  const missed = review.filter(item => !item.correct).length;
+  if (!missed) return '<section class="practice-summary"><h3>Every connection held on the first try.</h3><p>Revisit any explanation below, then try applying the energy pathway in your own words.</p></section>';
+  const total = practice?.items.length ?? missed;
+  const count = practice?.answers.length ?? 0;
+  const complete = practice && count === total;
+  const status = complete
+    ? `You answered ${practice.answers.filter(answer => answer.correct).length} of ${total} correctly on retry.`
+    : practice ? `Practice paused: ${count} of ${total} answered. Resume with the next unanswered prompt.`
+    : `Try ${missed === 1 ? 'the missed connection' : `each of the ${missed} missed connections`} once more.`;
+  const button = complete ? '' : `<button class="primary-button" id="practice-button">${practice ? 'Resume practice' : `Practice ${missed} missed ${missed === 1 ? 'connection' : 'connections'}`} <span aria-hidden="true">→</span></button>`;
+  return `<section class="practice-summary" aria-labelledby="practice-title"><h3 id="practice-title">${complete ? 'Practice complete' : 'A second pass'}</h3><p id="practice-status">${status}</p><p class="practice-note">You have seen these explanations. Practice is for recall; your first answers and model estimates stay as they were.</p>${button}</section>`;
+}
+
+function renderPracticeQuestion() {
+  const item = currentPracticeItem(practice);
+  if (!item) return renderResults();
+  const number = practice.answers.length + 1;
+  root.innerHTML = `<article class="question-card practice-card"><div class="question-type">PRACTICE ${number} OF ${practice.items.length} · ${escapeHtml(conceptLabel(item.concept).toUpperCase())}</div><h2>${escapeHtml(item.prompt)}</h2><p class="prompt">Recall the explanation. Choose the best answer once more.</p><p class="practice-note">This retry is recorded separately from your first try and model estimates.</p><div class="choices" role="group" aria-label="Practice answer options">${item.options.map((option, i) => `<button class="choice" data-practice-choice="${i}"><span class="choice-key">${String.fromCharCode(65+i)}</span>${escapeHtml(option)}</button>`).join('')}</div><div id="practice-feedback"></div><button class="text-button practice-back" id="back-to-review">Back to learning trace</button></article>`;
+  let submitted = false;
+  root.querySelectorAll('[data-practice-choice]').forEach(button => button.addEventListener('click', () => {
+    if (submitted) return;
+    const choice = Number(button.dataset.practiceChoice);
+    practice = answerPractice(practice, item.id, choice);
+    submitted = true;
+    const correct = choice === item.answer;
+    root.querySelectorAll('[data-practice-choice]').forEach(option => {
+      option.disabled = true;
+      const selected = Number(option.dataset.practiceChoice);
+      if (selected === item.answer) option.classList.add('correct');
+      else if (selected === choice) option.classList.add('incorrect');
+    });
+    const feedback = root.querySelector('#practice-feedback');
+    feedback.innerHTML = `<div class="feedback"><strong>${correct ? 'That connection holds on retry.' : 'Keep this connection in view.'}</strong><p><strong>Correct answer:</strong> ${escapeHtml(item.options[item.answer])}</p>${escapeHtml(item.explanation)}<span class="why">Apply the idea: ${escapeHtml(item.transfer)}</span></div><button class="primary-button next-button" id="practice-next">${currentPracticeItem(practice) ? 'Next practice connection' : 'See practice results'} <span aria-hidden="true">→</span></button>`;
+    feedback.querySelector('button').addEventListener('click', renderPracticeQuestion);
+    setProgress();
+    feedback.querySelector('button').focus();
+  }));
+  root.querySelector('#back-to-review').addEventListener('click', renderResults);
+  setProgress();
+  root.querySelector('[data-practice-choice]').focus({preventScroll:true});
+}
+
+document.querySelector('#simulation-button').addEventListener('click', () => {
+  const truth = { photosynthesis:0.82, glucose:0.66, 'cellular-respiration':0.53, atp:0.74 };
+  const adaptive = runLearnerSimulation(deck.items, concepts, truth, true, 41);
+  const fixed = runLearnerSimulation(deck.items, concepts, truth, false, 41);
+  const correctCount = run => run.trace.filter(answer => answer.correct).length;
+  document.querySelector('#simulation-output').innerHTML = `<div class="simulation-result"><strong>Scripted run · not learner evidence</strong><p>One deterministic toy profile (latent concept strengths: 0.53–0.82), same seed and response model; only item order changes.</p><div class="simulation-compare"><span>Adaptive: ${correctCount(adaptive)}/${adaptive.trace.length} correct · mean estimated mastery ${Math.round(adaptive.meanEstimatedMastery * 100)}%</span><span>Fixed order: ${correctCount(fixed)}/${fixed.trace.length} correct · mean estimated mastery ${Math.round(fixed.meanEstimatedMastery * 100)}%</span></div><p>One tiny synthetic run is not a performance claim. Use the test suite for invariants; efficacy needs a larger, preregistered study.</p></div>`;
+});
+document.querySelector('#start-button').addEventListener('click', renderQuestion);
+setProgress();
+
+</script>
+</body>
+</html>
