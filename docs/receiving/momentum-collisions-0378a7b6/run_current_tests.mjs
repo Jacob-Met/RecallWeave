@@ -1,0 +1,14 @@
+import fs from 'node:fs/promises';
+import {spawnSync} from 'node:child_process';
+import path from 'node:path';
+import {fileURLToPath} from 'node:url';
+const out=path.dirname(fileURLToPath(import.meta.url));
+const root=path.resolve(out,'../../..');
+const files=(await fs.readdir(path.join(root,'tests'))).filter(name=>name.endsWith('.test.mjs')).map(name=>'tests/'+name);
+const result=spawnSync(process.execPath,['--test',...files],{cwd:root,encoding:'utf8',maxBuffer:32*1024*1024});
+await fs.writeFile(path.join(out,'node-tests.stdout.txt'),result.stdout||'');
+await fs.writeFile(path.join(out,'node-tests.stderr.txt'),result.stderr||'');
+const receipt={at:new Date().toISOString(),node:process.version,files,exit:result.status,passed:result.status===0,summary:(result.stdout||'').split('\n').slice(-10)};
+await fs.writeFile(path.join(out,'node-tests.json'),JSON.stringify(receipt,null,2)+'\n');
+console.log(JSON.stringify({at:receipt.at,node:receipt.node,files:files.length,exit:receipt.exit,summary:receipt.summary},null,2));
+if(result.status!==0)process.exitCode=1;

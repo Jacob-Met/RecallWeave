@@ -1,0 +1,27 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import {fileURLToPath} from 'node:url';
+import {spawnSync,execFileSync} from 'node:child_process';
+import {createHash} from 'node:crypto';
+const out=path.dirname(fileURLToPath(import.meta.url)),root=path.resolve(out,'../../../..');
+const git=(...args)=>execFileSync('git',['-C',root,...args],{encoding:'utf8',maxBuffer:32*1024*1024}).trim();
+const raw=(ref,name)=>execFileSync('git',['-C',root,'show',ref+':'+name],{maxBuffer:32*1024*1024});
+const source='73bce1e4a9782217ff7f8a38d075f50996199301',parent='84d5a718c4075107dc2d0e13ba76e7cda4942532',base='3a3704c352f8a12e20c208445c2c5ade412b365d';
+const owned=new Set(git('diff','--name-only',base,source).split('\n'));
+const parents=git('ls-tree','-r',parent).split('\n').map(line=>{const[meta,name]=line.split('\t');return{path:name,meta};});
+let preserved=0;
+for(const entry of parents)if(!owned.has(entry.path)){assert.deepEqual(await fs.readFile(path.join(root,entry.path)),raw(parent,entry.path),entry.path);preserved++;}
+const currentReadme=raw(parent,'README.md'),actualReadme=await fs.readFile(path.join(root,'README.md'));
+assert.ok(actualReadme.subarray(0,currentReadme.length).equals(currentReadme),'current README prefix');
+const frozen=JSON.parse(await fs.readFile(path.join(out,'../browser-candidate-1/receipt.json'),'utf8')).source;
+for(const [name,hash]of Object.entries(frozen))if(!['demo.html','src/app.mjs','src/deck.mjs'].includes(name))assert.equal(createHash('sha256').update(await fs.readFile(path.join(root,name))).digest('hex'),hash,name);
+const files=(await fs.readdir(path.join(root,'tests'))).filter(name=>name.endsWith('.test.mjs')).map(name=>'tests/'+name);
+const run=spawnSync(process.execPath,['--test',...files],{cwd:root,encoding:'utf8',maxBuffer:32*1024*1024});
+await fs.writeFile(path.join(out,'node-tests.stdout.txt'),run.stdout||'');await fs.writeFile(path.join(out,'node-tests.stderr.txt'),run.stderr||'');
+const receipt={at:new Date().toISOString(),node:process.version,source,parent,composedTree:git('write-tree'),preservedCurrentUnownedLeaves:preserved,ownedPaths:owned.size,files:files.length,testExit:run.status,summary:(run.stdout||'').split('\n').filter(line=>/tests |pass |fail |duration_ms/.test(line)).slice(-8)};
+for(const entry of parents)if(!owned.has(entry.path))assert.deepEqual(await fs.readFile(path.join(root,entry.path)),raw(parent,entry.path),'post-test '+entry.path);
+receipt.unownedCurrentBytesPreservedAfterTests=true;
+receipt.passed=run.status===0;
+await fs.writeFile(path.join(out,'receipt.json'),JSON.stringify(receipt,null,2)+'\n');console.log(JSON.stringify(receipt,null,2));
+if(run.status!==0)process.exitCode=1;

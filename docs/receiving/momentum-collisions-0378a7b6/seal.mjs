@@ -1,0 +1,30 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import {fileURLToPath} from 'node:url';
+import {createHash} from 'node:crypto';
+import {execFileSync} from 'node:child_process';
+const proof=path.dirname(fileURLToPath(import.meta.url)),root=path.resolve(proof,'../../..');
+const base='3a3704c352f8a12e20c208445c2c5ade412b365d',original='73bce1e4a9782217ff7f8a38d075f50996199301',parent='76921e03cb9da8a3dd7162d128704185162eb380';
+const raw=(...args)=>execFileSync('git',['-C',root,...args],{maxBuffer:32*1024*1024});
+const git=(...args)=>raw(...args).toString('utf8').trim();
+const sha=bytes=>createHash('sha256').update(bytes).digest('hex');
+const blob=bytes=>createHash('sha1').update('blob '+bytes.length+'\0').update(bytes).digest('hex');
+const priorReadme=raw('show',base+':README.md'),authoredReadme=raw('show',original+':README.md'),currentReadme=raw('show',parent+':README.md');
+assert.ok(authoredReadme.subarray(0,priorReadme.length).equals(priorReadme));
+await fs.writeFile(path.join(root,'README.md'),Buffer.concat([currentReadme,authoredReadme.subarray(priorReadme.length)]));
+git('-c','core.autocrlf=false','add','README.md','docs/receiving/momentum-collisions-0378a7b6');
+const own=git('diff','--cached','--name-only',parent).split('\n');
+const tree=git('write-tree'),table=ref=>new Map(git('ls-tree','-r',ref).split('\n').map(line=>{const[meta,name]=line.split('\t');return[name,meta]}));
+const current=table(parent),composed=table(tree);
+let preserved=0;
+for(const[name,meta]of current)if(!own.includes(name)){assert.equal(composed.get(name),meta,name);assert.equal(blob(await fs.readFile(path.join(root,name))),meta.split(' ')[2],name+' native Git bytes');preserved++;}
+for(const name of own)assert.ok(name==='README.md'||name.startsWith('docs/receiving/momentum-collisions-0378a7b6/')||/^(courses|src|templates|tests)\/momentum-collisions/.test(name)||/^tools\/(build-momentum-collisions|check_momentum_collisions_browser)\.mjs$/.test(name),name);
+const originalReceipt=JSON.parse(await fs.readFile(path.join(proof,'browser-candidate-1/receipt.json'),'utf8'));
+for(const[name,hash]of Object.entries(originalReceipt.source))if(!['demo.html','src/app.mjs','src/deck.mjs'].includes(name))assert.equal(sha(await fs.readFile(path.join(root,name))),hash,name);
+for(const name of ['demo.html','src/app.mjs','src/deck.mjs'])assert.deepEqual(raw('show','84d5a718c4075107dc2d0e13ba76e7cda4942532:'+name),raw('show',parent+':'+name),name);
+const files=[];for(const name of own){const bytes=await fs.readFile(path.join(root,name));const meta=composed.get(name).split(' ');assert.equal(blob(bytes),meta[2],name+' exact publication bytes');files.push({path:name,mode:meta[0],gitBlob:meta[2],bytes:bytes.length,sha256:sha(bytes)});}
+assert.equal(sha(await fs.readFile(path.join(proof,'original-suite-test-produced-vector.html'))),'c2739775c627a939d84ba1a9e2ae6f4b6713127941ca2ab7401184189017411c');
+const manifest={at:new Date().toISOString(),originalBase:base,originalNativeCommit:original,currentParent:parent,treeBeforeManifest:tree,currentUnownedLeavesPreserved:preserved,readmeCurrentPrefixSha256:sha(currentReadme),files,passed:true};
+await fs.writeFile(path.join(proof,'publication-manifest.json'),JSON.stringify(manifest,null,2)+'\n');
+console.log(JSON.stringify({parent,treeBeforeManifest:tree,currentUnownedLeavesPreserved:preserved,ownedFiles:files.length,manifestSha256:sha(await fs.readFile(path.join(proof,'publication-manifest.json'))),passed:true}));
