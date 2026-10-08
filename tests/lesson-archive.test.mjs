@@ -173,7 +173,6 @@ test('first answers must form the actual native adaptive prefix with canonical o
     doc => { doc.firstAnswers[0].item = 'missing'; },
     doc => { doc.firstAnswers[1].item = doc.firstAnswers[0].item; },
     doc => { doc.firstAnswers.reverse(); },
-    doc => { doc.firstAnswers[0].item = 'r1'; },
     doc => { doc.firstAnswers[0].correct = true; },
     doc => { delete doc.firstAnswers[0].choice; }
   ];
@@ -185,6 +184,14 @@ test('first answers must form the actual native adaptive prefix with canonical o
     mutate(changed);
     assert.throws(() => readDocument(changed), /invalid first answers/);
   }
+  // r1 and p1 initially share the maximum score, and the saved p2 is also maximal.
+  // This different valid priority prefix must still refuse the unchanged mastery.
+  const differentTie = clone(original);
+  differentTie.firstAnswers[0].item = 'r1';
+  assert.throws(() => readDocument(differentTie), {
+    name: 'RangeError', message: 'This lesson does not preserve the original model estimates.'
+  });
+
   const tooMany = clone(original);
   tooMany.firstAnswers = Array.from({length: deck.items.length + 1}, () => ({item: 'p1', choice: 0}));
   assert.throws(() => readDocument(tooMany), /complete/);

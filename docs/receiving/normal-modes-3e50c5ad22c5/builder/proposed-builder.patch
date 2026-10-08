@@ -1,0 +1,24 @@
+--- a/tools/build-normal-modes.mjs
++++ b/tools/build-normal-modes.mjs
+@@ -38,14 +38,15 @@
+     '{{NORMAL_MODES_DECK_JSON}}': inlineString(deck),
+     '{{NORMAL_MODES_GUIDE_JSON}}': inlineString(guide),
+   };
+-  let output = template;
+-  for (const [token, value] of Object.entries(replacements)) {
+-    if (output.split(token).length !== 2)
++  let remaining = template;
++  for (const token of Object.keys(replacements)) {
++    if (template.split(token).length !== 2)
+       throw new Error('Template must contain exactly one ' + token);
+-    output = output.replace(token, () => value);
++    remaining = remaining.replace(token, '');
+   }
+-  if (/\{\{NORMAL_MODES_/.test(output)) throw new Error('Unresolved standalone token.');
+-  return output;
++  if (/\{\{NORMAL_MODES_/.test(remaining)) throw new Error('Unresolved standalone token.');
++  return template.replace(/\{\{NORMAL_MODES_(?:CORE|UI|DECK_JSON|GUIDE_JSON)\}\}/g,
++    token => replacements[token]);
+ }
+ 
+ export async function buildLab({root = REPOSITORY_ROOT, check = false} = {}) {

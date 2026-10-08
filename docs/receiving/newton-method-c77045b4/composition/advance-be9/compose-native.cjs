@@ -1,0 +1,34 @@
+const fs=require('node:fs'),path=require('node:path'),cp=require('node:child_process'),crypto=require('node:crypto');
+const root=path.resolve(__dirname,'..'),git='C:\\Program Files\\Git\\cmd\\git.exe',dir=path.join(__dirname,'newton-advance-be9');
+const prior='47110281b5b19bfca7c96e8b94e72b4fbdeb1086',priorIncoming='3986046772e36b1b94c72db0568b276e852d066d',incoming='be9b88f1891e42ed7a7f0f4199ad9da4375d631d';
+const g=args=>cp.execFileSync(git,['-C',root,...args],{maxBuffer:64*1024*1024}),s=args=>g(args).toString('utf8').trim(),h=b=>crypto.createHash('sha256').update(b).digest('hex');
+function tree(ref){return new Map(g(['ls-tree','-r','-z',ref]).toString('utf8').split('\0').filter(Boolean).map(line=>{const at=line.indexOf('\t'),[mode,type,sha]=line.slice(0,at).split(' ');return [line.slice(at+1),{mode,type,sha}];}));}
+function run(args,label){const r=cp.spawnSync(git,['-C',root,...args],{encoding:'utf8',maxBuffer:64*1024*1024});fs.writeFileSync(path.join(dir,label+'.log'),(r.stdout||'')+(r.stderr||''));return r;}
+if(s(['rev-parse','HEAD'])!==prior||s(['status','--porcelain']))throw Error('Unexpected source state');fs.mkdirSync(dir);
+if(run(['fetch','origin',incoming],'fetch').status!==0)throw Error('Exact incoming fetch failed');
+const old=tree(prior),ancestor=tree(priorIncoming),next=tree(incoming),owned=[...old.keys()].filter(f=>JSON.stringify(old.get(f))!==JSON.stringify(ancestor.get(f)));
+if(owned.length!==37)throw Error('Unexpected ownership');
+for(const f of owned)if(f!=='README.md'&&next.has(f))throw Error('Incoming path collision '+f);
+const baseReadme=g(['show',priorIncoming+':README.md']),previousReadme=g(['show',prior+':README.md']),incomingReadme=g(['show',incoming+':README.md']);
+if(!previousReadme.subarray(0,baseReadme.length).equals(baseReadme))throw Error('README prefix lost');
+const ownAddition=previousReadme.subarray(baseReadme.length);
+const merge=run(['-c','user.name=HAMON Autonomous Worker','-c','user.email=hamon-autonomous@localhost','merge','--no-ff','--no-commit',incoming],'merge'),conflicts=s(['diff','--name-only','--diff-filter=U']).split('\n').filter(Boolean);
+if(merge.status!==0&&(conflicts.length!==1||conflicts[0]!=='README.md'))throw Error('Unexpected conflicts '+conflicts);
+fs.writeFileSync(path.join(root,'README.md'),Buffer.concat([incomingReadme,ownAddition]));g(['add','--','README.md']);
+const final=tree(s(['write-tree']));
+for(const [f,v]of next)if(f!=='README.md'&&JSON.stringify(final.get(f))!==JSON.stringify(v))throw Error('Incoming leaf changed '+f);
+for(const f of owned)if(f!=='README.md'&&JSON.stringify(final.get(f))!==JSON.stringify(old.get(f)))throw Error('Owned leaf changed '+f);
+if(final.size!==next.size+36)throw Error('Unexpected final count');
+if(run(['-c','user.name=HAMON Autonomous Worker','-c','user.email=hamon-autonomous@localhost','commit','-m','Preserve locale-resumable learner in Newton composition'],'commit').status!==0)throw Error('Commit failed');
+const accepted=JSON.parse(fs.readFileSync(path.join(root,'docs/receiving/newton-method-c77045b4/independent-browser/acceptance.json'),'utf8'));
+const inputs=accepted.source.map(f=>{const b=fs.readFileSync(path.join(root,f.path));return {path:f.path,bytes:b.length,sha256:h(b),gitBlob:final.get(f.path).sha,priorSha256:f.sha256,unchanged:h(b)===f.sha256&&b.length===f.bytes};});
+const receipt={at:new Date().toISOString(),prior,priorIncoming,incoming,incomingTree:s(['rev-parse',incoming+'^{tree}']),nativeCommit:s(['rev-parse','HEAD']),nativeTree:s(['rev-parse','HEAD^{tree}']),orderedParents:s(['show','-s','--format=%P','HEAD']).split(' '),incomingLeaves:next.size,finalLeaves:final.size,unchangedIncomingLeaves:next.size-1,readmeIncomingPrefixPreserved:true,all36OwnedNonReadmeBlobsUnchanged:true,mergeExit:merge.status,conflicts,inputs,browserRequalification:'required for changed demo.html; original receiving is retained unchanged'};
+fs.writeFileSync(path.join(dir,'composition.json'),JSON.stringify(receipt,null,2)+'\n');
+const runtime=JSON.parse(fs.readFileSync(path.join(__dirname,'newton-receiving/private-runtime.json'),'utf8'));
+if(h(fs.readFileSync(runtime.original))!==runtime.sha256||h(fs.readFileSync(runtime.alias))!==runtime.sha256)throw Error('Qualified runtime changed');
+const env={...process.env};for(const k of Object.keys(env))if(k.toLowerCase()==='path')delete env[k];
+env.PATH=[path.dirname(runtime.alias),path.dirname(runtime.original),path.dirname(process.execPath),process.env.PATH||process.env.Path||''].join(path.delimiter);env.PYTHON=runtime.original;env.PYTHONHOME=path.dirname(runtime.original);env.PYTHONIOENCODING='utf-8';
+const gates=cp.spawnSync(process.execPath,[path.join(__dirname,'run-newton-author-gates.cjs'),'advance-be9-configured'],{env,encoding:'utf8',maxBuffer:32*1024*1024});fs.writeFileSync(path.join(dir,'gate-runner.log'),(gates.stdout||'')+(gates.stderr||''));
+const result=JSON.parse(fs.readFileSync(path.join(__dirname,'newton-receiving/advance-be9-configured.json'),'utf8'));if(result.runs.find(x=>x.name==='build').status!==0||result.runs.find(x=>x.name==='focused').status!==0||!result.inputsUnchanged)throw Error('Newton source gates failed');
+const summary=fs.readFileSync(path.join(__dirname,'newton-receiving/advance-be9-configured-full.log'),'utf8').split('\n').filter(l=>/^(?:ℹ (?:tests|pass|fail|cancelled|skipped)|test at|✖ )/.test(l));
+console.log(JSON.stringify({nativeCommit:receipt.nativeCommit,nativeTree:receipt.nativeTree,incoming,incomingTree:receipt.incomingTree,incomingLeaves:next.size,finalLeaves:final.size,unchangedIncomingLeaves:next.size-1,changedBrowserInputs:inputs.filter(x=>!x.unchanged),focusedPassed:22,fullWindowsExit:gates.status,fullSummary:summary}));

@@ -38,6 +38,14 @@ Inputs are whole numbers from 0 to 10. Every invocation counts, including base c
 
 The explorer needs no server or account and keeps no automatic browser storage. Its trace is an algorithm inspection record, separate from learner-answer archives. Rebuild it with `node tools/build_recursion_call_stack.mjs`; add `--check` to verify that the checked-in page matches its exact sources and validated deck.
 
+## Explore coupled motion
+
+Open **[Coupled motion: two patterns inside one system](courses/normal-modes-lab.html)** directly in a browser. Set the masses, spring stiffnesses and initial motion, then inspect how two independent normal modes combine into the motion of two coupled masses. Compare in-phase, opposite, localized and uncoupled motion; the exact values and energy decomposition accompany the schematic and time traces.
+
+The original **[sixteen-question course](courses/normal-modes.json)** and **[worked guide](courses/normal-modes.md)** develop the force balance, initial-value solution, conserved modal energies and zero-coupling limit. Download the course from the lab and open it through **Bring your own lesson**, preview it and choose **Start this deck** in RecallWeave. The separate observation download retains the applied parameters, inspection time and full analytical trajectory.
+
+The lab works offline and saves only explicit downloads. Rebuild with `node tools/build-normal-modes.mjs`; `--check` verifies exact source, course and guide parity. Run its focused native controls with `node --test tests/normal-modes.test.mjs`.
+
 ## Explore coherent waves
 
 Open **[Coherent waves: from phasors to interference](courses/phasor-interference-lab.html)** for an offline lab that connects two rotating complex amplitudes to their real cosine signals. Predict cancellation, vary relative and common phase, and compare the arrow diagram with the time trace and downloadable values. The [worked guide](courses/phasor-interference.md) explains the assumptions and original examples; save the [sixteen-question course](courses/phasor-interference.json) and open it through **Bring your own lesson** to practice the connections.
