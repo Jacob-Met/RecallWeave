@@ -6,6 +6,14 @@
 
 Open `demo.html` directly in a browser—no server, install, build step, internet, login, API key, or user data storage is required. It is a single self-contained file with embedded CSS, JavaScript and deck. The modular source is in `index.html`, `src/`, and `data/`; to test that version locally, serve this directory with `python3 -m http.server 8080` and visit `http://localhost:8080`. Rebuild the direct-open demo with `python3 tools/make_demo.py` after source changes. No hosted endpoint is called by either version.
 
+## Follow recursive calls and returns
+
+Open **[Calls go down. Answers come back.](courses/recursion-call-stack-explorer.html)** directly in a browser to step through factorial, Fibonacci, and memoized Fibonacci. Inspect each caller’s suspended calculation, saved child values, actual return order, and a fresh cache. Previous, Next, and the event selector revisit exact snapshots; the completed-run comparison separates total invocations, computed calls, cache hits, and maximum active depth.
+
+Inputs are whole numbers from 0 to 10. Every invocation counts, including base cases and cache hits; factorial uses only the zero base case, and Fibonacci uses F(0) = 0 and F(1) = 1. The memoized algorithm starts with an empty cache and stores base results too. Download the full exact trace with its selected inspection step, or download the original [twelve-question course](courses/recursion-call-stack.json) and open it through **Bring your own lesson**. The [worked guide](courses/recursion-call-stack.md) includes the shared conventions, answer explanations, and transfer prompts.
+
+The explorer needs no server or account and keeps no automatic browser storage. Its trace is an algorithm inspection record, separate from learner-answer archives. Rebuild it with `node tools/build_recursion_call_stack.mjs`; add `--check` to verify that the checked-in page matches its exact sources and validated deck.
+
 ## Explore grouped rates
 
 Open **[When groups and totals disagree](courses/grouped-data-explorer.html)** for a separate offline lesson about group rates, pooled samples and a chosen common mix. Edit the recorded counts, inspect exact fractions and download the current comparison. The worked examples explain why both groups can favor one option while the pooled sample favors the other, and why this alone does not establish a causal effect.
