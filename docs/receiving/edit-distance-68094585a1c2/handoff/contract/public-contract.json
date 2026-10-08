@@ -1,0 +1,382 @@
+{
+  "identity": "estate-68094585a1c2 / production",
+  "issue": "https://github.com/Jacob-Met/RecallWeave/issues/141",
+  "source_parent": "567425f209cdf8e8cf9767faac9bfd3003af3e65",
+  "source_tree": "a877e5d5eb1953aa2389ea75ef7cad96da321c1a",
+  "status": "Public author contract and manually reasoned examples frozen before candidate implementation; independent parent receiving remains separate.",
+  "model": {
+    "entry": "analyzeEditDistance(source, target)",
+    "input": "Two well-formed JavaScript strings of 0–24 Unicode code points each; reject nonstrings and lone UTF-16 surrogates. No trim, case folding, or normalization.",
+    "costs": {
+      "match": 0,
+      "insert": 1,
+      "delete": 1,
+      "substitute": 1
+    },
+    "excluded_operation": "Adjacent transposition is not one edit.",
+    "matrix": "D[i][j] is minimum source-prefix i to target-prefix j cost. Row 0 is j; column 0 is i. Interior is min(diagonal + equality/substitution cost, above + deletion cost, left + insertion cost).",
+    "ties": "Every optimal predecessor is retained. Canonical backtrace, starting at D[m][n], chooses diagonal first, then deletion, then insertion; reverse the chosen steps for forward alignment.",
+    "counts": "Exact BigInt internally; decimal strings in the returned/downloaded record. Count optimal monotone alignment paths, not distinct final strings or arbitrarily reordered edit programs.",
+    "result": {
+      "format": "recallweave-edit-distance/1",
+      "fields": [
+        "format",
+        "policy",
+        "source",
+        "target",
+        "sourcePoints",
+        "targetPoints",
+        "distance",
+        "optimalPathCount",
+        "matrix",
+        "cells",
+        "alignment"
+      ],
+      "cell": "{i,j,cost,optimalPathCount,candidates:[{operation,from:[i,j],stepCost,totalCost,optimal}]} in deterministic diagonal/delete/insert order; origin has no candidates.",
+      "alignment_step": "{step,operation,sourceIndex,targetIndex,source,target,cost,from:[i,j],to:[i,j]}; zero-based source/target indices or null at a gap; step is one-based; origin-to-final order."
+    }
+  },
+  "ui": {
+    "entry": "Directly opened, dependency-free single HTML file.",
+    "controls": [
+      "Edit both source and target; explicitly Compare.",
+      "Fixed, labeled example pairs.",
+      "Select any prefix cell by button or arrow-key movement to inspect candidate costs and all ties.",
+      "Previous/Next/Show all canonical-alignment steps; no automatic motion.",
+      "Explicit download of the exact applied comparison JSON, with policy/input/matrix/candidates/path/alignment.",
+      "Separate fixed 14-question course JSON download for the unchanged learner."
+    ],
+    "draft": "Keep literal draft text. Mark retained results as previous when inputs differ. Disable comparison download until a valid comparison matches the draft. A failed comparison does not publish a new result.",
+    "representation": "Use DOM text nodes for all inputs, including markup, quotes, whitespace and Unicode. Show indices and code point labels; a gap is explicitly labeled and not an ordinary text character.",
+    "phone": "No page-level horizontal overflow at 320px; dense prefix matrix may scroll within its own labeled region.",
+    "network": "No external dependency, storage, account or runtime fetch; reference hyperlinks are user initiated."
+  },
+  "course": {
+    "format": "recallweave-deck/1",
+    "items": 14,
+    "concepts": [
+      "Allowed edits",
+      "Prefix subproblems",
+      "Alignments and ties",
+      "Representation and limits"
+    ],
+    "basis": "Original questions, worked guide and explanations. Native parser, adaptive selection, review/practice and study-note export remain unchanged."
+  },
+  "receiving": {
+    "baseline": "Exact original source closure and representative native deck/learner/review flow before candidate; no new feature exists in baseline.",
+    "author_math": "Frozen manual cases plus independent exhaustive enumeration of all monotone alignment paths for every pair of binary strings of length <=4; verify both minimum cost and number of minima, and replay selected alignment.",
+    "browser": "Actual installed Chromium interaction and physical downloads, including import into exact unchanged learner, one mixed-answer session and practice/notes; private profile, no account or remote page.",
+    "preservation": "Exact before/after source pins, first failures and artifacts. No unrelated source writes; source publication and parent receiving distinct."
+  },
+  "references": [
+    {
+      "title": "Wagner and Fischer (1974), The String-to-String Correction Problem",
+      "doi": "https://doi.org/10.1145/321796.321811",
+      "original_paper": "https://computingbiology.github.io/docs/wagner1974.pdf",
+      "bibliography": "https://projects.csail.mit.edu/jacm/References/wagnerf1974:168.html"
+    },
+    {
+      "title": "Levenshtein (1966 translation), Binary Codes Capable of Correcting Deletions, Insertions, and Reversals",
+      "original_paper": "https://nymity.ch/sybilhunting/pdf/Levenshtein1966a.pdf"
+    },
+    {
+      "title": "Unicode UAX #29, revision 49, grapheme cluster boundaries",
+      "url": "https://www.unicode.org/reports/tr29/tr29-49.html"
+    }
+  ],
+  "manual_examples": [
+    {
+      "source": "",
+      "target": "",
+      "distance": 0,
+      "pathCount": "1",
+      "matrix": [
+        [
+          0
+        ]
+      ],
+      "operations": []
+    },
+    {
+      "source": "",
+      "target": "ABC",
+      "distance": 3,
+      "pathCount": "1",
+      "matrix": [
+        [
+          0,
+          1,
+          2,
+          3
+        ]
+      ],
+      "operations": [
+        "insert",
+        "insert",
+        "insert"
+      ]
+    },
+    {
+      "source": "ABC",
+      "target": "",
+      "distance": 3,
+      "pathCount": "1",
+      "matrix": [
+        [
+          0
+        ],
+        [
+          1
+        ],
+        [
+          2
+        ],
+        [
+          3
+        ]
+      ],
+      "operations": [
+        "delete",
+        "delete",
+        "delete"
+      ]
+    },
+    {
+      "source": "KITTEN",
+      "target": "SITTING",
+      "distance": 3,
+      "operations": [
+        "substitute",
+        "match",
+        "match",
+        "match",
+        "substitute",
+        "match",
+        "insert"
+      ],
+      "note": "Path count deliberately not frozen from an unproved mental calculation."
+    },
+    {
+      "source": "AB",
+      "target": "BA",
+      "distance": 2,
+      "pathCount": "3",
+      "matrix": [
+        [
+          0,
+          1,
+          2
+        ],
+        [
+          1,
+          1,
+          1
+        ],
+        [
+          2,
+          1,
+          2
+        ]
+      ],
+      "operations": [
+        "substitute",
+        "substitute"
+      ]
+    },
+    {
+      "source": "AA",
+      "target": "A",
+      "distance": 1,
+      "pathCount": "2",
+      "matrix": [
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          2,
+          1
+        ]
+      ],
+      "operations": [
+        "delete",
+        "match"
+      ]
+    },
+    {
+      "source": "A",
+      "target": "AA",
+      "distance": 1,
+      "pathCount": "2",
+      "matrix": [
+        [
+          0,
+          1,
+          2
+        ],
+        [
+          1,
+          0,
+          1
+        ]
+      ],
+      "operations": [
+        "insert",
+        "match"
+      ]
+    },
+    {
+      "source": "ABC",
+      "target": "AC",
+      "distance": 1,
+      "pathCount": "1",
+      "matrix": [
+        [
+          0,
+          1,
+          2
+        ],
+        [
+          1,
+          0,
+          1
+        ],
+        [
+          2,
+          1,
+          1
+        ],
+        [
+          3,
+          2,
+          1
+        ]
+      ],
+      "operations": [
+        "match",
+        "delete",
+        "match"
+      ]
+    },
+    {
+      "source": "é",
+      "target": "é",
+      "distance": 2,
+      "pathCount": "2",
+      "matrix": [
+        [
+          0,
+          1,
+          2
+        ],
+        [
+          1,
+          1,
+          2
+        ]
+      ],
+      "operations": [
+        "insert",
+        "substitute"
+      ],
+      "note": "Canonical alignment inserts U+0065, then substitutes U+00E9 with U+0301."
+    },
+    {
+      "source": "👩‍🔬",
+      "target": "👩",
+      "distance": 2,
+      "pathCount": "1",
+      "operations": [
+        "match",
+        "delete",
+        "delete"
+      ],
+      "note": "Three source code points: U+1F469, U+200D, U+1F52C."
+    },
+    {
+      "source": "cat",
+      "target": "Cat",
+      "distance": 1,
+      "pathCount": "1",
+      "operations": [
+        "substitute",
+        "match",
+        "match"
+      ]
+    },
+    {
+      "source": " A",
+      "target": "A ",
+      "distance": 2,
+      "pathCount": "3",
+      "operations": [
+        "substitute",
+        "substitute"
+      ]
+    },
+    {
+      "source": "AAAAAAAAAAAAAAAAAAAAAAAA",
+      "target": "",
+      "distance": 24,
+      "pathCount": "1",
+      "operations": [
+        "delete",
+        "delete",
+        "delete",
+        "delete",
+        "delete",
+        "delete",
+        "delete",
+        "delete",
+        "delete",
+        "delete",
+        "delete",
+        "delete",
+        "delete",
+        "delete",
+        "delete",
+        "delete",
+        "delete",
+        "delete",
+        "delete",
+        "delete",
+        "delete",
+        "delete",
+        "delete",
+        "delete"
+      ]
+    }
+  ],
+  "refusal_examples": [
+    {
+      "source": "AAAAAAAAAAAAAAAAAAAAAAAAA",
+      "target": "",
+      "reason": "25 code points exceeds 24."
+    },
+    {
+      "source_code_units": [
+        55296
+      ],
+      "target": "",
+      "reason": "Lone high surrogate is not admitted."
+    },
+    {
+      "source": "",
+      "target_code_units": [
+        56320
+      ],
+      "reason": "Lone low surrogate is not admitted."
+    },
+    {
+      "source": 12,
+      "target": "A",
+      "reason": "Nonstring."
+    }
+  ],
+  "pre_freeze_carrier_note": "First functions request was rejected by JavaScript-value serialization before any native call or stored draft. It contained actual lone surrogate strings. Invalid UTF-16 examples are represented here by numeric code-unit arrays for native construction; no candidate code existed.",
+  "frozen_at": "2026-10-08T19:36:31.378Z"
+}
