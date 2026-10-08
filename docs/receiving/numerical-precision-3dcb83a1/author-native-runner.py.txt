@@ -1,0 +1,69 @@
+import datetime, hashlib, json, pathlib, shutil, subprocess, sys
+ROOT = pathlib.Path("/dev/shm/recallweave-precision-3dcb83a1")
+SOURCE = ROOT / "source"
+MIN_FREE = 512 * 1024 * 1024
+MAX_OWN = 16 * 1024 * 1024
+def hashes(data):
+    return {"sha256": hashlib.sha256(data).hexdigest(), "git_blob": hashlib.sha1(b"blob " + str(len(data)).encode() + b"\0" + data).hexdigest(), "bytes": len(data)}
+def guard():
+    free = shutil.disk_usage(ROOT).free
+    own = sum(p.stat().st_size for p in ROOT.rglob("*") if p.is_file())
+    if free < MIN_FREE or own > MAX_OWN:
+        raise RuntimeError(f"source resource guard refused: free={free}, own={own}")
+    return {"free_bytes": free, "owned_bytes": own, "minimum_free_bytes": MIN_FREE, "maximum_owned_bytes": MAX_OWN}
+def inventory():
+    return {str(p.relative_to(SOURCE)): hashes(p.read_bytes()) for p in sorted(SOURCE.rglob("*")) if p.is_file()}
+receipt = {"at": datetime.datetime.now(datetime.timezone.utc).isoformat(), "root": str(ROOT), "commands": [], "guards": [], "source_mutated_by_tests": None, "boundary": "Sparse exact current native source, focused new tests and generated offline consumer; no installed learning-page importer or browser receiving claim."}
+try:
+    receipt["guards"].append(guard())
+    payload = json.loads((ROOT / "incoming-source.json").read_text())
+    receipt["base"] = payload["base"]
+    receipt["base_tree"] = payload["tree"]
+    if SOURCE.exists(): raise RuntimeError("Source path already exists; do not replace an earlier candidate.")
+    seen = set()
+    for row in payload["files"]:
+        path = pathlib.PurePosixPath(row["path"])
+        if path.is_absolute() or ".." in path.parts or str(path) in seen: raise RuntimeError("Unsafe or duplicate source path.")
+        seen.add(str(path))
+        digest = hashes(row["content"].encode())
+        if any(digest[k] != row[k] for k in ("sha256", "git_blob", "bytes")): raise RuntimeError("Source payload pin mismatch: " + str(path))
+    SOURCE.mkdir()
+    for row in payload["files"]:
+        path = SOURCE / row["path"]
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(row["content"].encode())
+    for name, key in (("contract.json", "contract"), ("blind-questions.json", "blind"), ("authored-key.json", "authored_key")):
+        (ROOT / name).write_text(json.dumps(payload[key], ensure_ascii=False, indent=2) + "\n")
+    receipt["initial_source"] = inventory()
+    receipt["unchanged_primary_sources"] = payload["base_files"]
+    receipt["guards"].append(guard())
+    version = subprocess.run(["/usr/bin/node", "--version"], text=True, capture_output=True, timeout=10, check=True)
+    receipt["node"] = version.stdout.strip()
+    for args in (["/usr/bin/node", "tools/build-numerical-precision.mjs"], ["/usr/bin/node", "--test", "tests/numerical-precision.test.mjs"]):
+        receipt["guards"].append(guard())
+        before = inventory()
+        run = subprocess.run(args, cwd=SOURCE, text=True, capture_output=True, timeout=45)
+        after = inventory()
+        item = {"command": args, "cwd": str(SOURCE), "returncode": run.returncode, "stdout": run.stdout, "stderr": run.stderr, "before": before, "after": after}
+        receipt["commands"].append(item)
+        receipt["guards"].append(guard())
+        if args[1] == "--test":
+            receipt["source_mutated_by_tests"] = before != after
+            if before != after: raise RuntimeError("Tests changed source.")
+        else:
+            expected = payload["expected_html"]
+            received = hashes((SOURCE / expected["path"]).read_bytes())
+            if received != {k: expected[k] for k in received}: raise RuntimeError("Native build differs from author exact source assembly.")
+            if any(after.get(path) != pin for path, pin in before.items()): raise RuntimeError("Builder changed an input source.")
+        if run.returncode: raise RuntimeError("Native command failed: " + " ".join(args))
+    receipt["final_source"] = inventory()
+    receipt["outcome"] = "pass"
+except Exception as error:
+    receipt["outcome"] = "refused_or_failed"
+    receipt["error_type"] = type(error).__name__
+    receipt["error"] = str(error)
+finally:
+    receipt["runner_sha256"] = hashlib.sha256(pathlib.Path(__file__).read_bytes()).hexdigest()
+    (ROOT / "native-qualification.json").write_text(json.dumps(receipt, ensure_ascii=False, indent=2) + "\n")
+print(json.dumps({"outcome": receipt["outcome"], "node": receipt.get("node"), "source_files": len(receipt.get("final_source", {})), "commands": [{"command": r["command"], "returncode": r["returncode"], "tail": r["stdout"][-1500:], "stderr": r["stderr"][-500:]} for r in receipt["commands"]], "guards": receipt["guards"], "error": receipt.get("error")}, ensure_ascii=False))
+sys.exit(0 if receipt["outcome"] == "pass" else 1)
