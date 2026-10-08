@@ -1,0 +1,218 @@
+{
+  "schema": "recallweave-deck/1",
+  "title": "Sorting records without losing their identity",
+  "attribution": "Original fictional examples, question wording and worked explanations by the RecallWeave project. Conceptual references: Robert Sedgewick and Kevin Wayne, Algorithms, 4th Edition, Section 2.1 Elementary Sorts, https://algs4.cs.princeton.edu/21elementary/ ; insertion and selection class documentation at https://algs4.cs.princeton.edu/code/edu/princeton/cs/algs4/Insertion.java.html and https://algs4.cs.princeton.edu/code/edu/princeton/cs/algs4/Selection.java.html .",
+  "license": "Original course wording and fictional examples may be used, copied and adapted with attribution to RecallWeave. Linked reference works retain their own licenses; no reference passages, figures or source code are reproduced.",
+  "concepts": [
+    "Record identity",
+    "Insertion passes",
+    "Selection and stability",
+    "Choosing and checking a sort"
+  ],
+  "items": [
+    {
+      "id": "stable-sort-records",
+      "concept": "Record identity",
+      "prerequisites": [],
+      "prompt": "A record has a numeric key and a tag, such as (3, Amber). When sorting records by ascending key, which property must be preserved?",
+      "options": [
+        "Records with equal keys can be combined into one record.",
+        "Each original key stays with its tag, and every original record appears exactly once.",
+        "Tags can be reassigned after the keys are sorted.",
+        "Every record must remain at its original array position."
+      ],
+      "answer": 1,
+      "explanation": "Sorting rearranges complete records. Comparing only the key does not give permission to change its attached data, lose an entry or create a duplicate. A tag helps us follow identity through the rearrangement.",
+      "transfer": "Name a real list with a sorting key and another field that must stay attached to the same record."
+    },
+    {
+      "id": "stable-sort-key-ties",
+      "concept": "Record identity",
+      "prerequisites": [],
+      "prompt": "Two distinct records have the same key. What additional promise does a stable sort make about them?",
+      "options": [
+        "It keeps both records at their original absolute positions.",
+        "It assigns the equal keys different numeric values.",
+        "It guarantees that equal keys will never be compared.",
+        "It preserves their relative order from the input to that sort."
+      ],
+      "answer": 3,
+      "explanation": "Stability concerns the relative order of records whose comparison keys are equal. They can move to new positions together as smaller keys move ahead of them. It does not mean the array stays unchanged.",
+      "transfer": "Explain how two tied records can both move several positions while still keeping their relative order."
+    },
+    {
+      "id": "stable-sort-stable-result",
+      "concept": "Record identity",
+      "prerequisites": [],
+      "prompt": "The input is (2, A), (2, B), (1, C). Which result is both ascending by key and stable?",
+      "options": [
+        "(1, C), (2, A), (2, B)",
+        "(1, C), (2, B), (2, A)",
+        "(2, A), (2, B), (1, C)",
+        "(1, C), (2, A)"
+      ],
+      "answer": 0,
+      "explanation": "C must move before the two key-2 records. Stability then keeps A before B because that was their relative input order. Reversing A and B still sorts the keys, but it loses this stability property.",
+      "transfer": "Create a four-record input with two equal keys and write two sorted outputs: one that keeps their order and one that changes it."
+    },
+    {
+      "id": "stable-sort-prefix",
+      "concept": "Insertion passes",
+      "prerequisites": [
+        "Record identity"
+      ],
+      "prompt": "In adjacent-exchange insertion sort, what is guaranteed after a completed pass has inserted the next record?",
+      "options": [
+        "The processed prefix already contains the globally smallest keys from the entire input.",
+        "Every record in the entire array is now in its final position.",
+        "The processed prefix is sorted; later records may still need to move into it.",
+        "Equal-key records have been removed from the processed prefix."
+      ],
+      "answer": 2,
+      "explanation": "An insertion pass places one additional record into the previously sorted prefix. Future records can be smaller and may shift that prefix later. The invariant describes the part processed so far, not a claim that all those positions are final.",
+      "transfer": "Trace [4, 7, 2] and point to the prefix after the first pass. Why is that prefix not already the set of smallest keys?"
+    },
+    {
+      "id": "stable-sort-equal-compare",
+      "concept": "Insertion passes",
+      "prerequisites": [
+        "Record identity"
+      ],
+      "prompt": "During an insertion pass, the current record is (2, B) and its immediate predecessor is (2, A). This recipe exchanges neighbors only when the later key is strictly smaller. What happens here?",
+      "options": [
+        "The two records are exchanged to put the newer one first.",
+        "Only their tags are exchanged, leaving the keys in place.",
+        "The earlier record is discarded because its key is duplicated.",
+        "The records are not exchanged, and this insertion pass stops."
+      ],
+      "answer": 3,
+      "explanation": "The test 2 < 2 is false. Stopping on equality keeps the later record from crossing an earlier equal-key record. Using a non-strict test instead would change this tie behavior.",
+      "transfer": "Change the comparison rule to exchange when the later key is less than or equal. What happens to [2A, 2B]?"
+    },
+    {
+      "id": "stable-sort-descending-count",
+      "concept": "Insertion passes",
+      "prerequisites": [
+        "Record identity"
+      ],
+      "prompt": "Use adjacent-exchange insertion sort on descending keys [4, 3, 2, 1]. Count only key comparisons and exchanges of two distinct positions; do not count index-bound checks. What totals result?",
+      "options": [
+        "3 key comparisons and 3 exchanges",
+        "6 key comparisons and 6 exchanges",
+        "6 key comparisons and 3 exchanges",
+        "12 key comparisons and 6 exchanges"
+      ],
+      "answer": 1,
+      "explanation": "The three insertion passes move the next record left by 1, 2 and 3 positions. Every compared pair is out of order, so each of the six key comparisons is followed by an exchange. Reaching the front adds no further key comparison.",
+      "transfer": "Repeat the count for [3, 2, 1], writing down each compared pair so index checks do not get counted as key comparisons."
+    },
+    {
+      "id": "stable-sort-selection-crossing",
+      "concept": "Selection and stability",
+      "prerequisites": [
+        "Record identity",
+        "Insertion passes"
+      ],
+      "prompt": "Selection sort starts with (2, A), (2, B), (1, C). Its first pass selects C as the minimum and exchanges it with the first record. What order remains immediately after that exchange?",
+      "options": [
+        "(1, C), (2, A), (2, B)",
+        "(2, B), (1, C), (2, A)",
+        "(1, C), (2, B), (2, A)",
+        "(2, A), (2, B), (1, C)"
+      ],
+      "answer": 2,
+      "explanation": "Exchanging the first and third positions moves A past B. The keys are already ascending afterward, but the key-2 identities have reversed from A then B to B then A. This is a concrete counterexample to stability for this selection recipe.",
+      "transfer": "Mark which two positions are exchanged. Which tied record is crossed without being selected as the minimum?"
+    },
+    {
+      "id": "stable-sort-earliest-minimum",
+      "concept": "Selection and stability",
+      "prerequisites": [
+        "Record identity",
+        "Insertion passes"
+      ],
+      "prompt": "The selection scan keeps its earlier minimum when it encounters an equal key. Why can the overall sort still change the order of tied records?",
+      "options": [
+        "A distant exchange can move one tied record past another.",
+        "Keeping the earlier minimum changes equal keys into unequal keys.",
+        "Stability depends only on the final keys, so record order is irrelevant.",
+        "The scan must directly exchange two equal records whenever it sees a tie."
+      ],
+      "answer": 0,
+      "explanation": "Choosing the first minimum controls the scan's tie choice, but it does not make the later exchange local. In [2A, 2B, 1C], selecting 1C and exchanging it with 2A moves A across B even though the scan kept the earlier key-2 minimum when those keys tied.",
+      "transfer": "Compare a neighboring exchange with an exchange across several positions. Which intervening identities might the longer exchange pass?"
+    },
+    {
+      "id": "stable-sort-observed-v-guarantee",
+      "concept": "Selection and stability",
+      "prerequisites": [
+        "Record identity",
+        "Insertion passes"
+      ],
+      "prompt": "On the input (2, A), (1, C), (2, B), this selection recipe finishes as (1, C), (2, A), (2, B). What does that observation establish?",
+      "options": [
+        "It kept the tied records in order for this input; that alone does not establish a general stability guarantee.",
+        "Selection sort must be stable for every possible input.",
+        "The input had no equal keys, so tie order could not be checked.",
+        "Every future selection-sort run will require exactly the same comparisons and exchanges."
+      ],
+      "answer": 0,
+      "explanation": "A and B retain their order in this example. A general stability claim concerns all allowed inputs; a different input, such as [2A, 2B, 1C], can reverse them. The explorer separates observed tie order from the algorithm's guarantee.",
+      "transfer": "Test an all-distinct input. Why does that run provide no actual tied-key group whose order you can compare?"
+    },
+    {
+      "id": "stable-sort-sorted-counts",
+      "concept": "Choosing and checking a sort",
+      "prerequisites": [
+        "Insertion passes",
+        "Selection and stability"
+      ],
+      "prompt": "The five keys [1, 2, 3, 4, 5] are already ascending. Insertion uses strict adjacent comparisons. Selection scans every remaining position and skips self-exchanges. Which operation count is correct?",
+      "options": [
+        "Insertion: 0 comparisons; selection: 0 comparisons; both: 0 exchanges",
+        "Insertion: 10 comparisons; selection: 4 comparisons; both: 5 exchanges",
+        "Insertion: 4 comparisons; selection: 10 comparisons; both: 0 exchanges",
+        "Insertion: 4 comparisons; selection: 10 comparisons; both: 5 exchanges"
+      ],
+      "answer": 2,
+      "explanation": "Insertion makes one unsuccessful less-than comparison in each of four passes and never exchanges. Selection still scans 4 + 3 + 2 + 1 remaining keys, giving ten comparisons. The chosen minimum is already in place each time, and this recipe skips self-exchanges.",
+      "transfer": "Keep the same number of records but reverse their keys. Which recipe's comparison total changes, and why?"
+    },
+    {
+      "id": "stable-sort-cost-model",
+      "concept": "Choosing and checking a sort",
+      "prerequisites": [
+        "Insertion passes",
+        "Selection and stability"
+      ],
+      "prompt": "One displayed trace uses fewer key comparisons than another. Which conclusion is justified by that count alone?",
+      "options": [
+        "It must be faster on every computer and every input size.",
+        "It used fewer key comparisons under the declared recipe; no elapsed-time measurement has been made.",
+        "It used less total memory, because comparisons measure memory use.",
+        "It will always preserve tied-record order, because fewer comparisons imply stability."
+      ],
+      "answer": 1,
+      "explanation": "The explorer counts particular algorithm operations. It does not measure elapsed time, memory allocation, rendering or all language-runtime work. Stability is a separate ordering property. Operation counts can explain algorithm behavior without serving as a timing benchmark.",
+      "transfer": "Name two costs that a browser timing measurement might include even though this comparison counter does not."
+    },
+    {
+      "id": "stable-sort-two-keys",
+      "concept": "Choosing and checking a sort",
+      "prerequisites": [
+        "Insertion passes",
+        "Selection and stability"
+      ],
+      "prompt": "You first sort tickets by distinct arrival number. You then use a stable sort by priority. Among tickets with the same priority, what order does the second sort preserve?",
+      "options": [
+        "The reverse of arrival order, because the primary key is sorted last.",
+        "Whichever order their labels have in the alphabet.",
+        "Their original absolute positions from before either sort.",
+        "Increasing arrival number, because those tied-priority tickets keep their relative input order."
+      ],
+      "answer": 3,
+      "explanation": "Before the second sort, all tickets are ordered by arrival number. The stable priority sort forms priority groups while retaining that earlier relative order inside each equal-priority group. Stability is defined relative to the input of the current sort; it does not restore some earlier absolute positions.",
+      "transfer": "Explain what could go wrong if the priority pass used a sort that can reorder tied records. Give a small ticket example."
+    }
+  ]
+}
