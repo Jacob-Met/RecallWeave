@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src 'none'; base-uri 'none'; form-action 'none'">
+<title>Inheritance lab — RecallWeave</title>
+<style>
+:root{color-scheme:light;--paper:#f5f3e9;--white:#fffef8;--ink:#18352b;--muted:#466458;--line:#c6d2bc;--leaf:#245c3e;--soft:#e6ecd9;--lime:#d8ed95;--error:#9d3428}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.55 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}a{color:var(--leaf);text-underline-offset:.2em}button,select{font:inherit}button,a,select{touch-action:manipulation}button{cursor:pointer;border:1px solid var(--leaf);border-radius:8px;padding:11px 16px;color:var(--leaf);background:var(--white);line-height:1.3}button:hover{background:var(--soft)}button:disabled{cursor:default;opacity:.5}button.primary{background:var(--leaf);color:white;font-weight:700}button.primary:hover{background:#17472e}button:focus-visible,a:focus-visible,select:focus-visible{outline:3px solid #b66119;outline-offset:3px}h1,h2,h3,p{margin-top:0}h1,h2{font-family:Georgia,"Times New Roman",serif;font-weight:500;line-height:1.08}h1{font-size:clamp(2.6rem,5vw,4.5rem);max-width:790px;margin-bottom:20px}h2{font-size:2rem;margin-bottom:18px}h3{font-size:1.02rem;margin-bottom:8px}p{margin-bottom:14px}small,.small{font-size:.88rem}.muted{color:var(--muted)}[hidden]{display:none!important}.skip{position:absolute;top:-100px;left:16px;z-index:3;background:white;padding:10px}.skip:focus{top:10px}.wrap{max-width:1220px;margin:auto;padding:0 28px}.masthead{background:var(--ink);color:var(--paper);padding:24px 0 42px}.brand{display:flex;justify-content:space-between;gap:24px;border-bottom:1px solid #58735f;padding-bottom:16px;margin-bottom:30px;font-size:.85rem;letter-spacing:.06em}.brand a{color:var(--lime)}.eyebrow{text-transform:uppercase;letter-spacing:.13em;font-size:.75rem;font-weight:750;color:var(--lime);margin-bottom:15px}.intro{max-width:740px;color:#dfe9d9;font-size:1.08rem;margin-bottom:0}.boundary{display:flex;align-items:start;gap:22px;padding:23px 0;border-bottom:1px solid var(--line)}.boundary strong{white-space:nowrap;color:var(--leaf)}.boundary p{margin:0;color:var(--muted)}main{padding-bottom:50px}.workspace{display:grid;grid-template-columns:310px minmax(0,1fr);gap:26px;padding-top:28px;align-items:start}.card{border:1px solid var(--line);border-radius:15px;background:var(--white);padding:24px;min-width:0}.step{color:var(--muted);font-size:.75rem;letter-spacing:.1em;text-transform:uppercase;font-weight:750;margin-bottom:12px}.controls h2{font-size:1.65rem}.field{margin:16px 0}label{display:block;font-weight:650;font-size:.9rem;margin-bottom:6px}select{width:100%;min-height:44px;padding:8px 10px;border:1px solid #9aaf98;border-radius:7px;background:white;color:var(--ink)}.parent-fields{display:grid;grid-template-columns:1fr 1fr;gap:12px}.full{width:100%}.preset-list{display:flex;flex-direction:column;gap:8px}.preset{text-align:left;font-size:.84rem;padding:10px 11px;border-color:var(--line)}.presets-title{margin-top:27px;padding-top:22px;border-top:1px solid var(--line)}.error{color:var(--error);font-weight:600;font-size:.9rem;margin-top:12px}.status{font-size:.85rem;color:var(--muted);margin:9px 0 0}.empty{padding:60px 32px;background:var(--soft);border:1px dashed #99b080;border-radius:12px;min-height:285px;display:grid;align-content:center}.empty-mark{font-family:Georgia,serif;font-size:3rem;margin-bottom:12px}.empty p{max-width:430px}.gamete-pools{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin:22px 0}.gametes{display:flex;flex-wrap:wrap;gap:6px;list-style:none;padding:0;margin:0}.gametes li{border:1px solid var(--line);border-radius:6px;background:var(--soft);padding:5px 8px;font-size:.88rem;font-family:ui-monospace,monospace}.table-frame{border:1px solid var(--line);border-radius:10px;overflow:hidden}table{width:100%;border-collapse:collapse;font-size:.9rem}caption{caption-side:top;text-align:left;padding:13px 14px;color:var(--muted);font-size:.85rem;background:var(--paper)}th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line)}th{font-weight:650}thead{background:var(--soft)}tbody tr:last-child>*{border-bottom:0}.punnett{text-align:center;table-layout:fixed}.punnett th,.punnett td{text-align:center;padding:6px}.punnett thead th:first-child{font-size:.68rem}.punnett tbody th{background:var(--soft);font-family:ui-monospace,monospace}.punnett button{font-family:ui-monospace,monospace;width:100%;padding:13px 4px;font-size:1rem;min-height:44px;background:var(--white);border-color:var(--line)}.punnett button[aria-pressed=true]{background:var(--leaf);border-color:var(--leaf);color:white}.route-detail{background:#eef1e1;border-left:4px solid var(--leaf);padding:18px;margin:18px 0 25px;min-height:135px}.route-detail p{font-size:.9rem;margin-bottom:8px}.route-detail p:last-child{margin-bottom:0}.summaries{display:grid;grid-template-columns:1fr 1fr;gap:18px}.summaries table{font-variant-numeric:tabular-nums}.summaries td:last-child{white-space:nowrap;font-size:.84rem}.summaries th,.summaries td{padding:9px 8px}.summaries tbody th{font-family:ui-monospace,monospace}.record{display:flex;flex-wrap:wrap;align-items:center;gap:12px;padding-top:20px;margin-top:22px;border-top:1px solid var(--line)}.record p{margin:0;max-width:320px}.learn{margin-top:28px;display:grid;grid-template-columns:1.1fr 1fr;gap:28px}.learn ol{padding-left:23px}.learn li{margin:7px 0}.course-actions{display:flex;gap:13px;flex-wrap:wrap;align-items:center;margin-top:20px}.assumptions{margin-top:25px;padding:20px 24px}.assumptions summary{font-weight:700;cursor:pointer}.assumptions li{margin:8px 0}.footer{border-top:1px solid var(--line);padding:24px 0;font-size:.82rem;color:var(--muted)}
+@media(max-width:920px){.workspace{grid-template-columns:260px minmax(0,1fr);gap:18px}.card{padding:19px}.summaries{grid-template-columns:1fr}.learn{grid-template-columns:1fr 1fr;gap:18px}.punnett button{font-size:.88rem}}
+@media(max-width:680px){.wrap{padding:0 16px}.masthead{padding:20px 0 30px}.brand{font-size:.75rem;gap:12px;margin-bottom:25px}.boundary{display:block;padding:20px 0}.boundary strong{display:block;margin-bottom:6px}.workspace,.learn{grid-template-columns:1fr;gap:18px}.workspace{padding-top:20px}.card{padding:18px}h2{font-size:1.8rem}.controls h2{font-size:1.65rem}.presets-title{margin-top:22px}.preset-list{gap:6px}.empty{padding:30px 22px;min-height:240px}.gamete-pools{gap:12px}.gametes li{font-size:.79rem;padding:5px 7px}.punnett th,.punnett td{padding:4px}.punnett button{font-size:.78rem;padding:12px 1px}.punnett thead th:first-child{font-size:.59rem}.route-detail{padding:14px}.learn{margin-top:18px}.assumptions{padding:17px}.summaries table{font-size:.85rem}}
+</style>
+</head>
+<body>
+<a class="skip" href="#cross-form">Skip to the cross controls</a>
+<header class="masthead">
+<div class="wrap">
+<div class="brand"><span>RECALLWEAVE / FIELD LAB 01</span><a href="../demo.html">Open the learner ↗</a></div>
+<p class="eyebrow">Mendelian inheritance</p>
+<h1>Follow the alleles.<br>See the possibilities.</h1>
+<p class="intro">Choose two parents, trace their gametes, and build offspring probabilities one fertilization at a time. Then test the connections in a twelve-question lesson.</p>
+</div>
+</header>
+<div class="wrap">
+<div class="boundary"><strong>A model, with boundaries</strong><p>Hypothetical plant traits with complete dominance. Two-locus crosses assume independent assortment. These are probabilities for each zygote, not a promised ratio in a small group of offspring.</p></div>
+<main>
+<div class="workspace">
+<section class="card controls" aria-labelledby="parents-title">
+<p class="step">01 / Choose the parents</p>
+<h2 id="parents-title">Start with a cross</h2>
+<form id="cross-form">
+<div class="field"><label for="loci">Loci to follow</label><select id="loci"><option value="1">One locus · A / a</option><option value="2">Two independent loci · A / a and B / b</option></select></div>
+<div class="parent-fields">
+<div class="field"><label for="parent-1">Parent 1 genotype</label><select id="parent-1"></select></div>
+<div class="field"><label for="parent-2">Parent 2 genotype</label><select id="parent-2"></select></div>
+</div>
+<button class="primary full" type="submit" id="explore-cross">Explore this cross →</button>
+<p id="cross-error" class="error" role="alert" tabindex="-1"></p>
+</form>
+<h3 class="presets-title">Try a different pattern</h3>
+<div id="presets" class="preset-list"></div>
+<p class="small muted" style="margin:15px 0 0">A is an allele label, not a measure of strength or frequency. Aa has one copy of each allele; a gamete has one allele per locus.</p>
+</section>
+<section class="card" aria-labelledby="possibilities-title">
+<p class="step">02 / Follow the routes</p>
+<h2 id="possibilities-title">From gametes to offspring</h2>
+<div id="pending" class="empty" role="status"><div class="empty-mark" aria-hidden="true">A + a</div><p>Select <strong>Explore this cross</strong> to see the gametes, fertilization routes and exact probabilities.</p></div>
+<div id="results" hidden>
+<h3 id="cross-heading" tabindex="-1"></h3>
+<p id="route-count" class="small muted"></p>
+<div class="gamete-pools">
+<div><h3>Parent 1 gametes</h3><ul id="gametes-1" class="gametes"></ul></div>
+<div><h3>Parent 2 gametes</h3><ul id="gametes-2" class="gametes"></ul></div>
+</div>
+<div class="table-frame"><table id="punnett" class="punnett" aria-label="Fertilization routes"></table></div>
+<div id="route-detail" class="route-detail" aria-live="polite"></div>
+<p class="step">03 / Add routes, compare meanings</p>
+<div class="summaries">
+<section aria-labelledby="genotype-title"><h3 id="genotype-title">Genotypes</h3><div class="table-frame"><table><thead><tr><th scope="col">Genotype</th><th scope="col">Routes</th><th scope="col">Probability</th></tr></thead><tbody id="genotype-summary"></tbody></table></div></section>
+<section aria-labelledby="phenotype-title"><h3 id="phenotype-title">Phenotypes</h3><div class="table-frame"><table><thead><tr><th scope="col">Traits</th><th scope="col">Routes</th><th scope="col">Probability</th></tr></thead><tbody id="phenotype-summary"></tbody></table></div></section>
+</div>
+<p id="phenotype-key" class="small muted" style="margin-top:14px"></p>
+</div>
+<div class="record">
+<button type="button" id="download-cross" disabled>Save this cross (.json)</button>
+<p class="small muted">Keep the parent genotypes, every gamete route, exact fractions and the model assumptions.</p>
+</div>
+<p id="cross-status" class="status" role="status"></p>
+</section>
+</div>
+<div class="learn">
+<section class="card" aria-labelledby="lesson-title">
+<p class="step">04 / Make the connection</p>
+<h2 id="lesson-title">Take the lesson with you</h2>
+<p>Twelve original questions connect allele segregation, genotype and phenotype, one-locus crosses and independent two-locus crosses. Worked explanations and transfer prompts help you check your reasoning.</p>
+<ol><li>Download the course JSON below.</li><li>Open RecallWeave and choose the local course file.</li><li>Review the preview, then select <strong>Start this deck</strong>. Your current lesson changes only when you choose to start it.</li><li>Complete the lesson, retry missed connections, and download your study notes.</li></ol>
+<div class="course-actions"><button type="button" class="primary" id="download-course">Download the course (.json)</button><a href="../demo.html">Open RecallWeave ↗</a></div>
+<p id="course-status" class="status" role="status"></p>
+</section>
+<section class="card" aria-labelledby="thinking-title">
+<p class="step">A question to carry forward</p>
+<h2 id="thinking-title">One label can hide two routes.</h2>
+<p>For <strong>Aa × Aa</strong>, choose each cell that produces Aa. One parent can supply A and the other a, or the contributions can be reversed.</p>
+<p>Now compare the genotype and phenotype summaries. Why do the two summaries group the same cells differently?</p>
+<p class="muted">Try <strong>AABb × Aabb</strong> next. Derive its probabilities from its own gametes before reaching for a familiar ratio.</p>
+<a href="mendelian-inheritance.md">Read the worked course guide and references ↗</a>
+</section>
+</div>
+<details class="card assumptions"><summary>What this model assumes — and what it leaves out</summary><ul id="assumptions"></ul><p class="small muted">Linked-locus gamete weights, incomplete dominance, interactions between genes, environmental effects and survival differences require a suitable model. The course includes questions about these boundaries. This explorer stays within the assumptions listed here.</p></details>
+</main>
+<footer class="footer">Original RecallWeave learning material · Course text: CC0-1.0 · No account or network service is needed by this lab. Inputs stay in this page unless you explicitly download a file. Reloading resets the cross.</footer>
+</div>
+<script>
+const INHERITANCE_DECK_TEXT = /* INHERITANCE_DECK_TEXT */;
+/* INHERITANCE_MODEL */
+/* INHERITANCE_UI */
+</script>
+</body>
+</html>

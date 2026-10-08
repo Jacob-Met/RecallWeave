@@ -1,0 +1,127 @@
+RecallWeave — study notes
+Finite convolution: indices, contributions, and filters
+Saved: 2026-10-08T14:14:54.142Z
+
+FIRST SESSION
+10 of 12 connections correct on the first try.
+This count describes this session; it is not a measure of your ability.
+
+ESTIMATED MASTERY — MODEL STATE, NOT A GRADE
+These estimates come from the demo’s learning model. They are not a validated assessment.
+Practice does not change the first-session estimates.
+Indices and support: 98%
+Shift and sum: 90%
+Finite filter responses: 98%
+Properties and operation choice: 74%
+
+PRACTICE
+Complete: 2 of 2 practice answers recorded; 2 correct on retry.
+Practice follows the explanations and is recorded separately from the first answers.
+
+REVIEW THE CONNECTIONS
+
+1. A finite sequence is x = [3, −2, 4], with its first entry at index 0 and zero at every index outside the list. What is x[−1]?
+Concept: Indices and support
+Your first answer: 0
+First try: correct
+Correct answer: 0
+Explanation: Index 0 contains 3, index 1 contains −2, and index 2 contains 4. The index −1 is outside the declared list, so zero extension makes x[−1] = 0. A negative index is not a request to count backward from the end.
+Apply the idea: Write the values of x[0], x[2], and x[3]. Explain which are listed samples and which use zero extension.
+
+2. Let x = [2, −1, 3] and h = [1, 2], both starting at index 0 and zero elsewhere. For y[n] = Σₖ x[k]h[n−k], what is y[1]?
+Concept: Shift and sum
+Your first answer: 5
+First try: needs review
+Correct answer: 3
+Explanation: At n=1, the terms are x[0]h[1]=2×2=4, x[1]h[0]=(−1)×1=−1, and x[2]h[−1]=3×0=0. Their sum is 3. The kernel index is n−k, so its order reverses as k increases.
+Apply the idea: Move the lab from output index 1 to index 2. Identify which kernel index each input sample meets and which terms become zero.
+Practice answer: 3
+Practice result: correct on retry
+
+3. Let x = [2, −1, 3] and h = [1, 2], both starting at index 0 and zero elsewhere. Which list is the full linear convolution y[n] = Σₖ x[k]h[n−k]?
+Concept: Shift and sum
+Your first answer: [2, 3, 1, 6]
+First try: correct
+Correct answer: [2, 3, 1, 6]
+Explanation: The four sums are y[0]=2×1=2; y[1]=2×2+(−1)×1=3; y[2]=(−1)×2+3×1=1; and y[3]=3×2=6. Zero extension supplies all omitted terms. The result is [2,3,1,6], with length 3+2−1=4.
+Apply the idea: Change only the middle input sample from −1 to 0. Predict every output that changes and the amount of each change.
+
+4. Let x = [1, 2] and h = [3, −1, 2], both starting at index 0 and zero elsewhere. At n = 2, which sum correctly computes y[2] = Σₖ x[k]h[2−k]?
+Concept: Shift and sum
+Your first answer: 1 × 2 + 2 × (−1) = 0
+First try: correct
+Correct answer: 1 × 2 + 2 × (−1) = 0
+Explanation: At n=2, the two input indices pair with h[2] and h[1]: 1×2 + 2×(−1)=0. The terms cancel. Pairing x[0] with h[0], or keeping the kernel in forward order, computes a different quantity.
+Apply the idea: Try x=[1,2] and h=[3,−1,2] in the lab. Inspect all four output positions and locate the cancellation at n=2.
+
+5. Two lists have lengths 4 and 3. Both begin at index 0 and are zero elsewhere. Which index range is retained by their full linear convolution, including possible zero entries at the ends?
+Concept: Indices and support
+Your first answer: 0 through 5: six entries
+First try: correct
+Correct answer: 0 through 5: six entries
+Explanation: Nonzero contributions can occur when an input index k in 0…3 and a kernel index j in 0…2 add to n. The first retained index is 0+0=0 and the last is 3+2=5, giving 4+3−1=6 entries. The full convention keeps this range even when some values are zero.
+Apply the idea: Choose input lengths 2 and 5. State the first index, last index, and full output length before doing any multiplication.
+
+6. An averaging kernel is h = [0.5, 0.5] and a finite input is x = [0, 4, 0]. Both start at index 0 and are zero elsewhere. What is their full linear convolution?
+Concept: Finite filter responses
+Your first answer: [0, 2, 2, 0]
+First try: correct
+Correct answer: [0, 2, 2, 0]
+Explanation: The filter computes y[n]=0.5x[n]+0.5x[n−1]. The four retained values are 0, 2, 2, and 0. The single nonzero input contributes to two consecutive outputs. No claim about removing real-world noise follows from this one authored example.
+Apply the idea: Compare h=[0.5,0.5] with h=[1,1] for the same input. Describe the change in output values without making a claim about an unknown signal.
+
+7. A first-difference kernel is h = [1, −1]. The finite input x = [2, 2, 2] begins at index 0 and is zero elsewhere. What is the full output y[n] = x[n] − x[n−1]?
+Concept: Finite filter responses
+Your first answer: [2, 0, 0, −2]
+First try: correct
+Correct answer: [2, 0, 0, −2]
+Explanation: Inside the constant part of the finite input, adjacent values cancel. At the start, y[0]=2−0=2; at the end, y[3]=0−2=−2. Thus the complete output is [2,0,0,−2]. Assuming the value 2 continues forever would describe a different input.
+Apply the idea: Replace the finite input with [2,2,2,2]. Predict how the two nonzero boundary outputs move, then verify the full result.
+
+8. For zero-extended lists indexed from 0, let x = [1, 2], z = [3, −1], and h = [1, 1]. Their full convolutions are x*h = [1, 3, 2] and z*h = [3, 2, −1]. What is (x+z)*h?
+Concept: Properties and operation choice
+Your first answer: [4, 5, 1]
+First try: correct
+Correct answer: [4, 5, 1]
+Explanation: Convolution with the fixed h is linear: (x+z)*h = x*h + z*h. Adding the given output lists entry by entry gives [1+3,3+2,2+(−1)] = [4,5,1]. Directly convolving x+z=[4,1] with [1,1] gives the same result.
+Apply the idea: Pick two equal-length input lists and one fixed kernel. Verify one output index of the sum in two ways and explain why it agrees.
+
+9. Let x = [1, 2] and h = [3, 4], both starting at 0 and zero elsewhere. Define convolution y[n] = Σₖ x[k]h[n−k], and define the real zero-lag correlation r[0] = Σₖ x[k]h[k]. What are y[0] and r[0]?
+Concept: Properties and operation choice
+Your first answer: y[0] = 4 and r[0] = 10
+First try: needs review
+Correct answer: y[0] = 3 and r[0] = 11
+Explanation: At n=0, zero extension leaves only x[0]h[0]=1×3=3 in the convolution sum. The separately defined zero-lag correlation is the aligned dot product 1×3+2×4=11. The formulas use different index pairings; a matching-index dot product is not generally y[0].
+Apply the idea: For the same x and h, calculate y[1] by listing its kernel indices. Contrast this with a matching-index product sum.
+Practice answer: y[0] = 3 and r[0] = 11
+Practice result: correct on retry
+
+10. For finite lists indexed from 0 and zero elsewhere, x = [1, 0, 2] and h = [−1, 3] have full convolution x*h = [−1, 3, −2, 6]. What is the full convolution h*x?
+Concept: Properties and operation choice
+Your first answer: [−1, 3, −2, 6]
+First try: correct
+Correct answer: [−1, 3, −2, 6]
+Explanation: Finite linear convolution is commutative under the same indexing and zero-extension convention. Swapping x and h therefore gives [−1,3,−2,6] again. It does not reverse or negate the result. Direct expansion is −1×[1,0,2] plus a one-index-shifted 3×[1,0,2].
+Apply the idea: Swap the input and kernel in the lab. Compare the complete output and explain why the per-index contribution table can look different.
+
+11. Let x = [2, −1, 3] and h = [0, 1]. Both lists begin at index 0 and are zero elsewhere. For y[n] = Σₖ x[k]h[n−k], what is the full output?
+Concept: Indices and support
+Your first answer: [0, 2, −1, 3]
+First try: correct
+Correct answer: [0, 2, −1, 3]
+Explanation: Only h[1] is nonzero, so y[n]=x[n−1]. Evaluating indices 0…3 gives [0,2,−1,3]. This is a one-sample delay, with no change in amplitude; the leading zero and final sample both belong to the full result.
+Apply the idea: Replace h with [0,0,1] in the lab. Predict the output before checking, and explain the two initial zeros.
+
+12. An input list x = [1, 0, 0] and a kernel h = [2, −1] both begin at index 0 and are zero elsewhere. Which list retains the complete full linear convolution, including the declared trailing zeros?
+Concept: Finite filter responses
+Your first answer: [2, −1, 0, 0]
+First try: correct
+Correct answer: [2, −1, 0, 0]
+Explanation: The input has an impulse at index 0 followed by two declared zeros, so the output copies h and retains the complete 3+2−1=4-entry range: [2,−1,0,0]. The shorter list [2,−1] has the same nonzero support but is not the requested full representation.
+Apply the idea: Use x=[0,1,0] with the same h. Explain both the shifted nonzero samples and the retained zero entries.
+
+DECK ATTRIBUTION
+Original questions, numbers, worked examples and diagrams by RecallWeave contributors (2026). Mathematical background: Alan V. Oppenheim, MIT OpenCourseWare RES.6.007, Lecture 4, Convolution, https://ocw.mit.edu/courses/res-6-007-signals-and-systems-spring-2011/resources/lecture-4-convolution/ ; D. Rowell, MIT 2.161, Lecture 18, pp. 18–1 to 18–2, https://ocw.mit.edu/courses/2-161-signal-processing-continuous-and-discrete-fall-2008/14f29be83ac38f11eb1a1bd5fdb6f5ea_lecture_18.pdf . No source questions, passages or figures are reproduced.
+Original course wording, worked examples and diagrams: CC BY 4.0. Cited MIT reference materials retain their own licenses; this course does not reproduce them.
+
+Saved from this browser session. The download does not upload the session or restore it after a refresh.
