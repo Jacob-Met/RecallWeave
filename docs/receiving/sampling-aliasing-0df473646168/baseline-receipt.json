@@ -1,0 +1,24 @@
+[
+  {
+    "label": "native-core-positive",
+    "command": [
+      "node",
+      "--input-type=module",
+      "-e",
+      "import{readFile}from'node:fs/promises';const{parseDeck,serializeDeck}=await import(process.argv[1]+'/src/deck.mjs');const{initialMastery,selectNextItem}=await import(process.argv[1]+'/src/knowledge.mjs');const d=parseDeck(await readFile(new URL(process.argv[1]+'/data/deck.json'),'utf8'));const asked=new Set();const mastery=initialMastery(d.concepts);while(asked.size<d.items.length){const i=selectNextItem(d.items,asked,mastery);if(!i||asked.has(i.id))throw Error('selection failed');asked.add(i.id)};process.stdout.write(JSON.stringify({title:d.title,items:d.items.length,selected:asked.size,roundtrip:JSON.stringify(parseDeck(serializeDeck(d)))===JSON.stringify(d)})+'\\n');",
+      "file:///dev/shm/universal-0df473646168/product/recallweave-sampling/baseline"
+    ],
+    "returncode": 0
+  },
+  {
+    "label": "sampling-feature-witness",
+    "command": [
+      "node",
+      "--input-type=module",
+      "-e",
+      "const {analyzeSampling}=await import(process.argv[1]+'/src/sampling-aliasing.mjs');const s=analyzeSampling({frequencyHz:9,sampleRateHz:8});if(s.aliasHz!==1||s.samples.length!==9)throw Error('feature mismatch');process.stdout.write(JSON.stringify(s)+'\\n');",
+      "file:///dev/shm/universal-0df473646168/product/recallweave-sampling/baseline"
+    ],
+    "returncode": 1
+  }
+]

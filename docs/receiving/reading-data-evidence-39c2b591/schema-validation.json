@@ -1,0 +1,16 @@
+{
+  "base": "a1ecbb83e71abe013c02d92ec3ba5fdf5b9ffbc4",
+  "node": "v22.22.1",
+  "validator_sha256": "621438c166ec4bfafd9d87c698a1d46cb1722f4fb92dcbb8d9f52fce682c338b",
+  "course_sha256": "cd59656da5e8e426f553bdda0b0ab7912232551a6dea3ab21727e73b70ca9411",
+  "guide_sha256": "82662af54bd4a83b306fa4b773583621af408ef43878b187aaa2ed2612702162",
+  "command": [
+    "node",
+    "--input-type=module",
+    "-"
+  ],
+  "stdin": "import fs from 'node:fs';\nimport { parseDeck } from './src/deck.mjs';\nconst raw=fs.readFileSync('courses/reading-data-and-evidence.json','utf8');\nconst deck=parseDeck(raw);\nif (deck.items.length!==12 || deck.concepts.length!==4) throw Error('Course count mismatch');\nif (!Object.isFrozen(deck) || !deck.items.every(Object.isFrozen)) throw Error('Validator snapshot is not frozen');\nconsole.log(JSON.stringify({accepted:true,format:deck.format,title:deck.title,items:deck.items.length,concepts:deck.concepts.length,utf8_bytes:Buffer.byteLength(raw)}));\n",
+  "exit": 0,
+  "stdout": "{\"accepted\":true,\"format\":\"recallweave-deck/1\",\"title\":\"Reading data and evaluating evidence\",\"items\":12,\"concepts\":4,\"utf8_bytes\":14103}\n",
+  "stderr": ""
+}

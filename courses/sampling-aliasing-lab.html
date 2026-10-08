@@ -1,0 +1,318 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src 'none'; base-uri 'none'; form-action 'none'">
+  <meta name="description" content="An offline RecallWeave lab about uniform sampling, aliases, and the assumptions behind signal recovery.">
+  <title>Sampling &amp; aliasing — RecallWeave field lab</title>
+  <style>
+    :root{color-scheme:light;--sa-ink:#182d39;--sa-muted:#4f6268;--sa-paper:#f5f3ec;--sa-line:#d1d9d5;--sa-orange:#ad4823;--sa-blue:#126b87;--sa-teal:#075d54;--sa-wash:#eaf2ed}
+    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--sa-paper);color:var(--sa-ink);font:16px/1.6 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}button,input{font:inherit}button,a,input{touch-action:manipulation}a{color:var(--sa-teal);text-underline-offset:3px}button{cursor:pointer}button:disabled{cursor:not-allowed;opacity:.48}[hidden]{display:none!important}:focus-visible{outline:3px solid #a95516;outline-offset:4px}h1,h2,h3,p{margin-top:0}h1,h2,h3{line-height:1.15}h2{font-size:1.7rem;letter-spacing:-.04em}h3{font-size:1.08rem}p{margin-bottom:1rem}code{font: .92em ui-monospace,SFMono-Regular,Consolas,monospace;overflow-wrap:anywhere}.sa-shell{max-width:1240px;margin:auto;padding:0 38px}.sa-top{display:flex;align-items:center;justify-content:space-between;gap:24px;padding:23px 0;border-bottom:1px solid var(--sa-line);font-size:.85rem}.sa-brand{font-weight:780;font-size:1.03rem;letter-spacing:-.04em}.sa-mark{display:inline-block;width:15px;height:15px;border:4px solid var(--sa-teal);border-radius:50%;margin-right:9px;vertical-align:-1px}.sa-top nav{display:flex;gap:22px}.sa-top a{text-decoration:none;font-weight:650}.sa-kicker{font-size:.73rem;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--sa-teal)}.sa-hero{display:grid;grid-template-columns:1.3fr 1fr;gap:70px;align-items:end;padding:54px 0 34px}.sa-hero h1{font-size:clamp(2.65rem,5vw,4.55rem);letter-spacing:-.065em;margin:.4rem 0 0;line-height:1.03}.sa-hero h1 span{color:var(--sa-orange)}.sa-intro{font-size:1.04rem;color:var(--sa-muted);margin-bottom:.15rem;max-width:460px}.sa-model-note{font-size:.82rem;padding:12px 17px;background:#e9eeea;border:1px solid var(--sa-line);border-radius:8px;margin-bottom:25px}.sa-workbench{display:grid;grid-template-columns:285px minmax(0,1fr);gap:22px;align-items:start}.sa-controls{background:var(--sa-ink);color:white;border-radius:14px;padding:23px}.sa-controls .sa-kicker{color:#b8ddd0;margin-bottom:16px}.sa-input-label{font-size:.91rem;font-weight:720;display:block;margin-bottom:7px}.sa-input-wrap{display:flex;align-items:center;gap:9px}.sa-input-wrap input{background:white;color:var(--sa-ink);border:2px solid transparent;border-radius:7px;padding:10px 12px;font-size:1.35rem;font-weight:700;width:100%;min-width:0}.sa-input-wrap input[aria-invalid=true]{border-color:#ffb084;background:#fff2e7}.sa-input-wrap span{font-size:.8rem;line-height:1.2;width:50px;flex-shrink:0;color:#d3e0e1}.sa-hint{font-size:.76rem;color:#c9d6d9;margin:5px 0 22px}.sa-presets{display:grid;gap:7px;margin-top:5px}.sa-presets button{border:1px solid #526670;border-radius:7px;background:transparent;color:white;text-align:left;padding:9px 10px;line-height:1.3;font-size:.79rem}.sa-presets button span{display:block;color:#c2d5d7;font-size:.73rem;margin-top:3px}.sa-presets button[aria-pressed=true]{border-color:#bbe1d3;background:#304f54;box-shadow:inset 3px 0 #bbe1d3}.sa-button{display:inline-flex;justify-content:center;align-items:center;gap:8px;border:1px solid var(--sa-teal);border-radius:7px;padding:10px 16px;background:var(--sa-teal);color:white;font-weight:700;font-size:.83rem;text-decoration:none}.sa-controls .sa-button{width:100%;background:#d5eade;color:#123b37;border-color:#d5eade;margin-top:20px}.sa-help{font-size:.75rem;line-height:1.5;margin:10px 0 0;color:#c9d6d9}.sa-error{padding:12px 14px;background:#fff0e5;border:1px solid #b85622;border-radius:8px;color:#763817;font-size:.87rem;margin-bottom:17px}.sa-result{min-width:0}.sa-card{border:1px solid var(--sa-line);background:#fffefa;border-radius:14px;overflow:hidden}.sa-readouts{display:grid;grid-template-columns:repeat(3,1fr);border-bottom:1px solid var(--sa-line)}.sa-readout{padding:17px 18px}.sa-readout+.sa-readout{border-left:1px solid var(--sa-line)}.sa-readout dt{font-size:.68rem;letter-spacing:.055em;text-transform:uppercase;font-weight:760;color:var(--sa-muted)}.sa-readout dd{font-size:1.65rem;font-weight:750;line-height:1.3;margin:4px 0 0;letter-spacing:-.055em}.sa-readout small{display:block;font-size:.69rem;color:var(--sa-muted);margin-top:3px}.sa-readout:first-child dd{color:var(--sa-orange)}.sa-readout:nth-child(2) dd{color:var(--sa-blue)}.sa-chart{padding:24px 21px 17px;margin:0}.sa-chart h3{font-size:.97rem;letter-spacing:-.02em;margin-bottom:7px}.sa-legend{display:flex;flex-wrap:wrap;gap:7px 17px;font-size:.7rem;color:var(--sa-muted);margin-bottom:18px}.sa-key{display:inline-flex;align-items:center;gap:7px}.sa-key::before{content:"";width:23px;height:0;border-top:3px solid var(--sa-orange)}.sa-key-alt::before{border-color:var(--sa-blue);border-top-style:dashed}.sa-key-dot::before{width:7px;height:7px;border:0;border-radius:50%;background:var(--sa-ink)}.sa-plot-wrap{position:relative;padding-left:24px}.sa-axis-y{position:absolute;left:0;top:0;bottom:0;display:flex;flex-direction:column;justify-content:space-between;padding:0 0 0;font-size:.69rem;color:var(--sa-muted)}.sa-plot{display:block;width:100%;height:auto;overflow:visible;aspect-ratio:900/280}.sa-grid{stroke:#dde4df;stroke-width:1;vector-effect:non-scaling-stroke}.sa-reference{stroke:var(--sa-orange);stroke-width:2.25;vector-effect:non-scaling-stroke}.sa-comparison{stroke:var(--sa-blue);stroke-width:2.25;stroke-dasharray:6 4;vector-effect:non-scaling-stroke}.sa-sample{fill:var(--sa-ink);stroke:#fffefa;stroke-width:1.2;vector-effect:non-scaling-stroke}.sa-axis-x{display:flex;justify-content:space-between;margin-left:24px;font-size:.69rem;color:var(--sa-muted)}.sa-chart-caption{font-size:.76rem;color:var(--sa-muted);margin:14px 0 0}.sa-observation{padding:16px 20px;border-top:1px solid var(--sa-line);background:#edf3ee;font-size:.84rem;line-height:1.55}.sa-observation p{margin:0}.sa-stats{display:flex;flex-wrap:wrap;gap:8px 22px;font-size:.73rem;color:var(--sa-muted);margin:14px 2px}.sa-stats strong{color:var(--sa-ink);font-weight:720}.sa-table-detail{border:1px solid var(--sa-line);border-radius:10px;background:#fffefa;padding:14px 17px;margin-top:17px}.sa-table-detail summary{font-size:.86rem;font-weight:720;cursor:pointer}.sa-table-detail>p{font-size:.76rem;color:var(--sa-muted);margin:10px 0}.sa-table-scroll{overflow-x:auto;max-height:320px;border-radius:6px;border:1px solid var(--sa-line)}table{border-collapse:collapse;width:100%;font-size:.75rem;font-variant-numeric:tabular-nums}th,td{text-align:right;padding:8px 12px;white-space:nowrap;border-bottom:1px solid #e1e7e1}th{background:#eef2ed;position:sticky;top:0;font-weight:700}th:first-child,td:first-child{text-align:left}tbody tr:last-child td{border-bottom:0}.sa-field-notes{padding:51px 0 40px}.sa-notes-heading{display:flex;align-items:baseline;justify-content:space-between;gap:25px;margin-bottom:20px}.sa-notes-heading h2{margin:0}.sa-notes-heading p{font-size:.8rem;color:var(--sa-muted);margin:0}.sa-note-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:19px}.sa-note{background:#fffefa;border:1px solid var(--sa-line);border-radius:11px;padding:23px}.sa-number{font-size:.72rem;color:var(--sa-teal);font-weight:800;letter-spacing:.08em;margin-bottom:20px}.sa-note h3{font-size:1.08rem;letter-spacing:-.02em}.sa-note p{font-size:.84rem;color:var(--sa-muted);margin-bottom:12px}.sa-formula{font: .84rem/1.55 ui-monospace,SFMono-Regular,Consolas,monospace;padding:10px 11px;background:var(--sa-wash);border-radius:5px;color:var(--sa-ink);overflow-wrap:anywhere}.sa-note details{margin-top:14px;border-top:1px solid var(--sa-line);padding-top:12px;font-size:.83rem}.sa-note summary{cursor:pointer;font-weight:700}.sa-note details p{margin:10px 0 0}.sa-course{display:grid;grid-template-columns:1fr auto;align-items:center;gap:30px;padding:28px 30px;background:#e2eee5;border:1px solid #bacdc0;border-radius:12px}.sa-course h2{font-size:1.4rem;margin-bottom:8px}.sa-course p{font-size:.84rem;color:#3c5650;max-width:760px;margin:0}.sa-course .sa-button{white-space:nowrap}.sa-source{font-size:.75rem;color:var(--sa-muted);padding:32px 0 35px}.sa-source h2{font-size:.8rem;letter-spacing:0;margin-bottom:10px}.sa-source ol{padding-left:20px;margin:0 0 14px}.sa-source p{max-width:1030px;margin:10px 0 0}.sa-source a{overflow-wrap:anywhere}.sa-bottom{border-top:1px solid var(--sa-line);padding:16px 0 24px;display:flex;justify-content:space-between;gap:15px;font-size:.7rem;color:var(--sa-muted)}.sa-sr{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+    @media(max-width:880px){.sa-shell{padding:0 24px}.sa-hero{gap:30px}.sa-workbench{grid-template-columns:240px minmax(0,1fr);gap:15px}.sa-controls{padding:19px}.sa-readout{padding:13px 12px}.sa-readout dd{font-size:1.4rem}.sa-readout dt{font-size:.59rem}.sa-readout small{font-size:.62rem}.sa-chart{padding:20px 14px 15px}.sa-note{padding:20px}.sa-note-grid{gap:13px}.sa-notes-heading{display:block}.sa-notes-heading p{margin-top:10px}.sa-course{padding:24px;grid-template-columns:1fr}.sa-course .sa-button{justify-self:start}}
+    @media(max-width:640px){.sa-shell{padding:0 18px}.sa-top{padding:18px 0;gap:15px}.sa-top nav{gap:15px;font-size:.75rem}.sa-brand{font-size:.94rem}.sa-hero{grid-template-columns:1fr;gap:22px;padding:37px 0 23px}.sa-hero h1{font-size:3.05rem}.sa-intro{font-size:.94rem;max-width:none}.sa-model-note{font-size:.76rem}.sa-workbench{grid-template-columns:minmax(0,1fr)}.sa-controls{padding:21px}.sa-input-fields{display:grid;grid-template-columns:1fr 1fr;gap:18px}.sa-input-label{font-size:.78rem}.sa-input-wrap{gap:6px}.sa-input-wrap input{padding:9px;font-size:1.16rem}.sa-input-wrap span{font-size:.67rem;width:30px}.sa-hint{font-size:.67rem;margin-bottom:17px}.sa-presets{grid-template-columns:1fr 1fr}.sa-presets button{font-size:.72rem}.sa-presets button span{font-size:.66rem}.sa-controls .sa-button{margin-top:16px}.sa-help{font-size:.7rem}.sa-readout{padding:14px 10px}.sa-readout dt{font-size:.59rem;letter-spacing:0}.sa-readout dd{font-size:1.4rem}.sa-readout small{font-size:.61rem}.sa-chart{padding:20px 14px 16px}.sa-legend{gap:6px 12px;font-size:.66rem}.sa-chart-caption{font-size:.72rem}.sa-observation{padding:15px;font-size:.79rem}.sa-stats{gap:7px 14px;font-size:.68rem}.sa-table-detail{padding:13px}.sa-table-detail summary{font-size:.79rem}.sa-field-notes{padding:36px 0 26px}.sa-note-grid{grid-template-columns:1fr}.sa-number{margin-bottom:13px}.sa-note p{font-size:.85rem}.sa-course{padding:23px}.sa-course .sa-button{width:100%}.sa-bottom{display:block}.sa-bottom span{display:block;margin-bottom:5px}}
+    @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+    @media print{body{background:white}.sa-shell{padding:0}.sa-top nav,.sa-controls,.sa-course .sa-button{display:none}.sa-workbench{display:block}.sa-hero{padding:20px 0}.sa-hero h1{font-size:2.5rem}.sa-note-grid{grid-template-columns:1fr}.sa-note,.sa-card,.sa-course{break-inside:avoid}.sa-source{padding:20px 0}.sa-field-notes{padding:25px 0}.sa-table-scroll{max-height:none}}
+  </style>
+</head>
+<body>
+  <div class="sa-shell">
+    <header class="sa-top">
+      <div class="sa-brand"><span class="sa-mark" aria-hidden="true"></span>RecallWeave</div>
+      <nav aria-label="Lab sections"><a href="#sa-field-notes">Field notes</a><a href="#sa-course">Practice course</a></nav>
+    </header>
+    <main>
+      <section class="sa-hero" aria-labelledby="sa-title">
+        <div><div class="sa-kicker">Signal processing · field lab 01</div><h1 id="sa-title">Same samples.<br><span>Different signals.</span></h1></div>
+        <p class="sa-intro">A sampler only sees certain instants. Change the signal and the sampling rate to discover how different curves can leave the same observations.</p>
+      </section>
+      <p class="sa-model-note"><strong>The model:</strong> an ideal, unit-amplitude, zero-phase cosine, uniformly sampled over one second. The two curves are authored signals; the dots are their shared observations. No sound, hardware or uploaded data is involved.</p>
+      <noscript><p class="sa-error">Enable JavaScript to use the sampling controls and downloads. The field notes below remain readable.</p></noscript>
+      <section class="sa-workbench" aria-label="Interactive sampling experiment">
+        <form class="sa-controls" id="sa-controls" novalidate>
+          <div class="sa-kicker">01 / Set the experiment</div>
+          <div class="sa-input-fields">
+            <div><label class="sa-input-label" for="sa-frequency">Signal frequency</label><div class="sa-input-wrap"><input id="sa-frequency" name="frequency" type="number" min="0" max="40" step="0.5" value="9" inputmode="decimal" aria-describedby="sa-frequency-hint sa-error"><span>Hz</span></div><p class="sa-hint" id="sa-frequency-hint">0–40 Hz · steps of 0.5</p></div>
+            <div><label class="sa-input-label" for="sa-rate">Sample rate</label><div class="sa-input-wrap"><input id="sa-rate" name="sample-rate" type="number" min="2" max="32" step="1" value="8" inputmode="numeric" aria-describedby="sa-rate-hint sa-error"><span>samples<br>/ sec</span></div><p class="sa-hint" id="sa-rate-hint">2–32 · whole numbers</p></div>
+          </div>
+          <h2 class="sa-sr">Try a starting point</h2>
+          <div class="sa-presets" role="group" aria-label="Experiment presets">
+            <button type="button" data-sa-frequency="9" data-sa-rate="8" aria-pressed="true">A slower-looking signal<span>9 Hz · 8 samples/sec</span></button>
+            <button type="button" data-sa-frequency="5" data-sa-rate="12" aria-pressed="false">Below the half-rate<span>5 Hz · 12 samples/sec</span></button>
+            <button type="button" data-sa-frequency="4" data-sa-rate="8" aria-pressed="false">Exactly at the boundary<span>4 Hz · 8 samples/sec</span></button>
+            <button type="button" data-sa-frequency="8" data-sa-rate="8" aria-pressed="false">A constant-looking record<span>8 Hz · 8 samples/sec</span></button>
+          </div>
+          <button class="sa-button" id="sa-download-csv" type="button" disabled>Download these samples · CSV</button>
+          <p class="sa-help">Downloads retain the current frequencies, rate, time and both values. Nothing is sent to a server.</p>
+        </form>
+        <div>
+          <p class="sa-error" id="sa-error" role="alert" hidden></p>
+          <p class="sa-sr" id="sa-status" role="status" aria-live="polite"></p>
+          <div class="sa-result" id="sa-result" hidden>
+            <div class="sa-card">
+              <dl class="sa-readouts" style="margin:0">
+                <div class="sa-readout"><dt>Authored reference</dt><dd id="sa-reference-value"></dd><small>solid orange curve</small></div>
+                <div class="sa-readout"><dt>Matching alternative</dt><dd id="sa-comparison-value"></dd><small>dashed blue curve</small></div>
+                <div class="sa-readout"><dt>Lowest representative</dt><dd id="sa-alias-value"></dd><small>between 0 and half-rate</small></div>
+              </dl>
+              <figure class="sa-chart">
+                <h3 id="sa-plot-title">Both curves meet the sample points.</h3>
+                <div class="sa-legend" aria-hidden="true"><span class="sa-key">Reference</span><span class="sa-key sa-key-alt">Alternative</span><span class="sa-key sa-key-dot">Samples</span></div>
+                <p class="sa-sr" id="sa-plot-description"></p>
+                <div class="sa-plot-wrap"><div class="sa-axis-y" aria-hidden="true"><span>+1</span><span>0</span><span>−1</span></div><svg class="sa-plot" id="sa-plot" viewBox="0 0 900 280" role="img" aria-labelledby="sa-plot-title sa-plot-description"></svg></div>
+                <div class="sa-axis-x" aria-hidden="true"><span>0 s</span><span>0.5 s</span><span>1 s</span></div>
+                <figcaption class="sa-chart-caption">Look between the dots: the curves differ there. Choosing the lower alias does not identify an unknown physical original.</figcaption>
+              </figure>
+              <div class="sa-observation"><p id="sa-relation"></p></div>
+            </div>
+            <div class="sa-stats"><span>Half-rate: <strong id="sa-half-rate"></strong></span><span>Sample interval: <strong id="sa-sampling-interval"></strong></span><span>Both endpoints included: <strong id="sa-sample-count"></strong> dots</span></div>
+            <details class="sa-table-detail" id="sa-table-detail"><summary>Inspect the sample values</summary><p>Displayed numbers round to six decimal places. The CSV keeps full numeric precision. Tiny floating-point differences can occur when evaluating cosine.</p><div class="sa-table-scroll"><table><caption class="sa-sr">Uniform sample index, time, and the two cosine values.</caption><thead><tr><th scope="col">Index n</th><th scope="col">Time (s)</th><th scope="col">Reference</th><th scope="col">Alternative</th></tr></thead><tbody id="sa-sample-rows"></tbody></table></div></details>
+          </div>
+        </div>
+      </section>
+      <section class="sa-field-notes" id="sa-field-notes" aria-labelledby="sa-notes-title">
+        <div class="sa-notes-heading"><h2 id="sa-notes-title">Three ideas to take with you</h2><p>Predict a result before changing the controls.</p></div>
+        <div class="sa-note-grid">
+          <article class="sa-note"><div class="sa-number">01 / THE CLOCK</div><h3>Whole cycles can disappear.</h3><p>At times <code>t = n / fs</code>, adding one entire sample rate to a cosine’s frequency adds <code>2πn</code> to its phase. Cosine repeats, so the observations agree for every integer n.</p><div class="sa-formula">cos(2π(f + fs)n / fs)<br>= cos(2πfn / fs)</div><details><summary>Try 9 Hz at 8 samples/sec.</summary><p>The 9 Hz reference has the same samples as 1 Hz. Change the reference to 1 Hz: the lab now shows 9 Hz as a different matching alternative. More samples at the same integer times cannot distinguish this pair.</p></details></article>
+          <article class="sa-note"><div class="sa-number">02 / THE ASSUMPTION</div><h3>The boundary needs care.</h3><p>With a known band limit B, the ideal strict condition is <code>fs &gt; 2B</code>. It concerns a complete ideal sample sequence. A finite plot does not establish the band limit or prove practical recovery.</p><div class="sa-formula">At fs = 8 and f = 4:<br>sin(2π · 4n/8) = sin(πn) = 0</div><details><summary>Why use a sine example?</summary><p>That signal varies between samples yet looks identical to zero at every sample time. The lab uses a zero-phase cosine, which instead alternates +1 and −1 at this boundary. One specified phase does not justify arbitrary-phase recovery.</p></details></article>
+          <article class="sa-note"><div class="sa-number">03 / THE ACQUISITION</div><h3>Prevent the fold upstream.</h3><p>Unwanted high-frequency content can fold into the band you want. An appropriate anti-alias filter attenuates it <strong>before</strong> sampling. A later filter cannot distinguish causes that already gave identical readings.</p><div class="sa-formula">Input → anti-alias filter<br>→ sampler → digital processing</div><details><summary>Can a faster rate help?</summary><p>For a new acquisition of the authored 9 Hz reference, 24 samples/sec puts 9 Hz below the 12 Hz half-rate. It does not repair an older recording. This lab does not design a physical filter or test real equipment.</p></details></article>
+        </div>
+      </section>
+      <section class="sa-course" id="sa-course" aria-labelledby="sa-course-title">
+        <div><div class="sa-kicker">02 / Practice the connections</div><h2 id="sa-course-title">Twelve questions. Four connected ideas.</h2><p>Take the original sampling course into RecallWeave’s native deck format. It includes explanations and transfer prompts on the clock, alias families, recovery assumptions, and acquisition choices. The adjacent companion guide contains worked answers. Deck import availability depends on your RecallWeave version; the experiment above works directly from this file.</p></div>
+        <button class="sa-button" id="sa-download-course" type="button">Download practice course · JSON</button>
+      </section>
+      <section class="sa-source" aria-labelledby="sa-sources-title">
+        <h2 id="sa-sources-title">Mathematical background &amp; scope</h2>
+        <ol><li>MIT 6.300, <a href="https://sigproc.mit.edu/_static/fall25/lectures/Sampling_and_Aliasing-handout.pdf">Sampling and Aliasing</a>, Fall 2025: uniform samples, frequency equivalence and baseband representatives.</li><li>Dennis Freeman, MIT 6.003, <a href="https://ocw.mit.edu/courses/6-003-signals-and-systems-fall-2011/resources/mit6_003f11_lec21/">Lecture 21: Sampling</a>, Fall 2011: ideal reconstruction with a known band limit and a strict sampling condition.</li></ol>
+        <p>Original AI-assisted course wording, worked examples and field-note text: CC0-1.0. The linked MIT materials retain their own licenses; their exercises, prose and figures are not reproduced. Other repository content is not relicensed. This lesson makes no claim about learning efficacy, unknown physical sources, finite-record reconstruction, or real acquisition safety.</p>
+      </section>
+    </main>
+    <footer class="sa-bottom"><span>RecallWeave / Sampling &amp; aliasing</span><span>Offline experiment · no account · no automatic persistence</span></footer>
+  </div>
+  <script id="sa-course-data" type="application/json">"{\n  \"format\": \"recallweave-deck/1\",\n  \"title\": \"Sampling: different signals, identical observations\",\n  \"attribution\": \"Original questions, distractors, explanations and worked examples for RecallWeave, with AI assistance. Mathematical background: MIT 6.300 Signal Processing, Sampling and Aliasing (Fall 2025), https://sigproc.mit.edu/_static/fall25/lectures/Sampling_and_Aliasing-handout.pdf; Dennis Freeman, MIT 6.003 Signals and Systems, Lecture 21: Sampling (Fall 2011), https://ocw.mit.edu/courses/6-003-signals-and-systems-fall-2011/resources/mit6_003f11_lec21/. Original examples use ideal uniform samples and fully stated assumptions; no source exercises, passages or figures are copied.\",\n  \"license\": \"Original question wording, explanations and worked examples in this course: CC0-1.0. Referenced MIT teaching materials retain their own licenses. No license change is made to other repository content.\",\n  \"concepts\": [\"sample-clock\", \"frequency-aliases\", \"recovery-assumptions\", \"acquisition-choices\"],\n  \"items\": [\n    {\n      \"id\": \"sampling-clock-interval\",\n      \"concept\": \"sample-clock\",\n      \"prerequisites\": [],\n      \"prompt\": \"An ideal uniform sampler records 8 samples per second. How much time separates consecutive samples?\",\n      \"options\": [\"0.125 seconds\", \"8 seconds\", \"0.25 seconds\", \"0.0625 seconds\"],\n      \"answer\": 0,\n      \"explanation\": \"The interval is the reciprocal of the rate: 1 / 8 = 0.125 seconds. Eight is a rate, not an interval. The other intervals would produce 4 or 16 samples per second.\",\n      \"transfer\": \"A second sampler records 20 samples per second. Calculate its interval and explain why it is shorter.\"\n    },\n    {\n      \"id\": \"sampling-clock-count\",\n      \"concept\": \"sample-clock\",\n      \"prerequisites\": [],\n      \"prompt\": \"A one-second display includes both t = 0 and t = 1 second. Uniform samples arrive at t = n / 6 seconds for integer n. How many displayed samples are there?\",\n      \"options\": [\"6 samples\", \"7 samples\", \"5 samples\", \"12 samples\"],\n      \"answer\": 1,\n      \"explanation\": \"The included indices are 0, 1, 2, 3, 4, 5 and 6: seven samples across six intervals. The phrase '6 samples per second' specifies spacing. Including both endpoints adds one observation to this displayed interval count.\",\n      \"transfer\": \"At 10 samples per second, count the observations from t = 0 through t = 0.4 seconds, including both endpoints.\"\n    },\n    {\n      \"id\": \"sampling-clock-phase\",\n      \"concept\": \"sample-clock\",\n      \"prerequisites\": [],\n      \"prompt\": \"The reference signal is x(t) = cos(2π × 3t), with t in seconds. It is sampled at 12 samples per second. What phase advance separates adjacent samples of this reference?\",\n      \"options\": [\"π radians\", \"π/4 radians\", \"π/2 radians\", \"2π/3 radians\"],\n      \"answer\": 2,\n      \"explanation\": \"One sample interval is 1/12 second. Multiplying it by 2π × 3 radians per second gives π/2 radians, or one quarter of a cycle. A time interval and an angular advance have different units.\",\n      \"transfer\": \"Calculate the phase advance for a 5 Hz cosine sampled at 20 samples per second.\"\n    },\n    {\n      \"id\": \"sampling-alias-nine\",\n      \"concept\": \"frequency-aliases\",\n      \"prerequisites\": [\"sample-clock\"],\n      \"prompt\": \"A unit-amplitude, zero-phase 9 Hz cosine is sampled at t = n/8 seconds for every integer n. Which is the lowest nonnegative frequency of a zero-phase cosine with exactly the same samples?\",\n      \"options\": [\"7 Hz\", \"4 Hz\", \"9 Hz\", \"1 Hz\"],\n      \"answer\": 3,\n      \"explanation\": \"At sample times, the 9 Hz phase is 2π × 9n/8 = 2πn + 2πn/8. The whole-cycle term does not change cosine. A 1 Hz cosine therefore has the same samples. The 9 Hz reference is compatible too, but is not the lowest representative; 7 Hz also folds to 1 Hz.\",\n      \"transfer\": \"Find the lowest nonnegative alias of a 17 Hz zero-phase cosine sampled at 12 samples per second.\"\n    },\n    {\n      \"id\": \"sampling-alias-fold\",\n      \"concept\": \"frequency-aliases\",\n      \"prerequisites\": [\"sample-clock\"],\n      \"prompt\": \"A unit-amplitude, zero-phase 13 Hz cosine is uniformly sampled at 10 samples per second. Which frequency is its lowest nonnegative zero-phase cosine alias?\",\n      \"options\": [\"3 Hz\", \"1 Hz\", \"7 Hz\", \"13 Hz\"],\n      \"answer\": 0,\n      \"explanation\": \"Subtract one sample rate: 13 − 10 = 3 Hz. Three lies between 0 and the half-rate, 5 Hz. A 7 Hz cosine produces the same samples by cosine's evenness, but folds to the lower 3 Hz representative. Merely choosing any matching frequency does not answer 'lowest'.\",\n      \"transfer\": \"At 8 samples per second, an 11 Hz cosine subtracts to 3 Hz. What does a 7 Hz cosine fold to, and why?\"\n    },\n    {\n      \"id\": \"sampling-alias-family\",\n      \"concept\": \"frequency-aliases\",\n      \"prerequisites\": [\"sample-clock\"],\n      \"prompt\": \"A zero-phase 2 Hz cosine is sampled at t = n/10 seconds for every integer n. Which different zero-phase cosine must agree at every one of those sample times?\",\n      \"options\": [\"A 7 Hz cosine\", \"A 12 Hz cosine\", \"A 5 Hz cosine\", \"A 3 Hz cosine\"],\n      \"answer\": 1,\n      \"explanation\": \"The 12 Hz signal adds 10 Hz, one entire sample rate. Its phase differs by 2πn at each sample, so all values agree. This equality holds for every integer sample index, not just the one-second plot.\",\n      \"transfer\": \"Give another matching frequency for a zero-phase 7 Hz cosine sampled at 10 samples per second. Explain it using whole cycles.\"\n    },\n    {\n      \"id\": \"sampling-assumption-rate\",\n      \"concept\": \"recovery-assumptions\",\n      \"prerequisites\": [\"sample-clock\", \"frequency-aliases\"],\n      \"prompt\": \"Assume an ideal continuous signal has no frequency content above 5 Hz. Which listed uniform sample rate satisfies the strict sampling condition fs > 2 × 5 Hz?\",\n      \"options\": [\"8 samples per second\", \"10 samples per second\", \"12 samples per second\", \"5 samples per second\"],\n      \"answer\": 2,\n      \"explanation\": \"The stated condition requires a rate strictly greater than 10 samples per second; 12 qualifies. Equality is excluded by this condition. Ideal reconstruction also presumes the band limit and a complete ideal sample sequence; a finite graph alone is not such a reconstruction guarantee.\",\n      \"transfer\": \"For a known 7 Hz band limit, compare 14 and 15 samples per second against the same strict condition.\"\n    },\n    {\n      \"id\": \"sampling-assumption-boundary\",\n      \"concept\": \"recovery-assumptions\",\n      \"prerequisites\": [\"sample-clock\", \"frequency-aliases\"],\n      \"prompt\": \"At the boundary fs = 8 samples per second, sample x(t) = sin(2π × 4t) at t = n/8. What demonstrates why equality at twice a frequency is insufficient for an arbitrary phase?\",\n      \"options\": [\"Sampling cancels the sine before it reaches the sampler.\", \"The original sine is zero at every continuous time.\", \"Eight samples determine every possible signal up to 8 Hz.\", \"Every sample is zero while the sine varies between samples.\"],\n      \"answer\": 3,\n      \"explanation\": \"The sample values are sin(πn) = 0 for every integer n. The continuous sine is not identically zero, so these readings cannot distinguish it from a zero signal. The lab's zero-phase cosine is one specified phase; it cannot prove arbitrary-phase recovery at the boundary.\",\n      \"transfer\": \"At the same times, what values does cos(2π × 4t) produce? Compare the two phases.\"\n    },\n    {\n      \"id\": \"sampling-assumption-evidence\",\n      \"concept\": \"recovery-assumptions\",\n      \"prerequisites\": [\"frequency-aliases\"],\n      \"prompt\": \"Two different continuous cosines agree with every displayed sample in the lab. No bandwidth information about an unknown physical source is supplied. What can the displayed measurements alone establish?\",\n      \"options\": [\"Both curves remain compatible with these observations.\", \"The lower frequency must be the physical original.\", \"The higher frequency cannot have produced the samples.\", \"The smoothest curve is proven to be the original signal.\"],\n      \"answer\": 0,\n      \"explanation\": \"Matching the measurements establishes compatibility, not which physical source generated them. Choosing a baseband representative is a convention. Additional assumptions, such as a justified input band limit, can rule out alternatives; the sampled values alone do not supply that assumption.\",\n      \"transfer\": \"Explain how a known input band limit could exclude one displayed alternative without changing the sample values.\"\n    },\n    {\n      \"id\": \"sampling-acquisition-filter\",\n      \"concept\": \"acquisition-choices\",\n      \"prerequisites\": [\"frequency-aliases\", \"recovery-assumptions\"],\n      \"prompt\": \"An ideal input contains wanted content from 0 to 3 Hz and an unwanted 11 Hz component. Before sampling at 8 samples per second, which ordering can prevent that 11 Hz component from folding into the wanted band?\",\n      \"options\": [\"Sample first, then remove digital frequencies above 4 Hz.\", \"Attenuate 11 Hz before sampling while retaining 0–3 Hz.\", \"Connect more display points after the samples are taken.\", \"Collect a longer record at the unchanged sampling rate.\"],\n      \"answer\": 1,\n      \"explanation\": \"At 8 samples per second, the 11 Hz component aliases to 3 Hz. An appropriate analog anti-alias filter acts before sampling, separating it from the wanted 0–3 Hz input band. Once it has folded onto 3 Hz, removing only higher digital frequencies cannot separate the two causes. This is an ideal ordering example, not a physical filter design.\",\n      \"transfer\": \"At 12 samples per second, what lower frequency would an unwanted 15 Hz cosine share? Where must attenuation occur to prevent that alias?\"\n    },\n    {\n      \"id\": \"sampling-acquisition-after\",\n      \"concept\": \"acquisition-choices\",\n      \"prerequisites\": [\"frequency-aliases\", \"recovery-assumptions\"],\n      \"prompt\": \"A zero-phase 9 Hz cosine and a zero-phase 1 Hz cosine give the same samples at 8 samples per second. Can a deterministic digital filter that receives only those samples distinguish which cosine was originally present?\",\n      \"options\": [\"Yes, by drawing a smoother curve between the samples.\", \"Yes, by removing digital frequencies above 4 Hz.\", \"No, because the filter receives identical input sequences.\", \"No, because every possible digital filter returns zeros.\"],\n      \"answer\": 2,\n      \"explanation\": \"A deterministic filter supplied with identical input sequences produces identical outputs. It cannot recover the missing distinction without additional information. Filtering can still serve other purposes; the limitation is the ambiguity already present in these sampled inputs.\",\n      \"transfer\": \"Would extending both recordings to more integer sample times at the same rate separate these two specified cosines? Explain.\"\n    },\n    {\n      \"id\": \"sampling-acquisition-rate\",\n      \"concept\": \"acquisition-choices\",\n      \"prerequisites\": [\"recovery-assumptions\"],\n      \"prompt\": \"Keep the lab's authored 9 Hz cosine fixed. Which listed sample rate puts 9 Hz strictly below half the sample rate?\",\n      \"options\": [\"8 samples per second\", \"12 samples per second\", \"18 samples per second\", \"24 samples per second\"],\n      \"answer\": 3,\n      \"explanation\": \"Half of 24 is 12 Hz, so 9 \u003c 12. At 18 samples per second, 9 Hz is exactly the half-rate and does not satisfy 'strictly below'. Changing the acquisition rate can move this known reference inside baseband; it does not retrospectively repair an earlier ambiguous recording.\",\n      \"transfer\": \"Would 20 samples per second also put this 9 Hz reference below the half-rate? State the comparison.\"\n    }\n  ]\n}\n"</script>
+  <script>(() => {
+'use strict';
+/** An ideal, uniform, one-second cosine sampling model for an offline lesson. */
+const SAMPLING_FORMAT = 'recallweave-sampling/1';
+const DURATION_SECONDS = 1;
+
+function validateSampling({ frequencyHz, sampleRateHz } = {}) {
+  if (!Number.isFinite(frequencyHz) || frequencyHz < 0 || frequencyHz > 40 || !Number.isInteger(frequencyHz * 2)) {
+    throw new RangeError('Choose a signal frequency from 0 to 40 Hz in steps of 0.5 Hz.');
+  }
+  if (!Number.isInteger(sampleRateHz) || sampleRateHz < 2 || sampleRateHz > 32) {
+    throw new RangeError('Choose a whole-number sample rate from 2 to 32 samples per second.');
+  }
+  return Object.freeze({ frequencyHz, sampleRateHz });
+}
+
+/** Lowest nonnegative zero-phase cosine representative at this uniform rate. */
+function principalAlias(frequencyHz, sampleRateHz) {
+  validateSampling({ frequencyHz, sampleRateHz });
+  const remainder = frequencyHz % sampleRateHz;
+  return Math.min(remainder, sampleRateHz - remainder);
+}
+
+function cosineAt(frequencyHz, timeSeconds) {
+  return Math.cos(2 * Math.PI * frequencyHz * timeSeconds);
+}
+
+/** The same immutable snapshot supplies the graph, table and exported numbers. */
+function analyzeSampling(parameters) {
+  const { frequencyHz, sampleRateHz } = validateSampling(parameters);
+  const aliasHz = principalAlias(frequencyHz, sampleRateHz);
+  // Keep a genuinely different curve visible even when the reference is already
+  // in baseband. This higher alias is not evidence of the unknown original.
+  const comparisonHz = aliasHz === frequencyHz ? frequencyHz + sampleRateHz : aliasHz;
+  const samples = Array.from({ length: sampleRateHz + 1 }, (_, index) => {
+    const timeSeconds = index / sampleRateHz;
+    return Object.freeze({ index, timeSeconds,
+      reference: cosineAt(frequencyHz, timeSeconds),
+      comparison: cosineAt(comparisonHz, timeSeconds) });
+  });
+  return Object.freeze({
+    format: SAMPLING_FORMAT, frequencyHz, sampleRateHz, aliasHz, comparisonHz,
+    durationSeconds: DURATION_SECONDS, intervalSeconds: 1 / sampleRateHz,
+    halfSampleRateHz: sampleRateHz / 2,
+    relation: frequencyHz < sampleRateHz / 2 ? 'below' : frequencyHz === sampleRateHz / 2 ? 'at' : 'above',
+    samples: Object.freeze(samples),
+  });
+}
+
+/** CSV is numeric only; full-precision values come from a freshly checked snapshot. */
+function samplingCsv(snapshot) {
+  const checked = analyzeSampling(snapshot);
+  const header = 'sample_index,time_seconds,reference_hz,sample_rate_hz,comparison_hz,lowest_alias_hz,reference_value,comparison_value';
+  const rows = checked.samples.map(sample => [sample.index, sample.timeSeconds, checked.frequencyHz,
+    checked.sampleRateHz, checked.comparisonHz, checked.aliasHz, sample.reference, sample.comparison].join(','));
+  return header + '\n' + rows.join('\n') + '\n';
+}
+
+
+const SVG_NS = 'http://www.w3.org/2000/svg';
+const readable = value => Number(value.toFixed(6)).toString();
+
+/** Direct-file UI. Every visible result belongs to one checked sampling snapshot. */
+function mountSamplingLab(doc = document) {
+  const find = id => doc.getElementById(id);
+  const frequency = find('sa-frequency');
+  const rate = find('sa-rate');
+  const result = find('sa-result');
+  const error = find('sa-error');
+  const csvButton = find('sa-download-csv');
+  const rows = find('sa-sample-rows');
+  const plot = find('sa-plot');
+  const courseText = JSON.parse(find('sa-course-data').textContent);
+  let current = null;
+
+  function svgElement(tag, attributes) {
+    const element = doc.createElementNS(SVG_NS, tag);
+    for (const [key, value] of Object.entries(attributes)) element.setAttribute(key, String(value));
+    return element;
+  }
+
+  function graph(snapshot) {
+    const group = svgElement('g', {});
+    const width = 900;
+    const height = 280;
+    const pad = 12;
+    const x = time => pad + (width - 2 * pad) * time;
+    const y = value => height / 2 - value * (height / 2 - pad);
+    for (const amplitude of [-1, 0, 1]) {
+      group.append(svgElement('line', { x1: x(0), x2: x(1), y1: y(amplitude), y2: y(amplitude), class: 'sa-grid' }));
+    }
+    for (const time of [0, 0.25, 0.5, 0.75, 1]) {
+      group.append(svgElement('line', { x1: x(time), x2: x(time), y1: y(-1), y2: y(1), class: 'sa-grid' }));
+    }
+    const steps = Math.max(960, Math.ceil(Math.max(snapshot.frequencyHz, snapshot.comparisonHz) * 40));
+    for (const [hertz, name] of [[snapshot.comparisonHz, 'sa-comparison'], [snapshot.frequencyHz, 'sa-reference']]) {
+      const path = Array.from({ length: steps + 1 }, (_, index) => {
+        const time = index / steps;
+        return `${index ? 'L' : 'M'}${x(time).toFixed(3)},${y(cosineAt(hertz, time)).toFixed(3)}`;
+      }).join(' ');
+      group.append(svgElement('path', { d: path, class: name, fill: 'none' }));
+    }
+    for (const sample of snapshot.samples) {
+      group.append(svgElement('circle', { cx: x(sample.timeSeconds), cy: y(sample.reference), r: 4.4, class: 'sa-sample' }));
+    }
+    return group;
+  }
+
+  function numericRows(snapshot) {
+    const fragment = doc.createDocumentFragment();
+    for (const sample of snapshot.samples) {
+      const row = doc.createElement('tr');
+      for (const value of [sample.index, sample.timeSeconds, sample.reference, sample.comparison]) {
+        const cell = doc.createElement('td');
+        cell.textContent = readable(value);
+        row.append(cell);
+      }
+      fragment.append(row);
+    }
+    return fragment;
+  }
+
+  function retire(message) {
+    current = null;
+    result.hidden = true;
+    rows.replaceChildren();
+    plot.replaceChildren();
+    csvButton.disabled = true;
+    error.textContent = message;
+    error.hidden = false;
+    find('sa-status').textContent = 'Results paused. Correct the highlighted input to sample again.';
+  }
+
+  function readInputs() {
+    frequency.removeAttribute('aria-invalid');
+    rate.removeAttribute('aria-invalid');
+    const f = Number(frequency.value);
+    const fs = Number(rate.value);
+    const problems = [];
+    if (!frequency.value.trim() || frequency.validity.badInput || !Number.isFinite(f) || f < 0 || f > 40 || !Number.isInteger(f * 2)) {
+      frequency.setAttribute('aria-invalid', 'true');
+      problems.push('Signal frequency needs 0 to 40 Hz in steps of 0.5 Hz.');
+    }
+    if (!rate.value.trim() || rate.validity.badInput || !Number.isInteger(fs) || fs < 2 || fs > 32) {
+      rate.setAttribute('aria-invalid', 'true');
+      problems.push('Sample rate needs a whole number from 2 to 32 samples per second.');
+    }
+    if (problems.length) throw new RangeError(problems.join(' '));
+    return analyzeSampling({ frequencyHz: f, sampleRateHz: fs });
+  }
+
+  function update() {
+    try {
+      const next = readInputs();
+      // Stage complete graph and table before committing the checked snapshot.
+      const nextGraph = graph(next);
+      const nextRows = numericRows(next);
+      plot.replaceChildren(nextGraph);
+      rows.replaceChildren(nextRows);
+      find('sa-reference-value').textContent = `${readable(next.frequencyHz)} Hz`;
+      find('sa-comparison-value').textContent = `${readable(next.comparisonHz)} Hz`;
+      find('sa-alias-value').textContent = `${readable(next.aliasHz)} Hz`;
+      find('sa-half-rate').textContent = `${readable(next.halfSampleRateHz)} Hz`;
+      find('sa-sampling-interval').textContent = `${readable(next.intervalSeconds)} s`;
+      find('sa-sample-count').textContent = String(next.samples.length);
+      find('sa-plot-description').textContent = `The ${next.frequencyHz} Hz authored cosine and ${next.comparisonHz} Hz comparison agree at all ${next.samples.length} displayed samples, spaced 1/${next.sampleRateHz} second apart. The numeric table follows.`;
+      find('sa-relation').textContent = next.relation === 'below'
+        ? 'The authored reference is below the half-rate. A higher matching alternative still exists; a justified band limit can exclude it.'
+        : next.relation === 'at'
+          ? 'The authored reference is exactly at the half-rate. This specified cosine phase does not establish arbitrary-phase recovery; see the sine counterexample below.'
+          : 'The authored reference is above the half-rate and shares its samples with a lower-frequency cosine.';
+      for (const preset of doc.querySelectorAll('[data-sa-frequency]')) {
+        preset.setAttribute('aria-pressed', String(Number(preset.dataset.saFrequency) === next.frequencyHz && Number(preset.dataset.saRate) === next.sampleRateHz));
+      }
+      error.hidden = true;
+      error.textContent = '';
+      result.hidden = false;
+      current = next;
+      csvButton.disabled = false;
+      find('sa-status').textContent = `${next.samples.length} samples ready. Reference ${next.frequencyHz} Hz; matching alternative ${next.comparisonHz} Hz.`;
+      return true;
+    } catch (failure) {
+      retire(failure instanceof Error ? failure.message : 'These inputs could not be sampled.');
+      return false;
+    }
+  }
+
+  function download(text, mediaType, filename) {
+    const url = URL.createObjectURL(new Blob([text], { type: mediaType }));
+    const link = doc.createElement('a');
+    link.href = url;
+    link.download = filename;
+    doc.body.append(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+
+  frequency.addEventListener('input', update);
+  rate.addEventListener('input', update);
+  find('sa-controls').addEventListener('submit', event => { event.preventDefault(); update(); });
+  for (const preset of doc.querySelectorAll('[data-sa-frequency]')) {
+    preset.addEventListener('click', () => {
+      frequency.value = preset.dataset.saFrequency;
+      rate.value = preset.dataset.saRate;
+      update();
+    });
+  }
+  csvButton.addEventListener('click', () => {
+    // Re-read even a programmatic click: edited or invalid controls cannot export
+    // the previous result. The same committed snapshot supplies all CSV metadata.
+    if (!update() || !current) return;
+    download(samplingCsv(current), 'text/csv;charset=utf-8', `sampling-${current.frequencyHz}Hz-at-${current.sampleRateHz}sps.csv`);
+  });
+  find('sa-download-course').addEventListener('click', () => {
+    download(courseText, 'application/json;charset=utf-8', 'sampling-aliasing.json');
+  });
+  update();
+}
+
+if (typeof document !== 'undefined') mountSamplingLab(document);
+
+})();</script>
+</body>
+</html>

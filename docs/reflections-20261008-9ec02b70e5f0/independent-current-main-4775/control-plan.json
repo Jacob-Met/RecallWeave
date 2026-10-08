@@ -1,0 +1,66 @@
+{
+  "controls": [
+    {
+      "assertions": [
+        "Source first session is 0/6 with 2/6 practice attempts, one correct retry",
+        "Destination first session is 6/6 with different six-ID notebook",
+        "Actual JSON export includes first answers, full-precision mastery and practice only"
+      ],
+      "boundary": "Actual modular trace export to standalone offline receiver",
+      "id": 1
+    },
+    {
+      "assertions": [
+        "No answer, model, practice or notebook changes",
+        "Actual before/after notes bytes match except Saved timestamp",
+        "Selected file clears and preview hides on cancellation"
+      ],
+      "boundary": "Preview then explicit cancel",
+      "id": 2
+    },
+    {
+      "assertions": [
+        "One item explanation edited, another cleared and Apply-it changed after preview",
+        "Latest destination writing remains attached to canonical item IDs",
+        "Actual notes match source first answers plus destination notebook",
+        "Actual restored trace matches source first answers, mastery and practice"
+      ],
+      "boundary": "Late current-tab note edit before confirmed same-course restore",
+      "id": 3
+    },
+    {
+      "assertions": [
+        "Private negative fixture modifies only deck title and one prompt in actual downloaded trace",
+        "Native file receiver rejects course mismatch",
+        "No state or exported-note content changes; negative fixture bytes preserved"
+      ],
+      "boundary": "Wrong course version sharing exact item IDs",
+      "id": 4
+    },
+    {
+      "assertions": [
+        "Native practice opens the next unanswered canonical item",
+        "A third retry changes only practice progress",
+        "First answers, model estimates and destination notebook remain intact"
+      ],
+      "boundary": "Resume restored practice",
+      "id": 5
+    },
+    {
+      "assertions": [
+        "Actual reload followed by new 6/6 session clears all six notes and Apply-it",
+        "Fresh exported notes contain no previous notebook markers",
+        "Separate source tab and original trace bytes remain unchanged",
+        "Standalone target makes no HTTP(S) request"
+      ],
+      "boundary": "Actual fresh local reset",
+      "id": 6
+    }
+  ],
+  "initial_attempt": "initial-attempt.json",
+  "outcomes_are_not_inferred_from_source_review": true,
+  "receiver": "verify_trace_notebook_receiving.mjs",
+  "schema": "recallweave-native-receiving-controls.v1",
+  "source_pin_manifest": "source-pins.json",
+  "status": "authored-awaiting-qualified-browser-completion"
+}

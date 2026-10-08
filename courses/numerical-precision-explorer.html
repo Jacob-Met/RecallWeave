@@ -1,0 +1,453 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>Numerical precision lab · RecallWeave</title>
+<style>
+:root{--paper:#f4f1e9;--ink:#20312e;--muted:#586760;--line:#c8d3c9;--green:#164c3d;--gold:#d6a853;--white:#fffef9;--amber:#704217;font-family:ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--ink);background:var(--paper)}
+*{box-sizing:border-box}body{margin:0;line-height:1.6}a{color:#174f42}button,input,select{font:inherit}button{cursor:pointer}button:disabled{cursor:default;opacity:.5}button,input,select,summary,a{touch-action:manipulation}button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible,a:focus-visible{outline:3px solid #975c00;outline-offset:4px}button:focus-visible{outline-color:#cf7900}.skip{position:absolute;left:1rem;top:-5rem;background:white;padding:.75rem;z-index:3}.skip:focus{top:1rem}
+.shell{max-width:1100px;margin:auto;padding:0 24px}.hero{background:var(--green);color:#fffef5;padding:38px 0 42px;border-bottom:7px solid var(--gold)}.eyebrow{text-transform:uppercase;letter-spacing:.16em;font-size:.73rem;font-weight:750;margin:0 0 14px;color:#d4e7d8}.hero h1{font-family:ui-serif,Georgia,serif;font-weight:500;font-size:clamp(2.3rem,6vw,4rem);letter-spacing:-.035em;line-height:1.08;max-width:760px;margin:0 0 20px}.hero .lead{font-size:1.05rem;max-width:720px;margin:0;color:#e4eee6}.offline{display:inline-block;margin:22px 0 0;padding:6px 11px;border:1px solid #80ad95;border-radius:4px;font-size:.78rem;letter-spacing:.04em}
+main{padding-top:30px;padding-bottom:54px}.intro{color:var(--muted);max-width:850px}.workspace{display:grid;grid-template-columns:minmax(0,1fr) minmax(250px,.72fr);gap:24px;align-items:start}.card{background:var(--white);border:1px solid var(--line);border-radius:10px;padding:24px;min-width:0;box-shadow:0 3px 0 #dbe2d933}.card h2{font-size:1.25rem;line-height:1.3;margin:0 0 12px}.card p:first-child{margin-top:0}fieldset{padding:0;border:0;min-width:0;margin:0}legend{font-size:1.25rem;font-weight:750;margin-bottom:14px}label{display:block;font-weight:650;font-size:.87rem;margin:0 0 6px}.fields{display:grid;grid-template-columns:minmax(0,1fr) 110px minmax(0,1fr);gap:12px}input,select{width:100%;min-width:0;border:1px solid #8b9d92;background:white;border-radius:5px;padding:10px 9px;color:var(--ink)}input{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:.95rem}input[aria-invalid=true],select[aria-invalid=true]{border:2px solid #a93423}.hint{font-size:.8rem;color:var(--muted);margin:12px 0 18px}.primary{background:var(--green);color:white;border:1px solid var(--green);border-radius:5px;padding:10px 18px;font-weight:650}.secondary{background:var(--white);color:var(--green);border:1px solid #789888;border-radius:5px;padding:9px 13px;font-size:.86rem;font-weight:650}.presets{display:flex;flex-wrap:wrap;gap:8px}.preset{border:1px solid #a9bbb0;background:#eff4ed;color:#245542;border-radius:5px;padding:7px 9px;text-align:left;font-size:.78rem}.preset:hover,.secondary:hover{background:#e6efe4}.section-label{font-size:.73rem;letter-spacing:.1em;text-transform:uppercase;font-weight:750;color:var(--muted);margin:23px 0 9px}.aside p{font-size:.87rem}.aside strong{font-weight:700}.aside ol{padding-left:22px;font-size:.87rem}.aside li+li{margin-top:10px}.status{font-size:.87rem;margin:18px 0;color:var(--muted)}.error{background:#fff1e8;border-left:4px solid #b44322;color:#76270f;padding:12px 16px;margin:15px 0}.result{margin-top:26px}.result-head{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:22px;align-items:start;border-bottom:1px solid var(--line);padding-bottom:20px;margin-bottom:20px}.result-label{font-size:.78rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:0 0 5px}.card h2.number{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:clamp(1.45rem,4.6vw,2.6rem);line-height:1.2;overflow-wrap:anywhere;font-weight:500;margin:0}.verdict{display:inline-block;border-radius:4px;padding:3px 9px;font-size:.76rem;font-weight:700;margin:14px 0 0}.matches{background:#e2efde;color:#20562a}.differs{background:#f7e8cc;color:#744309}.explanation{margin:12px 0 0;max-width:800px}.integer{font-size:.82rem;color:var(--muted);margin:9px 0 0}.result-grids{display:grid;grid-template-columns:1fr 1fr;gap:26px}.subheading{font-size:1rem;margin:0 0 10px}table{border-collapse:collapse;width:100%;table-layout:fixed;font-size:.84rem}caption{text-align:left;color:var(--muted);font-size:.78rem;margin-bottom:9px}th,td{text-align:left;vertical-align:top;border-bottom:1px solid var(--line);padding:12px 7px;overflow-wrap:anywhere}th{width:48%;font-weight:650}th small{display:block;font-weight:400;font-size:.74rem;line-height:1.45;color:var(--muted);margin-top:5px}code{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;overflow-wrap:anywhere;font-size:.84rem}.exact-value summary{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:.8rem;cursor:pointer;overflow-wrap:anywhere}.exact-body{padding:8px 0 0}.exact-body code{display:block;font-size:.77rem}.tiny-label{display:block;color:var(--muted);font-size:.65rem;text-transform:uppercase;letter-spacing:.04em;margin:8px 0 3px}.identity{font-size:.8rem;color:var(--muted);padding:14px 0 0;margin:0}.operand-details{margin-top:22px;border-top:1px solid var(--line);padding-top:18px}.operand-details>summary{cursor:pointer;font-weight:650}.operands{display:grid;grid-template-columns:1fr 1fr;gap:26px;margin-top:12px}.bits{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:.73rem;overflow-wrap:anywhere;color:var(--muted)}.lesson{margin-top:28px}.lesson-title{display:flex;justify-content:space-between;align-items:start;gap:18px}.lesson-title h2{margin-bottom:8px}.downloads{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end}.lesson-intro{font-size:.9rem;color:var(--muted)}.all-questions>summary{cursor:pointer;font-weight:650;padding:10px 0}.question{padding:20px 0;border-top:1px solid var(--line);max-width:850px}.question h3{font-size:.8rem;color:var(--green);letter-spacing:.025em;margin:0 0 6px}.question p{font-size:.9rem}.question li{font-size:.86rem;margin:5px 0}.question summary{cursor:pointer;font-size:.88rem;color:var(--green);font-weight:650}.question details{border-left:3px solid #c0d7bd;padding:8px 0 8px 15px}.transfer{font-style:italic}.footer{font-size:.78rem;color:var(--muted);margin-top:28px;border-top:1px solid var(--line);padding-top:17px}summary{list-style-position:outside;margin-left:15px}[hidden]{display:none!important}
+@media(max-width:760px){.workspace,.result-grids,.operands{grid-template-columns:1fr}.hero{padding:28px 0 32px}.shell{padding-left:17px;padding-right:17px}.card{padding:19px}.result-head{grid-template-columns:1fr;gap:14px}.result-head button{justify-self:start}.lesson-title{display:block}.downloads{justify-content:flex-start;margin:14px 0}.aside{border-left:4px solid var(--gold)}}
+@media(max-width:400px){.fields{grid-template-columns:1fr}.shell{padding-left:12px;padding-right:12px}.card{padding:16px}.hero h1{font-size:2.35rem}th{width:45%}.hero .lead{font-size:.98rem}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+@media print{.hero{background:white;color:black;border-color:#777}.hero .lead,.eyebrow{color:black}.offline,form,.presets,.downloads,button,.status,.skip{display:none}.workspace,.result-grids,.operands{display:block}.card{break-inside:avoid;box-shadow:none}.shell{max-width:none;padding:0}.hero{padding:0}details{display:block}}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to the lab</a>
+<header class="hero">
+<div class="shell"><p class="eyebrow">RecallWeave / numerical precision</p>
+<h1>Where did the difference enter?</h1>
+<p class="lead">Type two decimal values. Compare the exact written arithmetic with the values JavaScript stores, then see which step introduces a difference.</p>
+<p class="offline">Works offline · Local file downloads · No account</p></div>
+</header>
+<main id="main" class="shell">
+<p class="intro">A short decimal label can hide a longer stored value. This lab follows one addition or subtraction through input conversion and arithmetic, using exact fractions to keep the comparison visible.</p>
+<div class="workspace">
+<section class="card" aria-label="Decimal comparison controls">
+<form id="precision-form" novalidate>
+<fieldset><legend>Compare two values</legend>
+<div class="fields">
+<div><label for="precision-a">First decimal value</label><input id="precision-a" type="text" inputmode="decimal" maxlength="128" autocomplete="off" spellcheck="false" aria-describedby="input-help"></div>
+<div><label for="precision-operation">Operation</label><select id="precision-operation"><option value="+">Add (+)</option><option value="-">Subtract (−)</option></select></div>
+<div><label for="precision-b">Second decimal value</label><input id="precision-b" type="text" inputmode="decimal" maxlength="128" autocomplete="off" spellcheck="false" aria-describedby="input-help"></div>
+</div>
+<p class="hint" id="input-help">Plain decimal text: up to 18 whole and 18 fractional digits, with an optional + or - sign. Write 0.5, not .5. Exponents, commas and expressions are refused.</p>
+<button class="primary" type="submit">Compare values</button>
+</fieldset></form>
+<p class="section-label">Try a different case</p><div class="presets" id="precision-presets" aria-label="Worked example presets"></div>
+</section>
+<aside class="card aside"><h2>Three values. Two possible changes.</h2>
+<ol><li><strong>Decimal reference:</strong> the exact arithmetic implied by your written values.</li><li><strong>After conversion:</strong> exact arithmetic on the Number values that were actually stored.</li><li><strong>Stored result:</strong> the value after JavaScript performs the operation.</li></ol>
+<p>The signed changes between these steps add up exactly. They can reinforce each other or cancel.</p>
+<p>Your decimal text is a mathematical reference. The lab does not assign measurement accuracy to it.</p></aside>
+</div>
+<p id="precision-status" class="status" role="status" aria-live="polite"></p>
+<div id="precision-error" class="error" role="alert" hidden></div>
+<section id="precision-result" class="card result" aria-label="Comparison result" hidden>
+<div class="result-head"><div><p class="result-label">JavaScript Number label</p><h2 id="number-result" class="number"></h2><p id="precision-verdict" class="verdict"></p><p id="precision-explanation" class="explanation"></p><p id="integer-status" class="integer"></p></div><button id="download-worked" class="secondary" type="button" disabled>Download worked record</button></div>
+<div class="result-grids">
+<div><h3 class="subheading">Follow the values</h3><table><caption>Expand a value for every decimal digit and its reduced fraction.</caption><tbody id="value-rows"></tbody></table></div>
+<div><h3 class="subheading">Account for the difference</h3><table><caption>Signed discrepancy, relative to the written-decimal reference.</caption><tbody id="error-rows"></tbody></table><p class="identity">Operand conversion + operation rounding = total discrepancy. This identity is checked with exact fractions.</p></div>
+</div>
+<details class="operand-details"><summary>Inspect each input and the stored bits</summary>
+<div class="operands"><div><h3 id="operand-a-rows-label" class="subheading"></h3><table aria-label="First operand details"><tbody id="operand-a-rows"></tbody></table><p id="operand-a-rows-bits" class="bits"></p></div><div><h3 id="operand-b-rows-label" class="subheading"></h3><table aria-label="Second operand details"><tbody id="operand-b-rows"></tbody></table><p id="operand-b-rows-bits" class="bits"></p></div></div>
+<p id="result-bits" class="bits"></p><p id="zero-note" class="hint" hidden>Exact fractions treat positive and negative zero as the same rational value. The Number label and bits retain the sign of negative zero separately.</p>
+</details></section>
+<section class="card lesson">
+<div class="lesson-title"><div><p class="eyebrow" style="color:var(--green)">Keep learning</p><h2>Twelve questions, with worked explanations</h2></div><div class="downloads"><button id="download-lesson" type="button" class="secondary">Download lesson (.json)</button><button id="download-guide" type="button" class="secondary">Download worked guide</button></div></div>
+<p class="lesson-intro">Explore representations, conversion, arithmetic, comparisons and integer guarantees. The guide includes worked transfer answers. Download the lesson, then open RecallWeave’s learner page or local demo. Under “Bring your own lesson,” choose the JSON file, review the preview, and select “Start this deck” to begin a fresh lesson.</p>
+<details class="all-questions"><summary>Read the questions and reveal their explanations</summary><div id="precision-questions"></div></details>
+</section>
+<footer class="footer">Original RecallWeave teaching material. The calculation uses exact BigInt fractions alongside JavaScript Number operations. Source behavior is defined by the <a href="https://tc39.es/ecma262/multipage/ecmascript-data-types-and-values.html#sec-ecmascript-language-types-number-type" rel="noreferrer">ECMAScript Number specification</a>. No provider call, account, automatic storage or learning-effect claim is involved.</footer>
+</main>
+<script id="precision-deck-json" type="application/json">"{\n  \"format\": \"recallweave-deck/1\",\n  \"title\": \"Numerical precision: decimal intent, binary Number and exact comparisons\",\n  \"attribution\": \"Original questions, numerical examples and worked explanations prepared for RecallWeave, 2026. Technical reference: Ecma International, ECMAScript language specification, Number type, Number arithmetic, Number.isSafeInteger, Number.EPSILON and Number.prototype.toFixed: https://tc39.es/ecma262/ .\",\n  \"license\": \"Original teaching text and examples. This contribution makes no additional reuse-license grant. The linked specification is a technical reference; no standard prose, exercise or figure is copied.\",\n  \"concepts\": [\n    \"Exact representations\",\n    \"Conversion and arithmetic\",\n    \"Comparison and order\",\n    \"Integer guarantees\"\n  ],\n  \"items\": [\n    {\n      \"id\": \"np-01\",\n      \"concept\": \"Exact representations\",\n      \"prerequisites\": [],\n      \"prompt\": \"Which exact decimal value is representable by a finite binary fraction?\",\n      \"options\": [\n        \"0.1\",\n        \"0.125\",\n        \"0.2\",\n        \"0.3\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"0.125 = 1/8 = 0.001 in base two, so this small value is exactly representable. The other choices reduce to 1/10, 1/5 and 3/10; each denominator retains a factor of 5, so its binary expansion does not terminate. This is a claim about these particular values, not a claim that every decimal fraction is inexact.\",\n      \"transfer\": \"Write 0.375 as a reduced fraction. Does its denominator permit a finite binary expansion?\"\n    },\n    {\n      \"id\": \"np-02\",\n      \"concept\": \"Exact representations\",\n      \"prerequisites\": [],\n      \"prompt\": \"For a rational number reduced to lowest terms, which denominator condition gives a finite binary expansion?\",\n      \"options\": [\n        \"Its denominator is any even integer.\",\n        \"Its denominator is a power of 10.\",\n        \"Its denominator is any prime number.\",\n        \"Its denominator is a power of 2, including 1.\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"A finite binary fractional expansion has an integer numerator over 2^k. After reduction, its denominator can therefore contain only factors of 2. Being even is insufficient: 1/6 retains a factor of 3. A power of 10 usually retains factors of 5, and an arbitrary prime need not be 2. The criterion concerns a finite mathematical binary expansion; a specific floating-point format also imposes precision and range limits.\",\n      \"transfer\": \"Decide whether 3/40 and 7/16 have finite binary expansions, explaining the denominator test.\"\n    },\n    {\n      \"id\": \"np-03\",\n      \"concept\": \"Exact representations\",\n      \"prerequisites\": [],\n      \"prompt\": \"JavaScript displays String(Number('0.1')) as '0.1'. What does that display establish about the stored value?\",\n      \"options\": [\n        \"The short display alone does not prove that the stored value equals the exact fraction 1/10.\",\n        \"The stored binary value must equal the exact fraction 1/10.\",\n        \"Number preserves the original input string as its numeric representation.\",\n        \"Displaying a value converts its stored representation to exact decimal arithmetic.\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"The displayed text is short, while the stored value can be inspected separately. For this Number, the exact fraction is 3602879701896397/36028797018963968, slightly greater than 1/10. The text '0.1' therefore does not prove exact equality to the written decimal. A Number is not the original input string, and displaying it does not replace binary arithmetic with decimal arithmetic.\",\n      \"transfer\": \"Explain why inspecting an exact fraction of the stored value answers a different question from reading its shortest displayed decimal.\"\n    },\n    {\n      \"id\": \"np-04\",\n      \"concept\": \"Conversion and arithmetic\",\n      \"prerequisites\": [\n        \"Exact representations\"\n      ],\n      \"prompt\": \"In JavaScript using Number values, what is String(0.1 + 0.2)?\",\n      \"options\": [\n        \"'0.3'\",\n        \"'0.29999999999999999'\",\n        \"'0.30000000000000004'\",\n        \"'NaN'\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"The expression displays '0.30000000000000004'. The exact written-decimal sum is 3/10, while the stored result exceeds that reference by 1/22517998136852480. For this example, operand conversion and addition rounding both contribute. '0.3' is not the displayed result of this expression; the smaller proposed value has the wrong direction, and both inputs are finite numbers, so NaN does not arise. Formatting can change the label, but it does not undo those operations.\",\n      \"transfer\": \"Compare the exact decimal sum with the exact stored result. Is formatting the result a way to undo the earlier arithmetic?\"\n    },\n    {\n      \"id\": \"np-05\",\n      \"concept\": \"Conversion and arithmetic\",\n      \"prerequisites\": [\n        \"Exact representations\"\n      ],\n      \"prompt\": \"Let a = Number('1.0000000000000001') and b = Number('1'). JavaScript computes a - b as 0, while the exact decimal-text difference is 0.0000000000000001. Where was that difference lost?\",\n      \"options\": [\n        \"Both inputs were exact, but subtraction necessarily rounds every sufficiently small difference to zero.\",\n        \"Conversion rounded a to 1; subtracting the two stored values then gives exactly zero.\",\n        \"The exact decimal-text difference is also zero, so there is no discrepancy.\",\n        \"Number converts the first input to NaN, and subtraction changes NaN to zero.\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"Number('1.0000000000000001') is already 1 after conversion. The written difference is 1/10000000000000000, but the stored operands are both exactly 1. Their subtraction is exactly zero: the combined conversion contribution is -1/10000000000000000, and the arithmetic contribution is zero. It is inaccurate to attribute this example's discrepancy to new rounding during subtraction, to a zero written-decimal difference, or to NaN.\",\n      \"transfer\": \"Would subtracting stored 1 from stored 1 introduce an arithmetic rounding discrepancy? Keep this separate from the earlier input conversion.\"\n    },\n    {\n      \"id\": \"np-06\",\n      \"concept\": \"Conversion and arithmetic\",\n      \"prerequisites\": [\n        \"Exact representations\"\n      ],\n      \"prompt\": \"For the exact decimal inputs 0.125 and 0.25, JavaScript Number addition returns 0.375. Which account is correct?\",\n      \"options\": [\n        \"Every decimal input has already rounded, even in this example.\",\n        \"The inputs are exact, but the result must be inexact because addition uses Number.\",\n        \"The displayed result is exact only after converting it to a string.\",\n        \"Both operands and their sum are exactly representable; no discrepancy is introduced in this example.\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"The operands are 1/8 and 1/4, and their sum is 3/8. All three fit exactly in this small binary calculation. There is no input-conversion discrepancy and no arithmetic discrepancy. Number operations do not introduce an error in every example, and a string conversion is not what makes this example exact.\",\n      \"transfer\": \"Give another pair of small dyadic fractions whose sum is exactly representable, and show their exact fraction arithmetic.\"\n    },\n    {\n      \"id\": \"np-07\",\n      \"concept\": \"Comparison and order\",\n      \"prerequisites\": [\n        \"Conversion and arithmetic\"\n      ],\n      \"prompt\": \"Let x = 0.1 + 0.2 and y = 0.3. A stated policy accepts differences with Math.abs(x - y) \u003c= 1e-12. What are the values of x === y and this acceptance check?\",\n      \"options\": [\n        \"false; true\",\n        \"true; true\",\n        \"false; false\",\n        \"true; false\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"The strict equality check is false. The two stored Numbers differ by 1/18014398509481984, approximately 5.55 × 10^-17, which satisfies the explicitly chosen 10^-12 absolute bound. Thus the acceptance check is true. The other pairs disagree with one or both tests. This policy accepts a small difference; it does not make the values exactly equal or establish a tolerance suitable for every unit and application.\",\n      \"transfer\": \"Why does passing this explicitly chosen tolerance not prove exact equality, and why would another application need to choose its own tolerance?\"\n    },\n    {\n      \"id\": \"np-08\",\n      \"concept\": \"Comparison and order\",\n      \"prerequisites\": [\n        \"Conversion and arithmetic\"\n      ],\n      \"prompt\": \"Run const x = 0.1 + 0.2; const label = x.toFixed(2). Which statement is correct?\",\n      \"options\": [\n        \"label is '0.30', and x is changed to the exact decimal value 0.3.\",\n        \"label is '0.3', and x is changed to a string.\",\n        \"label is '0.30', while x remains the same Number and still differs from the Number value 0.3.\",\n        \"label is '0.30000000000000004', because formatting cannot round displayed text.\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"toFixed(2) returns the string '0.30'. It formats a value for display without changing x, which remains the original Number and still differs from the Number value 0.3. The alternatives incorrectly change x, omit a requested fractional digit, or ignore the formatting operation. Converting the label back to Number would be another operation with its own result; that conversion has not occurred in the stated code.\",\n      \"transfer\": \"What would need to be recorded if a worked example must preserve the computed Number as well as a two-decimal display?\"\n    },\n    {\n      \"id\": \"np-09\",\n      \"concept\": \"Comparison and order\",\n      \"prerequisites\": [\n        \"Conversion and arithmetic\"\n      ],\n      \"prompt\": \"Let a = 10000000000000000, b = -10000000000000000 and c = 1, all JavaScript Number values. What are (a + b) + c and a + (b + c), respectively?\",\n      \"options\": [\n        \"0 and 0\",\n        \"1 and 1\",\n        \"0 and 1\",\n        \"1 and 0\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"In the left grouping, a + b is exactly zero, then adding c gives 1. In the right grouping, the exact integer b + c would be -9999999999999999. That intermediate rounds to -10000000000000000 under Number arithmetic, so the final sum is zero. Exact integer arithmetic gives 1 with either grouping. The alternatives either change the exact first cancellation or assume reassociation preserves the rounded intermediates.\",\n      \"transfer\": \"Compute the exact integer result for each parenthesization, then identify the rounded intermediate in the Number calculation.\"\n    },\n    {\n      \"id\": \"np-10\",\n      \"concept\": \"Integer guarantees\",\n      \"prerequisites\": [\n        \"Exact representations\"\n      ],\n      \"prompt\": \"Which value is Number.MAX_SAFE_INTEGER, the positive end of JavaScript's guaranteed safe-integer interval?\",\n      \"options\": [\n        \"9007199254740991 (2^53 - 1)\",\n        \"9007199254740992 (2^53)\",\n        \"4503599627370496 (2^52)\",\n        \"18446744073709551615 (2^64 - 1)\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"Number.MAX_SAFE_INTEGER is 2^53 - 1, or 9007199254740991. The API's safe-integer interval is symmetric, from -9007199254740991 to +9007199254740991 inclusive. The value 2^52 is safely inside it but is not the maximum; 2^53 is representable but outside the interval; 2^64 - 1 is not its bound. The interval must not be confused with the entire set of representable integers or finite Numbers.\",\n      \"transfer\": \"State the corresponding negative endpoint. Does a value outside this interval automatically have to be non-integer?\"\n    },\n    {\n      \"id\": \"np-11\",\n      \"concept\": \"Integer guarantees\",\n      \"prerequisites\": [\n        \"Exact representations\"\n      ],\n      \"prompt\": \"Let s = '9007199254740992' and t = '9007199254740993'. What are Number(s) === Number(t) and BigInt(s) === BigInt(t), respectively?\",\n      \"options\": [\n        \"false; false\",\n        \"false; true\",\n        \"true; false\",\n        \"true; true\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"Both Number conversions produce 9007199254740992, so their strict equality is true. Direct BigInt conversion preserves the two distinct integer strings, so that equality is false. The other answer pairs lose one of those distinctions. BigInt(Number(t)) cannot recover the original integer after Number(t) has already rounded; the exact integer text must reach BigInt directly when that is the intended representation.\",\n      \"transfer\": \"If these strings are exact integer counts that must stay distinct, explain why converting through Number before BigInt would lose information.\"\n    },\n    {\n      \"id\": \"np-12\",\n      \"concept\": \"Integer guarantees\",\n      \"prerequisites\": [\n        \"Exact representations\"\n      ],\n      \"prompt\": \"JavaScript evaluates 9007199254740992 + 2 as 9007199254740994, and Number.isSafeInteger of that result is false. How should these facts be interpreted?\",\n      \"options\": [\n        \"The reported sum must be numerically wrong because the result is outside the safe interval.\",\n        \"This particular sum is exactly representable; isSafeInteger reports the guaranteed interval, not exactness of every individual value.\",\n        \"Number.isSafeInteger is true for every exactly represented integer, so the reported false is impossible.\",\n        \"Every integer greater than Number.MAX_SAFE_INTEGER is stored as Infinity.\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"This particular addition is exact: both operands and the result 9007199254740994 are representable. Number.isSafeInteger is nevertheless false because the result is beyond its guaranteed interval. An outside value is not automatically inexact or infinite, and the API is not a test of exactness for every individual integer. Nearby integer text such as '9007199254740993' does round during conversion, demonstrating why the interval and per-value exactness are different questions.\",\n      \"transfer\": \"Contrast this exact result with converting the distinct integer text '9007199254740993' to Number.\"\n    }\n  ]\n}\n"</script>
+<script id="precision-guide-json" type="application/json">"# Numerical precision — worked lesson\n\nThis original lesson compares exact written decimal values with JavaScript Number operations. It keeps operand conversion, arithmetic rounding, display formatting and a chosen comparison policy separate. Exact written values are mathematical references, not claims about measurement accuracy. The directly openable explorer supports bounded decimal addition and subtraction; the lesson also asks about grouping, comparisons and integer representation.\n\n## Use the explorer\n\nOpen `numerical-precision-explorer.html` directly. Choose an example or enter two signed plain decimal values, each with at most 18 whole digits and 18 fractional digits. Exponent notation, commas and expressions are refused. Choose addition or subtraction and select **Compare values**. Editing an input clears the previous result until another comparison succeeds.\n\nThe result table shows the exact written-decimal result, the exact arithmetic result for the already converted operands, and the actual Number result. A second table decomposes the total signed discrepancy into an operand-conversion contribution and an arithmetic contribution. Their signs can reinforce or cancel. Expand exact fractions to inspect the values without reading rounded labels as exact decimal truth. Rational zero treats +0 and -0 as the same value; the Number bits and displayed sign preserve negative zero separately.\n\n**Download worked record** saves the exact inputs, represented fractions, bits, arithmetic result and signed decomposition as local JSON. **Download lesson** saves `numerical-precision.json` in RecallWeave's deck format. To study it, open RecallWeave's learner page or local `demo.html`. Under **Bring your own lesson**, use **Choose a deck file** to select the downloaded JSON, review its title and twelve-question preview, then select **Start this deck**. Starting the selected deck replaces the current lesson and its practice answers. The file stays on your device. This explorer makes no network requests and does not automatically save browser state.\n\n## Model boundaries\n\nThe arithmetic reference uses BigInt rational values. The Number calculation uses JavaScript's actual conversion and + or - operation; the model extracts the finite binary64 value through DataView. This is a small teaching surface, not an arbitrary expression evaluator, a decimal package, a measurement-uncertainty model or a rule for production financial calculations. The examples deliberately include exact results, conversion-only discrepancy, arithmetic-only discrepancy and mixed contributions.\n\nThe safe-integer flag reports Number.isSafeInteger for the stored Number. False can mean that a value is fractional or outside the guaranteed integer interval. It does not by itself say that the entered value was rounded. The separately calculated exact discrepancy answers that question for this bounded operation.\n\n## Worked questions and transfer\n\n### np-01 — Exact representations\n\nWhich exact decimal value is representable by a finite binary fraction?\n\nA. 0.1\nB. 0.125\nC. 0.2\nD. 0.3\n\n**Answer: B.** 0.125 = 1/8 = 0.001 in base two, so this small value is exactly representable. The other choices reduce to 1/10, 1/5 and 3/10; each denominator retains a factor of 5, so its binary expansion does not terminate. This is a claim about these particular values, not a claim that every decimal fraction is inexact.\n\n**Transfer:** Write 0.375 as a reduced fraction. Does its denominator permit a finite binary expansion?\n\n0.375 = 375/1000 = 3/8. Since 8 = 2^3, the binary expansion terminates: 0.011₂.\n\n### np-02 — Exact representations\n\nFor a rational number reduced to lowest terms, which denominator condition gives a finite binary expansion?\n\nA. Its denominator is any even integer.\nB. Its denominator is a power of 10.\nC. Its denominator is any prime number.\nD. Its denominator is a power of 2, including 1.\n\n**Answer: D.** A finite binary fractional expansion has an integer numerator over 2^k. After reduction, its denominator can therefore contain only factors of 2. Being even is insufficient: 1/6 retains a factor of 3. A power of 10 usually retains factors of 5, and an arbitrary prime need not be 2. The criterion concerns a finite mathematical binary expansion; a specific floating-point format also imposes precision and range limits.\n\n**Transfer:** Decide whether 3/40 and 7/16 have finite binary expansions, explaining the denominator test.\n\n3/40 is already reduced and 40 = 2^3 × 5, so it has no finite binary expansion. The reduced denominator of 7/16 is 2^4, so 7/16 = 0.0111₂ terminates. Finite expansion alone does not establish a particular format's range or precision.\n\n### np-03 — Exact representations\n\nJavaScript displays String(Number('0.1')) as '0.1'. What does that display establish about the stored value?\n\nA. The short display alone does not prove that the stored value equals the exact fraction 1/10.\nB. The stored binary value must equal the exact fraction 1/10.\nC. Number preserves the original input string as its numeric representation.\nD. Displaying a value converts its stored representation to exact decimal arithmetic.\n\n**Answer: A.** The displayed text is short, while the stored value can be inspected separately. For this Number, the exact fraction is 3602879701896397/36028797018963968, slightly greater than 1/10. The text '0.1' therefore does not prove exact equality to the written decimal. A Number is not the original input string, and displaying it does not replace binary arithmetic with decimal arithmetic.\n\n**Transfer:** Explain why inspecting an exact fraction of the stored value answers a different question from reading its shortest displayed decimal.\n\nThe exact stored fraction identifies the numeric value represented by the bits. Its numerator times 10 differs from its denominator, so it is not 1/10. A short display is a readable representation and need not spell out that entire exact fraction.\n\n### np-04 — Conversion and arithmetic\n\nIn JavaScript using Number values, what is String(0.1 + 0.2)?\n\nA. '0.3'\nB. '0.29999999999999999'\nC. '0.30000000000000004'\nD. 'NaN'\n\n**Answer: C.** The expression displays '0.30000000000000004'. The exact written-decimal sum is 3/10, while the stored result exceeds that reference by 1/22517998136852480. For this example, operand conversion and addition rounding both contribute. '0.3' is not the displayed result of this expression; the smaller proposed value has the wrong direction, and both inputs are finite numbers, so NaN does not arise. Formatting can change the label, but it does not undo those operations.\n\n**Transfer:** Compare the exact decimal sum with the exact stored result. Is formatting the result a way to undo the earlier arithmetic?\n\nThe reference is 3/10. The stored result is 1351079888211149/4503599627370496, larger by 1/22517998136852480. A two-decimal string such as '0.30' is a presentation choice; x still contains the previously computed Number unless another operation assigns a different value.\n\n### np-05 — Conversion and arithmetic\n\nLet a = Number('1.0000000000000001') and b = Number('1'). JavaScript computes a - b as 0, while the exact decimal-text difference is 0.0000000000000001. Where was that difference lost?\n\nA. Both inputs were exact, but subtraction necessarily rounds every sufficiently small difference to zero.\nB. Conversion rounded a to 1; subtracting the two stored values then gives exactly zero.\nC. The exact decimal-text difference is also zero, so there is no discrepancy.\nD. Number converts the first input to NaN, and subtraction changes NaN to zero.\n\n**Answer: B.** Number('1.0000000000000001') is already 1 after conversion. The written difference is 1/10000000000000000, but the stored operands are both exactly 1. Their subtraction is exactly zero: the combined conversion contribution is -1/10000000000000000, and the arithmetic contribution is zero. It is inaccurate to attribute this example's discrepancy to new rounding during subtraction, to a zero written-decimal difference, or to NaN.\n\n**Transfer:** Would subtracting stored 1 from stored 1 introduce an arithmetic rounding discrepancy? Keep this separate from the earlier input conversion.\n\nNo. The stored calculation 1 - 1 is exact. Its arithmetic contribution is zero, while the earlier conversion of 1.0000000000000001 to 1 accounts for the whole discrepancy from the written-decimal reference.\n\n### np-06 — Conversion and arithmetic\n\nFor the exact decimal inputs 0.125 and 0.25, JavaScript Number addition returns 0.375. Which account is correct?\n\nA. Every decimal input has already rounded, even in this example.\nB. The inputs are exact, but the result must be inexact because addition uses Number.\nC. The displayed result is exact only after converting it to a string.\nD. Both operands and their sum are exactly representable; no discrepancy is introduced in this example.\n\n**Answer: D.** The operands are 1/8 and 1/4, and their sum is 3/8. All three fit exactly in this small binary calculation. There is no input-conversion discrepancy and no arithmetic discrepancy. Number operations do not introduce an error in every example, and a string conversion is not what makes this example exact.\n\n**Transfer:** Give another pair of small dyadic fractions whose sum is exactly representable, and show their exact fraction arithmetic.\n\nFor example, 0.5 + 0.25 = 1/2 + 1/4 = 3/4 = 0.75. These small operands and the result are all exactly representable.\n\n### np-07 — Comparison and order\n\nLet x = 0.1 + 0.2 and y = 0.3. A stated policy accepts differences with Math.abs(x - y) \u003c= 1e-12. What are the values of x === y and this acceptance check?\n\nA. false; true\nB. true; true\nC. false; false\nD. true; false\n\n**Answer: A.** The strict equality check is false. The two stored Numbers differ by 1/18014398509481984, approximately 5.55 × 10^-17, which satisfies the explicitly chosen 10^-12 absolute bound. Thus the acceptance check is true. The other pairs disagree with one or both tests. This policy accepts a small difference; it does not make the values exactly equal or establish a tolerance suitable for every unit and application.\n\n**Transfer:** Why does passing this explicitly chosen tolerance not prove exact equality, and why would another application need to choose its own tolerance?\n\nThe two values remain distinct; the policy merely accepts their difference. An application's scale, units and required accuracy determine a useful tolerance. Neither 10^-12 nor Number.EPSILON is a universal acceptance rule.\n\n### np-08 — Comparison and order\n\nRun const x = 0.1 + 0.2; const label = x.toFixed(2). Which statement is correct?\n\nA. label is '0.30', and x is changed to the exact decimal value 0.3.\nB. label is '0.3', and x is changed to a string.\nC. label is '0.30', while x remains the same Number and still differs from the Number value 0.3.\nD. label is '0.30000000000000004', because formatting cannot round displayed text.\n\n**Answer: C.** toFixed(2) returns the string '0.30'. It formats a value for display without changing x, which remains the original Number and still differs from the Number value 0.3. The alternatives incorrectly change x, omit a requested fractional digit, or ignore the formatting operation. Converting the label back to Number would be another operation with its own result; that conversion has not occurred in the stated code.\n\n**Transfer:** What would need to be recorded if a worked example must preserve the computed Number as well as a two-decimal display?\n\nKeep the original computed value in an unambiguous form, such as its exact binary64 fraction or bits, alongside the separate string '0.30'. Keeping only the rounded label loses distinctions between values that share that label.\n\n### np-09 — Comparison and order\n\nLet a = 10000000000000000, b = -10000000000000000 and c = 1, all JavaScript Number values. What are (a + b) + c and a + (b + c), respectively?\n\nA. 0 and 0\nB. 1 and 1\nC. 0 and 1\nD. 1 and 0\n\n**Answer: D.** In the left grouping, a + b is exactly zero, then adding c gives 1. In the right grouping, the exact integer b + c would be -9999999999999999. That intermediate rounds to -10000000000000000 under Number arithmetic, so the final sum is zero. Exact integer arithmetic gives 1 with either grouping. The alternatives either change the exact first cancellation or assume reassociation preserves the rounded intermediates.\n\n**Transfer:** Compute the exact integer result for each parenthesization, then identify the rounded intermediate in the Number calculation.\n\nBoth exact groupings give 10000000000000000 - 10000000000000000 + 1 = 1. Only the right Number grouping first computes b + c; its exact intermediate lies between representable values and rounds to -10000000000000000. The left grouping cancels a and b exactly first.\n\n### np-10 — Integer guarantees\n\nWhich value is Number.MAX_SAFE_INTEGER, the positive end of JavaScript's guaranteed safe-integer interval?\n\nA. 9007199254740991 (2^53 - 1)\nB. 9007199254740992 (2^53)\nC. 4503599627370496 (2^52)\nD. 18446744073709551615 (2^64 - 1)\n\n**Answer: A.** Number.MAX_SAFE_INTEGER is 2^53 - 1, or 9007199254740991. The API's safe-integer interval is symmetric, from -9007199254740991 to +9007199254740991 inclusive. The value 2^52 is safely inside it but is not the maximum; 2^53 is representable but outside the interval; 2^64 - 1 is not its bound. The interval must not be confused with the entire set of representable integers or finite Numbers.\n\n**Transfer:** State the corresponding negative endpoint. Does a value outside this interval automatically have to be non-integer?\n\nThe negative endpoint is -9007199254740991. Outside values can still be finite integers and can sometimes be represented exactly; being outside means Number.isSafeInteger returns false, not that Number.isInteger necessarily does.\n\n### np-11 — Integer guarantees\n\nLet s = '9007199254740992' and t = '9007199254740993'. What are Number(s) === Number(t) and BigInt(s) === BigInt(t), respectively?\n\nA. false; false\nB. false; true\nC. true; false\nD. true; true\n\n**Answer: C.** Both Number conversions produce 9007199254740992, so their strict equality is true. Direct BigInt conversion preserves the two distinct integer strings, so that equality is false. The other answer pairs lose one of those distinctions. BigInt(Number(t)) cannot recover the original integer after Number(t) has already rounded; the exact integer text must reach BigInt directly when that is the intended representation.\n\n**Transfer:** If these strings are exact integer counts that must stay distinct, explain why converting through Number before BigInt would lose information.\n\nNumber(t) has already become 9007199254740992, so BigInt(Number(t)) receives that rounded integer. BigInt(t) receives the original decimal integer text and returns 9007199254740993n. Choose the representation before losing the distinction.\n\n### np-12 — Integer guarantees\n\nJavaScript evaluates 9007199254740992 + 2 as 9007199254740994, and Number.isSafeInteger of that result is false. How should these facts be interpreted?\n\nA. The reported sum must be numerically wrong because the result is outside the safe interval.\nB. This particular sum is exactly representable; isSafeInteger reports the guaranteed interval, not exactness of every individual value.\nC. Number.isSafeInteger is true for every exactly represented integer, so the reported false is impossible.\nD. Every integer greater than Number.MAX_SAFE_INTEGER is stored as Infinity.\n\n**Answer: B.** This particular addition is exact: both operands and the result 9007199254740994 are representable. Number.isSafeInteger is nevertheless false because the result is beyond its guaranteed interval. An outside value is not automatically inexact or infinite, and the API is not a test of exactness for every individual integer. Nearby integer text such as '9007199254740993' does round during conversion, demonstrating why the interval and per-value exactness are different questions.\n\n**Transfer:** Contrast this exact result with converting the distinct integer text '9007199254740993' to Number.\n\n9007199254740994 is an exactly representable even integer at this magnitude, so the stated sum is exact. The neighboring text '9007199254740993' lies between representable Number values and converts to 9007199254740992. Both results remain outside the API's safe interval.\n\n## Technical references and provenance\n\nNormative background was checked on 2026-10-08 against the live ECMAScript specification:\n\n- [Number type and binary64 representation](https://tc39.es/ecma262/multipage/ecmascript-data-types-and-values.html#sec-ecmascript-language-types-number-type).\n- [Number addition and subtraction](https://tc39.es/ecma262/multipage/ecmascript-data-types-and-values.html#sec-numeric-types-number-add).\n- [Number.isSafeInteger](https://tc39.es/ecma262/multipage/numbers-and-dates.html#sec-number.issafeinteger) and [Number.MAX_SAFE_INTEGER](https://tc39.es/ecma262/multipage/numbers-and-dates.html#sec-number.max_safe_integer).\n- [Number.EPSILON](https://tc39.es/ecma262/multipage/numbers-and-dates.html#sec-number.epsilon) and [Number.prototype.toFixed](https://tc39.es/ecma262/multipage/numbers-and-dates.html#sec-number.prototype.tofixed).\n\nAll questions, distractor reasoning and transfer answers are newly written. Numerical examples are deterministic mathematical inputs, not collected observations. AI assistance was used in authorship and implementation. Source rules establish the language contract; separately recorded exact arithmetic, native execution and independent receiving qualify these concrete examples. No learning-effect or assessment-validity claim is made.\n"</script>
+<script type="module">
+const { analyzeDecimalOperation, serializeWorkedExample, PRECISION_PRESETS } = (() => {
+/** Exact arithmetic teaching model for bounded decimal addition/subtraction.
+ * No expression evaluation, provider call, measurement model or persistence.
+ */
+const FORMAT = 'recallweave-numerical-worked/1';
+const MAX_TEXT = 128;
+
+function refuse(message, field) {
+  const error = new Error(message);
+  error.field = field;
+  throw error;
+}
+function absolute(value) { return value < 0n ? -value : value; }
+function gcd(a, b) {
+  a = absolute(a);
+  b = absolute(b);
+  while (b !== 0n) [a, b] = [b, a % b];
+  return a;
+}
+function ratio(n, d = 1n) {
+  if (d === 0n) throw new Error('An exact denominator cannot be zero.');
+  if (d < 0n) { n = -n; d = -d; }
+  const factor = gcd(n, d);
+  return { n: n / factor, d: d / factor };
+}
+function add(a, b) { return ratio(a.n * b.d + b.n * a.d, a.d * b.d); }
+function subtract(a, b) { return ratio(a.n * b.d - b.n * a.d, a.d * b.d); }
+function same(a, b) { return a.n === b.n && a.d === b.d; }
+
+function exactDecimal(text, field) {
+  if (typeof text !== 'string' || text.length > MAX_TEXT) {
+    refuse('Enter a plain decimal with at most 18 whole and 18 fractional digits.', field);
+  }
+  const value = text.trim();
+  if (!/^[+-]?\d{1,18}(?:\.\d{1,18})?$/.test(value)) {
+    refuse('Use an optional sign, 1–18 whole digits and at most 18 fractional digits; no exponent, comma or expression.', field);
+  }
+  const negative = value.startsWith('-');
+  const unsigned = /^[+-]/.test(value) ? value.slice(1) : value;
+  const [whole, fraction = ''] = unsigned.split('.');
+  const n = BigInt(whole + fraction) * (negative ? -1n : 1n);
+  return ratio(n, 10n ** BigInt(fraction.length));
+}
+
+function binaryValue(value) {
+  if (!Number.isFinite(value)) throw new Error('Only finite Number values are supported.');
+  const buffer = new ArrayBuffer(8);
+  const view = new DataView(buffer);
+  view.setFloat64(0, value, false);
+  const bits = view.getBigUint64(0, false);
+  const sign = (bits >> 63n) === 0n ? 1n : -1n;
+  const exponent = Number((bits >> 52n) & 0x7ffn);
+  const tail = bits & ((1n << 52n) - 1n);
+  const significand = exponent === 0 ? tail : (1n << 52n) + tail;
+  const power = exponent === 0 ? -1074 : exponent - 1023 - 52;
+  const exact = power >= 0
+    ? ratio(sign * significand * (1n << BigInt(power)))
+    : ratio(sign * significand, 1n << BigInt(-power));
+  return { exact, bits: bits.toString(16).padStart(16, '0') };
+}
+
+function decimalText(value) {
+  const sign = value.n < 0n ? '-' : '';
+  const magnitude = absolute(value.n);
+  let remainder = magnitude % value.d;
+  let text = sign + String(magnitude / value.d);
+  if (remainder === 0n) return text;
+  text += '.';
+  // Input decimal denominators and finite binary64 denominators contain only
+  // factors 2 and 5. The bound also covers every binary64 subnormal.
+  let digits = 0;
+  while (remainder !== 0n) {
+    if (digits++ >= 1100) throw new Error('Exact decimal expansion exceeded its bound.');
+    remainder *= 10n;
+    text += String(remainder / value.d);
+    remainder %= value.d;
+  }
+  return text;
+}
+
+function publicRatio(value) {
+  return {
+    numerator: String(value.n),
+    denominator: String(value.d),
+    fraction: String(value.n) + '/' + String(value.d),
+    decimal: decimalText(value),
+    isZero: value.n === 0n
+  };
+}
+function numberDisplay(value) { return Object.is(value, -0) ? '-0' : String(value); }
+function freeze(value) {
+  for (const child of Object.values(value)) {
+    if (child && typeof child === 'object' && !Object.isFrozen(child)) freeze(child);
+  }
+  return Object.freeze(value);
+}
+function operand(text, field) {
+  const intended = exactDecimal(text, field);
+  const value = Number(text.trim());
+  if (!Number.isFinite(value)) refuse('This input cannot be represented as a finite Number.', field);
+  const stored = binaryValue(value);
+  return {
+    intended, value, stored: stored.exact,
+    public: {
+      input: text,
+      exact: publicRatio(intended),
+      stored: publicRatio(stored.exact),
+      display: numberDisplay(value),
+      bits: stored.bits,
+      conversionDiscrepancy: publicRatio(subtract(stored.exact, intended)),
+      isInteger: Number.isInteger(value),
+      isSafeInteger: Number.isSafeInteger(value),
+      isNegativeZero: Object.is(value, -0)
+    }
+  };
+}
+
+/** Compare exact decimal intent, converted operands and the actual operation.
+ * The exact reference treats +0 and -0 as the same rational zero; the Number
+ * display, bits and isNegativeZero fields retain the sign separately.
+ */
+function analyzeDecimalOperation(aText, operation, bText) {
+  if (operation !== '+' && operation !== '-') refuse('Choose addition or subtraction.', 'operation');
+  const a = operand(aText, 'a');
+  const b = operand(bText, 'b');
+  const combine = operation === '+' ? add : subtract;
+  const intended = combine(a.intended, b.intended);
+  const converted = combine(a.stored, b.stored);
+  const actualNumber = operation === '+' ? a.value + b.value : a.value - b.value;
+  const actual = binaryValue(actualNumber);
+  const conversion = subtract(converted, intended);
+  const arithmetic = subtract(actual.exact, converted);
+  const total = subtract(actual.exact, intended);
+  if (!same(add(conversion, arithmetic), total)) throw new Error('Exact discrepancy identity failed.');
+  return freeze({
+    format: FORMAT,
+    operation,
+    a: a.public,
+    b: b.public,
+    result: {
+      decimalIntent: publicRatio(intended),
+      storedOperandArithmetic: publicRatio(converted),
+      actual: publicRatio(actual.exact),
+      display: numberDisplay(actualNumber),
+      bits: actual.bits,
+      conversionContribution: publicRatio(conversion),
+      arithmeticContribution: publicRatio(arithmetic),
+      totalDiscrepancy: publicRatio(total),
+      exactMatch: total.n === 0n,
+      isInteger: Number.isInteger(actualNumber),
+      isSafeInteger: Number.isSafeInteger(actualNumber),
+      isNegativeZero: Object.is(actualNumber, -0)
+    },
+    identityVerified: true,
+    interpretation: 'Exact decimal text is the arithmetic reference, not measured truth. The signed contributions may reinforce or cancel. Safe-integer status describes the guaranteed interval, not whether every particular outside value is inexact.'
+  });
+}
+
+function serializeWorkedExample(aText, operation, bText) {
+  return JSON.stringify(analyzeDecimalOperation(aText, operation, bText), null, 2) + '\n';
+}
+
+const PRECISION_PRESETS = Object.freeze([
+  Object.freeze({ id: 'decimal-sum', title: 'Decimal sum', a: '0.1', operation: '+', b: '0.2' }),
+  Object.freeze({ id: 'binary-fractions', title: 'Exact binary fractions', a: '0.125', operation: '+', b: '0.25' }),
+  Object.freeze({ id: 'conversion-cancellation', title: 'Conversion before subtraction', a: '1.0000000000000001', operation: '-', b: '1' }),
+  Object.freeze({ id: 'lost-integer-step', title: 'A missing integer step', a: '9007199254740992', operation: '+', b: '1' }),
+  Object.freeze({ id: 'canceling-contributions', title: 'Signed contributions that cancel', a: '0.1', operation: '+', b: '0.4' }),
+  Object.freeze({ id: 'exact-unsafe-sum', title: 'An exact sum outside the safe range', a: '9007199254740992', operation: '+', b: '2' })
+]);
+
+return { analyzeDecimalOperation, serializeWorkedExample, PRECISION_PRESETS };
+})();
+
+const byId = id => document.getElementById(id);
+const form = byId('precision-form');
+const inputA = byId('precision-a');
+const inputB = byId('precision-b');
+const operation = byId('precision-operation');
+const resultPanel = byId('precision-result');
+const status = byId('precision-status');
+const errorBox = byId('precision-error');
+const workedButton = byId('download-worked');
+const deckText = JSON.parse(byId('precision-deck-json').textContent);
+const guideText = JSON.parse(byId('precision-guide-json').textContent);
+const deck = JSON.parse(deckText);
+let current = null;
+
+function element(name, text, className) {
+  const node = document.createElement(name);
+  if (text !== undefined) node.textContent = text;
+  if (className) node.className = className;
+  return node;
+}
+function clearError() {
+  errorBox.textContent = '';
+  errorBox.hidden = true;
+  for (const field of [inputA, inputB, operation]) field.removeAttribute('aria-invalid');
+}
+function invalidate(message = 'Inputs changed. Choose Compare values to calculate this example.') {
+  current = null;
+  workedButton.disabled = true;
+  resultPanel.hidden = true;
+  clearError();
+  status.textContent = message;
+}
+function exactCell(value) {
+  const cell = element('td');
+  const details = element('details', undefined, 'exact-value');
+  const short = value.decimal.length > 38 ? value.decimal.slice(0, 35) + '…' : value.decimal;
+  const summary = element('summary', short);
+  summary.setAttribute('aria-label', 'Exact value ' + short + '. Expand for all digits and the fraction.');
+  const body = element('div', undefined, 'exact-body');
+  body.append(element('span', 'Exact decimal', 'tiny-label'), element('code', value.decimal),
+    element('span', 'Reduced fraction', 'tiny-label'), element('code', value.fraction));
+  details.append(summary, body);
+  cell.append(details);
+  return cell;
+}
+function exactRow(label, note, value) {
+  const row = element('tr');
+  const heading = element('th');
+  heading.scope = 'row';
+  heading.append(element('span', label), element('small', note));
+  row.append(heading, exactCell(value));
+  return row;
+}
+function integerLabel(value) {
+  if (!value.isInteger) return 'Fractional Number: the integer guarantee does not apply.';
+  return value.isSafeInteger
+    ? 'Integer inside the guaranteed safe interval.'
+    : 'Integer outside the guaranteed safe interval; this flag alone does not say whether this example rounded.';
+}
+function explanation(record) {
+  const r = record.result;
+  if (r.exactMatch) {
+    if (!r.conversionContribution.isZero || !r.arithmeticContribution.isZero) {
+      return 'The final value matches the decimal reference, although the two signed contributions cancel.';
+    }
+    if (!record.a.conversionDiscrepancy.isZero || !record.b.conversionDiscrepancy.isZero) {
+      return 'The final value matches the decimal reference. Some inputs rounded, but their combined contribution is zero.';
+    }
+    return 'For these values, input conversion and arithmetic introduce no discrepancy.';
+  }
+  if (r.arithmeticContribution.isZero) {
+    return 'The operation on the stored operands is exact. Earlier input conversion accounts for the discrepancy.';
+  }
+  if (r.conversionContribution.isZero) {
+    return 'The combined input-conversion contribution is zero. The operation introduces the displayed discrepancy.';
+  }
+  return 'Input conversion and the operation both contribute. The signed rows below show how they combine.';
+}
+function showOperand(id, value, name) {
+  const body = byId(id);
+  body.replaceChildren(
+    exactRow('Written decimal', 'The exact value of your input text.', value.exact),
+    exactRow('Stored Number', 'The exact value represented by the binary64 bits.', value.stored),
+    exactRow('Conversion discrepancy', 'Stored value minus written decimal.', value.conversionDiscrepancy));
+  byId(id + '-label').textContent = name + ' Number label: ' + value.display;
+  byId(id + '-bits').textContent = 'Binary64 bits (hex): 0x' + value.bits;
+}
+function render(record) {
+  const r = record.result;
+  byId('number-result').textContent = r.display;
+  byId('precision-verdict').textContent = r.exactMatch
+    ? 'Matches the written-decimal result' : 'Differs from the written-decimal result';
+  byId('precision-verdict').className = 'verdict ' + (r.exactMatch ? 'matches' : 'differs');
+  byId('precision-explanation').textContent = explanation(record);
+  byId('integer-status').textContent = integerLabel(r);
+  byId('result-bits').textContent = 'Stored result bits (hex): 0x' + r.bits;
+  byId('zero-note').hidden = ![record.a, record.b, r].some(value => value.isNegativeZero);
+  byId('value-rows').replaceChildren(
+    exactRow('1 · Decimal reference', 'Exact arithmetic on the written input values.', r.decimalIntent),
+    exactRow('2 · After conversion', 'Exact arithmetic on the already stored operands, before operation rounding.', r.storedOperandArithmetic),
+    exactRow('3 · Stored result', 'The exact value of the actual JavaScript Number result.', r.actual));
+  byId('error-rows').replaceChildren(
+    exactRow('Operand conversion', 'Step 2 minus step 1.', r.conversionContribution),
+    exactRow('Operation rounding', 'Step 3 minus step 2.', r.arithmeticContribution),
+    exactRow('Total discrepancy', 'Step 3 minus step 1; exactly the sum of the two signed contributions.', r.totalDiscrepancy));
+  showOperand('operand-a-rows', record.a, 'First value');
+  showOperand('operand-b-rows', record.b, 'Second value');
+  resultPanel.hidden = false;
+  workedButton.disabled = false;
+  status.textContent = 'Comparison ready. Exact values, signed contributions and a worked-record download are available.';
+}
+function compare() {
+  clearError();
+  try {
+    const next = analyzeDecimalOperation(inputA.value, operation.value, inputB.value);
+    current = next;
+    render(next);
+  } catch (error) {
+    invalidate('No result is displayed for these inputs.');
+    errorBox.textContent = error.message;
+    errorBox.hidden = false;
+    const field = { a: inputA, b: inputB, operation }[error.field];
+    if (field) {
+      field.setAttribute('aria-invalid', 'true');
+      field.focus();
+    }
+  }
+}
+form.addEventListener('submit', event => {
+  event.preventDefault();
+  compare();
+});
+for (const field of [inputA, inputB, operation]) {
+  field.addEventListener('input', () => invalidate());
+  field.addEventListener('change', () => invalidate());
+}
+for (const preset of PRECISION_PRESETS) {
+  const button = element('button', preset.title, 'preset');
+  button.type = 'button';
+  button.dataset.preset = preset.id;
+  button.addEventListener('click', () => {
+    inputA.value = preset.a;
+    inputB.value = preset.b;
+    operation.value = preset.operation;
+    compare();
+  });
+  byId('precision-presets').append(button);
+}
+
+function download(contents, filename, mimeType) {
+  let url;
+  let link;
+  try {
+    const blob = new Blob([contents], { type: mimeType + ';charset=utf-8' });
+    url = URL.createObjectURL(blob);
+    link = element('a');
+    link.href = url;
+    link.download = filename;
+    document.body.append(link);
+    link.click();
+    status.textContent = 'Download prepared. Use your browser’s download controls to keep the file.';
+  } catch {
+    errorBox.textContent = 'Could not prepare the download. Your comparison is still available; try the download again.';
+    errorBox.hidden = false;
+  } finally {
+    link?.remove();
+    if (url) setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+}
+workedButton.addEventListener('click', () => {
+  if (!current || current.a.input !== inputA.value || current.b.input !== inputB.value ||
+      current.operation !== operation.value) {
+    invalidate('Compare the current inputs before downloading a worked record.');
+    return;
+  }
+  clearError();
+  download(serializeWorkedExample(current.a.input, current.operation, current.b.input),
+    'numerical-precision-worked.json', 'application/json');
+});
+byId('download-lesson').addEventListener('click', () => {
+  clearError();
+  download(deckText, 'numerical-precision.json', 'application/json');
+});
+byId('download-guide').addEventListener('click', () => {
+  clearError();
+  download(guideText, 'numerical-precision-guide.md', 'text/markdown');
+});
+
+for (const item of deck.items) {
+  const article = element('article', undefined, 'question');
+  const title = element('h3', item.id + ' · ' + item.concept);
+  const choices = element('ol');
+  choices.type = 'A';
+  for (const option of item.options) choices.append(element('li', option));
+  const answer = element('details');
+  answer.append(element('summary', 'Reveal the worked answer'),
+    element('p', String.fromCharCode(65 + item.answer) + '. ' + item.explanation),
+    element('p', 'Transfer: ' + item.transfer, 'transfer'));
+  article.append(title, element('p', item.prompt), choices, answer);
+  byId('precision-questions').append(article);
+}
+const initial = PRECISION_PRESETS[0];
+inputA.value = initial.a;
+inputB.value = initial.b;
+operation.value = initial.operation;
+compare();
+
+</script>
+</body>
+</html>

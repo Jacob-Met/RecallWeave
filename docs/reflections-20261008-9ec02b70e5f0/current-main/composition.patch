@@ -1,0 +1,179 @@
+--- a/README.md
++++ b/README.md
+@@ -23,9 +23,17 @@
+ 
+ Review and practice stay in this tab's memory. Refreshing the page or starting a fresh local session clears the active state; an explicitly downloaded learning trace can restore the recorded answers later. The modular app and the direct-open `demo.html` provide the same flow.
+ 
++### Write your own explanations
++
++Each completed review panel has a **Your explanation** field beside the existing transfer prompt. Write or revise how you would connect the idea, including for questions you answered correctly. **Apply it in your own words** provides a separate place to describe the complete energy pathway.
++
++Writing stays attached to its question while you open other panels or pause and resume practice. Edits take effect as you type; clearing a field clears that reflection. Your writing is not scored and does not change your first answers, practice results, or model estimates. Refreshing or starting a fresh local session clears the writing along with the lesson. Download study notes to keep a readable copy.
++
+ ### Keep your study notes
+ 
+ After the first session, choose **Download study notes (.txt)** to save a readable copy of the complete learning trace. The file includes the question order, actual first answers, corrections, explanations, transfer prompts, the first-session model estimates, and deck attribution. Any recorded practice answers appear separately; a paused round reports how many questions are still unanswered.
++
++The file also includes the latest question reflections and application response, explicitly labeled as the learner's writing rather than scored answers. Blank fields are marked as unwritten. Multiline writing is indented with `>` so it stays distinguishable from the original questions and explanations.
+ 
+ The download works offline in both the modular app and `demo.html`. It saves a UTF-8 text file through the browser's normal download flow. It does not upload the session or restore it after a refresh. Model estimates remain labeled as model state rather than grades, and practice never replaces the original answers.
+ 
+@@ -77,6 +85,14 @@
+ 
+ The [trace archive receiving packet](docs/receiving/trace-archive-49f845d0dece/README.md) records the exact source, native results, independent review, and actual saved-file examples.
+ 
++The reflection receiver also types into the actual fields, navigates practice, resets the session, and reads the files saved by the browser:
++
++```bash
++node tools/check_reflections_browser.mjs --browser /path/to/chromium --output /tmp/recallweave-reflection-check
++```
++
++Its output directory must be new. The receiving evidence and scope are recorded in [the reflection receipt](docs/reflections-20261008-9ec02b70e5f0/README.md).
++
+ ## Accessibility and constraints
+ 
+ Semantic landmarks, skip link, visible keyboard focus, labeled progress bar, live session region, labeled answer group, text feedback, and responsive small-screen layout are included. No external images or data requests are needed. The default font stack remains usable offline. The app is a local demo, not a production assessment.
+--- a/src/app.mjs
++++ b/src/app.mjs
+@@ -2,12 +2,14 @@
+ import { answerPractice, beginPractice, createReview, currentPracticeItem } from './review.mjs';
+ import { createStudyNotes } from './session-export.mjs';
+ import { mountTraceArchive } from './trace-archive-ui.mjs';
++import { APPLICATION_PROMPT, createReflections, itemReflection, updateReflection, updateApplicationReflection } from './reflections.mjs';
+ import { orderOptions } from './answer-order.mjs';
+ 
+ const root = document.querySelector('#session-content');
+ const dataResponse = await fetch('./data/deck.json');
+ if (!dataResponse.ok) throw new Error('The local demo deck could not be loaded.');
+ const deck = await dataResponse.json();
++let reflections = createReflections(deck.items);
+ const concepts = deck.concepts;
+ const optionOrders = new Map(deck.items.map(item => [item.id, orderOptions(item.options.length)]));
+ const mastery = initialMastery(concepts);
+@@ -73,9 +75,20 @@
+   inPractice = false;
+   review ??= createReview(deck.items, answers);
+   const correct = answers.filter(answer => answer.correct).length;
+-  root.innerHTML = `<article class="result-card"><div class="result-mark" aria-hidden="true">⌁</div><div class="card-kicker">YOUR LEARNING TRACE</div><h2 tabindex="-1">Notice the links you built.</h2><p id="first-try-summary">You made ${correct} of ${answers.length} connections on the first try. That count is a snapshot—not a measure of your ability. Review the concept estimates and choose one connection to explain in your own words.</p>${renderMastery()}${renderPracticeSummary()}<section class="review-list" aria-labelledby="review-title"><h3 id="review-title">Review the connections</h3><p>Open a question to see your first answer, the explanation, and an idea to apply.</p>${review.map(renderReviewItem).join('')}</section><div class="reflection"><strong>Apply it:</strong> Trace energy from sunlight to a cell doing work. Where does the form of energy change, and what molecule transfers it to cellular processes?</div><p class="source-note"><strong>Demo deck attribution:</strong> Original question wording adapted from OpenStax, <cite>Biology 2e</cite>, Chapters 7–8, Rice University, CC BY 4.0. ${deck.attribution}</p><button class="reset-button" id="reset-button">Start a fresh local session</button></article>`;
++  root.innerHTML = `<article class="result-card"><div class="result-mark" aria-hidden="true">⌁</div><div class="card-kicker">YOUR LEARNING TRACE</div><h2 tabindex="-1">Notice the links you built.</h2><p id="first-try-summary">You made ${correct} of ${answers.length} connections on the first try. That count is a snapshot—not a measure of your ability. Review the concept estimates and choose one connection to explain in your own words.</p>${renderMastery()}${renderPracticeSummary()}<section class="review-list" aria-labelledby="review-title"><h3 id="review-title">Review the connections</h3><p>Open a question to see your first answer and explanation, then write how you would apply the idea.</p>${review.map(renderReviewItem).join('')}</section><section class="reflection reflection-field" aria-labelledby="application-label"><label id="application-label" for="application-reflection">Apply it in your own words</label><p id="application-prompt">${escapeHtml(APPLICATION_PROMPT)}</p><textarea id="application-reflection" rows="4" aria-describedby="application-prompt application-hint"></textarea><p id="application-hint" class="reflection-hint">Your writing is not scored. It stays in this tab and is included when you download study notes.</p></section><p class="source-note"><strong>Demo deck attribution:</strong> Original question wording adapted from OpenStax, <cite>Biology 2e</cite>, Chapters 7–8, Rice University, CC BY 4.0. ${deck.attribution}</p><button class="reset-button" id="reset-button">Start a fresh local session</button></article>`;
++  root.querySelectorAll('[data-reflection-item]').forEach(field => {
++    field.value = itemReflection(reflections, field.dataset.reflectionItem);
++    field.addEventListener('input', () => {
++      reflections = updateReflection(reflections, field.dataset.reflectionItem, field.value);
++    });
++  });
++  const application = root.querySelector('#application-reflection');
++  application.value = reflections.application;
++  application.addEventListener('input', () => {
++    reflections = updateApplicationReflection(reflections, application.value);
++  });
+   const resetButton = root.querySelector('#reset-button');
+-  resetButton.insertAdjacentHTML('beforebegin', '<section class="practice-summary" aria-labelledby="save-notes-title"><h3 id="save-notes-title">Keep these connections</h3><p>Save your questions, first answers, explanations, and any practice answers as a text file.</p><button class="reset-button" id="save-notes-button" aria-describedby="save-notes-status">Download study notes (.txt)</button><p id="save-notes-status" role="status">Your session stays in this tab until you refresh. Download notes to keep a copy.</p></section>');
++  resetButton.insertAdjacentHTML('beforebegin', '<section class="practice-summary" aria-labelledby="save-notes-title"><h3 id="save-notes-title">Keep these connections</h3><p>Save your questions, first answers, explanations, reflections, and any practice answers as a text file.</p><button class="reset-button" id="save-notes-button" aria-describedby="save-notes-status">Download study notes (.txt)</button><p id="save-notes-status" role="status">Your session stays in this tab until you refresh. Download notes to keep a copy.</p></section>');
+   root.querySelector('#save-notes-button').addEventListener('click', downloadStudyNotes);
+   resetButton.addEventListener('click', () => location.reload());
+   root.querySelector('#practice-button')?.addEventListener('click', () => {
+@@ -91,7 +104,7 @@
+   const status = root.querySelector('#save-notes-status');
+   let url;
+   try {
+-    const notes = createStudyNotes({deck, review, mastery, practice, conceptLabel});
++    const notes = createStudyNotes({deck, review, mastery, practice, reflections, conceptLabel});
+     url = URL.createObjectURL(new Blob([notes.text], {type: notes.mediaType}));
+     const link = document.createElement('a');
+     link.href = url;
+@@ -115,7 +128,7 @@
+   const practiceAnswer = retry
+     ? `<div class="review-practice-answer"><strong>Practice answer · ${retry.correct ? 'correct on retry' : 'keep reviewing'}</strong><p>${escapeHtml(item.options[retry.choice])}</p></div>`
+     : '';
+-  return `<details class="review-item"><summary><span class="review-label">${String(index + 1).padStart(2, '0')} · ${escapeHtml(conceptLabel(item.concept))}</span><span class="review-status ${item.correct ? 'is-correct' : 'needs-review'}">${item.correct ? 'Correct' : 'Needs review'} · first try</span><span class="review-prompt">${escapeHtml(item.prompt)}</span></summary><div class="review-body"><dl class="review-answers"><div><dt>Your first answer</dt><dd>${escapeHtml(item.options[item.choice])}</dd></div><div><dt>Correct answer</dt><dd>${escapeHtml(item.options[item.answer])}</dd></div></dl><p>${escapeHtml(item.explanation)}</p><p class="review-transfer"><strong>Apply the idea:</strong> ${escapeHtml(item.transfer)}</p>${practiceAnswer}</div></details>`;
++  return `<details class="review-item"><summary><span class="review-label">${String(index + 1).padStart(2, '0')} · ${escapeHtml(conceptLabel(item.concept))}</span><span class="review-status ${item.correct ? 'is-correct' : 'needs-review'}">${item.correct ? 'Correct' : 'Needs review'} · first try</span><span class="review-prompt">${escapeHtml(item.prompt)}</span></summary><div class="review-body"><dl class="review-answers"><div><dt>Your first answer</dt><dd>${escapeHtml(item.options[item.choice])}</dd></div><div><dt>Correct answer</dt><dd>${escapeHtml(item.options[item.answer])}</dd></div></dl><p>${escapeHtml(item.explanation)}</p><p class="review-transfer"><strong>Apply the idea:</strong> ${escapeHtml(item.transfer)}</p><div class="reflection-field"><label for="reflection-${index}">Your explanation</label><p id="reflection-hint-${index}" class="reflection-hint">Connect the idea in your own words. These notes are not scored.</p><textarea id="reflection-${index}" rows="3" data-reflection-item="${escapeHtml(item.id)}" aria-describedby="reflection-hint-${index}"></textarea></div>${practiceAnswer}</div></details>`;
+ }
+ 
+ function renderPracticeSummary() {
+--- a/src/session-export.mjs
++++ b/src/session-export.mjs
+@@ -1,5 +1,7 @@
++import { APPLICATION_PROMPT, reflectionSnapshot } from './reflections.mjs';
++
+ /** Build local, readable study notes from a completed first session and separate practice. */
+-export function createStudyNotes({ deck, review, mastery, practice = null, exportedAt = new Date(), conceptLabel = id => id }) {
++export function createStudyNotes({ deck, review, mastery, practice = null, reflections = null, exportedAt = new Date(), conceptLabel = id => id }) {
+   if (!Array.isArray(review) || review.length !== deck.items.length || review.length === 0) {
+     throw new RangeError('Finish the learning session before saving study notes.');
+   }
+@@ -25,6 +27,8 @@
+   });
+   const savedAt = new Date(exportedAt);
+   if (!Number.isFinite(savedAt.getTime())) throw new RangeError('Study notes need a valid save time.');
++  const notebook = reflections === null ? null : reflectionSnapshot(reflections, deck.items);
++  const reflectionById = new Map(notebook?.notes.map(note => [note.item, note.text]));
+   const lines = [
+     'RecallWeave — study notes',
+     deck.title,
+@@ -66,10 +70,20 @@
+       `Explanation: ${item.explanation}`,
+       `Apply the idea: ${item.transfer}`
+     );
++    if (notebook) {
++      const text = reflectionById.get(item.id);
++      lines.push('Your explanation — reflection, not scored:');
++      lines.push(...(text ? text.split('\n').map(line => `  > ${line}`) : ['  Not written.']));
++    }
+     if (retry) {
+       lines.push(`Practice answer: ${item.options[retry.choice]}`, `Practice result: ${retry.choice === item.answer ? 'correct on retry' : 'keep reviewing'}`);
+     } else if (item.choice !== item.answer) lines.push('Practice answer: not recorded.');
+   });
++  if (notebook) {
++    lines.push('', 'YOUR APPLICATION REFLECTION — NOT SCORED');
++    lines.push(`Prompt: ${APPLICATION_PROMPT}`);
++    lines.push(...(notebook.application ? notebook.application.split('\n').map(line => `  > ${line}`) : ['Not written.']));
++  }
+   lines.push('', 'DECK ATTRIBUTION', deck.attribution, deck.license, '', 'Saved from this browser session. The download does not upload the session or restore it after a refresh.');
+   return Object.freeze({
+     filename: `recallweave-study-notes-${savedAt.toISOString().slice(0, 10)}.txt`,
+--- a/styles.css
++++ b/styles.css
+@@ -25,6 +25,12 @@
+ .review-practice-answer{margin-top:12px;border-left:2px solid var(--orange)}
+ .review-practice-answer strong{font-size:11px;color:#6d482f}
+ .review-practice-answer p{margin:5px 0 0}
++.reflection-field{margin-top:18px}
++.reflection-field label{display:block;font-size:12px;font-weight:600;color:var(--green)}
++.reflection-field p{margin:7px 0;font-size:11px;line-height:1.65}
++.reflection-field textarea{display:block;width:100%;min-height:90px;padding:10px 12px;border:1px solid #9fb1a4;border-radius:4px;background:#fff;color:var(--ink);font:inherit;font-size:12px;line-height:1.6;resize:vertical}
++.reflection-field textarea:focus-visible{outline:3px solid var(--orange);outline-offset:3px}
++.reflection-field .reflection-hint{color:var(--muted)}
+ .result-card h2:focus{outline:2px solid var(--orange);outline-offset:5px}
+ @media(max-width:800px){.layout{grid-template-columns:1fr;gap:35px;padding-top:42px}.intro{padding-top:0}.intro h1{font-size:57px;margin-top:20px}.concept-map{margin-top:35px}.workbench{min-height:0}.topbar{height:64px}.local-badge{font-size:8px}}@media(max-width:480px){.topbar{padding:0 18px}.layout{padding:32px 18px 52px;gap:26px}.intro h1{font-size:49px}.intro>p{font-size:13px}.concept-map{max-width:100%}.map-node{font-size:9px}.map-line{margin-left:7px;margin-right:7px}.workbench{padding:22px 18px 16px}.welcome-card{padding:30px 2px 18px}.welcome-card h2{font-size:30px}.question-card{padding:24px 0 14px}.question-card h2{font-size:26px}.mastery-row{grid-template-columns:78px 1fr 35px}footer{padding:18px;flex-direction:column}footer span:last-child{text-align:left}}
+ 
+--- a/tools/make_demo.py
++++ b/tools/make_demo.py
+@@ -8,6 +8,7 @@
+ css = (ROOT / "styles.css").read_text()
+ core = (ROOT / "src/knowledge.mjs").read_text()
+ review = (ROOT / "src/review.mjs").read_text()
++reflections = (ROOT / "src/reflections.mjs").read_text()
+ session_export = (ROOT / "src/session-export.mjs").read_text()
+ trace_archive = (ROOT / "src/trace-archive.mjs").read_text()
+ trace_archive_ui = (ROOT / "src/trace-archive-ui.mjs").read_text()
+@@ -20,6 +21,8 @@
+ html = html.replace("</head>", f"<style>\n{css}\n</style>\n</head>")
+ core = re.sub(r"^export (const|function) ", r"\1 ", core, flags=re.M)
+ review = re.sub(r"^export (const|function) ", r"\1 ", review, flags=re.M)
++reflections = re.sub(r"^export (const|function) ", r"\1 ", reflections, flags=re.M)
++session_export = session_export.replace("import { APPLICATION_PROMPT, reflectionSnapshot } from './reflections.mjs';\n", "")
+ session_export = re.sub(r"^export (const|function) ", r"\1 ", session_export, flags=re.M)
+ answer_order = re.sub(r"^export (const|function) ", r"\1 ", answer_order, flags=re.M)
+ app = app.replace("import { orderOptions } from './answer-order.mjs';\n", "")
+@@ -29,8 +32,9 @@
+ trace_archive_ui = re.sub(r"^export (const|function) ", r"\1 ", trace_archive_ui, flags=re.M)
+ app = app.replace("import { mountTraceArchive } from './trace-archive-ui.mjs';\n", "")
+ app = app.replace("import { createStudyNotes } from './session-export.mjs';\n", "")
++app = app.replace("import { APPLICATION_PROMPT, createReflections, itemReflection, updateReflection, updateApplicationReflection } from './reflections.mjs';\n", "")
+ app = app.replace("import { answerPractice, beginPractice, createReview, currentPracticeItem } from './review.mjs';\n", "")
+ app = app.replace("import { DEFAULT_BKT, initialMastery, runLearnerSimulation, selectNextItem, updateMastery } from './knowledge.mjs';\n\nconst root = document.querySelector('#session-content');\nconst dataResponse = await fetch('./data/deck.json');\nif (!dataResponse.ok) throw new Error('The local demo deck could not be loaded.');\nconst deck = await dataResponse.json();", "const root = document.querySelector('#session-content');\nconst deck = JSON.parse(document.querySelector('#deck-json').textContent);")
+-html = html.replace("</body>", f'<script id="deck-json" type="application/json">{deck}</script>\n<script>\n{core}\n{review}\n{session_export}\n{answer_order}\n{trace_archive}\n{trace_archive_ui}\n{app}\n</script>\n</body>')
++html = html.replace("</body>", f'<script id="deck-json" type="application/json">{deck}</script>\n<script>\n{core}\n{review}\n{reflections}\n{session_export}\n{answer_order}\n{trace_archive}\n{trace_archive_ui}\n{app}\n</script>\n</body>')
+ (ROOT / "demo.html").write_text(html)
+ print(f"Built {ROOT / 'demo.html'} ({len(html)} bytes)")

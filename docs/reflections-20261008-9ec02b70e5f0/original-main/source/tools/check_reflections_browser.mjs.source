@@ -1,0 +1,387 @@
+#!/usr/bin/env node
+/** Reflection receiving through the real app and downloads. Transport reused from check_notes_browser.mjs. */
+import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
+import { spawn } from 'node:child_process';
+import { createServer } from 'node:http';
+import { readFile, writeFile, rename, mkdir, mkdtemp, rm } from 'node:fs/promises';
+import { dirname, extname, join, resolve } from 'node:path';
+import { fileURLToPath, pathToFileURL } from 'node:url';
+
+const args = process.argv.slice(2);
+const option = (name, fallback) => args.includes(name) ? args[args.indexOf(name) + 1] : fallback;
+const project = resolve(option('--root', join(dirname(fileURLToPath(import.meta.url)), '..')));
+const executable = option('--browser', 'chromium');
+const output = resolve(option('--output', join(project, 'browser-check')));
+await mkdir(output, {recursive: false});
+const downloadPath = join(output, 'downloads');
+await mkdir(downloadPath, {recursive: true});
+const downloads = new Map();
+const profile = await mkdtemp(join(output, 'profile-'));
+const report = {status: 'running', project, executable, checks: [], screenshots: [], downloads: [], sourceSha256: {}};
+const sourcePaths = ['src/app.mjs', 'src/knowledge.mjs', 'src/review.mjs', 'src/reflections.mjs', 'src/session-export.mjs', 'data/deck.json', 'demo.html', 'index.html', 'styles.css', 'tools/make_demo.py'];
+for (const path of sourcePaths) {
+  try { report.sourceSha256[path] = createHash('sha256').update(await readFile(join(project, path))).digest('hex'); }
+  catch (error) { if (error.code !== 'ENOENT') throw error; }
+}
+const deck = JSON.parse(await readFile(join(project, 'data/deck.json'), 'utf8'));
+const {initialMastery, updateMastery} = await import(pathToFileURL(join(project, 'src/knowledge.mjs')));
+const server = createServer(async (request, response) => {
+  try {
+    const pathname = decodeURIComponent(new URL(request.url, 'http://localhost').pathname);
+    const file = resolve(project, `.${pathname === '/' ? '/index.html' : pathname}`);
+    if (!file.startsWith(`${project}/`)) { response.writeHead(403).end(); return; }
+    const body = await readFile(file);
+    const mime = {'.html': 'text/html', '.mjs': 'text/javascript', '.css': 'text/css', '.json': 'application/json'}[extname(file)];
+    response.writeHead(200, {'Content-Type': `${mime ?? 'application/octet-stream'}; charset=utf-8`});
+    response.end(body);
+  } catch { response.writeHead(404).end(); }
+});
+await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
+const base = `http://127.0.0.1:${server.address().port}`;
+let browser;
+let socket;
+let sessionId;
+let browserLog = '';
+const pageErrors = [];
+let pageRequests = [];
+const pending = new Map();
+let sequence = 0;
+
+const sleep = milliseconds => new Promise(resolve => setTimeout(resolve, milliseconds));
+async function waitFor(check, label) {
+  let lastError;
+  for (let step = 0; step < 160; step++) {
+    try { if (await check()) return; } catch (error) { lastError = error; }
+    await sleep(100);
+  }
+  throw new Error(`Timed out: ${label}${lastError ? ` (${lastError.message})` : ''}`);
+}
+function command(method, params = {}, scoped = true) {
+  const id = ++sequence;
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => { pending.delete(id); reject(new Error(`CDP timeout: ${method}`)); }, 10000);
+    pending.set(id, {resolve, reject, timer});
+    socket.send(JSON.stringify({id, method, params, ...(scoped && sessionId ? {sessionId} : {})}));
+  });
+}
+async function evaluate(expression) {
+  const result = await command('Runtime.evaluate', {expression, returnByValue: true, awaitPromise: true});
+  if (result.exceptionDetails) throw new Error(result.exceptionDetails.exception?.description ?? result.exceptionDetails.text);
+  return result.result.value;
+}
+async function key(name, shift = false) {
+  const code = name === 'Tab' ? 9 : 13;
+  for (const type of ['keyDown', 'keyUp']) {
+    await command('Input.dispatchKeyEvent', {
+      type, key: name, code: name, windowsVirtualKeyCode: code, nativeVirtualKeyCode: code,
+      modifiers: shift ? 8 : 0,
+      ...(name === 'Enter' && type === 'keyDown' ? {text: '\r', unmodifiedText: '\r'} : {})
+    });
+  }
+}
+async function activate(selector) {
+  assert.ok(await evaluate(`!!document.querySelector(${JSON.stringify(selector)})`), `Missing control ${selector}`);
+  await evaluate(`document.querySelector(${JSON.stringify(selector)}).focus()`);
+  await key('Enter');
+}
+async function navigate(url, width = 1280, height = 1000) {
+  await command('Emulation.setDeviceMetricsOverride', {width, height, deviceScaleFactor: 1, mobile: false});
+  pageRequests = [];
+  await command('Page.navigate', {url});
+  await waitFor(() => evaluate(`document.URL === ${JSON.stringify(url)} && document.readyState === 'complete' && !!document.querySelector('#start-button')`), 'lesson welcome');
+}
+async function snapshot() {
+  return evaluate(`({
+    score: document.querySelector('.result-card > p')?.textContent,
+    estimates: [...document.querySelectorAll('.mastery-box output')].map(node => node.textContent),
+    reviewCount: document.querySelectorAll('.review-item').length,
+    progress: document.querySelector('[role="progressbar"]').getAttribute('aria-valuenow'),
+    focus: document.activeElement.tagName,
+    overflow: document.documentElement.scrollWidth > innerWidth
+  })`);
+}
+async function lesson(mode) {
+  await activate('#start-button');
+  await waitFor(() => evaluate(`!!document.querySelector('.question-card h2')`), 'first question after keyboard start');
+  const firstAnswers = [];
+  const estimates = initialMastery(deck.concepts);
+  for (let index = 0; index < deck.items.length; index++) {
+    const prompt = await evaluate(`document.querySelector('.question-card h2').textContent`);
+    const item = deck.items.find(item => item.prompt === prompt);
+    assert.ok(item, 'Question must come from the existing deck');
+    assert.ok(await evaluate(`document.activeElement.matches('[data-choice]')`), 'An answer receives keyboard focus');
+    const correct = mode === 'correct' || (mode === 'mixed' && index % 2 === 1);
+    const choice = correct ? item.answer : (item.answer + 1 + index % (item.options.length - 1)) % item.options.length;
+    await activate(`[data-choice="${choice}"]`);
+    assert.equal(await evaluate('document.activeElement.id'), 'next-button');
+    estimates[item.concept] = updateMastery(estimates[item.concept], correct);
+    firstAnswers.push({item, choice, correct});
+    await key('Enter');
+  }
+  const state = await snapshot();
+  assert.deepEqual(state.estimates, deck.concepts.map(concept => `${Math.round(estimates[concept] * 100)}%`));
+  assert.equal(state.progress, String(deck.items.length));
+  return {firstAnswers, state};
+}
+async function screenshot(name, selector) {
+  if (selector) await evaluate(`document.querySelector(${JSON.stringify(selector)}).scrollIntoView({block:'start'})`);
+  const {data} = await command('Page.captureScreenshot', {format: 'png', captureBeyondViewport: false});
+  await writeFile(join(output, name), Buffer.from(data, 'base64'));
+  report.screenshots.push(name);
+}
+async function savedNotes(name, firstAnswers, expectedPractice, expectedNotes, application) {
+  const stateBefore = await snapshot();
+  const requestedBefore = [...pageRequests];
+  const previous = new Set(downloads.keys());
+  await activate('#save-notes-button');
+  let download;
+  await waitFor(() => {
+    download = [...downloads.values()].find(value => !previous.has(value.guid) && value.state === 'completed');
+    return !!download;
+  }, `saved study notes: ${name}`);
+  assert.match(download.suggestedFilename, /^recallweave-study-notes-\d{4}-\d{2}-\d{2}\.txt$/);
+  const bytes = await readFile(join(downloadPath, download.guid));
+  const content = new TextDecoder('utf-8', {fatal: true}).decode(bytes);
+  assert.match(content, /MODEL STATE, NOT A GRADE/);
+  assert.match(content, expectedPractice);
+  assert.ok(content.includes(deck.attribution));
+  assert.ok(content.includes(deck.license));
+  let previousQuestion = -1;
+  for (const {item, choice} of firstAnswers) {
+    const start = content.indexOf(item.prompt);
+    assert.ok(start > previousQuestion);
+    previousQuestion = start;
+    const ordinal = firstAnswers.findIndex(answer => answer.item.id === item.id);
+    const end = ordinal + 1 < firstAnswers.length ? content.indexOf(`${ordinal + 2}. ${firstAnswers[ordinal + 1].item.prompt}`) : content.indexOf('YOUR APPLICATION REFLECTION');
+    const block = content.slice(start, end < 0 ? undefined : end);
+    assert.ok(block.includes(`Your first answer: ${item.options[choice]}`));
+    assert.ok(block.includes(`Correct answer: ${item.options[item.answer]}`));
+    assert.ok(block.includes(`Explanation: ${item.explanation}`));
+    assert.ok(block.includes(`Apply the idea: ${item.transfer}`));
+    const text = expectedNotes[item.id] ?? '';
+    assert.ok(block.includes(`Your explanation — reflection, not scored:\n${text ? text.split('\n').map(line => `  > ${line}`).join('\n') : '  Not written.'}`), `Saved reflection belongs to ${item.id}`);
+  }
+  assert.ok(content.includes('YOUR APPLICATION REFLECTION — NOT SCORED'));
+  assert.ok(content.includes(application ? application.split('\n').map(line => `  > ${line}`).join('\n') : 'Not written.'));
+  const after = await snapshot();
+  assert.equal(after.score, stateBefore.score);
+  assert.deepEqual(after.estimates, stateBefore.estimates);
+  assert.equal(await evaluate('document.activeElement.id'), 'save-notes-button');
+  assert.equal(await evaluate('document.documentElement.scrollWidth > innerWidth'), false);
+  assert.match(await evaluate(`document.querySelector('#save-notes-status').textContent`), /Download requested/);
+  assert.deepEqual(pageRequests, requestedBefore, 'Saving notes must not create a network request');
+  await rename(join(downloadPath, download.guid), join(output, name));
+  report.downloads.push({name, suggestedFilename: download.suggestedFilename, bytes: bytes.length, sha256: createHash('sha256').update(bytes).digest('hex')});
+  passed(`actual saved notes retain reflections and original trace: ${name}`);
+  return content;
+}
+
+async function readWriting() {
+  return evaluate(`({notes: Object.fromEntries([...document.querySelectorAll('[data-reflection-item]')].map(field => [field.dataset.reflectionItem, field.value])), application: document.querySelector('#application-reflection')?.value})`);
+}
+
+async function openReflection(itemId) {
+  const selector = `[data-reflection-item="${itemId}"]`;
+  assert.ok(await evaluate(`!!document.querySelector(${JSON.stringify(selector)})`), `Missing reflection for ${itemId}`);
+  if (!await evaluate(`document.querySelector(${JSON.stringify(selector)}).closest('details').open`)) {
+    await evaluate(`document.querySelector(${JSON.stringify(selector)}).closest('details').querySelector('summary').focus()`);
+    await key('Enter');
+  }
+  return selector;
+}
+
+async function writeText(selector, value) {
+  await evaluate(`document.querySelector(${JSON.stringify(selector)}).focus()`);
+  for (const type of ['keyDown', 'keyUp']) {
+    await command('Input.dispatchKeyEvent', {type, key: 'a', code: 'KeyA', windowsVirtualKeyCode: 65, nativeVirtualKeyCode: 65, modifiers: 2});
+  }
+  for (const type of ['keyDown', 'keyUp']) {
+    await command('Input.dispatchKeyEvent', {type, key: 'Backspace', code: 'Backspace', windowsVirtualKeyCode: 8, nativeVirtualKeyCode: 8});
+  }
+  if (value) await command('Input.insertText', {text: value});
+  assert.equal(await evaluate(`document.querySelector(${JSON.stringify(selector)}).value`), value);
+  assert.equal(await evaluate(`document.activeElement === document.querySelector(${JSON.stringify(selector)})`), true, 'Writing retains focus');
+}
+
+async function firstAnswerReadout() {
+  return evaluate(`({summary: document.querySelector('#first-try-summary').textContent, estimates: [...document.querySelectorAll('.mastery-box output')].map(node => node.outerHTML), firstAnswers: [...document.querySelectorAll('.review-item .review-answers')].map(node => node.textContent)})`);
+}
+const passed = name => { report.checks.push(name); console.log(`PASS ${name}`); };
+
+try {
+  browser = spawn(executable, [
+    '--headless=new', '--no-sandbox', '--disable-gpu', '--disable-background-networking',
+    '--disable-component-update', '--disable-sync', '--no-first-run', '--no-default-browser-check',
+    '--remote-debugging-address=127.0.0.1', '--remote-debugging-port=0', `--user-data-dir=${profile}`, 'about:blank'
+  ], {stdio: ['ignore', 'ignore', 'pipe']});
+  browser.stderr.on('data', data => { browserLog = (browserLog + data.toString()).slice(-6000); });
+  let launchError;
+  browser.on('error', error => { launchError = error; });
+  let port;
+  let endpoint;
+  await waitFor(async () => {
+    if (launchError) throw launchError;
+    if (browser.exitCode !== null) throw new Error(`Browser exited ${browser.exitCode}: ${browserLog}`);
+    [port, endpoint] = (await readFile(join(profile, 'DevToolsActivePort'), 'utf8')).trim().split('\n');
+    return Boolean(port && endpoint);
+  }, 'browser startup');
+  socket = new WebSocket(`ws://127.0.0.1:${port}${endpoint}`);
+  socket.addEventListener('message', event => {
+    const message = JSON.parse(event.data);
+    if (message.id) {
+      const request = pending.get(message.id);
+      if (!request) return;
+      pending.delete(message.id);
+      clearTimeout(request.timer);
+      if (message.error) request.reject(new Error(message.error.message));
+      else request.resolve(message.result);
+    } else if (message.method === 'Browser.downloadWillBegin' || message.method === 'Browser.downloadProgress') {
+      const value = message.params;
+      downloads.set(value.guid, {...downloads.get(value.guid), ...value});
+    } else if (message.method === 'Runtime.exceptionThrown') {
+      pageErrors.push(message.params.exceptionDetails.exception?.description ?? message.params.exceptionDetails.text);
+    } else if (message.method === 'Network.requestWillBeSent') {
+      pageRequests.push(message.params.request.url);
+    }
+  });
+  await new Promise((resolve, reject) => { socket.addEventListener('open', resolve, {once: true}); socket.addEventListener('error', reject, {once: true}); });
+  report.browser = await command('Browser.getVersion', {}, false);
+  await command('Browser.setDownloadBehavior', {behavior: 'allowAndName', downloadPath, eventsEnabled: true}, false);
+  const {targetId} = await command('Target.createTarget', {url: 'about:blank'}, false);
+  ({sessionId} = await command('Target.attachToTarget', {targetId, flatten: true}, false));
+  await command('Page.enable');
+  await command('Runtime.enable');
+  await command('Network.enable');
+
+  await navigate(`${base}/index.html`);
+  const {firstAnswers, state: original} = await lesson('mixed');
+  const firstReadout = await firstAnswerReadout();
+  report.firstTry = {original, firstReadout, ids: firstAnswers.map(answer => answer.item.id)};
+  assert.equal(original.reviewCount, deck.items.length);
+  passed('native mixed lesson reaches the complete original review with expected model estimates');
+
+  assert.equal(await evaluate(`document.querySelectorAll('[data-reflection-item]').length`), deck.items.length, 'Each reviewed question needs its own editable reflection');
+  assert.equal(await evaluate(`document.querySelectorAll('#application-reflection').length`), 1, 'Apply-it needs an editable response');
+  const expectedNotes = Object.fromEntries(deck.items.map(item => [item.id, `My connection ${item.id}: glucose → ATP\nLiteral <strong>writing</strong> 🪴`]));
+  expectedNotes[firstAnswers[0].item.id] += '\n</textarea><img id="unexpected-note-markup" src="https://example.invalid/" onerror="window.unexpectedReflection=true">';
+  for (const {item} of firstAnswers) {
+    const selector = await openReflection(item.id);
+    await evaluate(`document.querySelector(${JSON.stringify(selector)}).closest('details').querySelector('summary').focus()`);
+    await key('Tab');
+    assert.equal(await evaluate('document.activeElement.dataset.reflectionItem'), item.id, 'Tab enters the opened reflection');
+    await writeText(selector, expectedNotes[item.id]);
+  }
+  let application = 'My pathway: sunlight → stored sugar → cellular work.\nDECK ATTRIBUTION is literal learner writing here.';
+  await writeText('#application-reflection', application);
+  assert.deepEqual(await readWriting(), {notes: expectedNotes, application});
+  assert.deepEqual(await firstAnswerReadout(), firstReadout);
+  passed('all six canonical questions and Apply-it accept multiline Unicode writing without changing first answers or estimates');
+  await savedNotes('modular-initial-reflections.txt', firstAnswers, /Not started\. 3 missed connections/, expectedNotes, application);
+
+  const missed = firstAnswers.filter(answer => !answer.correct);
+  await activate('#practice-button');
+  assert.equal(await evaluate(`document.querySelector('.practice-card h2').textContent`), missed[0].item.prompt);
+  await activate(`[data-practice-choice="${missed[0].item.answer}"]`);
+  await activate('#back-to-review');
+  assert.match(await evaluate(`document.querySelector('#practice-status').textContent`), /1 of 3 answered/);
+  assert.deepEqual(await readWriting(), {notes: expectedNotes, application});
+  await activate('#practice-button');
+  assert.equal(await evaluate(`document.querySelector('.practice-card h2').textContent`), missed[1].item.prompt);
+  await activate('#back-to-review');
+  assert.deepEqual(await readWriting(), {notes: expectedNotes, application});
+  assert.deepEqual(await firstAnswerReadout(), firstReadout);
+  assert.equal(await evaluate(`!!document.querySelector('#unexpected-note-markup') || !!window.unexpectedReflection`), false);
+  passed('practice after a retry and before another answer retains exact writing; literal markup stays text on rerender');
+
+  expectedNotes[firstAnswers[0].item.id] = '';
+  expectedNotes[firstAnswers[1].item.id] = 'Revised after practice.\nA question I still want to explore 🪴';
+  for (const {item} of firstAnswers.slice(0, 2)) await writeText(await openReflection(item.id), expectedNotes[item.id]);
+  application = 'Revised pathway — my final words.';
+  await writeText('#application-reflection', application);
+  await evaluate('window.savedCreateObjectURL = URL.createObjectURL; URL.createObjectURL = () => { throw new Error("Reflection receiving download failure"); }');
+  const downloadCount = downloads.size;
+  await activate('#save-notes-button');
+  assert.match(await evaluate(`document.querySelector('#save-notes-status').textContent`), /could not be prepared/);
+  assert.equal(downloads.size, downloadCount);
+  assert.deepEqual(await readWriting(), {notes: expectedNotes, application});
+  await evaluate('URL.createObjectURL = window.savedCreateObjectURL; delete window.savedCreateObjectURL');
+  const revisedFile = await savedNotes('modular-revised-paused-reflections.txt', firstAnswers, /Paused: 1 of 3 practice answers recorded; 1 correct on retry/, expectedNotes, application);
+  assert.ok(!revisedFile.includes('unexpected-note-markup'), 'Cleared writing is absent from the latest file');
+  assert.deepEqual(await firstAnswerReadout(), firstReadout);
+  passed('edit, clear and download preparation failure retain the latest notebook for retry');
+  await openReflection(firstAnswers[1].item.id);
+  await screenshot('reflection-desktop.png', `[data-reflection-item="${firstAnswers[1].item.id}"]`);
+
+  await activate('#reset-button');
+  await waitFor(() => evaluate(`!!document.querySelector('#start-button')`), 'fresh local session after actual reset');
+  await command('Emulation.setDeviceMetricsOverride', {width: 390, height: 844, deviceScaleFactor: 1, mobile: false});
+  const correct = await lesson('correct');
+  const emptyNotes = Object.fromEntries(deck.items.map(item => [item.id, '']));
+  assert.deepEqual(await readWriting(), {notes: emptyNotes, application: ''});
+  assert.equal(await evaluate(`!!document.querySelector('#practice-button')`), false);
+  assert.ok(await evaluate(`[...document.querySelectorAll('textarea')].every(field => field.labels.length === 1 && field.getAttribute('aria-describedby').split(' ').every(id => document.getElementById(id)))`));
+  assert.equal(await evaluate(`new Set([...document.querySelectorAll('[id]')].map(node => node.id)).size === document.querySelectorAll('[id]').length`), true);
+  const mobileId = correct.firstAnswers.at(-1).item.id;
+  emptyNotes[mobileId] = 'A new session’s reflection, even with every first answer correct.';
+  await writeText(await openReflection(mobileId), emptyNotes[mobileId]);
+  assert.equal(await evaluate('document.documentElement.scrollWidth > innerWidth'), false);
+  await screenshot('reflection-mobile.png', `[data-reflection-item="${mobileId}"]`);
+  await savedNotes('mobile-new-session-reflections.txt', correct.firstAnswers, /No missed connections/, emptyNotes, '');
+  passed('actual reset clears every field; all-correct review is writable and labeled without overflow at 390px');
+
+  await command('Network.setBlockedURLs', {urls: ['http://*', 'https://*']});
+  await navigate(pathToFileURL(join(project, 'demo.html')).href);
+  const direct = await lesson('mixed');
+  const directNotes = Object.fromEntries(deck.items.map(item => [item.id, '']));
+  assert.deepEqual(await readWriting(), {notes: directNotes, application: ''});
+  const directId = direct.firstAnswers[2].item.id;
+  directNotes[directId] = 'Written in the direct-open demo.\nNo connection required 🪴';
+  await writeText(await openReflection(directId), directNotes[directId]);
+  const directApplication = 'My offline application response.';
+  await writeText('#application-reflection', directApplication);
+  await activate('#practice-button');
+  await activate('#back-to-review');
+  assert.deepEqual(await readWriting(), {notes: directNotes, application: directApplication});
+  await savedNotes('standalone-reflections.txt', direct.firstAnswers, /Paused: 0 of 3 practice answers recorded/, directNotes, directApplication);
+  assert.ok(pageRequests.every(url => url.startsWith('file:')), 'Direct-open flow makes no hosted request');
+  assert.deepEqual(pageErrors, []);
+  passed('self-contained demo retains and downloads writing with HTTP(S) blocked and no page exception');
+  report.status = 'passed';
+} catch (error) {
+  report.status = 'failed';
+  report.error = error.stack ?? String(error);
+  report.browserLog = browserLog;
+  report.pageErrors = pageErrors;
+  if (sessionId) {
+    try {
+      report.lastPage = await evaluate(`({url: location.href, ready: document.readyState, focus: document.activeElement.outerHTML, text: document.body.innerText.slice(0, 6000)})`);
+      await screenshot('failed-state.png');
+    } catch { /* Preserve the original failure when the browser is unavailable. */ }
+  }
+  console.error(report.error);
+  process.exitCode = 1;
+} finally {
+  if (socket?.readyState === WebSocket.OPEN) {
+    try { await command('Browser.close', {}, false); } catch { /* Browser may already have exited. */ }
+  }
+  socket?.close();
+  for (const request of pending.values()) clearTimeout(request.timer);
+  if (browser && browser.exitCode === null) browser.kill('SIGTERM');
+  server.closeAllConnections();
+  await new Promise(resolve => server.close(resolve));
+  await sleep(300);
+  await rm(profile, {recursive: true, force: true});
+  report.sourceAfterSha256 = {};
+  for (const path of sourcePaths) {
+    try { report.sourceAfterSha256[path] = createHash('sha256').update(await readFile(join(project, path))).digest('hex'); }
+    catch (error) { if (error.code !== 'ENOENT') throw error; }
+  }
+  if (JSON.stringify(report.sourceAfterSha256) !== JSON.stringify(report.sourceSha256)) {
+    report.status = 'failed';
+    report.sourceChanged = true;
+    process.exitCode = 1;
+  }
+  await writeFile(join(output, 'browser-report.json'), `${JSON.stringify(report, null, 2)}\n`);
+  console.log(`${report.status.toUpperCase()}: ${report.checks.length} browser checkpoints; ${join(output, 'browser-report.json')}`);
+}

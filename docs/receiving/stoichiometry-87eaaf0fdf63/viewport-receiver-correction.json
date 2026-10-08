@@ -1,0 +1,17 @@
+{
+  "finding": "Visual reading of browser-final/stoichiometry-mobile.png contradicts the earlier green overflow assertion: the long product clips. The original receiver compared scrollWidth with innerWidth, which includes the scrollbar rather than the usable client width, and did not explicitly await settled frames after resize. Use clientWidth, await two frames and record product/card geometry. No chemistry change.",
+  "original_green": "browser-final/browser-report.json",
+  "original_screenshot": "browser-final/stoichiometry-mobile.png",
+  "before_tool_sha256": "f072447ce0fa72b11283c07ab2ac61d3a8421dc029e5d17ed9d30866fb387335",
+  "after_tool_sha256": "a05553288697fc0a7969a4e2f263eae0096066f7c2439443dc1476c15f4d9882",
+  "changes": [
+    {
+      "before": "overflow: document.documentElement.scrollWidth > innerWidth",
+      "after": "overflow: document.documentElement.scrollWidth > document.documentElement.clientWidth"
+    },
+    {
+      "before": "  assert.equal((await state()).overflow, false);\n  await screenshot('stoichiometry-mobile.png', '#result-section-title');",
+      "after": "  await waitFor(() => page(() => innerWidth === 390), '390px viewport');\n  await page(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));\n  report.mobileLayout = await page(() => ({viewport: innerWidth, client: document.documentElement.clientWidth, scroll: document.documentElement.scrollWidth, productRight: document.querySelector('#product-amount').getBoundingClientRect().right, cardRight: document.querySelector('#product-amount').closest('.card').getBoundingClientRect().right}));\n  assert.equal((await state()).overflow, false, JSON.stringify(report.mobileLayout));\n  assert.ok(report.mobileLayout.productRight <= report.mobileLayout.cardRight, 'The full product amount must remain inside its card.');\n  await screenshot('stoichiometry-mobile.png', '#result-section-title');"
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+--- initial/verify_reflections_receiving.mjs
++++ qualified/verify_reflections_receiving.mjs
+@@ -123,7 +123,9 @@
+     application:document.querySelector('#application-reflection').value})`);
+ }
+ async function lesson(page, correctness) {
++  await waitFor(() => evaluate(page, `!!document.querySelector('#start-button') && document.querySelector('#progress-fill')?.style.width === '0%'`), `${page.name} native initialization`);
+   await activate(page, '#start-button');
++  await waitFor(() => evaluate(page, `!!document.querySelector('.question-card h2')`), `${page.name} first question`);
+   const trace = [];
+   for (let n = 0; n < deck.items.length; n++) {
+     const prompt = await evaluate(page, `document.querySelector('.question-card h2').textContent`);
