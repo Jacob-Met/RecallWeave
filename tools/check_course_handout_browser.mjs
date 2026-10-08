@@ -157,6 +157,10 @@ async function screenshot(name, selector = null) {
   const {data} = await command('Page.captureScreenshot', {format: 'png', captureBeyondViewport: false});
   return saveArtifact(name, Buffer.from(data, 'base64'), {kind: 'actual Chrome screenshot'});
 }
+async function screenshotLastQuestion(name) {
+  await evaluate('[...document.querySelectorAll(".handout-question")].at(-1).scrollIntoView({block:"start"})');
+  return screenshot(name);
+}
 const passed = name => { report.checks.push(name); console.log('PASS ' + name); };
 
 async function downloaded(button, name) {
@@ -353,7 +357,7 @@ async function printArtifact(button, name, kind, deck) {
   await saveArtifact(name + '.pdf', bytes, {kind, pageCount, geometry,
     printObservation: await evaluate('window.__handoutReceiverPrint')});
   await checkPdfText(name, kind, deck);
-  await screenshot(name + '.png', '.handout-question:last-child');
+  await screenshotLastQuestion(name + '.png');
   await command('Emulation.setEmulatedMedia', {media: ''});
 }
 function checkExportText(text, deck, kind) {
@@ -580,7 +584,7 @@ try {
   checkPaper(await readPaper(), deck, 'worksheet');
   await noInjectionOrOverflow('390px direct-open teacher worksheet');
   await screenshot('standalone-controls-390.png', '#choose-handout-file');
-  await screenshot('standalone-worksheet-390.png', '.handout-question:last-child');
+  await screenshotLastQuestion('standalone-worksheet-390.png');
   await click('#preview-answer-key');
   checkPaper(await readPaper(), deck, 'answer-key');
   await noInjectionOrOverflow('390px direct-open teacher answer key');
