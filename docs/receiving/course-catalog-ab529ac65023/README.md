@@ -145,3 +145,27 @@ resetSession → renderQuestion callback remain. The current app47c43bbb and
 standalonefc782277 are preserved, along with the unchanged parser, picker and
 four original decks. Existing Node parity passed against that actual learner.
 Current-main README additions are retained around the exact catalog pointer.
+
+## Qualified catalog and current learner composition
+
+The repaired browser gate passed all11 groups and11 real downloads in run
+37796203029/job113376181882, against actual checkout
+`df380ab5f275869f3435bdf4f73980b2fa6d59e1`.
+The exact tree was699b4474ca4828fe6eb2f5e467e77ab550d64b00. All16 packet-file
+hashes and all original download bytes were independently checked by both
+receiver and root. Four actual screenshots were inspected. The separate-tab
+learner preview preserved the old session, explicit start reached a real course
+question, direct-file downloads worked with network offline at390px, and
+native URL cleanup matched6+1+4 allocations. Page, external-request and harness
+error collections were empty. Full passing evidence is under browser-passing/.
+
+The same checkout passed233/233 Node tests, with no skips or failures and
+existing standalone parity. The full log is hosted-node-ce979598.log.
+
+After that qualification, main e49aee89 merged unfinished-lesson save/resume.
+Its actual app changes first-question rendering and refreshes a new lesson
+archive control during imported-course start. Root read the complete exact
+delta, retained current source and both earlier qualified packets, and queued
+one final unchanged receiver run for this specific current-learner boundary.
+See current-learner-composition.json for exact identities and qualification
+limits. No catalog production, course content or browser oracle is changed.

@@ -79,6 +79,7 @@
 .trace-archive-actions{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
 .trace-archive-actions .primary-button{margin-top:0}
 #trace-preview{margin-top:18px;overflow-wrap:anywhere}
+.lesson-preview{margin-top:18px;overflow-wrap:anywhere}
 
 </style>
 </head>
@@ -121,6 +122,7 @@
           <div class="simulation-launch"><button id="simulation-button" class="text-button">Or inspect a scripted learner simulation ↗</button><p>Clearly synthetic; compares the adaptive selector with fixed deck order.</p><div id="simulation-output" aria-live="polite"></div></div>
         </div>
       </div>
+      <section id="lesson-archive" class="practice-summary trace-archive" aria-label="Save or resume an unfinished lesson"></section>
       <section id="trace-archive" class="practice-summary trace-archive" aria-label="Save or restore a learning trace"></section>
       <details class="model-note"><summary>How the adaptive model works</summary><p>Bayesian Knowledge Tracing estimates mastery per concept using explicit initial-knowledge, guess, slip, and learning-transition probabilities. After each response, the selector scores unasked items by expected information gain, weighted toward prerequisite concepts. The values are illustrative defaults, not a validated assessment.</p></details>
     </section>
@@ -1019,6 +1021,292 @@ function mountTraceArchive({container, getDeck, getTrace, restoreTrace}) {
   return Object.freeze({refresh});
 }
 
+const {LESSON_ARCHIVE_MAX_BYTES, createLessonArchive, readLessonArchive} = (() => {
+
+const LESSON_ARCHIVE_MAX_BYTES = 2 * 1024 * 1024;
+const LESSON_ARCHIVE_FORMAT = 'recallweave.unfinished-lesson';
+const LESSON_ARCHIVE_MODEL = Object.freeze({name: 'recallweave-bkt-v1', parameters: DEFAULT_BKT});
+
+function lessonRecord(value, keys) {
+  return value !== null && typeof value === 'object' && !Array.isArray(value)
+    && JSON.stringify(Object.keys(value).sort()) === JSON.stringify([...keys].sort());
+}
+
+// Compare the already admitted source, including content and array order, without
+// depending on JSON object key order. No archived content becomes a loaded deck.
+function lessonCanonical(value, depth = 0) {
+  if (depth > 16) throw new RangeError('This unfinished lesson has invalid course or model data.');
+  if (Array.isArray(value)) return '[' + value.map(entry => lessonCanonical(entry, depth + 1)).join(',') + ']';
+  if (value !== null && typeof value === 'object') {
+    const prototype = Object.getPrototypeOf(value);
+    if (prototype !== Object.prototype && prototype !== null) {
+      throw new RangeError('This unfinished lesson has invalid course or model data.');
+    }
+    return '{' + Object.keys(value).sort().map(key =>
+      JSON.stringify(key) + ':' + lessonCanonical(value[key], depth + 1)).join(',') + '}';
+  }
+  if (value === null || typeof value === 'string' || typeof value === 'boolean'
+      || (typeof value === 'number' && Number.isFinite(value))) return JSON.stringify(value);
+  throw new RangeError('This unfinished lesson has invalid course or model data.');
+}
+
+function lessonReplay(document, deck) {
+  if (!lessonRecord(document, ['format', 'version', 'savedAt', 'deck', 'model', 'firstAnswers', 'mastery', 'presentation'])
+      || document.format !== LESSON_ARCHIVE_FORMAT || document.version !== 1) {
+    throw new RangeError('This unfinished lesson format is not supported.');
+  }
+  if (typeof document.savedAt !== 'string' || document.savedAt.length !== 24
+      || !Number.isFinite(Date.parse(document.savedAt))
+      || new Date(document.savedAt).toISOString() !== document.savedAt) {
+    throw new RangeError('This unfinished lesson has an invalid save time.');
+  }
+  if (lessonCanonical(document.deck) !== lessonCanonical(deck)) {
+    throw new RangeError('This lesson belongs to a different course or course version. Load its course, then choose this file again.');
+  }
+  if (lessonCanonical(document.model) !== lessonCanonical(LESSON_ARCHIVE_MODEL)) {
+    throw new RangeError('This lesson uses a different learning model.');
+  }
+  if (!Array.isArray(document.firstAnswers)) {
+    throw new RangeError('This lesson has invalid first answers.');
+  }
+  if (document.firstAnswers.length >= deck.items.length) {
+    throw new RangeError('This lesson is complete. Use a completed learning trace to save or restore it.');
+  }
+
+  const asked = new Set();
+  const mastery = initialMastery(deck.concepts);
+  const answers = [];
+  for (const answer of document.firstAnswers) {
+    const item = selectNextItem(deck.items, asked, mastery);
+    if (!lessonRecord(answer, ['item', 'choice']) || !item || answer.item !== item.id
+        || !Number.isInteger(answer.choice) || answer.choice < 0 || answer.choice >= item.options.length) {
+      throw new RangeError('This lesson has invalid first answers or question order.');
+    }
+    const correct = answer.choice === item.answer;
+    asked.add(item.id);
+    mastery[item.concept] = updateMastery(mastery[item.concept], correct);
+    answers.push(Object.freeze({item: item.id, concept: item.concept, choice: answer.choice, correct}));
+  }
+  if (!lessonRecord(document.mastery, deck.concepts)
+      || deck.concepts.some(concept => !Number.isFinite(document.mastery[concept]) || document.mastery[concept] !== mastery[concept])) {
+    throw new RangeError('This lesson does not preserve the original model estimates.');
+  }
+
+  const nextItem = selectNextItem(deck.items, asked, mastery);
+  const presentation = document.presentation;
+  if (!lessonRecord(presentation, ['phase', 'itemId', 'optionOrders'])
+      || !['question', 'feedback'].includes(presentation.phase)
+      || presentation.itemId !== (presentation.phase === 'question' ? nextItem?.id : answers.at(-1)?.item)
+      || (presentation.phase === 'feedback' && answers.length === 0)
+      || !lessonRecord(presentation.optionOrders, deck.items.map(item => item.id))) {
+    throw new RangeError('This lesson has invalid question or feedback presentation.');
+  }
+  const optionOrders = Object.fromEntries(deck.items.map(item => {
+    const order = presentation.optionOrders[item.id];
+    if (!Array.isArray(order) || order.length !== item.options.length
+        || new Set(order).size !== order.length
+        || !order.every(index => Number.isInteger(index) && index >= 0 && index < item.options.length)) {
+      throw new RangeError('This lesson has invalid answer display order.');
+    }
+    return [item.id, Object.freeze([...order])];
+  }));
+
+  return Object.freeze({
+    savedAt: document.savedAt,
+    title: deck.title,
+    answers: Object.freeze(answers),
+    mastery: Object.freeze(mastery),
+    presentation: Object.freeze({
+      phase: presentation.phase, itemId: presentation.itemId,
+      optionOrders: Object.freeze(optionOrders)
+    }),
+    nextItemId: nextItem.id,
+    summary: Object.freeze({
+      answered: answers.length,
+      total: deck.items.length,
+      remaining: deck.items.length - answers.length,
+      correctFirst: answers.filter(answer => answer.correct).length
+    })
+  });
+}
+
+/** Validate bounded JSON against the loaded deck; return immutable state without applying it. */
+function readLessonArchive(text, deck) {
+  if (typeof text !== 'string' || text.length > LESSON_ARCHIVE_MAX_BYTES
+      || new TextEncoder().encode(text).byteLength > LESSON_ARCHIVE_MAX_BYTES) {
+    throw new RangeError('Choose an unfinished lesson file no larger than 2 MiB.');
+  }
+  let document;
+  try { document = JSON.parse(text); }
+  catch { throw new RangeError('This file is not valid unfinished lesson JSON.'); }
+  return lessonReplay(document, deck);
+}
+
+/** Save a started, unfinished first session, including current presentation and every option order. */
+function createLessonArchive({deck, answers, mastery, presentation, savedAt = new Date()}) {
+  if (!Array.isArray(answers) || answers.some(answer => answer === null || typeof answer !== 'object')) {
+    throw new RangeError('This lesson has invalid first answers.');
+  }
+  const when = new Date(savedAt);
+  if (!Number.isFinite(when.getTime())) throw new RangeError('An unfinished lesson needs a valid save time.');
+  const document = {
+    format: LESSON_ARCHIVE_FORMAT,
+    version: 1,
+    savedAt: when.toISOString(),
+    deck,
+    model: LESSON_ARCHIVE_MODEL,
+    firstAnswers: answers.map(answer => ({item: answer.item, choice: answer.choice})),
+    mastery,
+    presentation
+  };
+  // Validate the original state before JSON can discard non-JSON values or extra keys.
+  lessonReplay(document, deck);
+  const text = JSON.stringify(document, null, 2) + '\n';
+  readLessonArchive(text, deck);
+  return Object.freeze({
+    filename: 'recallweave-unfinished-lesson-' + when.toISOString().slice(0, 10) + '.json',
+    mediaType: 'application/json;charset=utf-8',
+    text
+  });
+}
+
+return {LESSON_ARCHIVE_MAX_BYTES, createLessonArchive, readLessonArchive};
+})();
+
+/** The caller owns lesson state; reading and previewing a file never change it. */
+function mountLessonArchive({container, getDeck, getLesson, resumeLesson, getSessionRevision = () => 0}) {
+  container.innerHTML = '<details id="lesson-archive-panel"><summary>Save or resume an unfinished lesson</summary>'
+    + '<p>Save your place, answers, and answer ordering in a file. To continue later, open the same course and choose that file.</p>'
+    + '<button type="button" class="reset-button" id="save-lesson-button" aria-describedby="save-lesson-status">Save lesson (.json)</button>'
+    + '<p id="save-lesson-status" role="status"></p>'
+    + '<label for="lesson-file">Choose a saved unfinished lesson (.json, up to 2 MiB)</label>'
+    + '<input type="file" id="lesson-file" accept=".json,application/json" aria-describedby="lesson-restore-status">'
+    + '<p id="lesson-restore-status" role="status">A preview appears before anything is resumed.</p>'
+    + '<section id="lesson-preview" class="lesson-preview" hidden aria-labelledby="lesson-preview-title">'
+    + '<h3 id="lesson-preview-title" tabindex="-1">Preview saved lesson</h3><p id="lesson-preview-summary"></p>'
+    + '<p>Resuming replaces the lesson answers and practice progress in this tab. Any reflections already in this tab stay as they are.</p>'
+    + '<div class="trace-archive-actions"><button type="button" class="primary-button" id="resume-lesson-confirm">Resume this lesson</button>'
+    + '<button type="button" class="reset-button" id="resume-lesson-cancel">Cancel</button></div></section></details>';
+  const query = selector => container.querySelector(selector);
+  const saveButton = query('#save-lesson-button');
+  const saveStatus = query('#save-lesson-status');
+  const input = query('#lesson-file');
+  const restoreStatus = query('#lesson-restore-status');
+  const preview = query('#lesson-preview');
+  let generation = 0, pending = null, readingStamp = null, previousSaveState;
+
+  // A fresh Start invalidates pending work even if its course and state are equal.
+  // This transient revision is never included in the saved lesson file.
+  const stamp = () => JSON.stringify({revision: getSessionRevision(), deck: getDeck(), lesson: getLesson()});
+  function clearPreview(message, resetInput = true) {
+    generation++;
+    pending = null;
+    readingStamp = null;
+    preview.hidden = true;
+    if (resetInput) input.value = '';
+    if (message) restoreStatus.textContent = message;
+  }
+  function changed() {
+    clearPreview('Your lesson changed. Choose the saved file again to preview it against the current lesson.');
+  }
+  function refresh() {
+    const lesson = getLesson();
+    const complete = lesson.answers.length >= getDeck().items.length;
+    const started = ['question', 'feedback'].includes(lesson.presentation?.phase);
+    const saveState = complete ? 'complete' : started ? 'started' : 'unstarted';
+    saveButton.disabled = saveState !== 'started';
+    if (saveState !== previousSaveState) {
+      saveStatus.textContent = complete
+        ? 'This lesson is complete. Use the learning trace below to save its answers and practice progress.'
+        : started ? 'Save a file to return to this question or feedback later. Your lesson stays open.'
+          : 'Start a lesson to save your place, even before answering its first question.';
+      previousSaveState = saveState;
+    }
+    const expected = pending?.stamp ?? readingStamp;
+    if (expected !== null && expected !== undefined && expected !== stamp()) changed();
+  }
+
+  saveButton.addEventListener('click', () => {
+    if (saveButton.disabled) return;
+    let url;
+    try {
+      const archive = createLessonArchive({deck: getDeck(), ...getLesson()});
+      url = URL.createObjectURL(new Blob([archive.text], {type: archive.mediaType}));
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = archive.filename;
+      document.body.append(link);
+      try { link.click(); } finally { link.remove(); }
+      saveStatus.textContent = 'Download requested. Check your browser’s downloads for the saved lesson. Your answers are still here.';
+    } catch {
+      saveStatus.textContent = 'The lesson file could not be prepared. Your answers are still here; try saving again.';
+    } finally {
+      if (url) setTimeout(() => URL.revokeObjectURL(url), 10000);
+    }
+  });
+
+  input.addEventListener('click', () => {
+    clearPreview('Choose a saved lesson to preview it. Your current lesson is unchanged.');
+  });
+  input.addEventListener('cancel', () => {
+    clearPreview('File selection canceled. Your current lesson is unchanged.');
+  });
+  input.addEventListener('change', async () => {
+    const file = input.files?.[0];
+    clearPreview(undefined, false);
+    if (!file) {
+      restoreStatus.textContent = 'No file selected. Your current lesson is unchanged.';
+      return;
+    }
+    const ticket = generation;
+    readingStamp = stamp();
+    const beforeRead = readingStamp;
+    restoreStatus.textContent = 'Reading the selected lesson…';
+    try {
+      if (file.size > LESSON_ARCHIVE_MAX_BYTES) throw new RangeError('Choose a saved lesson file no larger than 2 MiB.');
+      const text = await file.text();
+      if (ticket !== generation || !container.isConnected) return;
+      if (beforeRead !== stamp()) return changed();
+      const state = readLessonArchive(text, getDeck());
+      pending = {state, stamp: beforeRead};
+      readingStamp = null;
+      const {answered, total, remaining} = state.summary;
+      const position = state.presentation.phase === 'feedback'
+        ? 'Returns to the explanation for your last answer.'
+        : 'Returns to the next unanswered question.';
+      query('#lesson-preview-summary').textContent = state.title + ' — saved ' + state.savedAt
+        + '. ' + answered + ' of ' + total + ' questions answered; ' + remaining + ' remaining. ' + position;
+      preview.hidden = false;
+      restoreStatus.textContent = 'Preview ready. Your current lesson stays as it is until you resume.';
+      query('#lesson-preview-title').focus();
+    } catch (error) {
+      if (ticket !== generation || !container.isConnected) return;
+      if (beforeRead !== stamp()) return changed();
+      clearPreview((error instanceof RangeError ? error.message : 'This lesson file could not be read.')
+        + ' Your current lesson is unchanged.');
+    }
+  });
+  query('#resume-lesson-cancel').addEventListener('click', () => {
+    clearPreview('Resume canceled. Your current lesson is unchanged.');
+    input.focus();
+  });
+  query('#resume-lesson-confirm').addEventListener('click', () => {
+    if (!pending || !container.isConnected) return;
+    if (pending.stamp !== stamp()) {
+      changed();
+      input.focus();
+      return;
+    }
+    const state = pending.state;
+    clearPreview();
+    resumeLesson(state);
+    refresh();
+    restoreStatus.textContent = 'Lesson resumed. Continue from the saved question or feedback.';
+  });
+  refresh();
+  return Object.freeze({refresh});
+}
+
 
 const root = document.querySelector('#session-content');
 const bundledSource = JSON.parse(document.querySelector('#deck-json').textContent);
@@ -1034,6 +1322,10 @@ let review = null;
 let practice = null;
 let inPractice = false;
 let traceArchiveControls = null;
+let lessonArchiveControls = null;
+let lessonPhase = null;
+let lessonItemId = null;
+let lessonSessionRevision = 0;
 const progressFill = document.querySelector('#progress-fill');
 const progressTrack = document.querySelector('[role="progressbar"]');
 const stepLabel = document.querySelector('#step-label');
@@ -1068,6 +1360,7 @@ function renderDeckContext() {
 }
 
 function resetSession(nextDeck = deck) {
+  lessonSessionRevision++;
   deck = nextDeck;
   reflections = createReflections(deck.items);
   concepts = deck.concepts;
@@ -1079,6 +1372,8 @@ function resetSession(nextDeck = deck) {
   practice = null;
   inPractice = false;
   root.innerHTML = welcomeMarkup;
+  lessonPhase = null;
+  lessonItemId = null;
   root.querySelector('.simulation-launch').hidden = deck !== bundledDeck;
   bindWelcome();
   renderDeckContext();
@@ -1090,6 +1385,7 @@ function resetSession(nextDeck = deck) {
 
 function setProgress() {
   traceArchiveControls?.refresh();
+  lessonArchiveControls?.refresh();
   const count = inPractice ? practice.answers.length : answers.length;
   const total = inPractice ? practice.items.length : deck.items.length;
   stepCount.textContent = `${count} / ${total}`;
@@ -1112,18 +1408,29 @@ function conceptLabel(concept) {
 function renderQuestion() {
   const item = selectNextItem(deck.items, asked, mastery);
   if (!item) return renderResults();
+  renderLessonQuestion(item);
+}
+function renderLessonQuestion(item, restoredAnswer = null) {
   asked.add(item.id);
-  root.innerHTML = `<article class="question-card"><div class="question-type">CONNECTION ${String(answers.length + 1).padStart(2, '0')} · ${escapeHtml(conceptLabel(item.concept).toUpperCase())}</div><h2>${escapeHtml(item.prompt)}</h2><p class="prompt">Choose the best explanation, then connect it to the larger idea.</p><div class="choices" role="group" aria-label="Answer options">${optionOrders.get(item.id).map((choice, position) => `<button class="choice" data-choice="${choice}"><span class="choice-key">${String.fromCharCode(65+position)}</span>${escapeHtml(item.options[choice])}</button>`).join('')}</div><div id="feedback-slot"></div>${renderMastery()}</article>`;
+  lessonPhase = 'question';
+  lessonItemId = item.id;
+  root.innerHTML = `<article class="question-card"><div class="question-type">CONNECTION ${String(answers.length + (restoredAnswer ? 0 : 1)).padStart(2, '0')} · ${escapeHtml(conceptLabel(item.concept).toUpperCase())}</div><h2>${escapeHtml(item.prompt)}</h2><p class="prompt">Choose the best explanation, then connect it to the larger idea.</p><div class="choices" role="group" aria-label="Answer options">${optionOrders.get(item.id).map((choice, position) => `<button class="choice" data-choice="${choice}"><span class="choice-key">${String.fromCharCode(65+position)}</span>${escapeHtml(item.options[choice])}</button>`).join('')}</div><div id="feedback-slot"></div>${renderMastery()}</article>`;
   root.querySelectorAll('[data-choice]').forEach(button => button.addEventListener('click', () => submitAnswer(item, Number(button.dataset.choice))));
   const first = root.querySelector('[data-choice]');
   first?.focus({preventScroll:true});
   setProgress();
+  if (restoredAnswer) renderAnswerFeedback(item, restoredAnswer.choice, restoredAnswer.correct);
 }
 function submitAnswer(item, choice) {
   if (answers.some(answer => answer.item === item.id)) return;
   const correct = choice === item.answer;
   answers.push(Object.freeze({item: item.id, concept:item.concept, choice, correct}));
   mastery[item.concept] = updateMastery(mastery[item.concept] ?? DEFAULT_BKT.initial, correct);
+  renderAnswerFeedback(item, choice, correct);
+}
+function renderAnswerFeedback(item, choice, correct) {
+  lessonPhase = 'feedback';
+  lessonItemId = item.id;
   root.querySelectorAll('[data-choice]').forEach(button => {
     button.disabled = true;
     const selected = Number(button.dataset.choice);
@@ -1145,6 +1452,8 @@ function applicationPrompt() {
 }
 
 function renderResults() {
+  lessonPhase = null;
+  lessonItemId = null;
   inPractice = false;
   review ??= createReview(deck.items, answers);
   const correct = answers.filter(answer => answer.correct).length;
@@ -1264,6 +1573,30 @@ mountDeckPicker(document.querySelector('#deck-picker'), bundledDeck, nextDeck =>
   renderQuestion();
 });
 bindWelcome();
+lessonArchiveControls = mountLessonArchive({
+  container: document.querySelector('#lesson-archive'),
+  // Match the active source identity used by completed learning traces.
+  getDeck: () => deck === bundledDeck ? bundledSource : deck,
+  getSessionRevision: () => lessonSessionRevision,
+  getLesson: () => ({answers, mastery, presentation: {
+    phase: lessonPhase, itemId: lessonItemId, optionOrders: Object.fromEntries(optionOrders)
+  }}),
+  resumeLesson: state => {
+    answers.splice(0, answers.length, ...state.answers);
+    asked.clear();
+    for (const answer of state.answers) asked.add(answer.item);
+    Object.assign(mastery, state.mastery);
+    optionOrders.clear();
+    for (const [id, order] of Object.entries(state.presentation.optionOrders)) optionOrders.set(id, [...order]);
+    review = null;
+    practice = null;
+    inPractice = false;
+    if (state.presentation.phase === 'feedback') {
+      const item = deck.items.find(candidate => candidate.id === state.presentation.itemId);
+      renderLessonQuestion(item, state.answers[state.answers.length - 1]);
+    } else renderQuestion();
+  }
+});
 traceArchiveControls = mountTraceArchive({
   container: document.querySelector('#trace-archive'),
   // Keep the bundled course identity compatible with traces saved before local imports.
