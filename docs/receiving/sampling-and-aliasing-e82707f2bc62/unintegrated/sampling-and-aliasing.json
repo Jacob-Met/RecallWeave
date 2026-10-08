@@ -1,0 +1,215 @@
+{
+  "format": "recallweave-deck/1",
+  "title": "Sampling and aliasing",
+  "attribution": "Original questions, answer choices, explanations and transfer prompts written for RecallWeave with AI assistance. Examples are ideal mathematical signals, not measured data. Background: Dennis Freeman, MIT 6.003, Lecture 21: Sampling (2011), https://ocw.mit.edu/courses/6-003-signals-and-systems-fall-2011/resources/mit6_003f11_lec21/ ; DFT frequency convention: NumPy fft.fftfreq documentation, https://numpy.org/doc/stable/reference/generated/numpy.fft.fftfreq.html .",
+  "license": "Original course text is dedicated to the public domain under CC0 1.0 Universal: https://creativecommons.org/publicdomain/zero/1.0/ . Referenced teaching material and documentation retain their own terms; no source exercises, passages or figures are reproduced.",
+  "concepts": [
+    "Sample timing",
+    "Aliasing",
+    "Reconstruction conditions",
+    "Reading sampled data"
+  ],
+  "items": [
+    {
+      "id": "sample-01",
+      "prompt": "An ideal uniform sampler records 20 samples per second. Its first sample has index n = 0 at t = 0. At what time is the sample with index n = 4 recorded?",
+      "options": [
+        "0.05 s",
+        "0.20 s",
+        "0.25 s",
+        "4 s"
+      ],
+      "concept": "Sample timing",
+      "prerequisites": [],
+      "answer": 1,
+      "explanation": "The interval is 1/20 = 0.05 s. Starting at t = 0, index n occurs at t = n/20, so t_4 = 4/20 = 0.20 s. Index 4 is the fifth recorded value, but only four intervals have elapsed. The 0.25 s option counts values as if each one added a preceding interval.",
+      "transfer": "A sampler starts at t = 2 s and records 25 samples/s. Find the time at index 6, and state how many recorded values occur from index 0 through index 6."
+    },
+    {
+      "id": "sample-02",
+      "prompt": "A record contains exactly nine uniformly spaced samples at 40 samples per second, with indices 0 through 8. What is the elapsed time from the first recorded sample to the last recorded sample?",
+      "options": [
+        "0.200 s",
+        "0.225 s",
+        "0.025 s",
+        "0.400 s"
+      ],
+      "concept": "Sample timing",
+      "prerequisites": [],
+      "answer": 0,
+      "explanation": "Nine values have eight adjacent intervals. The first-to-last span is (9 - 1)/40 = 0.200 s. The expression N/f_s = 9/40 = 0.225 s describes nine sampling intervals; it is not the elapsed time between the two recorded endpoints. The prompt specifies which duration is wanted.",
+      "transfer": "Six samples are recorded at 10 samples/s, starting at zero. List their timestamps, then compare the last timestamp with 6/10 seconds. Explain the extra interval."
+    },
+    {
+      "id": "sample-03",
+      "prompt": "An acquisition was configured for 10 samples per second. A saved four-row excerpt records timestamps 0.0, 0.1, 0.2 and 0.4 seconds. The excerpt gives no reason for the timing. Which conclusion follows from these timestamps?",
+      "options": [
+        "Every adjacent pair is 0.1 s apart because the configured rate was 10 samples per second.",
+        "The last timestamp should be replaced by 0.3 s because there are four rows.",
+        "The excerpt proves that exactly one physical measurement was lost during storage.",
+        "The last adjacent interval is 0.2 s; the nominal rate alone does not establish why."
+      ],
+      "concept": "Sample timing",
+      "prerequisites": [],
+      "answer": 3,
+      "explanation": "Subtract adjacent saved times: 0.1 - 0.0 = 0.1 s, 0.2 - 0.1 = 0.1 s and 0.4 - 0.2 = 0.2 s. The final saved interval is twice the nominal 0.1 s. Those facts do not identify its cause. A missing row, acquisition timing, selection or another mechanism would need additional evidence; replacing a timestamp would change the observations.",
+      "transfer": "A saved excerpt has times 2.0, 2.1, 2.35 and 2.45 s. Report its adjacent intervals. Give one extra piece of acquisition evidence you would seek before explaining the longest interval."
+    },
+    {
+      "id": "alias-01",
+      "prompt": "Consider zero-phase, unit-amplitude cosine waves x(t) = cos(2π f t), with f in hertz. Sample at t = n/8 seconds for every integer n. Which other frequency gives exactly the same infinite sample sequence as f = 1 Hz?",
+      "options": [
+        "2 Hz",
+        "4 Hz",
+        "7 Hz",
+        "3 Hz"
+      ],
+      "concept": "Aliasing",
+      "prerequisites": [
+        "Sample timing"
+      ],
+      "answer": 2,
+      "explanation": "At t = n/8, the 7 Hz samples are cos(2π·7n/8) = cos(2πn - 2πn/8) = cos(2πn/8), because cosine is periodic and even. This equals the 1 Hz sequence for every integer n. The continuous waves differ between some sample times. The equality uses the stated cosine phase and exact uniform grid.",
+      "transfer": "At 10 samples/s, show algebraically why zero-phase cosines at 2 Hz and 8 Hz have the same samples. Find one time outside that sample grid where they differ."
+    },
+    {
+      "id": "alias-02",
+      "prompt": "The wave x(t) = cos(2π · 9t) is sampled uniformly at 12 samples per second, starting at t = 0. Which zero-phase, unit-amplitude cosine below 6 Hz has the same samples at every recorded index?",
+      "options": [
+        "3 Hz",
+        "4.5 Hz",
+        "6 Hz",
+        "9 Hz"
+      ],
+      "concept": "Aliasing",
+      "prerequisites": [
+        "Sample timing"
+      ],
+      "answer": 0,
+      "explanation": "For every integer n, cos(2π·9n/12) = cos(2πn - 2π·3n/12) = cos(2π·3n/12). Thus 9 Hz folds to 12 - 9 = 3 Hz. Merely dividing 9 by two gives 4.5 Hz and does not reproduce the samples. The 6 Hz and 9 Hz options also fail the prompt's requirement of a frequency below 6 Hz.",
+      "transfer": "A zero-phase 13 Hz cosine is sampled at 16 samples/s. Find its equivalent cosine frequency below 8 Hz and verify equality at n = 0, 1 and 2."
+    },
+    {
+      "id": "alias-03",
+      "prompt": "An exact sampler observes x(t) = sin(2π · 4t) at times t = n/8 seconds, where n is an integer. What sequence does it record? Assume no noise or timing error.",
+      "options": [
+        "Alternating +1 and -1 values.",
+        "A constant +1 value.",
+        "One complete visible sine-wave cycle every four samples.",
+        "Zero at every sample, although the continuous wave is not identically zero."
+      ],
+      "concept": "Aliasing",
+      "prerequisites": [
+        "Sample timing"
+      ],
+      "answer": 3,
+      "explanation": "Substituting t = n/8 gives sin(2π·4n/8) = sin(πn) = 0 for every integer n. The continuous wave still reaches nonzero values between samples. A cosine at this same frequency would instead alternate +1 and -1. Exact timing and phase matter at this boundary; a rule that ignores them cannot guarantee recovery at exactly twice the frequency.",
+      "transfer": "Replace the sine by cos(2π·4t) while keeping the 8 samples/s clock. Write the first four samples. Explain why this change of phase changes the observations without changing the frequency."
+    },
+    {
+      "id": "reconstruct-01",
+      "prompt": "An otherwise arbitrary continuous signal is known to have no frequency components above 6 Hz in magnitude. Under the ideal theorem for a complete infinite sequence of exact uniform samples, which listed rate is strictly above twice that highest possible frequency?",
+      "options": [
+        "6 samples/s",
+        "12 samples/s",
+        "13 samples/s",
+        "10 samples/s"
+      ],
+      "concept": "Reconstruction conditions",
+      "prerequisites": [
+        "Aliasing"
+      ],
+      "answer": 2,
+      "explanation": "Twice 6 Hz is 12 samples/s, and 13 is the only listed rate strictly above 12. The ideal statement requires a band-limited signal, exact uniform samples and the complete infinite sequence. It does not promise exact reconstruction from a short, noisy or irregular record. The exact boundary is deliberately excluded; the previous sine example shows why phase at that boundary deserves care.",
+      "transfer": "For a highest possible frequency of 5 Hz, decide whether 12 samples/s meets the stated strict condition. Which assumptions would still need checking before applying the ideal theorem to a recorded excerpt?"
+    },
+    {
+      "id": "reconstruct-02",
+      "prompt": "An analog input may contain both a desired 3 Hz cosine and an unwanted 17 Hz cosine. It will be sampled at 20 samples per second. Which step prevents the unwanted component from becoming indistinguishable from a 3 Hz cosine in the samples? Assume the stated ideal filter is available.",
+      "options": [
+        "Join the recorded samples with smoother curves.",
+        "Apply an analog low-pass filter before sampling that passes 3 Hz and removes 17 Hz.",
+        "After sampling, remove only the 17 Hz component from those samples while keeping every possible 3 Hz component.",
+        "Record more samples at the same rate and then identify the two components from the samples alone."
+      ],
+      "concept": "Reconstruction conditions",
+      "prerequisites": [
+        "Aliasing"
+      ],
+      "answer": 1,
+      "explanation": "At 20 samples/s, a 17 Hz cosine folds to 20 - 17 = 3 Hz. Once sampled, that contribution can share the same sample pattern as a genuine 3 Hz component, so a digital operation cannot always separate their origins. The stipulated analog filter acts before this ambiguity is created: it passes the wanted 3 Hz and removes the unwanted 17 Hz. A smoother drawing or a longer record at the same rate does not undo an exact alias.",
+      "transfer": "An input may contain desired 2 Hz and unwanted 18 Hz components before a 20 samples/s sampler. Explain where an ideal separating filter must act and why a longer record at that rate alone cannot identify both origins."
+    },
+    {
+      "id": "reconstruct-03",
+      "prompt": "Only five exact samples of an otherwise unspecified signal are available. The signal is band-limited to 3 Hz and those samples came from an 8 samples/s uniform clock. Which statement correctly applies the usual ideal sampling theorem under only these assumptions?",
+      "options": [
+        "The complete infinite uniform sample sequence would determine the band-limited signal; five values alone do not determine its entire waveform.",
+        "Those five values uniquely determine the entire waveform because 8 is greater than twice 3.",
+        "No amount of data at 8 samples/s can reconstruct a signal band-limited to 3 Hz.",
+        "The original waveform must equal the straight lines joining the five sample points."
+      ],
+      "concept": "Reconstruction conditions",
+      "prerequisites": [
+        "Aliasing"
+      ],
+      "answer": 0,
+      "explanation": "The rate 8 samples/s is strictly above twice the 3 Hz bound, but only five values are supplied. The ideal theorem uses the complete infinite uniform sequence. A finite set of values leaves room for distinct band-limited signals that agree at those times and differ elsewhere. Additional model assumptions could change a finite-data problem; none are supplied here. Straight-line interpolation is a separate choice.",
+      "transfer": "Would ten finite samples, with no additional signal model, establish the entire waveform uniquely? Explain what has changed and what is still missing from the ideal theorem's information requirement."
+    },
+    {
+      "id": "interpret-01",
+      "prompt": "Two exact recorded values are x(0 s) = 0 and x(1 s) = 2. A display uses linear interpolation and shows x = 1 at 0.5 s. No measurement was taken at 0.5 s and no rule for the between-sample signal was supplied. What is the status of the displayed middle value?",
+      "options": [
+        "It is an additional physical measurement supplied by interpolation.",
+        "It proves that the original signal was a straight line between the measurements.",
+        "It proves that the acquisition sample rate doubled.",
+        "It is a value computed by the chosen interpolation rule, not an independently recorded sample."
+      ],
+      "concept": "Reading sampled data",
+      "prerequisites": [
+        "Sample timing",
+        "Reconstruction conditions"
+      ],
+      "answer": 3,
+      "explanation": "Linear interpolation computes the midpoint as 0 + (0.5 - 0)/(1 - 0)·(2 - 0) = 1. That number follows from the display rule and the two recorded endpoints. It is not a third observation and does not prove that the source varied linearly. Different continuous curves can pass through the same endpoints while taking different midpoint values.",
+      "transfer": "Give two continuous functions that equal 0 at t = 0 and 2 at t = 1 but have different values at t = 0.5. State which one linear interpolation draws."
+    },
+    {
+      "id": "interpret-02",
+      "prompt": "A standard N-point DFT is computed from N = 40 uniformly spaced samples recorded at 20 samples per second. What is the spacing from the frequency-bin centre at k = 0 to the one at k = 1? This asks for bin spacing, not guaranteed separation of two tones.",
+      "options": [
+        "20 Hz",
+        "2 Hz",
+        "0.5 Hz",
+        "1/40 Hz"
+      ],
+      "concept": "Reading sampled data",
+      "prerequisites": [
+        "Sample timing",
+        "Reconstruction conditions"
+      ],
+      "answer": 2,
+      "explanation": "The standard DFT bin centres have spacing f_s/N. Here 20/40 = 0.5 Hz. This frequency grid uses N sampling intervals, whereas the recorded first-to-last span is (N - 1)/f_s. Bin spacing alone does not guarantee that two nearby tones can be separated: the signal, record, window and analysis also matter.",
+      "transfer": "Keep the 20 samples/s clock and use N = 80 samples. Compute the new DFT bin spacing and the first-to-last sample span. Explain why the two formulas use different counts of intervals."
+    },
+    {
+      "id": "interpret-03",
+      "prompt": "A 1 Hz zero-phase cosine and a 7 Hz zero-phase cosine have identical samples at every time t = n/8 seconds. Without any additional information about the source, would extending this exact uniform recording at the same rate distinguish these two possibilities from the recorded samples alone?",
+      "options": [
+        "Yes; enough extra samples always remove this exact alias.",
+        "No; the sequences agree at every integer index, including all newly recorded indices.",
+        "Yes; drawing a denser line through the samples creates the missing information.",
+        "No, because all sampled signals are indistinguishable from one another."
+      ],
+      "concept": "Reading sampled data",
+      "prerequisites": [
+        "Sample timing",
+        "Reconstruction conditions"
+      ],
+      "answer": 1,
+      "explanation": "The equality holds for every integer index, not only for a short initial segment. Extending the same exact sample grid adds more equal values, so it cannot distinguish this particular 1 Hz/7 Hz pair without additional information. That does not make all sampled signals identical. A changed observation time or an independently justified restriction on the source can distinguish possibilities.",
+      "transfer": "For these two cosine waves, compare their values at t = 1/16 s, halfway between the first two original sample times. Explain what this new observation changes and why it does not prove a general recovery guarantee."
+    }
+  ]
+}
