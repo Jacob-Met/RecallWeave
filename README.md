@@ -6,6 +6,12 @@
 
 Open `demo.html` directly in a browser—no server, install, build step, internet, login, API key, or user data storage is required. It is a single self-contained file with embedded CSS, JavaScript and deck. The modular source is in `index.html`, `src/`, and `data/`; to test that version locally, serve this directory with `python3 -m http.server 8080` and visit `http://localhost:8080`. Rebuild the direct-open demo with `python3 tools/make_demo.py` after source changes. No hosted endpoint is called by either version.
 
+## Explore linear programming
+
+Open **[See the whole optimum](courses/linear-programming-explorer.html)** directly in a browser to solve a small continuous linear program inside an explicit finite rectangle. Inspect exact rational vertices, every boundary pair, row slacks and the complete optimal set—including tied edges, constant objectives, feasible lines and points, and empty sets.
+
+Edit the bounds, objective and up to eight inequalities, then apply the draft. Download the full observation or the original [sixteen-question course](courses/linear-programming.json) and [worked guide](courses/linear-programming.md). The course imports through the existing learner's normal preview and start flow. This offline lab uses no automatic storage or external service. Rebuild it with `node tools/build-linear-programming.mjs`; add `--check` to verify exact source and embedded-download parity.
+
 ## Explore RC transients
 
 Open **[RC transients: where the energy goes](courses/rc-transients-lab.html)** directly in a browser to follow the response of one resistor and capacitor after an ideal source step. Compare charging, discharge, reversed polarity, a precharged capacitor returning energy to the source, resistance scaling and equilibrium. Voltage, signed current, charge, stored energy, resistor heat and source work share the same applied circuit and time cursor.
