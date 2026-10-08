@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'">
+<title>Minimum spanning forests · RecallWeave</title>
+<style>
+:root{color-scheme:light;--ink:#182c35;--muted:#48616b;--paper:#f3f6f3;--card:#fff;--line:#c4d1cc;--green:#135d3d;--green-light:#e6f4ea;--amber:#805300;--amber-light:#fff3d0;--reject:#65596b}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:1rem/1.6 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}main{max-width:1160px;margin:auto;padding:32px 24px 64px}header{max-width:850px;margin-bottom:30px}.eyebrow{font-size:.83rem;font-weight:750;letter-spacing:.1em;text-transform:uppercase;color:var(--green);margin:0 0 8px}h1{font-size:clamp(2rem,5vw,3.3rem);line-height:1.13;letter-spacing:-.025em;margin:0 0 18px}h2{font-size:1.35rem;line-height:1.3;margin:0 0 14px}h3{font-size:1.06rem;margin:0 0 8px}p{margin:0 0 14px}.lead{font-size:1.12rem;color:var(--muted)}a{color:var(--green);text-underline-offset:3px}code{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:.93em}button,input,select,textarea{font:inherit}button,select{min-height:44px}button{border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink);font-weight:650;padding:10px 16px;cursor:pointer}button:hover:not(:disabled){background:#edf5ee;border-color:var(--green)}button.primary{background:var(--green);color:#fff;border-color:var(--green)}button.primary:hover{background:#0d462d}button:disabled{opacity:.48;cursor:default}button:focus-visible,select:focus-visible,textarea:focus-visible,a:focus-visible,[tabindex]:focus-visible{outline:3px solid #2368cc;outline-offset:4px}select,textarea{width:100%;border:1px solid #718c82;background:#fff;color:var(--ink);border-radius:7px;padding:9px 11px}textarea{min-height:190px;font:1rem/1.6 ui-monospace,SFMono-Regular,Consolas,monospace;resize:vertical}label{display:block;font-weight:700;margin-bottom:6px}.hint{font-size:.92rem;color:var(--muted);margin:8px 0 0}.panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:24px;margin-bottom:22px;min-width:0}.input-grid{display:grid;grid-template-columns:minmax(180px,.8fr) minmax(0,2fr);gap:24px}.form-actions,.example-controls,.downloads{display:flex;gap:12px;align-items:center;flex-wrap:wrap}.form-actions{margin-top:18px}.example-controls{margin-top:20px;padding-top:18px;border-top:1px solid var(--line)}.example-choice{flex:1 1 300px;min-width:0}.example-controls button{align-self:flex-end}.error{background:#fff0ed;border-left:4px solid #a32923;padding:12px;margin:14px 0 0;color:#7a201b}.empty{padding:32px;border:1px dashed #9eb2a6;border-radius:14px;color:var(--muted);margin-bottom:22px}.trace-title{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;align-items:center}.trace-title h2{margin:0}.nav{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:18px 0}.metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:18px 0 24px}.metric{padding:12px 16px;background:#edf3ef;border-radius:9px;min-width:0}.metric dt{font-size:.84rem;color:var(--muted)}.metric dd{font-size:1.7rem;font-weight:750;margin:0;line-height:1.35}.trace-grid{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:24px;align-items:start}.graph-wrap{max-width:100%;overflow:auto;border:1px solid var(--line);border-radius:10px;background:#fbfdfb}.graph-wrap svg{display:block;width:100%;min-width:330px;aspect-ratio:7/6}.graph-edge{stroke:#a2b1b8;stroke-width:2.8}.graph-edge.accepted{stroke:var(--green);stroke-width:5}.graph-edge.rejected{stroke:var(--reject);stroke-dasharray:7 5;stroke-width:3}.graph-edge.candidate{stroke:#885e04;stroke-width:3.5}.candidate-halo{stroke:#f3cb56;stroke-width:11;opacity:.65}.graph-vertex circle{fill:#fff;stroke:var(--ink);stroke-width:2.5}.graph-vertex text{font-size:18px;font-weight:750;fill:var(--ink)}.edge-label rect{fill:#fff;stroke:#a0b2aa}.edge-label text{font:13px system-ui,sans-serif;fill:var(--ink);font-weight:600}.edge-label.accepted rect{fill:var(--green-light);stroke:var(--green)}.edge-label.candidate rect{fill:var(--amber-light);stroke:var(--amber)}.edge-label.rejected rect{fill:#f3eef4;stroke:var(--reject)}.legend{list-style:none;display:flex;flex-wrap:wrap;gap:6px 18px;padding:0;margin:12px 0}.legend li{font-size:.9rem}.legend-symbol{font-weight:800}.decisions{display:grid;gap:14px}.decision{padding:16px;border:1px solid var(--line);border-radius:10px}.decision.next{background:var(--amber-light);border-color:#d4b666}.decision p:last-child{margin-bottom:0}.components{list-style:none;display:flex;gap:8px;flex-wrap:wrap;padding:0;margin:8px 0 18px}.component{border:1px solid #90b59f;border-radius:7px;padding:5px 10px;background:var(--green-light);font-family:ui-monospace,Consolas,monospace}.result{border-left:5px solid var(--green);padding:18px;background:var(--green-light);border-radius:0 10px 10px 0;margin-top:20px}.result p:last-child{margin-bottom:0}.tables{display:grid;grid-template-columns:minmax(0,1fr);gap:22px;margin-top:26px}.table-wrap{max-width:100%;overflow:auto;border:1px solid var(--line);border-radius:8px}table{border-collapse:collapse;width:100%;font-size:.93rem}th,td{padding:11px 13px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}th{background:#edf3ef;white-space:nowrap;font-weight:700}tr:last-child td{border-bottom:0}.edge-row.accepted{background:#eef8f1}.edge-row.candidate{background:var(--amber-light)}.edge-row.rejected{color:var(--reject)}td:last-child{min-width:100px}#history-table{min-width:730px}#history-table td:nth-child(5){min-width:210px}.instructions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px}.instructions ol{padding-left:22px;margin-top:0}.instructions li{margin-bottom:9px}.downloads{margin:18px 0 8px}.status{min-height:1.6em;color:var(--muted);overflow-wrap:anywhere}.sources{font-size:.91rem;color:var(--muted);margin-top:24px}.sources p{margin-bottom:10px}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}[hidden]{display:none!important}
+@media(max-width:720px){main{padding:22px 16px 40px}.panel{padding:18px}.input-grid,.trace-grid,.instructions{grid-template-columns:minmax(0,1fr);gap:18px}.metrics{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.nav{grid-template-columns:repeat(2,minmax(0,1fr))}.example-controls{align-items:stretch}.example-controls button{align-self:auto;width:100%}.downloads button{flex:1 1 160px}.trace-title{gap:8px}.graph-wrap{margin-inline:0}th,td{padding:10px 11px}.empty{padding:22px}h1{font-size:2.1rem}.lead{font-size:1.04rem}}
+@media(prefers-reduced-motion:no-preference){button{transition:background-color .12s}}
+</style>
+</head>
+<body>
+<main>
+<header>
+<p class="eyebrow">RecallWeave · original graph course</p>
+<h1>Minimum spanning forests,<br>one edge at a time.</h1>
+<p class="lead">Choose the cheapest cycle-free connections that span every original connected component. Follow Kruskal’s choices, keep isolated vertices visible, and see why some links must be rejected.</p>
+<p>A minimum spanning tree minimizes the <strong>total chosen edge weight</strong>. It does not generally preserve every shortest route. If the input is disconnected, the result is a forest.</p>
+</header>
+<noscript><p class="error">Enable JavaScript to build and inspect a trace. The original course JSON and worked guide are also available beside this page.</p></noscript>
+<section class="panel" aria-labelledby="input-heading">
+<h2 id="input-heading">1. Enter your graph</h2>
+<form id="search-form" novalidate>
+<div class="input-grid">
+<div>
+<label for="vertex-count">Number of vertices</label>
+<select id="vertex-count" aria-describedby="vertex-help"><option>1</option><option>2</option><option>3</option><option selected>4</option><option>5</option><option>6</option><option>7</option><option>8</option></select>
+<p id="vertex-help" class="hint">Vertices are named A onward, up to H. A vertex with no edge remains in the graph.</p>
+<p class="hint">Undirected, simple graph: no self-loops and no repeated unordered pair. Negative and zero weights are valid.</p>
+</div>
+<div>
+<label for="edges-input">Edges, one per line</label>
+<textarea id="edges-input" rows="6" spellcheck="false" autocapitalize="characters" aria-describedby="edge-help input-error">A B 4
+A C 1
+B C 2
+B D 5
+C D 3</textarea>
+<p id="edge-help" class="hint">Use <code>A B -3</code>: two vertex letters and an integer from −99 to 99, separated by spaces or tabs. Blank lines are allowed. A–B and B–A are the same unordered pair.</p>
+</div>
+</div>
+<p id="input-error" class="error" role="alert" hidden></p>
+<div class="form-actions"><button id="build-trace" class="primary" type="submit">Build forest trace</button><span class="hint">Editing either input retires the previous trace.</span></div>
+</form>
+<div class="example-controls">
+<div class="example-choice"><label for="example">Or choose a worked example</label><select id="example"><option value="">Choose an example…</option></select></div>
+<button id="apply-example" type="button">Use example</button>
+</div>
+</section>
+<div id="empty-view" class="empty"><h2>Ready to inspect the choices?</h2><p id="empty-message">Build a trace to begin with every vertex in its own component.</p></div>
+<section id="trace-view" class="panel" aria-labelledby="trace-heading" hidden>
+<div class="trace-title"><h2 id="trace-heading" tabindex="-1">Your forest</h2><span class="hint">Ties follow original input order.</span></div>
+<div class="nav" aria-label="Trace steps"><button id="first-step" type="button" disabled>First</button><button id="previous-step" type="button" disabled>Previous</button><button id="next-step" class="primary" type="button" disabled>Next</button><button id="last-step" type="button" disabled>Finish</button></div>
+<dl class="metrics"><div class="metric"><dt>Edge decisions</dt><dd id="step-count">0 / 0</dd></div><div class="metric"><dt>Accepted edges</dt><dd id="accepted-count">0</dd></div><div class="metric"><dt>Components</dt><dd id="component-count">0</dd></div><div class="metric"><dt>Total weight so far</dt><dd id="total-weight">0</dd></div></dl>
+<div class="trace-grid">
+<div>
+<h3 id="graph-heading">The entered graph</h3>
+<div class="graph-wrap" tabindex="0" role="region" aria-label="Graph diagram; scroll horizontally if needed">
+<svg id="graph" viewBox="0 0 420 360" role="img" aria-labelledby="graph-title" aria-describedby="graph-description"><title id="graph-title">Graph diagram</title><desc id="graph-description">Build a trace to inspect the graph.</desc></svg>
+</div>
+<ul class="legend" aria-label="Edge states"><li><span class="legend-symbol">✓</span> Accepted · solid</li><li><span class="legend-symbol">×</span> Cycle rejected · dashed</li><li><span class="legend-symbol">→</span> Next · outlined</li><li>Not decided · thin</li></ul>
+<p class="hint">Lines crossing in the picture do not create vertices. Exact weights and states are also in the edge table.</p>
+<p id="dense-note" class="hint" hidden>For more than 12 edges, labels move to the table to keep the drawing readable.</p>
+</div>
+<div class="decisions">
+<section class="decision"><h3>Last decision</h3><p id="last-decision"></p></section>
+<section class="decision next"><h3>Predict the next choice</h3><p id="next-decision"></p></section>
+<section><h3>Accepted components now</h3><ul id="components" class="components" aria-label="Current connected components"></ul><p class="hint">An acceptance merges exactly two components. A rejection changes neither the forest nor its total.</p></section>
+</div>
+</div>
+<section id="result" class="result" hidden><h3 id="result-heading"></h3><p id="result-summary"></p><p id="result-explanation"></p></section>
+<div class="tables">
+<section aria-labelledby="edge-table-heading"><h3 id="edge-table-heading">Every input edge, in decision order</h3><div class="table-wrap" tabindex="0" role="region" aria-label="Edge order and states"><table id="edge-table"><thead><tr><th scope="col">Order</th><th scope="col">Input identity · edge</th><th scope="col">Weight</th><th scope="col">Current state</th></tr></thead><tbody id="edge-body"></tbody></table></div><p id="no-edges" hidden>No edges were entered. Each vertex is still represented.</p></section>
+<section aria-labelledby="history-heading"><h3 id="history-heading">Decisions already applied</h3><p id="no-history">No edge decisions yet.</p><div class="table-wrap" tabindex="0" role="region" aria-label="Applied decision history"><table id="history-table" hidden><thead><tr><th scope="col">Decision</th><th scope="col">Edge</th><th scope="col">Weight</th><th scope="col">Reason</th><th scope="col">Components afterward</th><th scope="col">Total</th></tr></thead><tbody id="history-body"></tbody></table></div></section>
+</div>
+<p class="hint" style="margin-top:18px">This teaching trace decides every edge, including later cycle rejections. Its count excludes sorting comparisons, component lookups, validation and rendering.</p>
+</section>
+<section class="panel" aria-labelledby="study-heading">
+<h2 id="study-heading">2. Keep the trace, then study the ideas</h2>
+<div class="instructions">
+<div><h3>Save this exact inspection</h3><p>The trace download includes the original entered text, the selected decision and the full sequence of immutable snapshots. It is an algorithm record, separate from learner answers.</p><p>No automatic storage or upload occurs. The page works directly from your files without a server or connection.</p></div>
+<div><h3>Use the original twelve-question course</h3><ol><li>Download the course JSON below.</li><li>Open RecallWeave and choose it under <strong>Bring your own lesson</strong>.</li><li>Inspect the preview, then choose <strong>Start this deck</strong>.</li></ol><p>The worked guide supplies explanations and transfer prompts. The learning estimate is a model state, not a grade.</p></div>
+</div>
+<div class="downloads"><button id="download-trace" type="button" disabled>Download trace</button><button id="download-course" type="button">Download course</button><button id="download-guide" type="button">Download guide</button></div>
+<p id="file-status" class="status" role="status" aria-live="polite"></p>
+</section>
+<footer class="sources"><p>Original questions, examples, guide and diagrams for RecallWeave, 2026. Course content: CC0-1.0. This explorer adds no network request, account or persistent storage.</p><p>Optional algorithm background: <a href="https://algs4.cs.princeton.edu/code/javadoc/edu/princeton/cs/algs4/KruskalMST.html" target="_blank" rel="noopener noreferrer">Princeton Algorithms 4/e: KruskalMST</a> and <a href="https://ocw.mit.edu/courses/6-046j-design-and-analysis-of-algorithms-spring-2015/resources/lecture-12-greedy-algorithms-minimum-spanning-tree/" target="_blank" rel="noopener noreferrer">MIT OpenCourseWare: minimum spanning trees</a>. These external pages open only when selected; their original materials retain their own terms.</p></footer>
+<p id="step-announcement" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></p>
+</main>
+<script type="module">
+const SOURCE_DECK = @@DECK_JSON@@;
+const SOURCE_GUIDE = @@GUIDE_JSON@@;
+@@SCRIPT@@
+</script>
+</body>
+</html>
