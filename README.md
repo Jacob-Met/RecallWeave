@@ -6,6 +6,14 @@
 
 Open `demo.html` directly in a browser—no server, install, build step, internet, login, API key, or user data storage is required. It is a single self-contained file with embedded CSS, JavaScript and deck. The modular source is in `index.html`, `src/`, and `data/`; to test that version locally, serve this directory with `python3 -m http.server 8080` and visit `http://localhost:8080`. Rebuild the direct-open demo with `python3 tools/make_demo.py` after source changes. No hosted endpoint is called by either version.
 
+## Practice recall before seeing the answer
+
+Open **[Recall first](recall-first.html)** directly in your browser to explain each idea before revealing its reference answer. Start the bundled lesson or preview a local RecallWeave course JSON, then explicitly choose **Start this course**.
+
+Write, speak or think through an answer, select **Reveal and compare**, and choose **Ready for now** or **Revisit**. These are your own study judgments, not a correctness score or mastery estimate. The first pass follows the course order; one optional revisit pass includes only the prompts you marked Revisit and retains both attempts.
+
+The page works offline, uses no automatic storage, and leaves the main learner's answers and model unchanged. Closing or reloading clears this separate practice. See the [practice guide](docs/recall-first.md) for file limits, restart behavior and the limits of using multiple-choice prompts without their choices. Rebuild with `node tools/build-recall-first.mjs`; verify with `--check`.
+
 ## Explore RC transients
 
 Open **[RC transients: where the energy goes](courses/rc-transients-lab.html)** directly in a browser to follow the response of one resistor and capacitor after an ideal source step. Compare charging, discharge, reversed polarity, a precharged capacitor returning energy to the source, resistance scaling and equilibrium. Voltage, signed current, charge, stored energy, resistor heat and source work share the same applied circuit and time cursor.

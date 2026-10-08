@@ -1,0 +1,69 @@
+{
+  "schema": "hamon.recall-first-independent-contract.v1",
+  "worker": "estate-f3d1a0c556df/coordination",
+  "base": "698902f9c9c1d5c5023092b85b3632a7cb7a01ed",
+  "tree": "d6d3707b691850af7928299242631534cff89aa8",
+  "candidate_source_seen": false,
+  "validator_blob": "f0f8a4b234489c2388f427633f548d56c6ed4c03",
+  "api": [
+    "createRecall(deck)",
+    "currentRecall(session)",
+    "writeRecall(session,text)",
+    "revealRecall(session)",
+    "judgeRecall(session,'ready'|'revisit')",
+    "beginRevisit(session)",
+    "recallSummary(session)"
+  ],
+  "oracles": {
+    "source_order": [
+      "z-start",
+      "a-next",
+      "m-middle",
+      "b-last"
+    ],
+    "first_pass_judgments": [
+      "revisit",
+      "ready",
+      "revisit",
+      "ready"
+    ],
+    "revisit_order": [
+      "z-start",
+      "m-middle"
+    ],
+    "revisit_judgments": [
+      "ready",
+      "revisit"
+    ],
+    "final_summary": {
+      "completed": true,
+      "pass": "revisit",
+      "total": 4,
+      "firstChecked": 4,
+      "revisitChecked": 2,
+      "markedFirst": 2,
+      "revisitRemaining": 1
+    },
+    "reveal": "Judgment only after exactly one Reveal; draft only before Reveal; optional empty text accepted",
+    "text_limit": "4000 UTF16 code units; 2000 astral codepoints accepted and 2001 refused atomically",
+    "self_report": "Exact ready/revisit choices independent of agreement with reference; no inferred correctness/scoring/mastery",
+    "completion": "Current-pass completion may retain flagged items. One optional revisit of only first-pass flags, then completion with no third pass",
+    "restart": "Explicit createRecall(previous.deck), leaving prior history unchanged; no implicit reset",
+    "immutability": "Prior snapshots, checked deck, source order and records remain exact; invalid transition creates no partial changes",
+    "validation": "Exact errors from unchanged validateDeck, not parallel validation or silent repair"
+  },
+  "clarifications": {
+    "revisitRemaining": "Count of latest available self-checks still labeled revisit, including unseen flagged revisit items; not unfinished-queue countdown",
+    "markedFirst": "Original first-pass flagged count remains unchanged through revisit",
+    "total": "Original deck item count"
+  },
+  "excluded": [
+    "Browser/UI receiving owned by source_lane",
+    "Existing app/review/model changes",
+    "ThinkPad or scratch writes",
+    "provider/service calls",
+    "Actions",
+    "dependency installs"
+  ],
+  "runtime": "Existing Node v24.21.0 on LA7; fresh free space425847345152 bytes"
+}

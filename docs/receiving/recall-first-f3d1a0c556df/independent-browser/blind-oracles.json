@@ -1,0 +1,82 @@
+{
+  "schema": "hamon.recall-first.independent-browser-oracles.v1",
+  "actor": "estate-f3d1a0c556df/source_lane",
+  "basis": {
+    "base": "698902f9c9c1d5c5023092b85b3632a7cb7a01ed",
+    "tree": "d6d3707b691850af7928299242631534cff89aa8",
+    "read_only_sources": [
+      "src/deck.mjs",
+      "data/deck.json"
+    ],
+    "candidate_implementation_seen": false,
+    "public_control_names_from_author_contract_only": true
+  },
+  "groups": [
+    {
+      "id": "bundled-explicit-start-and-reveal",
+      "expectations": [
+        "Standalone direct-file initial bundled preview identifies actual bundled title/attribution/license; session starts only through Start this course.",
+        "First bundled item is p1, then p2 after explicit self-judgment, preserving source order.",
+        "Before Reveal, rendered active card contains prompt and optional own-answer input but none of its options, correct-answer text, explanation or transfer.",
+        "Reveal and compare exposes exact correct option, explanation and transfer as text, and the learner's retained own answer; Ready for now and Revisit are explicit self-judgments.",
+        "Keyboard Enter/Space and focus navigation activate Start, Reveal and judgment. No app/model state injection."
+      ]
+    },
+    {
+      "id": "custom-two-pass-history",
+      "expectations": [
+        "Validated real local three-item fixture preview does not change existing session; only explicit Start does.",
+        "Source order z-first,a-second,m-third despite lexical/concept prerequisite order; answer indices 2,1,0 distinguish using the actual correct option.",
+        "Own answers first-one, empty optional response, first-three; initial judgments Revisit, Ready for now, Revisit.",
+        "Exactly one additional pass contains z-first,m-third in source order; own answers second-one and second-three; judgments Ready for now, Revisit.",
+        "Five chronological attempts remain visible, preserving both answers and judgments for revisited items; second-pass Revisit does not enqueue a third pass.",
+        "No scoring/mastery is asserted or generated; readiness is self-reported."
+      ]
+    },
+    {
+      "id": "own-answer-limit-and-confirmed-restart",
+      "expectations": [
+        "Actual text input admits 4000 UTF-16 code units, including 2000 astral symbols; native attempted insertion beyond the bound cannot produce a stored answer longer than4000.",
+        "Reveal preserves exact allowed own answer as text.",
+        "Start over requests explicit confirmation. Keep my work preserves active item, own answer, reveal phase and prior attempts.",
+        "Start over and clear attempts resets to source-first prompt with hidden answer, empty own answer and cleared attempts; no old response retained in displayed history."
+      ]
+    },
+    {
+      "id": "strict-file-and-preservation",
+      "expectations": [
+        "Real File inputs use unchanged validator and262144-byte UTF8JSON limit; exactly262144 accepted,262145 rejected although decoded UTF16 length is below bytecap.",
+        "MalformedUTF8 bytes and UTF16-encoded JSON are refused; strict malformedJSON/schema/cycle/duplicateID controls are refused.",
+        "Each invalid read preserves prior session prompt, own response, phase and attempts while showing an actionable error.",
+        "Valid replacement preview and Cancel preview preserve current work; canceled/empty file selection does not clear it.",
+        "Literal harmless markup, quotes and ampersands remain text; no active resource/event payload is used."
+      ]
+    },
+    {
+      "id": "controlled-stale-file-completion",
+      "expectations": [
+        "Delay only selected synthetic fixture File read completion at browser File/Blob/FileReader boundary; still use real input File objects, bytes, decoder, parser and validator.",
+        "SlowvalidA followed by fastvalidB leaves B as preview after A resolves; established session unchanged until explicit Start.",
+        "SlowinvalidA completed after fastvalidB cannot erase B or replace its successful preview with an obsolete error.",
+        "Cancel preview after an admitted replacement preserves the prior session; driver records exactly which delayed-reader/cancel branch actually executed.",
+        "This qualifies controlled asynchronous browser reads, not a human OS picker or disk-performance test."
+      ]
+    },
+    {
+      "id": "narrow-screen-long-fields-and-keyboard",
+      "expectations": [
+        "Fresh390px viewport displays bounded long unbroken title, prompt, correct option, explanation, transfer, attribution and license without horizontal document overflow.",
+        "Pre-Reveal rendered card still omits all answer material. After explicit Reveal exact long text is reachable and visible by scrolling.",
+        "Primary controls remain keyboard reachable and usable; attribution and license remain available.",
+        "Inspect actual before/after screenshots. No screen-reader or whole-app accessibility claim."
+      ]
+    }
+  ],
+  "invariant": {
+    "network": "Block and record all HTTP(S); direct-file isolated contexts only, no provider/service/user profile.",
+    "source": "Pin full candidate execution closure before running and verify bytes unchanged afterward.",
+    "run_count": "Only these needed groups, retain every failed attempt, no full suite or Actions.",
+    "oracle_binding": "Candidate implementation not read before freeze; later adapters may bind accessible controls to this oracle but may not silently change expected behavior.",
+    "artifacts": "Actual chosen fixture files, browser event/download data if any, screenshots, stdout/stderr and exact source hashes retained."
+  }
+}
