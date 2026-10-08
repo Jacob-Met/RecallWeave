@@ -276,3 +276,7 @@ This public source repository supports the ForgeHacks 2026 demo. The Devpost acc
 [Open the offline lab](courses/mendelian-inheritance-lab.html), [download the original course](courses/mendelian-inheritance.json), or [read the worked guide](courses/mendelian-inheritance.md). Twelve questions connect allele segregation, genotype and phenotype, one-locus crosses and independent two-locus crosses. The explorer follows each parental gamete route and shows exact genotype and phenotype fractions, with explicit complete-dominance and independent-assortment assumptions. Its downloads preserve the checked course and a worked cross record.
 
 Import the course through the existing local-file preview and **Start this deck** flow, then use the learner's review, separate missed-item practice and study-note downloads. All traits are hypothetical plant examples; the model gives probabilities, not guaranteed finite offspring counts. Build and optional browser-receiving commands are in the guide.
+
+## Weighted interval scheduling
+
+The [weighted-intervals explorer](courses/weighted-intervals-explorer.html) is a self-contained offline lab for choosing compatible activities by total value. Edit a small schedule, inspect take/skip decisions, reconstruct the chosen prefix, and compare it with earliest finish. Download its [twelve-question course](courses/weighted-interval-scheduling.json) into the existing learner, or use the [course guide](courses/weighted-interval-scheduling.md) for the worked table, answer derivations, assumptions and build/check commands.
