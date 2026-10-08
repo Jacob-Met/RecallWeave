@@ -433,3 +433,13 @@ Open [the minimum-spanning-forest explorer](courses/minimum-spanning-forest-expl
 
 Download the full trace with its original entered text and selected frame, or save the original [twelve-question course](courses/minimum-spanning-forest.json) and [worked guide](courses/minimum-spanning-forest.md). Open the JSON through the learner's existing **Bring your own lesson** preview and **Start this deck** flow. No network, account, automatic storage or learner-session modification is involved. Rebuild the standalone page with `node tools/build-minimum-spanning-forest.mjs`; add `--check` to verify exact source parity.
 
+
+## Information: what one label reveals
+
+Open **[the information explorer](courses/information-theory-explorer.html)** directly in a browser to compare joint probabilities, entropy, conditioning and mutual information. Edit a small table of card counts, inspect exact reduced fractions, and choose which label to observe. A rare observation can increase uncertainty in that one case while the probability-weighted average decreases it.
+
+Ten examples include a biased copy, opposite labels, unused categories and a tiny dependence that a rounded value could hide. Independence is decided by exact integer factorization for every cell. Information values are approximate bits; the full signed contribution table keeps negative terms and distinguishes zero weighted terms from undefined conditionals.
+
+Download the original **[sixteen-question course](courses/information-theory.json)** and **[worked guide](courses/information-theory.md)**, then import the JSON into the existing learner. The explorer embeds the exact course and guide for download, works offline, uses no browser storage and exports only an explicitly applied observation. Editing counts retires its previous result.
+
+Build with `node tools/build-information-theory.mjs`; add `--check` to verify the generated page. Focused checks: `node --test tests/information-theory.test.mjs tests/information-theory-course.test.mjs`. The [native receiving packet](docs/receiving/information-theory-5f566b5ec8ef/README.md) records mathematical, source and browser qualification.

@@ -1,0 +1,194 @@
+RecallWeave — study notes
+Information: what one label reveals
+Saved: 2026-10-08T22:10:40.466Z
+
+FIRST SESSION
+15 of 16 connections correct on the first try.
+This count describes this session; it is not a measure of your ability.
+
+ESTIMATED MASTERY — MODEL STATE, NOT A GRADE
+These estimates come from the demo’s learning model. They are not a validated assessment.
+Practice does not change the first-session estimates.
+Joint probability tables: 90%
+Surprise and entropy: 98%
+Conditional information: 98%
+Mutual information: 100%
+Interpreting dependence: 98%
+
+PRACTICE
+Complete: 1 of 1 practice answers recorded; 1 correct on retry.
+Practice follows the explanations and is recorded separately from the first answers.
+
+REVIEW THE CONNECTIONS
+
+1. The joint table is [3,0]; [0,1]. Either label determines the other perfectly, and H(X) = H(Y) is approximately 0.811278 bits. What is I(X;Y)?
+Concept: Mutual information
+Your first answer: Approximately 0.811278 bits: the information removes the other's entire original uncertainty.
+First try: correct
+Correct answer: Approximately 0.811278 bits: the information removes the other's entire original uncertainty.
+Explanation: I(X;Y) = H(Y) - H(Y|X). The conditional entropy is zero because X determines Y, so the shared information equals H(Y), approximately 0.811278 bits. Perfect prediction need not provide one bit: the amount depends on the uncertainty present before the observation. The same identity holds with X and Y exchanged.
+Apply the idea: Compare the shared information for [1,0]; [0,1] with that for [7,0]; [0,0]. Both are deterministic. Why are their information amounts different?
+Your explanation — reflection, not scored:
+  Not written.
+
+2. The joint counts are X1: [3,1] and X2: [1,3]. After you learn that the drawn card has X1, what is P(Y2 given X1)?
+Concept: Conditional information
+Your first answer: 1/4: one of the four X1 cards carries Y2.
+First try: correct
+Correct answer: 1/4: one of the four X1 cards carries Y2.
+Explanation: Conditioning on X1 restricts the draw to its four cards. Only one of those cards has Y2, so the conditional probability is 1/4. The joint probability is 1/8, and the marginal probability of Y2 is 1/2. These answer different questions and use different denominators.
+Apply the idea: For the same table, calculate P(X1 given Y2) and P(Y1 given X2). State the restricted total each time.
+Your explanation — reflection, not scored:
+  Not written.
+
+3. A box contains 8 cards. The counts for (X1,Y1), (X1,Y2), (X2,Y1), (X2,Y2) are 3, 1, 1, 3. One card is drawn uniformly. What is P(X1 and Y2)?
+Concept: Joint probability tables
+Your first answer: 1/2, because half the cards have X1.
+First try: needs review
+Correct answer: 1/8, because one of the eight cards has that pair.
+Explanation: The joint event specifies both labels on the same card. Exactly one of all eight cards has (X1,Y2), so its probability is 1/8. Counting possible pair names does not make the pairs equally likely. Restricting the denominator to X1 cards would instead answer a conditional-probability question.
+Apply the idea: Replace the counts by 6, 2, 2, 6. What is the joint probability of (X1,Y2), and why?
+Your explanation — reflection, not scored:
+  > A rare conditioning value can increase entropy; the weighted average is constrained. <literal reflection>
+Practice answer: 1/8, because one of the eight cards has that pair.
+Practice result: correct on retry
+
+4. A joint-count table has rows X1: [2, 1, 1] and X2: [0, 2, 2], with columns Y1, Y2, Y3. Which calculation gives P(Y2)?
+Concept: Joint probability tables
+Your first answer: (1+2)/8 = 3/8, summing Y2 over both X labels.
+First try: correct
+Correct answer: (1+2)/8 = 3/8, summing Y2 over both X labels.
+Explanation: A marginal probability leaves the other label unspecified. The Y2 column contains one X1 card and two X2 cards, giving three of the eight cards. The row total 4/8 is P(X1), while 1/4 is P(Y2 given X1). Marginalization adds disjoint joint events.
+Apply the idea: For this table, calculate P(X2) and P(Y3). Explain which cells you add in each case.
+Your explanation — reflection, not scored:
+  Not written.
+
+5. Every joint count in a finite card box is multiplied by 5. Cards are still drawn uniformly. What changes in the normalized joint distribution?
+Concept: Joint probability tables
+Your first answer: Nothing: each count and the common total grow by the same factor.
+First try: correct
+Correct answer: Nothing: each count and the common total grow by the same factor.
+Explanation: If a cell has count n and the total is N, replacing every count by 5 times its value gives 5n/(5N) = n/N. Marginals and positive-marginal conditionals are unchanged too. This operation enlarges an authored finite box; it is not five new independent observations or evidence for a population claim.
+Apply the idea: Starting with rows [1,2] and [2,4], multiply all counts by 3 and show one unchanged joint probability.
+Your explanation — reflection, not scored:
+  Not written.
+
+6. Four equally likely X labels map to Y groups: X1 and X2 always carry Y1; X3 and X4 always carry Y2. Which pair of conditional entropies is correct?
+Concept: Mutual information
+Your first answer: H(Y|X) = 0 bit and H(X|Y) = 1 bit.
+First try: correct
+Correct answer: H(Y|X) = 0 bit and H(X|Y) = 1 bit.
+Explanation: Knowing the exact X label identifies its Y group, leaving no Y uncertainty. Knowing only Y leaves two equally likely X labels, or one bit of uncertainty. The mutual information is nevertheless symmetric: H(Y)-H(Y|X) = 1-0 and H(X)-H(X|Y) = 2-1 both equal one bit.
+Apply the idea: Give a deterministic mapping from eight equally likely X labels into two groups of four. Find H(X), H(Y), both conditional entropies and I(X;Y).
+Your explanation — reflection, not scored:
+  Not written.
+
+7. For rows [8,0] and [1,1], Y has marginal probabilities 9/10 and 1/10, so H(Y) is about 0.469 bits. Observing X2 makes Y evenly split, with entropy 1 bit. Which statement is correct?
+Concept: Conditional information
+Your first answer: A particular observation can increase uncertainty; the average H(Y|X) is still at most H(Y).
+First try: correct
+Correct answer: A particular observation can increase uncertainty; the average H(Y|X) is still at most H(Y).
+Explanation: The inequality concerns the average over observations, not every conditional distribution separately. Here the rare X2 observation raises entropy to 1 bit, but the frequent X1 observation reduces it to zero. The weighted average is 0.2 bits, below the original roughly 0.469 bits. The mutual information is therefore positive.
+Apply the idea: For rows [18,0] and [1,1], compare H(Y|X2) with H(Y). Does that one observation still increase uncertainty?
+Your explanation — reflection, not scored:
+  Not written.
+
+8. X has four named categories, but all 7 cards carry X1; the other category counts are zero. What is H(X)?
+Concept: Surprise and entropy
+Your first answer: 0 bits, because the X label is already certain.
+First try: correct
+Correct answer: 0 bits, because the X label is already certain.
+Explanation: The only positive-probability X label has probability 1 and surprisal 0. Its contribution is zero, and every zero-probability entropy summand is defined as zero. Thus H(X) = 0. Unused names do not create uncertainty. This zero-summand convention does not mean that the surprisal of a zero-probability event is a finite zero.
+Apply the idea: Add two more unused category names without changing any cards. Does H(X) change? Explain the zero-probability convention.
+Your explanation — reflection, not scored:
+  Not written.
+
+9. X takes two labels with probabilities 3/4 and 1/4. Which expression is its entropy in bits?
+Concept: Surprise and entropy
+Your first answer: (3/4)log2(4/3) + (1/4)log2(4), approximately 0.811278.
+First try: correct
+Correct answer: (3/4)log2(4/3) + (1/4)log2(4), approximately 0.811278.
+Explanation: Entropy is the probability-weighted average of surprisal. The common label contributes (3/4)log2(4/3), and the rare label contributes (1/4) times 2. Their sum is about 0.811278 bits. A fair two-label variable has entropy 1 bit; uneven probabilities reduce this average uncertainty.
+Apply the idea: Calculate the entropy of four equally likely labels. Then explain why merely listing four labels does not force that entropy.
+Your explanation — reflection, not scored:
+  Not written.
+
+10. A fictional investigator enters 40 classroom observations as joint counts and obtains positive mutual information. What does this calculation establish by itself?
+Concept: Interpreting dependence
+Your first answer: That the normalized recorded table has dependence; population and causal conclusions need further evidence and assumptions.
+First try: correct
+Correct answer: That the normalized recorded table has dependence; population and causal conclusions need further evidence and assumptions.
+Explanation: The calculation describes the finite distribution formed from those entered counts. It does not automatically account for sampling variation, selection, hidden common causes or interventions. Positive mutual information is not a direction of causation, a guarantee of prediction, or a validated learning score. The lab's finite-card interpretation makes its probability assumption explicit.
+Apply the idea: Name one sampling concern and one causal concern that would need attention before using an observed classroom table to claim that an intervention improves learning.
+Your explanation — reflection, not scored:
+  Not written.
+
+11. The only populated pairs are (X1,Y2) and (X2,Y1), with one card each. Which interpretation is justified?
+Concept: Interpreting dependence
+Your first answer: I(X;Y) is 1 bit: either label predicts the other. The measure has no positive/negative association sign or causal direction.
+First try: correct
+Correct answer: I(X;Y) is 1 bit: either label predicts the other. The measure has no positive/negative association sign or causal direction.
+Explanation: Each label is a fair two-label variable, and either observation completely determines the other, giving one bit of shared information. Mutual information measures dependence without a correlation sign. Relabeling a category does not change it. These jointly assigned card labels also do not identify a causal effect.
+Apply the idea: Swap the names Y1 and Y2. Describe what changes in the table and what happens to H(X), H(Y) and I(X;Y).
+Your explanation — reflection, not scored:
+  Not written.
+
+12. A box has joint rows X1: [8,0] and X2: [1,1]. Given X1, Y is certain; given X2, Y is a fair two-label variable. What is the average conditional entropy H(Y|X)?
+Concept: Conditional information
+Your first answer: (8/10) times 0 + (2/10) times 1 = 1/5 bit.
+First try: correct
+Correct answer: (8/10) times 0 + (2/10) times 1 = 1/5 bit.
+Explanation: H(Y|X) weights each row's entropy by the probability of that X label. The certain row appears with probability 8/10, and the ambiguous row appears with probability 2/10. Their weighted average is 0.2 bits. An unweighted average of row entropies would give the rare row too much influence.
+Apply the idea: Use joint rows [18,0] and [1,1]. Compute the new average conditional entropy and compare it with the original 1/5 bit.
+Your explanation — reflection, not scored:
+  Not written.
+
+13. A table has rows [1,2] and [2,4]. Each row has Y proportions 1/3 and 2/3. What follows for this authored finite distribution?
+Concept: Mutual information
+Your first answer: X and Y are independent, and I(X;Y) = 0.
+First try: correct
+Correct answer: X and Y are independent, and I(X;Y) = 0.
+Explanation: The total is 9, with row totals 3 and 6 and column totals 3 and 6. For every cell, count times 9 equals its row total times its column total. Equivalently, each joint probability factors into the product of its marginals. Thus observing X does not change Y's distribution, even though that distribution is uneven.
+Apply the idea: Verify all four count cross-products for rows [1,2] and [2,4]. Explain why checking only the largest cell would be insufficient in general.
+Your explanation — reflection, not scored:
+  Not written.
+
+14. Rows [998,999] and [997,998] have a tiny mutual information that can round to 0.000000 bits. For cell (X1,Y1), count times total is 3,984,016, while row total times column total is 3,984,015. What should the explorer conclude?
+Concept: Interpreting dependence
+Your first answer: The authored table is dependent: the exact factorization fails even though a rounded information display looks zero.
+First try: correct
+Correct answer: The authored table is dependent: the exact factorization fails even though a rounded information display looks zero.
+Explanation: Independence requires every joint probability to equal the product of its marginals. Integer cross-products compare this condition exactly for the admitted counts. A difference of one is still a failure of equality. The shared information is positive but extremely small, about 4.54 times 10 to the power -14 bits; display rounding must not replace the exact decision.
+Apply the idea: If the same two exact cross-products were both multiplied by 4, would they become equal? Connect your answer to scaling every joint count by 2.
+Your explanation — reflection, not scored:
+  Not written.
+
+15. Using base-2 surprisal, -log2(p), an outcome has probability 1/8. How much surprisal is attached to that outcome?
+Concept: Surprise and entropy
+Your first answer: 3 bits, because 2 to the power 3 is eight.
+First try: correct
+Correct answer: 3 bits, because 2 to the power 3 is eight.
+Explanation: The outcome's surprisal is log2(8) = 3 bits. This is a property of the specified outcome under the probability model, not the entropy of an arbitrary variable containing it. Entropy averages the surprisals of all possible outcomes with their probabilities. A low-probability event has more surprisal than a high-probability one.
+Apply the idea: Compare the surprisals of outcomes with probabilities 1/2 and 1/16. Which is larger and by how many bits?
+Your explanation — reflection, not scored:
+  Not written.
+
+16. For rows [3,1] and [1,3], the pair (X1,Y2) has p = 1/8, while P(X1)P(Y2) = 1/4. What is this cell's contribution p log2[p/(P(X1)P(Y2))] to mutual information?
+Concept: Mutual information
+Your first answer: -1/8 bit; other cells can make the complete sum positive.
+First try: correct
+Correct answer: -1/8 bit; other cells can make the complete sum positive.
+Explanation: The probability ratio is (1/8)/(1/4) = 1/2, whose base-2 logarithm is -1. Multiplying by the joint probability gives -1/8 bit. This is one signed cell contribution, not the total mutual information. The two more frequent diagonal pairs supply enough positive contribution to give a positive total of about 0.188722 bits.
+Apply the idea: Compute the contribution of (X1,Y1) in the same table, where p = 3/8 and the independent-product probability is 1/4. Then sum both diagonal and both off-diagonal terms.
+Your explanation — reflection, not scored:
+  Not written.
+
+YOUR APPLICATION REFLECTION — NOT SCORED
+Prompt: Choose one connection from this deck and explain how it relates to another idea in your own words.
+  > This authored finite table alone does not establish population or causal effects.
+
+DECK ATTRIBUTION
+Original questions, card-box examples and worked transfer prompts by RecallWeave contributors with AI assistance, 2026. Mathematical definitions checked against Tsachy Weissman's Stanford EE376A/STATS376A Lecture 3 (2018): https://web.stanford.edu/class/ee376a/files/2017-18/lecture_3.pdf and MIT 6.441 Information Theory, Lecture 1 (2010): https://ocw.mit.edu/courses/6-441-information-theory-spring-2010/aa7737b3645178c0b746a57f1bdff2cd_MIT6_441S10_lec01.pdf . No source exercises, prose or figures are reproduced. All boxes and observations in these questions are hypothetical teaching examples.
+CC0-1.0 for this original course content. Referenced materials retain their own terms and are not included.
+
+Saved from this browser session. The download does not upload the session or restore it after a refresh.

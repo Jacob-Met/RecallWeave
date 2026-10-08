@@ -1,0 +1,88 @@
+{
+  "schema": "recallweave.information-theory.unchanged-learner-contract-review.v1",
+  "reviewer": "chatgpt:5f566b5ec8ef:production",
+  "canonicalCommit": "1c8ece2713554f95b0e507297a34909d50222736",
+  "baselineNative": "4ebc6c0967890d26d731fc166e0c2416f5ad25bf",
+  "demoBlob": "ef7bc3e27e7f161d917ced6a457fad8822802f3f",
+  "scope": "Read only existing exact demo embedded deck picker, learner app, review/practice, reflections/download and modular deck/review validators. No new information-theory question source or UI has been read in this receipt; no browser launched.",
+  "flow": [
+    {
+      "action": "Select actual downloaded course",
+      "control": "#deck-file",
+      "expected": "File is size-limited to256KiB, JSON validated/frozen and previewed without changing the active session. Async selection revision guards stale file reads."
+    },
+    {
+      "action": "Inspect preview",
+      "control": "#deck-preview; #deck-preview-title; .deck-questions ol",
+      "expected": "Literal title, attribution, license,16 prompts and concepts/prerequisites appear. Expand actual details summary to inspect all prompts."
+    },
+    {
+      "action": "Start selected course",
+      "control": "#start-deck",
+      "expected": "Resets current session to imported deck, rerenders context and welcome; this does not yet answer or display the first adaptive question."
+    },
+    {
+      "action": "Begin first question",
+      "control": "#start-button",
+      "expected": "Start the thread renders the first adaptive item. Need this second explicit action after imported deck start."
+    },
+    {
+      "action": "Answer all16",
+      "control": ".question-card h2; button[data-choice]; #next-button",
+      "expected": "Resolve current prompt to exact course item and use data-choice canonical index, not visible A/B order. Options are shuffled. Focus+Enter drives real keyboard; assert actual option text and explicit feedback. Intentionally miss one independently derived answer."
+    },
+    {
+      "action": "Review full trace",
+      "control": ".review-item; #first-try-summary",
+      "expected": "16 unique first answers retained in asked order, deliberate missmarked needs-review and first score15/16. Each explanation and transfer matches exact imported content; no learning ability claim."
+    },
+    {
+      "action": "Write reflection",
+      "control": "textarea[data-reflection-item]; #application-reflection",
+      "expected": "Input listeners retain explanatory notes in tab memory; notes survive practice round through frozen reflection state. Nothing is scored."
+    },
+    {
+      "action": "Practice deliberate miss",
+      "control": "#practice-button; [data-practice-choice]; #practice-next",
+      "expected": "Only initial missed item is retried, canonical answer index again independent of shown key. Retry stays separate from original answers and model estimates; results show15/16 original and correct retry separately."
+    },
+    {
+      "action": "Download notes",
+      "control": "#save-notes-button",
+      "expected": "Explicit Blob text download includes all original prompts, choices, explanations, transfer prompts, original notes, separate practice answer and supplied deck attribution. Check actual bytes and filename."
+    }
+  ],
+  "importContract": {
+    "format": "recallweave-deck/1",
+    "itemsRange": [
+      1,
+      100
+    ],
+    "conceptsRange": [
+      1,
+      32
+    ],
+    "optionCount": [
+      2,
+      6
+    ],
+    "answer": "zero-based option index",
+    "requiredItemFields": [
+      "id",
+      "concept",
+      "prerequisites",
+      "prompt",
+      "options",
+      "answer",
+      "explanation",
+      "transfer"
+    ],
+    "identityConstraints": "Unique IDs/options/concepts, all concepts covered, known acyclic prerequisites, bounded literal text. Only recognized content fields copied; imported data cannot replace runtime."
+  },
+  "independentReceivingPreparation": "Use actual downloaded course only after its16 masked answers and content are independently checked. Do not rebuild demo: optional make_demo.py was preserved for provenance, while its full source closure is not part of this16-file baseline. Direct-open demo is already exact canonical self-contained output.",
+  "limitations": [
+    "Source-only receiver preparation, not actual browser acceptance.",
+    "No caller or current learner/source behavior was changed.",
+    "All user Actions/publication holds remain active."
+  ]
+}

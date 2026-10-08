@@ -1,0 +1,802 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'sha256-uodWeI5uQxxrr/JAlPrNVOijBHatttC85TbQttNti5I='; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta name="description" content="Explore exact joint probabilities, entropy, conditioning and mutual information with a finite box of labelled cards.">
+<title>What one label reveals · RecallWeave</title>
+<style>
+:root{color-scheme:light;--paper:#f4f2e9;--ink:#213d37;--muted:#52665f;--line:#d4ddd3;--green:#166c5e;--pale:#e8f0e7;--blue:#5a66a2;--gold:#d5a444;--white:#fffef9;--warning:#963e2b}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+[hidden]{display:none!important}
+button,select,textarea{font:inherit}
+button,a,select,textarea,summary,[tabindex]{-webkit-tap-highlight-color:transparent}
+button:focus-visible,a:focus-visible,select:focus-visible,textarea:focus-visible,summary:focus-visible,[tabindex]:focus-visible{outline:3px solid #ad591f;outline-offset:4px}
+button{cursor:pointer}
+button:disabled{cursor:default;opacity:.5}
+a{color:var(--green);text-underline-offset:.18em}
+p{margin:.6rem 0 1rem}
+h1,h2,h3{line-height:1.16}
+h1{font-family:Georgia,"Times New Roman",serif;font-weight:400;font-size:clamp(2.5rem,5.5vw,4.5rem);letter-spacing:-.045em;margin:.4rem 0 1.3rem;max-width:14ch}
+h2{font-size:1.45rem;letter-spacing:-.025em;margin:.2rem 0 1rem}
+h3{font-size:1.08rem;margin:1.2rem 0 .6rem}
+.shell{max-width:1160px;padding:0 28px;margin:auto}
+.masthead{display:flex;gap:1rem;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line);padding:1.25rem 0}
+.wordmark{font-weight:800;letter-spacing:-.03em}
+.edition{font-size:.73rem;letter-spacing:.11em;text-transform:uppercase;color:var(--muted)}
+.hero{display:grid;grid-template-columns:1.25fr 1fr;gap:3rem;align-items:end;padding:3.2rem 0 2rem}
+.eyebrow{font-size:.73rem;letter-spacing:.12em;text-transform:uppercase;font-weight:800;color:var(--green)}
+.lead{font-size:1.08rem;color:var(--muted);max-width:53ch}
+.course-card{padding:1.4rem 1.6rem;border:1px solid #bfcfc1;border-radius:14px;background:var(--pale);margin-bottom:.7rem}
+.course-card h2{font-size:1.2rem}
+.course-card p{font-size:.9rem}
+.course-meta{font-size:.77rem;color:var(--muted);margin:.8rem 0 0}
+.actions{display:flex;flex-wrap:wrap;gap:.6rem;align-items:center}
+.button{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:.65rem 1rem;border:1px solid var(--green);border-radius:7px;font-size:.9rem;font-weight:700;line-height:1.4;text-decoration:none;max-width:100%}
+.primary{background:var(--green);color:#fff}
+.secondary{background:var(--white);color:var(--green)}
+.button:hover:enabled{filter:brightness(.95)}
+.text-link{display:inline-block;margin-top:.85rem;font-size:.9rem}
+.lab-input{display:grid;grid-template-columns:1fr 1fr;gap:2rem;border:1px solid var(--line);border-radius:14px;background:var(--white);padding:1.7rem}
+.step-number{display:inline-grid;place-items:center;width:25px;height:25px;background:var(--ink);color:white;border-radius:50%;font-size:.75rem;margin-right:.45rem;vertical-align:middle}
+label{display:block;font-size:.85rem;font-weight:700;margin:.8rem 0 .35rem}
+select,textarea{display:block;width:100%;max-width:100%;min-width:0;border:1px solid #a6b9ad;border-radius:7px;background:#fff;color:var(--ink);padding:.7rem .8rem;min-height:44px}
+textarea{font:1.12rem/1.75 ui-monospace,SFMono-Regular,Consolas,monospace;resize:vertical;min-height:132px}
+textarea[aria-invalid=true]{border:2px solid var(--warning)}
+.help{font-size:.79rem;color:var(--muted);margin:.55rem 0 .95rem}
+.example-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:.6rem;align-items:end}
+.example-row label{margin:0}
+.example-note{border-left:3px solid var(--gold);padding:.65rem .9rem;margin:1rem 0;font-size:.92rem}
+.table-status{min-height:1.6rem;color:var(--green);font-size:.88rem;padding:.5rem 0;margin:.6rem 0 1.3rem}
+.error{background:#fff0e7;color:var(--warning);border-left:4px solid var(--warning);padding:.7rem 1rem;margin:.9rem 0;font-size:.88rem}
+.result-title{display:flex;flex-wrap:wrap;gap:1rem;justify-content:space-between;align-items:center;margin:1.2rem 0}
+.result-title h2{margin:0}
+.result-title p{margin:.35rem 0 0;font-size:.85rem;color:var(--muted)}
+.metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.8rem}
+.metric{border:1px solid var(--line);border-radius:10px;padding:1rem 1.15rem;background:var(--white);min-width:0}
+.metric strong,.metric span{display:block}
+.metric strong{font-size:.82rem;line-height:1.5}
+.metric .metric-value{font:1.75rem/1.35 ui-monospace,SFMono-Regular,Consolas,monospace;margin:.4rem 0 .1rem;letter-spacing:-.05em}
+.metric .metric-unit{font-size:.72rem;color:var(--muted)}
+.metric.shared-metric{background:var(--ink);border-color:var(--ink);color:#fff}
+.shared-metric .metric-unit{color:#d4e1d7}
+.metric-note{font-size:.79rem;color:var(--muted);margin:.7rem 0 1.5rem}
+.panel{border:1px solid var(--line);border-radius:13px;background:var(--white);padding:1.55rem;margin:1.1rem 0;min-width:0}
+.panel>p{max-width:82ch}
+.two-column{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;align-items:start}
+.two-column>.panel{margin:0;height:100%}
+.table-scroll{overflow-x:auto;overscroll-behavior-x:contain;max-width:100%;border:1px solid var(--line);border-radius:8px;margin:.9rem 0}
+table{border-collapse:collapse;width:100%;font-size:.86rem;line-height:1.5;text-align:left}
+caption{text-align:left;font-size:.77rem;color:var(--muted);padding:.75rem .8rem;background:#f5f6ef}
+th,td{padding:.75rem .8rem;border-bottom:1px solid var(--line);vertical-align:top}
+thead th{background:#edf0e7;font-size:.74rem}
+tbody th{font-weight:700}
+tfoot th,tfoot td{background:#edf0e7;font-weight:700}
+tr:last-child>th,tr:last-child>td{border-bottom:0}
+td strong{font-size:.88rem}
+.cell-detail{display:block;font: .79rem/1.65 ui-monospace,SFMono-Regular,Consolas,monospace;white-space:nowrap;margin-top:.15rem}
+#joint-table table{min-width:450px}
+#joint-table .marginal{background:#f1f3eb}
+#joint-table th:first-child{min-width:95px}
+.section-intro{font-size:.94rem;color:var(--muted)}
+.legend{display:flex;flex-wrap:wrap;gap:.45rem 1.1rem;margin:.9rem 0;font-size:.77rem}
+.legend span:before{content:"";display:inline-block;width:11px;height:11px;margin-right:.35rem;border-radius:2px;vertical-align:-1px}
+.legend .legend-shared:before,.bar-segment.shared{background:var(--green)}
+.legend .legend-x:before,.bar-segment.remaining-x{background:var(--blue)}
+.legend .legend-y:before,.bar-segment.remaining-y{background:var(--gold)}
+.decomposition-row{margin:1rem 0 1.25rem}
+.bar-heading{display:flex;justify-content:space-between;gap:1rem;align-items:baseline;font-size:.9rem}
+.bar-heading span{font: .86rem/1.4 ui-monospace,SFMono-Regular,Consolas,monospace}
+.bar-track{display:flex;height:24px;background:#ebede5;border:1px solid #d0d9cb;border-radius:4px;overflow:hidden;margin:.45rem 0}
+.bar-segment{display:block;height:100%;flex-shrink:0}
+.bar-formula{font-size:.73rem;color:var(--muted);margin:.3rem 0;overflow-wrap:anywhere}
+.small-values{font-size:.86rem;color:var(--muted)}
+.small-values strong{color:var(--ink)}
+.verdict{font-size:1.02rem;font-weight:800;color:var(--green)}
+fieldset{border:0;padding:0;margin:1rem 0;min-width:0}
+legend{font-size:.86rem;font-weight:800;padding:0}
+.condition-controls{display:grid;grid-template-columns:1fr 1fr;gap:1rem;max-width:650px}
+.condition-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.8rem;margin:1rem 0}
+.condition-summary>div{padding:.9rem 1rem;background:#f0f3ea;border-radius:8px;min-width:0}
+.condition-summary strong{display:block;font-size:.77rem}
+.condition-summary output{font:1.3rem/1.65 ui-monospace,SFMono-Regular,Consolas,monospace;overflow-wrap:anywhere}
+.condition-summary small{font-size:.72rem;color:var(--muted)}
+.condition-message{padding:.85rem 1rem;border-left:3px solid var(--green);background:var(--pale);font-size:.91rem}
+#conditional-distribution table{min-width:320px}
+#conditional-distribution th{width:30%}
+#conditional-distribution td{width:35%}
+.probability-track{display:block;width:100%;height:10px;background:#e9ece4;margin-top:.5rem;border-radius:3px;overflow:hidden}
+.probability-bar{display:block;height:100%;background:var(--blue)}
+.probability-bar.after{background:var(--green)}
+#weighted-conditionals table{min-width:400px}
+.observed-row{background:#e9f1e6}
+details{border-top:1px solid var(--line);margin:1.2rem 0 0;padding:1rem 0 0}
+summary{font-size:.94rem;font-weight:750;cursor:pointer;line-height:1.5;padding:.25rem 0}
+details>p{font-size:.85rem;color:var(--muted)}
+#factorization-table table{min-width:440px}
+#cell-contributions table{min-width:910px}
+#cell-contributions td{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:.78rem}
+#cell-contributions td:nth-child(4),#cell-contributions td:nth-child(6){min-width:135px}
+.negative-term{color:#973d2b;font-weight:800}
+#numerical-note{max-width:90ch;font-size:.84rem}
+.scope{margin:1.3rem 0 2.2rem;padding:1.1rem 1.4rem;border-left:3px solid var(--gold);font-size:.89rem;color:var(--muted)}
+.scope strong{color:var(--ink)}
+footer{padding:1.5rem 0 2.3rem;border-top:1px solid var(--line);font-size:.75rem;color:var(--muted);overflow-wrap:anywhere}
+footer p{max-width:90ch}
+.skip-link{position:absolute;top:-5rem;left:1rem;background:white;padding:.7rem 1rem;z-index:2}
+.skip-link:focus{top:1rem}
+noscript p{padding:1rem;border:2px solid var(--warning);background:white}
+@media(max-width:850px){
+.hero{grid-template-columns:1fr 1fr;gap:1.5rem;padding-top:2rem}
+.lab-input{gap:1.3rem;padding:1.3rem}
+.two-column{grid-template-columns:1fr}
+.two-column>.panel{height:auto}
+.metric .metric-value{font-size:1.45rem}
+}
+@media(max-width:620px){
+.shell{padding:0 16px}
+.masthead{padding:1rem 0;align-items:start}
+.edition{max-width:14ch;text-align:right;font-size:.65rem}
+.hero{display:block;padding:1.7rem 0 1rem}
+h1{max-width:14ch;font-size:2.9rem}
+.course-card{padding:1.2rem;margin-top:1.4rem}
+.lab-input{grid-template-columns:1fr;padding:1.2rem;gap:1.5rem}
+.example-row{grid-template-columns:1fr}
+.example-row .button{justify-self:start}
+.metrics{grid-template-columns:1fr 1fr;gap:.65rem}
+.metric{padding:.85rem .9rem}
+.metric .metric-value{font-size:1.35rem;letter-spacing:-.065em}
+.panel{padding:1.1rem}
+.condition-controls{grid-template-columns:1fr 1fr;gap:.6rem}
+.condition-summary{grid-template-columns:1fr}
+.condition-summary>div{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:.4rem;align-items:baseline}
+.condition-summary strong{font-size:.81rem}
+.condition-summary small{grid-column:2}
+.condition-message{padding:.7rem .8rem}
+.result-title .button{width:100%}
+.actions .button{flex-grow:1}
+.scope{padding:.9rem 1rem}
+}
+</style>
+</head>
+<body>
+<a class="skip-link" href="#count-form">Skip to the count table</a>
+<div class="shell">
+<header class="masthead"><span class="wordmark">RecallWeave</span><span class="edition">Probability lab · 16 questions</span></header>
+<main>
+<section class="hero" aria-labelledby="page-title">
+<div><p class="eyebrow">Information theory</p><h1 id="page-title">What one label reveals.</h1><p class="lead">Draw one card from a box. Each card has an X label and a Y label. Change the counts, then explore how much seeing one label tells you about the other.</p></div>
+<aside class="course-card" aria-labelledby="course-heading"><h2 id="course-heading">Try it. Then explain it.</h2><p>Use the lab to test an idea, then work through sixteen questions on joint probability, uncertainty and shared information.</p><div class="actions"><button id="download-course" class="button primary" type="button">Download course</button><button id="download-guide" class="button secondary" type="button">Download worked guide</button></div><a class="text-link" href="../demo.html" target="_blank" rel="noopener">Open the RecallWeave learner ↗</a><p class="course-meta">Import the JSON in the learner. The course and guide stay fixed when you edit this table.</p></aside>
+</section>
+<noscript><p>This explorer needs JavaScript for local calculations and downloads. The <a href="information-theory.md">worked guide</a> and <a href="information-theory.json">course JSON</a> are also available as separate files beside this page.</p></noscript>
+<section class="lab-input" aria-labelledby="input-heading">
+<div><h2 id="input-heading"><span class="step-number">1</span> Build a box of cards</h2>
+<form id="count-form">
+<label for="count-table">Counts by row (X) and column (Y)</label>
+<textarea id="count-table" rows="4" maxlength="512" spellcheck="false" autocomplete="off" aria-describedby="count-help table-error">3 1
+1 3</textarea>
+<p class="help" id="count-help">One row per line, with counts separated by spaces. Use 2–4 rows and 2–4 columns; whole counts 0–999, with at least one card.</p>
+<button id="apply-table" class="button primary" type="submit">Apply table</button>
+<p id="table-error" class="error" role="alert" hidden=""></p>
+</form></div>
+<div><h2>Choose a question to explore</h2><div class="example-row"><div><label for="example-choice">Authored example</label><select id="example-choice"><option value="independent">Independent fair labels</option><option value="copy">A perfect copy</option><option value="biased-copy">A biased perfect copy</option><option value="opposite">Opposite labels</option><option value="coarse">Four labels become two groups</option><option value="noisy">A noisy correspondence</option><option value="rare">A rare ambiguous observation</option><option value="empty">An unused category</option><option value="constant">Only one populated pair</option><option value="near">A tiny dependence</option></select></div><button id="use-example" class="button secondary" type="button">Use example</button></div><p class="example-note" id="example-note">Some pairs occur less often than under independence. Inspect their signed contributions to the total.</p><p class="help">Selecting a name leaves your table in place. Use the example to apply its counts. All examples describe a uniform draw from an invented finite box.</p></div>
+</section>
+<p id="table-status" class="table-status" role="status" aria-live="polite">Applied 8 cards. Counts and fractions are exact; information values are approximate bits.</p>
+<div id="applied-result">
+<div class="result-title"><div><h2 id="result-heading" tabindex="-1"><span class="step-number">2</span> Read the applied table</h2><p id="applied-summary">8 cards · 2 X labels · 2 Y labels</p></div><button id="download-observation" class="button secondary" type="button">Download this observation</button></div>
+<div class="metrics" aria-label="Information values in approximate bits">
+<div class="metric"><strong>Uncertainty in X · H(X)</strong><output id="entropy-x" class="metric-value" data-bits="1">1</output><span class="metric-unit">bits before seeing Y</span></div>
+<div class="metric"><strong>Uncertainty in Y · H(Y)</strong><output id="entropy-y" class="metric-value" data-bits="1">1</output><span class="metric-unit">bits before seeing X</span></div>
+<div class="metric"><strong>Joint · H(X,Y)</strong><output id="entropy-joint" class="metric-value" data-bits="1.8112781244591325">1.811278</output><span class="metric-unit">bits for the pair</span></div>
+<div class="metric shared-metric"><strong>Shared · I(X;Y)</strong><output id="mutual-information" class="metric-value" data-bits="0.18872187554086717">0.188722</output><span class="metric-unit">bits one label reveals about the other</span></div>
+</div>
+<p class="metric-note">Counts and reduced fractions are exact. All bit values are approximate base-two logarithm calculations. Tiny nonzero values use scientific notation.</p>
+<section class="panel" aria-labelledby="joint-heading"><h2 id="joint-heading">Start with the probabilities</h2><p class="section-intro">Each cell describes both labels on the same draw. Sum a row or column to ignore the other label. Category names alone do not make outcomes equally likely.</p><div id="joint-table" class="table-scroll" role="region" aria-label="Joint probability table; scroll horizontally if needed" tabindex="0"><table><caption>Joint counts and exact probabilities — 8 cards</caption><thead><tr><th scope="col">X / Y</th><th scope="col">Y1</th><th scope="col">Y2</th><th scope="col">X marginal</th></tr></thead><tbody><tr><th scope="row">X1</th><td data-row="0" data-column="0" data-probability="3/8" style="background-color: rgba(33, 128, 109, 0.125);"><strong>3 cards</strong><span class="cell-detail">P = 3/8</span></td><td data-row="0" data-column="1" data-probability="1/8" style="background-color: rgba(33, 128, 109, 0.07);"><strong>1 card</strong><span class="cell-detail">P = 1/8</span></td><td class="marginal"><strong>4 cards</strong><span class="cell-detail">P = 1/2</span></td></tr><tr><th scope="row">X2</th><td data-row="1" data-column="0" data-probability="1/8" style="background-color: rgba(33, 128, 109, 0.07);"><strong>1 card</strong><span class="cell-detail">P = 1/8</span></td><td data-row="1" data-column="1" data-probability="3/8" style="background-color: rgba(33, 128, 109, 0.125);"><strong>3 cards</strong><span class="cell-detail">P = 3/8</span></td><td class="marginal"><strong>4 cards</strong><span class="cell-detail">P = 1/2</span></td></tr></tbody><tfoot><tr><th scope="row">Y marginal</th><td><strong>4 cards</strong><span class="cell-detail">P = 1/2</span></td><td><strong>4 cards</strong><span class="cell-detail">P = 1/2</span></td><td>N = 8; P = 1</td></tr></tfoot></table></div><p class="help">On a narrow screen, focus a table region and use the arrow keys, or scroll sideways.</p></section>
+<div class="two-column">
+<section class="panel" aria-labelledby="decomposition-heading"><h2 id="decomposition-heading">Where the uncertainty goes</h2><div class="legend" aria-label="Bar segment meanings"><span class="legend-shared">Shared information</span><span class="legend-x">X remaining after Y</span><span class="legend-y">Y remaining after X</span></div><div id="entropy-bars"><div class="decomposition-row"><div class="bar-heading"><strong>H(X)</strong><span>1 bits</span></div><div class="bar-track" aria-hidden="true"><span class="bar-segment shared" title="Shared: 0.188722 bits" style="width: 9.43609%;"></span><span class="bar-segment remaining-x" title="X remaining: 0.811278 bits" style="width: 40.5639%;"></span></div><p class="bar-formula">I(X;Y) + H(X given Y)</p></div><div class="decomposition-row"><div class="bar-heading"><strong>H(Y)</strong><span>1 bits</span></div><div class="bar-track" aria-hidden="true"><span class="bar-segment shared" title="Shared: 0.188722 bits" style="width: 9.43609%;"></span><span class="bar-segment remaining-y" title="Y remaining: 0.811278 bits" style="width: 40.5639%;"></span></div><p class="bar-formula">I(X;Y) + H(Y given X)</p></div><div class="decomposition-row"><div class="bar-heading"><strong>H(X,Y)</strong><span>1.811278 bits</span></div><div class="bar-track" aria-hidden="true"><span class="bar-segment shared" title="Shared: 0.188722 bits" style="width: 9.43609%;"></span><span class="bar-segment remaining-x" title="X remaining: 0.811278 bits" style="width: 40.5639%;"></span><span class="bar-segment remaining-y" title="Y remaining: 0.811278 bits" style="width: 40.5639%;"></span></div><p class="bar-formula">I(X;Y) + H(X given Y) + H(Y given X)</p></div></div><p id="bar-scale" class="help">All tracks use the same scale: 0 to 2 bits.</p><p class="small-values">H(X given Y) = <strong><output id="remaining-x" data-bits="0.8112781244591328">0.811278</output> bits</strong><br>H(Y given X) = <strong><output id="remaining-y" data-bits="0.8112781244591328">0.811278</output> bits</strong></p><p class="help">Tiny segments can be too small to see. Use the numbers to compare them. These bars encode lengths on a common scale.</p></section>
+<section class="panel" aria-labelledby="independence-heading"><h2 id="independence-heading">Does either label tell you anything?</h2><p id="independence-verdict" class="verdict" data-independent="false">Dependent — at least one exact check differs.</p><p id="independence-explanation" class="section-intro">4 of 4 cell checks differ. This verdict uses integer counts, even when the information is very small.</p><p class="help">Independence requires every joint probability to equal the product of its marginals. The exact test is <strong>cell count × total = row total × column total</strong>. Rounded bits never decide it.</p><details id="factorization-details"><summary>Inspect every exact check</summary><div id="factorization-table" class="table-scroll" role="region" aria-label="Exact integer independence checks" tabindex="0"><table><caption>Exact factorization: n × N compared with row total × column total</caption><thead><tr><th scope="col">Pair</th><th scope="col">n × N</th><th scope="col">Row × column</th><th scope="col">Equal?</th></tr></thead><tbody><tr><th scope="row">X1, Y1</th><td>24</td><td>16</td><td>No</td></tr><tr><th scope="row">X1, Y2</th><td>8</td><td>16</td><td>No</td></tr><tr><th scope="row">X2, Y1</th><td>8</td><td>16</td><td>No</td></tr><tr><th scope="row">X2, Y2</th><td>24</td><td>16</td><td>No</td></tr></tbody></table></div></details></section>
+</div>
+<section class="panel" aria-labelledby="conditioning-heading"><h2 id="conditioning-heading"><span class="step-number">3</span> Observe one label</h2><p class="section-intro">Conditioning means keeping only cards carrying the observed label. The denominator changes to the number of cards that remain.</p>
+<fieldset id="conditioning-controls"><legend>Choose the observation</legend><div class="condition-controls"><div><label for="condition-axis">Which label do you see?</label><select id="condition-axis"><option value="X">Observe X</option><option value="Y">Observe Y</option></select></div><div><label for="condition-value">Observed value</label><select id="condition-value"><option value="0">X1</option><option value="1">X2</option></select></div></div></fieldset>
+<h3 id="condition-heading">What happens to Y after seeing X1?</h3><p id="condition-probability" class="help">P(X1) = 1/2 (4 of 8 cards).</p>
+<div class="condition-summary"><div><strong>Before observing</strong><output id="entropy-before" data-bits="1">1</output><small>bits</small></div><div><strong id="entropy-after-label">After X1</strong><output id="entropy-after" data-bits="0.8112781244591328">0.811278</output><small>bits when defined</small></div><div><strong id="conditional-average-label">Average after observing X</strong><output id="conditional-average" data-bits="0.8112781244591328">0.811278</output><small>bits, weighted over all observations</small></div></div>
+<p id="condition-message" class="condition-message">This is one observed label. Conditional entropy H(Y given X) averages over every possible X label with its probability as weight.</p>
+<div id="conditional-distribution" class="table-scroll" role="region" aria-label="Marginal and selected conditional probabilities" tabindex="0"><table><caption>Distribution of Y: before observing versus after X1</caption><thead><tr><th scope="col">Y outcome</th><th scope="col">Before</th><th scope="col">After X1</th></tr></thead><tbody><tr><th scope="row">Y1</th><td>1/2<span class="probability-track"><span class="probability-bar before" aria-hidden="true" style="width: 50%;"></span></span></td><td>3/4<span class="probability-track"><span class="probability-bar after" aria-hidden="true" style="width: 75%;"></span></span></td></tr><tr><th scope="row">Y2</th><td>1/2<span class="probability-track"><span class="probability-bar before" aria-hidden="true" style="width: 50%;"></span></span></td><td>1/4<span class="probability-track"><span class="probability-bar after" aria-hidden="true" style="width: 25%;"></span></span></td></tr></tbody></table></div><p class="help">Each probability bar uses the same scale, from 0 to 1. Purple: before observing. Green: after the selected observation.</p>
+<div id="weighted-conditionals" class="table-scroll" role="region" aria-label="All conditional entropies and their probability weights" tabindex="0"><table><caption>Average every possible observation: H(Y given X)</caption><thead><tr><th scope="col">Observe</th><th scope="col">Probability</th><th scope="col">Entropy afterward</th><th scope="col">Weighted term</th></tr></thead><tbody><tr class="observed-row"><th scope="row">X1</th><td>1/2</td><td>0.811278</td><td>0.405639</td></tr><tr><th scope="row">X2</th><td>1/2</td><td>0.811278</td><td>0.405639</td></tr></tbody><tfoot><tr><th scope="row">Average</th><td>1</td><td>Probability-weighted</td><td>0.811278</td></tr></tfoot></table></div>
+<p class="help">An impossible observation has undefined conditional probabilities and entropy. Its zero probability gives it zero weight in the average.</p>
+</section>
+<section class="panel" aria-labelledby="terms-heading"><h2 id="terms-heading">Inspect the terms, including the negative ones</h2><p class="section-intro">Entropy averages surprise. Mutual information averages the log ratio between a joint probability and the corresponding independent probability. An individual signed information term can be negative even though the total is nonnegative.</p>
+<details id="entropy-details"><summary>Marginal entropy terms</summary><div id="marginal-contributions" class="table-scroll" role="region" aria-label="Individual X and Y entropy contributions" tabindex="0"><table><caption>Marginal entropy terms — sum X terms for H(X), Y terms for H(Y)</caption><thead><tr><th scope="col">Label</th><th scope="col">Probability</th><th scope="col">Entropy term (bits)</th></tr></thead><tbody><tr><th scope="row">X1</th><td>1/2</td><td>0.5</td></tr><tr><th scope="row">X2</th><td>1/2</td><td>0.5</td></tr><tr><th scope="row">Y1</th><td>1/2</td><td>0.5</td></tr><tr><th scope="row">Y2</th><td>1/2</td><td>0.5</td></tr></tbody></table></div></details>
+<details id="cell-details"><summary>Every joint cell and its signed information term</summary><p>Information columns are in bits. A zero-probability cell has zero weighted terms. Its surprise and pointwise information are excluded here; they are not finite zero values.</p><div id="cell-contributions" class="table-scroll" role="region" aria-label="All joint entropy and signed mutual information contributions" tabindex="0"><table><caption>Each joint cell: p is its probability; q is the product of its marginals</caption><thead><tr><th scope="col">Pair</th><th scope="col">p</th><th scope="col">q</th><th scope="col">Surprise log2(1/p)</th><th scope="col">Entropy term</th><th scope="col">Pointwise log2(p/q)</th><th scope="col">Signed p × log2(p/q)</th></tr></thead><tbody><tr data-row="0" data-column="0"><th scope="row">X1, Y1</th><td>3/8</td><td>1/4</td><td>1.415037</td><td>0.530639</td><td>0.584963</td><td data-bits="0.21936093777043358">0.219361</td></tr><tr data-row="0" data-column="1"><th scope="row">X1, Y2</th><td>1/8</td><td>1/4</td><td>3</td><td>0.375</td><td>-1</td><td data-bits="-0.125" class="negative-term">-0.125</td></tr><tr data-row="1" data-column="0"><th scope="row">X2, Y1</th><td>1/8</td><td>1/4</td><td>3</td><td>0.375</td><td>-1</td><td data-bits="-0.125" class="negative-term">-0.125</td></tr><tr data-row="1" data-column="1"><th scope="row">X2, Y2</th><td>3/8</td><td>1/4</td><td>1.415037</td><td>0.530639</td><td>0.584963</td><td data-bits="0.21936093777043358">0.219361</td></tr></tbody></table></div><p>Sum of the displayed terms, before display rounding: <strong><output id="direct-mi-sum" data-bits="0.18872187554086717">0.188722</output> bits</strong>.<br>Numerically stabilized total: <strong><output id="stable-mi-sum" data-bits="0.18872187554086717">0.188722</output> bits</strong>.</p></details>
+<details id="arithmetic-details"><summary>Why very small information needs careful arithmetic</summary><p id="numerical-note">Subtracting almost equal entropies or adding positive and negative terms can lose tiny differences. The total uses an equivalent divergence expression that avoids that cancellation. The signed table still shows the original p × log2(p/q) terms. The complete observation includes both decompositions. See the worked guide for the identity; exact integer checks alone decide independence.</p></details>
+</section>
+</div>
+<aside class="scope"><strong>What this model says.</strong> These numbers describe a uniform draw from this finite box. Counts from observations would describe their recorded distribution; the table alone does not establish a population effect, a causal direction, learning progress or a compressed file size. A perfect opposite can reveal as much as a perfect copy.</aside>
+</main>
+<footer><p>Original lesson and examples prepared with AI assistance · CC0-1.0 for original content. Definitions checked against <a href="https://web.stanford.edu/class/ee376a/files/2017-18/lecture_3.pdf" target="_blank" rel="noopener">Stanford EE376A, Lecture 3</a> and <a href="https://ocw.mit.edu/courses/6-441-information-theory-spring-2010/aa7737b3645178c0b746a57f1bdff2cd_MIT6_441S10_lec01.pdf" target="_blank" rel="noopener">MIT 6.441, Lecture 1</a>. Linked sources retain their own terms.</p><p>This page calculates locally and uses no browser storage. Downloads start only when requested. External source links and the learner link are explicit navigation.</p></footer>
+</div>
+<script>
+(function () {
+"use strict";
+/** A finite, authored joint distribution. No learner model or sampling is used. */
+const INFORMATION_FORMAT = 'recallweave-information-table/1';
+const MAX_INFORMATION_TEXT_LENGTH = 512;
+
+function freezeInformation(value) {
+  if (value && typeof value === 'object') {
+    for (const child of Object.values(value)) freezeInformation(child);
+    Object.freeze(value);
+  }
+  return value;
+}
+
+const INFORMATION_EXAMPLES = freezeInformation([
+  { id: 'independent', title: 'Independent fair labels', text: '1 1\n1 1', note: 'Each X label has the same Y distribution. Does seeing X change uncertainty about Y?' },
+  { id: 'copy', title: 'A perfect copy', text: '2 0\n0 2', note: 'The two labels vary, but knowing either one identifies the other.' },
+  { id: 'biased-copy', title: 'A biased perfect copy', text: '3 0\n0 1', note: 'Prediction is perfect. The shared information is less than one bit because the labels are uneven.' },
+  { id: 'opposite', title: 'Opposite labels', text: '0 1\n1 0', note: 'The labels disagree every time. One still determines the other.' },
+  { id: 'coarse', title: 'Four labels become two groups', text: '1 0\n1 0\n0 1\n0 1', note: 'X determines Y, but a Y label leaves two possible X labels. Compare the two conditional entropies.' },
+  { id: 'noisy', title: 'A noisy correspondence', text: '3 1\n1 3', note: 'Some pairs occur less often than under independence. Inspect their signed contributions to the total.' },
+  { id: 'rare', title: 'A rare ambiguous observation', text: '8 0\n1 1', note: 'Before observing X, Y is usually Y1. Observing X2 makes Y evenly split. Compare that one case with the weighted average.' },
+  { id: 'empty', title: 'An unused category', text: '1 0 0\n1 0 0\n0 0 0', note: 'Y is already certain. X3, Y2 and Y3 have no cards; conditioning on them is undefined.' },
+  { id: 'constant', title: 'Only one populated pair', text: '7 0\n0 0', note: 'Both labels are already known before drawing. There is no uncertainty for one to remove.' },
+  { id: 'near', title: 'A tiny dependence', text: '998 999\n997 998', note: 'All four exact factorization checks differ by one. Rounded information values must not be used to decide independence.' }
+]);
+
+/** Strict, bounded text input; original text is retained by the page's explicit export. */
+function parseInformationCounts(text) {
+  if (typeof text !== 'string' || text.length > MAX_INFORMATION_TEXT_LENGTH) {
+    throw new RangeError('Use at most 512 characters for the count table.');
+  }
+  const trimmed = text.trim();
+  if (!trimmed) throw new RangeError('Enter two to four rows of counts.');
+  const lines = trimmed.split(/\r?\n/);
+  if (lines.length < 2 || lines.length > 4) {
+    throw new RangeError('Use two to four rows, one row per line.');
+  }
+  const counts = lines.map(function (line, row) {
+    if (!line.trim()) throw new RangeError('Row ' + (row + 1) + ' is blank.');
+    const cells = line.trim().split(/\s+/u);
+    if (cells.length < 2 || cells.length > 4) {
+      throw new RangeError('Row ' + (row + 1) + ' needs two to four counts.');
+    }
+    return cells.map(function (token, column) {
+      if (!/^(0|[1-9][0-9]{0,2})$/.test(token)) {
+        throw new RangeError('Row ' + (row + 1) + ', column ' + (column + 1) + ': use a whole count from 0 to 999.');
+      }
+      return Number(token);
+    });
+  });
+  return freezeInformation(copyInformationCounts(counts));
+}
+
+function copyInformationCounts(input) {
+  if (!Array.isArray(input) || input.length < 2 || input.length > 4) {
+    throw new RangeError('The table needs two to four rows.');
+  }
+  const width = Array.isArray(input[0]) ? input[0].length : 0;
+  if (width < 2 || width > 4) throw new RangeError('The table needs two to four columns.');
+  const copy = [];
+  let total = 0;
+  for (let row = 0; row < input.length; row += 1) {
+    if (!Array.isArray(input[row]) || input[row].length !== width) {
+      throw new RangeError('Every row must have the same number of counts.');
+    }
+    const resultRow = [];
+    for (let column = 0; column < width; column += 1) {
+      const count = input[row][column];
+      if (typeof count !== 'number' || !Number.isInteger(count) || count < 0 || count > 999) {
+        throw new RangeError('Every count must be an integer from 0 to 999.');
+      }
+      resultRow.push(count === 0 ? 0 : count);
+      total += count;
+    }
+    copy.push(resultRow);
+  }
+  if (total === 0) throw new RangeError('At least one count must be greater than zero.');
+  return copy;
+}
+
+function informationFraction(numerator, denominator) {
+  let a = numerator;
+  let b = denominator;
+  while (b !== 0) {
+    const next = a % b;
+    a = b;
+    b = next;
+  }
+  const divisor = a || 1;
+  return {
+    numerator: numerator / divisor,
+    denominator: denominator / divisor,
+    value: numerator / denominator
+  };
+}
+
+function informationEntropyTerm(count, total) {
+  return count === 0 ? 0 : (count / total) * Math.log2(total / count);
+}
+
+/** phi(t)=(1+t)ln(1+t)-t; its quadratic series preserves tiny dependence. */
+function informationPhi(t) {
+  if (t === -1) return 1;
+  if (Math.abs(t) < 0.01) {
+    let power = t * t;
+    let result = 0;
+    for (let k = 2; k <= 12; k += 1) {
+      result += (k % 2 === 0 ? 1 : -1) * power / (k * (k - 1));
+      power *= t;
+    }
+    return result;
+  }
+  return (1 + t) * Math.log1p(t) - t;
+}
+
+function informationCondition(counts, total, population) {
+  if (total === 0) {
+    return { defined: false, probabilities: null, entropyBits: null, weightedEntropyBits: 0 };
+  }
+  const entropyBits = counts.reduce(function (sum, count) {
+    return sum + informationEntropyTerm(count, total);
+  }, 0);
+  return {
+    defined: true,
+    probabilities: counts.map(function (count) { return informationFraction(count, total); }),
+    entropyBits,
+    weightedEntropyBits: (total / population) * entropyBits
+  };
+}
+
+/** Complete detached snapshot. Counts and factorization checks are exact; bits are approximate. */
+function analyzeInformationTable(input) {
+  const counts = copyInformationCounts(input);
+  const rowTotals = counts.map(function (row) { return row.reduce(function (sum, n) { return sum + n; }, 0); });
+  const columnTotals = counts[0].map(function (_, column) {
+    return counts.reduce(function (sum, row) { return sum + row[column]; }, 0);
+  });
+  const total = rowTotals.reduce(function (sum, n) { return sum + n; }, 0);
+  const rows = counts.map(function (row, index) {
+    return {
+      label: 'X' + (index + 1), count: rowTotals[index],
+      probability: informationFraction(rowTotals[index], total),
+      entropyContributionBits: informationEntropyTerm(rowTotals[index], total),
+      conditionalY: informationCondition(row, rowTotals[index], total)
+    };
+  });
+  const columns = columnTotals.map(function (count, index) {
+    return {
+      label: 'Y' + (index + 1), count,
+      probability: informationFraction(count, total),
+      entropyContributionBits: informationEntropyTerm(count, total),
+      conditionalX: informationCondition(counts.map(function (row) { return row[index]; }), count, total)
+    };
+  });
+  const cells = [];
+  const factorizationDifferences = [];
+  for (let row = 0; row < counts.length; row += 1) {
+    for (let column = 0; column < counts[0].length; column += 1) {
+      const count = counts[row][column];
+      const jointCrossProduct = count * total;
+      const marginalCrossProduct = rowTotals[row] * columnTotals[column];
+      const difference = jointCrossProduct - marginalCrossProduct;
+      const delta = marginalCrossProduct === 0 ? null : difference / marginalCrossProduct;
+      const pointwiseInformationBits = count === 0 ? null : Math.log1p(delta) / Math.LN2;
+      const signedContributionBits = count === 0 ? 0 : (count / total) * pointwiseInformationBits;
+      const stabilizedContributionBits = marginalCrossProduct === 0 ? 0 :
+        (marginalCrossProduct / (total * total)) * informationPhi(delta) / Math.LN2;
+      if (difference !== 0) factorizationDifferences.push({ row, column, jointCrossProduct, marginalCrossProduct, difference });
+      cells.push({
+        row, column, x: rows[row].label, y: columns[column].label, count,
+        probability: informationFraction(count, total),
+        independentProbability: informationFraction(marginalCrossProduct, total * total),
+        surprisalBits: count === 0 ? null : Math.log2(total / count),
+        entropyContributionBits: informationEntropyTerm(count, total),
+        pointwiseInformationBits,
+        signedContributionBits,
+        stabilizedContributionBits,
+        zeroProbability: count === 0,
+        jointCrossProduct, marginalCrossProduct
+      });
+    }
+  }
+  const sum = function (items, key) { return items.reduce(function (value, item) { return value + item[key]; }, 0); };
+  const metrics = {
+    entropyXBits: sum(rows, 'entropyContributionBits'),
+    entropyYBits: sum(columns, 'entropyContributionBits'),
+    jointEntropyBits: sum(cells, 'entropyContributionBits'),
+    conditionalYGivenXBits: rows.reduce(function (value, row) { return value + row.conditionalY.weightedEntropyBits; }, 0),
+    conditionalXGivenYBits: columns.reduce(function (value, column) { return value + column.conditionalX.weightedEntropyBits; }, 0),
+    mutualInformationBits: sum(cells, 'stabilizedContributionBits'),
+    signedContributionSumBits: sum(cells, 'signedContributionBits')
+  };
+  return freezeInformation({
+    format: INFORMATION_FORMAT,
+    interpretation: 'Uniform draw from a finite authored box of cards bearing X and Y labels.',
+    arithmetic: 'Exact integer counts and reduced fractions; binary64 base-2 logarithms and approximate information values in bits.',
+    zeroConvention: 'Zero-probability summands are zero. A zero-marginal conditional is undefined. Null zero-cell surprisal and pointwise information are excluded, not finite zero.',
+    counts, total, rows, columns, cells, metrics,
+    independence: { exact: factorizationDifferences.length === 0, factorizationDifferences }
+  });
+}
+
+
+/** Mount the self-contained explorer; only explicit controls create downloads. */
+function mountInformationTheory(root, downloads) {
+  const doc = root.ownerDocument || root;
+  const find = function (id) { return root.querySelector('#' + id); };
+  const countsInput = find('count-table');
+  const result = find('applied-result');
+  const axisInput = find('condition-axis');
+  const valueInput = find('condition-value');
+  const status = find('table-status');
+  const error = find('table-error');
+  let applied = null;
+
+  function node(tag, text, className) {
+    const element = doc.createElement(tag);
+    if (text !== undefined && text !== null) element.textContent = String(text);
+    if (className) element.className = className;
+    return element;
+  }
+  function fraction(value) {
+    return value.denominator === 1 ? String(value.numerator) : value.numerator + '/' + value.denominator;
+  }
+  function bits(value) {
+    if (value === null) return 'Undefined';
+    if (value === 0) return '0';
+    if (Math.abs(value) < 0.000001) return value.toExponential(5);
+    return String(Number(value.toFixed(6)));
+  }
+  function output(id, value) {
+    const element = find(id);
+    element.textContent = bits(value);
+    element.dataset.bits = String(value);
+  }
+  function cell(tag, text, scope) {
+    const element = node(tag, text);
+    if (scope) element.scope = scope;
+    return element;
+  }
+  function makeTable(caption, headings, rows) {
+    const table = node('table');
+    table.append(node('caption', caption));
+    const head = node('thead');
+    const headingRow = node('tr');
+    for (const heading of headings) headingRow.append(cell('th', heading, 'col'));
+    head.append(headingRow);
+    table.append(head);
+    const body = node('tbody');
+    rows.forEach(function (values) {
+      const row = node('tr');
+      values.forEach(function (value, index) {
+        row.append(cell(index === 0 ? 'th' : 'td', value, index === 0 ? 'row' : undefined));
+      });
+      body.append(row);
+    });
+    table.append(body);
+    return table;
+  }
+  function retire(message) {
+    applied = null;
+    result.hidden = true;
+    find('download-observation').disabled = true;
+    find('conditioning-controls').disabled = true;
+    error.hidden = true;
+    error.textContent = '';
+    countsInput.removeAttribute('aria-invalid');
+    status.textContent = message;
+  }
+  function resetConditioning() {
+    axisInput.value = 'X';
+    fillConditionValues();
+  }
+  function fillConditionValues() {
+    if (!applied) return;
+    const labels = axisInput.value === 'X' ? applied.analysis.rows : applied.analysis.columns;
+    valueInput.replaceChildren();
+    labels.forEach(function (entry, index) {
+      const option = node('option', entry.label + (entry.count === 0 ? ' — no cards' : ''));
+      option.value = String(index);
+      valueInput.append(option);
+    });
+    valueInput.value = '0';
+  }
+  function renderJoint() {
+    const a = applied.analysis;
+    const table = node('table');
+    table.append(node('caption', 'Joint counts and exact probabilities — ' + a.total + ' cards'));
+    const head = node('thead');
+    const header = node('tr');
+    header.append(cell('th', 'X / Y', 'col'));
+    for (const column of a.columns) header.append(cell('th', column.label, 'col'));
+    header.append(cell('th', 'X marginal', 'col'));
+    head.append(header);
+    table.append(head);
+    const body = node('tbody');
+    a.rows.forEach(function (row, rowIndex) {
+      const tr = node('tr');
+      tr.append(cell('th', row.label, 'row'));
+      a.columns.forEach(function (_, columnIndex) {
+        const value = a.cells[rowIndex * a.columns.length + columnIndex];
+        const td = node('td');
+        td.dataset.row = String(rowIndex);
+        td.dataset.column = String(columnIndex);
+        td.dataset.probability = fraction(value.probability);
+        td.style.backgroundColor = 'rgba(33, 128, 109, ' + (0.04 + 0.23 * value.probability.value) + ')';
+        td.append(node('strong', value.count + (value.count === 1 ? ' card' : ' cards')),
+          node('span', 'P = ' + fraction(value.probability), 'cell-detail'));
+        tr.append(td);
+      });
+      const marginal = node('td', null, 'marginal');
+      marginal.append(node('strong', row.count + ' cards'), node('span', 'P = ' + fraction(row.probability), 'cell-detail'));
+      tr.append(marginal);
+      body.append(tr);
+    });
+    table.append(body);
+    const foot = node('tfoot');
+    const footer = node('tr');
+    footer.append(cell('th', 'Y marginal', 'row'));
+    a.columns.forEach(function (column) {
+      const td = node('td');
+      td.append(node('strong', column.count + ' cards'), node('span', 'P = ' + fraction(column.probability), 'cell-detail'));
+      footer.append(td);
+    });
+    footer.append(cell('td', 'N = ' + a.total + '; P = 1'));
+    foot.append(footer);
+    table.append(foot);
+    find('joint-table').replaceChildren(table);
+  }
+  function renderDecomposition() {
+    const m = applied.analysis.metrics;
+    const scale = Math.max(1, Math.ceil(m.jointEntropyBits * 2) / 2);
+    const i = m.mutualInformationBits;
+    const x = m.conditionalXGivenYBits;
+    const y = m.conditionalYGivenXBits;
+    const rows = [
+      ['H(X)', m.entropyXBits, [['Shared', i, 'shared'], ['X remaining', x, 'remaining-x']],
+        'I(X;Y) + H(X given Y)'],
+      ['H(Y)', m.entropyYBits, [['Shared', i, 'shared'], ['Y remaining', y, 'remaining-y']],
+        'I(X;Y) + H(Y given X)'],
+      ['H(X,Y)', m.jointEntropyBits, [['Shared', i, 'shared'], ['X remaining', x, 'remaining-x'], ['Y remaining', y, 'remaining-y']],
+        'I(X;Y) + H(X given Y) + H(Y given X)']
+    ];
+    const fragment = doc.createDocumentFragment();
+    for (const [label, total, parts, identity] of rows) {
+      const row = node('div', null, 'decomposition-row');
+      const heading = node('div', null, 'bar-heading');
+      heading.append(node('strong', label), node('span', bits(total) + ' bits'));
+      const track = node('div', null, 'bar-track');
+      track.setAttribute('aria-hidden', 'true');
+      for (const [name, value, className] of parts) {
+        const segment = node('span', null, 'bar-segment ' + className);
+        segment.style.width = String(100 * value / scale) + '%';
+        segment.title = name + ': ' + bits(value) + ' bits';
+        track.append(segment);
+      }
+      row.append(heading, track, node('p', identity, 'bar-formula'));
+      fragment.append(row);
+    }
+    find('entropy-bars').replaceChildren(fragment);
+    find('bar-scale').textContent = 'All tracks use the same scale: 0 to ' + bits(scale) + ' bits.';
+    output('remaining-x', x);
+    output('remaining-y', y);
+  }
+  function renderIndependence() {
+    const a = applied.analysis;
+    const verdict = find('independence-verdict');
+    verdict.textContent = a.independence.exact ? 'Independent — every exact check agrees.' : 'Dependent — at least one exact check differs.';
+    verdict.dataset.independent = String(a.independence.exact);
+    const differences = a.independence.factorizationDifferences;
+    find('independence-explanation').textContent = a.independence.exact
+      ? 'Each joint probability equals the product of its marginals. The two labels carry no information about each other in this finite box.'
+      : differences.length + ' of ' + a.cells.length + ' cell checks differ. This verdict uses integer counts, even when the information is very small.';
+    find('factorization-table').replaceChildren(makeTable(
+      'Exact factorization: n × N compared with row total × column total',
+      ['Pair', 'n × N', 'Row × column', 'Equal?'],
+      a.cells.map(function (c) { return [
+        c.x + ', ' + c.y, c.jointCrossProduct, c.marginalCrossProduct,
+        c.jointCrossProduct === c.marginalCrossProduct ? 'Yes' : 'No'
+      ]; })
+    ));
+  }
+  function renderContributions() {
+    const a = applied.analysis;
+    const marginalRows = a.rows.map(function (r) { return [r.label, fraction(r.probability), bits(r.entropyContributionBits)]; })
+      .concat(a.columns.map(function (c) { return [c.label, fraction(c.probability), bits(c.entropyContributionBits)]; }));
+    find('marginal-contributions').replaceChildren(makeTable(
+      'Marginal entropy terms — sum X terms for H(X), Y terms for H(Y)',
+      ['Label', 'Probability', 'Entropy term (bits)'], marginalRows
+    ));
+    const table = makeTable(
+      'Each joint cell: p is its probability; q is the product of its marginals',
+      ['Pair', 'p', 'q', 'Surprise log2(1/p)', 'Entropy term', 'Pointwise log2(p/q)', 'Signed p × log2(p/q)'],
+      a.cells.map(function (c) { return [
+        c.x + ', ' + c.y, fraction(c.probability), fraction(c.independentProbability),
+        c.zeroProbability ? 'Excluded (p = 0)' : bits(c.surprisalBits),
+        bits(c.entropyContributionBits),
+        c.zeroProbability ? 'Excluded (p = 0)' : bits(c.pointwiseInformationBits),
+        bits(c.signedContributionBits)
+      ]; })
+    );
+    Array.from(table.tBodies[0].rows).forEach(function (row, index) {
+      const c = a.cells[index];
+      row.dataset.row = String(c.row);
+      row.dataset.column = String(c.column);
+      row.cells[6].dataset.bits = String(c.signedContributionBits);
+      if (c.signedContributionBits < 0) row.cells[6].classList.add('negative-term');
+    });
+    find('cell-contributions').replaceChildren(table);
+    output('direct-mi-sum', a.metrics.signedContributionSumBits);
+    output('stable-mi-sum', a.metrics.mutualInformationBits);
+  }
+  function renderConditioning(announce) {
+    if (!applied) return;
+    const a = applied.analysis;
+    const observeX = axisInput.value === 'X';
+    const entries = observeX ? a.rows : a.columns;
+    const observedIndex = Number(valueInput.value);
+    const observed = entries[observedIndex];
+    if (!observed) return;
+    const outcomes = observeX ? a.columns : a.rows;
+    const condition = observeX ? observed.conditionalY : observed.conditionalX;
+    const before = observeX ? a.metrics.entropyYBits : a.metrics.entropyXBits;
+    const average = observeX ? a.metrics.conditionalYGivenXBits : a.metrics.conditionalXGivenYBits;
+    const target = observeX ? 'Y' : 'X';
+    const given = observeX ? 'X' : 'Y';
+    find('condition-heading').textContent = 'What happens to ' + target + ' after seeing ' + observed.label + '?';
+    find('condition-probability').textContent = 'P(' + observed.label + ') = ' + fraction(observed.probability) + ' (' + observed.count + ' of ' + a.total + ' cards).';
+    output('entropy-before', before);
+    find('entropy-after').textContent = condition.defined ? bits(condition.entropyBits) : 'Undefined';
+    find('entropy-after').dataset.bits = condition.defined ? String(condition.entropyBits) : 'null';
+    find('entropy-after-label').textContent = 'After ' + observed.label;
+    output('conditional-average', average);
+    find('conditional-average-label').textContent = 'Average after observing ' + given;
+    let message;
+    if (!condition.defined) {
+      message = 'There are no cards with ' + observed.label + '. This conditional distribution and its entropy are undefined. Its weight in the average is zero.';
+    } else if (condition.entropyBits > before + 1e-12) {
+      message = 'This particular observation increases uncertainty. The weighted average over all ' + given + ' observations can still decrease it; compare the average below.';
+    } else {
+      message = 'This is one observed label. Conditional entropy H(' + target + ' given ' + given + ') averages over every possible ' + given + ' label with its probability as weight.';
+    }
+    find('condition-message').textContent = message;
+    const table = makeTable(
+      'Distribution of ' + target + ': before observing versus after ' + observed.label,
+      [target + ' outcome', 'Before', 'After ' + observed.label],
+      outcomes.map(function (entry, index) { return [
+        entry.label, fraction(entry.probability), condition.defined ? fraction(condition.probabilities[index]) : 'Undefined'
+      ]; })
+    );
+    Array.from(table.tBodies[0].rows).forEach(function (row, index) {
+      const beforeBar = node('span', null, 'probability-bar before');
+      beforeBar.style.width = (100 * outcomes[index].probability.value) + '%';
+      beforeBar.setAttribute('aria-hidden', 'true');
+      const beforeTrack = node('span', null, 'probability-track');
+      beforeTrack.append(beforeBar);
+      row.cells[1].append(beforeTrack);
+      if (condition.defined) {
+        const afterBar = node('span', null, 'probability-bar after');
+        afterBar.style.width = (100 * condition.probabilities[index].value) + '%';
+        afterBar.setAttribute('aria-hidden', 'true');
+        const afterTrack = node('span', null, 'probability-track');
+        afterTrack.append(afterBar);
+        row.cells[2].append(afterTrack);
+      }
+    });
+    find('conditional-distribution').replaceChildren(table);
+    const weighted = makeTable(
+      'Average every possible observation: H(' + target + ' given ' + given + ')',
+      ['Observe', 'Probability', 'Entropy afterward', 'Weighted term'],
+      entries.map(function (entry) {
+        const c = observeX ? entry.conditionalY : entry.conditionalX;
+        return [entry.label, fraction(entry.probability), c.defined ? bits(c.entropyBits) : 'Undefined', bits(c.weightedEntropyBits)];
+      })
+    );
+    weighted.tBodies[0].rows[observedIndex].classList.add('observed-row');
+    const foot = node('tfoot');
+    const sumRow = node('tr');
+    sumRow.append(cell('th', 'Average', 'row'), cell('td', '1'), cell('td', 'Probability-weighted'), cell('td', bits(average)));
+    foot.append(sumRow);
+    weighted.append(foot);
+    find('weighted-conditionals').replaceChildren(weighted);
+    if (announce) status.textContent = 'Applied table unchanged. Conditioning view: observe ' + observed.label + (condition.defined ? '.' : ' — undefined because there are no such cards.');
+  }
+  function applyTable(focusResult) {
+    retire('Checking the table…');
+    try {
+      const text = countsInput.value;
+      const analysis = analyzeInformationTable(parseInformationCounts(text));
+      applied = { text, analysis };
+      result.hidden = false;
+      find('conditioning-controls').disabled = false;
+      find('download-observation').disabled = false;
+      find('applied-summary').textContent = analysis.total + ' cards · ' + analysis.rows.length + ' X labels · ' + analysis.columns.length + ' Y labels';
+      output('entropy-x', analysis.metrics.entropyXBits);
+      output('entropy-y', analysis.metrics.entropyYBits);
+      output('entropy-joint', analysis.metrics.jointEntropyBits);
+      output('mutual-information', analysis.metrics.mutualInformationBits);
+      resetConditioning();
+      renderJoint();
+      renderDecomposition();
+      renderIndependence();
+      renderContributions();
+      renderConditioning(false);
+      status.textContent = 'Applied ' + analysis.total + ' cards. Counts and fractions are exact; information values are approximate bits.';
+      if (focusResult) find('result-heading').focus();
+    } catch (cause) {
+      retire('No applied table. Correct the input and apply it again.');
+      error.textContent = cause instanceof Error ? cause.message : String(cause);
+      error.hidden = false;
+      countsInput.setAttribute('aria-invalid', 'true');
+      countsInput.focus();
+    }
+  }
+  function saveText(filename, text, type) {
+    const url = URL.createObjectURL(new Blob([text], { type }));
+    const anchor = node('a');
+    anchor.href = url;
+    anchor.download = filename;
+    anchor.hidden = true;
+    doc.body.append(anchor);
+    anchor.click();
+    anchor.remove();
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+  }
+
+  const exampleSelect = find('example-choice');
+  INFORMATION_EXAMPLES.forEach(function (example) {
+    const option = node('option', example.title);
+    option.value = example.id;
+    exampleSelect.append(option);
+  });
+  exampleSelect.value = 'noisy';
+  function updateExampleNote() {
+    const example = INFORMATION_EXAMPLES.find(function (entry) { return entry.id === exampleSelect.value; });
+    find('example-note').textContent = example.note;
+  }
+  exampleSelect.addEventListener('change', updateExampleNote);
+  find('use-example').addEventListener('click', function () {
+    const example = INFORMATION_EXAMPLES.find(function (entry) { return entry.id === exampleSelect.value; });
+    countsInput.value = example.text;
+    applyTable(true);
+  });
+  countsInput.addEventListener('input', function () { retire('Draft changed. Apply the table to calculate and download its result.'); });
+  find('count-form').addEventListener('submit', function (event) { event.preventDefault(); applyTable(true); });
+  axisInput.addEventListener('change', function () { fillConditionValues(); renderConditioning(true); });
+  valueInput.addEventListener('change', function () { renderConditioning(true); });
+  find('download-observation').addEventListener('click', function () {
+    if (!applied) return;
+    const axis = axisInput.value;
+    const index = Number(valueInput.value);
+    const entry = (axis === 'X' ? applied.analysis.rows : applied.analysis.columns)[index];
+    if (!entry) return;
+    const observation = {
+      format: 'recallweave-information-observation/1',
+      appliedText: applied.text,
+      conditioning: { observedAxis: axis, observedIndex: index, observedLabel: entry.label },
+      analysis: applied.analysis
+    };
+    saveText('information-observation.json', JSON.stringify(observation, null, 2) + '\n', 'application/json;charset=utf-8');
+    status.textContent = 'Observation download requested for the applied table and ' + entry.label + ' view.';
+  });
+  find('download-course').addEventListener('click', function () {
+    saveText('information-theory.json', downloads.courseText, 'application/json;charset=utf-8');
+    status.textContent = 'Course download requested. This fixed sixteen-question lesson is independent of the editable table.';
+  });
+  find('download-guide').addEventListener('click', function () {
+    saveText('information-theory.md', downloads.guideText, 'text/markdown;charset=utf-8');
+    status.textContent = 'Worked guide download requested.';
+  });
+  updateExampleNote();
+  countsInput.value = INFORMATION_EXAMPLES.find(function (entry) { return entry.id === 'noisy'; }).text;
+  applyTable(false);
+}
+
+const informationCourseText = "{\n  \"format\": \"recallweave-deck/1\",\n  \"title\": \"Information: what one label reveals\",\n  \"attribution\": \"Original questions, card-box examples and worked transfer prompts by RecallWeave contributors with AI assistance, 2026. Mathematical definitions checked against Tsachy Weissman's Stanford EE376A/STATS376A Lecture 3 (2018): https://web.stanford.edu/class/ee376a/files/2017-18/lecture_3.pdf and MIT 6.441 Information Theory, Lecture 1 (2010): https://ocw.mit.edu/courses/6-441-information-theory-spring-2010/aa7737b3645178c0b746a57f1bdff2cd_MIT6_441S10_lec01.pdf . No source exercises, prose or figures are reproduced. All boxes and observations in these questions are hypothetical teaching examples.\",\n  \"license\": \"CC0-1.0 for this original course content. Referenced materials retain their own terms and are not included.\",\n  \"concepts\": [\n    \"Joint probability tables\",\n    \"Surprise and entropy\",\n    \"Conditional information\",\n    \"Mutual information\",\n    \"Interpreting dependence\"\n  ],\n  \"items\": [\n    {\n      \"id\": \"info-joint\",\n      \"concept\": \"Joint probability tables\",\n      \"prerequisites\": [],\n      \"prompt\": \"A box contains 8 cards. The counts for (X1,Y1), (X1,Y2), (X2,Y1), (X2,Y2) are 3, 1, 1, 3. One card is drawn uniformly. What is P(X1 and Y2)?\",\n      \"options\": [\n        \"1/4, because there are four possible pairs.\",\n        \"1/8, because one of the eight cards has that pair.\",\n        \"1/2, because half the cards have X1.\",\n        \"3/8, because the most common pairs each have three cards.\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"The joint event specifies both labels on the same card. Exactly one of all eight cards has (X1,Y2), so its probability is 1/8. Counting possible pair names does not make the pairs equally likely. Restricting the denominator to X1 cards would instead answer a conditional-probability question.\",\n      \"transfer\": \"Replace the counts by 6, 2, 2, 6. What is the joint probability of (X1,Y2), and why?\"\n    },\n    {\n      \"id\": \"info-marginal\",\n      \"concept\": \"Joint probability tables\",\n      \"prerequisites\": [],\n      \"prompt\": \"A joint-count table has rows X1: [2, 1, 1] and X2: [0, 2, 2], with columns Y1, Y2, Y3. Which calculation gives P(Y2)?\",\n      \"options\": [\n        \"2/8, using only the second row's Y2 count.\",\n        \"1/4, using only the first row.\",\n        \"(1+2)/8 = 3/8, summing Y2 over both X labels.\",\n        \"(2+1+1)/8 = 1/2, summing the first row.\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"A marginal probability leaves the other label unspecified. The Y2 column contains one X1 card and two X2 cards, giving three of the eight cards. The row total 4/8 is P(X1), while 1/4 is P(Y2 given X1). Marginalization adds disjoint joint events.\",\n      \"transfer\": \"For this table, calculate P(X2) and P(Y3). Explain which cells you add in each case.\"\n    },\n    {\n      \"id\": \"info-scale\",\n      \"concept\": \"Joint probability tables\",\n      \"prerequisites\": [],\n      \"prompt\": \"Every joint count in a finite card box is multiplied by 5. Cards are still drawn uniformly. What changes in the normalized joint distribution?\",\n      \"options\": [\n        \"Nothing: each count and the common total grow by the same factor.\",\n        \"Every joint probability grows by a factor of 5.\",\n        \"The labels become independent because the box is larger.\",\n        \"Zero-count pairs gain positive probability.\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"If a cell has count n and the total is N, replacing every count by 5 times its value gives 5n/(5N) = n/N. Marginals and positive-marginal conditionals are unchanged too. This operation enlarges an authored finite box; it is not five new independent observations or evidence for a population claim.\",\n      \"transfer\": \"Starting with rows [1,2] and [2,4], multiply all counts by 3 and show one unchanged joint probability.\"\n    },\n    {\n      \"id\": \"info-surprise\",\n      \"concept\": \"Surprise and entropy\",\n      \"prerequisites\": [\n        \"Joint probability tables\"\n      ],\n      \"prompt\": \"Using base-2 surprisal, -log2(p), an outcome has probability 1/8. How much surprisal is attached to that outcome?\",\n      \"options\": [\n        \"1/8 bit, because surprisal equals probability.\",\n        \"8 bits, because the denominator is eight.\",\n        \"1 bit, because an outcome either occurs or does not.\",\n        \"3 bits, because 2 to the power 3 is eight.\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"The outcome's surprisal is log2(8) = 3 bits. This is a property of the specified outcome under the probability model, not the entropy of an arbitrary variable containing it. Entropy averages the surprisals of all possible outcomes with their probabilities. A low-probability event has more surprisal than a high-probability one.\",\n      \"transfer\": \"Compare the surprisals of outcomes with probabilities 1/2 and 1/16. Which is larger and by how many bits?\"\n    },\n    {\n      \"id\": \"info-constant\",\n      \"concept\": \"Surprise and entropy\",\n      \"prerequisites\": [\n        \"Joint probability tables\"\n      ],\n      \"prompt\": \"X has four named categories, but all 7 cards carry X1; the other category counts are zero. What is H(X)?\",\n      \"options\": [\n        \"2 bits, because four names are listed.\",\n        \"0 bits, because the X label is already certain.\",\n        \"7 bits, because there are seven cards.\",\n        \"Undefined, because some categories have zero probability.\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"The only positive-probability X label has probability 1 and surprisal 0. Its contribution is zero, and every zero-probability entropy summand is defined as zero. Thus H(X) = 0. Unused names do not create uncertainty. This zero-summand convention does not mean that the surprisal of a zero-probability event is a finite zero.\",\n      \"transfer\": \"Add two more unused category names without changing any cards. Does H(X) change? Explain the zero-probability convention.\"\n    },\n    {\n      \"id\": \"info-entropy-average\",\n      \"concept\": \"Surprise and entropy\",\n      \"prerequisites\": [\n        \"Joint probability tables\"\n      ],\n      \"prompt\": \"X takes two labels with probabilities 3/4 and 1/4. Which expression is its entropy in bits?\",\n      \"options\": [\n        \"log2(2) = 1, regardless of the probabilities.\",\n        \"(log2(4/3) + log2(4))/2, because the two labels have equal weight.\",\n        \"(3/4)log2(4/3) + (1/4)log2(4), approximately 0.811278.\",\n        \"log2(4) = 2, using only the less likely label.\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"Entropy is the probability-weighted average of surprisal. The common label contributes (3/4)log2(4/3), and the rare label contributes (1/4) times 2. Their sum is about 0.811278 bits. A fair two-label variable has entropy 1 bit; uneven probabilities reduce this average uncertainty.\",\n      \"transfer\": \"Calculate the entropy of four equally likely labels. Then explain why merely listing four labels does not force that entropy.\"\n    },\n    {\n      \"id\": \"info-conditional-denominator\",\n      \"concept\": \"Conditional information\",\n      \"prerequisites\": [\n        \"Joint probability tables\",\n        \"Surprise and entropy\"\n      ],\n      \"prompt\": \"The joint counts are X1: [3,1] and X2: [1,3]. After you learn that the drawn card has X1, what is P(Y2 given X1)?\",\n      \"options\": [\n        \"1/4: one of the four X1 cards carries Y2.\",\n        \"1/8: one of all eight cards carries both labels.\",\n        \"1/2: Y2's marginal probability must remain unchanged.\",\n        \"3/4: use the larger count in the X1 row.\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"Conditioning on X1 restricts the draw to its four cards. Only one of those cards has Y2, so the conditional probability is 1/4. The joint probability is 1/8, and the marginal probability of Y2 is 1/2. These answer different questions and use different denominators.\",\n      \"transfer\": \"For the same table, calculate P(X1 given Y2) and P(Y1 given X2). State the restricted total each time.\"\n    },\n    {\n      \"id\": \"info-weighted-conditional\",\n      \"concept\": \"Conditional information\",\n      \"prerequisites\": [\n        \"Joint probability tables\",\n        \"Surprise and entropy\"\n      ],\n      \"prompt\": \"A box has joint rows X1: [8,0] and X2: [1,1]. Given X1, Y is certain; given X2, Y is a fair two-label variable. What is the average conditional entropy H(Y|X)?\",\n      \"options\": [\n        \"1/2 bit, by averaging the two row entropies equally.\",\n        \"1 bit, because one conditional distribution is fair.\",\n        \"4/5 bit, using the probability of the certain row.\",\n        \"(8/10) times 0 + (2/10) times 1 = 1/5 bit.\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"H(Y|X) weights each row's entropy by the probability of that X label. The certain row appears with probability 8/10, and the ambiguous row appears with probability 2/10. Their weighted average is 0.2 bits. An unweighted average of row entropies would give the rare row too much influence.\",\n      \"transfer\": \"Use joint rows [18,0] and [1,1]. Compute the new average conditional entropy and compare it with the original 1/5 bit.\"\n    },\n    {\n      \"id\": \"info-particular-observation\",\n      \"concept\": \"Conditional information\",\n      \"prerequisites\": [\n        \"Joint probability tables\",\n        \"Surprise and entropy\"\n      ],\n      \"prompt\": \"For rows [8,0] and [1,1], Y has marginal probabilities 9/10 and 1/10, so H(Y) is about 0.469 bits. Observing X2 makes Y evenly split, with entropy 1 bit. Which statement is correct?\",\n      \"options\": [\n        \"The calculation is impossible: every individual observation must reduce entropy.\",\n        \"A particular observation can increase uncertainty; the average H(Y|X) is still at most H(Y).\",\n        \"The marginal entropy must also become 1 bit retroactively.\",\n        \"Mutual information is negative whenever any one observation increases uncertainty.\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"The inequality concerns the average over observations, not every conditional distribution separately. Here the rare X2 observation raises entropy to 1 bit, but the frequent X1 observation reduces it to zero. The weighted average is 0.2 bits, below the original roughly 0.469 bits. The mutual information is therefore positive.\",\n      \"transfer\": \"For rows [18,0] and [1,1], compare H(Y|X2) with H(Y). Does that one observation still increase uncertainty?\"\n    },\n    {\n      \"id\": \"info-biased-copy\",\n      \"concept\": \"Mutual information\",\n      \"prerequisites\": [\n        \"Conditional information\"\n      ],\n      \"prompt\": \"The joint table is [3,0]; [0,1]. Either label determines the other perfectly, and H(X) = H(Y) is approximately 0.811278 bits. What is I(X;Y)?\",\n      \"options\": [\n        \"1 bit, because prediction is perfect.\",\n        \"0 bits, because no uncertainty remains after observing either label.\",\n        \"2 bits, because there are two variables.\",\n        \"Approximately 0.811278 bits: the information removes the other's entire original uncertainty.\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"I(X;Y) = H(Y) - H(Y|X). The conditional entropy is zero because X determines Y, so the shared information equals H(Y), approximately 0.811278 bits. Perfect prediction need not provide one bit: the amount depends on the uncertainty present before the observation. The same identity holds with X and Y exchanged.\",\n      \"transfer\": \"Compare the shared information for [1,0]; [0,1] with that for [7,0]; [0,0]. Both are deterministic. Why are their information amounts different?\"\n    },\n    {\n      \"id\": \"info-directional-conditionals\",\n      \"concept\": \"Mutual information\",\n      \"prerequisites\": [\n        \"Conditional information\"\n      ],\n      \"prompt\": \"Four equally likely X labels map to Y groups: X1 and X2 always carry Y1; X3 and X4 always carry Y2. Which pair of conditional entropies is correct?\",\n      \"options\": [\n        \"H(Y|X) = 0 bit and H(X|Y) = 1 bit.\",\n        \"H(Y|X) = 1 bit and H(X|Y) = 0 bit.\",\n        \"Both are 0 bit because the mapping is deterministic.\",\n        \"Both are 2 bits because X has four possible labels.\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"Knowing the exact X label identifies its Y group, leaving no Y uncertainty. Knowing only Y leaves two equally likely X labels, or one bit of uncertainty. The mutual information is nevertheless symmetric: H(Y)-H(Y|X) = 1-0 and H(X)-H(X|Y) = 2-1 both equal one bit.\",\n      \"transfer\": \"Give a deterministic mapping from eight equally likely X labels into two groups of four. Find H(X), H(Y), both conditional entropies and I(X;Y).\"\n    },\n    {\n      \"id\": \"info-signed-term\",\n      \"concept\": \"Mutual information\",\n      \"prerequisites\": [\n        \"Conditional information\"\n      ],\n      \"prompt\": \"For rows [3,1] and [1,3], the pair (X1,Y2) has p = 1/8, while P(X1)P(Y2) = 1/4. What is this cell's contribution p log2[p/(P(X1)P(Y2))] to mutual information?\",\n      \"options\": [\n        \"0 bit: negative terms must be discarded.\",\n        \"+1/8 bit: mutual information requires every cell contribution to be positive.\",\n        \"-1/8 bit; other cells can make the complete sum positive.\",\n        \"-1 bit; the cell's probability does not enter its contribution.\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"The probability ratio is (1/8)/(1/4) = 1/2, whose base-2 logarithm is -1. Multiplying by the joint probability gives -1/8 bit. This is one signed cell contribution, not the total mutual information. The two more frequent diagonal pairs supply enough positive contribution to give a positive total of about 0.188722 bits.\",\n      \"transfer\": \"Compute the contribution of (X1,Y1) in the same table, where p = 3/8 and the independent-product probability is 1/4. Then sum both diagonal and both off-diagonal terms.\"\n    },\n    {\n      \"id\": \"info-exact-independence\",\n      \"concept\": \"Mutual information\",\n      \"prerequisites\": [\n        \"Conditional information\"\n      ],\n      \"prompt\": \"A table has rows [1,2] and [2,4]. Each row has Y proportions 1/3 and 2/3. What follows for this authored finite distribution?\",\n      \"options\": [\n        \"It is dependent because neither marginal is uniform.\",\n        \"X and Y are independent, and I(X;Y) = 0.\",\n        \"It is dependent because the four joint counts are unequal.\",\n        \"The information is one bit because there are two labels on each axis.\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"The total is 9, with row totals 3 and 6 and column totals 3 and 6. For every cell, count times 9 equals its row total times its column total. Equivalently, each joint probability factors into the product of its marginals. Thus observing X does not change Y's distribution, even though that distribution is uneven.\",\n      \"transfer\": \"Verify all four count cross-products for rows [1,2] and [2,4]. Explain why checking only the largest cell would be insufficient in general.\"\n    },\n    {\n      \"id\": \"info-opposite-labels\",\n      \"concept\": \"Interpreting dependence\",\n      \"prerequisites\": [\n        \"Mutual information\"\n      ],\n      \"prompt\": \"The only populated pairs are (X1,Y2) and (X2,Y1), with one card each. Which interpretation is justified?\",\n      \"options\": [\n        \"Mutual information is -1 bit because the labels move in opposite directions.\",\n        \"Mutual information is 0 because matching labels never occur.\",\n        \"I(X;Y) is 1 bit: either label predicts the other. The measure has no positive/negative association sign or causal direction.\",\n        \"I(X;Y) proves that changing X would cause Y to change.\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"Each label is a fair two-label variable, and either observation completely determines the other, giving one bit of shared information. Mutual information measures dependence without a correlation sign. Relabeling a category does not change it. These jointly assigned card labels also do not identify a causal effect.\",\n      \"transfer\": \"Swap the names Y1 and Y2. Describe what changes in the table and what happens to H(X), H(Y) and I(X;Y).\"\n    },\n    {\n      \"id\": \"info-rounding\",\n      \"concept\": \"Interpreting dependence\",\n      \"prerequisites\": [\n        \"Mutual information\"\n      ],\n      \"prompt\": \"Rows [998,999] and [997,998] have a tiny mutual information that can round to 0.000000 bits. For cell (X1,Y1), count times total is 3,984,016, while row total times column total is 3,984,015. What should the explorer conclude?\",\n      \"options\": [\n        \"The authored table is dependent: the exact factorization fails even though a rounded information display looks zero.\",\n        \"The table is independent whenever six-decimal information is zero.\",\n        \"The two integers are close enough to be treated as equal without stating a tolerance.\",\n        \"No exact conclusion is possible because the table contains large integer counts.\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"Independence requires every joint probability to equal the product of its marginals. Integer cross-products compare this condition exactly for the admitted counts. A difference of one is still a failure of equality. The shared information is positive but extremely small, about 4.54 times 10 to the power -14 bits; display rounding must not replace the exact decision.\",\n      \"transfer\": \"If the same two exact cross-products were both multiplied by 4, would they become equal? Connect your answer to scaling every joint count by 2.\"\n    },\n    {\n      \"id\": \"info-observations\",\n      \"concept\": \"Interpreting dependence\",\n      \"prerequisites\": [\n        \"Mutual information\"\n      ],\n      \"prompt\": \"A fictional investigator enters 40 classroom observations as joint counts and obtains positive mutual information. What does this calculation establish by itself?\",\n      \"options\": [\n        \"That the first recorded label causes the second.\",\n        \"That the population mutual information equals the displayed sample-table value exactly.\",\n        \"That every future observation can be predicted correctly.\",\n        \"That the normalized recorded table has dependence; population and causal conclusions need further evidence and assumptions.\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"The calculation describes the finite distribution formed from those entered counts. It does not automatically account for sampling variation, selection, hidden common causes or interventions. Positive mutual information is not a direction of causation, a guarantee of prediction, or a validated learning score. The lab's finite-card interpretation makes its probability assumption explicit.\",\n      \"transfer\": \"Name one sampling concern and one causal concern that would need attention before using an observed classroom table to claim that an intervention improves learning.\"\n    }\n  ]\n}\n";
+const informationGuideText = "# Information: what one label reveals\n\nA sixteen-question RecallWeave course with a small joint-distribution laboratory.\n\nStart with a box of cards. Each card carries an X label and a Y label. Draw one card uniformly. How uncertain is either label? How much does seeing one tell you about the other?\n\nThe explorer lets you change the **number of cards carrying each pair of labels**. Its probabilities describe that exact finite box. The examples are invented; they are not measurements of people, learning, or any outside population.\n\n## Use the explorer and course\n\nOpen [the information explorer](information-theory-explorer.html) directly in a browser. It is a self-contained page. Choose an example and press **Use example**, or type your own count table and press **Apply table**.\n\n- Put one X category on each line and one Y category in each column, separated by spaces.\n- Use 2–4 rows and 2–4 columns. Each count must be an integer from 0 through 999, with at least one positive count.\n- Use ordinary whole-number spelling: 0 and 12 are accepted; -0, 01, 1.5 and 1e2 are not. The input is limited to 512 characters.\n- A change to the draft retires the previous result. Apply the new table before interpreting or downloading its observation.\n- Select either **Observe X** or **Observe Y**, then select the observed label. Compare the distribution before observing that label with the conditional distribution afterward.\n- **Download this observation** saves the complete applied counts, exact fractions, approximate information values, and selected conditioning view. It does not save an unapplied draft.\n- **Download course** and **Download worked guide** always save this fixed lesson and guide. Editing a table does not change the questions.\n\nOpen [the RecallWeave learner](../demo.html). Import the downloaded course JSON, inspect the preview, then choose **Start this deck**. The welcome page has a separate **Start** action that begins the questions. The learner may change question and answer-option order; reason about the option text instead of memorizing letters.\n\nAfter answering the sixteen questions, inspect their explanations, write transfer reflections, and use the existing practice and notes controls. A practice retry is separate from the original recorded answer.\n\nThe explorer makes no network requests, uses no browser storage, and starts no download until you click a download button. A source link or the learner link is ordinary explicit navigation.\n\n## Read the counts before the bits\n\nFor a cell with count n, row total r, column total c, and grand total N:\n\n| Quantity | Meaning | Formula |\n| --- | --- | --- |\n| Joint probability | Both labels on the same draw | P(X=x, Y=y) = n / N |\n| X marginal | Ignore Y and count the row | P(X=x) = r / N |\n| Y marginal | Ignore X and count the column | P(Y=y) = c / N |\n| Y given X | Restrict the box to that X row | P(Y=y given X=x) = n / r, if r > 0 |\n| X given Y | Restrict the box to that Y column | P(X=x given Y=y) = n / c, if c > 0 |\n\nThe joint table shows reduced fractions and their integer counts. Equal numbers of category names do not imply equal probabilities.\n\nMultiplying every count by the same positive integer leaves all these probabilities unchanged. It therefore leaves the information quantities unchanged too. This is a property of the normalized finite table; it does not say that collecting more observations provides no additional statistical evidence.\n\n## Surprise, entropy, and shared information\n\nThe definitions use base-two logarithms, so their unit is the **bit**. For a positive-probability outcome, its surprise is log2(1/p). Entropy is its probability-weighted average. Conditional entropy averages the entropy after each possible observation. Mutual information is the average reduction in that uncertainty. These definitions and identities follow the primary course notes linked below. The numerical examples and questions here are original.\n\n- H(X) = sum over x of p(x) log2(1/p(x)).\n- H(X,Y) = sum over pairs of p(x,y) log2(1/p(x,y)).\n- H(Y given X) = sum over x with p(x)>0 of p(x) H(Y given X=x).\n- I(X;Y) = H(Y) - H(Y given X) = H(X) - H(X given Y).\n- Equivalently, I(X;Y) = sum over positive joint cells of p(x,y) log2[p(x,y)/(p(x)p(y))].\n\nSources: [Stanford EE376A/STATS376A, Lecture 3, January 16, 2018](https://web.stanford.edu/class/ee376a/files/2017-18/lecture_3.pdf), and [MIT 6.441, Lecture 1, Spring 2010](https://ocw.mit.edu/courses/6-441-information-theory-spring-2010/aa7737b3645178c0b746a57f1bdff2cd_MIT6_441S10_lec01.pdf).\n\nThe explorer's bars share one scale and display these decompositions:\n\n- H(X) = I(X;Y) + H(X given Y).\n- H(Y) = I(X;Y) + H(Y given X).\n- H(X,Y) = I(X;Y) + H(X given Y) + H(Y given X).\n\nThese are lengths for numerical quantities, not a claim that an arbitrary geometric Venn picture has meaningful area.\n\n### Work one table all the way through\n\nFor counts\n\n    3 1\n    1 3\n\nthere are eight cards. Each marginal is (1/2, 1/2), so H(X)=H(Y)=1 bit. Each conditional distribution is either (3/4, 1/4) or its reversal. Its entropy is\n\n    (3/4) log2(4/3) + (1/4) log2(4) = 0.811278124459… bits.\n\nThe weighted conditional average is the same value. The joint entropy is 1.811278124459… bits, and the mutual information is 0.188721875541… bits.\n\nThe cell (X1,Y2) has joint probability 1/8. Under independence its probability would be 1/4. Its pointwise information is log2(1/2)=-1 bit, and its weighted contribution to mutual information is -1/8 bit. Each diagonal cell contributes approximately 0.219360937770 bits. Adding all four signed terms gives the positive total above.\n\nA negative individual term does not make total mutual information negative. Mutual information is also unchanged when X and Y are swapped; the two conditional entropies need not be equal.\n\n### What zeros mean\n\nA cell with no cards contributes zero to entropy and to the weighted mutual-information sum. That summand convention does **not** give an impossible outcome a finite surprise of zero.\n\nThe downloadable data therefore uses null for a zero-cell surprise and pointwise information, together with explicit zero-probability metadata. The table labels these entries as excluded zero-probability outcomes. Their weighted terms are zero.\n\nA row or column with total zero describes an observation that cannot occur in the finite box. Its conditional probabilities and conditional entropy are undefined. The explorer shows no invented distribution for it. Its contribution to the average conditional entropy is zero because it has zero probability.\n\n### Seeing one label can increase uncertainty in that case\n\nFor counts\n\n    8 0\n    1 1\n\nthe Y marginal is (9/10, 1/10), with entropy about 0.468996 bits. If the observed label is X2, the conditional Y distribution is (1/2, 1/2), with entropy 1 bit: this particular observation leaves more uncertainty.\n\nThe average after observing X is different. X1 occurs with probability 4/5 and leaves zero entropy; X2 occurs with probability 1/5 and leaves one bit. Thus H(Y given X)=1/5 bit, less than the prior entropy.\n\n“Conditioning reduces entropy” refers to that weighted average. It does not promise a decrease after every individual outcome.\n\n## Exact independence and approximate information\n\nIndependence means every joint probability factors into its two marginals. The explorer checks every cell using exact integer arithmetic:\n\n    n * N == r * c\n\nThese products remain within exact integer representation under the lab's size and count limits. All cells must pass. The displayed bit values are approximate binary64 calculations and never determine this verdict.\n\nFor\n\n    998 999\n    997 998\n\nN=3992. At (X1,Y1), n*N=3,984,016 while r*c=3,984,015. The exact values differ, so the table is dependent. Its mutual information is only about 4.54467e-14 bits. A display rounded to six decimal places would conceal it; the explorer uses scientific notation for sufficiently small nonzero values.\n\n### Why the total and signed terms use different arithmetic\n\nDirectly subtracting two almost equal entropies can lose tiny mutual information. Even summing positive and negative cell terms can cancel most useful digits.\n\nThe model therefore also evaluates an equivalent divergence expression. For a cell, let p be its joint probability, q the product of its marginals, and t=(p-q)/q when q>0. The robust total sums\n\n    q * [(1+t) ln(1+t) - t] / ln(2).\n\nThe removed linear terms sum to zero over the complete distribution. Close to t=0, a short convergent series evaluates the bracket without subtracting nearly equal numbers. At p=0 with q>0 its bracket has limit 1; if q=0, the joint probability is also zero and the cell contributes zero.\n\nThe **signed contribution table** still displays the original p*log2(p/q) terms. The nonnegative stabilized terms are an equivalent way to compute the aggregate; they are not those original signed terms. Both are retained in the observation data, along with the direct signed sum. Small floating-point differences between equivalent identities are expected. No small-value threshold is used to declare independence.\n\n## What the table cannot establish\n\nThe finite-card model fixes the distribution by construction. If you instead type counts from observations, the explorer describes the normalized recorded counts. A positive value by itself cannot establish a population effect, causal direction, usefulness of a predictor on new data, learning progress, or a required compressed file size.\n\nAsk how the observations were selected, whether they are representative and independent, what is missing, how the labels were chosen, and what competing causal explanation could produce the association. Intervening on one label is a different question from conditioning on it.\n\nMutual information has no positive-versus-negative association sign. A perfect copy and a perfect opposite can carry the same information. Nor does perfect prediction always mean one bit: an uneven copied label contains less than one bit, and an already constant label contains zero.\n\n## Worked transfer responses\n\nThese are responses to the sixteen transfer prompts, keyed by stable item ID. The learner may present them in another order. Some prompts deliberately extend the idea beyond the explorer's 4-category or 999-count interface limits; solve those extensions by reasoning instead of forcing them into the lab.\n\n### 1. info-joint — scale the same pair\n\nThe new total is 16, and (X1,Y2) has count 2. Its joint probability is 2/16=1/8. Doubling both numerator and denominator preserves the probability. The draw is uniform over cards, not over pair names.\n\n### 2. info-marginal — sum before dividing\n\nThe original rows are (2,1,1) and (0,2,2), totaling eight cards. X2 has four cards, so P(X2)=4/8=1/2. Y3 has one plus two cards, so P(Y3)=3/8. Y2 also has three cards, although it gathers them from a different column.\n\n### 3. info-scale — more copies of every card\n\nThe counts (1,2; 2,4) become (3,6; 6,12), with total 27. The first joint cell has probability 3/27=1/9, just as 1/9 before scaling. Every marginal and conditional fraction also scales equally, so the information quantities are unchanged.\n\n### 4. info-surprise — compare two outcomes\n\nAt probability 1/2 the surprise is log2(2)=1 bit. At probability 1/16 it is log2(16)=4 bits. The rarer outcome has three additional bits of surprise. These are outcome surprises; an entropy would require averaging over a complete distribution.\n\n### 5. info-constant — unused names add no uncertainty\n\nAll seven cards still carry X1. Adding unused X category names adds only zero-probability summands, so H(X) remains zero. Nothing in this question specifies the Y labels. A zero weighted entropy term is a limiting convention, not a finite zero surprise for an impossible outcome.\n\n### 6. info-entropy-average — four equally likely values\n\nFor four equally likely values, each probability is 1/4 and each surprise is 2 bits. The weighted average is 4*(1/4)*2=2 bits. Merely listing four values does not make them equally likely: a distribution concentrated on one has zero entropy, and uneven nonconstant distributions give other values below two.\n\n### 7. info-conditional-denominator — condition in the other direction\n\nIn (3,1; 1,3), column Y2 contains four cards, one with X1. Thus P(X1 given Y2)=1/4. Row X2 also contains four cards, one with Y1, so P(Y1 given X2)=1/4. Both happen to match because of this table's symmetry, not because conditional probabilities always reverse unchanged.\n\n### 8. info-weighted-conditional — make the ambiguous row rarer\n\nIn (18,0; 1,1), X1 occurs with probability 18/20 and leaves zero Y entropy. X2 occurs with probability 2/20 and leaves one bit. H(Y given X)=(18/20)*0+(2/20)*1=0.1 bit. Averaging the two row entropies equally would ignore how often each observation occurs.\n\n### 9. info-particular-observation — separate one case from the average\n\nThe same table has Y probabilities (19/20, 1/20), with marginal entropy approximately 0.286396957116 bits. Observing X2 still gives an even split and one bit of conditional entropy in that case. The weighted average after observing X is only 0.1 bit. One surprising observation can increase uncertainty while the average decreases.\n\n### 10. info-biased-copy — perfect prediction of what?\n\nIn (1,0; 0,1), either label is fair and determines the other. The conditional entropies are zero and the mutual information is one bit. In (7,0; 0,0), both labels are already certain before observation, so all entropies and the mutual information are zero. Perfect prediction alone does not specify the amount of information gained.\n\n### 11. info-directional-conditionals — eight values grouped into two\n\nImagine eight equally likely X labels, each assigned deterministically to one of two Y groups of four. H(X)=3 bits and H(Y)=1 bit. Given X, Y is known, so H(Y given X)=0. Given Y, four equally likely X labels remain, so H(X given Y)=2 bits. H(X,Y)=3 bits and I(X;Y)=1 bit. This is an eight-row by-hand extension beyond the lab's four-row input limit.\n\n### 12. info-signed-term — assemble the noisy table\n\nFor either diagonal cell, p=3/8 and q=1/4, so its contribution is (3/8)log2(3/2), approximately 0.219360937770 bits. The two off-diagonal contributions are each -1/8 bit. The total is twice the diagonal contribution minus 1/4, approximately 0.188721875541 bits.\n\n### 13. info-exact-independence — check all pairs\n\nFor (1,2; 2,4), N=9 and both marginal count lists are (3,6). The four joint products n*N are 9, 18, 18, 36; the matching r*c products are 9, 18, 18, 36. Every comparison agrees, so this nonuniform table is independent.\n\nChecking only the largest cell is not a general method. Larger tables have additional degrees of freedom. The course asks for all four products here to practice the complete factorization check; the explorer always checks every cell.\n\n### 14. info-opposite-labels — rename, do not change probabilities\n\nIn (0,1; 1,0), swapping the two Y names moves the nonzero cells to the diagonal. Their probabilities remain 1/2, so H(X)=H(Y)=H(X,Y)=I(X;Y)=1 bit and both conditional entropies remain zero. The association's verbal description changes from “opposite” to “matching”; its information does not.\n\n### 15. info-rounding — an exact difference survives scaling\n\nDoubling every count also doubles each marginal count and N. Each product n*N and r*c therefore grows by a factor of four. Their original difference of one becomes four, so the inequality remains. The probabilities and mutual information are unchanged.\n\nThe doubled counts exceed the lab's 999 limit. This is a mathematical scaling argument, not an instruction to enter an out-of-range table. A positive approximate value may be tiny; an exact factorization failure remains a failure however the bits are formatted.\n\n### 16. info-observations — separate two kinds of question\n\nOne possible sampling concern: forty classroom observations may come from a selected or unrepresentative group, and repeated observations may not be independent. One possible causal concern: another factor could influence both labels, or the selection process could induce their association.\n\nA defensible statement is that the normalized recorded table has dependence. A claim about a wider population needs a sampling argument and uncertainty assessment. A causal claim needs an appropriate design and assumptions; the table alone does not supply them.\n\n## Source and regeneration\n\nThe model is in src/information-theory.mjs and the page behavior is in src/information-theory-ui.mjs. The authored HTML template, course JSON, and this guide sit beside the generated explorer.\n\nFrom the repository root, run:\n\n    node tools/build-information-theory.mjs\n\nTo check that the generated page matches the authored inputs without rewriting it:\n\n    node tools/build-information-theory.mjs --check\n\nThe builder embeds the exact course and guide text for download and the same model used by the Node tests. It does not rebuild the learner or change another course.\n\n## Attribution and license\n\nThis course, guide, examples, and wording are original work prepared with AI assistance. The original lesson content is offered under CC0-1.0. The linked primary sources retain their own terms. No exercise text was copied from them.\n";
+mountInformationTheory(document, { courseText: informationCourseText, guideText: informationGuideText });
+})();
+</script>
+
+
+</body></html>

@@ -1,0 +1,196 @@
+{
+  "format": "hamon.source-contribution-contract/1",
+  "owner": "chatgpt:5f566b5ec8ef:root",
+  "repository": "Jacob-Met/RecallWeave",
+  "canonicalBase": "81d66576837da8e7cb323bcc82072e49e0648420",
+  "objective": "Original sixteen-question information-theory course and directly openable offline joint-count explorer, usable through the unchanged existing learner import/review/practice/notes flow.",
+  "nativeRoot": "/home/jacob/recallweave-information-5f566b5ec8ef",
+  "scope": [
+    "src/information-theory.mjs",
+    "src/information-theory-ui.mjs",
+    "courses/information-theory.json",
+    "courses/information-theory.md",
+    "courses/information-theory-explorer.template.html",
+    "courses/information-theory-explorer.html",
+    "tools/build-information-theory.mjs",
+    "tests/information-theory.test.mjs",
+    "tests/information-theory-course.test.mjs",
+    "tools/check_information_theory_browser.mjs",
+    "README.md additive own entry",
+    "docs/receiving/information-theory-5f566b5ec8ef/"
+  ],
+  "preserved": "All other courses, catalog, learner, deck importer, learning estimate and information-gain/selector source, archives, original build and workflows. No learning-efficacy claim.",
+  "model": {
+    "interpretation": "A finite box of cards, each bearing an X and Y label, drawn uniformly; authored joint counts define the exact finite distribution. No sampling/estimation, causal inference or real data claim.",
+    "admission": "2–4 rows and 2–4 columns, rectangular integer arrays; each count0–999, at least one positive count. Text parser accepts one row per line and whitespace-separated canonical unsigned decimal cells, permits outer whitespace/CRLF, rejects internal blank lines, signs/fractions/exponents/booleans/nonfinite/ragged/oversized text. Maximum512 UTF-16 code units.",
+    "arithmetic": "Counts/totals/fraction numerators and denominators remain exact safe integers. Base2 logarithms and entropy/MI values are binary64 approximations; display rounding is separate. No tolerance decides independence.",
+    "observations": "Copied immutable complete matrix, row/column totals and distributions, every joint probability and independent-product probability, both families of conditional distributions and entropies, all joint entropy and weighted MI cell contributions, H(X),H(Y),H(X,Y),H(Y|X),H(X|Y),I(X;Y). Exact independence checks n_ij*N = row_i*col_j for every cell, with retained differing cross-products.",
+    "zero": "A zero-marginal conditional is explicitly undefined/null with zero aggregate weight. A zero-probability entropy/MI summand is zero by convention. It is never evaluated as 0*log2(0). Zero-cell surprisal/pointwise information is not a finite zero and is not fabricated; nullable excluded-cell metadata explains it. Every positive cell has positive marginals.",
+    "interpretationLimits": "MI is nonnegative and symmetric but conditional entropies need not match. A particular conditioned distribution can have more entropy than the marginal; only the average is bounded. Individual weighted MI contributions can be negative. Exact independence describes this authored table; a sampled zero count would not prove a population impossibility. No sign/direction/causation/learning-grade/compressor-size claim.",
+    "purity": "Reads do not mutate caller arrays. Outputs are detached, nested frozen snapshots. Invalid input refuses before a usable observation."
+  },
+  "ui": {
+    "entry": "Separate generated standalone file using inline exact model, UI, validated fixed course and guide; opens directly offline.",
+    "controls": "Example chooser plus explicit use; editable count text plus Apply; editing retires prior result/download; clearly selected conditioning axis/value; marginal-vs-conditional probabilities and zero-row refusal; all counts and contributions inspectable; complete explicit applied-observation JSON, exact fixed course JSON and worked-guide downloads.",
+    "meaning": "Four top metrics plus actual entropy decompositions, joint table, conditional view and full contribution tables. Exact fractions alongside approximate bits; scrollable tables stay inside390px and wide viewports. No area claim from illustrative geometry.",
+    "integrity": "No network, provider, storage or automatic download. Course downloads are independent of mutable lab inputs. Native focus/keyboard activation and visibly announced changed/invalid/applied states; no hidden off-screen-only result.",
+    "learner": "Actual downloaded course must import, preview, start, complete, review, practice a deliberately missed item and save original explanatory notes through unchanged demo.html. No learner source edits."
+  },
+  "manualCases": [
+    {
+      "name": "independent fair labels",
+      "counts": [
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ]
+      ],
+      "expected": "H(X)=H(Y)=1,H(X,Y)=2,both conditionals1,MI0,exact independence true"
+    },
+    {
+      "name": "balanced copy",
+      "counts": [
+        [
+          2,
+          0
+        ],
+        [
+          0,
+          2
+        ]
+      ],
+      "expected": "H(X)=H(Y)=H(X,Y)=MI1,both conditionals0"
+    },
+    {
+      "name": "biased copy",
+      "counts": [
+        [
+          3,
+          0
+        ],
+        [
+          0,
+          1
+        ]
+      ],
+      "expected": "H(X)=H(Y)=H(X,Y)=MI H2(1/4),approximately0.8112781244591328"
+    },
+    {
+      "name": "opposite labels",
+      "counts": [
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          0
+        ]
+      ],
+      "expected": "MI1,not negative; exact dependence"
+    },
+    {
+      "name": "coarsening four labels",
+      "counts": [
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          1
+        ]
+      ],
+      "expected": "H(X)=2,H(Y)=1,H(X,Y)=2,H(Y|X)=0,H(X|Y)=1,MI1"
+    },
+    {
+      "name": "noisy correspondence",
+      "counts": [
+        [
+          3,
+          1
+        ],
+        [
+          1,
+          3
+        ]
+      ],
+      "expected": "H(X)=H(Y)=1,both conditionals H2(1/4),MI1-H2(1/4); each off-diagonal weighted MI term=-1/8"
+    },
+    {
+      "name": "rare uncertainty increase",
+      "counts": [
+        [
+          8,
+          0
+        ],
+        [
+          1,
+          1
+        ]
+      ],
+      "expected": "H(Y)=H2(1/10),H(Y|X=second)=1,H(Y|X)=1/5; conditioning on that value increases uncertainty while the average reduces it"
+    },
+    {
+      "name": "padded constant",
+      "counts": [
+        [
+          7,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0
+        ]
+      ],
+      "expected": "all six aggregate measures0; zero marginals undefined; exact independence true"
+    },
+    {
+      "name": "padded one-sided variable",
+      "counts": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0
+        ]
+      ],
+      "expected": "H(X)=1,H(Y)=0,H(X,Y)=1,H(Y|X)=0,H(X|Y)=1,MI0; exact independence true"
+    }
+  ],
+  "qualification": "Freeze manual mathematical receiving before source review; meaningful invalid/zero/relabel/transpose/scaling/maximum controls; original course answer and transfer reasoning reviewed independently; existing deck/import/review baseline retained; actual native Node and Chromium source-bound checks with downloaded-byte comparisons and390px/desktop captures. All failures retained separately, no repeated broad suites without changed risk.",
+  "sourceReferences": [
+    "https://web.stanford.edu/class/ee376a/files/2017-18/lecture_3.pdf",
+    "https://ocw.mit.edu/courses/6-441-information-theory-spring-2010/aa7737b3645178c0b746a57f1bdff2cd_MIT6_441S10_lec01.pdf"
+  ],
+  "publication": "Jacob19:32 Actions hold6067592767 applies. Native development/qualification/custody continue. All four current workflows have no issues/issue_comment subscription. Pushes to main and PR creation/synchronization trigger Actions and remain held; check actual triggers before any later repository write. No gate bypass or workflow alteration.",
+  "ownershipRead": "Current untruncated2725-leaf tree, all current open issues, exact mutual-information and entropy-title searches show no same source contribution. Native Conscience through5018 has no matching claim. Bounded readable native coordination search returned no matching text; unreadable records were not treated as absence. Existing Markov/probability/BKT owners preserved."
+}

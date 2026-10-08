@@ -1,0 +1,234 @@
+{
+  "format": "recallweave-deck/1",
+  "title": "Information: what one label reveals",
+  "concepts": [
+    "Joint probability tables",
+    "Surprise and entropy",
+    "Conditional information",
+    "Mutual information",
+    "Interpreting dependence"
+  ],
+  "items": [
+    {
+      "id": "info-joint",
+      "concept": "Joint probability tables",
+      "prerequisites": [],
+      "prompt": "A box contains 8 cards. The counts for (X1,Y1), (X1,Y2), (X2,Y1), (X2,Y2) are 3, 1, 1, 3. One card is drawn uniformly. What is P(X1 and Y2)?",
+      "options": [
+        "1/4, because there are four possible pairs.",
+        "1/8, because one of the eight cards has that pair.",
+        "1/2, because half the cards have X1.",
+        "3/8, because the most common pairs each have three cards."
+      ]
+    },
+    {
+      "id": "info-marginal",
+      "concept": "Joint probability tables",
+      "prerequisites": [],
+      "prompt": "A joint-count table has rows X1: [2, 1, 1] and X2: [0, 2, 2], with columns Y1, Y2, Y3. Which calculation gives P(Y2)?",
+      "options": [
+        "2/8, using only the second row's Y2 count.",
+        "1/4, using only the first row.",
+        "(1+2)/8 = 3/8, summing Y2 over both X labels.",
+        "(2+1+1)/8 = 1/2, summing the first row."
+      ]
+    },
+    {
+      "id": "info-scale",
+      "concept": "Joint probability tables",
+      "prerequisites": [],
+      "prompt": "Every joint count in a finite card box is multiplied by 5. Cards are still drawn uniformly. What changes in the normalized joint distribution?",
+      "options": [
+        "Nothing: each count and the common total grow by the same factor.",
+        "Every joint probability grows by a factor of 5.",
+        "The labels become independent because the box is larger.",
+        "Zero-count pairs gain positive probability."
+      ]
+    },
+    {
+      "id": "info-surprise",
+      "concept": "Surprise and entropy",
+      "prerequisites": [
+        "Joint probability tables"
+      ],
+      "prompt": "Using base-2 surprisal, -log2(p), an outcome has probability 1/8. How much surprisal is attached to that outcome?",
+      "options": [
+        "1/8 bit, because surprisal equals probability.",
+        "8 bits, because the denominator is eight.",
+        "1 bit, because an outcome either occurs or does not.",
+        "3 bits, because 2 to the power 3 is eight."
+      ]
+    },
+    {
+      "id": "info-constant",
+      "concept": "Surprise and entropy",
+      "prerequisites": [
+        "Joint probability tables"
+      ],
+      "prompt": "X has four named categories, but all 7 cards carry X1; the other category counts are zero. What is H(X)?",
+      "options": [
+        "2 bits, because four names are listed.",
+        "0 bits, because the X label is already certain.",
+        "7 bits, because there are seven cards.",
+        "Undefined, because some categories have zero probability."
+      ]
+    },
+    {
+      "id": "info-entropy-average",
+      "concept": "Surprise and entropy",
+      "prerequisites": [
+        "Joint probability tables"
+      ],
+      "prompt": "X takes two labels with probabilities 3/4 and 1/4. Which expression is its entropy in bits?",
+      "options": [
+        "log2(2) = 1, regardless of the probabilities.",
+        "(log2(4/3) + log2(4))/2, because the two labels have equal weight.",
+        "(3/4)log2(4/3) + (1/4)log2(4), approximately 0.811278.",
+        "log2(4) = 2, using only the less likely label."
+      ]
+    },
+    {
+      "id": "info-conditional-denominator",
+      "concept": "Conditional information",
+      "prerequisites": [
+        "Joint probability tables",
+        "Surprise and entropy"
+      ],
+      "prompt": "The joint counts are X1: [3,1] and X2: [1,3]. After you learn that the drawn card has X1, what is P(Y2 given X1)?",
+      "options": [
+        "1/4: one of the four X1 cards carries Y2.",
+        "1/8: one of all eight cards carries both labels.",
+        "1/2: Y2's marginal probability must remain unchanged.",
+        "3/4: use the larger count in the X1 row."
+      ]
+    },
+    {
+      "id": "info-weighted-conditional",
+      "concept": "Conditional information",
+      "prerequisites": [
+        "Joint probability tables",
+        "Surprise and entropy"
+      ],
+      "prompt": "A box has joint rows X1: [8,0] and X2: [1,1]. Given X1, Y is certain; given X2, Y is a fair two-label variable. What is the average conditional entropy H(Y|X)?",
+      "options": [
+        "1/2 bit, by averaging the two row entropies equally.",
+        "1 bit, because one conditional distribution is fair.",
+        "4/5 bit, using the probability of the certain row.",
+        "(8/10) times 0 + (2/10) times 1 = 1/5 bit."
+      ]
+    },
+    {
+      "id": "info-particular-observation",
+      "concept": "Conditional information",
+      "prerequisites": [
+        "Joint probability tables",
+        "Surprise and entropy"
+      ],
+      "prompt": "For rows [8,0] and [1,1], Y has marginal probabilities 9/10 and 1/10, so H(Y) is about 0.469 bits. Observing X2 makes Y evenly split, with entropy 1 bit. Which statement is correct?",
+      "options": [
+        "The calculation is impossible: every individual observation must reduce entropy.",
+        "A particular observation can increase uncertainty; the average H(Y|X) is still at most H(Y).",
+        "The marginal entropy must also become 1 bit retroactively.",
+        "Mutual information is negative whenever any one observation increases uncertainty."
+      ]
+    },
+    {
+      "id": "info-biased-copy",
+      "concept": "Mutual information",
+      "prerequisites": [
+        "Conditional information"
+      ],
+      "prompt": "The joint table is [3,0]; [0,1]. Either label determines the other perfectly, and H(X) = H(Y) is approximately 0.811278 bits. What is I(X;Y)?",
+      "options": [
+        "1 bit, because prediction is perfect.",
+        "0 bits, because no uncertainty remains after observing either label.",
+        "2 bits, because there are two variables.",
+        "Approximately 0.811278 bits: the information removes the other's entire original uncertainty."
+      ]
+    },
+    {
+      "id": "info-directional-conditionals",
+      "concept": "Mutual information",
+      "prerequisites": [
+        "Conditional information"
+      ],
+      "prompt": "Four equally likely X labels map to Y groups: X1 and X2 always carry Y1; X3 and X4 always carry Y2. Which pair of conditional entropies is correct?",
+      "options": [
+        "H(Y|X) = 0 bit and H(X|Y) = 1 bit.",
+        "H(Y|X) = 1 bit and H(X|Y) = 0 bit.",
+        "Both are 0 bit because the mapping is deterministic.",
+        "Both are 2 bits because X has four possible labels."
+      ]
+    },
+    {
+      "id": "info-signed-term",
+      "concept": "Mutual information",
+      "prerequisites": [
+        "Conditional information"
+      ],
+      "prompt": "For rows [3,1] and [1,3], the pair (X1,Y2) has p = 1/8, while P(X1)P(Y2) = 1/4. What is this cell's contribution p log2[p/(P(X1)P(Y2))] to mutual information?",
+      "options": [
+        "0 bit: negative terms must be discarded.",
+        "+1/8 bit: mutual information requires every cell contribution to be positive.",
+        "-1/8 bit; other cells can make the complete sum positive.",
+        "-1 bit; the cell's probability does not enter its contribution."
+      ]
+    },
+    {
+      "id": "info-exact-independence",
+      "concept": "Mutual information",
+      "prerequisites": [
+        "Conditional information"
+      ],
+      "prompt": "A table has rows [1,2] and [2,4]. Each row has Y proportions 1/3 and 2/3. What follows for this authored finite distribution?",
+      "options": [
+        "It is dependent because neither marginal is uniform.",
+        "X and Y are independent, and I(X;Y) = 0.",
+        "It is dependent because the four joint counts are unequal.",
+        "The information is one bit because there are two labels on each axis."
+      ]
+    },
+    {
+      "id": "info-opposite-labels",
+      "concept": "Interpreting dependence",
+      "prerequisites": [
+        "Mutual information"
+      ],
+      "prompt": "The only populated pairs are (X1,Y2) and (X2,Y1), with one card each. Which interpretation is justified?",
+      "options": [
+        "Mutual information is -1 bit because the labels move in opposite directions.",
+        "Mutual information is 0 because matching labels never occur.",
+        "I(X;Y) is 1 bit: either label predicts the other. The measure has no positive/negative association sign or causal direction.",
+        "I(X;Y) proves that changing X would cause Y to change."
+      ]
+    },
+    {
+      "id": "info-rounding",
+      "concept": "Interpreting dependence",
+      "prerequisites": [
+        "Mutual information"
+      ],
+      "prompt": "Rows [998,999] and [997,998] have a tiny mutual information that can round to 0.000000 bits. For cell (X1,Y1), count times total is 3,984,016, while row total times column total is 3,984,015. What should the explorer conclude?",
+      "options": [
+        "The authored table is dependent: the exact factorization fails even though a rounded information display looks zero.",
+        "The table is independent whenever six-decimal information is zero.",
+        "The two integers are close enough to be treated as equal without stating a tolerance.",
+        "No exact conclusion is possible because the table contains large integer counts."
+      ]
+    },
+    {
+      "id": "info-observations",
+      "concept": "Interpreting dependence",
+      "prerequisites": [
+        "Mutual information"
+      ],
+      "prompt": "A fictional investigator enters 40 classroom observations as joint counts and obtains positive mutual information. What does this calculation establish by itself?",
+      "options": [
+        "That the first recorded label causes the second.",
+        "That the population mutual information equals the displayed sample-table value exactly.",
+        "That every future observation can be predicted correctly.",
+        "That the normalized recorded table has dependence; population and causal conclusions need further evidence and assumptions."
+      ]
+    }
+  ]
+}
