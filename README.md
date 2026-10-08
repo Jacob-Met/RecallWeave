@@ -357,3 +357,17 @@ Build with `node tools/build_least_squares.mjs`; `--check` verifies the generate
 ## Mathematical induction: a base, a bridge, every integer
 
 [Open the offline proof lab](courses/mathematical-induction-lab.html), download the [twelve-question lesson](courses/mathematical-induction.json), or read the [worked guide](courses/mathematical-induction.md). Compare an arithmetic sum with a proposed formula, inspect the exact base and symbolic successor step, and see why a few matching values do not prove every case. The lab keeps its finite examples separate from the induction argument and saves an explicit proof record. Import its lesson JSON through the existing learner preview and Start this deck controls.
+
+## Download the complete offline course pack
+
+Save [the offline course pack](offline/) as one ZIP, extract the entire
+RecallWeave folder, and open its catalog.html. The matching demo.html and original
+registered course files are included. Choose a course from the courses folder
+under **Bring your own lesson**, inspect its preview, then explicitly start it.
+
+After changing the learner, rebuild it with `python3 tools/make_demo.py`.
+After catalog or registered-course changes, run `node tools/build-course-catalog.mjs`.
+Then run `python3 tools/build-offline-pack.py` to update the ZIP;
+`python3 tools/build-offline-pack.py --check` checks exact bytes without writing.
+The pack uses the explicit catalog/courses.json registration list. Its
+SHA256SUMS.json records every other included file's byte length and content hash.
