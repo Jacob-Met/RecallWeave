@@ -1,0 +1,11 @@
+# Polynomial interpolation: held native packet
+
+This is detached archive custody for [RecallWeave issue172](https://github.com/Jacob-Met/RecallWeave/issues/172). It changes no runtime source, course, README, dependency or workflow. No pull request or source activation accompanies it.
+
+The immutable `native-packet-v1.zip` preserves the original four-file learner baseline, actual absent-command observations, implementation, 13 author tests, six independently frozen native receiving cases,18 blindly solved questions, all original failures and receiving provenance. Its original pending-review label is historical. `prose-successor-v1.zip` supplies the accepted corrected course JSON, exact one-clause patch/inverse proof and final root source/content review. Extract v1 and overlay only the successor course JSON to recover the accepted proposal. The correction explains that13/4 is exact; it makes no new execution claim. Both ZIPs include per-member hashes and have been completely read back locally.
+
+The new pure API and real file/stdin CLI compute exact reduced-rational divided differences, Newton and monomial coefficients, native-node checks and bounded query values. The original eighteen-question course and guide connect those computations to uniqueness, lower actual degree, equivalent representations and interpolation limits. The v1 receiving guide documents actual reproduction commands. Nothing claims an error bound for an unknown function or improved learning outcomes.
+
+Native qualification used Node24.19.0: author13/13 at its original deck pin, independent6/6 with unchanged core/CLI/source/input hashes, and root18/18 blind content receiving. The final prose-only successor retains all prompts/options/answers. No browser, catalog registration, hosted test, source integration, deployment or Node20 execution is claimed.
+
+Jacob’s no-more-GitHub-Actions direction remains active. The complete current2915-leaf primary source at698902f9 / tree d6d3707b and all five workflow definitions were read before this custody route. Checked-in events are pull requests and pushes restricted to main; a unique non-main archive branch without a PR matches neither. This is an audited nontriggering custody operation, not a workflow suppression or waiver of required future gates. `root-custody-audit-v1.json` retains the complete checked event definitions.
