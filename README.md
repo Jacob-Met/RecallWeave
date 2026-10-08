@@ -353,3 +353,9 @@ Build with `node tools/build_least_squares.mjs`; `--check` verifies the generate
 ## Mathematical induction: a base, a bridge, every integer
 
 [Open the offline proof lab](courses/mathematical-induction-lab.html), download the [twelve-question lesson](courses/mathematical-induction.json), or read the [worked guide](courses/mathematical-induction.md). Compare an arithmetic sum with a proposed formula, inspect the exact base and symbolic successor step, and see why a few matching values do not prove every case. The lab keeps its finite examples separate from the induction argument and saves an explicit proof record. Import its lesson JSON through the existing learner preview and Start this deck controls.
+
+## Momentum and collisions
+
+[Open the offline explorer](courses/momentum-collisions-explorer.html) to compare signed momentum and kinetic energy in ideal one-dimensional elastic and completely inelastic encounters. Enter two positive masses and signed incoming velocities, inspect exact fraction results on a shared velocity scale, and download the complete analysis. Equal or growing initial gaps explicitly produce no future collision endpoints.
+
+The [original twelve-question course](courses/momentum-collisions.json) imports through the existing learner's preview and **Start this deck** flow, including feedback, separate missed-item practice and study-note downloads. The [worked guide](courses/momentum-collisions.md) derives the formulas, explains the physical assumptions and provides build/check commands. Open the explorer directly from disk; it requires no server or network and saves nothing automatically.
