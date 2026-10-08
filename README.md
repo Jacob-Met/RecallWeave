@@ -6,6 +6,10 @@
 
 Open `demo.html` directly in a browser—no server, install, build step, internet, login, API key, or user data storage is required. It is a single self-contained file with embedded CSS, JavaScript and deck. The modular source is in `index.html`, `src/`, and `data/`; to test that version locally, serve this directory with `python3 -m http.server 8080` and visit `http://localhost:8080`. Rebuild the direct-open demo with `python3 tools/make_demo.py` after source changes. No hosted endpoint is called by either version.
 
+## Explore coherent waves
+
+Open **[Coherent waves: from phasors to interference](courses/phasor-interference-lab.html)** for an offline lab that connects two rotating complex amplitudes to their real cosine signals. Predict cancellation, vary relative and common phase, and compare the arrow diagram with the time trace and downloadable values. The [worked guide](courses/phasor-interference.md) explains the assumptions and original examples; save the [sixteen-question course](courses/phasor-interference.json) and open it through **Bring your own lesson** to practice the connections.
+
 ## Explore grouped rates
 
 Open **[When groups and totals disagree](courses/grouped-data-explorer.html)** for a separate offline lesson about group rates, pooled samples and a chosen common mix. Edit the recorded counts, inspect exact fractions and download the current comparison. The worked examples explain why both groups can favor one option while the pooled sample favors the other, and why this alone does not establish a causal effect.
@@ -28,6 +32,12 @@ Each saved HTML file opens and prints offline on its own. The worksheet file con
 - The welcome panel includes a clearly labeled, deterministic synthetic learner simulation comparing adaptive selection with fixed deck order using the same toy learner assumptions and random seed. Its tiny run is demonstrative, not empirical evidence or an efficacy claim. Test coverage separately evaluates model invariants, not learning outcomes.
 
 ## Bring your own lesson
+
+Open the **[Course catalog](catalog.html)** to browse supplied courses, search their
+titles and concepts, read source and permission statements, and download an original
+course file. In the learner, choose that file under **Bring your own lesson**, inspect
+the preview, then select **Start this deck**. The catalog also works directly from
+your files without a server or internet connection.
 
 Use **Download example deck** to get an editable JSON copy of the bundled lesson,
 including its original attribution. Replace the lesson content using the
