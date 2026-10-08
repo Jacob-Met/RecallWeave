@@ -1,0 +1,77 @@
+name: answer-feedback-browser
+
+on:
+  pull_request:
+    paths:
+      - index.html
+      - styles.css
+      - src/knowledge.mjs
+      - src/review.mjs
+      - src/reflections.mjs
+      - src/deck.mjs
+      - src/deck-picker.mjs
+      - src/session-export.mjs
+      - src/trace-archive.mjs
+      - src/trace-archive-ui.mjs
+      - src/lesson-archive.mjs
+      - src/lesson-archive-ui.mjs
+      - src/answer-order.mjs
+      - src/app.mjs
+      - data/deck.json
+      - demo.html
+      - tools/make_demo.py
+      - docs/receiving/answer-feedback-ab529ac65023/literal-deck.json
+      - tools/check_answer_feedback_browser.mjs
+      - .github/workflows/answer-feedback-browser.yml
+  push:
+    branches: [main]
+    paths:
+      - index.html
+      - styles.css
+      - src/knowledge.mjs
+      - src/review.mjs
+      - src/reflections.mjs
+      - src/deck.mjs
+      - src/deck-picker.mjs
+      - src/session-export.mjs
+      - src/trace-archive.mjs
+      - src/trace-archive-ui.mjs
+      - src/lesson-archive.mjs
+      - src/lesson-archive-ui.mjs
+      - src/answer-order.mjs
+      - src/app.mjs
+      - data/deck.json
+      - demo.html
+      - tools/make_demo.py
+      - docs/receiving/answer-feedback-ab529ac65023/literal-deck.json
+      - tools/check_answer_feedback_browser.mjs
+      - .github/workflows/answer-feedback-browser.yml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  real-browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      # Keep the existing workflows intact and use their pinned action identities.
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: "22"
+      - name: Check maintained receiver syntax
+        run: node --check tools/check_answer_feedback_browser.mjs
+      - name: Verify the committed standalone learner
+        run: |
+          python3 tools/make_demo.py
+          git diff --exit-code -- demo.html
+      - name: Receive visible answer identities with installed Chrome
+        run: |
+          chrome_bin="$(command -v google-chrome)"
+          "$chrome_bin" --version
+          node tools/check_answer_feedback_browser.mjs --root "$GITHUB_WORKSPACE" --browser "$chrome_bin" --output "$RUNNER_TEMP/answer-feedback-receiving" --emit-bundle
