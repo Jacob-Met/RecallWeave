@@ -55,13 +55,13 @@ The separate author page leaves ongoing learning sessions open. It has no accoun
 
 ## Demo deck provenance
 
-Question text and distractors are newly authored for this demo. Scientific concepts are adapted from OpenStax, *Biology 2e*, Chapters 7–8, Rice University, CC BY 4.0: <https://openstax.org/details/books/biology-2e>. Deck attribution and license are also embedded in `data/deck.json` and shown at completion. This work does not copy an existing hackathon entry or project.
+Question text and distractors are newly authored for this demo. Scientific concepts are checked against [OpenStax, *Biology 2e*](https://openstax.org/books/biology-2e/pages/1-introduction), sections 6.4, 7.1, 7.4 and 8.1–8.3, by Mary Ann Clark, Matthew Douglas and Jung Choi (Rice University). The current linked reference textbook content is licensed CC BY-NC-SA 4.0. [The item-level content review](docs/deck-content-review-20261008.md) records the scientific distinctions and references. Attribution is embedded in `data/deck.json`, shown at completion and included in downloaded notes. This demo uses original wording and does not copy textbook passages, figures or an existing hackathon entry.
 
 ## Tests
 
 Run the unit/property tests with Node 20+ and Python 3 (`python3` on your PATH): `node --test tests/*.test.mjs`. The local-file tests use Node's global [`File`](https://nodejs.org/api/globals.html#class-file), added in Node 20; Python verifies that the checked-in standalone author HTML matches its modular sources. No npm packages are required. Tests cover bounded probabilities over repeated updates, directional evidence behavior, invalid parameter rejection, entropy/information-gain bounds, prerequisite selection, exhaustion, and initialization.
 
-Review tests also cover immutable first-answer snapshots, missed-question order, separate correct/incorrect retries, resumption, duplicate/out-of-order refusal, and all-correct sessions. The existing knowledge model and deck are unchanged.
+Review tests also cover immutable first-answer snapshots, missed-question order, separate correct/incorrect retries, resumption, duplicate/out-of-order refusal, and all-correct sessions. Content revisions preserve item identities and the existing model/review contracts.
 
 The optional rendered acceptance runner uses Node 22+ and an already-installed Chrome or Chromium executable:
 

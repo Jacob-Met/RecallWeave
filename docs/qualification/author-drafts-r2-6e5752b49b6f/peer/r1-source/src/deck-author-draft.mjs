@@ -137,21 +137,9 @@ function freeze(value) {
   return value;
 }
 
-/** Formatting is optional; every admitted draft must fit when saved again. */
-function savedState(draft) {
-  const envelope = { format: DRAFT_FORMAT, draft };
-  const pretty = JSON.stringify(envelope, null, 2) + '\n';
-  if (encoder.encode(pretty).length <= MAX_DRAFT_BYTES) return pretty;
-  const compact = JSON.stringify(envelope);
-  if (encoder.encode(compact).length > MAX_DRAFT_BYTES) {
-    invalid('This draft exceeds the 2 MiB saved-file limit.');
-  }
-  return compact;
-}
-
 /** Saving never changes the live editor or promotes an unfinished draft to a lesson. */
 export function serializeAuthorDraft(draft) {
-  return savedState(canonicalState(draft));
+  return withinFileLimit(JSON.stringify({ format: DRAFT_FORMAT, draft: canonicalState(draft) }, null, 2) + '\n');
 }
 
 /** Stage a frozen copy; the caller explicitly replaces the editor with a mutable clone. */
@@ -164,8 +152,5 @@ export function parseAuthorDraft(source) {
   if (!Object.hasOwn(envelope, 'format') || envelope.format !== DRAFT_FORMAT) {
     invalid('This file is not a supported Deck Studio draft.');
   }
-  const draft = canonicalState(field(envelope, 'draft'));
-  // Private-key canonicalization can add bytes even to compact incoming JSON.
-  savedState(draft);
-  return freeze(draft);
+  return freeze(canonicalState(field(envelope, 'draft')));
 }

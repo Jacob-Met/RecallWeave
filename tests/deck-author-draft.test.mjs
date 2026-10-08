@@ -216,3 +216,58 @@ test('draft size limits count actual UTF-8 bytes and failed saving leaves writin
   assert.throws(() => serializeAuthorDraft(draft), /2 MiB/);
   assert.deepEqual(draft, before);
 });
+
+// Build exact-size files independently of the draft parser and serializer.
+function boundaryFile(size, separateTypedKeys = false) {
+  const draft = { nextKey: 1, title: '', attribution: '', license: '',
+    concepts: [{ key: 'concept-1', name: '' }], questions: [] };
+  let nextKey = 2;
+  const fields = [];
+  for (let index = 0; index < 100; index++) {
+    const key = `question-${separateTypedKeys ? index + 1 : nextKey++}`;
+    const options = Array.from({ length: 6 }, (_, option) => ({
+      key: `option-${separateTypedKeys ? index * 6 + option + 1 : nextKey++}`, text: '',
+    }));
+    const question = { key, id: `item-${index + 1}`, conceptKey: 'concept-1',
+      prerequisiteKeys: [], prompt: '', options, answerKey: options[0].key,
+      explanation: '', transfer: '' };
+    draft.questions.push(question);
+    fields.push([question, 'prompt', 2000], [question, 'explanation', 4000],
+      [question, 'transfer', 2000], ...options.map(option => [option, 'text', 1000]));
+  }
+  draft.nextKey = separateTypedKeys ? 601 : nextKey;
+  const bytes = value => new TextEncoder().encode(value).length;
+  let remaining = size - bytes(envelope(draft));
+  for (const [object, name, maximum] of fields) {
+    const count = Math.min(maximum, Math.floor(remaining / 2));
+    object[name] = 'é'.repeat(count);
+    remaining -= count * 2;
+    if (remaining === 1 && count < maximum) { object[name] += 'a'; remaining--; }
+  }
+  assert.equal(remaining, 0, 'the requested size fits the editor field limits');
+  const source = envelope(draft);
+  assert.equal(bytes(source), size);
+  return { draft, source };
+}
+
+test('compact drafts remain saveable near and exactly at the byte limit without added whitespace', () => {
+  for (const size of [MAX_DRAFT_BYTES - 128, MAX_DRAFT_BYTES]) {
+    const { draft, source } = boundaryFile(size);
+    const before = structuredClone(draft);
+    assert.ok(new TextEncoder().encode(JSON.stringify({ format: DRAFT_FORMAT, draft }, null, 2)).length > MAX_DRAFT_BYTES);
+    const restored = parseAuthorDraft(source);
+    assert.deepEqual(meaning(restored), meaning(draft));
+    assert.equal(serializeAuthorDraft(restored), source);
+    assert.equal(serializeAuthorDraft(draft), source);
+    assert.equal(serializeAuthorDraft(parseAuthorDraft(source)), source);
+    assert.deepEqual(draft, before);
+  }
+});
+
+test('a file whose canonical private keys exceed the saved limit is refused before admission', () => {
+  const { draft, source } = boundaryFile(MAX_DRAFT_BYTES, true);
+  const before = structuredClone(draft);
+  assert.throws(() => parseAuthorDraft(source), /2 MiB/);
+  assert.throws(() => serializeAuthorDraft(draft), /2 MiB/);
+  assert.deepEqual(draft, before);
+});
