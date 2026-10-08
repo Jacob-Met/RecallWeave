@@ -6,6 +6,14 @@
 
 Open `demo.html` directly in a browser—no server, install, build step, internet, login, API key, or user data storage is required. It is a single self-contained file with embedded CSS, JavaScript and deck. The modular source is in `index.html`, `src/`, and `data/`; to test that version locally, serve this directory with `python3 -m http.server 8080` and visit `http://localhost:8080`. Rebuild the direct-open demo with `python3 tools/make_demo.py` after source changes. No hosted endpoint is called by either version.
 
+## Explore RC transients
+
+Open **[RC transients: where the energy goes](courses/rc-transients-lab.html)** directly in a browser to follow the response of one resistor and capacitor after an ideal source step. Compare charging, discharge, reversed polarity, a precharged capacitor returning energy to the source, resistance scaling and equilibrium. Voltage, signed current, charge, stored energy, resistor heat and source work share the same applied circuit and time cursor.
+
+Edit the resistance, capacitance, source voltage and initial capacitor voltage, then select **Apply circuit**. Draft edits retire the previous result. Inspect 161 samples from 0 to 8 time constants and download the full observation with physical units and assumptions. The finite horizon is not an exact steady-state endpoint.
+
+The original [sixteen-question course](courses/rc-transients.json) and [worked guide](courses/rc-transients.md) connect the lab to voltage continuity, time constants and energy balance. Download the course and choose it under **Bring your own lesson** for the existing preview, review, practice and notes flow. The standalone lab needs no server or connection and uses no automatic browser storage. Rebuild it with `node tools/build-rc-transients.mjs`, or verify exact source and embedded-download parity with `--check`.
+
 ## Trace a maximum flow
 
 Open **[More flow needs a way through](courses/network-flow-explorer.html)** directly in a browser to follow a small directed capacity network from zero assignment to a matching flow-and-cut certificate. Inspect each breadth-first residual path, including cancellation of an earlier edge assignment, and keep independently supplied opposite edges distinct. The original-edge, residual and conservation tables expose every integer value.

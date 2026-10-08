@@ -1,0 +1,283 @@
+{
+  "format": "recallweave-deck/1",
+  "title": "RC transients: charge, time and energy",
+  "attribution": "Original questions, examples and explanations authored for RecallWeave (2026). Physics background: OpenStax, University Physics Volume 2, section 10.5, and MIT OCW 8.02T, Chapter 7, DC circuits. The accompanying guide gives links, assumptions and worked answers.",
+  "license": "Original course content created for this repository; no textbook passages, figures or exercises are reproduced. Cited reference works retain their own terms. No new repository-wide license is declared.",
+  "concepts": [
+    "Capacitor voltage and current",
+    "Time constants",
+    "General voltage steps",
+    "Energy flow"
+  ],
+  "items": [
+    {
+      "id": "rc-continuity",
+      "concept": "Capacitor voltage and current",
+      "prerequisites": [],
+      "prompt": "An ideal capacitor initially has 2 V across its marked terminals. At t = 0 it is connected through a finite positive resistor to an ideal 8 V source. What is the capacitor voltage immediately after switching?",
+      "options": [
+        "0 V",
+        "2 V",
+        "6 V",
+        "8 V"
+      ],
+      "answer": 1,
+      "explanation": "The capacitor voltage is continuous for this finite-resistance step: vC(0+) = V0 = 2 V. Its current can change immediately, but raising capacitor voltage by a finite amount in zero time would require an impulse of current. The resistor initially has 8 - 2 = 6 V across it; that is not the capacitor voltage.",
+      "transfer": "Keep V0 = 2 V but reverse the new source to -8 V. What remains continuous, and which quantity changes direction immediately?"
+    },
+    {
+      "id": "rc-initial-current",
+      "concept": "Capacitor voltage and current",
+      "prerequisites": [],
+      "prompt": "A 6 V source is connected through a 2,000 ohm resistor to an initially uncharged ideal capacitor. Taking positive current from the source through the resistor into the capacitor, what is the current at t = 0+?",
+      "options": [
+        "0 A",
+        "12 A",
+        "3 mA",
+        "0.333 mA"
+      ],
+      "answer": 2,
+      "explanation": "Initially vC = 0 V, so the resistor has 6 V across it. The current is i = (Vs - vC)/R = 6/2000 A = 0.003 A = 3 mA. A capacitor can have zero initial voltage and a nonzero charging current. Its capacitance affects how quickly the current later changes, not this initial value.",
+      "transfer": "If the initial capacitor voltage were 2 V instead, calculate the new initial current without changing the source or resistance."
+    },
+    {
+      "id": "rc-discharge-sign",
+      "concept": "Capacitor voltage and current",
+      "prerequisites": [],
+      "prompt": "A capacitor starts at +6 V, then is connected through a 3,000 ohm resistor to a source set to 0 V. Positive current is defined from the source into the capacitor's positive terminal. What is the initial signed current?",
+      "options": [
+        "+2 mA",
+        "0 mA",
+        "-18 mA",
+        "-2 mA"
+      ],
+      "answer": 3,
+      "explanation": "i(0+) = (0 - 6)/3000 A = -0.002 A = -2 mA. The minus sign indicates flow opposite the chosen positive reference: stored charge leaves the marked positive plate through the resistor. The current magnitude is 2 mA; using the magnitude alone would lose the direction.",
+      "transfer": "Would choosing the opposite current reference reverse the physical discharge, or only the sign used to describe it?"
+    },
+    {
+      "id": "rc-final-state",
+      "concept": "Capacitor voltage and current",
+      "prerequisites": [],
+      "prompt": "After an ideal single-R single-C circuit has approached a fixed 7 V source for a very long time, what are its asymptotic capacitor voltage and current?",
+      "options": [
+        "7 V and 0 A",
+        "0 V and 7/R A",
+        "7 V and 7/R A",
+        "A voltage set by C and a current set by R"
+      ],
+      "answer": 0,
+      "explanation": "For positive R and C, vC tends to the fixed source voltage and the resistor voltage tends to zero. Therefore current tends to zero. These are limits as time increases, not an assertion that a nonzero initial voltage gap becomes exactly zero after a finite number of time constants.",
+      "transfer": "Which of the initial voltage, resistance and capacitance changes the final voltage when the source stays fixed?"
+    },
+    {
+      "id": "rc-tau-units",
+      "concept": "Time constants",
+      "prerequisites": [
+        "Capacitor voltage and current"
+      ],
+      "prompt": "A circuit has R = 2,000 ohms and C = 500 microfarads. What is its time constant tau = RC?",
+      "options": [
+        "1,000,000 s",
+        "1 s",
+        "4 s",
+        "0.001 s"
+      ],
+      "answer": 1,
+      "explanation": "500 microfarads is 500 x 10^-6 F = 0.0005 F. Thus tau = 2000 x 0.0005 = 1 second. Microfarads must be converted to farads before multiplying by ohms. The product ohm-farad has units of seconds.",
+      "transfer": "Find tau for 4,000 ohms and 250 microfarads. How can different components share the same time constant?"
+    },
+    {
+      "id": "rc-one-tau",
+      "concept": "Time constants",
+      "prerequisites": [
+        "Capacitor voltage and current"
+      ],
+      "prompt": "An initially uncharged capacitor charges toward a fixed 10 V source. After exactly one time constant, approximately what is its voltage? Use exp(-1) = 0.368.",
+      "options": [
+        "3.68 V",
+        "10 V",
+        "6.32 V",
+        "0.368 V"
+      ],
+      "answer": 2,
+      "explanation": "The remaining voltage gap is 10 x exp(-1) = 3.68 V. The voltage reached is 10 - 3.68 = 6.32 V. One time constant removes about 63.2% of the initial gap and leaves about 36.8%; those complementary fractions should not be interchanged.",
+      "transfer": "If the capacitor instead starts at 4 V and tends to 10 V, apply the same remaining-gap fraction to find its voltage after one time constant."
+    },
+    {
+      "id": "rc-double-r",
+      "concept": "Time constants",
+      "prerequisites": [
+        "Capacitor voltage and current"
+      ],
+      "prompt": "For charging from zero with the same fixed source and capacitance, the resistance is doubled. Which comparison is correct?",
+      "options": [
+        "The time constant halves and initial current doubles.",
+        "The time constant and initial current both double.",
+        "The final voltage doubles.",
+        "The time constant doubles, initial current halves, and final voltage stays the same."
+      ],
+      "answer": 3,
+      "explanation": "tau = RC doubles when R doubles. The initial current Vs/R halves. The asymptotic capacitor voltage is still Vs. The voltage curve has the same shape against t/tau, but the corresponding physical times are twice as long.",
+      "transfer": "Compare the two circuits at the same physical time and then at the same normalized time t/tau. Why are those different comparisons?"
+    },
+    {
+      "id": "rc-five-tau",
+      "concept": "Time constants",
+      "prerequisites": [
+        "Capacitor voltage and current"
+      ],
+      "prompt": "For a nonzero initial voltage gap, what fraction of that gap remains after five time constants? Use exp(-5) = 0.00674.",
+      "options": [
+        "About 0.674%; the gap is small but not exactly zero.",
+        "Exactly zero, because charging has finished.",
+        "About 63.2%.",
+        "About 99.326%."
+      ],
+      "answer": 0,
+      "explanation": "The remaining fraction is exp(-5) = 0.00674, which is 0.674%. The moved fraction is about 99.326%. Five time constants is a useful approximation threshold for many exercises, but the ideal exponential reaches its asymptote only in the infinite-time limit.",
+      "transfer": "For an initial gap of 12 V, calculate the approximate remaining gap after five time constants."
+    },
+    {
+      "id": "rc-zero-crossing",
+      "concept": "General voltage steps",
+      "prerequisites": [
+        "Capacitor voltage and current",
+        "Time constants"
+      ],
+      "prompt": "A capacitor starts at -4 V and approaches a +4 V source. At t/tau = ln(2), the exponential decay factor is 1/2. What is the capacitor voltage then?",
+      "options": [
+        "+2 V",
+        "-2 V",
+        "0 V",
+        "+4 V"
+      ],
+      "answer": 2,
+      "explanation": "The general response is vC = Vs + (V0 - Vs) exp(-t/tau). Here vC = 4 + (-4 - 4)/2 = 0 V. The voltage moves halfway from -4 V to +4 V at this time. Crossing zero does not mean current is zero: the source-to-capacitor voltage gap is still positive.",
+      "transfer": "Find the sign of the current at the zero crossing, and explain why zero capacitor voltage is not the final state."
+    },
+    {
+      "id": "rc-precharged-current",
+      "concept": "General voltage steps",
+      "prerequisites": [
+        "Capacitor voltage and current"
+      ],
+      "prompt": "A capacitor initially has 9 V while the new fixed source is 3 V, connected through 3,000 ohms. With positive current from source to capacitor, what is i(0+)?",
+      "options": [
+        "+1 mA",
+        "-2 mA",
+        "+2 mA",
+        "-3 mA"
+      ],
+      "answer": 1,
+      "explanation": "i(0+) = (Vs - V0)/R = (3 - 9)/3000 A = -2 mA. The capacitor voltage initially exceeds the source, so current flows toward the source. The final capacitor voltage approaches 3 V from above rather than falling to zero.",
+      "transfer": "If the source were increased to 12 V while V0 remained 9 V, calculate and interpret the initial current."
+    },
+    {
+      "id": "rc-equilibrium",
+      "concept": "General voltage steps",
+      "prerequisites": [
+        "Capacitor voltage and current"
+      ],
+      "prompt": "An ideal capacitor already has 5 V and is connected through a positive resistor to a fixed 5 V source. Which description is correct?",
+      "options": [
+        "It first discharges to zero before charging again.",
+        "Its current is 5/R A forever.",
+        "It stores no energy because current is zero.",
+        "Its voltage stays at 5 V, current is zero, and its stored energy stays constant."
+      ],
+      "answer": 3,
+      "explanation": "There is no initial voltage gap: Vs - V0 = 0. Thus current is zero and the voltage remains 5 V for all times. The capacitor can still hold energy U = (1/2)C(5 V)^2. Zero power transfer is different from zero stored energy.",
+      "transfer": "How can the decay multiplier exp(-t/tau) change numerically while the actual voltage remains constant in this special case?"
+    },
+    {
+      "id": "rc-double-c",
+      "concept": "General voltage steps",
+      "prerequisites": [
+        "Capacitor voltage and current",
+        "Time constants"
+      ],
+      "prompt": "For charging from zero, keep the source and resistance fixed but double the capacitance. What changes?",
+      "options": [
+        "The time constant doubles, the initial current stays the same, and the final stored charge doubles.",
+        "The initial current doubles and the time constant halves.",
+        "The final voltage halves.",
+        "The time constant and final charge stay the same."
+      ],
+      "answer": 0,
+      "explanation": "tau = RC doubles with C. Initially vC = 0 in both circuits, so i(0+) = Vs/R is unchanged. The final charge is Q = CVs, which doubles. At a given normalized time, the voltage is the same, but physical time and stored charge differ.",
+      "transfer": "At the same fixed source voltage, what happens to the final stored energy when capacitance doubles?"
+    },
+    {
+      "id": "rc-charge-energy",
+      "concept": "Energy flow",
+      "prerequisites": [
+        "Capacitor voltage and current",
+        "Time constants"
+      ],
+      "prompt": "An initially uncharged 1,000 microfarad capacitor approaches a fixed 4 V source through a resistor. In the infinite-time limit, what are the stored capacitor energy, resistor heat, and source work?",
+      "options": [
+        "16 mJ stored, 0 mJ heat, 16 mJ source work",
+        "8 mJ stored, 0 mJ heat, 8 mJ source work",
+        "8 mJ stored, 8 mJ heat, 16 mJ source work",
+        "4 mJ stored, 4 mJ heat, 8 mJ source work"
+      ],
+      "answer": 2,
+      "explanation": "C = 0.001 F. Final stored energy is (1/2)CVs^2 = 0.008 J = 8 mJ. Source work is Vs times delivered charge, Vs(CVs) = CVs^2 = 16 mJ. The remaining 8 mJ becomes resistor heat. This equal split applies to this ideal charging-from-zero case, not every initial condition.",
+      "transfer": "If the resistance changes but source voltage and capacitance do not, which of these infinite-time energies changes? Which rate or duration does change?"
+    },
+    {
+      "id": "rc-discharge-energy",
+      "concept": "Energy flow",
+      "prerequisites": [
+        "Capacitor voltage and current"
+      ],
+      "prompt": "A 500 microfarad capacitor initially at 6 V discharges through a resistor to a source set to 0 V. In the infinite-time limit, how much heat does the resistor receive?",
+      "options": [
+        "18 mJ",
+        "9 mJ",
+        "3 mJ",
+        "0 mJ because the source supplies no work"
+      ],
+      "answer": 1,
+      "explanation": "The initial stored energy is (1/2)CV0^2 = 0.5 x 0.0005 x 36 J = 0.009 J = 9 mJ. The final capacitor energy is zero and a zero-voltage source does zero work, so all 9 mJ becomes resistor heat. Negative current does not imply negative dissipation.",
+      "transfer": "If the initial capacitor voltage were -6 V, would the initial energy or final resistor heat differ?"
+    },
+    {
+      "id": "rc-return-energy",
+      "concept": "Energy flow",
+      "prerequisites": [
+        "Capacitor voltage and current",
+        "General voltage steps"
+      ],
+      "prompt": "A capacitor starts at 10 V and approaches a fixed 5 V ideal source through a positive resistor. Which energy-flow description is correct during the transient?",
+      "options": [
+        "The source absorbs energy while the resistor dissipates nonnegative heat.",
+        "The resistor supplies energy because current is negative.",
+        "The source must always deliver energy because its voltage is positive.",
+        "No energy moves until the capacitor voltage reaches 5 V."
+      ],
+      "answer": 0,
+      "explanation": "Current is negative relative to the source-to-capacitor direction. Source power delivered is Vs*i, so it is negative: the ideal source absorbs energy. Resistor power is i^2 R, which remains nonnegative. The capacitor loses stored energy; some returns to the source and some becomes heat.",
+      "transfer": "For C = 1,000 microfarads, compare the infinite-time source work, change in capacitor energy and resistor heat. Keep their signs distinct."
+    },
+    {
+      "id": "rc-energy-balance",
+      "concept": "Energy flow",
+      "prerequisites": [
+        "Capacitor voltage and current",
+        "General voltage steps"
+      ],
+      "prompt": "During an interval in the ideal RC model, the source delivers 20 mJ of work and the resistor receives 7 mJ as heat. What is the change in stored capacitor energy over that same interval?",
+      "options": [
+        "27 mJ",
+        "-13 mJ",
+        "7 mJ",
+        "13 mJ"
+      ],
+      "answer": 3,
+      "explanation": "With source work positive for delivery, energy balance is Wsource = change(Ucapacitor) + Qresistor. Therefore change(Ucapacitor) = 20 - 7 = 13 mJ. Work, heat and change of stored energy must refer to the same interval. The capacitor's total final energy would also depend on its initial energy.",
+      "transfer": "Apply the same balance when the source work is -25 mJ and resistor heat is 12.5 mJ. What does the sign of the capacitor energy change mean?"
+    }
+  ]
+}
