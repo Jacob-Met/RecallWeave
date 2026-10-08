@@ -1,0 +1,221 @@
+{
+  "format": "recallweave-deck/1",
+  "title": "Newton's method: tangent steps, exact residuals and visible limits",
+  "attribution": "Original teaching text, questions and worked examples prepared for RecallWeave in October 2026. Mathematical reference: Gilbert Strang and Edwin Herman, OpenStax Calculus Volume 1, section 4.9 (Newton's Method), https://openstax.org/books/calculus-volume-1/pages/4-9-newtons-method . Reference checked 2026-10-08. All question wording, calculations and graphics in this contribution are original.",
+  "license": "Original teaching text and examples. This contribution makes no additional reuse-license grant. Linked teaching sources retain their own terms; no textbook prose, exercise or figure is copied.",
+  "concepts": [
+    "Tangent steps",
+    "Exact residuals",
+    "Failure and repetition",
+    "Interpreting a run"
+  ],
+  "items": [
+    {
+      "id": "nm-01",
+      "concept": "Tangent steps",
+      "prerequisites": [],
+      "prompt": "For f(x) = 2x − 3, start at x₀ = 4. Where does the tangent meet the x-axis?",
+      "options": [
+        "3",
+        "5/2",
+        "3/2",
+        "4"
+      ],
+      "answer": 2,
+      "explanation": "The graph is already a straight line. At x₀ = 4, f(x₀) = 5 and f′(x₀) = 2. Its x-intercept is 4 − 5/2 = 3/2. Substituting 3/2 into 2x − 3 gives exactly zero, so one step reaches the root.",
+      "transfer": "Replace the constant −3 with −5. Find the new root and explain why the starting point does not matter for this nonhorizontal straight line."
+    },
+    {
+      "id": "nm-02",
+      "concept": "Tangent steps",
+      "prerequisites": [],
+      "prompt": "A tangent at xₙ has equation y = f(xₙ) + f′(xₙ)(x − xₙ), with f′(xₙ) ≠ 0. Which rule sets its next x-intercept?",
+      "options": [
+        "xₙ₊₁ = xₙ − f′(xₙ)",
+        "xₙ₊₁ = xₙ − f(xₙ)/f′(xₙ)",
+        "xₙ₊₁ = xₙ + f(xₙ)/f′(xₙ)",
+        "xₙ₊₁ = f(xₙ)/f′(xₙ)"
+      ],
+      "answer": 1,
+      "explanation": "Set the tangent's y-value to zero and solve: f′(xₙ)(xₙ₊₁ − xₙ) = −f(xₙ). Dividing by the nonzero slope gives a displacement of −f/f′ from the current x. The quotient alone is a correction, not the next coordinate.",
+      "transfer": "If xₙ = 3, f(xₙ) = −6 and f′(xₙ) = 4, compute the signed correction f/f′ and the next coordinate separately."
+    },
+    {
+      "id": "nm-03",
+      "concept": "Tangent steps",
+      "prerequisites": [],
+      "prompt": "For f(x) = x² − 2, use x₀ = 1. What is the first Newton iterate?",
+      "options": [
+        "1/2",
+        "0",
+        "2",
+        "3/2"
+      ],
+      "answer": 3,
+      "explanation": "Here f(1) = −1 and f′(1) = 2. The correction f/f′ is −1/2, so x₁ = 1 − (−1/2) = 3/2. A negative function value does not mean the next coordinate must decrease; the slope also matters.",
+      "transfer": "Start the same polynomial at x₀ = 2. Explain why the first step reaches the same coordinate from the other side."
+    },
+    {
+      "id": "nm-04",
+      "concept": "Exact residuals",
+      "prerequisites": [
+        "Tangent steps"
+      ],
+      "prompt": "The iterate x = 3/2 is being used for f(x) = x² − 2. What is its exact residual f(x)?",
+      "options": [
+        "1/4",
+        "0",
+        "1/2",
+        "3/2"
+      ],
+      "answer": 0,
+      "explanation": "The residual is (3/2)² − 2 = 9/4 − 8/4 = 1/4. It measures the function value at the current iterate. It is neither the x-coordinate nor, in general, the horizontal distance to a root.",
+      "transfer": "For x = 17/12, calculate x² − 2 exactly. Compare this function residual with the difference between 17/12 and 3/2."
+    },
+    {
+      "id": "nm-05",
+      "concept": "Exact residuals",
+      "prerequisites": [
+        "Tangent steps"
+      ],
+      "prompt": "For f(x) = x², the starting point is x₀ = 0. Both f(x₀) and f′(x₀) are zero. What should the explorer report first?",
+      "options": [
+        "A cycle of length one with a nonzero residual.",
+        "An exact root has already been reached; no Newton division is needed.",
+        "A nonroot horizontal-tangent failure.",
+        "A new iterate of 0/0."
+      ],
+      "answer": 1,
+      "explanation": "A root is a point where f(x) is zero. That condition is already satisfied, so the process can stop successfully without attempting a division by the derivative. A zero derivative prevents a step away from a nonroot; it does not erase an exact root.",
+      "transfer": "Compare f(x) = x² at x = 0 with f(x) = x² − 2 at x = 0. Which residual changes the stopping decision?"
+    },
+    {
+      "id": "nm-06",
+      "concept": "Exact residuals",
+      "prerequisites": [
+        "Tangent steps"
+      ],
+      "prompt": "After three Newton steps for x² − 2 from x₀ = 2, the exact residual is 1/166464. What does that record justify?",
+      "options": [
+        "The exact root has been reached because a short display might show 0.0000.",
+        "The iteration must diverge because the residual is positive.",
+        "The residual is the exact horizontal error in x.",
+        "The residual is small but nonzero, so this iterate is not an exact root."
+      ],
+      "answer": 3,
+      "explanation": "The rational residual 1/166464 is not zero. A rounded decimal display can hide a nonzero value, while exact arithmetic retains it. A finite run can produce a useful approximation without proving an exact root or guaranteeing all future behavior.",
+      "transfer": "Why can defined Newton steps with rational coefficients and a rational start stay rational, even when the root being approached is irrational?"
+    },
+    {
+      "id": "nm-07",
+      "concept": "Failure and repetition",
+      "prerequisites": [
+        "Tangent steps",
+        "Exact residuals"
+      ],
+      "prompt": "For f(x) = x² − 2 at x = 0, f(x) = −2 and f′(x) = 0. What happens to the tangent step?",
+      "options": [
+        "The horizontal tangent y = −2 has no x-intercept, so the next Newton iterate is undefined.",
+        "The next iterate is zero because the slope is zero.",
+        "The method has found a root.",
+        "The method should silently choose a nearby starting point."
+      ],
+      "answer": 0,
+      "explanation": "The tangent is the constant line y = −2. It never meets y = 0, and the quotient f/f′ would divide a nonzero value by zero. The explorer records this stop rather than inventing a replacement point.",
+      "transfer": "Change only the starting point to 1/1000. Compute the next coordinate and explain why a very small nonzero slope can create a large jump."
+    },
+    {
+      "id": "nm-08",
+      "concept": "Failure and repetition",
+      "prerequisites": [
+        "Tangent steps",
+        "Exact residuals"
+      ],
+      "prompt": "For f(x) = x³ − 2x + 2, Newton steps from 0 give 0 → 1 → 0. The residuals are 2 → 1 → 2. What has been established?",
+      "options": [
+        "The root is halfway between 0 and 1.",
+        "The iteration has converged because it returned to its start.",
+        "An exact nonroot cycle of length two repeats under the same deterministic rule.",
+        "One more identical step is guaranteed to find a root."
+      ],
+      "answer": 2,
+      "explanation": "At 0, f = 2 and f′ = −2, so the next point is 1. At 1, f = 1 and f′ = 1, so the next point is 0. Returning to the same exact nonroot point repeats the same future steps. This proves a cycle for this start, not that the polynomial has no real root.",
+      "transfer": "Start the cycle example at a different allowed point. Explain why a different finite trace does not invalidate the exact 0 → 1 → 0 calculation."
+    },
+    {
+      "id": "nm-09",
+      "concept": "Failure and repetition",
+      "prerequisites": [
+        "Tangent steps",
+        "Exact residuals"
+      ],
+      "prompt": "For f(x) = (x − 1)² and x ≠ 1, Newton's rule simplifies to xₙ₊₁ = (xₙ + 1)/2. Starting at 3, what happens to the distance from the root on each step?",
+      "options": [
+        "It is halved: 2, 1, 1/2, 1/4, … .",
+        "It is squared: 2, 4, 16, … .",
+        "It becomes exactly zero after the first step.",
+        "It remains fixed because the root is repeated."
+      ],
+      "answer": 0,
+      "explanation": "Subtract 1 from the update: xₙ₊₁ − 1 = (xₙ − 1)/2. From x₀ = 3, the iterates are 3, 2, 3/2, 5/4, … . The error decreases steadily but remains nonzero at every finite step from this start. A repeated root can approach differently from a simple root.",
+      "transfer": "Use the explorer's repeated-root example and compare the exact residual sequence with the exact distance-to-1 sequence. Why does the residual shrink by a factor of four?"
+    },
+    {
+      "id": "nm-10",
+      "concept": "Interpreting a run",
+      "prerequisites": [
+        "Tangent steps",
+        "Exact residuals",
+        "Failure and repetition"
+      ],
+      "prompt": "Replace f(x) with g(x) = −3f(x), keeping the same start. Whenever the derivative is nonzero, what happens to the Newton x-intercepts?",
+      "options": [
+        "Their signs reverse.",
+        "Their magnitudes are multiplied by three.",
+        "They stay the same because g/g′ = f/f′.",
+        "Every step becomes undefined."
+      ],
+      "answer": 2,
+      "explanation": "Both the function value and derivative are multiplied by −3, so their ratio is unchanged: (−3f)/(−3f′) = f/f′. The graph and residual values change, but the tangent x-intercepts follow the same recurrence. This reasoning requires a nonzero scale factor.",
+      "transfer": "Compare x² − 2 with −3x² + 6 in the explorer. Which exact fields change and which remain identical?"
+    },
+    {
+      "id": "nm-11",
+      "concept": "Interpreting a run",
+      "prerequisites": [
+        "Tangent steps",
+        "Exact residuals",
+        "Failure and repetition"
+      ],
+      "prompt": "For f(x) = x² − 1, a start of −3 gives the first iterate −5/3. Which interpretation is justified?",
+      "options": [
+        "The next iterate must be +1 because +1 is a root.",
+        "This first step stays on the negative side; a starting point influences the path, and one step alone is not a convergence proof.",
+        "The polynomial has only one real root.",
+        "The method always chooses the root nearest zero."
+      ],
+      "answer": 1,
+      "explanation": "The first correction is 8/(−6) = −4/3, giving −3 + 4/3 = −5/3. The polynomial has roots at −1 and +1. Newton's method follows the local tangent from the chosen start; it does not carry a separate instruction naming a preferred root. A finite observation should not be overstated.",
+      "transfer": "For a nonzero x, simplify this polynomial's update to (x² + 1)/(2x). What does that expression say about the sign of the next iterate?"
+    },
+    {
+      "id": "nm-12",
+      "concept": "Interpreting a run",
+      "prerequisites": [
+        "Tangent steps",
+        "Exact residuals",
+        "Failure and repetition"
+      ],
+      "prompt": "The explorer stops because the next complete exact step would exceed its arithmetic bound. What does that result mean?",
+      "options": [
+        "The polynomial has no root.",
+        "The iterates have been proved to diverge.",
+        "The displayed approximate coordinate should be accepted as an exact root.",
+        "The bounded computation has stopped; the last complete exact steps remain valid, and no convergence or divergence is inferred."
+      ],
+      "answer": 3,
+      "explanation": "A resource limit is a limit of this computation. It is separate from the mathematical facts that establish an exact root, a zero-slope obstruction, or an exact repeated cycle. The explorer keeps completed records and does not invent an unfinished next step or relabel the limit as a theorem.",
+      "transfer": "Explain how a chosen step-limit stop differs from an exact cycle stop. What evidence would you need to make a stronger mathematical claim?"
+    }
+  ]
+}

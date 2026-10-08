@@ -1,0 +1,357 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>Newton's method · RecallWeave</title>
+<style>
+:root{--paper:#f5f3ec;--white:#fffefa;--ink:#203b37;--muted:#596d67;--teal:#0b6d64;--teal-soft:#e4f0eb;--gold:#bf6328;--line:#d9ded5;--error:#982f2d}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}button,input,select{font:inherit}button,a,input,select,summary{touch-action:manipulation}button{cursor:pointer}button:disabled{cursor:default;opacity:.42}a{color:var(--teal);text-underline-offset:3px}button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:3px solid #b86721;outline-offset:3px}[hidden]{display:none!important}.shell{max-width:1220px;margin:auto;padding:0 30px}.topbar{display:flex;justify-content:space-between;align-items:center;padding:22px 0;border-bottom:1px solid var(--line);gap:20px}.wordmark{font-weight:760;letter-spacing:-.025em;text-decoration:none;font-size:19px}.topbar span{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}.hero{display:grid;grid-template-columns:1.5fr 1fr;gap:48px;align-items:center;padding:52px 0 38px}.eyebrow{font-size:11px;font-weight:750;letter-spacing:.16em;text-transform:uppercase;color:var(--teal)}h1{font-size:clamp(32px,4.3vw,54px);line-height:1.12;letter-spacing:-.055em;margin:13px 0 20px;font-weight:680}h1 em{font-style:normal;color:var(--teal)}.intro{max-width:630px;color:var(--muted);margin:0}.formula-card{border-left:3px solid var(--teal);padding:18px 0 18px 28px}.formula{font:28px/1.8 Georgia,serif;white-space:nowrap;letter-spacing:-.01em}.fraction{display:inline-flex;vertical-align:middle;flex-direction:column;text-align:center;font-size:.75em;line-height:1.3;margin:0 4px}.fraction span:first-child{border-bottom:1px solid currentColor;padding:0 5px 2px}.fraction span:last-child{padding-top:2px}.formula-card p{font-size:13px;line-height:1.5;color:var(--muted);max-width:300px;margin:12px 0 0}.workspace{display:grid;grid-template-columns:300px minmax(0,1fr);gap:24px;align-items:start;margin-bottom:28px}.panel{background:var(--white);border:1px solid var(--line);border-radius:15px;min-width:0}.controls{padding:24px;position:sticky;top:20px}.panel h2{font-size:20px;line-height:1.3;margin:0 0 18px;letter-spacing:-.025em}.subtle-label{font-size:12px;font-weight:700;color:var(--muted);display:block;margin-bottom:7px}select,input{width:100%;color:var(--ink);background:#fff;border:1px solid #bdc9c1;border-radius:7px;padding:9px 10px;min-height:43px}select{font-size:13px}input{font-variant-numeric:tabular-nums}.secondary,.nav-button{border:1px solid #b7c8bf;border-radius:7px;background:transparent;color:var(--teal);font-size:13px;font-weight:700;padding:9px 12px;min-height:42px}.secondary:hover,.nav-button:hover:not(:disabled){background:var(--teal-soft)}.example-button{width:100%;margin-top:9px}.divider{border:0;border-top:1px solid var(--line);margin:24px 0}.coefficients{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}.coefficients label{text-align:center;font-size:12px;color:var(--muted)}.coefficients input{padding:9px 5px;text-align:center}.range-note{font-size:11px;color:var(--muted);margin:8px 0 18px}.input-row{display:grid;grid-template-columns:1.2fr .8fr;gap:12px;margin:16px 0}.input-row label{font-size:12px;font-weight:700}.input-row input{margin-top:6px}.primary{border:1px solid var(--teal);border-radius:8px;background:var(--teal);color:#fff;font-weight:720;padding:12px 18px;min-height:47px}.run-button{width:100%}.primary:hover{background:#07574f}.input-feedback{font-size:12px;line-height:1.5;margin:12px 0 0;color:var(--muted)}.error{color:var(--error);font-size:13px;line-height:1.5;margin:10px 0 0;font-weight:650}.content{min-width:0}.result-head{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:25px 26px 20px}.function-title{font:24px/1.3 Georgia,serif;margin:6px 0 0;overflow-wrap:anywhere}.count{text-align:right;border-left:1px solid var(--line);padding-left:24px;white-space:nowrap}.count strong{font-size:31px;line-height:1;display:block;font-variant-numeric:tabular-nums}.count span{font-size:10px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}.graph-wrap{padding:0 20px}#newton-plot{width:100%;height:auto;display:block}.grid-line{stroke:#e3e8e0;stroke-width:1}.axis-line{stroke:#acb9b0;stroke-width:1.3}.axis-label{font:12px system-ui,sans-serif;fill:#62736d}.function-line{stroke:var(--teal);stroke-width:3;stroke-linejoin:round}.tangent-line{stroke:var(--gold);stroke-width:2.5}.point-guide{stroke:#698a7f;stroke-width:1.5;stroke-dasharray:4 4}.current-point{fill:var(--teal);stroke:white;stroke-width:2}.intercept-point{fill:var(--gold);stroke:white;stroke-width:2}.plot-legend{display:flex;gap:20px;padding:0 26px;font-size:12px;color:var(--muted);flex-wrap:wrap}.legend-mark{display:inline-block;width:24px;height:3px;vertical-align:middle;background:var(--teal);margin-right:7px}.legend-mark.tangent{background:var(--gold)}.plot-note{font-size:11px;line-height:1.5;color:var(--muted);margin:11px 26px 21px}.inspector{border-top:1px solid var(--line);padding:22px 26px}.inspector-head{display:flex;justify-content:space-between;gap:15px;align-items:center}.inspector-head h3{font-size:14px;margin:0;letter-spacing:-.01em}.point-nav{display:flex;gap:6px}.nav-button{min-width:42px;font-size:17px;padding:5px 10px}.seek-row{display:grid;grid-template-columns:minmax(0,1fr) 170px;gap:15px;align-items:center;margin:13px 0 18px}.seek-row input{accent-color:var(--teal);padding:0;min-height:36px;border:0;background:none}.seek-row select{font-size:12px;padding:7px}.metric-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.metric{padding:12px;border:1px solid var(--line);border-radius:8px;min-width:0}.metric-label{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin-bottom:6px}.value{font:21px/1.25 Georgia,serif;overflow-wrap:anywhere}.metric details{margin-top:7px;font-size:11px}.metric code{display:block;overflow-wrap:anywhere;line-height:1.5;margin-top:8px}.tangent-equation{border-left:3px solid var(--gold);padding:11px 15px;margin:20px 0 0;background:#fbf6ec}.tangent-equation p{font-size:13px;margin:7px 0}.tangent-equation .eyebrow{color:#8f4d24}.equation-line{overflow-wrap:anywhere}.equation-line code{font-size:13px}.muted{color:var(--muted)}.outcome{margin-top:18px;padding:23px 26px;border-top:4px solid var(--teal)}.outcome h3{margin:3px 0 8px;font-size:20px;letter-spacing:-.025em}.outcome p{margin:0;color:var(--muted);font-size:14px}.outcome .secondary{margin-top:16px}.record{margin-top:18px;padding:20px 26px}.record summary{font-weight:700;cursor:pointer;font-size:14px}.record p{font-size:12px;color:var(--muted)}table{table-layout:fixed;width:100%;border-collapse:collapse;font-size:12px;margin-top:14px}th,td{text-align:left;vertical-align:top;padding:9px 8px;border-bottom:1px solid var(--line)}th:first-child{width:50px}td code{overflow-wrap:anywhere;font-size:11px;line-height:1.7}thead th{color:var(--muted);font-size:11px;font-weight:650}.selected-row{background:var(--teal-soft)}.table-point{background:transparent;border:1px solid #b5c5bc;border-radius:5px;color:var(--teal);min-width:30px;min-height:32px;cursor:pointer}.study-panel{display:grid;grid-template-columns:1.1fr 1fr;gap:28px;padding:28px 32px;margin:30px 0;background:#e8eee4;border-color:#d2ddcd}.study-panel h2{margin:5px 0 11px}.study-panel p{font-size:14px;color:var(--muted);margin:0}.study-actions{display:flex;gap:9px;flex-wrap:wrap;align-content:center;align-items:center}.study-actions button{background:var(--white)}.study-actions a{font-size:13px;margin:6px 4px}.download-status{font-size:12px;color:var(--muted);min-height:20px;margin:0 0 20px}.boundaries{font-size:12px;color:var(--muted);margin:25px 0}.boundaries summary{font-weight:700;cursor:pointer}.boundaries p{max-width:880px}footer{padding:24px 0 36px;border-top:1px solid var(--line);font-size:11px;display:flex;justify-content:space-between;gap:24px;color:var(--muted)}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+@media(max-width:900px){.hero{grid-template-columns:1.2fr 1fr;gap:25px}.workspace{grid-template-columns:270px minmax(0,1fr);gap:16px}.controls{padding:19px}.shell{padding:0 20px}.metric-grid{gap:7px}.metric{padding:9px}.value{font-size:18px}.seek-row{grid-template-columns:minmax(0,1fr) 135px}.inspector,.result-head{padding-left:19px;padding-right:19px}.graph-wrap{padding:0 10px}}
+@media(max-width:700px){.hero{display:block;padding:32px 0 25px}.formula-card{margin-top:26px;padding-top:10px;padding-bottom:10px}.formula{font-size:25px}.formula-card p{max-width:none}.workspace{display:block}.controls{position:static;margin-bottom:18px}.coefficients{gap:12px}.coefficients input{padding:9px}.controls .input-row{grid-template-columns:1fr 1fr}.content{width:100%}.study-panel{display:block;padding:24px}.study-actions{margin-top:20px}.metric-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.value{font-size:19px}.hero h1{max-width:480px}.topbar span{letter-spacing:.08em;font-size:10px}}
+@media(max-width:400px){.shell{padding:0 14px}.topbar{gap:10px}.topbar span{max-width:130px;text-align:right}.result-head{padding:20px 16px}.function-title{font-size:22px}.count{padding-left:14px}.inspector{padding:20px 14px}.seek-row{grid-template-columns:1fr;gap:4px}.point-select-wrap{max-width:100%}.metric{padding:8px}.value{font-size:17px}.metric-label{font-size:9px}.outcome,.record{padding:20px 17px}.plot-legend{padding:0 17px;gap:12px}.plot-note{margin-left:17px;margin-right:17px}.formula{font-size:23px}footer{display:block}footer span{display:block;margin-top:10px}}
+</style>
+</head>
+<body>
+<div class="shell">
+<header class="topbar"><a class="wordmark" href="../catalog.html">RecallWeave</a><span>Calculus · a local learning lab</span></header>
+<section class="hero" aria-labelledby="page-title">
+<div><span class="eyebrow">Explore a numerical method</span><h1 id="page-title">Newton's method,<br><em>one tangent at a time.</em></h1><p class="intro">Choose a polynomial and a starting point. Follow each exact tangent step, then inspect what the recorded run establishes.</p></div>
+<div class="formula-card"><span class="eyebrow">From a local slope to a new coordinate</span><div class="formula" aria-label="x n plus one equals x n minus f of x n divided by f prime of x n">x<sub>n+1</sub> = x<sub>n</sub> − <span class="fraction"><span>f(x<sub>n</sub>)</span><span>f′(x<sub>n</sub>)</span></span></div><p>A tangent intercept is the next iterate. Its residual tells you whether that point is an exact root.</p></div>
+</section>
+<main>
+<div class="workspace">
+<aside class="panel controls" aria-labelledby="experiment-title">
+<h2 id="experiment-title">Set up an experiment</h2>
+<label class="subtle-label" for="example-select">Start with an example</label><select id="example-select"></select><button class="secondary example-button" type="button" id="apply-example">Use this example</button>
+<hr class="divider">
+<form id="newton-form" novalidate>
+<span class="subtle-label">Polynomial coefficients</span>
+<div class="coefficients">
+<label for="c3">x³<input id="c3" inputmode="numeric" maxlength="4" aria-label="Cubic coefficient" value="0"></label>
+<label for="c2">x²<input id="c2" inputmode="numeric" maxlength="4" aria-label="Quadratic coefficient" value="1"></label>
+<label for="c1">x<input id="c1" inputmode="numeric" maxlength="4" aria-label="Linear coefficient" value="0"></label>
+<label for="c0">constant<input id="c0" inputmode="numeric" maxlength="4" aria-label="Constant coefficient" value="-2"></label>
+</div>
+<p class="range-note">Integer coefficients from −12 to 12. Include zeros.</p>
+<div class="input-row"><label for="start">Starting x<input id="start" maxlength="24" value="2" aria-describedby="start-note"></label><label for="step-limit">Step limit<input id="step-limit" inputmode="numeric" maxlength="2" value="6" aria-label="Step limit from 1 to 8"></label></div>
+<p id="start-note" class="range-note">Start from −20 to 20. Try 2, 1.25 or 3/2. Choose 1–8 steps.</p>
+<button class="primary run-button" type="submit">Run exact steps</button>
+<p id="input-error" class="error" role="alert"></p><p id="input-status" class="input-feedback" role="status"></p>
+</form>
+</aside>
+<div class="content" id="result-panel" hidden>
+<section class="panel" aria-labelledby="function-label">
+<div class="result-head"><div><span class="eyebrow">Exact record · approximate drawing</span><h2 class="function-title" id="function-label"></h2></div><div class="count"><strong id="step-count">0</strong><span>complete steps</span></div></div>
+<div class="graph-wrap"><svg id="newton-plot" viewBox="0 0 780 430" role="img" aria-labelledby="plot-title plot-description"></svg></div>
+<div class="plot-legend"><span><i class="legend-mark"></i>Polynomial</span><span><i class="legend-mark tangent"></i>Recorded tangent &amp; intercept</span></div>
+<p class="plot-note" id="plot-note"></p>
+<div class="inspector">
+<div class="inspector-head"><h3 id="point-title" tabindex="-1">Point 0</h3><div class="point-nav"><button id="previous-point" class="nav-button" type="button" aria-label="Previous recorded point">←</button><button id="next-point" class="nav-button" type="button" aria-label="Next recorded point">→</button></div></div>
+<div class="seek-row"><label class="sr-only" for="point-slider">Inspect a recorded point</label><input id="point-slider" type="range" min="0" max="0" step="1" value="0"><label class="sr-only" for="point-select">Choose a recorded point</label><select id="point-select"></select></div>
+<div class="metric-grid" id="point-values"></div><div class="tangent-equation" id="tangent-equation"></div>
+</div>
+</section>
+<section class="panel outcome" aria-labelledby="outcome-title"><span class="eyebrow" id="point-count"></span><h3 id="outcome-title"></h3><p id="outcome-description"></p><button id="download-run" class="secondary" type="button" disabled>Download exact record</button></section>
+<details class="panel record"><summary>All exact point values</summary><p>Every completed point is retained. Select a point number to inspect its tangent. Fractions remain exact even when a short decimal display would round them.</p><table><thead><tr><th scope="col">Point</th><th scope="col">x</th><th scope="col">f(x)</th><th scope="col">f′(x)</th></tr></thead><tbody id="step-table-body"></tbody></table></details>
+</div>
+</div>
+<section class="panel study-panel" aria-labelledby="study-title"><div><span class="eyebrow">Take the reasoning further</span><h2 id="study-title">Twelve questions. Worked examples.</h2><p>Download the lesson JSON, open it in RecallWeave, inspect the preview and choose <strong>Start this deck</strong>. Keep the worked guide beside your experiment.</p></div><div class="study-actions"><button id="download-course" class="secondary" type="button">Download lesson JSON</button><button id="download-guide" class="secondary" type="button">Download worked guide</button><a href="../demo.html">Open the learner →</a></div></section>
+<p id="download-status" class="download-status" role="status"></p>
+<details class="boundaries"><summary>Inputs, exact arithmetic and execution limits</summary><p>The start accepts integers, decimals with up to three decimal places, or fractions with a positive denominator at most 1000 and numerator magnitude at most 20000, within −20 to 20. The polynomial has four integer coefficients from −12 to 12. Choose 1–8 steps.</p><p>Every fraction and stopping decision is exact within a 4096-bit numerator/denominator bound. A resource stop preserves the last complete step and establishes no convergence or divergence. Plot coordinates and short decimal labels are approximate. Editing an input retires the previous record until you run again. This self-contained page makes no network requests.</p></details>
+</main>
+<footer><span>Original teaching text, questions and graphics for RecallWeave.</span><span>Reference: <a href="https://openstax.org/books/calculus-volume-1/pages/4-9-newtons-method">OpenStax Calculus 1 · §4.9</a></span></footer>
+</div>
+<script>
+const courseText="{\n  \"format\": \"recallweave-deck/1\",\n  \"title\": \"Newton's method: tangent steps, exact residuals and visible limits\",\n  \"attribution\": \"Original teaching text, questions and worked examples prepared for RecallWeave in October 2026. Mathematical reference: Gilbert Strang and Edwin Herman, OpenStax Calculus Volume 1, section 4.9 (Newton's Method), https://openstax.org/books/calculus-volume-1/pages/4-9-newtons-method . Reference checked 2026-10-08. All question wording, calculations and graphics in this contribution are original.\",\n  \"license\": \"Original teaching text and examples. This contribution makes no additional reuse-license grant. Linked teaching sources retain their own terms; no textbook prose, exercise or figure is copied.\",\n  \"concepts\": [\n    \"Tangent steps\",\n    \"Exact residuals\",\n    \"Failure and repetition\",\n    \"Interpreting a run\"\n  ],\n  \"items\": [\n    {\n      \"id\": \"nm-01\",\n      \"concept\": \"Tangent steps\",\n      \"prerequisites\": [],\n      \"prompt\": \"For f(x) = 2x − 3, start at x₀ = 4. Where does the tangent meet the x-axis?\",\n      \"options\": [\n        \"3\",\n        \"5/2\",\n        \"3/2\",\n        \"4\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"The graph is already a straight line. At x₀ = 4, f(x₀) = 5 and f′(x₀) = 2. Its x-intercept is 4 − 5/2 = 3/2. Substituting 3/2 into 2x − 3 gives exactly zero, so one step reaches the root.\",\n      \"transfer\": \"Replace the constant −3 with −5. Find the new root and explain why the starting point does not matter for this nonhorizontal straight line.\"\n    },\n    {\n      \"id\": \"nm-02\",\n      \"concept\": \"Tangent steps\",\n      \"prerequisites\": [],\n      \"prompt\": \"A tangent at xₙ has equation y = f(xₙ) + f′(xₙ)(x − xₙ), with f′(xₙ) ≠ 0. Which rule sets its next x-intercept?\",\n      \"options\": [\n        \"xₙ₊₁ = xₙ − f′(xₙ)\",\n        \"xₙ₊₁ = xₙ − f(xₙ)/f′(xₙ)\",\n        \"xₙ₊₁ = xₙ + f(xₙ)/f′(xₙ)\",\n        \"xₙ₊₁ = f(xₙ)/f′(xₙ)\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"Set the tangent's y-value to zero and solve: f′(xₙ)(xₙ₊₁ − xₙ) = −f(xₙ). Dividing by the nonzero slope gives a displacement of −f/f′ from the current x. The quotient alone is a correction, not the next coordinate.\",\n      \"transfer\": \"If xₙ = 3, f(xₙ) = −6 and f′(xₙ) = 4, compute the signed correction f/f′ and the next coordinate separately.\"\n    },\n    {\n      \"id\": \"nm-03\",\n      \"concept\": \"Tangent steps\",\n      \"prerequisites\": [],\n      \"prompt\": \"For f(x) = x² − 2, use x₀ = 1. What is the first Newton iterate?\",\n      \"options\": [\n        \"1/2\",\n        \"0\",\n        \"2\",\n        \"3/2\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"Here f(1) = −1 and f′(1) = 2. The correction f/f′ is −1/2, so x₁ = 1 − (−1/2) = 3/2. A negative function value does not mean the next coordinate must decrease; the slope also matters.\",\n      \"transfer\": \"Start the same polynomial at x₀ = 2. Explain why the first step reaches the same coordinate from the other side.\"\n    },\n    {\n      \"id\": \"nm-04\",\n      \"concept\": \"Exact residuals\",\n      \"prerequisites\": [\n        \"Tangent steps\"\n      ],\n      \"prompt\": \"The iterate x = 3/2 is being used for f(x) = x² − 2. What is its exact residual f(x)?\",\n      \"options\": [\n        \"1/4\",\n        \"0\",\n        \"1/2\",\n        \"3/2\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"The residual is (3/2)² − 2 = 9/4 − 8/4 = 1/4. It measures the function value at the current iterate. It is neither the x-coordinate nor, in general, the horizontal distance to a root.\",\n      \"transfer\": \"For x = 17/12, calculate x² − 2 exactly. Compare this function residual with the difference between 17/12 and 3/2.\"\n    },\n    {\n      \"id\": \"nm-05\",\n      \"concept\": \"Exact residuals\",\n      \"prerequisites\": [\n        \"Tangent steps\"\n      ],\n      \"prompt\": \"For f(x) = x², the starting point is x₀ = 0. Both f(x₀) and f′(x₀) are zero. What should the explorer report first?\",\n      \"options\": [\n        \"A cycle of length one with a nonzero residual.\",\n        \"An exact root has already been reached; no Newton division is needed.\",\n        \"A nonroot horizontal-tangent failure.\",\n        \"A new iterate of 0/0.\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"A root is a point where f(x) is zero. That condition is already satisfied, so the process can stop successfully without attempting a division by the derivative. A zero derivative prevents a step away from a nonroot; it does not erase an exact root.\",\n      \"transfer\": \"Compare f(x) = x² at x = 0 with f(x) = x² − 2 at x = 0. Which residual changes the stopping decision?\"\n    },\n    {\n      \"id\": \"nm-06\",\n      \"concept\": \"Exact residuals\",\n      \"prerequisites\": [\n        \"Tangent steps\"\n      ],\n      \"prompt\": \"After three Newton steps for x² − 2 from x₀ = 2, the exact residual is 1/166464. What does that record justify?\",\n      \"options\": [\n        \"The exact root has been reached because a short display might show 0.0000.\",\n        \"The iteration must diverge because the residual is positive.\",\n        \"The residual is the exact horizontal error in x.\",\n        \"The residual is small but nonzero, so this iterate is not an exact root.\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"The rational residual 1/166464 is not zero. A rounded decimal display can hide a nonzero value, while exact arithmetic retains it. A finite run can produce a useful approximation without proving an exact root or guaranteeing all future behavior.\",\n      \"transfer\": \"Why can defined Newton steps with rational coefficients and a rational start stay rational, even when the root being approached is irrational?\"\n    },\n    {\n      \"id\": \"nm-07\",\n      \"concept\": \"Failure and repetition\",\n      \"prerequisites\": [\n        \"Tangent steps\",\n        \"Exact residuals\"\n      ],\n      \"prompt\": \"For f(x) = x² − 2 at x = 0, f(x) = −2 and f′(x) = 0. What happens to the tangent step?\",\n      \"options\": [\n        \"The horizontal tangent y = −2 has no x-intercept, so the next Newton iterate is undefined.\",\n        \"The next iterate is zero because the slope is zero.\",\n        \"The method has found a root.\",\n        \"The method should silently choose a nearby starting point.\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"The tangent is the constant line y = −2. It never meets y = 0, and the quotient f/f′ would divide a nonzero value by zero. The explorer records this stop rather than inventing a replacement point.\",\n      \"transfer\": \"Change only the starting point to 1/1000. Compute the next coordinate and explain why a very small nonzero slope can create a large jump.\"\n    },\n    {\n      \"id\": \"nm-08\",\n      \"concept\": \"Failure and repetition\",\n      \"prerequisites\": [\n        \"Tangent steps\",\n        \"Exact residuals\"\n      ],\n      \"prompt\": \"For f(x) = x³ − 2x + 2, Newton steps from 0 give 0 → 1 → 0. The residuals are 2 → 1 → 2. What has been established?\",\n      \"options\": [\n        \"The root is halfway between 0 and 1.\",\n        \"The iteration has converged because it returned to its start.\",\n        \"An exact nonroot cycle of length two repeats under the same deterministic rule.\",\n        \"One more identical step is guaranteed to find a root.\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"At 0, f = 2 and f′ = −2, so the next point is 1. At 1, f = 1 and f′ = 1, so the next point is 0. Returning to the same exact nonroot point repeats the same future steps. This proves a cycle for this start, not that the polynomial has no real root.\",\n      \"transfer\": \"Start the cycle example at a different allowed point. Explain why a different finite trace does not invalidate the exact 0 → 1 → 0 calculation.\"\n    },\n    {\n      \"id\": \"nm-09\",\n      \"concept\": \"Failure and repetition\",\n      \"prerequisites\": [\n        \"Tangent steps\",\n        \"Exact residuals\"\n      ],\n      \"prompt\": \"For f(x) = (x − 1)² and x ≠ 1, Newton's rule simplifies to xₙ₊₁ = (xₙ + 1)/2. Starting at 3, what happens to the distance from the root on each step?\",\n      \"options\": [\n        \"It is halved: 2, 1, 1/2, 1/4, … .\",\n        \"It is squared: 2, 4, 16, … .\",\n        \"It becomes exactly zero after the first step.\",\n        \"It remains fixed because the root is repeated.\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"Subtract 1 from the update: xₙ₊₁ − 1 = (xₙ − 1)/2. From x₀ = 3, the iterates are 3, 2, 3/2, 5/4, … . The error decreases steadily but remains nonzero at every finite step from this start. A repeated root can approach differently from a simple root.\",\n      \"transfer\": \"Use the explorer's repeated-root example and compare the exact residual sequence with the exact distance-to-1 sequence. Why does the residual shrink by a factor of four?\"\n    },\n    {\n      \"id\": \"nm-10\",\n      \"concept\": \"Interpreting a run\",\n      \"prerequisites\": [\n        \"Tangent steps\",\n        \"Exact residuals\",\n        \"Failure and repetition\"\n      ],\n      \"prompt\": \"Replace f(x) with g(x) = −3f(x), keeping the same start. Whenever the derivative is nonzero, what happens to the Newton x-intercepts?\",\n      \"options\": [\n        \"Their signs reverse.\",\n        \"Their magnitudes are multiplied by three.\",\n        \"They stay the same because g/g′ = f/f′.\",\n        \"Every step becomes undefined.\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"Both the function value and derivative are multiplied by −3, so their ratio is unchanged: (−3f)/(−3f′) = f/f′. The graph and residual values change, but the tangent x-intercepts follow the same recurrence. This reasoning requires a nonzero scale factor.\",\n      \"transfer\": \"Compare x² − 2 with −3x² + 6 in the explorer. Which exact fields change and which remain identical?\"\n    },\n    {\n      \"id\": \"nm-11\",\n      \"concept\": \"Interpreting a run\",\n      \"prerequisites\": [\n        \"Tangent steps\",\n        \"Exact residuals\",\n        \"Failure and repetition\"\n      ],\n      \"prompt\": \"For f(x) = x² − 1, a start of −3 gives the first iterate −5/3. Which interpretation is justified?\",\n      \"options\": [\n        \"The next iterate must be +1 because +1 is a root.\",\n        \"This first step stays on the negative side; a starting point influences the path, and one step alone is not a convergence proof.\",\n        \"The polynomial has only one real root.\",\n        \"The method always chooses the root nearest zero.\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"The first correction is 8/(−6) = −4/3, giving −3 + 4/3 = −5/3. The polynomial has roots at −1 and +1. Newton's method follows the local tangent from the chosen start; it does not carry a separate instruction naming a preferred root. A finite observation should not be overstated.\",\n      \"transfer\": \"For a nonzero x, simplify this polynomial's update to (x² + 1)/(2x). What does that expression say about the sign of the next iterate?\"\n    },\n    {\n      \"id\": \"nm-12\",\n      \"concept\": \"Interpreting a run\",\n      \"prerequisites\": [\n        \"Tangent steps\",\n        \"Exact residuals\",\n        \"Failure and repetition\"\n      ],\n      \"prompt\": \"The explorer stops because the next complete exact step would exceed its arithmetic bound. What does that result mean?\",\n      \"options\": [\n        \"The polynomial has no root.\",\n        \"The iterates have been proved to diverge.\",\n        \"The displayed approximate coordinate should be accepted as an exact root.\",\n        \"The bounded computation has stopped; the last complete exact steps remain valid, and no convergence or divergence is inferred.\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"A resource limit is a limit of this computation. It is separate from the mathematical facts that establish an exact root, a zero-slope obstruction, or an exact repeated cycle. The explorer keeps completed records and does not invent an unfinished next step or relabel the limit as a theorem.\",\n      \"transfer\": \"Explain how a chosen step-limit stop differs from an exact cycle stop. What evidence would you need to make a stronger mathematical claim?\"\n    }\n  ]\n}\n";
+const guideText="# Newton's method: a tangent step is a proposal\n\nOpen the [offline tangent explorer](newton-method-explorer.html) and keep this guide beside it. Download the [twelve-question course](newton-method.json), then open the existing RecallWeave learner, choose the local JSON file, inspect its preview and select **Start this deck**.\n\nThe explorer studies one polynomial at a time. It records exact rational steps; the drawn curve and short decimal labels are approximate. A tangent can lead toward a root, jump far away, become unusable or repeat an earlier point. The result panel states which fact the actual recorded run establishes.\n\n## 1. The current coordinate, residual and slope have different jobs\n\nA root is a coordinate r satisfying f(r) = 0. At a current coordinate x, the **residual** is f(x), the vertical function value. It is not generally the horizontal distance x − r.\n\nThe tangent at x is the line\n\n    y = f(x) + f′(x)(X − x).\n\nHere X is a coordinate moving along the line; x is the fixed point where the tangent was taken. Set y = 0. When f′(x) is nonzero, the tangent's x-intercept is\n\n    next = x − f(x) / f′(x).\n\nThe quotient f/f′ is a signed correction. Subtract it from x to obtain a new coordinate. The tangent line is a local approximation to the curve; its intercept is a proposed next iterate, not automatically a root of the original polynomial.\n\n**Worked line.** Let f(x) = 2x − 3 and start at 4. The residual is 5 and the slope is 2. The correction is 5/2, so the next coordinate is 4 − 5/2 = 3/2. Substitution gives f(3/2) = 0. This polynomial is itself a straight line, so its tangent reaches the exact root in one step.\n\n**Try it.** Select **One step on a straight line**. Inspect the original point and the final point separately. Then change the constant coefficient from −3 to −5 and run a fresh experiment.\n\n## 2. Exact fractions make the square-root calculation inspectable\n\nUse f(x) = x² − 2, with f′(x) = 2x and x₀ = 2. The first three steps are:\n\n| Current x | Exact f(x) | Exact f′(x) | Correction f/f′ | Next x |\n| --- | --- | --- | --- | --- |\n| 2 | 2 | 4 | 1/2 | 3/2 |\n| 3/2 | 1/4 | 3 | 1/12 | 17/12 |\n| 17/12 | 1/144 | 17/6 | 1/408 | 577/408 |\n\nAt the final point in this table,\n\n    f(577/408) = 1/166464.\n\nThat value is small and positive. It is still not zero. A display rounded to a few decimal places can conceal the distinction, so inspect the exact fraction before interpreting a stop.\n\nStarting with rational coefficients and a rational coordinate, each defined Newton step uses rational arithmetic and remains rational. The irrational root √2 can therefore be approached without being reached exactly in a finite sequence of such steps.\n\n**Try it.** Select **Approach a square root**, set the step limit to 3, and inspect each recorded tangent. Check that the final panel says the chosen step limit was reached. Increasing the limit is another bounded experiment; it does not change a nonzero exact residual into zero by declaration.\n\n## 3. Check for an exact root before attempting division\n\nTwo experiments can have the same zero slope and different outcomes.\n\n| Polynomial and point | Residual | Slope | Correct interpretation |\n| --- | --- | --- | --- |\n| f(x) = x² at x = 0 | 0 | 0 | Already an exact root; no step is needed. |\n| f(x) = x² − 2 at x = 0 | −2 | 0 | Nonroot horizontal tangent; the Newton step is undefined. |\n\nIn the second row, the tangent is y = −2, which never meets the x-axis. The explorer retains that initial point and records no invented step.\n\nA small nonzero slope is different from zero. For x² − 2 at x = 1/1000, the next coordinate is\n\n    1/1000 − (−1999999/1000000)/(1/500)\n    = 2000001/2000\n    = 1000.0005.\n\nA starting point close to zero has produced a very large jump. The input limit applies to the starting point; the method is not silently clamped when it produces an iterate outside that starting interval. A point outside the current chart window remains available in the exact records.\n\n## 4. A repeated exact point can prove a cycle for one start\n\nFor f(x) = x³ − 2x + 2:\n\n- At x = 0, the residual is 2 and the slope is −2. The next point is 1.\n- At x = 1, the residual is 1 and the slope is 1. The next point is 0.\n\nThus the exact sequence is 0 → 1 → 0. Neither point is a root. Returning to the same exact point under the same deterministic rule repeats the same future steps, giving a cycle of length two.\n\nThis conclusion concerns the selected start and recurrence. It does not say that the polynomial has no real root. A different start defines a different experiment.\n\n**Try it.** Select **An exact two-step cycle**. Read both corrections, then inspect the repeated final point. The explorer includes the completed step returning to zero and labels the cycle; it does not continue filling the table with redundant repetitions.\n\n## 5. Repeated roots can approach at a different rate\n\nFor f(x) = (x − 1)², the derivative is 2(x − 1). Away from the root, cancellation gives\n\n    next = x − (x − 1)² / (2(x − 1))\n         = (x + 1)/2.\n\nSubtracting 1 from both sides shows that the distance from the root is halved on every defined step:\n\n    next − 1 = (x − 1)/2.\n\nFrom x₀ = 3, the coordinates are 3, 2, 3/2, 5/4, … . The exact distances to 1 are 2, 1, 1/2, 1/4, … ; the residuals are their squares, 4, 1, 1/4, 1/16, … . This start approaches the root without reaching it in a finite number of steps.\n\nAt x = 1 itself, the original residual is zero. The explorer stops there before trying to use a divided expression.\n\n## 6. Interpret only what the recorded experiment establishes\n\nMultiplying a polynomial by any nonzero constant multiplies both f and f′ by that constant. Their ratio stays the same, so the defined tangent x-intercepts stay the same. The curve's vertical scale and exact residuals can change while the iterate path does not.\n\nChanging the starting point is different. For x² − 1, the update at a nonzero x is (x² + 1)/(2x). Its numerator is positive, so the next point has the same sign as x. A start of −3 gives −5/3 as the next point; a start of +3 gives +5/3. The method does not carry a separate instruction naming a preferred root.\n\nUse the result labels precisely:\n\n- **Exact root:** the recorded exact residual is zero.\n- **Zero slope:** a nonzero residual has a zero derivative; the next tangent step is undefined.\n- **Exact cycle:** a nonroot rational point repeats, establishing repetition under this recurrence.\n- **Step limit:** the selected number of complete steps has been recorded; no further conclusion is added.\n- **Arithmetic limit:** the next complete exact step would exceed the computation's bound; the last complete point and steps remain valid.\n\nThe last two labels describe bounded execution. Neither proves convergence nor divergence.\n\n## Explorer contract and saved files\n\nEnter four integer coefficients, from −12 to 12, for the constant, x, x² and x³ terms. Include zeros. The starting point must lie from −20 to 20 and can be an integer, a decimal with up to three decimal places, or a fraction with a positive denominator at most 1000 and numerator magnitude at most 20000. Choose 1–8 steps. Rational numerators and denominators are bounded to 4096 bits during computation.\n\nEditing any input retires the previous computed result. Choose **Run exact steps** to calculate from the current complete inputs. The experiment download includes the admitted input, complete rational point/step records, explicit outcome and limits. It is a record for inspection, not a claim that the learner has mastered the topic.\n\nThe course and guide downloads contain the same text embedded in the self-contained page. The page makes no network requests and uses no account or hosted model. Existing RecallWeave learning estimates and review/practice behavior remain controlled by the learner itself.\n\n## Mathematical reference\n\nThe tangent recurrence and its limitations can also be studied in [OpenStax, Calculus Volume 1, §4.9: Newton's Method](https://openstax.org/books/calculus-volume-1/pages/4-9-newtons-method), by Gilbert Strang and Edwin Herman, checked 2026-10-08. The teaching prose, questions, calculations and graphics in this contribution are original. No textbook passage, exercise or figure is reproduced.\n\nSee the repository's AI-tool disclosure for its educational-content review guidance.\n";
+const { NEWTON_PRESETS, analyzeNewton, approximateRational, polynomialLabel } = (() => {
+/**
+ * Newton tangent steps for bounded cubic-or-lower polynomials.
+ * Arithmetic and stopping decisions are exact. Approximation is for drawing only.
+ */
+const NEWTON_LIMITS = Object.freeze({coefficient:12,startMagnitude:20,startDenominator:1000,steps:8,arithmeticBits:4096});
+const NEWTON_PRESETS = Object.freeze([
+  {id:'square-root',label:'Approach a square root',coefficients:[-2,0,1,0],start:'2',steps:6},
+  {id:'zero-slope',label:'A horizontal tangent away from a root',coefficients:[-2,0,1,0],start:'0',steps:6},
+  {id:'two-cycle',label:'An exact two-step cycle',coefficients:[2,-2,0,1],start:'0',steps:6},
+  {id:'repeated-root',label:'Approach a repeated root',coefficients:[1,-2,1,0],start:'3',steps:6},
+  {id:'straight-line',label:'One step on a straight line',coefficients:[-3,2,0,0],start:'4',steps:6},
+  {id:'already-root',label:'Already at a root with zero slope',coefficients:[0,0,1,0],start:'0',steps:6},
+  {id:'negative-root',label:'Approach the negative root',coefficients:[-1,0,1,0],start:'-3',steps:6},
+  {id:'exact-landing',label:'Land on an exact root',coefficients:[0,2,-2,1],start:'1',steps:6}
+].map(p=>Object.freeze({...p,coefficients:Object.freeze(p.coefficients)})));
+
+class ArithmeticLimit extends Error {}
+const abs=n=>n<0n?-n:n;
+function gcd(a,b) {a=abs(a);b=abs(b);while(b){const next=a%b;a=b;b=next;}return a;}
+function fraction(n,d=1n) {
+  if(d===0n)throw new Error('A fraction denominator cannot be zero.');
+  if(d<0n){n=-n;d=-d;}
+  const divisor=gcd(n,d);n/=divisor;d/=divisor;
+  if(abs(n).toString(2).length>NEWTON_LIMITS.arithmeticBits||d.toString(2).length>NEWTON_LIMITS.arithmeticBits)throw new ArithmeticLimit();
+  return {n,d};
+}
+const add=(a,b)=>fraction(a.n*b.d+b.n*a.d,a.d*b.d);
+const subtract=(a,b)=>fraction(a.n*b.d-b.n*a.d,a.d*b.d);
+const multiply=(a,b)=>fraction(a.n*b.n,a.d*b.d);
+const divide=(a,b)=>fraction(a.n*b.d,a.d*b.n);
+const text=a=>a.d===1n?String(a.n):a.n+'/'+a.d;
+
+function integer(value,label,min,max) {
+  if(typeof value!=='string'&&typeof value!=='number')throw new Error(label+' must be an integer from '+min+' to '+max+'.');
+  const raw=String(value).trim();
+  if(!/^[+-]?\d{1,3}$/.test(raw))throw new Error(label+' must be an integer from '+min+' to '+max+'.');
+  const result=Number(raw);
+  if(!Number.isInteger(result)||result<min||result>max)throw new Error(label+' must be an integer from '+min+' to '+max+'.');
+  return result;
+}
+function startingPoint(value) {
+  if(typeof value==='number'&&Number.isInteger(value))value=String(value);
+  if(typeof value!=='string'||value.length>24)throw new Error('Enter the starting point as an integer, decimal or fraction.');
+  const raw=value.trim();let n,d;
+  const ratio=/^([+-]?\d{1,5})\/(\d{1,4})$/.exec(raw);
+  if(ratio) {
+    n=BigInt(ratio[1]);d=BigInt(ratio[2]);
+    if(d<1n||d>1000n||abs(n)>20000n)throw new Error('Use a fraction with a positive denominator at most 1000 and numerator magnitude at most 20000.');
+  } else {
+    const decimal=/^([+-]?)(?:(\d{1,2})(?:\.(\d{0,3}))?|\.(\d{1,3}))$/.exec(raw);
+    if(!decimal)throw new Error('Use an integer, up to three decimal places, or a fraction such as 3/2.');
+    const digits=decimal[3]??decimal[4]??'';
+    n=BigInt((decimal[2]??'0')+digits)*(decimal[1]==='-'?-1n:1n);d=10n**BigInt(digits.length);
+  }
+  const result=fraction(n,d);
+  if(abs(result.n)>20n*result.d)throw new Error('The starting point must be between -20 and 20.');
+  return result;
+}
+function polynomial(coefficients,x) {
+  let value=fraction(0n);
+  for(let i=coefficients.length-1;i>=0;i--)value=add(multiply(value,x),fraction(BigInt(coefficients[i])));
+  return value;
+}
+function evaluate(coefficients,derivative,x,index) {
+  return {index,x,value:polynomial(coefficients,x),derivative:polynomial(derivative,x)};
+}
+function pointRecord(point) {
+  return Object.freeze({index:point.index,x:text(point.x),value:text(point.value),derivative:text(point.derivative)});
+}
+
+/** Coefficients are [constant, x, x², x³]. The input is never modified. */
+function analyzeNewton(input) {
+  if(!input||typeof input!=='object'||Array.isArray(input))throw new Error('Provide a polynomial, starting point and step limit.');
+  if(!Array.isArray(input.coefficients)||input.coefficients.length!==4)throw new Error('Provide all four coefficients, including zeros.');
+  const coefficients=input.coefficients.map((v,i)=>integer(v,'Coefficient c'+i,-12,12));
+  const start=startingPoint(input.start);
+  const limit=integer(input.steps,'Step limit',1,8);
+  const derivative=coefficients.slice(1).map((c,i)=>c*(i+1));
+  const points=[],steps=[],seen=new Map([[text(start),0]]);
+  let current=evaluate(coefficients,derivative,start,0),outcome;
+  points.push(pointRecord(current));
+  while(true) {
+    if(current.value.n===0n) {
+      outcome={kind:'exact-root',index:current.index,message:'The exact residual is zero. This point is an exact root; no further step is needed.'};break;
+    }
+    if(current.derivative.n===0n) {
+      outcome={kind:'zero-slope',index:current.index,message:'The residual is nonzero and the derivative is zero. This horizontal tangent has no x-intercept, so a Newton step is undefined.'};break;
+    }
+    if(steps.length===limit) {
+      outcome={kind:'step-limit',index:current.index,message:'The chosen step limit is reached. The residual is still nonzero; this stop is not a convergence claim.'};break;
+    }
+    let correction,next;
+    try {
+      correction=divide(current.value,current.derivative);
+      const nextX=subtract(current.x,correction);
+      next=evaluate(coefficients,derivative,nextX,current.index+1);
+    } catch(error) {
+      if(!(error instanceof ArithmeticLimit))throw error;
+      outcome={kind:'arithmetic-limit',index:current.index,message:'The next complete step would exceed the 4096-bit exact-arithmetic bound. The last complete point and steps are retained; no convergence or divergence is inferred.'};break;
+    }
+    steps.push(Object.freeze({index:current.index,x:text(current.x),value:text(current.value),derivative:text(current.derivative),correction:text(correction),next:text(next.x),nextValue:text(next.value)}));
+    points.push(pointRecord(next));
+    const repeated=seen.get(text(next.x));
+    current=next;
+    if(current.value.n!==0n&&repeated!==undefined) {
+      outcome={kind:'cycle',index:current.index,cycleStart:repeated,cycleLength:current.index-repeated,message:'This exact rational point has appeared before with a nonzero residual. The deterministic steps repeat a cycle of length '+(current.index-repeated)+'.'};break;
+    }
+    seen.set(text(current.x),current.index);
+  }
+  return Object.freeze({
+    format:'recallweave-newton/1',
+    input:Object.freeze({coefficients:Object.freeze(coefficients),start:text(start),steps:limit}),
+    limits:NEWTON_LIMITS,
+    points:Object.freeze(points),steps:Object.freeze(steps),outcome:Object.freeze(outcome),
+    arithmetic:'Every fraction and stopping decision is exact within the stated bound. Plot coordinates and approximate labels are rounded; a small displayed value does not establish a root.'
+  });
+}
+
+/** Approximate a canonical fraction for a plot, retaining the exact string elsewhere. */
+function approximateRational(value) {
+  if(typeof value!=='string'||value.length>2500||! /^-?\d+(?:\/[1-9]\d*)?$/.test(value))throw new Error('Expected a bounded canonical fraction.');
+  const parts=value.split('/');const n=BigInt(parts[0]),d=BigInt(parts[1]??'1');
+  const magnitude=abs(n);if(magnitude===0n)return 0;
+  const nShift=Math.max(0,magnitude.toString(2).length-53),dShift=Math.max(0,d.toString(2).length-53);
+  return (n<0n?-1:1)*(Number(magnitude>>BigInt(nShift))/Number(d>>BigInt(dShift)))*2**(nShift-dShift);
+}
+function polynomialLabel(coefficients) {
+  const terms=[];
+  for(let power=3;power>=0;power--){
+    const c=coefficients[power];if(c===0)continue;
+    const magnitude=Math.abs(c),variable=power===0?'':power===1?'x':power===2?'x²':'x³';
+    const body=(power===0||magnitude!==1?String(magnitude):'')+variable;
+    terms.push((terms.length?(c<0?' − ':' + '):(c<0?'−':''))+body);
+  }
+  return terms.join('')||'0';
+}
+
+return { NEWTON_PRESETS, analyzeNewton, approximateRational, polynomialLabel };
+})();
+const el=id=>document.getElementById(id);
+const svgNS='http://www.w3.org/2000/svg';
+let result=null,selected=0;
+function node(tag,text,className) {
+  const value=document.createElement(tag);if(text!==undefined)value.textContent=text;if(className)value.className=className;return value;
+}
+function svgNode(tag,attributes={},text) {
+  const value=document.createElementNS(svgNS,tag);for(const [key,data]of Object.entries(attributes))value.setAttribute(key,String(data));if(text!==undefined)value.textContent=text;return value;
+}
+function short(value) {
+  if(value.length<=24)return value;
+  const number=approximateRational(value);
+  return Number.isFinite(number)?'≈ '+number.toPrecision(7):'Outside decimal display range';
+}
+function exactValue(label,value) {
+  const box=node('div',undefined,'metric');box.append(node('span',label,'metric-label'));
+  const strong=node('strong',short(value),'value');box.append(strong);
+  if(value.length>24){const details=node('details');details.append(node('summary','Exact fraction'),node('code',value));box.append(details);}
+  return box;
+}
+function currentInput(){return {coefficients:['c0','c1','c2','c3'].map(id=>el(id).value),start:el('start').value,steps:el('step-limit').value};}
+function retire() {
+  result=null;selected=0;el('result-panel').hidden=true;el('download-run').disabled=true;
+  el('input-error').textContent='';el('download-status').textContent='';
+  el('input-status').textContent='Inputs changed. Run exact steps to create a fresh record.';
+  el('newton-plot').replaceChildren();el('step-table-body').replaceChildren();el('point-values').replaceChildren();
+}
+function fillPreset(preset) {
+  ['c0','c1','c2','c3'].forEach((id,i)=>{el(id).value=String(preset.coefficients[i]);});
+  el('start').value=preset.start;el('step-limit').value=String(preset.steps);retire();
+}
+function drawPlot(point,step) {
+  const svg=el('newton-plot');svg.replaceChildren();const W=Math.max(280,Math.round(svg.getBoundingClientRect().width)||780),H=W<480?320:430,pad={left:62,right:20,top:32,bottom:60};
+  svg.setAttribute('viewBox','0 0 '+W+' '+H);
+  const currentX=approximateRational(point.x),nextX=step?approximateRational(step.next):null;
+  const currentY=approximateRational(point.value),slope=approximateRational(point.derivative);
+  const included=[currentX,nextX].filter(x=>x!==null&&Number.isFinite(x)&&Math.abs(x)<=20);
+  let lo=Math.min(-2,...included.map(x=>x-1)),hi=Math.max(2,...included.map(x=>x+1));
+  lo=Math.max(-22,lo);hi=Math.min(22,hi);
+  const coefficients=result.input.coefficients;
+  const f=x=>coefficients.reduceRight((total,c)=>total*x+c,0);
+  const samples=Array.from({length:181},(_,i)=>{const x=lo+(hi-lo)*i/180;return {x,y:f(x)};});
+  const ys=[0,...samples.map(p=>p.y)];
+  let low=Math.min(...ys),high=Math.max(...ys),span=high-low;
+  if(span<1){low-=.5;high+=.5;span=high-low;}
+  low-=span*.12;high+=span*.12;
+  const X=x=>pad.left+(x-lo)/(hi-lo)*(W-pad.left-pad.right);
+  const Y=y=>H-pad.bottom-(y-low)/(high-low)*(H-pad.top-pad.bottom);
+  const axis=n=>Math.abs(n)<1e-12?'0':Math.abs(n)>=10000?n.toExponential(1):Number(n.toPrecision(4)).toString();
+  const title=svgNode('title',{id:'plot-title'},'Polynomial and recorded tangent at point '+point.index);
+  const description=svgNode('desc',{id:'plot-description'},'Approximate drawing of f(x) = '+polynomialLabel(coefficients)+'. Current exact x is '+point.x+' and exact residual is '+point.value+'. '+(step?'The recorded tangent intercept is '+step.next+'.':'No next tangent step is recorded at this point.')+' Exact values are provided below.');
+  svg.append(title,description);
+  const definitions=svgNode('defs'),clip=svgNode('clipPath',{id:'plot-window'});clip.append(svgNode('rect',{x:pad.left,y:pad.top,width:W-pad.left-pad.right,height:H-pad.top-pad.bottom}));definitions.append(clip);svg.append(definitions);
+  for(let i=0;i<=4;i++){
+    const x=lo+(hi-lo)*i/4,y=low+(high-low)*i/4;
+    svg.append(svgNode('line',{x1:X(x),y1:pad.top,x2:X(x),y2:H-pad.bottom,class:'grid-line'}));
+    svg.append(svgNode('line',{x1:pad.left,y1:Y(y),x2:W-pad.right,y2:Y(y),class:'grid-line'}));
+    svg.append(svgNode('text',{x:X(x),y:H-pad.bottom+26,'text-anchor':'middle',class:'axis-label'},axis(x)));
+    svg.append(svgNode('text',{x:pad.left-10,y:Y(y)+4,'text-anchor':'end',class:'axis-label'},axis(y)));
+  }
+  svg.append(svgNode('line',{x1:pad.left,y1:Y(0),x2:W-pad.right,y2:Y(0),class:'axis-line'}));
+  if(lo<=0&&hi>=0)svg.append(svgNode('line',{x1:X(0),y1:pad.top,x2:X(0),y2:H-pad.bottom,class:'axis-line'}));
+  svg.append(svgNode('text',{x:W-pad.right,y:H-14,'text-anchor':'end',class:'axis-label'},'x'));
+  svg.append(svgNode('text',{x:pad.left,y:18,class:'axis-label'},'f(x)'));
+  const clipped=svgNode('g',{'clip-path':'url(#plot-window)'});
+  clipped.append(svgNode('polyline',{points:samples.map(p=>X(p.x)+','+Y(p.y)).join(' '),fill:'none',class:'function-line'}));
+  if(step&&Number.isFinite(currentX)&&Number.isFinite(currentY)&&Number.isFinite(slope)){
+    const left=currentY+slope*(lo-currentX),right=currentY+slope*(hi-currentX);
+    if(Number.isFinite(left)&&Number.isFinite(right))clipped.append(svgNode('line',{x1:X(lo),y1:Y(left),x2:X(hi),y2:Y(right),class:'tangent-line'}));
+  }
+  if(Number.isFinite(currentX)&&Number.isFinite(currentY)&&currentX>=lo&&currentX<=hi){
+    clipped.append(svgNode('line',{x1:X(currentX),y1:Y(0),x2:X(currentX),y2:Y(currentY),class:'point-guide'}));
+    clipped.append(svgNode('circle',{cx:X(currentX),cy:Y(currentY),r:6,class:'current-point'}));
+  }
+  if(step&&Number.isFinite(nextX)&&nextX>=lo&&nextX<=hi)clipped.append(svgNode('circle',{cx:X(nextX),cy:Y(0),r:6,class:'intercept-point'}));
+  svg.append(clipped);
+  const off=[];
+  if(!Number.isFinite(currentX)||currentX<lo||currentX>hi)off.push('The current coordinate is outside this plot window.');
+  if(step&&(!Number.isFinite(nextX)||nextX<lo||nextX>hi))off.push('The next tangent intercept is outside this plot window.');
+  el('plot-note').textContent='Curve samples and plotted coordinates are approximate. '+off.join(' ')+' Exact values remain in the record.';
+}
+function renderPoint() {
+  if(!result)return;
+  const point=result.points[selected],step=result.steps[selected];
+  el('point-slider').value=String(selected);el('point-select').value=String(selected);
+  el('previous-point').disabled=selected===0;el('next-point').disabled=selected===result.points.length-1;
+  el('point-title').textContent='Point '+selected+(step?' · recorded tangent':' · final recorded point');
+  el('point-values').replaceChildren(exactValue('Current x',point.x),exactValue('Residual f(x)',point.value),exactValue('Slope f′(x)',point.derivative));
+  const box=el('tangent-equation');box.replaceChildren();
+  if(step){
+    box.append(node('span','Recorded tangent step','eyebrow'));
+    const equation=node('p',undefined,'equation-line');equation.append(node('code',step.x),' − ',node('code','('+step.value+') / ('+step.derivative+')'),' = ',node('code',step.next));box.append(equation);
+    box.append(node('p','The correction is '+short(step.correction)+'. At the next point, the exact residual is '+short(step.nextValue)+'.','muted'));
+  } else {
+    box.append(node('span','No further step recorded','eyebrow'),node('p',result.outcome.message));
+  }
+  for(const row of el('step-table-body').children)row.classList.toggle('selected-row',Number(row.dataset.index)===selected);
+  drawPlot(point,step);
+}
+function render() {
+  const outcomes={'exact-root':'Exact root','zero-slope':'Zero slope away from a root',cycle:'Exact repeated cycle','step-limit':'Step limit reached','arithmetic-limit':'Exact-arithmetic limit reached'};
+  el('function-label').textContent='f(x) = '+polynomialLabel(result.input.coefficients);
+  el('outcome-title').textContent=outcomes[result.outcome.kind];el('outcome-title').dataset.kind=result.outcome.kind;
+  el('outcome-description').textContent=result.outcome.message;
+  el('step-count').textContent=String(result.steps.length);el('point-count').textContent=result.points.length+' exact point'+(result.points.length===1?'':'s');
+  el('point-slider').max=String(result.points.length-1);
+  el('point-slider').disabled=result.points.length===1;
+  el('point-select').replaceChildren(...result.points.map(p=>{const option=node('option','Point '+p.index+' · x = '+short(p.x));option.value=String(p.index);return option;}));
+  el('step-table-body').replaceChildren(...result.points.map(p=>{
+    const row=node('tr');row.dataset.index=String(p.index);
+    const head=node('th');head.scope='row';const button=node('button',String(p.index),'table-point');button.type='button';button.setAttribute('aria-label','Inspect point '+p.index);button.addEventListener('click',()=>{selected=p.index;renderPoint();el('point-title').focus();});head.append(button);row.append(head);
+    for(const value of [p.x,p.value,p.derivative]){const cell=node('td');cell.append(node('code',value));row.append(cell);}return row;
+  }));
+  selected=0;el('result-panel').hidden=false;el('download-run').disabled=false;
+  el('input-status').textContent='Fresh exact record created from the current inputs.';
+  renderPoint();
+}
+function run(event) {
+  if(event)event.preventDefault();
+  retire();
+  try{result=analyzeNewton(currentInput());el('input-error').textContent='';render();}
+  catch(error){el('input-status').textContent='No result is active.';el('input-error').textContent=error.message;}
+}
+function download(content,name,type) {
+  let url;
+  try {
+    url=URL.createObjectURL(new Blob([content],{type}));
+    const a=node('a');a.href=url;a.download=name;document.body.append(a);a.click();a.remove();
+    el('download-status').textContent='Prepared '+name+'. Your browser handles saving the file.';
+  }catch(error){el('download-status').textContent='The download could not be prepared. Try again: '+error.message;}
+  finally{if(url)setTimeout(()=>URL.revokeObjectURL(url),30000);}
+}
+el('example-select').replaceChildren(...NEWTON_PRESETS.map(p=>{const option=node('option',p.label);option.value=p.id;return option;}));
+el('apply-example').addEventListener('click',()=>{fillPreset(NEWTON_PRESETS.find(p=>p.id===el('example-select').value));run();});
+el('newton-form').addEventListener('submit',run);
+for(const input of el('newton-form').querySelectorAll('input'))input.addEventListener('input',retire);
+el('previous-point').addEventListener('click',()=>{if(result&&selected>0){selected--;renderPoint();}});
+el('next-point').addEventListener('click',()=>{if(result&&selected<result.points.length-1){selected++;renderPoint();}});
+el('point-slider').addEventListener('input',()=>{if(result){selected=Number(el('point-slider').value);renderPoint();}});
+el('point-select').addEventListener('change',()=>{if(result){selected=Number(el('point-select').value);renderPoint();}});
+el('download-run').addEventListener('click',()=>{if(result)download(JSON.stringify(result,null,2)+'\n','newton-method-record.json','application/json;charset=utf-8');});
+el('download-course').addEventListener('click',()=>download(courseText,'newton-method.json','application/json;charset=utf-8'));
+el('download-guide').addEventListener('click',()=>download(guideText,'newton-method.md','text/markdown;charset=utf-8'));
+window.addEventListener('resize',()=>{if(result)renderPoint();});
+fillPreset(NEWTON_PRESETS[0]);run();
+
+</script>
+</body>
+</html>
