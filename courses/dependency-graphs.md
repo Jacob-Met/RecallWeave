@@ -23,6 +23,12 @@ convention below. The companion also downloads this original course unchanged
 for the existing learner; its calculations and download work directly from the
 single HTML file.
 
+For an optional extension beyond these twelve questions, open the
+[offline critical-path timing companion](dependency-timing.html). Add bounded
+integer durations to see earliest/latest times, total slack and all critical
+branches under unlimited parallelism, then download the exact timing trace.
+Durations use abstract time units; this does not estimate calendars or staffing.
+
 ## Open and adapt it with the integrated studio
 
 1. Open the repository's existing `author.html` directly in a browser, or serve
