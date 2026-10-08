@@ -29,6 +29,14 @@ After the first session, choose **Download study notes (.txt)** to save a readab
 
 The download works offline in both the modular app and `demo.html`. It saves a UTF-8 text file through the browser's normal download flow. It does not upload the session or restore it after a refresh. Model estimates remain labeled as model state rather than grades, and practice never replaces the original answers.
 
+### Save your place in an unfinished lesson
+
+After starting the lesson, open **Save or resume an unfinished lesson** and choose **Save lesson (.json)**. You can save before your first answer, on a later question, or while its explanation is visible. The file keeps your first answers, full precision model estimates, current question or feedback, and every question's displayed answer order.
+
+To continue later, open the same course, choose the saved lesson file, inspect its preview, then select **Resume this lesson**. The app returns to the saved question or explanation. Continuing selects the next unanswered question without repeating an answer or updating its estimate twice. Resuming deliberately replaces the active lesson and practice progress; reflections already in the tab stay in place. Canceling a preview or file chooser, selecting an invalid file, or continuing the current lesson while a file is being read leaves the active lesson in place.
+
+The saved file must match the exact loaded course and model. The app reconstructs the adaptive answer sequence and checks the saved estimates and answer ordering before offering a preview. Files larger than 2 MiB are refused. Saving and resuming work in the modular app and direct-open `demo.html`; the browser handles the explicit file download. Once the first session is complete, use the learning trace below to save completed answers and practice progress. The [unfinished lesson format](docs/lesson-archive.md) describes the source and restoration contract.
+
 ### Save and restore a learning trace
 
 After completing the first session, open **Keep or restore a learning trace** and choose **Download trace (.json)**. This separate file keeps the original answer order, canonical answer choices, full precision first-session model estimates, and any recorded practice progress.
