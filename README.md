@@ -271,6 +271,12 @@ node tools/check_reflections_browser.mjs --browser /path/to/chromium --output /t
 
 Its output directory must be new. The receiving evidence and scope are recorded in [the reflection receipt](docs/reflections-20261008-9ec02b70e5f0/README.md).
 
+## Explore stable sorting
+
+Open [Sorting with equal keys](stable-sorting.html) directly from disk to compare complete insertion and selection traces on the same 2–8 records. Numbered input identities make equal-key crossings visible; each panel shows declared comparisons and exchanges, with algorithm guarantees separate from the final tie order observed for that input. Edits retire the current run, and the complete-comparison JSON download includes both full traces.
+
+The explorer also downloads the exact original [twelve-question sorting course](courses/stable-sorting.json). Import it through the learner’s course picker, inspect the preview and choose **Start this deck** to begin. The [course guide](courses/stable-sorting.md) explains the worked example, review/practice flow, study-notes downloads and primary conceptual references. The [modular explorer](stable-sorting/index.html) works under the existing static server; rebuild the standalone file with `node tools/make_stable_sorting.mjs`.
+
 ## Accessibility and constraints
 
 Semantic landmarks, skip link, visible keyboard focus, labeled progress bar, live session region, labeled answer group, text feedback, and responsive small-screen layout are included. No external images or data requests are needed. The default font stack remains usable offline. The app is a local demo, not a production assessment.
