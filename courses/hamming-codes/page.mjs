@@ -89,7 +89,7 @@ footer{padding:.2rem 0 2.5rem;font-size:.85rem;color:var(--muted)}
 <p class="small">The sender and error switches belong to this simulation. The decoder receives only the seven bits that arrive.</p>
 <form id="scenario-form" novalidate>
 <label class="field" for="data-bits">Four data bits <small>Exactly four 0s or 1s. Leading zeros matter.</small></label>
-<input id="data-bits" type="text" inputmode="numeric" value="1011" maxlength="4" autocomplete="off" spellcheck="false" aria-describedby="data-help">
+<input id="data-bits" type="text" inputmode="numeric" value="1011" autocomplete="off" spellcheck="false" aria-describedby="data-help">
 <p id="data-help" class="small">Data fill positions 3, 5, 6 and 7. Positions 1, 2 and 4 hold even-parity checks. Position 1 is always at the left.</p>
 <fieldset><legend>Flip these transmitted positions</legend>
 <div class="bit-grid">${flipInputs}</div>

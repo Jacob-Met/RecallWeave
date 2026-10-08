@@ -12,6 +12,12 @@ Open **[When groups and totals disagree](courses/grouped-data-explorer.html)** f
 
 The [worked guide](courses/grouped-data.md) includes the assumptions, missing-rate behavior and derivations. To study its original [twelve-question course](courses/grouped-data.json), save the JSON file and open it through **Bring your own lesson** in RecallWeave. The explorer itself opens directly without a server or account.
 
+## Explore error correction
+
+Open **[When a repair can be wrong](courses/hamming-codes-explorer.html)** to work with an offline Hamming(7,4) code. Choose four data bits and the transmitted positions to flip, predict the syndrome, then inspect the parity arithmetic and the decoder's proposal. A separately labeled simulation comparison shows whether that proposal recovered the original message, including two-error miscorrections and three-error patterns that pass every check.
+
+The [worked guide](courses/hamming-codes.md) develops parity, distance and the at-most-one-error assumption. Download a worked text record from the explorer, or open its original [twelve-question course](courses/hamming-codes.json) through **Bring your own lesson**. The explorer opens directly from its HTML file; its scenarios do not estimate real channel reliability or measured learning benefit.
+
 ## Core and interaction
 
 - `src/knowledge.mjs` implements a transparent BKT update: initial knowledge, learning transition, guess, and slip are explicit probabilities. It also computes binary entropy and expected information gain.
