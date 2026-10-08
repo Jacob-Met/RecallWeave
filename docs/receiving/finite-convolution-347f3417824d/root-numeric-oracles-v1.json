@@ -1,0 +1,242 @@
+{
+  "schema": "hamon.independent_numerical_oracles.v1",
+  "reviewer": "chatgpt-347f3417824d/root",
+  "observed_at": "2026-10-08T13:22:24Z",
+  "candidate_implementation_seen": false,
+  "domain": "Two nonempty lists with1–24 finite values in[-100,100], decimal grid0.0001; indices start0; full linear convolution retains N+M-1 entries, including zeros.",
+  "cases": [
+    {
+      "name": "asymmetric-six-coefficients",
+      "x": [
+        "3",
+        "-2",
+        "0",
+        "5"
+      ],
+      "h": [
+        "-2",
+        "1",
+        "4"
+      ],
+      "expected": [
+        "-6",
+        "7",
+        "10",
+        "-18",
+        "5",
+        "20"
+      ],
+      "derivation": "Polynomial product (3-2z+5z^3)(-2+z+4z^2). At n3, terms are0,-8,0,-10."
+    },
+    {
+      "name": "delay-with-declared-zero-tail",
+      "x": [
+        "1",
+        "0",
+        "0"
+      ],
+      "h": [
+        "0",
+        "0",
+        "2"
+      ],
+      "expected": [
+        "0",
+        "0",
+        "2",
+        "0",
+        "0"
+      ],
+      "derivation": "A two-index delay times2, with declared lengths3 and3 retaining five entries."
+    },
+    {
+      "name": "minimum-grid-cancellation",
+      "x": [
+        "0.0001",
+        "-0.0001"
+      ],
+      "h": [
+        "0.0001",
+        "0.0001"
+      ],
+      "expected": [
+        "0.00000001",
+        "0",
+        "-0.00000001"
+      ],
+      "derivation": "a(1-z)*a(1+z)=a^2(1-z^2), a=10^-4."
+    },
+    {
+      "name": "scalar-kernel",
+      "x": [
+        "0",
+        "-1.2345",
+        "100"
+      ],
+      "h": [
+        "-100"
+      ],
+      "expected": [
+        "0",
+        "123.45",
+        "-10000"
+      ],
+      "derivation": "A one-entry kernel multiplies every retained input value by-100."
+    },
+    {
+      "name": "declared-zero-polynomials",
+      "x": [
+        "0",
+        "0"
+      ],
+      "h": [
+        "0",
+        "0",
+        "0"
+      ],
+      "expected": [
+        "0",
+        "0",
+        "0",
+        "0"
+      ],
+      "derivation": "Declared full output length remains4 despite zero polynomial support."
+    },
+    {
+      "name": "mixed-scale-products",
+      "x": [
+        "0.0001",
+        "-0.0001",
+        "100"
+      ],
+      "h": [
+        "100",
+        "-0.0001",
+        "0.0001"
+      ],
+      "expected": [
+        "0.01",
+        "-0.01000001",
+        "10000.00000002",
+        "-0.01000001",
+        "0.01"
+      ],
+      "derivation": "At n2, two10^-8 products add to10000; no product or exact decimal digit may be hidden by a rounded contribution total."
+    },
+    {
+      "name": "maximum-declared-length-and-amplitude",
+      "x": [
+        "100",
+        "100",
+        "100",
+        "100",
+        "100",
+        "100",
+        "100",
+        "100",
+        "100",
+        "100",
+        "100",
+        "100",
+        "100",
+        "100",
+        "100",
+        "100",
+        "100",
+        "100",
+        "100",
+        "100",
+        "100",
+        "100",
+        "100",
+        "100"
+      ],
+      "h": [
+        "-100",
+        "-100",
+        "-100",
+        "-100",
+        "-100",
+        "-100",
+        "-100",
+        "-100",
+        "-100",
+        "-100",
+        "-100",
+        "-100",
+        "-100",
+        "-100",
+        "-100",
+        "-100",
+        "-100",
+        "-100",
+        "-100",
+        "-100",
+        "-100",
+        "-100",
+        "-100",
+        "-100"
+      ],
+      "expected": [
+        "-10000",
+        "-20000",
+        "-30000",
+        "-40000",
+        "-50000",
+        "-60000",
+        "-70000",
+        "-80000",
+        "-90000",
+        "-100000",
+        "-110000",
+        "-120000",
+        "-130000",
+        "-140000",
+        "-150000",
+        "-160000",
+        "-170000",
+        "-180000",
+        "-190000",
+        "-200000",
+        "-210000",
+        "-220000",
+        "-230000",
+        "-240000",
+        "-230000",
+        "-220000",
+        "-210000",
+        "-200000",
+        "-190000",
+        "-180000",
+        "-170000",
+        "-160000",
+        "-150000",
+        "-140000",
+        "-130000",
+        "-120000",
+        "-110000",
+        "-100000",
+        "-90000",
+        "-80000",
+        "-70000",
+        "-60000",
+        "-50000",
+        "-40000",
+        "-30000",
+        "-20000",
+        "-10000"
+      ],
+      "derivation": "The overlap count of two24-entry rectangles is1,2,...,24,...,2,1; each product is-10000."
+    }
+  ],
+  "additional_observations": [
+    "Input arrays and calculation records must not be silently mutated by inspecting another output index.",
+    "The per-index contribution table must expose h[n-k], including zero extension, rather than forward kernel order.",
+    "Zero output endpoints must remain navigable.",
+    "Physical course and calculation downloads must match the data actually displayed."
+  ],
+  "public_sources": [
+    "https://ocw.mit.edu/courses/res-6-007-signals-and-systems-spring-2011/resources/lecture-4-convolution/",
+    "https://ocw.mit.edu/courses/2-161-signal-processing-continuous-and-discrete-fall-2008/14f29be83ac38f11eb1a1bd5fdb6f5ea_lecture_18.pdf"
+  ]
+}

@@ -6,6 +6,14 @@
 
 Open `demo.html` directly in a browser—no server, install, build step, internet, login, API key, or user data storage is required. It is a single self-contained file with embedded CSS, JavaScript and deck. The modular source is in `index.html`, `src/`, and `data/`; to test that version locally, serve this directory with `python3 -m http.server 8080` and visit `http://localhost:8080`. Rebuild the direct-open demo with `python3 tools/make_demo.py` after source changes. No hosted endpoint is called by either version.
 
+## Interactive binary-search companion
+
+Open [the binary-search explorer](courses/binary-search-explorer.html) to step through the exact lower-bound loop from the existing **Binary search: precise boundaries** course. The file works directly in a browser without a server or connection. Enter up to 32 sorted integers, choose a target, and inspect each comparison, the classified prefix/suffix, unresolved element indices `[lo, hi)`, and possible answer boundaries `[lo, hi]`. Repeated values, absent targets, empty arrays and the boundary after the last element have explicit examples.
+
+**Build trace**, then use **Next**, **Back**, **First** or **Finish**. Editing either input retires the previous displayed trace until you build again. The final insertion boundary is separate from the equality check for membership. Ordering-comparison counts exclude input validation, rendering, sorting, insertion and that final equality check.
+
+The companion downloads the complete trace with its entered text, plus the original unchanged course JSON and worked guide. To study the course, open RecallWeave, choose the downloaded JSON under **Bring your own lesson**, inspect the preview, then choose **Start this deck**. Downloads do not change an existing learner session. Rebuild the standalone page with `node tools/build-binary-search-explorer.mjs`; verify exact source/course parity with `--check`.
+
 ## Follow recursive calls and returns
 
 Open **[Calls go down. Answers come back.](courses/recursion-call-stack-explorer.html)** directly in a browser to step through factorial, Fibonacci, and memoized Fibonacci. Inspect each caller’s suspended calculation, saved child values, actual return order, and a fresh cache. Previous, Next, and the event selector revisit exact snapshots; the completed-run comparison separates total invocations, computed calls, cache hits, and maximum active depth.
@@ -14,9 +22,9 @@ Inputs are whole numbers from 0 to 10. Every invocation counts, including base c
 
 The explorer needs no server or account and keeps no automatic browser storage. Its trace is an algorithm inspection record, separate from learner-answer archives. Rebuild it with `node tools/build_recursion_call_stack.mjs`; add `--check` to verify that the checked-in page matches its exact sources and validated deck.
 
-## Explore hash-table probes
+## Explore coherent waves
 
-Open **[Hash tables: follow the probe](courses/hash-tables-explorer.html)** for an original offline integer-set explorer. Edit insert, find and delete operations, inspect exact slot visits, and compare collisions, wraparound, tombstones, duplicate checks and full-table results. The [worked guide](courses/hash-tables.md) explains the fixed-capacity model. Download its [twelve-question lesson](courses/hash-tables.json) and start it through **Bring your own lesson** to use the existing learner, review and study notes.
+Open **[Coherent waves: from phasors to interference](courses/phasor-interference-lab.html)** for an offline lab that connects two rotating complex amplitudes to their real cosine signals. Predict cancellation, vary relative and common phase, and compare the arrow diagram with the time trace and downloadable values. The [worked guide](courses/phasor-interference.md) explains the assumptions and original examples; save the [sixteen-question course](courses/phasor-interference.json) and open it through **Bring your own lesson** to practice the connections.
 
 ## Explore grouped rates
 
@@ -29,6 +37,10 @@ The [worked guide](courses/grouped-data.md) includes the assumptions, missing-ra
 Open [Course handouts](handout.html), choose a checked local deck JSON, review its title and source credit, then select **Use this deck**. Print or save an unanswered worksheet for learners and an explicitly separate answer key with the correct choices and authored explanations. Both keep the original question and option order, literal wording, attribution and permission; transfer prompts leave room for a written response because the deck supplies no separate transfer answer.
 
 Each saved HTML file opens and prints offline on its own. The worksheet file contains questions only; the teacher’s builder and the separate key receive the full checked deck. Cancelling a selection or choosing an invalid file leaves the current handout in place. This is a separate preparation flow; it does not start or change a learning session. Modular source lives in `handout/` and `src/course-handout*.mjs`; rebuild `handout.html` with `python3 tools/make_handout.py`, or verify it with `--check`.
+
+## Explore Boolean logic
+
+Open the [Boolean explorer](courses/boolean-logic-explorer.html) directly from your files to compare expressions, inspect complete truth tables, and find a counterexample when two expressions differ. Download the current full table as CSV or the original twelve-question course as JSON. Import that course through the learner’s existing preview and explicit start flow, then review, practice and save your notes. The [course guide](courses/boolean-logic.md) explains the supported grammar, worked answers and content sources.
 
 ## Core and interaction
 
@@ -122,6 +134,39 @@ A trace must match the exact loaded course content and learning model. For an im
 
 Trace files contain answers and practice progress. They do not include personal reflections or replace reflections already in the tab. The current session supplies the displayed option order; saved answers always identify the original option, regardless of its A–D position. Saving and restoring work offline in the standalone demo. There is no automatic browser persistence, account, or upload.
 
+## Compare two saved learning traces
+
+Open **[Compare learning traces](compare-traces.html)** directly from your files.
+Choose two completed learning-trace JSON files to inspect both sets of answers.
+The reader accepts only the exact same course content and current model, using the
+existing archive checks; it does not replace a learner session or modify the files.
+
+Questions appear in course order and match by canonical question identity, even
+when the two sessions answered them in different orders. Each side keeps its
+original first answer and question position. Practice is separate: initially
+correct questions, an unstarted round, a pending retry and a recorded retry have
+distinct labels. Filter to differing first answers or practice records, filter by
+concept, or print the current filtered comparison. Course answers, explanations,
+transfer prompts, attribution and permission stay available beside the records.
+
+A and B are the selected file positions, not an inferred chronology. Save times
+are file metadata; two files may be different snapshots of the same session.
+Correctness counts and answer differences do not establish learning improvement,
+grades or the validity of the illustrative model. Files are editable records,
+not authenticated observations. The reader does not compare model estimates.
+
+Finish a first session in the learner and choose **Download trace (.json)** under
+**Keep or restore a learning trace** to obtain a compatible file. Completed traces
+with no practice, partial practice or completed practice are supported. Decks,
+author drafts and unfinished-lesson files are separate formats. Each trace must
+be at most 2 MiB of valid UTF-8 JSON. Replacing or clearing either selection
+immediately retires the old paired view; canceled file selection preserves the
+accepted files, and rejected or superseded reads cannot restore a stale pair.
+
+This separate page works offline with no dependencies, upload or browser storage.
+Rebuild it by running: node tools/build-trace-comparison.mjs.
+The existing learner and author builders and generated pages are unchanged.
+
 ## Build a course deck
 
 Open **[Deck studio](author.html)** directly from your files, or visit `author/` when serving the modular app. Write a title, author/source and permission statement; name the concepts; then add questions, answer options, explanations and transfer prompts. A complete lesson needs a question for every concept. Optional prerequisite choices connect an earlier concept to a later one and must not form a loop in the checked lesson.
@@ -174,6 +219,14 @@ not establish subject accuracy, reuse rights, learning efficacy or a required
 teaching order. Rebuild it with `python3 tools/make_focus.py`, or verify its
 standalone parity with `python3 tools/make_focus.py --check`. Its focused native
 and builder tests are included in the existing Node test command.
+
+## Optional Markov-chain course
+
+Open the [Markov-chain explorer](courses/markov-chains-explorer.html) to edit a three-state transition table, follow probability flow, and compare mixing, alternation and absorbing states. It works as a single offline HTML file. Download its original fourteen-question course and import it through **Bring your own lesson**, or read the [course guide and worked checks](courses/markov-chains.md). The observation download keeps applied inputs and the complete computed trace; it is separate from a learner's answers.
+
+## Explore hash-table probes
+
+Open **[Hash tables: follow the probe](courses/hash-tables-explorer.html)** for an original offline integer-set explorer. Edit insert, find and delete operations, inspect exact slot visits, and compare collisions, wraparound, tombstones, duplicate checks and full-table results. The [worked guide](courses/hash-tables.md) explains the fixed-capacity model. Download its [twelve-question lesson](courses/hash-tables.json) and start it through **Bring your own lesson** to use the existing learner, review and study notes.
 
 ## Demo deck provenance
 
@@ -247,3 +300,10 @@ This public source repository supports the ForgeHacks 2026 demo. The Devpost acc
 [Open the offline lab](courses/mendelian-inheritance-lab.html), [download the original course](courses/mendelian-inheritance.json), or [read the worked guide](courses/mendelian-inheritance.md). Twelve questions connect allele segregation, genotype and phenotype, one-locus crosses and independent two-locus crosses. The explorer follows each parental gamete route and shows exact genotype and phenotype fractions, with explicit complete-dominance and independent-assortment assumptions. Its downloads preserve the checked course and a worked cross record.
 
 Import the course through the existing local-file preview and **Start this deck** flow, then use the learner's review, separate missed-item practice and study-note downloads. All traits are hypothetical plant examples; the model gives probabilities, not guaranteed finite offspring counts. Build and optional browser-receiving commands are in the guide.
+
+
+## Explore cache decisions
+
+Open **[Cache decisions: FIFO and LRU](courses/cache-replacement.html)** directly in a browser to inspect both policies on the same request sequence. Step through hits and evictions, compare complete-sequence misses across capacities, and download the accepted experiment. The worked examples include a trace where FIFO has fewer misses than LRU and the classic FIFO capacity anomaly; counts describe those inputs, not measured computer performance.
+
+The [worked guide](courses/cache-replacement.md) explains the empty-start, equal-size model and original derivations. Download the [twelve-question course](courses/cache-replacement.json) from the explorer or this link, then use **Bring your own lesson**, preview it, and explicitly start it in the unchanged learner. This separate lab works offline and does not alter learner or archive state. Rebuild only its standalone file with `node tools/build-cache-replacement.mjs`; `--check` verifies the committed artifact. Native controls run with `node --test tests/cache-replacement.test.mjs`.

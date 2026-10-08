@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Trace FIFO and LRU cache decisions, compare capacities and study an original RecallWeave lesson offline.">
+  <title>Cache decisions · RecallWeave</title>
+  <link rel="stylesheet" href="./cache-replacement.css">
+</head>
+<body>
+  <div class="wrap">
+    <nav aria-label="RecallWeave"><a class="brand" href="../demo.html">RecallWeave</a><a href="./cache-replacement.md">Worked guide</a></nav>
+    <header class="hero">
+      <p class="eyebrow">Systems lab · memory and history</p>
+      <h1>Same requests.<br>Different pages kept.</h1>
+      <p class="lede">Follow FIFO and LRU one request at a time. See how a hit changes the next eviction, then test what happens when the cache has more room.</p>
+      <div class="pill-row"><span class="pill">Starts empty</span><span class="pill">Equal-size pages</span><span class="pill">Any page can use any slot</span></div>
+    </header>
+    <main>
+      <section class="panel" aria-labelledby="input-title">
+        <h2 id="input-title">Choose a request sequence</h2>
+        <form id="comparison-form">
+          <div class="input-layout">
+            <div>
+              <label for="references">Page requests, in order</label>
+              <textarea id="references" rows="2" maxlength="512" spellcheck="false" aria-describedby="reference-help input-error">A B A C B</textarea>
+              <p class="hint" id="reference-help">Use up to 24 single page IDs: A–H or 1–8. Separate them with spaces or commas. A and 1 are different pages; an empty list is allowed.</p>
+            </div>
+            <div class="capacity-field">
+              <label for="capacity">Pages that fit</label>
+              <select id="capacity"><option value="1">1 page</option><option value="2" selected>2 pages</option><option value="3">3 pages</option><option value="4">4 pages</option><option value="5">5 pages</option></select>
+              <p class="hint">The same capacity for both policies.</p>
+            </div>
+          </div>
+          <div class="examples"><span>Try a worked example:</span><button type="button" id="load-recency">A hit changes the next eviction</button><button type="button" id="load-anomaly">The FIFO capacity anomaly</button></div>
+          <div class="form-bottom"><button type="submit" class="primary" id="run-comparison" disabled>Run comparison</button><p id="form-status" role="status">Loading the checked lesson…</p></div>
+          <p class="error" id="input-error" role="alert"></p>
+        </form>
+      </section>
+
+      <div id="results" hidden>
+        <section class="panel" aria-labelledby="inspection-title">
+          <div class="inspection-heading">
+            <div><h2 id="inspection-title">One shared sequence, two histories</h2><p class="hint"><span id="request-count">0</span> requests · capacity <span id="shown-capacity">2</span> · each card shows the selected prefix</p></div>
+            <button type="button" id="download-trace" disabled>Download experiment</button>
+          </div>
+          <p class="reference-line" id="accepted-references"></p>
+          <div class="step-controls" aria-label="Inspect retained steps">
+            <button type="button" id="step-first" disabled>First</button><button type="button" id="step-back" disabled>Back</button><button type="button" id="step-next" disabled>Next</button><button type="button" id="step-last" disabled>Last</button>
+            <p class="step-status" id="step-status" role="status" aria-live="polite"></p>
+          </div>
+          <progress id="step-progress" max="1" value="0" aria-label="Requests inspected"></progress>
+          <div class="policy-grid">
+            <article class="policy fifo" aria-labelledby="fifo-heading">
+              <header><h3 id="fifo-heading">FIFO</h3><span>First in, first out</span></header>
+              <p class="order">Oldest inserted → newest inserted</p><ol class="slots" id="fifo-slots" aria-label="FIFO cache in insertion order"></ol>
+              <p class="outcome" id="fifo-outcome"></p><p class="explanation" id="fifo-explanation"></p>
+              <dl class="counts" aria-label="FIFO cumulative counts at this step"><div><dt>hits</dt><dd id="fifo-hits">0</dd></div><div><dt>misses</dt><dd id="fifo-misses">0</dd></div></dl>
+            </article>
+            <article class="policy lru" aria-labelledby="lru-heading">
+              <header><h3 id="lru-heading">LRU</h3><span>Least recently used</span></header>
+              <p class="order">Least recently used → most recently used</p><ol class="slots" id="lru-slots" aria-label="LRU cache in recency order"></ol>
+              <p class="outcome" id="lru-outcome"></p><p class="explanation" id="lru-explanation"></p>
+              <dl class="counts" aria-label="LRU cumulative counts at this step"><div><dt>hits</dt><dd id="lru-hits">0</dd></div><div><dt>misses</dt><dd id="lru-misses">0</dd></div></dl>
+            </article>
+          </div>
+        </section>
+        <section class="panel" aria-labelledby="capacity-title">
+          <h2 id="capacity-title">More room, same complete sequence</h2>
+          <p class="hint">These totals use every request, regardless of the step selected above. Each row starts empty.</p>
+          <table id="capacity-table"><caption>Whole-sequence misses by capacity</caption><thead><tr><th scope="col">Capacity</th><th scope="col">FIFO misses</th><th scope="col">LRU misses</th></tr></thead><tbody id="capacity-rows"></tbody></table>
+          <p class="observation" id="whole-observation"></p><p class="observation" id="capacity-observation"></p>
+        </section>
+        <details class="panel trace-panel"><summary>Inspect the complete trace</summary><p class="hint">Cache contents are shown after each request, in each policy's order. “None” means no eviction.</p><p id="empty-trace" hidden>No requests to list.</p>
+          <div class="table-scroll" tabindex="0" role="region" aria-label="Complete two-policy trace">
+            <table class="trace-table"><caption>All requests; the selected step is highlighted</caption><thead><tr><th scope="col">Step</th><th scope="col">Page</th><th scope="col">FIFO</th><th scope="col">Evicts</th><th scope="col">FIFO contents</th><th scope="col">LRU</th><th scope="col">Evicts</th><th scope="col">LRU contents</th></tr></thead><tbody id="trace-rows"></tbody></table>
+          </div>
+        </details>
+      </div>
+
+      <div class="lower-grid">
+        <section class="panel" aria-labelledby="rules-title">
+          <h2 id="rules-title">Read the rule before the result</h2>
+          <p><strong>A hit</strong> finds the requested page already present. A miss loads it; if all slots are occupied, one page must leave first.</p>
+          <p><strong>FIFO</strong> keeps the insertion order on a hit. <strong>LRU</strong> refreshes the hit to most recent. The highlighted page is the request you just inspected.</p>
+          <p class="hint">Neither rule knows future requests. LRU's capacity guarantee compares LRU with itself at different capacities; it does not make LRU the winner on every workload.</p>
+        </section>
+        <section class="panel lesson-panel" aria-labelledby="lesson-title">
+          <p class="eyebrow">Take the next step</p><h2 id="lesson-title">Turn the trace into a lesson</h2>
+          <p>Predict the next eviction, explain the capacity anomaly and distinguish a trace count from a timing claim.</p>
+          <ul><li>Download the original course JSON.</li><li>Open RecallWeave and choose <strong>Bring your own lesson</strong>.</li><li>Review the preview, then explicitly start the lesson.</li></ul>
+          <button type="button" class="primary" id="download-course" disabled>Download the lesson</button><p class="course-counts" id="course-counts">12 questions · 4 concepts</p>
+        </section>
+      </div>
+    </main>
+    <footer>
+      <p>This is a small, fully associative model: pages have equal size, any page can use any slot, and every Run starts empty. Counts describe the supplied sequence; they are not a computer benchmark. Nothing is saved automatically.</p>
+      <p>Algorithm background: <a href="https://pages.cs.wisc.edu/~remzi/OSTEP/vm-beyondphys-policy.pdf">Arpaci-Dusseau &amp; Arpaci-Dusseau, <em>Operating Systems: Three Easy Pieces</em>, chapter 22</a>. The classic FIFO anomaly sequence is credited to Bélády, Nelson and Shedler. <a href="./cache-replacement.md">Read the worked guide and model limits.</a></p>
+    </footer>
+  </div>
+  <script type="module" src="./cache-replacement-entry.mjs"></script>
+</body>
+</html>

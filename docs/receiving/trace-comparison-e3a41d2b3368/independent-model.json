@@ -1,0 +1,159 @@
+{
+  "reviewer": "autonomous-e3a41d2b3368/root",
+  "sourceParent": "c00bd1f31c353698957d2ebad311334536cdef98",
+  "finishedAt": "2026-10-08T14:36:42.959Z",
+  "node": "v22.22.1",
+  "platform": "linux",
+  "architecture": "x64",
+  "harnessSha256": "1d20c29116bf2c40d108ea2850c37a97a4ebe90695d949b46743f4b27b08810e",
+  "source": {
+    "src/deck.mjs": {
+      "sha256": "621438c166ec4bfafd9d87c698a1d46cb1722f4fb92dcbb8d9f52fce682c338b",
+      "git_blob": "f0f8a4b234489c2388f427633f548d56c6ed4c03",
+      "bytes": 4894
+    },
+    "src/trace-archive.mjs": {
+      "sha256": "d9e6d4343563eac97a17f0e79ea9080d0cfe694fd74f5e0173b53a4af3d912c6",
+      "git_blob": "9976bba47897f7d883cd6d5da177a2a5db3c6b06",
+      "bytes": 6004
+    },
+    "src/knowledge.mjs": {
+      "sha256": "909dd4f171ed55ae7c65493f445b85a4df0f602bc354eca78a09bc4046e471c0",
+      "git_blob": "1a3a714dc0cf643b911ec196265746fb61c1f5cc",
+      "bytes": 4777
+    },
+    "src/review.mjs": {
+      "sha256": "06f23787c718313e0a3a546ba6677441f7708f3f74cbb4e3d5b347d39a4bf81a",
+      "git_blob": "06c76298e0cc60fabedfb8514f5e4851d2381005",
+      "bytes": 2031
+    },
+    "src/trace-comparison.mjs": {
+      "sha256": "c243b3bac7e4a7469d2f84a9c452423c68f9131dd3f405080ff8526f85a34326",
+      "git_blob": "15324a4adf17dac89eda07c4d77c5c1cef33b91a",
+      "bytes": 3667
+    }
+  },
+  "sourceUnchanged": true,
+  "passed": 12,
+  "failed": 0,
+  "results": [
+    {
+      "name": "native generated archives expose immutable completed summaries",
+      "passed": true,
+      "evidence": {
+        "questions": 4,
+        "correctFirst": 4,
+        "changedAnswers": 0,
+        "changedPractice": 0
+      }
+    },
+    {
+      "name": "canonical question identity is independent of first-answer order",
+      "passed": true,
+      "evidence": {
+        "canonicalIds": [
+          "item-z",
+          "item-a",
+          "__proto__",
+          "constructor"
+        ],
+        "positionsDiffer": true,
+        "answerChanges": 0
+      }
+    },
+    {
+      "name": "different wrong canonical options count as changed answers",
+      "passed": true,
+      "evidence": {
+        "bothWrong": true,
+        "choices": [
+          1,
+          2
+        ],
+        "changedAnswers": 1
+      }
+    },
+    {
+      "name": "unstarted, pending, answered and not-needed practice remain distinct",
+      "passed": true,
+      "evidence": {
+        "practiceChanges": 3,
+        "firstChanges": 0,
+        "correctFirstUnchanged": 1
+      }
+    },
+    {
+      "name": "distinct wrong practice choices never rewrite first answers or estimates",
+      "passed": true,
+      "evidence": {
+        "practiceChoices": [
+          1,
+          2
+        ],
+        "firstChoice": 1,
+        "modelEstimatesUnchanged": true
+      }
+    },
+    {
+      "name": "all-correct empty practice retains the recorded start without invented retries",
+      "passed": true,
+      "evidence": {
+        "emptyRoundStarted": true,
+        "eligibleRetries": 0,
+        "answerDifferences": 0
+      }
+    },
+    {
+      "name": "A and B remain explicit even when save times run backwards",
+      "passed": true,
+      "evidence": {
+        "left": "2026-10-08T13:00:00.000Z",
+        "right": "2025-01-01T00:00:00.000Z",
+        "sorted": false
+      }
+    },
+    {
+      "name": "exact raw course identity rejects semantically similar versions",
+      "passed": true,
+      "evidence": {
+        "differentVersionsRejected": 9,
+        "unversionedSelfComparisonAccepted": true
+      }
+    },
+    {
+      "name": "object key order and JSON whitespace do not invent a course change",
+      "passed": true,
+      "evidence": {
+        "objectKeysReordered": true,
+        "crlfJsonAccepted": true,
+        "literalPromptPreserved": true
+      }
+    },
+    {
+      "name": "native archive admission refuses corrupt completed history and model data",
+      "passed": true,
+      "evidence": {
+        "nativeCorruptionsRejected": 13,
+        "invalidOrOversizeInputsRejected": 6
+      }
+    },
+    {
+      "name": "the separate reader validates course content before using embedded archived content",
+      "passed": true,
+      "evidence": {
+        "invalidEmbeddedCoursesRejected": 6
+      }
+    },
+    {
+      "name": "nested result values are immutable and preserve literal data and reserved IDs",
+      "passed": true,
+      "evidence": {
+        "deepFrozen": true,
+        "reservedIdsPreserved": true,
+        "literalTextPreserved": true,
+        "liveSessionMethods": false
+      }
+    }
+  ],
+  "boundary": "Independent model/API receiving. Fixtures are created by the unchanged native archive/review/BKT functions; this does not substitute for a real browser or learner efficacy evidence."
+}

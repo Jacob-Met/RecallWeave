@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Explore classical Boolean logic through complete truth tables and counterexamples. Includes an original RecallWeave course.">
+  <title>Boolean logic explorer · RecallWeave</title>
+  <style>
+    :root { color-scheme: light; --ink:#152b38; --muted:#4b6570; --line:#ccdada; --paper:#f3f7f5; --green:#11634d; --blue:#194c72; --red:#913c33; --focus:#ba6200; }
+    * { box-sizing:border-box; }
+    body { margin:0; font:17px/1.55 system-ui,sans-serif; color:var(--ink); background:var(--paper); }
+    [hidden] { display:none !important; }
+    a { color:var(--blue); text-underline-offset:.2em; }
+    button,input { font:inherit; }
+    button { padding:.6rem .85rem; border:1px solid #8ba4a8; border-radius:.45rem; color:var(--ink); background:#fff; cursor:pointer; }
+    button:hover:not(:disabled) { background:#e3eee9; border-color:var(--green); }
+    button:disabled { cursor:default; color:#71828a; background:#edf1f1; border-color:#cdd7d8; }
+    button:focus-visible,input:focus-visible,a:focus-visible,summary:focus-visible { outline:3px solid var(--focus); outline-offset:3px; }
+    code { font: .93em/1.5 ui-monospace,SFMono-Regular,Consolas,monospace; overflow-wrap:anywhere; }
+    header { max-width:1120px; margin:auto; padding:2.7rem 1.25rem 1.6rem; }
+    .brand { letter-spacing:.17em; text-transform:uppercase; font-size:.8rem; font-weight:750; color:var(--green); }
+    h1 { margin:.45rem 0 .65rem; font:clamp(2.3rem,6vw,4.1rem)/1.08 Georgia,serif; letter-spacing:-.025em; }
+    h2 { margin:0 0 .7rem; font-size:1.4rem; line-height:1.25; }
+    h3 { margin:0 0 .6rem; font-size:1.04rem; }
+    p { margin:.4rem 0 1rem; }
+    .intro { max-width:760px; color:var(--muted); font-size:1.08rem; }
+    main { max-width:1120px; margin:0 auto; padding:0 1.25rem 3rem; }
+    .panel { background:#fff; border:1px solid var(--line); border-radius:.9rem; padding:1.4rem; margin-bottom:1.2rem; box-shadow:0 3px 16px #14392a05; min-width:0; }
+    .eyebrow { display:block; font-size:.78rem; font-weight:750; text-transform:uppercase; letter-spacing:.09em; color:var(--muted); margin-bottom:.35rem; }
+    .input-grid,.result-grid { display:grid; grid-template-columns:1fr 1fr; gap:1.2rem; }
+    .input-grid label { display:block; font-weight:650; margin-bottom:.4rem; }
+    .optional { font-weight:400; color:var(--muted); font-size:.85em; }
+    input[type=text] { width:100%; min-width:0; border:1px solid #8ba4a8; border-radius:.45rem; background:#fbfdfc; color:var(--ink); padding:.75rem; font-family:ui-monospace,SFMono-Regular,Consolas,monospace; }
+    input[aria-invalid=true] { border:2px solid var(--red); }
+    .hint { font-size:.87rem; color:var(--muted); margin-top:.5rem; }
+    .examples { display:flex; flex-wrap:wrap; gap:.5rem; margin-top:1.1rem; }
+    .examples button { font-size:.9rem; }
+    #example-note { border-left:3px solid #78aa97; padding:.15rem 0 .15rem .9rem; color:var(--muted); margin:1rem 0; }
+    #expression-error { color:var(--red); font-weight:650; margin:1rem 0 0; }
+    #expression-error:empty { margin:0; }
+    details { border-top:1px solid var(--line); padding-top:.8rem; margin-top:.8rem; }
+    summary { cursor:pointer; font-weight:650; }
+    details p { margin-top:.8rem; }
+    .grammar { font-size:.9rem; }
+    .grammar ul { padding-left:1.3rem; }
+    .grouped { display:block; font-size:1.05rem; font-weight:650; margin-bottom:.35rem; }
+    #comparison-verdict { margin:1.1rem 0; border-radius:.5rem; padding:.8rem 1rem; background:#e7f1eb; color:#174f3e; font-weight:650; }
+    .toolbar { display:flex; flex-wrap:wrap; align-items:center; gap:1rem; margin-bottom:.8rem; }
+    .checkbox { display:flex; gap:.55rem; align-items:center; cursor:pointer; }
+    input[type=checkbox] { width:1.2rem; height:1.2rem; accent-color:var(--green); }
+    .table-scroll { max-width:100%; overflow-x:auto; border:1px solid var(--line); border-radius:.6rem; }
+    table { width:100%; border-collapse:collapse; text-align:left; font-size:.94rem; }
+    caption { text-align:left; padding:.7rem .8rem; color:var(--muted); background:#f8faf9; }
+    th,td { padding:.62rem .8rem; border-top:1px solid var(--line); vertical-align:middle; }
+    thead th { background:#edf3f1; font-size:.84rem; white-space:nowrap; }
+    .row-button { padding:.3rem .6rem; min-width:2.3rem; font-variant-numeric:tabular-nums; }
+    .row-button[aria-pressed=true] { background:var(--blue); border-color:var(--blue); color:#fff; }
+    .selected-row { background:#edf5f9; }
+    .truth { display:inline-block; font-weight:700; white-space:nowrap; }
+    .true-value { color:var(--green); }
+    .false-value,.different-result { color:var(--red); }
+    .different-result { font-weight:600; }
+    #selected-section { border-color:#9cb9c9; background:#f8fbfd; }
+    #selected-assignment { font-weight:650; font-variant-numeric:tabular-nums; }
+    #selected-details { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+    .selected-expression { display:flex; flex-direction:column; align-items:flex-start; gap:.2rem; }
+    .selected-expression .truth { font-size:1.4rem; }
+    #selected-meaning { margin:1rem 0 0; color:var(--muted); }
+    .downloads { display:flex; gap:.7rem; flex-wrap:wrap; margin:1rem 0 .4rem; }
+    .primary { background:var(--green); color:#fff; border-color:var(--green); }
+    .primary:hover:not(:disabled) { background:#0e4c3b; color:#fff; }
+    .course-layout { display:grid; grid-template-columns:1.5fr 1fr; gap:1.7rem; }
+    .course-layout p:last-child { margin-bottom:0; }
+    .course-meta { color:var(--muted); font-size:.83rem; overflow-wrap:anywhere; }
+    .course-layout ol { padding-left:1.4rem; margin:.4rem 0; }
+    .note { font-size:.9rem; color:var(--muted); }
+    footer { max-width:1120px; margin:auto; padding:0 1.25rem 2rem; color:var(--muted); font-size:.85rem; }
+    @media (max-width:650px) { body { font-size:16px; } header { padding-top:1.8rem; } .panel { padding:1rem; } .input-grid,.result-grid,.course-layout,#selected-details { grid-template-columns:1fr; gap:1rem; } th,td { padding:.5rem .6rem; } .examples button { flex:1 1 40%; } }
+    @media print { body { background:#fff; } header { padding-top:0; } .input-panel,.toolbar,.downloads,button,footer { display:none; } .panel { box-shadow:none; break-inside:avoid; } .table-scroll { overflow:visible; } table { font-size:10pt; } }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">RecallWeave · Offline course companion</div>
+    <h1>Make the logic visible.</h1>
+    <p class="intro">Change an expression. Inspect every assignment. A matching example is a start; a complete truth table settles whether two expressions are equivalent.</p>
+  </header>
+  <main id="logic-app">
+    <section class="panel input-panel" aria-labelledby="expressions-title">
+      <span class="eyebrow">01 · Write a claim</span>
+      <h2 id="expressions-title">Your expressions</h2>
+      <div class="input-grid">
+        <div><label for="expression-left">Expression 1</label><input id="expression-left" type="text" value="A -> B" maxlength="512" autocomplete="off" autocapitalize="off" spellcheck="false" aria-describedby="expression-help expression-error"></div>
+        <div><label for="expression-right">Expression 2 <span class="optional">optional comparison</span></label><input id="expression-right" type="text" value="B -> A" maxlength="512" autocomplete="off" autocapitalize="off" spellcheck="false" aria-describedby="expression-help expression-error"></div>
+      </div>
+      <p class="hint" id="expression-help">Use A–E, true, false, not, and, xor, or, -&gt;, &lt;-&gt; and parentheses. Clear Expression 2 to study one expression.</p>
+      <div class="examples" aria-label="Example expressions">
+        <button type="button" data-example="implication">Implication</button><button type="button" data-example="converse">Converse</button><button type="button" data-example="contrapositive">Contrapositive</button><button type="button" data-example="demorgan">De Morgan's law</button><button type="button" data-example="inference">Valid inference</button>
+      </div>
+      <p id="example-note">Reversing the arrow creates the converse. Find an assignment where the two expressions disagree.</p>
+      <p id="expression-error" role="alert"></p>
+      <details class="grammar"><summary>How expressions are read</summary>
+        <p>This explorer uses classical two-valued propositional logic. Each variable is True or False. <strong>or</strong> includes the both-True case; <strong>xor</strong> requires exactly one True operand. <code>A -&gt; B</code> is False only when A=True and B=False. <code>A &lt;-&gt; B</code> is True when their values match.</p>
+        <p>Precedence, strongest first: <strong>not → and → xor → or → implication (-&gt;) → biconditional (&lt;-&gt;)</strong>. Implication groups to the right: <code>A -&gt; B -&gt; C</code> means <code>A -&gt; (B -&gt; C)</code>. Other binary operators group to the left. The grouped forms below make this convention explicit.</p>
+        <ul><li>Words and variables accept either case. Symbols other than the listed arrows and parentheses are not part of this grammar.</li><li>Each expression has at most 512 characters, 128 tokens, 32 nested parentheses and 32 nested operators.</li><li>Only A–E are supported, giving at most 32 complete assignments. Constants alone have one empty assignment.</li></ul>
+      </details>
+    </section>
+    <section class="panel" id="table-section" aria-labelledby="table-title" hidden>
+      <span class="eyebrow">02 · Check every possibility</span><h2 id="table-title">Complete truth table</h2>
+      <div class="result-grid">
+        <div><span class="eyebrow">Expression 1 · grouped</span><code class="grouped" id="left-canonical"></code><p class="hint" id="left-summary"></p></div>
+        <div id="right-result"><span class="eyebrow">Expression 2 · grouped</span><code class="grouped" id="right-canonical"></code><p class="hint" id="right-summary"></p></div>
+      </div>
+      <p id="comparison-verdict" role="status"></p>
+      <div class="toolbar"><label class="checkbox"><input id="differences-only" type="checkbox">Show differing rows only</label><button id="inspect-difference" type="button">Inspect first difference</button></div>
+      <p class="hint" id="row-count"></p>
+      <div class="table-scroll"><table><caption>All assignments of the variables used by these expressions</caption><thead><tr id="truth-head"></tr></thead><tbody id="truth-body"></tbody></table></div>
+      <p id="no-differences" class="hint" hidden>No differing rows. The complete table has matching outputs throughout.</p>
+    </section>
+    <section class="panel" id="selected-section" aria-labelledby="selected-title" hidden>
+      <span class="eyebrow">03 · Inspect one assignment</span><h2 id="selected-title">Why this row matters</h2>
+      <p id="selected-assignment"></p><div id="selected-details"></div><p id="selected-meaning"></p>
+    </section>
+    <section class="panel" aria-labelledby="course-heading">
+      <div class="course-layout">
+        <div><span class="eyebrow">Keep exploring</span><h2 id="course-heading">Study the connections</h2><p id="course-title"></p><p class="hint" id="course-count"></p><p>The original lesson connects truth values, material implication, equivalence and valid inference through worked explanations and open transfer prompts.</p></div>
+        <div><h3>Use the course in RecallWeave</h3><ol><li>Download the course JSON.</li><li>Open the <a href="../demo.html">RecallWeave learner</a>.</li><li>Choose the downloaded course, inspect the preview, then explicitly start it.</li></ol><p class="note">Your current learner session is separate from this page. Opening the companion or downloading a file does not replace it.</p></div>
+      </div>
+      <div class="downloads"><button type="button" class="primary" id="download-course">Download course (.json)</button><button type="button" id="download-table" disabled>Download full table (.csv)</button></div>
+      <p id="download-status" role="status" class="hint"></p>
+      <details class="course-meta"><summary>Course attribution and use</summary><p id="course-attribution"></p><p id="course-license"></p><p>The table evaluates a formal model. It does not establish real-world truth or causation. Formal validity does not verify an argument's premises. AI-assisted educational content should receive educator review before use with learners.</p></details>
+    </section>
+    <noscript><p class="panel">This offline explorer needs JavaScript to evaluate expressions. No account or internet connection is needed.</p></noscript>
+  </main>
+  <footer>Original RecallWeave companion. Expressions stay in this page. Downloads happen only when you request them.</footer>
+  <script type="module">
+const BOOLEAN_COURSE_TEXT = __BOOLEAN_DECK_TEXT__;
+__DECK_VALIDATOR__
+__BOOLEAN_MODEL__
+__BOOLEAN_UI__
+mountBooleanLogic(document.querySelector('#logic-app'), BOOLEAN_COURSE_TEXT);
+  </script>
+</body>
+</html>
