@@ -1,0 +1,183 @@
+{
+  "format": "hamming-course-blind-prompts/1",
+  "convention": "Position 1 leftmost; data3,5,6,7; even parity1,2,4; syndrome s1+2*s2+4*s4; ordinary decoder assumes at most one error.",
+  "concepts": [
+    "parity-and-redundancy",
+    "syndrome-reasoning",
+    "distance-and-recovery",
+    "decoder-assumptions"
+  ],
+  "items": [
+    {
+      "id": "hamming-parity-even",
+      "concept": "parity-and-redundancy",
+      "prerequisites": [],
+      "prompt": "An even-parity group already contains data bits 1, 0 and 1. Which check bit makes the total number of 1s even?",
+      "options": [
+        "0",
+        "1",
+        "Either value",
+        "There is no valid check bit"
+      ]
+    },
+    {
+      "id": "hamming-parity-budget",
+      "concept": "parity-and-redundancy",
+      "prerequisites": [],
+      "prompt": "This Hamming(7,4) code carries four data bits in seven transmitted positions. What fraction of the transmitted positions are data positions?",
+      "options": [
+        "3/7",
+        "4/7",
+        "4/3",
+        "7/4"
+      ]
+    },
+    {
+      "id": "hamming-parity-group",
+      "concept": "parity-and-redundancy",
+      "prerequisites": [],
+      "prompt": "Positions are numbered 1 through 7 from left to right. The parity check at position 2 covers every position whose binary position number has its 2s bit set. Which group is checked?",
+      "options": [
+        "1, 3, 5, 7",
+        "2, 3, 6, 7",
+        "4, 5, 6, 7",
+        "1, 2, 4"
+      ]
+    },
+    {
+      "id": "hamming-syndrome-value",
+      "concept": "syndrome-reasoning",
+      "prerequisites": [
+        "parity-and-redundancy"
+      ],
+      "prompt": "The received-word checks give s1 = 1, s2 = 0 and s4 = 1, where 1 means a failed even-parity check. Under the at-most-one-error assumption, which position should the decoder flip?",
+      "options": [
+        "1",
+        "4",
+        "5",
+        "6"
+      ]
+    },
+    {
+      "id": "hamming-syndrome-checkbit",
+      "concept": "syndrome-reasoning",
+      "prerequisites": [
+        "parity-and-redundancy"
+      ],
+      "prompt": "A valid Hamming(7,4) word suffers exactly one error, at parity position 2. What do the checks and standard one-error decoder do?",
+      "options": [
+        "All checks pass because data bits are unchanged.",
+        "Only s2 fails, and the decoder flips position 2.",
+        "All three checks fail, and the decoder flips position 7.",
+        "Only s1 fails, and the decoder flips position 1."
+      ]
+    },
+    {
+      "id": "hamming-syndrome-worked",
+      "concept": "syndrome-reasoning",
+      "prerequisites": [
+        "parity-and-redundancy"
+      ],
+      "prompt": "Use left-to-right positions 1–7, even parity at 1/2/4, and data at 3/5/6/7. The received word is 1011010. What is the syndrome value s1 + 2s2 + 4s4?",
+      "options": [
+        "0",
+        "3",
+        "5",
+        "7"
+      ]
+    },
+    {
+      "id": "hamming-distance-count",
+      "concept": "distance-and-recovery",
+      "prerequisites": [
+        "parity-and-redundancy",
+        "syndrome-reasoning"
+      ],
+      "prompt": "What is the Hamming distance between the equal-length words 0110011 and 0101010?",
+      "options": [
+        "1",
+        "2",
+        "3",
+        "4"
+      ]
+    },
+    {
+      "id": "hamming-distance-guarantee",
+      "concept": "distance-and-recovery",
+      "prerequisites": [
+        "parity-and-redundancy",
+        "syndrome-reasoning"
+      ],
+      "prompt": "A code has minimum distance 3 between distinct valid words. Why can nearest-word decoding recover every single-bit error?",
+      "options": [
+        "The original is distance 1 away, while every other valid word is at least distance 2 away.",
+        "All received words are valid codewords.",
+        "The receiver knows which physical bit failed.",
+        "A second error always cancels the first."
+      ]
+    },
+    {
+      "id": "hamming-distance-neighborhood",
+      "concept": "distance-and-recovery",
+      "prerequisites": [
+        "parity-and-redundancy",
+        "syndrome-reasoning"
+      ],
+      "prompt": "Each valid seven-bit word has itself plus seven one-bit neighbors. The 16 Hamming(7,4) codewords have disjoint such neighborhoods. How many distinct seven-bit received words do they cover?",
+      "options": [
+        "16",
+        "112",
+        "128",
+        "256"
+      ]
+    },
+    {
+      "id": "hamming-limit-two",
+      "concept": "decoder-assumptions",
+      "prerequisites": [
+        "parity-and-redundancy",
+        "syndrome-reasoning",
+        "distance-and-recovery"
+      ],
+      "prompt": "Start with valid word 0000000 and flip positions 1 and 2, receiving 1100000. The one-error decoder sees syndrome 3 and flips position 3. Which interpretation is correct?",
+      "options": [
+        "It recovers the original word because the syndrome is nonzero.",
+        "It produces 1110000, a different valid word; passing checks do not prove that the original was recovered.",
+        "It identifies both actual errors and leaves the word unchanged.",
+        "It proves that exactly three errors occurred in the channel."
+      ]
+    },
+    {
+      "id": "hamming-limit-three",
+      "concept": "decoder-assumptions",
+      "prerequisites": [
+        "parity-and-redundancy",
+        "syndrome-reasoning",
+        "distance-and-recovery"
+      ],
+      "prompt": "Start with valid word 0000000 and flip positions 1, 2 and 3, receiving 1110000. All three even-parity checks pass. What can the seven-bit decoder establish from those checks alone?",
+      "options": [
+        "No bits changed during transmission.",
+        "The sender must have chosen data bits 0000.",
+        "The received word is consistent with the checks; these checks cannot identify this nonzero error pattern.",
+        "Exactly one error occurred and was corrected."
+      ]
+    },
+    {
+      "id": "hamming-limit-policy",
+      "concept": "decoder-assumptions",
+      "prerequisites": [
+        "parity-and-redundancy",
+        "syndrome-reasoning",
+        "distance-and-recovery"
+      ],
+      "prompt": "For a minimum-distance-3 code, two distinct flipped positions always produce a nonzero syndrome. Why does the ordinary Hamming(7,4) one-error correction rule still fail to reliably flag a two-error message as uncorrectable?",
+      "options": [
+        "Two-bit errors always produce syndrome 0.",
+        "The same nonzero syndrome can represent a one-bit error, so the rule flips a third position and can return a different valid word.",
+        "Parity checks are not evaluated by the decoder.",
+        "The number of data bits changes after an error."
+      ]
+    }
+  ]
+}
