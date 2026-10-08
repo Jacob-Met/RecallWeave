@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Markov chains — RecallWeave explorer</title>
+<style>
+:root{color-scheme:light;--ink:#16313a;--muted:#4c646b;--paper:#f4f7f4;--line:#ccdcd6;--teal:#166e80;--soft:#e1efea;--danger:#9e271d}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.55 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}a{color:var(--teal)}button,input,select{font:inherit}button,select{min-height:44px}button{border:1px solid var(--line);border-radius:9px;background:white;color:var(--ink);padding:9px 15px;cursor:pointer;font-weight:650}button:hover{background:#edf4ef}button:disabled{opacity:.45;cursor:default}button.primary{background:var(--teal);color:white;border-color:var(--teal)}:focus-visible{outline:3px solid #a6550d;outline-offset:3px}input,select{border:1px solid #819b99;border-radius:7px;padding:8px;background:#fff;color:var(--ink)}input[type=text]{width:100%;min-width:0;text-align:center}input[type=range]{width:100%;padding:0;accent-color:var(--teal);min-height:32px}h1,h2,h3,p{margin-top:0}h1{font-size:clamp(30px,4vw,48px);line-height:1.12;letter-spacing:-.03em;margin-bottom:18px;max-width:780px}h2{font-size:22px;line-height:1.25;margin-bottom:10px}h3{font-size:17px;margin-bottom:10px}.small{font-size:14px;color:var(--muted)}.skip{position:absolute;left:10px;top:10px;transform:translateY(-180%);background:white;padding:8px;z-index:9}.skip:focus{transform:none}.shell{max-width:1240px;padding:28px;margin:auto}.topline{display:flex;justify-content:space-between;gap:15px;align-items:center;margin-bottom:35px}.brand{font-weight:800;letter-spacing:.04em}.eyebrow{text-transform:uppercase;letter-spacing:.12em;font-size:12px;font-weight:750;color:var(--teal)}.intro{font-size:19px;max-width:760px;color:var(--muted)}.layout{display:grid;grid-template-columns:minmax(310px, .85fr) minmax(0,1.75fr);gap:22px;align-items:start;margin-top:30px}.panel{background:#fff;border:1px solid var(--line);border-radius:16px;padding:23px}.controls{position:sticky;top:16px}.controls p{margin-bottom:16px}.controls select{width:100%;margin:7px 0 20px}.matrix{width:100%;border-collapse:separate;border-spacing:5px;text-align:center;table-layout:fixed}.matrix th{font-size:13px;font-weight:700}.matrix th:first-child{width:61px;text-align:left}.matrix td{padding:0}.matrix input{padding:9px 3px;min-height:44px}.initial{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}.initial label{font-size:13px;font-weight:700}.initial span{display:flex;align-items:center;gap:3px;margin-top:5px}.initial input{font-size:16px;font-weight:450}.quick-starts{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}.quick-starts button{font-size:12px;padding:7px 9px;min-height:38px}.apply{width:100%;margin-top:16px}.error{color:var(--danger);font-weight:650;margin:10px 0 0}.status{margin-top:10px;font-size:13px;color:var(--muted)}.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:18px 0 10px}.stat{border-top:4px solid var(--teal);background:#f1f6f3;padding:12px;border-radius:5px}.stat:nth-child(2){border-color:#a74320}.stat:nth-child(3){border-color:#6c48a2}.stat b{display:block;font-size:clamp(16px,2.1vw,23px);letter-spacing:-.035em;font-variant-numeric:tabular-nums}.stat span{font-size:13px}.legend{display:flex;gap:18px;flex-wrap:wrap;font-size:13px;margin-top:18px}.legend span{display:flex;align-items:center;gap:7px}.legend i{display:inline-block;width:26px;border-top:3px solid var(--teal)}.legend .b{border-color:#a74320;border-top-style:dashed}.legend .c{border-color:#6c48a2;border-top-style:dotted}#chart{width:100%;min-height:310px}#chart svg{display:block;width:100%;height:auto}.axis{font:12px system-ui;fill:#49636c}.stepbar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:5px}.step-buttons{display:flex;gap:6px}.cursor{margin:16px 0}.cursor label{display:block;font-weight:700}.explainer{margin:22px 0 0;padding:16px;background:var(--soft);border-left:4px solid var(--teal);border-radius:5px}.explainer p:last-child{margin-bottom:0}.lower{margin-top:20px}.table-scroll{overflow-x:auto}.data-table{width:100%;border-collapse:collapse;font-size:14px;font-variant-numeric:tabular-nums}.data-table caption{text-align:left;color:var(--muted);font-size:13px;margin:0 0 12px}.data-table th,.data-table td{padding:10px 8px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}.data-table th:first-child{text-align:left}.data-table tfoot{font-weight:700;background:#edf4ef}.selected-row{background:#dfede8}.downloads{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}.guide{max-width:880px;margin-top:32px}.guide li{margin:8px 0}.guide details{margin-top:20px}summary{cursor:pointer;font-weight:700;min-height:44px;display:list-item;padding:8px 0}footer{margin-top:32px;padding-top:22px;border-top:1px solid var(--line);font-size:13px;color:var(--muted)}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}[hidden]{display:none!important}
+@media(max-width:850px){.layout{grid-template-columns:1fr}.controls{position:static}.shell{padding:20px}.topline{margin-bottom:26px}.panel{padding:20px}.intro{font-size:17px}}
+@media(max-width:420px){.shell{padding:15px}.panel{padding:16px}.stats{gap:6px}.stat{padding:9px}.stat b{font-size:17px}.step-buttons button{font-size:14px;padding:9px 11px}.data-table{font-size:12px}.data-table th,.data-table td{padding:9px 5px}.topline{align-items:flex-start}.topline .small{max-width:180px;text-align:right}.legend{gap:12px}.matrix{border-spacing:3px}}
+@media print{body{background:white}.shell{max-width:none;padding:0}.layout{display:block}.controls,.downloads,.cursor,.step-buttons,.skip,.topline{display:none}.panel{break-inside:avoid;margin-bottom:15px;border:0;padding:10px}.guide{margin-top:10px}details{display:block}summary{list-style:none}.small{color:#333}}
+</style>
+</head>
+<body>
+<a class="skip" href="#explorer">Skip to the probability trace</a>
+<div class="shell">
+<header>
+<div class="topline"><div class="brand">RecallWeave</div><div class="small">Optional course · 14 questions<br>Three-state systems · works offline</div></div>
+<p class="eyebrow">Markov chains</p>
+<h1>Where will the probability go?</h1>
+<p class="intro">Give each state a rule. Follow the mass one step at a time, then compare a settling distribution with one that keeps alternating.</p>
+<p class="small">These are hypothetical teaching systems. The trace computes probabilities for each step; it does not simulate a single path or make a real-world forecast.</p>
+</header>
+<main>
+<div class="layout">
+<section class="panel controls" aria-labelledby="controls-heading">
+<h2 id="controls-heading">1. Choose the rules</h2>
+<label for="preset">Start with a teaching system</label>
+<select id="preset"><option value="mixing">Mixing</option><option value="alternating">Alternating</option><option value="absorbing">Absorbing A</option><option value="closed">Two closed states</option><option value="custom" disabled>Custom system</option></select>
+<form id="transition-form" novalidate>
+<h3>Transition percentages</h3>
+<p class="small">Each row starts in one state. Columns say where it goes next. Use whole percentages; each row must total 100%.</p>
+<table class="matrix"><thead><tr><th>Current</th><th scope="col">To A</th><th scope="col">To B</th><th scope="col">To C</th></tr></thead><tbody><tr><th scope="row">From A</th><td><input id="matrix-0-0" type="text" inputmode="numeric" aria-label="From A to A, percent" maxlength="3" value="0"></td><td><input id="matrix-0-1" type="text" inputmode="numeric" aria-label="From A to B, percent" maxlength="3" value="0"></td><td><input id="matrix-0-2" type="text" inputmode="numeric" aria-label="From A to C, percent" maxlength="3" value="0"></td></tr>
+<tr><th scope="row">From B</th><td><input id="matrix-1-0" type="text" inputmode="numeric" aria-label="From B to A, percent" maxlength="3" value="0"></td><td><input id="matrix-1-1" type="text" inputmode="numeric" aria-label="From B to B, percent" maxlength="3" value="0"></td><td><input id="matrix-1-2" type="text" inputmode="numeric" aria-label="From B to C, percent" maxlength="3" value="0"></td></tr>
+<tr><th scope="row">From C</th><td><input id="matrix-2-0" type="text" inputmode="numeric" aria-label="From C to A, percent" maxlength="3" value="0"></td><td><input id="matrix-2-1" type="text" inputmode="numeric" aria-label="From C to B, percent" maxlength="3" value="0"></td><td><input id="matrix-2-2" type="text" inputmode="numeric" aria-label="From C to C, percent" maxlength="3" value="0"></td></tr></tbody></table>
+<h3 style="margin-top:20px">Initial distribution</h3>
+<p class="small">Where is the probability at step 0? These three entries must also total 100%.</p>
+<div class="initial"><label>State A<span><input id="initial-0" type="text" inputmode="numeric" aria-label="Initial A, percent" maxlength="3" value="0"> %</span></label><label>State B<span><input id="initial-1" type="text" inputmode="numeric" aria-label="Initial B, percent" maxlength="3" value="0"> %</span></label><label>State C<span><input id="initial-2" type="text" inputmode="numeric" aria-label="Initial C, percent" maxlength="3" value="0"> %</span></label></div>
+<button class="primary apply" type="submit">Apply this system</button>
+<div class="quick-starts" aria-label="Apply a starting distribution"><button id="all-a-start" type="button">All in A</button><button id="all-c-start" type="button">All in C</button><button id="stationary-start" type="button">50 / 25 / 25</button></div>
+<p id="draft-error" class="error" role="alert"></p><p id="draft-status" class="status" role="status"></p>
+</form>
+</section>
+<section id="explorer" class="panel" aria-labelledby="explorer-heading" tabindex="-1">
+<p class="eyebrow">Applied system: <span id="applied-name">Mixing</span></p>
+<h2 id="explorer-heading">2. Follow the distribution</h2>
+<div class="stats" aria-label="Probability at the selected step"><div class="stat"><span>State A</span><b id="mass-0">—</b></div><div class="stat"><span>State B</span><b id="mass-1">—</b></div><div class="stat"><span>State C</span><b id="mass-2">—</b></div></div>
+<p class="small">Total probability: <span id="mass-total">—</span>. Displayed percentages are rounded to four decimal places.</p>
+<div class="legend" aria-hidden="true"><span><i></i>A · solid</span><span><i class="b"></i>B · dashed</span><span><i class="c"></i>C · dotted</span></div>
+<div id="chart"></div>
+<div class="cursor"><label for="step-slider">Selected step: <output id="step-number" for="step-slider">0</output></label><input id="step-slider" type="range" min="0" max="30" value="0" step="1"></div>
+<div class="stepbar"><span class="small">All 30 transitions are calculated.</span><div class="step-buttons"><button id="previous-step" type="button">Previous</button><button id="next-step" type="button">Next step</button><button id="reset-step" type="button">Step 0</button></div></div>
+<p id="step-announcement" class="sr-only" aria-live="polite"></p>
+<div class="explainer"><p id="system-note"></p><p id="absorbing-note" class="small"></p></div>
+</section>
+</div>
+
+<div class="panel lower" aria-labelledby="flow-heading">
+<h2 id="flow-heading">Before the first transition</h2>
+<p id="flow-empty" class="small">Step 0 is the distribution you supplied. Move to step 1 or later to see the incoming contributions.</p>
+<div class="table-scroll"><table id="flow-table" class="data-table" hidden>
+<caption id="flow-caption"></caption>
+<thead><tr><th scope="col">Previous state</th><th scope="col">To A</th><th scope="col">To B</th><th scope="col">To C</th></tr></thead>
+<tbody id="flow-body"></tbody>
+<tfoot><tr><th scope="row">Next probability</th><td id="flow-total-0"></td><td id="flow-total-1"></td><td id="flow-total-2"></td></tr></tfoot>
+</table></div>
+<details><summary>See all 31 distributions</summary>
+<div class="table-scroll"><table class="data-table">
+<caption>Step 0 and 30 transitions. Percentages are rounded to four decimal places; a displayed 0% can be a small positive value.</caption>
+<thead><tr><th scope="col">Step</th><th scope="col">State A</th><th scope="col">State B</th><th scope="col">State C</th></tr></thead>
+<tbody id="distribution-body"></tbody>
+</table></div></details>
+</div>
+<section class="panel lower" aria-labelledby="keep-heading">
+<h2 id="keep-heading">3. Keep an observation or learn the course</h2>
+<p>The observation file records the applied transition table, initial distribution, selected step and all computed values. The course is a separate, original fourteen-question lesson for RecallWeave.</p>
+<div class="downloads"><button id="download-observation" type="button">Download observation (.json)</button><button id="download-deck" type="button" class="primary">Download course (.json)</button></div>
+<p id="download-status" class="status" role="status"></p>
+<p class="small">Open <a href="../demo.html">RecallWeave</a>, choose the downloaded course under <strong>Bring your own lesson</strong>, inspect its preview, then select <strong>Start this deck</strong>. The lesson opens in that page; this explorer stays a separate activity. When using a copied explorer by itself, open your existing RecallWeave file separately.</p>
+</section>
+<section class="guide" aria-labelledby="guide-heading">
+<p class="eyebrow">Try, explain, compare</p><h2 id="guide-heading">A rule for each state, a distribution for the whole system</h2>
+<p>A transition row is conditional: it answers where the system goes next <em>given</em> its current state. A distribution says how likely the current states are. To find the next distribution, multiply each row by that state's current probability, then add the incoming contributions by column.</p>
+<ol>
+<li><strong>Trace one calculation.</strong> Choose Mixing and move to step 2. The previous distribution is 60%, 20%, 20%. The contributions to A are 36%, 8%, 8%, which total 52%. A single A → B → C path has probability 2%; being in C after two steps includes other paths and has probability 24%.</li>
+<li><strong>Separate stationarity from a motionless path.</strong> Choose Alternating. All in A switches between 100/0/0 and 0/50/50. Apply 50/25/25: the distribution is now stationary, even though the transition matrix makes every individual path change state at each step.</li>
+<li><strong>Ask what the initial distribution changes.</strong> Choose Two closed states. All in C reaches 40/60/0 after one step; All in A stays in A. The same matrix can have more than one stationary distribution.</li>
+</ol>
+<p>For a finite irreducible chain, a stationary distribution is unique. Adding aperiodicity guarantees convergence to it from every initial distribution. Irreducibility alone does not guarantee convergence, as the Alternating example shows. These are sufficient conditions; a reducible chain can also have a unique stationary distribution, as Absorbing A does.</p>
+<p class="small">The editable systems use three states, fixed transition rules, whole percentages and a 30-step horizon. Computation uses JavaScript binary64 arithmetic. Neither a finite plot nor rounded labels prove an exact limiting result. An absorbing state has a 100% self-transition; that fact alone does not show that other states can reach it.</p>
+<details><summary>Mathematical references and teaching notes</summary>
+<p class="small">The questions, numbers and explanations are original. The following primary lecture notes support the standard definitions and theorems. These optional external links need an internet connection; the explorer and course do not.</p>
+<ul>
+<li><a href="https://ocw.mit.edu/courses/6-436j-fundamentals-of-probability-fall-2018/141423989a49375f14f0a44940d81e67_MIT6_436JF18_lec21.pdf" target="_blank" rel="noopener noreferrer">MIT 6.436J, Lecture 21: Markov chains</a> — transition convention, probability flow and stationarity.</li>
+<li><a href="https://ocw.mit.edu/courses/18-445-introduction-to-stochastic-processes-spring-2015/2edaa8542469ce692226813a8bd1ec88_MIT18_445S15_lecture2.pdf" target="_blank" rel="noopener noreferrer">Hao Wu, MIT 18.445, Lecture 2</a> — irreducibility, stationary distributions and period.</li>
+<li><a href="https://ocw.mit.edu/courses/18-445-introduction-to-stochastic-processes-spring-2015/5bd4774f613aa28bd111c36f3a3beeed_MIT18_445S15_lecture4.pdf" target="_blank" rel="noopener noreferrer">Hao Wu, MIT 18.445, Lecture 4</a> — convergence for finite irreducible aperiodic chains.</li>
+</ul>
+<p class="small"><a href="markov-chains.md">Course guide and worked checks</a> accompanies this page in the source repository.</p>
+</details>
+</section>
+</main>
+<footer>Original teaching content © 2026, released under CC0-1.0. Prepared with AI assistance and independently checked. Referenced materials retain their own terms; no third-party exercises or figures are included. Nothing is saved automatically: download a course or observation to keep it.</footer>
+</div>
+<script id="course-data" type="application/octet-stream">@@COURSE_BASE64@@</script>
+<script type="module">
+@@SCRIPT@@
+</script>
+</body>
+</html>
