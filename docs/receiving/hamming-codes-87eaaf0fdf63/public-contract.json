@@ -1,0 +1,62 @@
+{
+  "scopeIssue": "https://github.com/Jacob-Met/RecallWeave/issues/68",
+  "module": "courses/hamming-codes/model.mjs",
+  "functions": {
+    "encodeHamming74": {
+      "arguments": [
+        "dataBits: exact four-character 0/1 string"
+      ],
+      "result": "seven-character word; position1 leftmost, parity1/2/4, data3/5/6/7"
+    },
+    "inspectReceived74": {
+      "arguments": [
+        "receivedWord: exact seven-character 0/1 string"
+      ],
+      "result": {
+        "receivedWord": "string",
+        "checks": "three objects in parity1,2,4 order: parityPosition, positions (array), bits (string), ones (integer), failed (boolean)",
+        "syndromeBits": "s4s2s1 padded three-character string",
+        "syndrome": "integer0..7",
+        "proposedPosition": "null when0, otherwise syndrome1..7",
+        "candidateWord": "received word after optional proposed single flip",
+        "candidateData": "candidate positions3,5,6,7"
+      }
+    },
+    "runHamming74": {
+      "arguments": [
+        "dataBits: exact four-character 0/1 string",
+        "flippedPositions: dense array of unique integers1..7, length0..7",
+        "prediction: null or integer0..7; omitted defaults null"
+      ],
+      "result": {
+        "dataBits": "string",
+        "codeword": "string",
+        "errorPositions": "sorted frozen copy of positions",
+        "receivedWord": "string",
+        "decoder": "inspectReceived74 result",
+        "truth": {
+          "flipCount": "integer",
+          "withinSingleErrorAssumption": "flipCount <= 1",
+          "originalRecovered": "candidateWord === codeword",
+          "remainingCodewordErrors": "Hamming distance candidate/original encoded",
+          "remainingDataErrors": "Hamming distance candidate/original four data bits",
+          "outcome": "clean if0; corrected if1; undetected if>1 and zero syndrome; miscorrected if>1 and nonzero syndrome"
+        },
+        "prediction": "null or number",
+        "predictionCorrect": "null if absent, otherwise prediction===syndrome"
+      }
+    },
+    "formatHammingRecord": {
+      "arguments": [
+        "completed result"
+      ],
+      "result": "deterministic UTF-8 text; recounts supplied dataBits/errorPositions/prediction through runHamming74; carries convention, actual parity arithmetic, decoder-only inference, separately labeled simulation truth, optional prediction, and limitations"
+    }
+  },
+  "invariants": [
+    "No input mutation; structured results and nested arrays are frozen.",
+    "Invalid strings, non-array/sparse/duplicate/out-of-range positions and invalid predictions throw before any result; no coercion or automatic trimming.",
+    "inspectReceived74 receives no original data or flip mask.",
+    "No input/output filesystem, randomness, channel probability, authentication or network in this module."
+  ]
+}
