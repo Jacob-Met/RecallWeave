@@ -1,5 +1,6 @@
 import { DEFAULT_BKT, initialMastery, runLearnerSimulation, selectNextItem, updateMastery } from './knowledge.mjs';
 import { answerPractice, beginPractice, createReview, currentPracticeItem } from './review.mjs';
+import { createStudyNotes } from './session-export.mjs';
 
 const root = document.querySelector('#session-content');
 const dataResponse = await fetch('./data/deck.json');
@@ -68,7 +69,10 @@ function renderResults() {
   review ??= createReview(deck.items, answers);
   const correct = answers.filter(answer => answer.correct).length;
   root.innerHTML = `<article class="result-card"><div class="result-mark" aria-hidden="true">⌁</div><div class="card-kicker">YOUR LEARNING TRACE</div><h2 tabindex="-1">Notice the links you built.</h2><p id="first-try-summary">You made ${correct} of ${answers.length} connections on the first try. That count is a snapshot—not a measure of your ability. Review the concept estimates and choose one connection to explain in your own words.</p>${renderMastery()}${renderPracticeSummary()}<section class="review-list" aria-labelledby="review-title"><h3 id="review-title">Review the connections</h3><p>Open a question to see your first answer, the explanation, and an idea to apply.</p>${review.map(renderReviewItem).join('')}</section><div class="reflection"><strong>Apply it:</strong> Trace energy from sunlight to a cell doing work. Where does the form of energy change, and what molecule transfers it to cellular processes?</div><p class="source-note"><strong>Demo deck attribution:</strong> Original question wording adapted from OpenStax, <cite>Biology 2e</cite>, Chapters 7–8, Rice University, CC BY 4.0. ${deck.attribution}</p><button class="reset-button" id="reset-button">Start a fresh local session</button></article>`;
-  root.querySelector('#reset-button').addEventListener('click', () => location.reload());
+  const resetButton = root.querySelector('#reset-button');
+  resetButton.insertAdjacentHTML('beforebegin', '<section class="practice-summary" aria-labelledby="save-notes-title"><h3 id="save-notes-title">Keep these connections</h3><p>Save your questions, first answers, explanations, and any practice answers as a text file.</p><button class="reset-button" id="save-notes-button" aria-describedby="save-notes-status">Download study notes (.txt)</button><p id="save-notes-status" role="status">Your session stays in this tab until you refresh. Download notes to keep a copy.</p></section>');
+  root.querySelector('#save-notes-button').addEventListener('click', downloadStudyNotes);
+  resetButton.addEventListener('click', () => location.reload());
   root.querySelector('#practice-button')?.addEventListener('click', () => {
     practice ??= beginPractice(review);
     inPractice = true;
@@ -76,6 +80,25 @@ function renderResults() {
   });
   setProgress();
   root.querySelector('h2').focus();
+}
+
+function downloadStudyNotes() {
+  const status = root.querySelector('#save-notes-status');
+  let url;
+  try {
+    const notes = createStudyNotes({deck, review, mastery, practice, conceptLabel});
+    url = URL.createObjectURL(new Blob([notes.text], {type: notes.mediaType}));
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = notes.filename;
+    document.body.append(link);
+    try { link.click(); } finally { link.remove(); }
+    status.textContent = 'Download requested. Check your browser’s downloads for the study notes. Your session is still here.';
+  } catch {
+    status.textContent = 'The notes could not be prepared. Your answers are still available in this learning trace; try the download again.';
+  } finally {
+    if (url) setTimeout(() => URL.revokeObjectURL(url), 10000);
+  }
 }
 
 function escapeHtml(value) {
