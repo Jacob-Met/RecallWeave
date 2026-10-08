@@ -1,0 +1,53 @@
+✔ unfinished and completely empty drafts save without claiming lesson validity (4.525354ms)
+✔ duplicate text, cyclic and self prerequisites, and unfinished selections survive for repair (0.926854ms)
+✔ ready imported lessons retain public IDs, ordered content, answer identity and checked bytes (0.857669ms)
+✔ canonical private keys recover near-limit counters without changing public IDs or live state (0.549677ms)
+✔ staged drafts are deeply frozen and replacement copies remain editable (0.353311ms)
+✔ missing or ambiguous internal references, malformed shape and unsafe counters refuse before admission (4.024051ms)
+✔ only recognized editor fields cross the draft boundary (0.511389ms)
+✔ a lesson larger than its admission limit can be saved as a draft and repaired later (29.632382ms)
+✔ draft size limits count actual UTF-8 bytes and failed saving leaves writing intact (56.471758ms)
+✖ compact drafts remain saveable near and exactly at the byte limit without added whitespace (40.660999ms)
+✖ a file whose canonical private keys exceed the saved limit is refused before admission (9.802129ms)
+ℹ tests 11
+ℹ suites 0
+ℹ pass 9
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 272.525882
+
+✖ failing tests:
+
+test at tests/deck-author-draft.test.mjs:253:1
+✖ compact drafts remain saveable near and exactly at the byte limit without added whitespace (40.660999ms)
+  Error: Choose a draft file no larger than 2 MiB.
+      at invalid (file:///workspace/scratch/6e5752b49b6f/recallweave-draft-code/src/deck-author-draft.mjs:10:9)
+      at withinFileLimit (file:///workspace/scratch/6e5752b49b6f/recallweave-draft-code/src/deck-author-draft.mjs:36:5)
+      at serializeAuthorDraft (file:///workspace/scratch/6e5752b49b6f/recallweave-draft-code/src/deck-author-draft.mjs:142:10)
+      at TestContext.<anonymous> (file:///workspace/scratch/6e5752b49b6f/recallweave-draft-code/tests/deck-author-draft.test.mjs:260:18)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7)
+
+test at tests/deck-author-draft.test.mjs:267:1
+✖ a file whose canonical private keys exceed the saved limit is refused before admission (9.802129ms)
+  AssertionError [ERR_ASSERTION]: Missing expected exception.
+      at TestContext.<anonymous> (file:///workspace/scratch/6e5752b49b6f/recallweave-draft-code/tests/deck-author-draft.test.mjs:270:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /2 MiB/,
+    operator: 'throws',
+    diff: 'simple'
+  }
