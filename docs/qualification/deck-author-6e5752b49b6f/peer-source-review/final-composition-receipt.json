@@ -1,0 +1,121 @@
+{
+  "status": "accepted",
+  "repo": "/workspace/scratch/6e5752b49b6f/agents/github_integration/recallweave-author",
+  "head": "75ef7e31bb1a780e4a58ea5e54ea132185b36c5c",
+  "tree": "1dcdafde1246de73b5b4b29333bc7f36c3121911",
+  "independentlyFetchedMain": "a64369f84fae4cfd0b81aa3878cc11e2fa8d298c",
+  "runtime": "v24.19.0",
+  "gates": [
+    {
+      "name": "All existing non-README main leaves and modes are preserved",
+      "status": "passed",
+      "leaves": 105
+    },
+    {
+      "name": "Only the agreed authoring files and qualification evidence were added",
+      "status": "passed",
+      "productAdditions": [
+        "author.html",
+        "author/author.css",
+        "author/index.html",
+        "src/deck-author-loader.mjs",
+        "src/deck-author-ui.mjs",
+        "src/deck-author.mjs",
+        "src/deck.mjs",
+        "tests/author-bundle.test.mjs",
+        "tests/deck-author-loader.test.mjs",
+        "tests/deck-author.test.mjs",
+        "tools/make_author.py"
+      ],
+      "evidenceAdditions": 41
+    },
+    {
+      "name": "The first offered successor only added evidence",
+      "status": "passed",
+      "evidenceOnlySuccessor": "8b82395c1730380e8c2cd08933f22d787df66ae6",
+      "paths": 41
+    },
+    {
+      "name": "Accepted editor runtime, loader, validator, styles and builder are retained",
+      "status": "passed",
+      "exactFiles": 5,
+      "statusOnlyFiles": 1
+    },
+    {
+      "name": "Static and generated user instructions only contain the intended accurate replacements",
+      "status": "passed"
+    },
+    {
+      "name": "README accurately describes save/reopen and current importer availability, with corrected prerequisites",
+      "status": "passed",
+      "testInstructions": "## Tests\n\nRun the unit/property tests with Node 20+ and Python 3 (`python3` on your PATH): `node --test tests/*.test.mjs`. The local-file tests use Node's global [`File`](https://nodejs.org/api/globals.html#class-file), added in Node 20; Python verifies that the checked-in standalone author HTML matches its modular sources. No npm packages are required. Tests cover bounded probabilities over repeated updates, directional evidence behavior, invalid parameter rejection, entropy/information-gain bounds, prerequisite selection, exhaustion, and initialization."
+    },
+    {
+      "name": "Standalone author HTML is generated exactly from the frozen modules and has no external script or stylesheet dependency",
+      "status": "passed",
+      "output": "author.html matches its modular sources"
+    },
+    {
+      "name": "Original loader receiving archive remains byte-identical",
+      "status": "passed"
+    }
+  ],
+  "programFiles": {
+    "src/deck.mjs": {
+      "sha256": "621438c166ec4bfafd9d87c698a1d46cb1722f4fb92dcbb8d9f52fce682c338b",
+      "comparedWithAccepted": "621438c166ec4bfafd9d87c698a1d46cb1722f4fb92dcbb8d9f52fce682c338b",
+      "change": "None"
+    },
+    "src/deck-author.mjs": {
+      "sha256": "67a60d718f91ac9c06ede1ea259f44e020a4290741cea96dcf5e325606e76104",
+      "comparedWithAccepted": "67a60d718f91ac9c06ede1ea259f44e020a4290741cea96dcf5e325606e76104",
+      "change": "None"
+    },
+    "src/deck-author-loader.mjs": {
+      "sha256": "3e52e81849fca916f64d117761ebc033bb4308efa623c3e545f72b04401c3ab7",
+      "comparedWithAccepted": "3e52e81849fca916f64d117761ebc033bb4308efa623c3e545f72b04401c3ab7",
+      "change": "None"
+    },
+    "author/author.css": {
+      "sha256": "786b0ddb5f6ca06cc5bb7ce97fdc42ab6f06d1d40d627429edb0881545c3b4ef",
+      "comparedWithAccepted": "786b0ddb5f6ca06cc5bb7ce97fdc42ab6f06d1d40d627429edb0881545c3b4ef",
+      "change": "None"
+    },
+    "tools/make_author.py": {
+      "sha256": "96981f39cdec0338383bacd897f00f1e37aa8a903ef84f8ceb8b67f6023414b9",
+      "comparedWithAccepted": "96981f39cdec0338383bacd897f00f1e37aa8a903ef84f8ceb8b67f6023414b9",
+      "change": "None"
+    },
+    "src/deck-author-ui.mjs": {
+      "sha256": "111b3edc520182154f77f96d5e167a102c8f55cd8689b6be2afea077b3595019",
+      "comparedWithAccepted": "45c6e3997e7465631d33a93a866fcb7e407fa3d88fcb8fd9b162764ae372c7d1",
+      "change": "Only the success-status sentence"
+    },
+    "author/index.html": {
+      "sha256": "d935987b7a9075d9699405c6a5274e9380602bacddf94fee94734eb927b909bb",
+      "change": "Two instruction sentences"
+    },
+    "author.html": {
+      "sha256": "898b32303c834f6539b49a54e6c86ab38d3dd2d3e88e981d8a3287d63f64295c",
+      "change": "Two instruction sentences and bundled success status"
+    }
+  },
+  "findings": [
+    {
+      "status": "resolved",
+      "kind": "Test prerequisite documentation",
+      "originalClaim": "Node 18+ suffices for the complete default suite",
+      "source": "tests/deck-author-loader.test.mjs constructs the global File; tests/author-bundle.test.mjs invokes python3",
+      "officialGlobalFileHistory": "https://nodejs.org/api/globals.html#class-file (Added in v20.0.0)",
+      "observation": "ReferenceError: File is not defined",
+      "diagnosticScope": "A missing-global capability control executed on v24.19.0; this is not a Node 18 execution claim.",
+      "resolution": "Node 20+ and Python 3 are now explicit; runtime and tests unchanged."
+    }
+  ],
+  "repeatedBrowserSuites": 0,
+  "finalInstructions": {
+    "staticPage": "Save/share JSON and reopen it in the author editor",
+    "successStatus": "Deck download started. Keep the JSON file to share or reopen it here.",
+    "importer": "Tracked separately; not claimed as present in current main"
+  }
+}
