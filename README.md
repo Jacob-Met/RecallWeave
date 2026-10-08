@@ -382,6 +382,13 @@ Build with `node tools/build_least_squares.mjs`; `--check` verifies the generate
 
 [Open the offline proof lab](courses/mathematical-induction-lab.html), download the [twelve-question lesson](courses/mathematical-induction.json), or read the [worked guide](courses/mathematical-induction.md). Compare an arithmetic sum with a proposed formula, inspect the exact base and symbolic successor step, and see why a few matching values do not prove every case. The lab keeps its finite examples separate from the induction argument and saves an explicit proof record. Import its lesson JSON through the existing learner preview and Start this deck controls.
 
+
+## Inspect rounding and stored geometry
+
+Open the offline [Floating-point lab](courses/floating-point-lab.html) to inspect binary32 input rounding, neighbors, halfway cases, subnormal values, overflow, and a triangle whose stored coordinates change after translation. Compare the exact source and stored signed areas, change the origin and power-of-two unit, and download the current experiment.
+
+The [worked guide](courses/floating-point.md) explains the numerical boundaries and the separate-origin alternative. Download the original [fourteen-question course](courses/floating-point.json), then use the existing **Bring your own lesson** preview and explicit **Start this deck** flow. The lesson complements the existing [Numerical precision guide](courses/numerical-precision.md).
+
 ## Momentum and collisions
 
 [Open the offline explorer](courses/momentum-collisions-explorer.html) to compare signed momentum and kinetic energy in ideal one-dimensional elastic and completely inelastic encounters. Enter two positive masses and signed incoming velocities, inspect exact fraction results on a shared velocity scale, and download the complete analysis. Equal or growing initial gaps explicitly produce no future collision endpoints.
