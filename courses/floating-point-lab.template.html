@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="An offline RecallWeave experiment in binary32 spacing, rounded addition, and the geometry that stored coordinates actually describe.">
+  <title>Floating point · RecallWeave</title>
+  <style>
+    :root { color-scheme: light; --ink:#18313a; --muted:#48616a; --paper:#f5f7f3; --white:#fff; --line:#c9d7d4; --blue:#164f97; --orange:#a84017; --teal:#086252; --focus:#8740a7; }
+    * { box-sizing:border-box; }
+    body { margin:0; color:var(--ink); background:var(--paper); font:17px/1.6 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
+    a { color:var(--blue); text-underline-offset:.18em; }
+    a:hover { text-decoration-thickness:2px; }
+    :focus-visible { outline:3px solid var(--focus); outline-offset:4px; }
+    .skip { position:absolute; top:-80px; left:12px; padding:10px; background:white; z-index:3; }
+    .skip:focus { top:8px; }
+    .shell { max-width:1120px; margin:auto; padding:0 28px; }
+    header { border-bottom:1px solid var(--line); }
+    .masthead { display:flex; align-items:center; justify-content:space-between; gap:16px; padding-top:18px; padding-bottom:18px; }
+    .brand { color:var(--ink); font-weight:750; text-decoration:none; letter-spacing:-.03em; }
+    .eyebrow { color:var(--teal); font-size:.78rem; font-weight:750; letter-spacing:.1em; text-transform:uppercase; }
+    h1,h2,h3 { line-height:1.15; letter-spacing:-.035em; }
+    h1 { font-size:clamp(2.25rem,5.2vw,4.3rem); max-width:850px; margin:12px 0 24px; }
+    h2 { font-size:clamp(1.65rem,3vw,2.4rem); margin:6px 0 16px; }
+    h3 { font-size:1.15rem; margin:0 0 12px; }
+    p { margin:0 0 16px; }
+    .hero { padding-top:56px; padding-bottom:44px; }
+    .lede { font-size:1.15rem; max-width:770px; color:var(--muted); }
+    .actions { display:flex; flex-wrap:wrap; align-items:center; gap:12px 20px; margin:22px 0 0; }
+    button,.button { font:inherit; font-weight:650; border:1px solid var(--teal); background:var(--teal); color:white; border-radius:6px; padding:10px 16px; cursor:pointer; text-decoration:none; line-height:1.35; }
+    button:hover,.button:hover { background:#064d41; }
+    button.secondary { color:var(--teal); background:white; }
+    button.secondary:hover { background:#e6f1ed; }
+    button:disabled { opacity:.5; cursor:not-allowed; }
+    main section { border-top:1px solid var(--line); padding:38px 0 44px; }
+    .intro { max-width:830px; color:var(--muted); }
+    .step { font:700 .8rem/1.2 ui-monospace,SFMono-Regular,Consolas,monospace; color:var(--teal); }
+    .control-grid { display:grid; grid-template-columns:1fr 1fr; gap:18px; margin:24px 0 20px; }
+    label { display:block; font-size:.93rem; font-weight:650; margin-bottom:7px; }
+    input,select { display:block; font:inherit; width:100%; min-width:0; padding:10px 12px; color:var(--ink); background:white; border:1px solid #8ba39f; border-radius:5px; }
+    .help { display:block; margin-top:7px; color:var(--muted); font-size:.86rem; line-height:1.45; }
+    .error { color:#8c1f24; font-weight:650; min-height:0; }
+    .error:empty { display:none; }
+    .panel { border:1px solid var(--line); background:var(--white); padding:22px; border-radius:8px; }
+    .two { display:grid; grid-template-columns:1fr 1fr; gap:22px; }
+    .bits { display:flex; flex-wrap:wrap; gap:8px; margin:20px 0; }
+    .bit-group { display:flex; flex-direction:column; gap:5px; max-width:100%; }
+    .bit-group code { font:600 clamp(.76rem,1.6vw,1.02rem)/1.5 ui-monospace,SFMono-Regular,Consolas,monospace; letter-spacing:.05em; padding:8px 10px; background:#eaf2fb; border:1px solid #becfe5; border-radius:4px; }
+    .bit-group:first-child code { background:#e4f1ea; border-color:#a5c8b8; }
+    .bit-group:last-child code { background:#fff0e9; border-color:#dfbca9; }
+    .bit-group span { font-size:.79rem; color:var(--muted); }
+    code { font: .92em/1.5 ui-monospace,SFMono-Regular,Consolas,monospace; overflow-wrap:anywhere; }
+    .result { font:650 clamp(1.2rem,2.3vw,1.8rem)/1.4 ui-monospace,SFMono-Regular,Consolas,monospace; overflow-wrap:anywhere; }
+    .result-label { display:block; color:var(--muted); font-size:.84rem; font-weight:650; margin-bottom:6px; }
+    .result-grid { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+    dl { margin:16px 0 0; }
+    dt { color:var(--muted); font-size:.87rem; margin-top:12px; }
+    dd { margin:3px 0 0; overflow-wrap:anywhere; }
+    details { margin-top:20px; }
+    summary { cursor:pointer; font-weight:650; color:var(--blue); }
+    details p { margin-top:14px; }
+    table { width:100%; border-collapse:collapse; margin-top:12px; font-size:.92rem; }
+    th,td { text-align:left; border-bottom:1px solid var(--line); padding:10px 8px; vertical-align:top; overflow-wrap:anywhere; }
+    th { font-weight:650; font-size:.84rem; color:var(--muted); }
+    caption { text-align:left; color:var(--muted); font-size:.85rem; padding-bottom:6px; }
+    .table-wrap { overflow-x:auto; }
+    .path { margin-top:16px; padding:16px; background:#eff5f4; border-left:3px solid var(--teal); }
+    .path p { margin-bottom:10px; }
+    .path p:last-child { margin-bottom:0; }
+    .path .result { font-size:1.8rem; }
+    .reference { margin-top:20px; padding:15px 18px; background:#e7f1ed; border-radius:5px; }
+    .status { display:inline-block; font-weight:750; font-size:.87rem; border:1px solid; padding:5px 10px; border-radius:4px; margin-bottom:18px; }
+    .status[data-state="reversed"] { color:#8c3415; background:#fff0e7; }
+    .status[data-state="collapsed"] { color:#6d325e; background:#f9edf5; }
+    .status[data-state="preserved"] { color:#145e4d; background:#e9f6ef; }
+    .plot-grid { display:grid; grid-template-columns:minmax(0,1.05fr) minmax(0,1fr); gap:25px; align-items:start; }
+    figure { margin:0; }
+    svg { width:100%; height:auto; display:block; background:#fafcf9; border:1px solid var(--line); border-radius:6px; }
+    figcaption { font-size:.83rem; color:var(--muted); margin-top:9px; }
+    .legend { display:flex; flex-wrap:wrap; gap:10px 24px; margin-top:10px; font-size:.84rem; font-weight:650; }
+    .legend .source { color:var(--blue); }
+    .legend .stored { color:var(--orange); }
+    .note { font-size:.92rem; color:var(--muted); }
+    .study { background:#e7f1ed; padding:24px; border-radius:8px; margin:20px 0 28px; }
+    .study p:last-child { margin-bottom:0; }
+    footer { border-top:1px solid var(--line); padding:24px 0 38px; font-size:.84rem; color:var(--muted); }
+    [hidden] { display:none !important; }
+    @media (max-width:700px) {
+      .shell { padding-left:18px; padding-right:18px; }
+      .hero { padding-top:36px; }
+      .control-grid,.two,.plot-grid,.result-grid { grid-template-columns:1fr; }
+      .panel { padding:17px; }
+      .masthead { align-items:flex-start; }
+      .masthead a:last-child { font-size:.87rem; }
+      .bit-group code { font-size:.79rem; letter-spacing:0; }
+      th,td { padding:9px 6px; }
+    }
+    @media print {
+      body { background:white; }
+      button,.control-grid,.actions,.skip { display:none; }
+      .panel { break-inside:avoid; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip" href="#experiments">Skip to experiments</a>
+  <header><div class="shell masthead"><a class="brand" href="../demo.html">RecallWeave</a><a href="floating-point.md">Read the worked explanation</a></div></header>
+  <div class="shell hero">
+    <div class="eyebrow">An offline numerical lab</div>
+    <h1>Small rounding.<br>A different triangle.</h1>
+    <p class="lede">Follow a value from its bits to its consequences. Inspect the number that binary32 stores, change the order of an addition, and reproduce a real case where a translated triangle reverses its winding.</p>
+    <div class="actions"><button type="button" data-download-lesson>Download the 14-question lesson</button><a href="../demo.html">Open the RecallWeave learner</a></div>
+    <p class="help">Import the downloaded JSON in the learner. The three experiments below work in this file without an account or connection.</p>
+    <p class="help">Companion lesson: <a href="numerical-precision.md">decimal intent and binary64 arithmetic</a>. Here, follow the next boundary into binary32 storage and geometry.</p>
+  </div>
+  <main id="experiments" class="shell" tabindex="-1">
+    <section aria-labelledby="number-heading">
+      <span class="step">01 / REPRESENTATION</span>
+      <h2 id="number-heading">Which number was stored?</h2>
+      <p class="intro">The input is a JavaScript Number (binary64). <code>Math.fround</code> selects a binary32 value with ties to even. The exact fractions below distinguish those two values from an author's intended decimal.</p>
+      <div class="control-grid">
+        <div><label for="number-preset">Choose an example</label><select id="number-preset"></select></div>
+        <div><label for="number-input">Number input</label><input id="number-input" type="text" inputmode="decimal" value="0.1" spellcheck="false" aria-describedby="number-help number-error"><span id="number-help" class="help">A finite decimal or scientific-notation Number, such as 0.1 or 1e8. This is not an exact decimal parser.</span></div>
+      </div>
+      <p id="number-error" class="error" role="alert"></p>
+      <div id="number-output" class="panel">
+        <div class="result-grid"><div><span class="result-label">Input Number</span><div id="number-value" class="result"></div></div><div><span class="result-label">Binary32 stored value</span><div id="stored-value" class="result"></div></div></div>
+        <div class="bits" aria-label="The 32 stored bits grouped by field"><div class="bit-group"><code id="sign-bits"></code><span>Sign · 1 bit</span></div><div class="bit-group"><code id="exponent-bits"></code><span>Exponent · 8 bits</span></div><div class="bit-group"><code id="fraction-bits"></code><span>Fraction · 23 bits</span></div></div>
+        <p class="note">Classification: <strong id="number-classification"></strong>. Hexadecimal bits: <code id="number-hex"></code>.</p>
+        <div class="table-wrap"><table><caption>Adjacent binary32 values in numerical order</caption><thead><tr><th>Previous</th><th>Stored</th><th>Next</th></tr></thead><tbody><tr><td><code id="neighbor-previous"></code></td><td><code id="neighbor-stored"></code></td><td><code id="neighbor-next"></code></td></tr></tbody></table></div>
+        <details><summary>Inspect the exact fractions and conversion error</summary><dl><dt>Exact input Number</dt><dd><code id="input-fraction"></code></dd><dt>Exact binary32 stored value</dt><dd><code id="stored-fraction"></code></dd><dt>Signed error: stored minus input Number</dt><dd><code id="number-error-fraction"></code></dd></dl><p class="note">These fractions decode the actual binary values. For the input written as 0.1, its difference from the intended rational 1/10 occurs before the conversion measured here.</p></details>
+      </div>
+    </section>
+    <section aria-labelledby="addition-heading">
+      <span class="step">02 / ARITHMETIC</span>
+      <h2 id="addition-heading">Move a rounding boundary.</h2>
+      <p class="intro">The same three inputs can give different results when each addition rounds to binary32. Compare both paths with an exact sum of the stored inputs.</p>
+      <div class="control-grid"><div><label for="addition-preset">Addition experiment</label><select id="addition-preset"></select></div></div>
+      <div class="two"><div class="panel"><h3>Round (a + b), then add c</h3><div class="path"><p><span class="result-label">First rounded result</span><code id="left-intermediate"></code></p><p><span class="result-label">Final rounded result</span><span id="left-result" class="result"></span></p></div></div><div class="panel"><h3>Round (b + c), then add a</h3><div class="path"><p><span class="result-label">First rounded result</span><code id="right-intermediate"></code></p><p><span class="result-label">Final rounded result</span><span id="right-result" class="result"></span></p></div></div></div>
+      <div class="reference">Exact sum of the stored inputs: <strong id="addition-exact"></strong>. <span id="addition-interpretation"></span></div>
+      <p class="help">Wider arithmetic before a loss can help. Widening an already rounded result cannot recover information that has disappeared.</p>
+    </section>
+    <section aria-labelledby="geometry-heading">
+      <span class="step">03 / GEOMETRY</span>
+      <h2 id="geometry-heading">An exact translation. A rounded output.</h2>
+      <p class="intro">Start with a=(0,0), b=(1.4,1.6), c=(2.6,3.4). Store the local vertices in binary32, add the same origin to both axes in wider arithmetic, then store the global output in binary32. Those final stored coordinates define the orange triangle.</p>
+      <div class="control-grid">
+        <div><label for="origin-preset">Origin example</label><select id="origin-preset"></select></div>
+        <div><label for="origin-input">Origin added to each axis, before the unit change</label><input id="origin-input" type="text" inputmode="numeric" value="10000000" spellcheck="false" aria-describedby="origin-help geometry-error"><span id="origin-help" class="help">A whole number from 0 through 67,108,864.</span></div>
+        <div><label for="unit-exponent">Change all units by 2^k</label><select id="unit-exponent"></select><span class="help">Scales the source and origin together. The plot divides this factor back out for comparison.</span></div>
+        <div class="actions"><button id="reset-geometry" class="secondary" type="button">Reset the original counterexample</button></div>
+      </div>
+      <p id="geometry-error" class="error" role="alert"></p>
+      <div id="geometry-output">
+        <span id="orientation-status" class="status" role="status"></span>
+        <div class="plot-grid">
+          <figure><svg id="triangle-plot" viewBox="0 0 450 410" role="img" aria-labelledby="triangle-plot-title triangle-plot-desc"><title id="triangle-plot-title">Source and stored triangle outlines</title><desc id="triangle-plot-desc"></desc><g id="plot-layer"></g></svg><div class="legend"><span class="source">Solid blue · local source</span><span class="stored">Dashed orange · stored output</span></div><figcaption>Both outlines are relative to their own vertex a and divided by the unit factor. Axes use the same scale. The table gives the actual stored coordinates.</figcaption></figure>
+          <div class="panel"><span class="result-label">Exact stored signed double area</span><div id="stored-area" class="result"></div><dl><dt>Intended decimal double area in these units</dt><dd><code id="intended-area"></code></dd><dt>Exact local binary32 source double area</dt><dd><code id="source-area"></code></dd><dt>Gap above the rounded origin in binary32</dt><dd><code id="origin-gap"></code></dd></dl><p id="orientation-explanation" class="note" style="margin-top:18px"></p><p class="help">Double area is the determinant, twice the signed triangle area. Its sign answers a winding question; it does not certify accurate shape or positions.</p></div>
+        </div>
+        <div class="table-wrap"><table><caption>Actual binary32 output coordinates and their retained differences</caption><thead><tr><th>Vertex</th><th>Stored x</th><th>Stored y</th><th>Relative to stored a</th></tr></thead><tbody id="coordinate-rows"></tbody></table></div>
+        <details><summary>Separate local storage, unit scaling, and sensitivity</summary><p>Keeping the local vertices and origin separate retains the local source double area: <code id="local-area"></code>. Subtracting the origin after global binary32 storage cannot restore the discarded edges. Baking large global coordinates again can repeat the loss.</p><p>For these local edges, |sin(theta)| is approximately <code id="shape-sine"></code>. This angle measure is dimensionless; it is not a complete condition number for the coordinate pipeline. The perturbation model and output of interest also matter.</p><p>The bounded power-of-two unit control preserves the normalized rounding pattern here. Raw area changes with squared units. Range failures such as overflow and subnormal rounding are explored separately above.</p></details>
+      </div>
+      <div class="actions"><button id="download-report" class="secondary" type="button">Download this experiment record</button><a href="floating-point.md">Read the derivation and scope</a></div>
+    </section>
+    <section aria-labelledby="practice-heading">
+      <span class="step">NEXT / RETRIEVAL</span>
+      <h2 id="practice-heading">Explain the boundary without the plot.</h2>
+      <div class="study"><p>Before opening the lesson, explain why a positive affine determinant and nonzero stored triangle area can both hold while the stored winding is wrong.</p><p>Then use RecallWeave's existing lesson importer to practice fourteen questions with explanations and transfer prompts. The learner keeps the first-answer and practice stages separate.</p></div>
+      <div class="actions"><button type="button" data-download-lesson>Download the lesson JSON</button><a href="../demo.html">Open the learner</a></div>
+    </section>
+  </main>
+  <footer><div class="shell">Original RecallWeave lesson. Exact arithmetic checks numerical examples; no measured learning outcome is claimed. <a href="floating-point.md">Guide, references, and verification scope</a>.</div></footer>
+  <script id="lesson-data" type="application/json">__FLOATING_POINT_DECK__</script>
+  <script>
+    (() => {
+      'use strict';
+      /*__FLOATING_POINT_CORE__*/
+      /*__FLOATING_POINT_UI__*/
+    })();
+  </script>
+</body>
+</html>

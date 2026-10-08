@@ -313,3 +313,10 @@ The [worked guide](courses/cache-replacement.md) explains the empty-start, equal
 ## Weighted interval scheduling
 
 The [weighted-intervals explorer](courses/weighted-intervals-explorer.html) is a self-contained offline lab for choosing compatible activities by total value. Edit a small schedule, inspect take/skip decisions, reconstruct the chosen prefix, and compare it with earliest finish. Download its [twelve-question course](courses/weighted-interval-scheduling.json) into the existing learner, or use the [course guide](courses/weighted-interval-scheduling.md) for the worked table, answer derivations, assumptions and build/check commands.
+
+
+## Inspect rounding and stored geometry
+
+Open the offline [Floating-point lab](courses/floating-point-lab.html) to inspect binary32 input rounding, neighbors, halfway cases, subnormal values, overflow, and a triangle whose stored coordinates change after translation. Compare the exact source and stored signed areas, change the origin and power-of-two unit, and download the current experiment.
+
+The [worked guide](courses/floating-point.md) explains the numerical boundaries and the separate-origin alternative. Download the original [fourteen-question course](courses/floating-point.json), then use the existing **Bring your own lesson** preview and explicit **Start this deck** flow. The lesson complements the existing [Numerical precision guide](courses/numerical-precision.md).
