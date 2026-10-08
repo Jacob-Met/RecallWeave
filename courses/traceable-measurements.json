@@ -1,0 +1,219 @@
+{
+  "format": "recallweave-deck/1",
+  "title": "Traceable measurements: follow a result back to its samples",
+  "attribution": "Original AI-assisted lesson, questions, distractors and worked explanations by the HAMON estate (2026). The case uses six derived algorithmic records from the C3D.ORG Sample00 IST Gait with EMG recording, received through Jacob-Met/srs-vicon-gait-analysis. Publisher: https://www.c3d.org/sampledata.html ; source archive: https://www.c3d.org/data/Sample00.zip . Exact input, derivative, code and report pins are in courses/traceable-measurements.source.json and the companion guide. General provenance background: W3C PROV-Overview, https://www.w3.org/TR/prov-overview/ . C3D unit-declaration background: https://www.c3d.org/HTML/Documents/pointunits.htm . The two-event sign comparison is authored, not another measured trial. No source passages, questions or figures are copied.",
+  "license": "Original lesson wording and authored exercises: CC0-1.0. The displayed computed numbers are factual results with their source identified. The original and derived C3D are not included; this statement does not relicense the publisher's recording or referenced documents. No clinical, calibration, contact-accuracy or learning-efficacy claim is made.",
+  "concepts": [
+    "Source and transformations",
+    "Clocks after cropping",
+    "Two sampling grids",
+    "Signs and summaries",
+    "Record and reference identity",
+    "Missingness and supported claims"
+  ],
+  "items": [
+    {
+      "id": "trace-source-configuration",
+      "concept": "Source and transformations",
+      "prerequisites": [],
+      "prompt": "Two runs record the same source-file SHA-256 and byte count. Run A uses a minimum peak distance of 85 marker samples and refuses analysis. Run B uses 51 samples and emits six event labels. What does the shared source pin establish in this comparison?",
+      "options": [
+        "The identical source pin guarantees identical detected event labels.",
+        "They record the same input identity, with different analysis settings.",
+        "The changed peak setting proves that the input file bytes changed.",
+        "The run with more labels establishes the actual ground-contact times."
+      ],
+      "answer": 1,
+      "explanation": "The content pin records the input identity; it does not include the analysis choices. Here the reported peak-distance settings differ, so a refusal and a six-label result can belong to the same pinned input. A reproducible result needs the input, transformation, code and settings together. Neither label count establishes contact accuracy.",
+      "transfer": "For a report you use, list the input identity and two processing choices that would also need to be recorded to reproduce it."
+    },
+    {
+      "id": "trace-source-lineage",
+      "concept": "Source and transformations",
+      "prerequisites": [],
+      "prompt": "An analysis derivative is built from an original recording: declared marker metres are converted to millimetres, marker names and axes are mapped, and the first marker sample plus 18 analog samples are removed. The derivative has a different content hash. Which record makes this relationship most auditable?",
+      "options": [
+        "Keep only the derivative's familiar filename and replace the original file.",
+        "Keep only the new millimetre label and omit the actual coordinate conversion.",
+        "Keep only the six output labels and omit the inputs and analysis settings.",
+        "Keep both content pins and the exact transformations, code and settings."
+      ],
+      "answer": 3,
+      "explanation": "Keep the original and derived content identities and the operations connecting them. Names and unit labels alone do not record the transformed coordinate values, the crop or the algorithm. The case derivative is a bounded compatibility input, not a promise that every part of the original acquisition was calibrated or converted.",
+      "transfer": "Sketch a three-stage record for source, transformed input and report. Name one piece of evidence you would retain at each stage."
+    },
+    {
+      "id": "trace-clock-crop",
+      "concept": "Clocks after cropping",
+      "prerequisites": [
+        "Source and transformations"
+      ],
+      "prompt": "A real exported event has retained marker_sample_index = 27. Retained samples are uniformly spaced at 60 Hz, with retained index 0 at time 0. Exactly one earlier source marker sample was cropped. Relative to the retained start and then the original source start, what are the event times? Round to six decimals.",
+      "options": [
+        "0.450000 s, then 0.466667 s.",
+        "0.466667 s, then 0.450000 s.",
+        "27.000000 s, then 28.000000 s.",
+        "0.450000 s, then 0.450000 s."
+      ],
+      "answer": 0,
+      "explanation": "The retained time is 27/60 = 0.45 s. Adding the removed sample gives source index 28, so its time from the source start is 28/60 = 0.466666... s. The offset is 1/60 s. These are two relative clocks; neither is a wall-clock timestamp or an original acquisition frame label.",
+      "transfer": "A different export removes 12 samples from a 100 Hz stream. Write the retained-time and source-relative-time expressions for retained index 35."
+    },
+    {
+      "id": "trace-clock-alignment",
+      "concept": "Clocks after cropping",
+      "prerequisites": [
+        "Source and transformations"
+      ],
+      "prompt": "Two separately exported recordings each contain an event at 0.45 s from that export's first retained sample. Their source start times and crop offsets are not supplied. Can those two labels alone establish that the events occurred at the same instant?",
+      "options": [
+        "Yes: matching printed seconds establish a shared physical instant.",
+        "Yes: any two streams measured in seconds have the same time origin.",
+        "No: the start-time and crop-to-source relationships are still needed.",
+        "No: times from sampled recordings can never be related to each other."
+      ],
+      "answer": 2,
+      "explanation": "A relative timestamp needs an origin. Equal numbers on clocks with unspecified origins do not establish simultaneity. Recording the source start relationships and crop offsets can make alignment possible; sample rates alone do not supply that evidence.",
+      "transfer": "When combining a video label with a sensor log, state what clock-origin or synchronization information you would request before aligning them."
+    },
+    {
+      "id": "trace-grid-crop",
+      "concept": "Two sampling grids",
+      "prerequisites": [
+        "Clocks after cropping"
+      ],
+      "prompt": "For this exercise, the original marker and analog grids share time zero and are uniformly sampled at 60 Hz and 1080 Hz. You remove the first marker sample. How many leading analog samples must be removed to keep the same elapsed-time start?",
+      "options": [
+        "1 analog sample.",
+        "60 analog samples.",
+        "18 analog samples.",
+        "1080 analog samples."
+      ],
+      "answer": 2,
+      "explanation": "One marker interval is 1/60 s. At 1080 analog samples per second, that interval contains 1080/60 = 18 samples. Removing one marker sample and 18 analog samples preserves the stated initial alignment. This is a crop relationship, not resampling, and the rates do not independently prove that the original grids shared time zero.",
+      "transfer": "Under the same shared-origin assumption, how many samples from a 1200 Hz stream correspond to cropping three samples from a 100 Hz stream? Explain the units in your calculation."
+    },
+    {
+      "id": "trace-grid-index",
+      "concept": "Two sampling grids",
+      "prerequisites": [
+        "Clocks after cropping"
+      ],
+      "prompt": "After the aligned crop of one marker sample and 18 analog samples, retained index 0 on both grids has the same time. Rates stay 60 Hz and 1080 Hz. An exported event is at retained marker index 59. Which pair gives the retained analog index and the original analog index at that timestamp?",
+      "options": [
+        "1062 retained, 1080 original.",
+        "59 retained, 60 original.",
+        "1080 retained, 1098 original.",
+        "1061 retained, 1079 original."
+      ],
+      "answer": 0,
+      "explanation": "There are 18 analog intervals per marker interval. The retained analog index is 59 × 18 = 1062. Restoring the 18-sample crop gives original analog index 1080. The retained time is 59/60 s and the source-relative time is 1 s. This maps sampling timestamps; it does not identify a force-contact boundary.",
+      "transfer": "Use the same two grids to map retained marker index 92 to both analog indices. State the assumption that makes the mapping meaningful."
+    },
+    {
+      "id": "trace-signed-units",
+      "concept": "Signs and summaries",
+      "prerequisites": [
+        "Source and transformations"
+      ],
+      "prompt": "The actual LHS row at retained marker index 27 has signed mos_ap_m = -0.04901354633425304 m. If you express this same signed event value in millimetres and round to three decimals, which result preserves its meaning?",
+      "options": [
+        "+49.014 mm.",
+        "-0.049 mm.",
+        "-49013.546 mm.",
+        "-49.014 mm."
+      ],
+      "answer": 3,
+      "explanation": "Multiplying by 1000 converts metres to millimetres and preserves the negative sign: -49.013546... mm, rounded to -49.014 mm. Taking an absolute value would be a separate operation. The field is a signed output of the stated calculation and reference convention; its sign alone is not a clinical classification.",
+      "transfer": "Write separate labels for a signed event value in millimetres and its absolute magnitude. Why should an export retain which operation was used?"
+    },
+    {
+      "id": "trace-absolute-summary",
+      "concept": "Signs and summaries",
+      "prerequisites": [
+        "Source and transformations"
+      ],
+      "prompt": "Consider an authored two-event comparison, separate from the measured case: the signed values are -0.04 m and +0.02 m. The stated summary takes the mean of their absolute magnitudes and reports millimetres. What are the signed mean in metres and that absolute-magnitude mean in millimetres?",
+      "options": [
+        "+0.03 m, then -10 mm.",
+        "-0.01 m, then 30 mm.",
+        "-0.01 m, then 10 mm.",
+        "+0.03 m, then 30 mm."
+      ],
+      "answer": 1,
+      "explanation": "The signed mean is (-0.04 + 0.02)/2 = -0.01 m. The stated absolute-magnitude mean is (0.04 + 0.02)/2 × 1000 = 30 mm. Taking the absolute value of the signed mean would instead give 10 mm. These operations answer different questions, and an aggregate cannot restore the individual signs.",
+      "transfer": "Give two different pairs of signed values with the same mean absolute magnitude. Explain what that shared summary leaves unknown."
+    },
+    {
+      "id": "trace-reference-foot",
+      "concept": "Record and reference identity",
+      "prerequisites": [
+        "Source and transformations",
+        "Clocks after cropping"
+      ],
+      "prompt": "The actual row at retained marker index 27 is detector = LHS and side = L. It also records mos_reference_foot = R. The export contract defines detector side as the label's side and MOS reference foot as a separate choice made from toe geometry. How should this row be read?",
+      "options": [
+        "The two fields have different meanings: detector L, geometry-selected reference R.",
+        "The row proves that the exporter accidentally swapped all left and right labels.",
+        "The reference R makes both the LHS label and its retained sample index unavailable.",
+        "Both fields name the same identity, so the record must discard one of the values."
+      ],
+      "answer": 0,
+      "explanation": "The row retains two distinct identities. LHS is the algorithm's left-side heel-strike label; R is the native MOS reference selected by the separate geometry calculation. Preserve both meanings. Copying the detector side into the reference field would change the recorded result.",
+      "transfer": "Find another dataset with two similarly named identity fields. Write a join rule that preserves each field's role instead of treating them as interchangeable."
+    },
+    {
+      "id": "trace-three-indices",
+      "concept": "Record and reference identity",
+      "prerequisites": [
+        "Clocks after cropping"
+      ],
+      "prompt": "The actual RHS row at retained sample 126 has event_index = 5, detector_index = 1 and mos_index = 3. event_index counts all exported events; detector_index counts within that detector's own array; mos_index counts native MOS entries. Which value indexes the RHS detector array?",
+      "options": [
+        "5.",
+        "3.",
+        "1.",
+        "126."
+      ],
+      "answer": 2,
+      "explanation": "detector_index = 1 is the second entry in the RHS array [59, 126]. event_index = 5 is the sixth row in the combined event table, mos_index = 3 is the fourth MOS entry, and 126 is a position in the retained marker samples. All are valid, but they index different things.",
+      "transfer": "For the LHS row at sample 92, the table gives event_index 3, detector_index 1 and mos_index 2. Describe the collection addressed by each index."
+    },
+    {
+      "id": "trace-unavailable-zero",
+      "concept": "Missingness and supported claims",
+      "prerequisites": [
+        "Record and reference identity"
+      ],
+      "prompt": "The actual LTO row at retained sample 66 has hcv_mm_s = null, lists hcv_mm_s in unavailable_fields, and has an empty nonfinite_fields list. This exporter associates HCV only with interior RHS rows. Which reading is supported?",
+      "options": [
+        "A heel-contact speed of exactly zero was measured at this toe-off label.",
+        "HCV is inapplicable to this exported toe-off row, rather than a measured zero.",
+        "A nonfinite HCV calculation was necessarily converted to null for this row.",
+        "The exporter failed to retain the toe-off label and its sample position."
+      ],
+      "answer": 1,
+      "explanation": "The field is inapplicable to this toe-off row under the stated association rule. Its null is not evidence of zero speed, and the empty nonfinite list does not report a NaN or infinity here. Keep a native numeric zero distinct from missingness; preserving a zero also does not, by itself, establish measurement quality.",
+      "transfer": "Design a small table that distinguishes an available value 0, an inapplicable field and a nonfinite calculation. Include the metadata needed to read the three cases correctly."
+    },
+    {
+      "id": "trace-supported-claim",
+      "concept": "Missingness and supported claims",
+      "prerequisites": [
+        "Source and transformations",
+        "Signs and summaries",
+        "Record and reference identity"
+      ],
+      "prompt": "The source and derivative pins were verified and the stated pipeline/settings emitted six labels. No reference contact annotations were supplied. The recording declares type-4 force plates, its vertical channels have sub-newton ranges, and this processing applied no plate calibration. Which conclusion is supported by this receiving?",
+      "options": [
+        "The six labels establish that the participant has a clinically normal gait.",
+        "The type-4 plate declaration establishes calibrated physical force measurements.",
+        "The computed 0 kg force-mean estimate is a valid measurement of the person's mass.",
+        "This pipeline emitted six labels for this pinned input and the stated setting."
+      ],
+      "answer": 3,
+      "explanation": "The received result is a reproducible software/data outcome within the recorded scope. Contact accuracy needs an appropriate reference, and a type declaration or unit label does not establish calibration. The inherited 0 kg estimate is excluded from body-mass interpretation on this input. No clinical or calibrated-force conclusion follows from the six labels.",
+      "transfer": "Write one narrow statement supported by a computed report and one stronger statement that would require new evidence. Name the missing evidence."
+    }
+  ]
+}
