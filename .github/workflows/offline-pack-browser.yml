@@ -1,0 +1,59 @@
+name: offline-pack-browser
+
+on:
+  pull_request:
+    paths:
+      - offline/**
+      - catalog.html
+      - catalog/**
+      - src/course-catalog*.mjs
+      - src/deck.mjs
+      - tools/build-course-catalog.mjs
+      - tools/build-offline-pack.py
+      - tools/check_offline_pack_browser.mjs
+      - courses/*.json
+      - demo.html
+      - .github/workflows/offline-pack-browser.yml
+  push:
+    branches: [main]
+    paths:
+      - offline/**
+      - catalog.html
+      - catalog/**
+      - src/course-catalog*.mjs
+      - src/deck.mjs
+      - tools/build-course-catalog.mjs
+      - tools/build-offline-pack.py
+      - tools/check_offline_pack_browser.mjs
+      - courses/*.json
+      - demo.html
+      - .github/workflows/offline-pack-browser.yml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  real-browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      # Reuse the repository's pinned action identities; existing workflows stay intact.
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: "22"
+      - name: Check maintained receiver syntax
+        run: node --check tools/check_offline_pack_browser.mjs
+      - name: Verify the committed catalog and offline pack without writing
+        run: |
+          node tools/build-course-catalog.mjs --check
+          python3 tools/build-offline-pack.py --check
+      - name: Receive actual ZIP download and extracted offline learner in installed Chrome
+        run: |
+          chrome_bin="$(command -v google-chrome)"
+          "$chrome_bin" --version
+          node tools/check_offline_pack_browser.mjs --root "$GITHUB_WORKSPACE" --browser "$chrome_bin" --output "$RUNNER_TEMP/offline-pack-receiving" --emit-bundle
