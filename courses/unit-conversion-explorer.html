@@ -1,0 +1,640 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>Unit conversion explorer · RecallWeave</title>
+  <style>
+    :root { font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #173d38; background: #f4f7f3; font-synthesis: none; line-height: 1.5; }
+    * { box-sizing: border-box; }
+    body { margin: 0; }
+    [hidden] { display: none !important; }
+    a { color: #075c73; text-underline-offset: .18em; }
+    button, input { font: inherit; touch-action: manipulation; }
+    button, summary { cursor: pointer; }
+    :focus-visible { outline: 3px solid #a8410f; outline-offset: 4px; }
+    .skip-link { position: absolute; left: 16px; top: -80px; background: white; padding: 12px; z-index: 2; }
+    .skip-link:focus { top: 12px; }
+    header, main, footer { width: min(1200px, 100%); padding: 24px; margin: 0 auto; }
+    header { padding-top: 32px; padding-bottom: 8px; }
+    .brand { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; font-weight: 750; }
+    .badge, .dimension-badge { font-size: .76rem; font-weight: 700; letter-spacing: .04em; background: #e0eee4; border: 1px solid #b5d2c2; padding: 5px 10px; border-radius: 99px; }
+    h1 { max-width: 900px; font-size: clamp(2rem, 5vw, 3.35rem); line-height: 1.12; letter-spacing: -.03em; margin: 24px 0 14px; }
+    .lede { font-size: 1.13rem; color: #426059; max-width: 800px; }
+    h2 { font-size: 1.4rem; line-height: 1.25; margin: 0 0 12px; }
+    h3 { font-size: 1.03rem; line-height: 1.4; margin: 0 0 10px; }
+    h4 { margin: 0 0 8px; font-size: .82rem; color: #426059; }
+    p { margin: 8px 0 16px; }
+    .actions { display: flex; align-items: center; flex-wrap: wrap; gap: 12px 20px; margin: 22px 0 8px; }
+    .workspace { display: grid; grid-template-columns: minmax(280px, 330px) minmax(0, 1fr); gap: 22px; align-items: start; }
+    .panel { min-width: 0; padding: 24px; border: 1px solid #cddbd2; border-radius: 16px; background: #fff; box-shadow: 0 5px 18px #173d3805; }
+    .input-panel { border-top: 5px solid #266653; }
+    .right-column { min-width: 0; display: grid; gap: 18px; }
+    label { font-weight: 700; display: block; margin: 16px 0 6px; }
+    input { width: 100%; min-width: 0; color: #173d38; background: #fff; border: 1px solid #647f70; border-radius: 7px; padding: 11px 12px; }
+    [aria-invalid="true"] { border: 2px solid #a32220; }
+    button { border: 1px solid #a1b9aa; border-radius: 8px; padding: 10px 14px; background: #f7faf6; color: #173d38; min-height: 44px; }
+    button:hover { background: #eaf2e9; }
+    button:disabled { opacity: .5; cursor: default; }
+    .primary { background: #195a49; color: #fff; border-color: #195a49; font-weight: 700; }
+    .primary:hover { background: #124637; }
+    form .primary { width: 100%; margin-top: 12px; }
+    .help { font-size: .86rem; color: #52685e; }
+    .status { font-size: .88rem; color: #52685e; min-height: 1.5em; margin: 16px 0 0; }
+    .error { background: #fff1ed; color: #842b21; border-left: 4px solid #a32220; padding: 12px; overflow-wrap: anywhere; }
+    .presets { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 14px; }
+    .presets button { text-align: left; font-size: .83rem; padding: 10px; }
+    .presets span { display: block; font-size: .74rem; color: #52685e; }
+    .input-panel h3 { margin-top: 24px; }
+    .result-panel { padding: 0; overflow: hidden; }
+    .result-heading { padding: 24px; background: #e9f3eb; border-bottom: 1px solid #cddbd2; }
+    .eyebrow { font-size: .78rem; font-weight: 750; letter-spacing: .05em; text-transform: uppercase; color: #426059; margin-top: 0; }
+    .answer { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: baseline; font-size: clamp(2rem, 4.5vw, 3.1rem); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+    .answer-unit { font-size: .5em; font-weight: 600; max-width: 100%; overflow-wrap: anywhere; }
+    .result-heading .help { margin-bottom: 0; }
+    .calculation { padding: 22px 24px 8px; }
+    .steps { padding-left: 24px; margin: 0; }
+    .steps > li { padding-left: 6px; margin: 0 0 22px; }
+    .steps > li::marker { font-weight: 750; color: #266653; }
+    .scale-pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+    .scale-card { min-width: 0; border: 1px solid #d8e2da; background: #f7faf6; border-radius: 9px; padding: 12px; }
+    .scale-card p { margin: 6px 0; }
+    .formula { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; font-size: .9rem; }
+    .unit-expression { font-weight: 700; }
+    .base-expression { color: #426059; }
+    .dimension-heading { display: flex; gap: 10px; justify-content: space-between; align-items: start; flex-wrap: wrap; }
+    .dimension-heading h2 { font-size: 1.15rem; }
+    .dimension-badge[data-match="false"] { background: #fff1ed; border-color: #dbb5a7; color: #842b21; }
+    table { width: 100%; border-collapse: collapse; font-size: .86rem; font-variant-numeric: tabular-nums; }
+    th, td { text-align: left; padding: 9px 8px; border-bottom: 1px solid #d8e2da; overflow-wrap: anywhere; }
+    #dimension-panel td, #dimension-panel thead th:not(:first-child) { text-align: center; }
+    #dimension-panel table { table-layout: fixed; }
+    #dimension-panel th:first-child { width: 50%; }
+    .dimension-difference { background: #fff1ed; color: #842b21; }
+    caption { text-align: left; padding: 4px 0 10px; font-size: .82rem; color: #52685e; }
+    .download-panel p { margin-bottom: 0; }
+    .next-steps { margin-top: 22px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px; }
+    .next-steps ol, .next-steps ul { padding-left: 22px; }
+    .next-steps li { margin: 9px 0; }
+    details { margin-top: 22px; }
+    summary { font-weight: 700; min-height: 38px; }
+    .table-scroll { max-width: 100%; overflow-x: auto; }
+    .catalog-table { table-layout: fixed; }
+    .catalog-table th:first-child { width: 18%; }
+    footer { color: #52685e; font-size: .84rem; padding-bottom: 36px; }
+    footer ul { display: flex; flex-wrap: wrap; gap: 10px 22px; list-style: none; padding: 0; }
+    @media (max-width: 850px) { .workspace { grid-template-columns: minmax(0, 1fr); } .presets { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+    @media (max-width: 560px) { header, main, footer { padding-left: 16px; padding-right: 16px; } .panel { padding: 18px; } .result-panel { padding: 0; } .result-heading, .calculation { padding: 18px; } .next-steps, .scale-pair { grid-template-columns: minmax(0, 1fr); } .presets { grid-template-columns: repeat(2, minmax(0, 1fr)); } .answer { font-size: 2rem; } }
+    @media print { :root { background: white; } .input-panel, .skip-link, .actions, .download-panel, .status { display: none; } .workspace, .next-steps { display: block; } .panel { border: 0; box-shadow: none; padding: 12px 0; } header, main, footer { width: 100%; } }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to the explorer</a>
+  <header>
+    <div class="brand"><a href="../demo.html">RecallWeave</a><span class="badge">Offline teaching explorer</span></div>
+    <h1>Let the units do the work.</h1>
+    <p class="lede">Changing units changes a number, while the quantity stays the same. Follow the scale factors, inspect the dimension powers, and see why a centimetre squared needs a squared conversion.</p>
+    <div class="actions"><button id="download-unit-deck" class="primary" type="button">Download lesson (.json)</button><a href="units-and-dimensions.md">Worked guide and answers</a><a href="../demo.html">Open the learner</a></div>
+  </header>
+  <main id="main">
+    <div class="workspace">
+      <section class="panel input-panel" aria-labelledby="quantity-heading">
+        <h2 id="quantity-heading">Choose a quantity</h2>
+        <p class="help">Start with a conversion you can predict, then change one part.</p>
+        <form id="conversion-form" novalidate>
+          <label for="quantity">Numerical value</label>
+          <input id="quantity" value="72" type="text" inputmode="decimal" maxlength="64" autocomplete="off" spellcheck="false" aria-describedby="number-help">
+          <p id="number-help" class="help">Decimal or scientific notation, such as 2.5 or 1e-3.</p>
+          <label for="from-unit">From unit</label>
+          <input id="from-unit" value="km/h" type="text" maxlength="128" list="unit-examples" autocomplete="off" spellcheck="false" aria-describedby="syntax-help">
+          <label for="to-unit">To unit</label>
+          <input id="to-unit" value="m/s" type="text" maxlength="128" list="unit-examples" autocomplete="off" spellcheck="false" aria-describedby="syntax-help">
+          <datalist id="unit-examples"></datalist>
+          <p id="syntax-help" class="help">Use * or / between units, ^ for a whole power, and parentheses for a denominator: kg/(m*s^2). Case matters.</p>
+          <button type="submit" class="primary">Show conversion</button>
+        </form>
+        <p id="conversion-status" class="status" role="status" aria-live="polite"></p>
+        <h3>Try a different idea</h3>
+        <div class="presets" aria-label="Conversion examples">
+          <button type="button" data-preset="speed">Speed<span>km/h → m/s</span></button>
+          <button type="button" data-preset="area">Area<span>cm² → mm²</span></button>
+          <button type="button" data-preset="volume">Volume<span>cm³ → L</span></button>
+          <button type="button" data-preset="density">Density<span>g/cm³ → kg/m³</span></button>
+          <button type="button" data-preset="case">Prefix case<span>MJ → mJ</span></button>
+          <button type="button" data-preset="mismatch">A mismatch<span>m → s</span></button>
+        </div>
+      </section>
+      <div class="right-column">
+        <section id="conversion-result" class="panel result-panel" aria-label="Current conversion" hidden></section>
+        <section id="dimension-panel" class="panel" aria-labelledby="dimension-heading" hidden>
+          <div class="dimension-heading"><h2 id="dimension-heading">Compare the dimension powers</h2><span id="dimension-badge" class="dimension-badge"></span></div>
+          <p id="dimension-summary" class="help"></p>
+          <table><caption>Zero means that a base dimension cancels out.</caption><thead><tr><th scope="col">Base dimension</th><th scope="col">From</th><th scope="col">To</th></tr></thead><tbody id="dimension-rows"></tbody></table>
+        </section>
+        <section class="panel download-panel" aria-label="Keep the current conversion">
+          <button id="download-conversion" type="button" disabled>Download current calculation (.json)</button>
+          <p class="help">Keeps the entered expressions, dimension powers, exact fractions and display precision. Download a fresh copy after changing a value.</p>
+          <p id="download-status" class="status" role="status" aria-live="polite"></p>
+        </section>
+      </div>
+    </div>
+    <div class="next-steps">
+      <section class="panel" aria-labelledby="try-heading">
+        <h2 id="try-heading">Predict, change, explain</h2>
+        <ol><li>Choose <strong>Area</strong>. If 1 cm is 10 mm, what must happen to each of two length factors?</li><li>Choose <strong>Speed</strong>. Why does the hour-to-second factor belong in the denominator?</li><li>Choose <strong>Prefix case</strong>. Compare MJ with mJ without changing the underlying energy.</li><li>Choose <strong>A mismatch</strong>. What information besides a scale factor would connect length with time?</li></ol>
+      </section>
+      <section class="panel" aria-labelledby="limits-heading">
+        <h2 id="limits-heading">What this check can tell you</h2>
+        <p>Matching dimensions permit a scale conversion for the listed units. They do not prove that a physical equation is correct, determine a numerical constant, or tell you what kind of quantity is being described.</p>
+        <p class="help">For example, energy and torque share the same base dimensions but describe different quantities. Interpret your calculation in its physical context.</p>
+        <p class="help">Arithmetic treats your entered number as exact. It does not estimate measurement uncertainty or select significant figures from an experiment. Affine temperatures, logarithmic units and arbitrary formulas are outside this explorer.</p>
+      </section>
+    </div>
+    <details class="panel">
+      <summary>Supported symbols and exact scales</summary>
+      <p class="help">Use explicit multiplication: m*s means metre × second; ms means millisecond. Division proceeds from left to right: kg/m*s differs from kg/(m*s). μm also accepts µm or the typed spelling um; ², ³ and · are accepted conveniences. Other symbols are not inferred.</p>
+      <div class="table-scroll"><table class="catalog-table"><caption>Each row gives one listed unit in metre, kilogram and second units.</caption><thead><tr><th scope="col">Symbol</th><th scope="col">Name</th><th scope="col">Exact base-unit scale</th></tr></thead><tbody id="unit-catalog"></tbody></table></div>
+      <p class="help">Expression limits: 128 characters, 24 unit factors, four levels of parentheses, whole powers from −6 to 6, and combined dimension powers from −24 to 24. The numerical value accepts at most 24 decimal digits, including zeros, and a scientific exponent from −24 to 24. The exact-number size is bounded.</p>
+    </details>
+    <section class="panel" style="margin-top:22px" aria-labelledby="lesson-heading">
+      <h2 id="lesson-heading">Continue in the twelve-question lesson</h2>
+      <p>Download the lesson above. Open RecallWeave, choose the JSON under <strong>Bring your own lesson</strong>, inspect the preview, and select <strong>Start this deck</strong>. Explanations, practice retries and downloadable study notes use the existing learner.</p>
+      <p class="help">The explorer and its two downloads work directly from this HTML file, offline. The guide and learner links open separate supplied files; keep the repository folder structure to use those links. Inputs stay in this page and are not saved automatically.</p>
+    </section>
+    <noscript><p class="error">This explorer requires JavaScript for its calculations. The separate worked guide and lesson JSON remain readable as files.</p></noscript>
+  </main>
+  <footer>
+    <p>Original RecallWeave teaching material. Definitions are checked against the primary references below. No textbook exercise or figure is reproduced, and no measured learning-effectiveness claim is made.</p>
+    <ul><li><a href="https://www.bipm.org/en/publications/si-brochure">BIPM SI Brochure · 9th edition, June 2026</a></li><li><a href="https://www.nist.gov/pml/owm/metric-si-prefixes">NIST · SI prefixes</a></li><li><a href="https://www.nist.gov/pml/special-publication-330/sp-330-section-4">NIST · minute, hour and litre</a></li></ul>
+  </footer>
+  <script>
+  (() => {
+    'use strict';
+    const unitCourseText = "{\n  \"format\": \"recallweave-deck/1\",\n  \"title\": \"Units and dimensions: conversions that preserve meaning\",\n  \"attribution\": \"Original AI-assisted questions, fictional quantities and worked explanations by RecallWeave contributors, 2026-10-08. Primary references: BIPM, The International System of Units (SI), 9th edition, version 4.01 (June 2026), sections 2.3.3–2.3.4, 3, 4 and 5.4.1, https://www.bipm.org/en/publications/si-brochure and https://doi.org/10.59161/AUEZ1291 ; NIST, Metric (SI) Prefixes, https://www.nist.gov/pml/owm/metric-si-prefixes ; NIST SP 330, section 4, https://www.nist.gov/pml/special-publication-330/sp-330-section-4 . Reference definitions inform the unit relations; no source exercise text is reproduced. Worked solutions and distractors are original. This introductory practice lesson is not a validated assessment; no endorsement by BIPM or NIST is implied.\",\n  \"license\": \"No separate license grant is made by this deck. Exercises, examples and explanations are original RecallWeave course content. The linked BIPM and NIST references retain their own terms; this notice does not relicense those sources or other repository content.\",\n  \"concepts\": [\n    \"Factors and prefixes\",\n    \"Area and volume\",\n    \"Rates and density\",\n    \"Dimensions and models\"\n  ],\n  \"items\": [\n    {\n      \"id\": \"units-factor-unity\",\n      \"concept\": \"Factors and prefixes\",\n      \"prerequisites\": [],\n      \"prompt\": \"A cable is 2.4 m long. Given 1 m = 100 cm, which calculation multiplies by a ratio equal to one AND cancels m to leave the answer directly in cm?\",\n      \"options\": [\n        \"2.4 m × (1 cm / 100 m) = 0.024 cm\",\n        \"2.4 m × (100 cm / 1 m) = 240 cm\",\n        \"2.4 m × (1 m / 100 cm) = 0.024 m^2/cm\",\n        \"2.4 m + 100 cm = 340 cm\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"100 cm and 1 m are the same length, so their ratio is one. Multiplying 2.4 m by (100 cm / 1 m) cancels m and leaves 240 cm. The physical length has not changed. The inverse ratio in the third option also equals one, but it leaves m^2/cm rather than cm directly; it is an unhelpful orientation here, not a different physical dimension. The first ratio is not one, and adding another length changes the quantity.\",\n      \"transfer\": \"Express 0.085 km in m using a written conversion factor. Explain why the numerical value changes while the length stays the same.\"\n    },\n    {\n      \"id\": \"units-prefix-case\",\n      \"concept\": \"Factors and prefixes\",\n      \"prerequisites\": [],\n      \"prompt\": \"An energy label reads 4 MJ. Using SI prefix symbols with their exact letter case, which value in J represents the same energy?\",\n      \"options\": [\n        \"0.004 J\",\n        \"4000 J\",\n        \"4 J\",\n        \"4000000 J\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"Capital M is mega, meaning 10^6. Therefore 4 MJ = 4 × 10^6 J = 4000000 J. Lowercase m is milli, meaning 10^−3: 4 mJ would be 0.004 J. The 4000 J option substitutes kilo for mega, and 4 J drops the prefix entirely. Prefix symbols are case-sensitive.\",\n      \"transfer\": \"Convert both 7 mJ and 7 MJ to J. How many times larger is the second energy than the first? Explain why changing the letter case changes the quantity.\"\n    },\n    {\n      \"id\": \"units-mass-chain\",\n      \"concept\": \"Factors and prefixes\",\n      \"prerequisites\": [],\n      \"prompt\": \"A sample has mass 360 mg. Which mass in kg is equal to it? Use 1000 mg = 1 g and 1000 g = 1 kg.\",\n      \"options\": [\n        \"0.00036 kg\",\n        \"0.36 kg\",\n        \"360000 kg\",\n        \"0.00000036 kg\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"Use both conversions: 360 mg × (1 g / 1000 mg) × (1 kg / 1000 g) = 0.00036 kg. The first step gives 0.36 g, not 0.36 kg. There are 1000000 mg in 1 kg. Multiplying by 1000 reverses the needed change in numerical value; dividing by an extra 1000 goes too far.\",\n      \"transfer\": \"Express 0.012 kg in g and in mg. Explain why standard prefixed mass-unit names are formed from gram, even though kilogram is the SI base unit.\"\n    },\n    {\n      \"id\": \"units-square-factor\",\n      \"concept\": \"Area and volume\",\n      \"prerequisites\": [\n        \"Factors and prefixes\"\n      ],\n      \"prompt\": \"A panel has area 36 cm^2. What is the same area in m^2? Use 1 cm = 0.01 m.\",\n      \"options\": [\n        \"0.36 m^2\",\n        \"360000 m^2\",\n        \"0.0036 m^2\",\n        \"0.000036 m^2\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"Square the entire length conversion: 1 cm^2 = (0.01 m)^2 = 0.0001 m^2. Thus 36 cm^2 = 36 × 0.0001 m^2 = 0.0036 m^2. A linear factor of 0.01 is insufficient for area; using its reciprocal reverses the conversion, and cubing it would be appropriate to volume rather than area.\",\n      \"transfer\": \"Express an area of 0.0045 m^2 in mm^2, showing a conversion factor raised to the second power. Explain why multiplying the numerical value by only 1000 is insufficient.\"\n    },\n    {\n      \"id\": \"units-cube-edge\",\n      \"concept\": \"Area and volume\",\n      \"prerequisites\": [\n        \"Factors and prefixes\"\n      ],\n      \"prompt\": \"A cube has edge length 20 mm. Using volume = edge^3 and 1 mm = 0.001 m, what is its volume in m^3?\",\n      \"options\": [\n        \"0.000008 m^3\",\n        \"0.008 m^3\",\n        \"0.02 m^3\",\n        \"8 m^3\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"First convert the edge: 20 mm = 0.02 m. Then cube it: (0.02 m)^3 = 0.000008 m^3. Alternatively, 8000 mm^3 × (0.001 m / 1 mm)^3 gives the same result. A cubic unit requires the cubed length factor; simply relabelling the edge as a volume or using a linear factor on a volume changes the result.\",\n      \"transfer\": \"The cube's edge is increased to 40 mm. Calculate its new volume in m^3 and the ratio of new volume to old volume. Explain why doubling an edge does not merely double the volume.\"\n    },\n    {\n      \"id\": \"units-litre-bridge\",\n      \"concept\": \"Area and volume\",\n      \"prerequisites\": [\n        \"Factors and prefixes\"\n      ],\n      \"prompt\": \"A jug contains 750 mL. Given 1000 mL = 1 L and 1 L = 0.001 m^3, which pair gives that same volume in L and in m^3?\",\n      \"options\": [\n        \"0.75 L and 0.75 m^3\",\n        \"0.00075 L and 0.00000075 m^3\",\n        \"750 L and 0.75 m^3\",\n        \"0.75 L and 0.00075 m^3\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"750 mL × (1 L / 1000 mL) = 0.75 L. Then 0.75 L × (0.001 m^3 / 1 L) = 0.00075 m^3. Each step changes the numerical representation of the same volume. In particular, 1 mL = 0.000001 m^3 = 1 cm^3; litres and cubic metres do not have the same unit size.\",\n      \"transfer\": \"Express 1.8 L in cm^3 and in m^3 using two unit-cancelling chains. Show that the two answers describe the same volume.\"\n    },\n    {\n      \"id\": \"units-speed-denominator\",\n      \"concept\": \"Rates and density\",\n      \"prerequisites\": [\n        \"Factors and prefixes\"\n      ],\n      \"prompt\": \"A cart moves steadily at 54 km/h. Which speed in m/s is equivalent? Use 1 km = 1000 m and 1 h = 3600 s.\",\n      \"options\": [\n        \"194.4 m/s\",\n        \"15 m/s\",\n        \"54000 m/s\",\n        \"0.015 m/s\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"Convert both the numerator and the denominator: 54 km/h × (1000 m / 1 km) × (1 h / 3600 s) = 15 m/s. The h cancels because the conversion places h in the numerator. The numerical factor is 1000/3600, not 3600/1000. Changing only kilometres or only hours leaves a missing factor.\",\n      \"transfer\": \"A belt moves at a constant 1.25 m/s without stopping. How many minutes does a marked point take to travel 750 m, and what is the belt's speed in km/h? Show the unit cancellations.\"\n    },\n    {\n      \"id\": \"units-density-two-scales\",\n      \"concept\": \"Rates and density\",\n      \"prerequisites\": [\n        \"Factors and prefixes\",\n        \"Area and volume\"\n      ],\n      \"prompt\": \"A uniform fictional fluid has mass density 1.2 g/mL. What is the equivalent density in kg/m^3? Use 1 g = 0.001 kg and 1 mL = 0.000001 m^3.\",\n      \"options\": [\n        \"0.0012 kg/m^3\",\n        \"1.2 kg/m^3\",\n        \"1200 kg/m^3\",\n        \"1200000 kg/m^3\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"Density is mass divided by volume. Substitute both unit sizes: 1.2 g/mL = 1.2 × 0.001 kg / (0.000001 m^3) = 1200 kg/m^3. The net factor is 1000 because the denominator shrinks by a factor of one million while the numerator shrinks by one thousand. The fluid's density has not physically changed.\",\n      \"transfer\": \"A sealed sample occupies 0.25 L and retains the stated density of 1.2 g/mL. Find its mass in kg. Solve once using g/mL and once using kg/m^3, and compare the results.\"\n    },\n    {\n      \"id\": \"units-flow-time\",\n      \"concept\": \"Rates and density\",\n      \"prerequisites\": [\n        \"Factors and prefixes\",\n        \"Area and volume\"\n      ],\n      \"prompt\": \"A pump delivers a constant 2.4 L/min into an empty tank with no leaks. What is that flow rate in m^3/h? Use 1 L = 0.001 m^3 and 1 h = 60 min.\",\n      \"options\": [\n        \"0.144 m^3/h\",\n        \"0.00004 m^3/h\",\n        \"144 m^3/h\",\n        \"0.0024 m^3/h\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"2.4 L/min × (0.001 m^3 / 1 L) × (60 min / 1 h) = 0.144 m^3/h. One hour contains 60 delivery intervals of one minute, so the per-hour numerical value grows by 60 before the volume-unit conversion. Dividing by 60 uses the time factor in the wrong direction; ignoring either conversion leaves a factor missing.\",\n      \"transfer\": \"At this same constant flow rate, how many mL enter the tank in 25 s? Assume there are still no leaks. Write the calculation so that both L and min cancel.\"\n    },\n    {\n      \"id\": \"units-power-dimensions\",\n      \"concept\": \"Dimensions and models\",\n      \"prerequisites\": [\n        \"Rates and density\"\n      ],\n      \"prompt\": \"On a constant-mass object, a constant net force F acts parallel to the motion. Use F = mass × acceleration, work E = F × displacement, and average power P = E / elapsed time. Acceleration has unit m/s^2. Which base-unit expression represents P?\",\n      \"options\": [\n        \"kg m/s^2\",\n        \"kg m^2/s^2\",\n        \"kg m^2/s\",\n        \"kg m^2/s^3\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"Force has units kg × m/s^2 = kg m/s^2, called N. Multiplying by distance gives energy units kg m^2/s^2, called J. Dividing that energy by time gives power units kg m^2/s^3, called W. Thus 1 W = 1 J/s. A force unit, an energy unit, or an energy unit multiplied by time cannot replace a power unit.\",\n      \"transfer\": \"A constant force of 6 N acts parallel to a displacement of 2.5 m over 3 s. Find the energy transferred in J and the average power in W, and expand both results in kg, m and s.\"\n    },\n    {\n      \"id\": \"units-pressure-dimensions\",\n      \"concept\": \"Dimensions and models\",\n      \"prerequisites\": [\n        \"Area and volume\",\n        \"Rates and density\"\n      ],\n      \"prompt\": \"For a uniform normal force F over area A, pressure is p = F/A. Given 1 N = 1 kg m/s^2 and 1 Pa = 1 N/m^2, which expression equals 1 Pa?\",\n      \"options\": [\n        \"1 kg m/s^2\",\n        \"1 kg m^2/s^2\",\n        \"1 kg/(m s^2)\",\n        \"1 kg/(m^2 s^2)\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"Divide the force unit by the area unit: (kg m/s^2)/m^2 = kg m^(1−2)/s^2 = kg/(m s^2). Therefore 1 Pa = 1 kg m^−1 s^−2. The other expressions either keep force units, use energy units, or subtract one too many powers of length.\",\n      \"transfer\": \"A uniform normal force of 180 N acts over 300 cm^2. Calculate the pressure in Pa and in kPa. Explain how the area conversion enters the calculation.\"\n    },\n    {\n      \"id\": \"units-dimensions-not-proof\",\n      \"concept\": \"Dimensions and models\",\n      \"prerequisites\": [\n        \"Rates and density\"\n      ],\n      \"prompt\": \"An object moves in one dimension from rest with constant positive acceleration a for elapsed time t > 0. A student proposes displacement x = a t^2. What does dimensional analysis ALONE allow you to conclude?\",\n      \"options\": [\n        \"The dimensions match, so the proposed physical law must be correct.\",\n        \"Both sides have length dimension, but the check cannot establish the formula or determine its numerical coefficient.\",\n        \"The expression is inconsistent because a t^2 has velocity dimension.\",\n        \"Dimensional analysis determines the coefficient 1/2 without any further physical reasoning.\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"Acceleration has dimension length/time^2, so a t^2 has length dimension, just like displacement. This necessary check cannot determine a dimensionless coefficient. For the stated constant-acceleration motion from rest, velocity rises linearly from 0 to a t; its average is a t/2, giving displacement a t^2/2. That additional motion reasoning shows why a dimensionally consistent proposal can still be wrong.\",\n      \"transfer\": \"For the same motion, compare x = a t and x = 3 a t^2. Which proposal can be discarded by dimensions alone? Use velocity-versus-time reasoning to assess the coefficient in the other proposal.\"\n    }\n  ]\n}\n";
+    /** Exact multiplicative unit conversions for the optional teaching explorer.
+ * Dimensions are ordered length (m), mass (kg), time (s). This is a bounded
+ * unit-expression grammar, not a general expression evaluator or quantity model.
+ */
+
+const MAX_EXPRESSION = 128;
+const MAX_FACTORS = 24;
+const MAX_DEPTH = 4;
+const MAX_POWER = 6;
+const MAX_DIMENSION = 24;
+const MAX_RATIONAL_DIGITS = 256;
+
+function fail(message, code = 'INVALID_INPUT') {
+  const error = new TypeError(message);
+  error.code = code;
+  throw error;
+}
+
+function gcd(a, b) {
+  a = a < 0n ? -a : a;
+  while (b) [a, b] = [b, a % b];
+  return a;
+}
+
+function rational(numerator, denominator = 1n) {
+  if (denominator === 0n) fail('A scale denominator cannot be zero.');
+  if (denominator < 0n) {
+    numerator = -numerator;
+    denominator = -denominator;
+  }
+  const common = gcd(numerator, denominator);
+  const result = { n: numerator / common, d: denominator / common };
+  if (result.n.toString().replace('-', '').length > MAX_RATIONAL_DIGITS ||
+      result.d.toString().length > MAX_RATIONAL_DIGITS) {
+    fail('This expression exceeds the explorer’s exact-number size limit.');
+  }
+  return result;
+}
+
+function multiply(a, b) { return rational(a.n * b.n, a.d * b.d); }
+function divide(a, b) { return rational(a.n * b.d, a.d * b.n); }
+function power(a, exponent) {
+  const p = BigInt(Math.abs(exponent));
+  return exponent < 0 ? rational(a.d ** p, a.n ** p) : rational(a.n ** p, a.d ** p);
+}
+
+function publicRational(value) {
+  const numerator = String(value.n);
+  const denominator = String(value.d);
+  return Object.freeze({ numerator, denominator,
+    exact: denominator === '1' ? numerator : numerator + '/' + denominator });
+}
+
+// Definitions: BIPM SI Brochure, 9th edition v4.01 (June 2026), sections 2–4:
+// https://www.bipm.org/en/publications/si-brochure
+// Only exact defining scale relations are listed. Symbols remain case-sensitive;
+// prefixes are deliberately not guessed for arbitrary unit names.
+const definitions = [
+  ['1', 'one (dimensionless)', [0, 0, 0], 1n, 1n],
+  ['m', 'metre', [1, 0, 0], 1n, 1n],
+  ['km', 'kilometre', [1, 0, 0], 1000n, 1n],
+  ['cm', 'centimetre', [1, 0, 0], 1n, 100n],
+  ['mm', 'millimetre', [1, 0, 0], 1n, 1000n],
+  ['μm', 'micrometre', [1, 0, 0], 1n, 1000000n],
+  ['nm', 'nanometre', [1, 0, 0], 1n, 1000000000n],
+  ['kg', 'kilogram', [0, 1, 0], 1n, 1n],
+  ['g', 'gram', [0, 1, 0], 1n, 1000n],
+  ['mg', 'milligram', [0, 1, 0], 1n, 1000000n],
+  ['t', 'tonne', [0, 1, 0], 1000n, 1n],
+  ['s', 'second', [0, 0, 1], 1n, 1n],
+  ['ms', 'millisecond', [0, 0, 1], 1n, 1000n],
+  ['min', 'minute', [0, 0, 1], 60n, 1n],
+  ['h', 'hour', [0, 0, 1], 3600n, 1n],
+  ['L', 'litre', [3, 0, 0], 1n, 1000n],
+  ['mL', 'millilitre', [3, 0, 0], 1n, 1000000n],
+  ['N', 'newton', [1, 1, -2], 1n, 1n],
+  ['kN', 'kilonewton', [1, 1, -2], 1000n, 1n],
+  ['Pa', 'pascal', [-1, 1, -2], 1n, 1n],
+  ['kPa', 'kilopascal', [-1, 1, -2], 1000n, 1n],
+  ['MPa', 'megapascal', [-1, 1, -2], 1000000n, 1n],
+  ['J', 'joule', [2, 1, -2], 1n, 1n],
+  ['mJ', 'millijoule', [2, 1, -2], 1n, 1000n],
+  ['kJ', 'kilojoule', [2, 1, -2], 1000n, 1n],
+  ['MJ', 'megajoule', [2, 1, -2], 1000000n, 1n],
+  ['W', 'watt', [2, 1, -3], 1n, 1n],
+  ['kW', 'kilowatt', [2, 1, -3], 1000n, 1n],
+];
+
+const units = new Map(definitions.map(([symbol, name, dimensions, n, d]) =>
+  [symbol, { symbol, name, dimensions, scale: rational(n, d) }]));
+
+const UNIT_CATALOG = Object.freeze([...units.values()].map(unit => Object.freeze({
+  symbol: unit.symbol, name: unit.name,
+  dimensions: Object.freeze([...unit.dimensions]), scale: publicRational(unit.scale),
+})));
+
+function checkDimensions(dimensions) {
+  if (dimensions.some(value => Math.abs(value) > MAX_DIMENSION)) {
+    fail('The combined power of a base dimension must stay between −24 and 24.');
+  }
+  return dimensions.map(value => value === 0 ? 0 : value);
+}
+
+function combine(left, right, division) {
+  const sign = division ? -1 : 1;
+  const dimensions = checkDimensions(left.dimensions.map((v, i) => v + sign * right.dimensions[i]));
+  const terms = new Map(left.terms);
+  for (const [symbol, exponent] of right.terms) {
+    terms.set(symbol, (terms.get(symbol) || 0) + sign * exponent);
+  }
+  return { dimensions, terms,
+    scale: division ? divide(left.scale, right.scale) : multiply(left.scale, right.scale),
+  };
+}
+
+function parseInternal(raw) {
+  if (typeof raw !== 'string' || raw.length === 0 || raw.length > MAX_EXPRESSION) {
+    fail('Enter a unit expression of 1–128 characters.');
+  }
+  // These are spelling conveniences, never implicit multiplication. In
+  // particular, whitespace between m and s must not silently become ms.
+  // Keep the admitted operator grouping in the displayed form. Rebuilding a
+  // power as plain text could turn (cm^2)^3 into the different text cm^2^3.
+  // Retaining ²/³ also keeps this form within the original character bound.
+  const normalized = raw.trim().replaceAll('µ', 'μ').replace(/\bum\b/gu, 'μm')
+    .replaceAll('·', '*').replaceAll('−', '-').replace(/\s+/gu, ' ');
+  const text = normalized.replaceAll('²', '^2').replaceAll('³', '^3');
+  let position = 0;
+  let factors = 0;
+  const whitespace = () => { while (/\s/u.test(text[position] || '') && position < text.length) position++; };
+  function factor(depth) {
+    whitespace();
+    let result;
+    if (text[position] === '(') {
+      if (depth >= MAX_DEPTH) fail('Use at most four levels of parentheses.');
+      position++;
+      result = expression(depth + 1);
+      whitespace();
+      if (text[position] !== ')') fail('Close each parenthesis in the unit expression.');
+      position++;
+    } else {
+      const match = /^(?:[A-Za-zμ]+|1)/u.exec(text.slice(position));
+      if (!match) fail('Expected a listed unit or a parenthesized unit expression.');
+      position += match[0].length;
+      const symbol = match[0] === 'um' ? 'μm' : match[0];
+      const unit = units.get(symbol);
+      if (!unit) fail('Unsupported unit “' + match[0] + '”. Choose a listed, case-sensitive symbol.', 'UNSUPPORTED_UNIT');
+      if (++factors > MAX_FACTORS) fail('Use at most 24 unit factors.');
+      result = { dimensions: [...unit.dimensions],
+        scale: unit.scale, terms: new Map(symbol === '1' ? [] : [[symbol, 1]]) };
+    }
+    whitespace();
+    if (text[position] === '^') {
+      position++;
+      whitespace();
+      const match = /^[+-]?\d+/u.exec(text.slice(position));
+      if (!match || match[0].length > 3) fail('Use whole powers from −6 through 6.');
+      const exponent = Number(match[0]);
+      if (!Number.isInteger(exponent) || Math.abs(exponent) > MAX_POWER) {
+        fail('Use whole powers from −6 through 6.');
+      }
+      position += match[0].length;
+      const dimensions = checkDimensions(result.dimensions.map(v => v * exponent));
+      result = { dimensions, scale: power(result.scale, exponent),
+        terms: new Map([...result.terms].map(([symbol, value]) => [symbol, value * exponent])) };
+    }
+    return result;
+  }
+  function expression(depth) {
+    let result = factor(depth);
+    while (true) {
+      whitespace();
+      const operator = text[position];
+      if (operator !== '*' && operator !== '/') break;
+      position++;
+      result = combine(result, factor(depth), operator === '/');
+    }
+    return result;
+  }
+  const result = expression(0);
+  whitespace();
+  if (position !== text.length) {
+    fail('Use explicit * or / between units, ^ for a whole power, and parentheses for grouping.');
+  }
+  return { ...result, input: raw, normalized, factors };
+}
+
+function publicUnit(unit) {
+  return Object.freeze({ input: unit.input, normalized: unit.normalized,
+    dimensions: Object.freeze([...unit.dimensions]), scale: publicRational(unit.scale),
+    terms: Object.freeze([...unit.terms].filter(([, exponent]) => exponent !== 0).map(([symbol, exponent]) =>
+      Object.freeze({ symbol, exponent, scale: publicRational(power(units.get(symbol).scale, exponent)),
+        dimensions: Object.freeze(units.get(symbol).dimensions.map(value => value * exponent || 0)) }))),
+  });
+}
+
+function parseUnitExpression(text) { return publicUnit(parseInternal(text)); }
+
+function parseQuantityInternal(text) {
+  if (typeof text !== 'string' || text.length > 64) fail('Enter a decimal number, with at most 24 digits.');
+  const match = /^([+-]?)(?:(\d+)(?:\.(\d*))?|\.(\d+))(?:[eE]([+-]?\d{1,2}))?$/u.exec(text.trim());
+  if (!match) fail('Enter a decimal number such as 2.5 or 1e-3; no commas or fractions.');
+  const whole = match[2] || '';
+  const fraction = match[3] ?? match[4] ?? '';
+  if (whole.length + fraction.length > 24) fail('Use at most 24 digits in the quantity.');
+  const exponent = Number(match[5] || 0);
+  if (Math.abs(exponent) > 24) fail('Use a scientific-notation exponent from −24 through 24.');
+  let n = BigInt((whole + fraction) || '0');
+  if (match[1] === '-') n = -n;
+  const places = fraction.length - exponent;
+  return places >= 0 ? rational(n, 10n ** BigInt(places)) : rational(n * 10n ** BigInt(-places));
+}
+
+function parseQuantity(text) { return publicRational(parseQuantityInternal(text)); }
+
+// Produce 12 significant digits with integer rounding. Small nonzero results
+// stay nonzero in scientific notation; the exact rational is always separate.
+function displayRational(value) {
+  if (value.n === 0n) return Object.freeze({ text: '0', rounded: false, significant_digits: 12 });
+  const negative = value.n < 0n;
+  const n = negative ? -value.n : value.n;
+  const d = value.d;
+  let exponent = n.toString().length - d.toString().length;
+  if (exponent >= 0 ? n < d * 10n ** BigInt(exponent) : n * 10n ** BigInt(-exponent) < d) exponent--;
+  const places = 11 - exponent;
+  const scaledN = places >= 0 ? n * 10n ** BigInt(places) : n;
+  const scaledD = places >= 0 ? d : d * 10n ** BigInt(-places);
+  let quotient = scaledN / scaledD;
+  const remainder = scaledN % scaledD;
+  if (remainder * 2n >= scaledD) quotient++;
+  if (quotient.toString().length > 12) { quotient /= 10n; exponent++; }
+  const digits = quotient.toString().padStart(12, '0');
+  let text;
+  if (exponent >= -6 && exponent < 12) {
+    const index = exponent + 1;
+    text = index <= 0 ? '0.' + '0'.repeat(-index) + digits
+      : digits.slice(0, index) + (index < digits.length ? '.' + digits.slice(index) : '');
+    if (text.includes('.')) text = text.replace(/0+$/u, '').replace(/\.$/u, '');
+  } else {
+    const rest = digits.slice(1).replace(/0+$/u, '');
+    text = digits[0] + (rest ? '.' + rest : '') + 'e' + (exponent >= 0 ? '+' : '') + exponent;
+  }
+  return Object.freeze({ text: (negative ? '-' : '') + text,
+    rounded: remainder !== 0n, significant_digits: 12 });
+}
+
+function convertUnits(valueText, fromText, toText) {
+  const value = parseQuantityInternal(valueText);
+  const from = parseInternal(fromText);
+  const to = parseInternal(toText);
+  if (from.dimensions.some((exponent, index) => exponent !== to.dimensions[index])) {
+    fail('These units describe different dimensions. A scale factor cannot convert between them.', 'INCOMPATIBLE_DIMENSIONS');
+  }
+  const factor = divide(from.scale, to.scale);
+  const result = multiply(value, factor);
+  return Object.freeze({ format: 'recallweave-unit-conversion/1',
+    input: Object.freeze({ value: valueText, from: fromText, to: toText }),
+    quantity: publicRational(value), from: publicUnit(from), to: publicUnit(to),
+    factor: publicRational(factor), result: publicRational(result), display: displayRational(result),
+    interpretation: 'Exact arithmetic for the entered number and listed unit definitions. No measurement uncertainty or physical-law validation is inferred.',
+  });
+}
+
+    
+const quantityInput = document.getElementById('quantity');
+const fromInput = document.getElementById('from-unit');
+const toInput = document.getElementById('to-unit');
+const resultRegion = document.getElementById('conversion-result');
+const statusRegion = document.getElementById('conversion-status');
+const dimensionRegion = document.getElementById('dimension-panel');
+const dimensionRows = document.getElementById('dimension-rows');
+const recordButton = document.getElementById('download-conversion');
+const downloadStatus = document.getElementById('download-status');
+let currentRecord = null;
+
+function element(tag, text, className) {
+  const node = document.createElement(tag);
+  if (text !== undefined) node.textContent = text;
+  if (className) node.className = className;
+  return node;
+}
+
+function baseUnitText(dimensions) {
+  const symbols = ['m', 'kg', 's'];
+  const terms = dimensions.flatMap((exponent, index) => exponent === 0 ? [] :
+    [symbols[index] + (exponent === 1 ? '' : '^' + exponent)]);
+  return terms.join(' · ') || '1';
+}
+
+function showDimensions(from, to) {
+  dimensionRows.replaceChildren();
+  const labels = ['Length · L', 'Mass · M', 'Time · T'];
+  for (let i = 0; i < labels.length; i++) {
+    const row = element('tr');
+    const label = element('th', labels[i]);
+    label.scope = 'row';
+    row.append(label, element('td', String(from.dimensions[i])), element('td', String(to.dimensions[i])));
+    if (from.dimensions[i] !== to.dimensions[i]) row.className = 'dimension-difference';
+    dimensionRows.append(row);
+  }
+  dimensionRegion.hidden = false;
+  const match = from.dimensions.every((value, index) => value === to.dimensions[index]);
+  document.getElementById('dimension-summary').textContent = match
+    ? 'The dimension powers match. The unit scales can be compared.'
+    : 'The dimension powers differ. Changing scale cannot connect these units.';
+  document.getElementById('dimension-badge').textContent = match ? 'Dimensions match' : 'Different dimensions';
+  document.getElementById('dimension-badge').dataset.match = String(match);
+}
+
+function scaleCard(label, unit) {
+  const card = element('div', undefined, 'scale-card');
+  card.append(element('h4', label), element('p', unit.normalized, 'formula unit-expression'));
+  card.append(element('p', unit.scale.exact + ' × ' + baseUnitText(unit.dimensions), 'formula base-expression'));
+  return card;
+}
+
+function showResult(record) {
+  const heading = element('div', undefined, 'result-heading');
+  const marker = element('p', 'Same quantity, new unit', 'eyebrow');
+  const answer = element('h2', undefined, 'answer');
+  const number = element('span', record.display.text);
+  number.id = 'converted-value';
+  answer.append(number, element('span', record.to.normalized, 'answer-unit'));
+  const precision = element('p', record.display.rounded
+    ? 'Display rounded to 12 significant digits. The exact result is kept below.'
+    : 'This displayed value is exact for the number you entered.', 'help');
+  precision.id = 'precision-notice';
+  heading.append(marker, answer, precision);
+  const calculation = element('div', undefined, 'calculation');
+  const steps = element('ol', undefined, 'steps');
+
+  const first = element('li');
+  first.append(element('h3', 'Express both units in m, kg and s'));
+  const scales = element('div', undefined, 'scale-pair');
+  scales.append(scaleCard('From unit', record.from), scaleCard('To unit', record.to));
+  first.append(scales);
+
+  const second = element('li');
+  second.append(element('h3', 'Divide the source scale by the target scale'));
+  const factor = element('p', '(' + record.from.scale.exact + ') ÷ (' + record.to.scale.exact + ') = ' + record.factor.exact, 'formula');
+  factor.id = 'exact-factor';
+  second.append(factor, element('p', 'The matching base units cancel; this factor changes the numerical value.', 'help'));
+
+  const third = element('li');
+  third.append(element('h3', 'Multiply the entered number by that factor'));
+  const exact = element('p', record.quantity.exact + ' × (' + record.factor.exact + ') = ' + record.result.exact, 'formula');
+  exact.id = 'exact-result';
+  third.append(exact, element('p', 'The result is expressed in ' + record.to.normalized + '.', 'help'));
+  steps.append(first, second, third);
+  calculation.append(steps);
+  resultRegion.replaceChildren(heading, calculation);
+  resultRegion.hidden = false;
+}
+
+function updateConversion() {
+  currentRecord = null;
+  recordButton.disabled = true;
+  resultRegion.replaceChildren();
+  resultRegion.hidden = true;
+  dimensionRows.replaceChildren();
+  dimensionRegion.hidden = true;
+  statusRegion.className = 'status';
+  statusRegion.textContent = '';
+  for (const input of [quantityInput, fromInput, toInput]) input.removeAttribute('aria-invalid');
+
+  let from;
+  let to;
+  try { from = parseUnitExpression(fromInput.value); }
+  catch (error) {
+    fromInput.setAttribute('aria-invalid', 'true');
+    statusRegion.className = 'status error';
+    statusRegion.textContent = 'From unit: ' + error.message;
+    return null;
+  }
+  try { to = parseUnitExpression(toInput.value); }
+  catch (error) {
+    toInput.setAttribute('aria-invalid', 'true');
+    statusRegion.className = 'status error';
+    statusRegion.textContent = 'To unit: ' + error.message;
+    return null;
+  }
+  showDimensions(from, to);
+  try {
+    currentRecord = convertUnits(quantityInput.value, fromInput.value, toInput.value);
+    showResult(currentRecord);
+    recordButton.disabled = false;
+    statusRegion.textContent = 'Conversion updated. Exact factors and the current result are ready below.';
+    return currentRecord;
+  } catch (error) {
+    if (error.code !== 'INCOMPATIBLE_DIMENSIONS') quantityInput.setAttribute('aria-invalid', 'true');
+    statusRegion.className = 'status error';
+    statusRegion.textContent = error.message;
+    return null;
+  }
+}
+
+function download(text, filename) {
+  const blob = new Blob([text], { type: 'application/json;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const anchor = element('a');
+  anchor.href = url;
+  anchor.download = filename;
+  anchor.hidden = true;
+  document.body.append(anchor);
+  try { anchor.click(); }
+  finally { anchor.remove(); setTimeout(() => URL.revokeObjectURL(url), 1000); }
+}
+
+document.getElementById('conversion-form').addEventListener('submit', event => {
+  event.preventDefault();
+  updateConversion();
+});
+for (const input of [quantityInput, fromInput, toInput]) {
+  input.addEventListener('input', () => { downloadStatus.textContent = ''; updateConversion(); });
+}
+
+const presets = {
+  speed: ['72', 'km/h', 'm/s'],
+  area: ['3', 'cm^2', 'mm^2'],
+  volume: ['250', 'cm^3', 'L'],
+  density: ['2.5', 'g/cm^3', 'kg/m^3'],
+  case: ['4', 'MJ', 'mJ'],
+  mismatch: ['1', 'm', 's'],
+};
+for (const button of document.querySelectorAll('[data-preset]')) {
+  button.addEventListener('click', () => {
+    [quantityInput.value, fromInput.value, toInput.value] = presets[button.dataset.preset];
+    downloadStatus.textContent = '';
+    updateConversion();
+  });
+}
+
+recordButton.addEventListener('click', () => {
+  // Read the live inputs again, including changes made without an input event.
+  const record = updateConversion();
+  if (!record) return;
+  download(JSON.stringify(record, null, 2) + '\n', 'recallweave-unit-conversion-v1.json');
+  downloadStatus.textContent = 'Current conversion download requested. It includes exact rational values and the displayed rounding label.';
+});
+document.getElementById('download-unit-deck').addEventListener('click', () => {
+  download(unitCourseText, 'units-and-dimensions.json');
+  downloadStatus.textContent = 'Lesson download requested. In RecallWeave, choose the file, review its preview, then select Start this deck.';
+});
+
+const catalog = document.getElementById('unit-catalog');
+const suggestions = document.getElementById('unit-examples');
+for (const unit of UNIT_CATALOG) {
+  const row = element('tr');
+  row.append(element('td', unit.symbol, 'formula'), element('td', unit.name),
+    element('td', unit.scale.exact + ' × ' + baseUnitText(unit.dimensions), 'formula'));
+  catalog.append(row);
+  const option = element('option');
+  option.value = unit.symbol;
+  suggestions.append(option);
+}
+for (const expression of ['km/h', 'm/s', 'cm^2', 'm^2', 'cm^3', 'g/cm^3', 'kg/m^3', 'kg*m/s^2']) {
+  const option = element('option');
+  option.value = expression;
+  suggestions.append(option);
+}
+updateConversion();
+
+  })();
+  </script>
+</body>
+</html>
