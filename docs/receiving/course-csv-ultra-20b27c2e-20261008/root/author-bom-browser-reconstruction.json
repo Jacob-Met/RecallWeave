@@ -1,0 +1,37 @@
+[
+  {
+    "index": 260,
+    "delete_count": 0,
+    "new": "      run_mode: mode, bom_cases: receipt.bom_cases,"
+  },
+  {
+    "index": 123,
+    "delete_count": 0,
+    "new": "    await group(encodingGroup, async () => {\n      for (const [selector, text] of [['#course-title', metadata.title], ['#course-attribution', metadata.attribution],\n        ['#course-license', metadata.license]]) await fill(page, selector, text);\n      for (const [count, filename] of [[0, 'questions.csv'], [1, 'one-bom.csv'], [2, 'two-bom.csv']]) {\n        await choose(filename);\n        await until(() => page.$eval('#check-csv', element => !element.disabled), 'BOM fixture read');\n        await page.click('#check-csv');\n        const accepted = await page.$eval('#download-course', element => !element.disabled);\n        const observation = {\n          initial_boms: count, filename, input_bytes: fixtures[filename].length, input_sha256: hash(fixtures[filename]),\n          accepted, expected_accepted: count < 2, matched_expected: accepted === (count < 2),\n          status: await page.$eval('#csv-status', element => element.textContent),\n          preview_hidden: await page.$eval('#course-preview', element => element.hidden)\n        };\n        if (accepted) {\n          const actual = await downloaded(page, '#download-course');\n          observation.output_bytes = actual.bytes.length;\n          observation.output_sha256 = hash(actual.bytes);\n          observation.output_artifact = path.relative(out, actual.file);\n          assert.equal(actual.bytes.toString(), JSON.stringify(expected, null, 2) + '\\n');\n        } else {\n          assert.equal(observation.preview_hidden, true);\n          assert.match(observation.status, /CSV (?:header column|record) /);\n        }\n        receipt.bom_cases.push(observation);\n      }\n      assert.deepEqual(receipt.bom_cases.map(observation => observation.accepted), [true, true, false]);\n    });"
+  },
+  {
+    "index": 63,
+    "delete_count": 0,
+    "new": "  if (mode === 'encoding-only' && name !== encodingGroup) return;"
+  },
+  {
+    "index": 57,
+    "delete_count": 1,
+    "new": "const receipt = { schema: 'recallweave-course-csv-browser.v2', node: process.version, run_mode: mode, groups: [], source_before: before,\n  executable: { path: __filename, sha256: hash(fs.readFileSync(__filename)) }, bom_cases: [],"
+  },
+  {
+    "index": 52,
+    "delete_count": 0,
+    "new": "const bom = Buffer.from([0xef, 0xbb, 0xbf]);\nfixtures['one-bom.csv'] = Buffer.concat([bom, fixtures['questions.csv']]);\nfixtures['two-bom.csv'] = Buffer.concat([bom, bom, fixtures['questions.csv']]);"
+  },
+  {
+    "index": 12,
+    "delete_count": 0,
+    "new": "const mode = options.get('--mode') || 'full';\nif (!['full', 'encoding-only'].includes(mode)) throw Error('--mode must be full or encoding-only.');\nconst encodingGroup = 'zero and one UTF-8 BOM preserve exact JSON; two initial BOMs refuse the complete bank';"
+  },
+  {
+    "index": 6,
+    "delete_count": 2,
+    "new": "  if (!['--repo', '--control-dir', '--output', '--puppeteer', '--chrome', '--mode'].includes(key) || !value || options.has(key)) {\n    throw Error('Use --output DIR [--repo DIR] [--control-dir DIR] [--puppeteer MODULE] --chrome PATH [--mode full|encoding-only].');"
+  }
+]

@@ -6,14 +6,6 @@
 
 Open `demo.html` directly in a browser—no server, install, build step, internet, login, API key, or user data storage is required. It is a single self-contained file with embedded CSS, JavaScript and deck. The modular source is in `index.html`, `src/`, and `data/`; to test that version locally, serve this directory with `python3 -m http.server 8080` and visit `http://localhost:8080`. Rebuild the direct-open demo with `python3 tools/make_demo.py` after source changes. No hosted endpoint is called by either version.
 
-## Interactive binary-search companion
-
-Open [the binary-search explorer](courses/binary-search-explorer.html) to step through the exact lower-bound loop from the existing **Binary search: precise boundaries** course. The file works directly in a browser without a server or connection. Enter up to 32 sorted integers, choose a target, and inspect each comparison, the classified prefix/suffix, unresolved element indices `[lo, hi)`, and possible answer boundaries `[lo, hi]`. Repeated values, absent targets, empty arrays and the boundary after the last element have explicit examples.
-
-**Build trace**, then use **Next**, **Back**, **First** or **Finish**. Editing either input retires the previous displayed trace until you build again. The final insertion boundary is separate from the equality check for membership. Ordering-comparison counts exclude input validation, rendering, sorting, insertion and that final equality check.
-
-The companion downloads the complete trace with its entered text, plus the original unchanged course JSON and worked guide. To study the course, open RecallWeave, choose the downloaded JSON under **Bring your own lesson**, inspect the preview, then choose **Start this deck**. Downloads do not change an existing learner session. Rebuild the standalone page with `node tools/build-binary-search-explorer.mjs`; verify exact source/course parity with `--check`.
-
 ## Follow recursive calls and returns
 
 Open **[Calls go down. Answers come back.](courses/recursion-call-stack-explorer.html)** directly in a browser to step through factorial, Fibonacci, and memoized Fibonacci. Inspect each caller’s suspended calculation, saved child values, actual return order, and a fresh cache. Previous, Next, and the event selector revisit exact snapshots; the completed-run comparison separates total invocations, computed calls, cache hits, and maximum active depth.
@@ -21,16 +13,6 @@ Open **[Calls go down. Answers come back.](courses/recursion-call-stack-explorer
 Inputs are whole numbers from 0 to 10. Every invocation counts, including base cases and cache hits; factorial uses only the zero base case, and Fibonacci uses F(0) = 0 and F(1) = 1. The memoized algorithm starts with an empty cache and stores base results too. Download the full exact trace with its selected inspection step, or download the original [twelve-question course](courses/recursion-call-stack.json) and open it through **Bring your own lesson**. The [worked guide](courses/recursion-call-stack.md) includes the shared conventions, answer explanations, and transfer prompts.
 
 The explorer needs no server or account and keeps no automatic browser storage. Its trace is an algorithm inspection record, separate from learner-answer archives. Rebuild it with `node tools/build_recursion_call_stack.mjs`; add `--check` to verify that the checked-in page matches its exact sources and validated deck.
-
-## Explore coherent waves
-
-Open **[Coherent waves: from phasors to interference](courses/phasor-interference-lab.html)** for an offline lab that connects two rotating complex amplitudes to their real cosine signals. Predict cancellation, vary relative and common phase, and compare the arrow diagram with the time trace and downloadable values. The [worked guide](courses/phasor-interference.md) explains the assumptions and original examples; save the [sixteen-question course](courses/phasor-interference.json) and open it through **Bring your own lesson** to practice the connections.
-
-## Explore rates and accumulation
-
-Open **[Rates become change](courses/rates-accumulation-explorer.html)** for an offline motion explorer. Edit a continuous velocity curve, inspect a moment, and compare signed displacement with total distance. Exact fractions expose a sign crossing between recorded points; the display also distinguishes instantaneous velocity, interval average velocity and an undefined acceleration at a corner.
-
-The [worked guide](courses/rates-accumulation.md) develops the examples from slopes and signed areas. Download the original [twelve-question course](courses/rates-accumulation.json) from the explorer, then choose it under **Bring your own lesson** in RecallWeave. The lesson, guide and current calculation download without a server or account. Rebuild the standalone explorer with `node tools/build-rates-accumulation.mjs`, or verify the checked-in file with `--check`.
 
 ## Explore grouped rates
 
@@ -47,10 +29,6 @@ Open [Question bank to course](csv-course.html) to turn a local CSV question ban
 Open [Course handouts](handout.html), choose a checked local deck JSON, review its title and source credit, then select **Use this deck**. Print or save an unanswered worksheet for learners and an explicitly separate answer key with the correct choices and authored explanations. Both keep the original question and option order, literal wording, attribution and permission; transfer prompts leave room for a written response because the deck supplies no separate transfer answer.
 
 Each saved HTML file opens and prints offline on its own. The worksheet file contains questions only; the teacher’s builder and the separate key receive the full checked deck. Cancelling a selection or choosing an invalid file leaves the current handout in place. This is a separate preparation flow; it does not start or change a learning session. Modular source lives in `handout/` and `src/course-handout*.mjs`; rebuild `handout.html` with `python3 tools/make_handout.py`, or verify it with `--check`.
-
-## Explore Boolean logic
-
-Open the [Boolean explorer](courses/boolean-logic-explorer.html) directly from your files to compare expressions, inspect complete truth tables, and find a counterexample when two expressions differ. Download the current full table as CSV or the original twelve-question course as JSON. Import that course through the learner’s existing preview and explicit start flow, then review, practice and save your notes. The [course guide](courses/boolean-logic.md) explains the supported grammar, worked answers and content sources.
 
 ## Core and interaction
 
@@ -230,14 +208,6 @@ teaching order. Rebuild it with `python3 tools/make_focus.py`, or verify its
 standalone parity with `python3 tools/make_focus.py --check`. Its focused native
 and builder tests are included in the existing Node test command.
 
-## Optional Markov-chain course
-
-Open the [Markov-chain explorer](courses/markov-chains-explorer.html) to edit a three-state transition table, follow probability flow, and compare mixing, alternation and absorbing states. It works as a single offline HTML file. Download its original fourteen-question course and import it through **Bring your own lesson**, or read the [course guide and worked checks](courses/markov-chains.md). The observation download keeps applied inputs and the complete computed trace; it is separate from a learner's answers.
-
-## Explore hash-table probes
-
-Open **[Hash tables: follow the probe](courses/hash-tables-explorer.html)** for an original offline integer-set explorer. Edit insert, find and delete operations, inspect exact slot visits, and compare collisions, wraparound, tombstones, duplicate checks and full-table results. The [worked guide](courses/hash-tables.md) explains the fixed-capacity model. Download its [twelve-question lesson](courses/hash-tables.json) and start it through **Bring your own lesson** to use the existing learner, review and study notes.
-
 ## Demo deck provenance
 
 Question text and distractors are newly authored for this demo. Scientific concepts are checked against [OpenStax, *Biology 2e*](https://openstax.org/books/biology-2e/pages/1-introduction), sections 6.4, 7.1, 7.4 and 8.1–8.3, by Mary Ann Clark, Matthew Douglas and Jung Choi (Rice University). The current linked reference textbook content is licensed CC BY-NC-SA 4.0. [The item-level content review](docs/deck-content-review-20261008.md) records the scientific distinctions and references. Attribution is embedded in `data/deck.json`, shown at completion and included in downloaded notes. This demo uses original wording and does not copy textbook passages, figures or an existing hackathon entry.
@@ -310,14 +280,3 @@ This public source repository supports the ForgeHacks 2026 demo. The Devpost acc
 [Open the offline lab](courses/mendelian-inheritance-lab.html), [download the original course](courses/mendelian-inheritance.json), or [read the worked guide](courses/mendelian-inheritance.md). Twelve questions connect allele segregation, genotype and phenotype, one-locus crosses and independent two-locus crosses. The explorer follows each parental gamete route and shows exact genotype and phenotype fractions, with explicit complete-dominance and independent-assortment assumptions. Its downloads preserve the checked course and a worked cross record.
 
 Import the course through the existing local-file preview and **Start this deck** flow, then use the learner's review, separate missed-item practice and study-note downloads. All traits are hypothetical plant examples; the model gives probabilities, not guaranteed finite offspring counts. Build and optional browser-receiving commands are in the guide.
-
-
-## Explore cache decisions
-
-Open **[Cache decisions: FIFO and LRU](courses/cache-replacement.html)** directly in a browser to inspect both policies on the same request sequence. Step through hits and evictions, compare complete-sequence misses across capacities, and download the accepted experiment. The worked examples include a trace where FIFO has fewer misses than LRU and the classic FIFO capacity anomaly; counts describe those inputs, not measured computer performance.
-
-The [worked guide](courses/cache-replacement.md) explains the empty-start, equal-size model and original derivations. Download the [twelve-question course](courses/cache-replacement.json) from the explorer or this link, then use **Bring your own lesson**, preview it, and explicitly start it in the unchanged learner. This separate lab works offline and does not alter learner or archive state. Rebuild only its standalone file with `node tools/build-cache-replacement.mjs`; `--check` verifies the committed artifact. Native controls run with `node --test tests/cache-replacement.test.mjs`.
-
-## Weighted interval scheduling
-
-The [weighted-intervals explorer](courses/weighted-intervals-explorer.html) is a self-contained offline lab for choosing compatible activities by total value. Edit a small schedule, inspect take/skip decisions, reconstruct the chosen prefix, and compare it with earliest finish. Download its [twelve-question course](courses/weighted-interval-scheduling.json) into the existing learner, or use the [course guide](courses/weighted-interval-scheduling.md) for the worked table, answer derivations, assumptions and build/check commands.

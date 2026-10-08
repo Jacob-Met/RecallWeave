@@ -1,0 +1,513 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Prepare a local RecallWeave course from a declared CSV question bank, review its answer key, and download a checked JSON deck.">
+<title>Question bank to course · RecallWeave</title>
+<style>
+:root{font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#25233a;background:#f6f5f1;font-synthesis:none;--purple:#6143ad;--line:#dedbe8;--muted:#656379}
+*{box-sizing:border-box}body{margin:0;line-height:1.6}button,input,textarea{font:inherit}a{color:var(--purple);text-underline-offset:3px}button,a,input,textarea{outline-offset:4px}button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid #b37924}
+button{min-height:44px;padding:10px 16px;border:1px solid var(--purple);border-radius:8px;background:var(--purple);color:white;font-weight:650;cursor:pointer;line-height:1.35}button.secondary{background:white;color:var(--purple);border-color:#c8bedf}button:disabled{opacity:.48;cursor:default}
+h1,h2,h3,h4{line-height:1.2;margin:0 0 .65em}h1{font-size:clamp(2rem,5vw,3.2rem);letter-spacing:-.045em;max-width:17ch}h2{font-size:1.4rem}h3{font-size:1.2rem}h4{font-size:.95rem;margin-top:1.35rem}p{margin:.6rem 0}code{font-family:ui-monospace,monospace;font-size:.9em;overflow-wrap:anywhere}
+.page{max-width:1120px;margin:auto;padding:0 28px}header{display:flex;align-items:center;justify-content:space-between;gap:24px;padding:24px 0;border-bottom:1px solid var(--line)}.brand{font-size:1.1rem;font-weight:750;text-decoration:none;color:inherit}.brand span{font-size:.8rem;color:var(--muted);font-weight:500;display:inline-block;margin-left:12px}nav{display:flex;gap:20px;flex-wrap:wrap;font-size:.9rem}nav a{min-height:44px;display:inline-flex;align-items:center}
+.hero{padding:48px 0 30px}.eyebrow{font-size:.72rem;font-weight:750;letter-spacing:.15em;color:var(--purple);text-transform:uppercase;margin-bottom:12px}.intro{max-width:66ch;color:var(--muted)}.workspace{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:22px;align-items:start}.card,.preview{background:white;border:1px solid var(--line);border-radius:14px;padding:26px;min-width:0}.step{color:var(--purple);font-size:.75rem;font-weight:750;letter-spacing:.13em;text-transform:uppercase}.button-row{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0}.field{margin:19px 0}.field label{display:block;font-weight:650;margin-bottom:7px}.field textarea{display:block;width:100%;min-height:70px;border:1px solid #c9c2d9;border-radius:7px;padding:10px;resize:vertical;color:inherit;background:white}.help,.filename,.identity{font-size:.87rem;color:var(--muted)}.filename{overflow-wrap:anywhere}.format-list{padding-left:20px}.format-list li{margin:10px 0}.notice{border-left:3px solid #c9b8ee;padding-left:14px;font-size:.9rem;color:var(--muted)}.status{padding:15px 18px;border-radius:8px;background:#eeebf5;margin:24px 0;min-height:56px;overflow-wrap:anywhere}.status.is-error{background:#fff2e9;color:#7c351d;border:1px solid #d4a58e}.preview{margin:28px 0}.preview[hidden]{display:none}.preview .literal{white-space:pre-wrap;overflow-wrap:anywhere}.preview-credit{padding:18px;background:#f7f5fb;border-radius:8px}.preview-credit dt{font-weight:650;font-size:.83rem;margin-top:10px}.preview-credit dd{margin:3px 0 0}.question-list{list-style:none;padding:0;margin:26px 0 0;display:grid;gap:20px}.question-card{padding:22px;border:1px solid var(--line);border-radius:10px;min-width:0}.prompt{font-size:1.07rem;font-weight:550;margin-top:18px}.options{padding-left:30px}.options li{padding:9px 12px;margin:8px 0;border:1px solid var(--line);border-radius:7px;overflow-wrap:anywhere}.options li.correct-choice{border-color:#b0c7b7;background:#f0f8f2}.correct-label{display:block;font-size:.75rem;color:#356146;margin-top:5px}.literal{white-space:pre-wrap;overflow-wrap:anywhere}footer{padding:28px 0 36px;border-top:1px solid var(--line);color:var(--muted);font-size:.87rem}.skip{position:absolute;left:-10000px}.skip:focus{left:12px;top:12px;background:white;padding:12px;z-index:2}
+@media(max-width:720px){.page{padding:0 18px}header{align-items:flex-start;gap:12px;flex-direction:column;padding:18px 0}.brand span{margin-left:8px}nav{gap:20px}.hero{padding-top:30px}.workspace{grid-template-columns:minmax(0,1fr)}.card,.preview{padding:20px}.question-card{padding:16px}.button-row button{max-width:100%}}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to course preparation</a>
+<div class="page">
+<header><a class="brand" href="demo.html">RecallWeave <span>Question bank</span></a><nav aria-label="Course tools"><a href="author.html">Deck studio ↗</a><a href="demo.html">Learning app ↗</a></nav></header>
+<main id="main">
+<section class="hero"><p class="eyebrow">Prepare a local lesson</p><h1>Turn a question bank into a course.</h1><p class="intro">Choose your CSV, add its title and source credit, then review every question and correct option before downloading a checked RecallWeave deck.</p></section>
+<form id="csv-form" novalidate>
+<div class="workspace">
+<section class="card" aria-labelledby="prepare-title">
+<p class="step">01 · The source</p><h2 id="prepare-title">Bring your questions</h2>
+<p class="help">Start with the template, which contains two example questions. Replace those rows with your own and save as UTF-8 CSV. Files stay in this tab.</p>
+<div class="button-row"><button id="download-csv-template" class="secondary" type="button">Download CSV template</button><button id="choose-csv" type="button">Choose CSV</button></div>
+<input id="csv-file" type="file" accept=".csv,text/csv" aria-label="CSV question bank" hidden>
+<p id="csv-filename" class="filename">No CSV selected.</p>
+<div class="field"><label for="course-title">Title</label><textarea id="course-title" rows="2" maxlength="160" placeholder="The course title learners will see"></textarea></div>
+<div class="field"><label for="course-attribution">Author or source</label><textarea id="course-attribution" rows="2" maxlength="2000" placeholder="Credit the author or source of these questions"></textarea></div>
+<div class="field"><label for="course-license">Permission to use this deck</label><textarea id="course-license" rows="2" maxlength="2000" placeholder="State the license or permission you have to share this content"></textarea></div>
+<p class="help">All three fields are required. Supply the actual credit and permission for your content; the converter does not infer them.</p>
+</section>
+<aside class="card" aria-labelledby="format-title">
+<p class="step">02 · The mapping</p><h2 id="format-title">Keep the answer key explicit</h2>
+<ul class="format-list">
+<li>Each record is one question. Keep the exact template header names; their order may change.</li>
+<li>Supply <code>option_1</code> and <code>option_2</code>. Add up to <code>option_6</code>; leave unused trailing option cells empty.</li>
+<li><code>correct_option</code> is numbered <strong>1–6</strong>. A value of <code>2</code> means <code>option_2</code>.</li>
+<li><code>prerequisites</code> may be empty, or a JSON array such as <code>["observation"]</code>. Names must match a concept in the same CSV exactly.</li>
+<li>Quote cells containing commas, quotes or line breaks. Double a quote inside a quoted cell.</li>
+</ul>
+<p class="notice">Question order, choice order, wording and IDs are kept. Concepts follow their first appearance. The check validates the deck structure and links; review your content and answer key yourself.</p>
+<p class="help">Up to 100 questions, 32 concepts and 256 KiB of UTF-8 CSV. The resulting JSON must also fit the existing 256 KiB deck limit.</p>
+<p><a href="docs/CSV_COURSES.md">Full column guide and limits</a></p>
+</aside>
+</div>
+<p id="csv-status" class="status" role="status" aria-live="polite">Enter the course metadata and choose a CSV to continue.</p>
+<div class="button-row"><button id="check-csv" type="submit" disabled>Check and preview</button><button id="download-course" type="button" class="secondary" disabled>Download checked deck (.json)</button></div>
+<p class="help">Changing the metadata or choosing another file clears the preview. Check again before downloading.</p>
+</form>
+<section id="course-preview" class="preview" aria-labelledby="preview-title" hidden>
+<p class="step">03 · Review before sharing</p><h2 id="preview-title" class="literal" tabindex="-1"></h2><p id="preview-summary" class="help"></p>
+<dl class="preview-credit"><dt>Author or source</dt><dd id="preview-attribution" class="literal"></dd><dt>Permission to use this deck</dt><dd id="preview-license" class="literal"></dd><dt>Concepts in first-seen order</dt><dd id="preview-concepts" class="literal"></dd></dl>
+<ol id="course-questions" class="question-list"></ol>
+</section>
+</main>
+<footer><p>Open the saved JSON in <a href="author.html">Deck studio</a> to edit it, or choose it in the <a href="demo.html">learning app</a> to start a lesson.</p><p>No upload, account or saved browser data. Refreshing clears this preparation; keep your source CSV and downloaded deck.</p></footer>
+</div>
+<script type="module">
+/** Local lesson content. Imported data cannot replace the model or run code. */
+const DECK_FORMAT = 'recallweave-deck/1';
+const MAX_DECK_BYTES = 262144;
+
+function deckRecord(value, path) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    throw new Error(`${path} must be an object.`);
+  }
+  return value;
+}
+
+function deckText(value, path, limit) {
+  if (typeof value !== 'string' || !value.trim() || value.length > limit) {
+    throw new Error(`${path} must be nonempty text of at most ${limit} characters.`);
+  }
+  return value;
+}
+
+function deckList(value, path, minimum, maximum) {
+  if (!Array.isArray(value) || value.length < minimum || value.length > maximum) {
+    throw new Error(`${path} must contain ${minimum}–${maximum} entries.`);
+  }
+  return value;
+}
+
+/** Validate and copy only the content fields used by the existing lesson runtime. */
+function validateDeck(value) {
+  const input = deckRecord(value, 'Deck');
+  if (input.format !== undefined && input.format !== DECK_FORMAT) {
+    throw new Error(`Unsupported deck format. Use ${DECK_FORMAT}.`);
+  }
+  const title = deckText(input.title, 'title', 160);
+  const attribution = deckText(input.attribution, 'attribution', 2000);
+  const license = deckText(input.license, 'license', 2000);
+  const concepts = deckList(input.concepts, 'concepts', 1, 32).map((concept, index) =>
+    deckText(concept, `concepts[${index}]`, 80));
+  if (new Set(concepts).size !== concepts.length) throw new Error('Concept names must be unique.');
+  const knownConcepts = new Set(concepts);
+  const ids = new Set();
+  const coveredConcepts = new Set();
+  const links = new Map(concepts.map(concept => [concept, new Set()]));
+  const items = deckList(input.items, 'items', 1, 100).map((value, index) => {
+    const path = `items[${index}]`;
+    const item = deckRecord(value, path);
+    const id = deckText(item.id, `${path}.id`, 80);
+    if (ids.has(id)) throw new Error(`${path}.id duplicates another question ID.`);
+    ids.add(id);
+    const concept = deckText(item.concept, `${path}.concept`, 80);
+    if (!knownConcepts.has(concept)) throw new Error(`${path}.concept is not in concepts.`);
+    coveredConcepts.add(concept);
+    const prerequisites = deckList(item.prerequisites, `${path}.prerequisites`, 0, 31).map((name, p) => {
+      deckText(name, `${path}.prerequisites[${p}]`, 80);
+      if (!knownConcepts.has(name)) throw new Error(`${path}.prerequisites contains an unknown concept.`);
+      if (name === concept) throw new Error(`${path} cannot require its own concept.`);
+      links.get(concept).add(name);
+      return name;
+    });
+    if (new Set(prerequisites).size !== prerequisites.length) throw new Error(`${path}.prerequisites contains a duplicate.`);
+    const options = deckList(item.options, `${path}.options`, 2, 6).map((option, o) =>
+      deckText(option, `${path}.options[${o}]`, 1000));
+    if (new Set(options).size !== options.length) throw new Error(`${path}.options must be distinct.`);
+    if (!Number.isInteger(item.answer) || item.answer < 0 || item.answer >= options.length) {
+      throw new Error(`${path}.answer must be a zero-based index of an option.`);
+    }
+    return Object.freeze({
+      id, concept, prerequisites: Object.freeze(prerequisites),
+      prompt: deckText(item.prompt, `${path}.prompt`, 2000),
+      options: Object.freeze(options), answer: item.answer,
+      explanation: deckText(item.explanation, `${path}.explanation`, 4000),
+      transfer: deckText(item.transfer, `${path}.transfer`, 2000)
+    });
+  });
+  if (coveredConcepts.size !== concepts.length) throw new Error('Every concept must have at least one question.');
+  const visiting = new Set();
+  const visited = new Set();
+  const visit = concept => {
+    if (visiting.has(concept)) throw new Error('Prerequisite links must not form a cycle.');
+    if (visited.has(concept)) return;
+    visiting.add(concept);
+    for (const prerequisite of links.get(concept)) visit(prerequisite);
+    visiting.delete(concept);
+    visited.add(concept);
+  };
+  concepts.forEach(visit);
+  return Object.freeze({
+    format: DECK_FORMAT, title, attribution, license,
+    concepts: Object.freeze(concepts), items: Object.freeze(items)
+  });
+}
+
+/** The same size limit applies to a File and to programmatically supplied UTF-8 JSON. */
+function parseDeck(text) {
+  if (typeof text !== 'string' || new TextEncoder().encode(text).length > MAX_DECK_BYTES) {
+    throw new Error('Choose a JSON deck no larger than 256 KiB.');
+  }
+  let value;
+  try { value = JSON.parse(text); }
+  catch { throw new Error('The file is not valid JSON. Check its commas, quotes and brackets.'); }
+  return validateDeck(value);
+}
+
+/** Export the existing bundled lesson as an editable example of the same contract. */
+function serializeDeck(deck) {
+  return JSON.stringify(validateDeck(deck), null, 2) + '\n';
+}
+
+
+const MAX_COURSE_CSV_BYTES = MAX_DECK_BYTES;
+const COURSE_CSV_COLUMNS = Object.freeze([
+  'id', 'concept', 'prompt', 'option_1', 'option_2', 'option_3', 'option_4',
+  'option_5', 'option_6', 'correct_option', 'explanation', 'transfer', 'prerequisites'
+]);
+const requiredColumns = ['id', 'concept', 'prompt', 'option_1', 'option_2',
+  'correct_option', 'explanation', 'transfer'];
+
+const exampleRows = [
+  COURSE_CSV_COLUMNS,
+  ['observe-1', 'observation', 'Which sentence reports an observation?',
+    'The next step will fail.', 'The log says "ready" at 09:00.', '', '', '', '', '2',
+    'The second sentence reports a recorded event. The first predicts an outcome.',
+    'Write one observation from an event log.', '[]'],
+  ['order-2', 'sequence', 'A is recorded at 09:00 and B at 09:02. Which is earlier?',
+    'A', 'B', '', '', '', '', '1',
+    'In this example, 09:00 precedes 09:02.',
+    'Describe an order without inventing a cause.', '["observation"]']
+];
+const COURSE_CSV_TEMPLATE = exampleRows.map(row =>
+  row.map(value => '"' + value.replaceAll('"', '""') + '"').join(',')
+).join('\r\n') + '\r\n';
+
+/** Comma and doubled-quote parsing; preserve every field's literal text. */
+function csvRecords(text) {
+  if (typeof text !== 'string' || new TextEncoder().encode(text).length > MAX_COURSE_CSV_BYTES) {
+    throw new Error('Choose a UTF-8 CSV no larger than 256 KiB.');
+  }
+  if (text.startsWith('\uFEFF')) text = text.slice(1);
+  const records = [];
+  let fields = [], field = '', state = 'start', line = 1, startLine = 1;
+  const fail = message => {
+    throw new Error('CSV record ' + (records.length + 1) + ', line ' + line + ': ' + message);
+  };
+  const finishField = () => {
+    fields.push(field);
+    if (fields.length > COURSE_CSV_COLUMNS.length) fail('there are more than 13 columns.');
+    field = '';
+    state = 'start';
+  };
+  const finishRecord = () => {
+    finishField();
+    if (records.length === 101) fail('a course can contain at most 100 question records.');
+    records.push({ fields, line: startLine });
+    fields = [];
+    startLine = line;
+  };
+  for (let index = 0; index < text.length; index++) {
+    const character = text[index];
+    if (state === 'quoted') {
+      if (character === '"') {
+        if (text[index + 1] === '"') { field += '"'; index++; }
+        else state = 'closed';
+      } else {
+        field += character;
+        if (character === '\n' || (character === '\r' && text[index + 1] !== '\n')) line++;
+      }
+      continue;
+    }
+    if (character === ',') { finishField(); continue; }
+    if (character === '\r' || character === '\n') {
+      if (character === '\r') {
+        if (text[index + 1] !== '\n') fail('use CRLF or LF between records; a bare CR is ambiguous.');
+        index++;
+      }
+      line++;
+      finishRecord();
+      continue;
+    }
+    if (character === '"') {
+      if (state !== 'start') fail('a quote must start a field or be doubled inside a quoted field.');
+      state = 'quoted';
+    } else {
+      if (state === 'closed') fail('only a comma, record ending or end of file may follow a closing quote.');
+      field += character;
+      state = 'plain';
+    }
+  }
+  if (state === 'quoted') fail('the quoted field has no closing quote.');
+  if (fields.length || state !== 'start' || field) finishRecord();
+  if (!records.length) throw new Error('The CSV needs a header and at least one question record.');
+  return records;
+}
+
+function csvHeader(record) {
+  const positions = new Map();
+  record.fields.forEach((name, index) => {
+    if (!COURSE_CSV_COLUMNS.includes(name)) {
+      throw new Error('CSV header column ' + (index + 1) + ' is unknown: ' + JSON.stringify(name) + '. Use the exact template names.');
+    }
+    if (positions.has(name)) {
+      throw new Error('CSV header repeats ' + JSON.stringify(name) + ' in columns ' +
+        (positions.get(name) + 1) + ' and ' + (index + 1) + '.');
+    }
+    positions.set(name, index);
+  });
+  for (const name of requiredColumns) {
+    if (!positions.has(name)) throw new Error('CSV header is missing required column ' + JSON.stringify(name) + '.');
+  }
+  for (let number = 3; number <= 6; number++) {
+    if (positions.has('option_' + number) && !positions.has('option_' + (number - 1))) {
+      throw new Error('CSV header has "option_' + number + '" without "option_' + (number - 1) + '".');
+    }
+  }
+  return positions;
+}
+
+/**
+ * Convert a declared question-bank CSV into one native, fully checked deck.
+ * Metadata is supplied explicitly. The returned JSON is the exact downloadable
+ * serializeDeck output and passes parseDeck's byte limit before admission.
+ */
+function convertCourseCsv(csvText, metadata) {
+  const records = csvRecords(csvText);
+  const header = records[0];
+  const positions = csvHeader(header);
+  const rows = records.slice(1);
+  if (!rows.length) throw new Error('The CSV needs at least one question record after its header.');
+  const concepts = [];
+  const seenConcepts = new Set();
+  const items = rows.map((record, index) => {
+    const location = 'CSV record ' + (index + 2) + ' (starts on line ' + record.line + ')';
+    const fail = message => { throw new Error(location + ': ' + message); };
+    if (record.fields.length !== header.fields.length) {
+      fail('expected ' + header.fields.length + ' fields, received ' + record.fields.length + '.');
+    }
+    const get = name => positions.has(name) ? record.fields[positions.get(name)] : '';
+    const options = [];
+    let gap = false;
+    for (let number = 1; number <= 6; number++) {
+      const value = get('option_' + number);
+      if (value === '') gap = true;
+      else {
+        if (gap) fail('"option_' + number + '" follows an empty option. Keep supplied options contiguous from option_1.');
+        options.push(value);
+      }
+    }
+    const correct = get('correct_option');
+    if (!/^[1-6]$/.test(correct) || Number(correct) > options.length) {
+      fail('"correct_option" must be one digit from 1 to 6 naming a supplied option (1 means option_1).');
+    }
+    const prerequisiteText = get('prerequisites');
+    let prerequisites = [];
+    if (prerequisiteText !== '') {
+      try { prerequisites = JSON.parse(prerequisiteText); }
+      catch { fail('"prerequisites" must be empty or a JSON array of exact concept names.'); }
+    }
+    const concept = get('concept');
+    if (!seenConcepts.has(concept)) { seenConcepts.add(concept); concepts.push(concept); }
+    return {
+      id: get('id'), concept, prerequisites,
+      prompt: get('prompt'), options, answer: Number(correct) - 1,
+      explanation: get('explanation'), transfer: get('transfer')
+    };
+  });
+  try {
+    const json = serializeDeck({
+      title: metadata?.title, attribution: metadata?.attribution, license: metadata?.license,
+      concepts, items
+    });
+    const deck = parseDeck(json);
+    return Object.freeze({ deck, json });
+  } catch (error) {
+    const match = /^items\[(\d+)\]/.exec(error.message);
+    if (match && rows[Number(match[1])]) {
+      const index = Number(match[1]);
+      throw new Error('CSV record ' + (index + 2) + ' (starts on line ' + rows[index].line + '): ' + error.message);
+    }
+    throw error;
+  }
+}
+
+
+const get = id => document.getElementById(id);
+const fileInput = get('csv-file');
+const fields = [get('course-title'), get('course-attribution'), get('course-license')];
+const checkButton = get('check-csv');
+const downloadButton = get('download-course');
+const preview = get('course-preview');
+const status = get('csv-status');
+let source = null, prepared = null, reading = false, fileGeneration = 0;
+
+function message(text, error = false) {
+  status.textContent = text;
+  status.classList.toggle('is-error', error);
+}
+function syncControls() {
+  checkButton.disabled = reading || source === null;
+  downloadButton.disabled = reading || prepared === null;
+  get('csv-form').setAttribute('aria-busy', String(reading));
+}
+function retire() {
+  prepared = null;
+  preview.hidden = true;
+  get('course-questions').replaceChildren();
+  syncControls();
+}
+function clearSource() {
+  fileGeneration++;
+  source = null;
+  reading = false;
+  get('csv-filename').textContent = 'No CSV selected.';
+  retire();
+}
+for (const field of fields) {
+  const changed = () => {
+    retire();
+    message(source ? 'Metadata changed. Check and preview again before downloading.' :
+      'Enter the course metadata and choose a CSV to continue.');
+  };
+  field.addEventListener('input', changed);
+  field.addEventListener('change', changed);
+}
+get('choose-csv').addEventListener('click', () => {
+  clearSource();
+  fileInput.value = '';
+  message('Choose a CSV. A replacement selection clears the previous preview.');
+  fileInput.click();
+});
+fileInput.addEventListener('cancel', () => {
+  clearSource();
+  message('File selection cancelled. Choose a CSV to continue; your metadata is kept.');
+});
+fileInput.addEventListener('change', async () => {
+  clearSource();
+  const generation = fileGeneration;
+  const file = fileInput.files?.[0];
+  if (!file) { message('Choose a CSV to continue.'); return; }
+  if (file.size > MAX_COURSE_CSV_BYTES) {
+    message('Choose a UTF-8 CSV no larger than 256 KiB.', true);
+    return;
+  }
+  reading = true;
+  get('csv-filename').textContent = file.name;
+  syncControls();
+  message('Reading ' + file.name + '…');
+  try {
+    const bytes = await file.arrayBuffer();
+    if (generation !== fileGeneration) return;
+    if (bytes.byteLength > MAX_COURSE_CSV_BYTES) {
+      throw new Error('Choose a UTF-8 CSV no larger than 256 KiB.');
+    }
+    let text;
+    try { text = new TextDecoder('utf-8', { fatal: true, ignoreBOM: true }).decode(bytes); }
+    catch { throw new Error('This file is not valid UTF-8. Export it as UTF-8 CSV and choose it again.'); }
+    source = Object.freeze({ text, name: file.name });
+    message('CSV loaded. Enter its title and permissions, then check the complete course.');
+  } catch (error) {
+    if (generation !== fileGeneration) return;
+    source = null;
+    message(error.message || 'The file could not be read. Choose it again.', true);
+  } finally {
+    if (generation === fileGeneration) { reading = false; syncControls(); }
+  }
+});
+
+function element(tag, className, text) {
+  const node = document.createElement(tag);
+  if (className) node.className = className;
+  if (text !== undefined) node.textContent = text;
+  return node;
+}
+function sectionText(parent, label, text) {
+  parent.append(element('h4', '', label), element('p', 'literal', text));
+}
+function renderCourse(deck, json) {
+  get('preview-title').textContent = deck.title;
+  get('preview-summary').textContent = deck.items.length + ' questions · ' + deck.concepts.length +
+    ' concepts · ' + new TextEncoder().encode(json).length + ' JSON bytes';
+  get('preview-attribution').textContent = deck.attribution;
+  get('preview-license').textContent = deck.license;
+  get('preview-concepts').textContent = deck.concepts.join(' → ');
+  const questions = get('course-questions');
+  questions.replaceChildren();
+  for (const [index, item] of deck.items.entries()) {
+    const card = element('li', 'question-card');
+    card.append(element('h3', '', 'Question ' + (index + 1)),
+      element('p', 'identity literal', 'ID: ' + item.id),
+      element('p', 'identity literal', 'Concept: ' + item.concept),
+      element('p', 'prompt literal', item.prompt));
+    const options = element('ol', 'options');
+    for (const [number, option] of item.options.entries()) {
+      const choice = element('li', number === item.answer ? 'correct-choice' : '');
+      choice.append(element('span', 'literal', option));
+      if (number === item.answer) choice.append(element('strong', 'correct-label', 'Correct option'));
+      options.append(choice);
+    }
+    card.append(options);
+    sectionText(card, 'Why this answer is correct', item.explanation);
+    sectionText(card, 'Apply the idea', item.transfer);
+    sectionText(card, 'Prerequisites', item.prerequisites.length ? JSON.stringify(item.prerequisites) : 'None');
+    questions.append(card);
+  }
+  preview.hidden = false;
+}
+get('csv-form').addEventListener('submit', event => {
+  event.preventDefault();
+  retire();
+  if (!source || reading) { message('Choose a CSV and wait for it to finish reading.', true); return; }
+  const metadata = fields.map(field => field.value);
+  try {
+    const result = convertCourseCsv(source.text, {
+      title: metadata[0], attribution: metadata[1], license: metadata[2]
+    });
+    renderCourse(result.deck, result.json);
+    prepared = Object.freeze({ ...result, source, metadata: Object.freeze(metadata) });
+    syncControls();
+    message('Ready. Review the question order and numbered answer key below, then download.');
+    get('preview-title').focus();
+  } catch (error) {
+    retire();
+    message(error.message, true);
+  }
+});
+function download(text, type, filename) {
+  const url = URL.createObjectURL(new Blob([text], { type }));
+  const link = element('a');
+  link.href = url;
+  link.download = filename;
+  document.body.append(link);
+  link.click();
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+downloadButton.addEventListener('click', () => {
+  if (!prepared || reading || prepared.source !== source ||
+      fields.some((field, index) => field.value !== prepared.metadata[index])) {
+    retire();
+    message('Inputs changed. Check and preview again before downloading.', true);
+    return;
+  }
+  download(prepared.json, 'application/json;charset=utf-8', 'recallweave-course.json');
+  message('Checked deck download started. Open the saved JSON in Deck studio or the learning app.');
+});
+get('download-csv-template').addEventListener('click', () => {
+  download(COURSE_CSV_TEMPLATE, 'text/csv;charset=utf-8', 'course-question-bank.csv');
+  message('CSV template download started. Replace its example rows with your own questions.');
+});
+syncControls();
+
+</script>
+</body>
+</html>
