@@ -74,6 +74,14 @@ Open the **[Euclidean algorithm explorer](courses/euclidean-algorithm-explorer.h
 
 The **[worked companion](courses/euclidean-algorithm.md)** includes proofs, examples and transfer responses. Download its original **[twelve-question course](courses/euclidean-algorithm.json)** and select it under **Bring your own lesson** to use RecallWeave's existing review, separate practice and saved-note flows. The explorer requires no server, account or dependency.
 
+## Explore counting principles
+
+Open **[Same labels. Different counts.](courses/counting-principles-explorer.html)** directly in a browser. Choose 0–8 label types and 0–6 items, then compare all four models: order matters or not, with or without reuse. Inspect every outcome through direct page controls; unordered selections appear once in canonical order. Exact counts and ordered-representation multiplicities explain why distinct unordered outcomes need not be equally likely.
+
+The explorer distinguishes one empty selection from an impossible selection. Editing the inputs retires the old result until you apply the new settings. Download the applied page of at most 24 outcomes, or save the original **[twelve-question course](courses/counting-principles.json)** and open it through **Bring your own lesson**, preview and **Start this deck**. The **[worked guide](courses/counting-principles.md)** develops the formulas, examples and transfer answers.
+
+This separate page works offline without dependencies or automatic storage. Rebuild it with `node tools/build-counting-principles.mjs`; `--check` verifies exact generated-source and embedded-course parity.
+
 ## Core and interaction
 
 - `src/knowledge.mjs` implements a transparent BKT update: initial knowledge, learning transition, guess, and slip are explicit probabilities. It also computes binary entropy and expected information gain.
