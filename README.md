@@ -230,6 +230,10 @@ and builder tests are included in the existing Node test command.
 
 Open the [Markov-chain explorer](courses/markov-chains-explorer.html) to edit a three-state transition table, follow probability flow, and compare mixing, alternation and absorbing states. It works as a single offline HTML file. Download its original fourteen-question course and import it through **Bring your own lesson**, or read the [course guide and worked checks](courses/markov-chains.md). The observation download keeps applied inputs and the complete computed trace; it is separate from a learner's answers.
 
+## Explore hash-table probes
+
+Open **[Hash tables: follow the probe](courses/hash-tables-explorer.html)** for an original offline integer-set explorer. Edit insert, find and delete operations, inspect exact slot visits, and compare collisions, wraparound, tombstones, duplicate checks and full-table results. The [worked guide](courses/hash-tables.md) explains the fixed-capacity model. Download its [twelve-question lesson](courses/hash-tables.json) and start it through **Bring your own lesson** to use the existing learner, review and study notes.
+
 ## Demo deck provenance
 
 Question text and distractors are newly authored for this demo. Scientific concepts are checked against [OpenStax, *Biology 2e*](https://openstax.org/books/biology-2e/pages/1-introduction), sections 6.4, 7.1, 7.4 and 8.1–8.3, by Mary Ann Clark, Matthew Douglas and Jung Choi (Rice University). The current linked reference textbook content is licensed CC BY-NC-SA 4.0. [The item-level content review](docs/deck-content-review-20261008.md) records the scientific distinctions and references. Attribution is embedded in `data/deck.json`, shown at completion and included in downloaded notes. This demo uses original wording and does not copy textbook passages, figures or an existing hackathon entry.

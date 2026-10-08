@@ -1,0 +1,212 @@
+{
+  "format": "recallweave-deck/1",
+  "title": "Hash tables: follow the probe",
+  "attribution": "Original worked questions, examples and explorer for RecallWeave, 2026. Algorithm background: Paul E. Black, NIST Dictionary of Algorithms and Data Structures, hash table (https://xlinux.nist.gov/dads/HTML/hashtab.html); Pat Morin, Open Data Structures, section 5.2, LinearHashTable: Linear Probing (https://opendatastructures.org/ods-python/5_2_LinearHashTable_Linear_.html). No source exercises, prose or figures are reproduced.",
+  "license": "CC0-1.0 for this original course content. Referenced NIST and Open Data Structures materials retain their own terms; they are not included in this deck.",
+  "concepts": [
+    "Home slots and collisions",
+    "Probe order and stopping",
+    "Deletion and duplicates",
+    "Capacity and cost"
+  ],
+  "items": [
+    {
+      "id": "ht-home-positive",
+      "concept": "Home slots and collisions",
+      "prerequisites": [],
+      "prompt": "This course stores distinct integer keys in a fixed table. Its home slot is the nonnegative remainder of key ÷ capacity, with slots numbered from 0. For capacity 7, what is the home slot of key 24?",
+      "options": [
+        "Slot 2",
+        "Slot 4",
+        "Slot 3",
+        "Slot 7"
+      ],
+      "answer": 2,
+      "explanation": "24 = 3 × 7 + 3, so its home slot is 3. Capacity 7 provides slots 0 through 6. The home slot is where an operation starts; collisions may make a key's eventual storage slot different.",
+      "transfer": "With the same capacity, 31 = 4 × 7 + 3 also starts at slot 3. If 24 is already there, inserting 31 needs a collision rule; calculating the home slot alone has not found an unused position."
+    },
+    {
+      "id": "ht-home-collision",
+      "concept": "Home slots and collisions",
+      "prerequisites": [],
+      "prompt": "In a capacity-7 table, keys 5 and 12 both have home slot 5. Which description is correct for this integer-set model?",
+      "options": [
+        "They collide at the same home slot but remain two distinct keys.",
+        "They are duplicates, so only the smaller key is allowed.",
+        "The table must use the key itself as the slot index.",
+        "Both keys must be stored together in a list at slot 5."
+      ],
+      "answer": 0,
+      "explanation": "A collision means different keys map to the same home slot. Equality is a separate comparison: 5 is not 12. This course uses open addressing, storing one key per slot and probing later slots. A list at each home slot would be a different collision scheme, separate chaining.",
+      "transfer": "Try inserting 5 and then 12 into an empty capacity-7 table. The first uses slot 5; the second probes 5, then uses empty slot 6. Inserting 12 again should report present, not create a second copy."
+    },
+    {
+      "id": "ht-home-negative",
+      "concept": "Home slots and collisions",
+      "prerequisites": [],
+      "prompt": "The model defines k mod m as the remainder in [0, m), even for negative keys. For key -1 and capacity 7, which home slot is valid?",
+      "options": [
+        "Slot -1",
+        "Slot 0",
+        "Slot 1",
+        "Slot 6"
+      ],
+      "answer": 3,
+      "explanation": "-1 = (-1) × 7 + 6, and 6 is in the allowed range 0 through 6. Some programming languages use a remainder operator whose result can be negative. The explorer explicitly normalizes that result so every key starts at a valid array slot.",
+      "transfer": "For key -8 with capacity 7, -8 = (-2) × 7 + 6, so it also starts at 6. Inserting -1 and -8 creates a collision even though both keys are negative. Zero and negative zero represent the same integer key."
+    },
+    {
+      "id": "ht-probe-wrap",
+      "concept": "Probe order and stopping",
+      "prerequisites": [
+        "Home slots and collisions"
+      ],
+      "prompt": "Start with an empty capacity-7 table. Insert 6, then 13, then 20. Linear probing moves to the next slot, wrapping from 6 to 0. Which probe sequence and final slot apply to inserting 20?",
+      "options": [
+        "Probes 6, 5, 4; inserts at 4.",
+        "Probes 6, 0, 1; inserts at 1.",
+        "Probes 6, 7, 8; inserts at 8.",
+        "Probes 1 only; inserts at 1."
+      ],
+      "answer": 1,
+      "explanation": "All three keys have home slot 6. Inserting 6 fills slot 6. Inserting 13 sees 6 occupied and fills slot 0. Inserting 20 then checks 6, 0 and 1, using empty slot 1. The wrap changes the slot index, not the key or the fixed capacity.",
+      "transfer": "Finding 13 in that final table probes 6 and then 0, stopping at the match. Finding 27 would probe 6, 0, 1 and empty slot 2 before reporting absent."
+    },
+    {
+      "id": "ht-probe-empty-stop",
+      "concept": "Probe order and stopping",
+      "prerequisites": [
+        "Home slots and collisions"
+      ],
+      "prompt": "Start empty with capacity 7 and insert only key 10, which occupies slot 3. Now find key 24, whose home slot is also 3. Count every inspected slot, including an empty slot. What happens?",
+      "options": [
+        "Probe 3, then empty slot 4; report absent after two probes.",
+        "Probe only slot 3; report absent after one probe.",
+        "Inspect all seven slots before an absent result is allowed.",
+        "Insert 24 into slot 4 as part of finding it."
+      ],
+      "answer": 0,
+      "explanation": "Slot 3 holds a different key, so the search continues. Slot 4 has never held a key: insertion of 24 would have stopped there rather than skipping it. That empty slot proves absence. Find is read-only and does not insert anything.",
+      "transfer": "An occupied nonmatching slot cannot prove absence. A deleted slot cannot either: another key may have been placed farther along before the deletion. The never-used empty state is the stopping evidence."
+    },
+    {
+      "id": "ht-probe-match",
+      "concept": "Probe order and stopping",
+      "prerequisites": [
+        "Home slots and collisions"
+      ],
+      "prompt": "Start empty with capacity 7; insert 10, 17 and 24 in that order. They occupy slots 3, 4 and 5. When finding 17, what result and probe count are correct?",
+      "options": [
+        "Found at home slot 3 after one probe.",
+        "Absent after two probes.",
+        "Found at slot 4 after two probes.",
+        "Found at slot 5 after three probes."
+      ],
+      "answer": 2,
+      "explanation": "Finding 17 starts at its home slot 3. That slot holds 10, so the search continues to slot 4 and matches 17. A successful find stops at the match: slot 5 is not inspected. The stored key's equality, not merely a shared home index, determines success.",
+      "transfer": "Deleting 17 follows the same two probes, then changes slot 4 to deleted. It does not shift key 24 to the left in this model. The deletion questions explore why that distinction matters."
+    },
+    {
+      "id": "ht-delete-chain",
+      "concept": "Deletion and duplicates",
+      "prerequisites": [
+        "Probe order and stopping"
+      ],
+      "prompt": "In a capacity-7 table, insert 10, 17 and 24, then delete 17. Key 24 remains at slot 5. How should slot 4 be marked so finding 24 from home slot 3 still works?",
+      "options": [
+        "Never-used empty, so the search can stop at slot 4.",
+        "Deleted, so the search continues through slot 4 to slot 5.",
+        "Occupied by 24, while also leaving 24 at slot 5.",
+        "Outside the table, so all later slot numbers decrease."
+      ],
+      "answer": 1,
+      "explanation": "Slot 4 becomes a deleted marker, often called a tombstone. Finding 24 checks key 10 at slot 3, passes the tombstone at 4 and finds 24 at 5. Replacing slot 4 with never-used empty would falsely end that search before the existing key.",
+      "transfer": "Delete 10 as well. Finding 24 must now pass tombstones at both 3 and 4 before reaching 5. A tombstone records relevant history even though it contains no current key."
+    },
+    {
+      "id": "ht-delete-duplicate",
+      "concept": "Deletion and duplicates",
+      "prerequisites": [
+        "Probe order and stopping"
+      ],
+      "prompt": "With capacity 7, insert 10, 17 and 24, then delete 10. Slot 3 is deleted, 4 holds 17 and 5 holds 24. Now insert 24 again. What must the set do?",
+      "options": [
+        "Immediately fill tombstone 3 with another 24.",
+        "Delete the older 24 at slot 5.",
+        "Stop at slot 4 and report the table full.",
+        "Remember slot 3, continue to the existing 24 at 5, and leave the table unchanged."
+      ],
+      "answer": 3,
+      "explanation": "The tombstone is only a possible insertion location. The probe sequence 3, 4, 5 finds the existing key before any empty slot, so insertion reports present. Filling slot 3 immediately would create two copies of 24 and break the set's duplicate policy.",
+      "transfer": "Change the last operation to insert 31. It is a different key with the same home slot. If a later empty slot or one full cycle proves 31 absent, the remembered tombstone can then be reused."
+    },
+    {
+      "id": "ht-delete-reuse",
+      "concept": "Deletion and duplicates",
+      "prerequisites": [
+        "Probe order and stopping"
+      ],
+      "prompt": "With capacity 7, insert 10, 17 and 24, then delete 17. Now insert 31. The relevant slots are 3:10, 4:deleted, 5:24 and 6:empty. Which result counts every inspected slot?",
+      "options": [
+        "Insert at 6 after one probe.",
+        "Insert at 4 immediately after two probes.",
+        "Probe 3, 4, 5, 6; prove absence at 6; insert at remembered slot 4.",
+        "Report full because the home slot is occupied."
+      ],
+      "answer": 2,
+      "explanation": "31 starts at 3. The search remembers deleted slot 4 but keeps checking for an existing 31. Slot 5 holds 24; empty slot 6 proves absence. The insertion then uses the first remembered tombstone, slot 4. There are four probes and exactly one slot changes.",
+      "transfer": "With two tombstones on the probe path, retain the first one as the candidate. A later tombstone does not replace it. The first empty slot still ends the duplicate search, and a full cycle is the alternative absence proof."
+    },
+    {
+      "id": "ht-capacity-full",
+      "concept": "Capacity and cost",
+      "prerequisites": [
+        "Deletion and duplicates"
+      ],
+      "prompt": "Start empty with capacity 3 and insert 0, 3 and 6. Slots 0, 1 and 2 are now occupied. This explorer keeps a fixed capacity and never resizes. What happens when inserting 9?",
+      "options": [
+        "The capacity automatically becomes 6.",
+        "After probes 0, 1 and 2, report full and preserve all three keys.",
+        "Overwrite key 0 because 9 shares its home slot.",
+        "Probe forever because no empty slot exists."
+      ],
+      "answer": 1,
+      "explanation": "All three slots are visited once, no key equals 9 and no empty or deleted location is available. The bounded loop reports full without mutation. The capacity bound guarantees termination even when no empty slot exists. Other hash-table implementations may resize; this teaching model deliberately does not.",
+      "transfer": "Insert 6 again into the same full table. It is found after probes 0, 1, 2, so the result is present rather than full. A full table can still answer successful finds and duplicate inserts."
+    },
+    {
+      "id": "ht-capacity-cycle-tombstone",
+      "concept": "Capacity and cost",
+      "prerequisites": [
+        "Deletion and duplicates"
+      ],
+      "prompt": "Start empty with capacity 3; insert 0, 3 and 6, then delete 3. Slots are 0:0, 1:deleted, 2:6. Insert 9. There are no never-used empty slots. What is correct?",
+      "options": [
+        "Report full as soon as slot 0 is occupied.",
+        "Treat deleted slot 1 as a match for key 9.",
+        "Insert at slot 2, replacing key 6.",
+        "Probe 0, 1, 2 once, prove 9 absent, then reuse slot 1."
+      ],
+      "answer": 3,
+      "explanation": "The first tombstone is remembered at slot 1. A complete three-slot cycle proves that 9 is not already stored. Although there is no never-used empty slot, the tombstone provides room, so insertion succeeds there. Full means no usable slot after absence is established, not merely no never-used empty slot.",
+      "transfer": "Finding a missing key in this pre-insertion table also needs all three probes, but remains read-only. Deleting a missing key does the same and creates no new tombstone."
+    },
+    {
+      "id": "ht-capacity-cost",
+      "concept": "Capacity and cost",
+      "prerequisites": [
+        "Deletion and duplicates"
+      ],
+      "prompt": "With capacity 7, insert 0, 7 and 14, then delete 7. Slots 0:0, 1:deleted, 2:14 are followed by empty slot 3. Find key 21. What are the current occupied-key fraction and number of probes?",
+      "options": [
+        "2/7 occupied; four probes, through slots 0, 1, 2 and 3.",
+        "3/7 occupied; one probe because hashing is always constant work.",
+        "2/7 occupied; two probes because deleted slots are free.",
+        "1/7 occupied; seven probes because every miss scans the whole table."
+      ],
+      "answer": 0,
+      "explanation": "Two live keys occupy the seven-slot table, giving 2/7. The tombstone is not a live key, but it still extends the probe path. Finding 21 starts at 0, passes 0, deleted 1 and 14 at 2, then stops at empty 3: four probes. The visible count measures this operation, not an empirical average.",
+      "transfer": "Compare the same search in a fresh capacity-7 table made by inserting 14 and 5. Those two live keys occupy slots 0 and 5; finding 21 now checks occupied slot 0 and empty slot 1, taking two probes. Equal live-key counts do not describe cluster layout or deletion history. Expected fast hashing requires assumptions and capacity management; a bounded linear probe can inspect every slot."
+    }
+  ]
+}

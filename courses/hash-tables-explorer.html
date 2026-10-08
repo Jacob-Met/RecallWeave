@@ -1,0 +1,633 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src 'none'; base-uri 'none'; form-action 'none'">
+<meta name="description" content="An original offline lesson and step-by-step integer hash-table explorer. Follow collisions, wraparound, deletion and duplicate checks with exact probe traces.">
+<title>Hash tables: follow the probe · RecallWeave</title>
+<style>
+:root{color-scheme:light;--paper:#f6f4ec;--card:#fffef9;--ink:#193a37;--muted:#526761;--line:#c9d4c9;--teal:#116b63;--wash:#e4f0e9;--amber:#9a4b08;--amber-wash:#fff0cf;--red:#a12b20;--shadow:0 8px 28px #163b3410}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+a{color:var(--teal);text-underline-offset:.2em;overflow-wrap:anywhere}
+a:hover{text-decoration-thickness:2px}
+button,input,textarea,select{font:inherit}
+button,select,input{min-height:44px}
+button{border:1px solid var(--teal);border-radius:8px;background:var(--card);color:var(--teal);font-weight:650;padding:.55rem .85rem;cursor:pointer}
+button:hover:not(:disabled){background:var(--wash)}
+button.primary{background:var(--teal);color:white}
+button.primary:hover:not(:disabled){background:#0b544e}
+button:disabled{opacity:.46;cursor:default}
+button:focus-visible,a:focus-visible,summary:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:3px solid var(--amber);outline-offset:3px}
+input,select,textarea{border:1px solid #8fa79e;border-radius:7px;background:white;color:var(--ink);padding:.5rem .65rem;max-width:100%}
+textarea{width:100%;resize:vertical;min-height:12.3rem;font:15px/1.65 ui-monospace,SFMono-Regular,Consolas,monospace}
+[aria-invalid="true"]{border:2px solid var(--red)}
+label{display:block;font-weight:650;margin-bottom:.3rem}
+h1,h2,h3,p{margin-top:0}
+h1{font:650 clamp(2.15rem,4.5vw,3.8rem)/1.08 Georgia,"Times New Roman",serif;letter-spacing:-.045em;max-width:13ch;margin:.5rem 0 1rem}
+h2{font:650 1.55rem/1.25 Georgia,"Times New Roman",serif;letter-spacing:-.015em}
+h3{font-size:1rem;line-height:1.4}
+p:last-child{margin-bottom:0}
+small,.small{font-size:.88rem;color:var(--muted)}
+code{font: .94em ui-monospace,SFMono-Regular,Consolas,monospace}
+.skip{position:absolute;left:1rem;top:-6rem;background:white;padding:.7rem;z-index:5}
+.skip:focus{top:1rem}
+.page{max-width:1200px;margin:auto;padding:1.7rem 2rem 3rem}
+.topline{display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap;border-bottom:1px solid var(--line);padding-bottom:1rem;margin-bottom:2rem;font-size:.83rem;font-weight:700;letter-spacing:.04em}
+.eyebrow{text-transform:uppercase;letter-spacing:.12em;font-size:.75rem;font-weight:750;color:var(--teal);margin-bottom:.5rem}
+.hero{display:grid;grid-template-columns:1.1fr 1fr;gap:3rem;align-items:end;margin-bottom:2rem}
+.hero-copy{max-width:55ch;font-size:1.05rem;color:var(--muted)}
+.rule-card{border-left:3px solid var(--teal);padding:.2rem 0 .2rem 1.3rem}
+.rule-card p{margin-bottom:.55rem}
+.rule-card strong{font-size:1.08rem}
+.rule-card .formula{font:600 1.35rem ui-monospace,SFMono-Regular,Consolas,monospace}
+.workspace{display:grid;grid-template-columns:minmax(270px,.78fr) minmax(0,1.65fr);gap:1.2rem;align-items:start}
+.card{border:1px solid var(--line);border-radius:13px;background:var(--card);padding:1.35rem;box-shadow:var(--shadow);min-width:0}
+.editor h2,.trace h2{margin-bottom:.7rem}
+.field{margin-bottom:1rem}
+.example-row{display:grid;gap:.6rem}
+.example-row select{width:100%}
+.divider{border-top:1px solid var(--line);margin:1.15rem 0}
+.capacity-row{display:flex;align-items:center;gap:1rem}
+.capacity-row input{width:6rem}
+.actions{display:flex;flex-wrap:wrap;gap:.6rem}
+.draft-status{border-left:3px solid var(--line);padding-left:.7rem;margin-top:1rem;font-size:.87rem;color:var(--muted)}
+.draft-status.dirty{border-color:var(--amber);color:#794212}
+.error{background:#fff0e9;color:#842c22;border:1px solid #d59280;border-radius:8px;padding:.7rem;margin:1rem 0}
+.trace-top{display:flex;align-items:baseline;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+.step-counter{color:var(--teal);font-size:.86rem;font-weight:700;white-space:nowrap}
+.step-controls{display:flex;gap:.5rem;flex-wrap:wrap;margin:1rem 0}
+.step-controls button{flex:1 1 auto}
+.table{list-style:none;padding:0;margin:1.35rem 0 .7rem;display:grid;grid-template-columns:repeat(auto-fit,minmax(75px,1fr));gap:.5rem}
+.slot{border:1px solid var(--line);border-radius:9px;min-height:112px;padding:.6rem .25rem;display:flex;align-items:center;flex-direction:column;justify-content:space-between;text-align:center;background:#f9faf5;position:relative}
+.slot.occupied{background:var(--wash);border-color:#a9c7b7}
+.slot.deleted{background:repeating-linear-gradient(135deg,#faf3e8,#faf3e8 7px,#f3e9d8 7px,#f3e9d8 8px);border-color:#cab489}
+.slot.focused{outline:3px solid var(--amber);outline-offset:1px;z-index:1}
+.slot.remembered{box-shadow:inset 0 0 0 2px var(--teal)}
+.slot-index{font-size:.74rem;color:var(--muted);font-weight:650}
+.slot strong{font-size:1.02rem;line-height:1.35}
+.slot-state{font-size:.67rem;color:var(--muted)}
+.legend{display:flex;flex-wrap:wrap;gap:.6rem 1.1rem;font-size:.78rem;color:var(--muted);margin:.8rem 0}
+.legend span{display:inline-flex;align-items:center;gap:.35rem}
+.swatch{width:.9rem;height:.9rem;display:inline-block;border:1px solid var(--line);border-radius:3px;background:#f9faf5}
+.swatch.live{background:var(--wash)}
+.swatch.gone{background:#f3e9d8;border-style:dashed;border-color:#aa9272}
+.swatch.focus{border:2px solid var(--amber)}
+.counts{font-size:.83rem;color:var(--muted);margin-bottom:1rem}
+.step-box{background:#edf3ee;border-radius:9px;padding:1rem 1.1rem}
+.step-box h3{font-size:1.07rem;margin-bottom:.45rem}
+.step-box p{font-size:.92rem}
+.candidate{font-size:.82rem;font-weight:650;color:var(--teal);margin:.65rem 0 0}
+.probes{padding-left:1.4rem;font-size:.86rem;margin:1rem 0}
+.probes li{padding-left:.2rem;margin-bottom:.5rem}
+.jump{display:flex;align-items:center;gap:.75rem;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:1rem;margin-top:1rem}
+.jump label{font-size:.88rem;margin:0}
+.jump select{flex:1 1 160px;min-width:0}
+.explanation-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1rem;margin:1.2rem 0}
+.explanation-grid article{box-shadow:none}
+.explanation-grid h3{color:var(--teal)}
+.explanation-grid p{font-size:.9rem;color:var(--muted)}
+.result-card{margin-top:1.2rem}
+summary{cursor:pointer;font-weight:650;min-height:44px;padding:.45rem 0}
+.table-scroll{overflow:auto;max-width:100%;margin:.7rem 0 1rem}
+table{border-collapse:collapse;width:100%;font-size:.88rem;text-align:left}
+th,td{border-bottom:1px solid var(--line);padding:.65rem .6rem;vertical-align:top}
+th{font-size:.76rem;color:var(--muted)}
+td:nth-child(3){min-width:9rem}
+.lesson{display:grid;grid-template-columns:1fr 1fr;gap:2rem;margin-top:1.2rem;background:#e7efe6}
+.lesson h2{margin-bottom:.55rem}
+.lesson-actions{margin-top:1rem}
+.source-credit{overflow-wrap:anywhere;font-size:.81rem;color:var(--muted)}
+.footer{margin-top:1.5rem;display:flex;gap:1rem;flex-wrap:wrap;justify-content:space-between;font-size:.82rem;color:var(--muted)}
+.js-only{display:none}
+.ready .js-only{display:block}
+.ready .js-note{display:none}
+@media(max-width:900px){.page{padding:1.1rem 1.1rem 2rem}.workspace{grid-template-columns:1fr}.hero{gap:1.5rem}.editor-layout{display:grid;grid-template-columns:1fr 1.3fr;gap:1.5rem}.editor-layout .divider{display:none}.explanation-grid{gap:.75rem}.table{grid-template-columns:repeat(auto-fit,minmax(76px,1fr))}}
+@media(max-width:580px){.page{padding:.9rem .75rem 2rem}.topline{margin-bottom:1.3rem}.hero,.lesson,.editor-layout{grid-template-columns:1fr;gap:1.1rem}.hero{margin-bottom:1.25rem}h1{font-size:2.65rem}.rule-card{font-size:.88rem}.card{padding:1rem}.editor-layout .divider{display:block}.editor-layout{display:block}.explanation-grid{grid-template-columns:1fr}.table{grid-template-columns:repeat(auto-fit,minmax(68px,1fr));gap:.45rem}.slot{min-height:98px}.step-controls button{flex:1 1 42%}.trace-top{gap:.3rem}.lesson{gap:1rem}.topline{font-size:.74rem}.hero-copy{font-size:1rem}.result-card .table-scroll{margin-left:-.25rem;margin-right:-.25rem}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+@media print{body{background:white}.page{max-width:none;padding:0}.topline,.editor,.step-controls,.jump,.actions,.lesson-actions,.skip,.js-note{display:none}.hero{display:block}.rule-card{margin:1rem 0}.workspace{display:block}.card{box-shadow:none;break-inside:avoid}.explanation-grid{display:block}.explanation-grid article{margin:.5rem 0}.lesson{display:block}.result-card{break-inside:auto}.table-scroll{overflow:visible}details>summary{display:none}details>*:not(summary){display:block}a{color:inherit}}
+</style>
+</head>
+<body>
+<a class="skip" href="#trace">Skip to the probe trace</a>
+<div class="page">
+<header class="topline"><a href="../demo.html">RecallWeave</a><span>ORIGINAL COURSE · OFFLINE EXPLORER</span></header>
+<section class="hero" aria-labelledby="page-title">
+<div><p class="eyebrow">Algorithms / Hash tables</p><h1 id="page-title">Follow the probe.</h1><p class="hero-copy">A home slot is a starting point. Insert, find and delete integer keys, then inspect the exact evidence behind each result.</p></div>
+<div class="rule-card"><p class="formula">home = key mod capacity</p><p><strong>One slot forward. Wrap at the end.</strong></p><p class="small">The remainder is always nonnegative. Each operation inspects at most one complete cycle. This is a fixed-capacity integer set: no duplicate keys and no resizing.</p></div>
+</section>
+<p class="js-note card">Enable JavaScript to run the explorer. The original twelve-question lesson is available as <a href="hash-tables.json">hash-tables.json</a>, with a <a href="hash-tables.md">worked guide</a>. The controls calculate locally; no connection is used.</p>
+<noscript><p class="card">Example: with capacity 7, insert 10, 17 and 24 into slots 3, 4 and 5. Deleting 17 leaves a tombstone at 4. Finding 24 must pass it to reach slot 5; marking it never-used empty would incorrectly stop the search.</p></noscript>
+<main class="js-only">
+<div class="workspace">
+<section class="card editor" aria-labelledby="editor-title">
+<h2 id="editor-title">Choose the operations</h2>
+<div class="editor-layout">
+<div>
+<div class="field example-row"><label for="example">Worked example</label><select id="example"><option value="tombstone">Deletion keeps a search alive</option><option value="duplicate">A tombstone before a duplicate</option><option value="wrap">Wrap from the last slot to zero</option><option value="full">A full table, then a reusable slot</option><option value="negative">Negative keys, valid home slots</option></select><button id="load-example" type="button">Load example</button></div>
+<p class="small">Loading an example replaces the draft and restarts its trace.</p>
+<div class="divider"></div>
+</div>
+<form id="scenario-form" novalidate>
+<div class="field"><label for="capacity">Capacity</label><div class="capacity-row"><input id="capacity" inputmode="numeric" maxlength="8" value="7" aria-describedby="capacity-help error"><span id="capacity-help" class="small">3–17 slots</span></div></div>
+<div class="field"><label for="operations">Operations, in order</label><textarea id="operations" spellcheck="false" maxlength="2048" aria-describedby="operations-help error"></textarea><p id="operations-help" class="small">One per line: <code>insert 10</code>, <code>find 10</code> or <code>delete 10</code>. Up to 24 operations; integer keys −9999 to 9999. Blank lines are ignored.</p></div>
+<div class="actions"><button id="apply" class="primary" type="submit">Apply operations</button><button id="revert" type="button" disabled>Revert edits</button></div>
+<p id="error" class="error" role="alert" hidden></p>
+<p id="draft-status" class="draft-status" role="status"></p>
+</form>
+</div>
+</section>
+<section id="trace" class="card trace" aria-labelledby="trace-title" tabindex="-1">
+<div class="trace-top"><h2 id="trace-title">Inspect the table</h2><span id="step-counter" class="step-counter">Step 0</span></div>
+<p id="applied-summary" class="small"></p>
+<div class="step-controls" aria-label="Trace controls"><button id="previous" type="button">Previous step</button><button id="next" class="primary" type="button">Next step</button><button id="restart" type="button">Restart trace</button><button id="final" type="button">Show final table</button></div>
+<ol id="table" class="table" aria-label="Table slots in index order"></ol>
+<div class="legend" aria-label="Slot legend"><span><i class="swatch"></i>Never-used empty</span><span><i class="swatch live"></i>Occupied</span><span><i class="swatch gone"></i>Deleted</span><span><i class="swatch focus"></i>Current slot</span></div>
+<p id="counts" class="counts"></p>
+<div class="step-box"><h3 id="step-heading" aria-live="polite" aria-atomic="true">Start with an empty table</h3><p id="step-detail"></p><p id="candidate" class="candidate"></p></div>
+<h3 class="small" style="margin:1rem 0 .3rem">This operation’s probes so far</h3>
+<ol id="probe-list" class="probes"></ol>
+<div class="jump"><label for="operation-picker">Inspect operation</label><select id="operation-picker"><option value="-1">Empty table</option></select></div>
+</section>
+</div>
+<section class="explanation-grid" aria-label="Three rules to keep in view">
+<article class="card"><h3>Empty proves absence.</h3><p>A never-used empty slot ends the search. A key previously inserted on this path would not have passed it.</p></article>
+<article class="card"><h3>Deleted means keep looking.</h3><p>A tombstone holds no key, but preserves a path to keys stored farther along. It can be a later insertion candidate.</p></article>
+<article class="card"><h3>Check before you reuse.</h3><p>Insertion remembers the first tombstone, then proves absence. An existing equal key leaves the table unchanged.</p></article>
+</section>
+<section class="card result-card" aria-label="Complete applied results">
+<details><summary>See every operation result</summary><p class="small">Each arrow is one inspected slot, including empty and deleted slots. Results describe the applied operations, even while editor changes are unapplied.</p><div class="table-scroll" tabindex="0" role="region" aria-label="Operation results; scroll horizontally on a small screen"><table><thead><tr><th scope="col">Operation</th><th scope="col">Home</th><th scope="col">Probe order</th><th scope="col">Result</th></tr></thead><tbody id="result-body"></tbody></table></div><button id="download-trace" type="button">Download applied trace (.json)</button><p class="small" style="margin-top:.6rem">This is a readable result record, not a saved lesson or a file the explorer imports.</p></details>
+</section>
+<section class="card lesson" aria-labelledby="lesson-heading">
+<div><p class="eyebrow">Connect the ideas</p><h2 id="lesson-heading">Study the twelve-question lesson</h2><p id="lesson-title"></p><p class="small">Download the original deck, open RecallWeave, choose the JSON under <strong>Bring your own lesson</strong>, inspect its preview and select <strong>Start this deck</strong>. Your answers, review, practice and study notes use the existing learner.</p><div class="actions lesson-actions"><button id="download-course" class="primary" type="button">Download lesson (.json)</button><a href="../demo.html" target="_blank" rel="noopener">Open RecallWeave</a></div></div>
+<div><details><summary>Sources and permission</summary><p id="lesson-credit" class="source-credit"></p><p id="lesson-license" class="source-credit"></p><p class="source-credit">Primary references: <a href="https://xlinux.nist.gov/dads/HTML/hashtab.html">NIST: hash table</a> and <a href="https://opendatastructures.org/ods-python/5_2_LinearHashTable_Linear_.html">Open Data Structures §5.2</a>. Examples, questions and diagrams here are original.</p></details><p class="small">This small model uses a simple remainder hash and deliberately keeps its capacity fixed. It displays exact work for a chosen history; it does not establish average performance, security or learning efficacy.</p><p class="small"><a href="hash-tables.md">Read the worked guide and source instructions</a></p></div>
+</section>
+</main>
+<footer class="footer"><span>Local computation · No account, storage or network calls</span><span>Indices start at 0 · One full cycle is the limit</span></footer>
+</div>
+<script type="module">
+/**
+ * Bounded integer-set model for the original RecallWeave hash-table lesson.
+ * Linear probing visits (home + offset) mod capacity, at most capacity times.
+ * See courses/hash-tables.md for conventions, references and the public API.
+ */
+const LIMITS = Object.freeze({
+  minCapacity: 3, maxCapacity: 17, minKey: -9999, maxKey: 9999, maxOperations: 24,
+});
+
+function freeze(value) {
+  if (value && typeof value === 'object' && !Object.isFrozen(value)) {
+    for (const child of Object.values(value)) freeze(child);
+    Object.freeze(value);
+  }
+  return value;
+}
+
+function objectFields(value, fields, path) {
+  if (!value || typeof value !== 'object' || Array.isArray(value) ||
+      ![Object.prototype, null].includes(Object.getPrototypeOf(value))) {
+    throw new TypeError(path + ' must be a plain object.');
+  }
+  const keys = Reflect.ownKeys(value);
+  if (keys.length !== fields.length || keys.some(key => !fields.includes(key))) {
+    throw new TypeError(path + ' must contain exactly ' + fields.join(' and ') + '.');
+  }
+}
+
+function integer(value, min, max, path) {
+  if (typeof value !== 'number' || !Number.isFinite(value) || !Number.isInteger(value)) {
+    throw new TypeError(path + ' must be a finite integer.');
+  }
+  if (value < min || value > max) {
+    throw new RangeError(path + ' must be between ' + min + ' and ' + max + '.');
+  }
+  return value === 0 ? 0 : value;
+}
+
+function validateScenario(value) {
+  objectFields(value, ['capacity', 'operations'], 'scenario');
+  const capacity = integer(value.capacity, LIMITS.minCapacity, LIMITS.maxCapacity, 'capacity');
+  if (!Array.isArray(value.operations)) throw new TypeError('operations must be an array.');
+  if (value.operations.length > LIMITS.maxOperations) {
+    throw new RangeError('operations must contain at most ' + LIMITS.maxOperations + ' entries.');
+  }
+  const operations = [];
+  for (let i = 0; i < value.operations.length; i += 1) {
+    const operation = value.operations[i];
+    const path = 'operations[' + i + ']';
+    objectFields(operation, ['type', 'key'], path);
+    if (!['insert', 'find', 'delete'].includes(operation.type)) {
+      throw new TypeError(path + '.type must be insert, find or delete.');
+    }
+    operations.push({
+      type: operation.type,
+      key: integer(operation.key, LIMITS.minKey, LIMITS.maxKey, path + '.key'),
+    });
+  }
+  return freeze({ capacity, operations });
+}
+
+function homeIndex(key, capacity) {
+  const k = integer(key, LIMITS.minKey, LIMITS.maxKey, 'key');
+  const m = integer(capacity, LIMITS.minCapacity, LIMITS.maxCapacity, 'capacity');
+  return ((k % m) + m) % m;
+}
+
+function snapshot(slots) {
+  return slots.map(slot => ({ ...slot }));
+}
+
+function runScenario(value) {
+  const scenario = validateScenario(value);
+  const slots = Array.from({ length: scenario.capacity }, () => ({ kind: 'empty' }));
+  const initialSlots = snapshot(slots);
+  const operations = [];
+  const trace = [{ kind: 'initial', operationIndex: null, probeIndex: null, slots: initialSlots }];
+
+  for (let operationIndex = 0; operationIndex < scenario.operations.length; operationIndex += 1) {
+    const operation = scenario.operations[operationIndex];
+    const { type, key } = operation;
+    const home = homeIndex(key, scenario.capacity);
+    const before = snapshot(slots);
+    const probes = [];
+    let firstDeleted = null;
+    let match = null;
+    let firstEmpty = null;
+
+    for (let offset = 0; offset < scenario.capacity; offset += 1) {
+      const index = (home + offset) % scenario.capacity;
+      const slot = { ...slots[index] };
+      let decision;
+      if (slot.kind === 'occupied') {
+        if (slot.key === key) {
+          decision = 'match';
+          match = index;
+        } else {
+          decision = 'collision';
+        }
+      } else if (slot.kind === 'empty') {
+        decision = 'empty-stop';
+        firstEmpty = index;
+      } else if (type === 'insert' && firstDeleted === null) {
+        firstDeleted = index;
+        decision = 'remember-deleted';
+      } else {
+        decision = 'skip-deleted';
+      }
+      probes.push({ index, slot, decision, firstDeleted });
+      trace.push({ kind: 'probe', operationIndex, probeIndex: probes.length - 1, slots: before });
+      if (match !== null || firstEmpty !== null) break;
+    }
+
+    let status;
+    let index = match;
+    if (type === 'insert') {
+      if (match !== null) {
+        status = 'present';
+      } else {
+        index = firstDeleted !== null ? firstDeleted : firstEmpty;
+        if (index === null) {
+          status = 'full';
+        } else {
+          slots[index] = { kind: 'occupied', key };
+          status = 'inserted';
+        }
+      }
+    } else if (type === 'delete') {
+      status = match === null ? 'absent' : 'deleted';
+      if (match !== null) slots[match] = { kind: 'deleted' };
+    } else {
+      status = match === null ? 'absent' : 'found';
+    }
+    const after = snapshot(slots);
+    operations.push({ operationIndex, operation, home, before, probes, status, index, after });
+    trace.push({ kind: 'result', operationIndex, probeIndex: null, slots: after });
+  }
+  return freeze({ scenario, initialSlots, operations, finalSlots: snapshot(slots), trace });
+}
+
+const COURSE_TEXT = "{\n  \"format\": \"recallweave-deck/1\",\n  \"title\": \"Hash tables: follow the probe\",\n  \"attribution\": \"Original worked questions, examples and explorer for RecallWeave, 2026. Algorithm background: Paul E. Black, NIST Dictionary of Algorithms and Data Structures, hash table (https://xlinux.nist.gov/dads/HTML/hashtab.html); Pat Morin, Open Data Structures, section 5.2, LinearHashTable: Linear Probing (https://opendatastructures.org/ods-python/5_2_LinearHashTable_Linear_.html). No source exercises, prose or figures are reproduced.\",\n  \"license\": \"CC0-1.0 for this original course content. Referenced NIST and Open Data Structures materials retain their own terms; they are not included in this deck.\",\n  \"concepts\": [\n    \"Home slots and collisions\",\n    \"Probe order and stopping\",\n    \"Deletion and duplicates\",\n    \"Capacity and cost\"\n  ],\n  \"items\": [\n    {\n      \"id\": \"ht-home-positive\",\n      \"concept\": \"Home slots and collisions\",\n      \"prerequisites\": [],\n      \"prompt\": \"This course stores distinct integer keys in a fixed table. Its home slot is the nonnegative remainder of key ÷ capacity, with slots numbered from 0. For capacity 7, what is the home slot of key 24?\",\n      \"options\": [\n        \"Slot 2\",\n        \"Slot 4\",\n        \"Slot 3\",\n        \"Slot 7\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"24 = 3 × 7 + 3, so its home slot is 3. Capacity 7 provides slots 0 through 6. The home slot is where an operation starts; collisions may make a key's eventual storage slot different.\",\n      \"transfer\": \"With the same capacity, 31 = 4 × 7 + 3 also starts at slot 3. If 24 is already there, inserting 31 needs a collision rule; calculating the home slot alone has not found an unused position.\"\n    },\n    {\n      \"id\": \"ht-home-collision\",\n      \"concept\": \"Home slots and collisions\",\n      \"prerequisites\": [],\n      \"prompt\": \"In a capacity-7 table, keys 5 and 12 both have home slot 5. Which description is correct for this integer-set model?\",\n      \"options\": [\n        \"They collide at the same home slot but remain two distinct keys.\",\n        \"They are duplicates, so only the smaller key is allowed.\",\n        \"The table must use the key itself as the slot index.\",\n        \"Both keys must be stored together in a list at slot 5.\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"A collision means different keys map to the same home slot. Equality is a separate comparison: 5 is not 12. This course uses open addressing, storing one key per slot and probing later slots. A list at each home slot would be a different collision scheme, separate chaining.\",\n      \"transfer\": \"Try inserting 5 and then 12 into an empty capacity-7 table. The first uses slot 5; the second probes 5, then uses empty slot 6. Inserting 12 again should report present, not create a second copy.\"\n    },\n    {\n      \"id\": \"ht-home-negative\",\n      \"concept\": \"Home slots and collisions\",\n      \"prerequisites\": [],\n      \"prompt\": \"The model defines k mod m as the remainder in [0, m), even for negative keys. For key -1 and capacity 7, which home slot is valid?\",\n      \"options\": [\n        \"Slot -1\",\n        \"Slot 0\",\n        \"Slot 1\",\n        \"Slot 6\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"-1 = (-1) × 7 + 6, and 6 is in the allowed range 0 through 6. Some programming languages use a remainder operator whose result can be negative. The explorer explicitly normalizes that result so every key starts at a valid array slot.\",\n      \"transfer\": \"For key -8 with capacity 7, -8 = (-2) × 7 + 6, so it also starts at 6. Inserting -1 and -8 creates a collision even though both keys are negative. Zero and negative zero represent the same integer key.\"\n    },\n    {\n      \"id\": \"ht-probe-wrap\",\n      \"concept\": \"Probe order and stopping\",\n      \"prerequisites\": [\n        \"Home slots and collisions\"\n      ],\n      \"prompt\": \"Start with an empty capacity-7 table. Insert 6, then 13, then 20. Linear probing moves to the next slot, wrapping from 6 to 0. Which probe sequence and final slot apply to inserting 20?\",\n      \"options\": [\n        \"Probes 6, 5, 4; inserts at 4.\",\n        \"Probes 6, 0, 1; inserts at 1.\",\n        \"Probes 6, 7, 8; inserts at 8.\",\n        \"Probes 1 only; inserts at 1.\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"All three keys have home slot 6. Inserting 6 fills slot 6. Inserting 13 sees 6 occupied and fills slot 0. Inserting 20 then checks 6, 0 and 1, using empty slot 1. The wrap changes the slot index, not the key or the fixed capacity.\",\n      \"transfer\": \"Finding 13 in that final table probes 6 and then 0, stopping at the match. Finding 27 would probe 6, 0, 1 and empty slot 2 before reporting absent.\"\n    },\n    {\n      \"id\": \"ht-probe-empty-stop\",\n      \"concept\": \"Probe order and stopping\",\n      \"prerequisites\": [\n        \"Home slots and collisions\"\n      ],\n      \"prompt\": \"Start empty with capacity 7 and insert only key 10, which occupies slot 3. Now find key 24, whose home slot is also 3. Count every inspected slot, including an empty slot. What happens?\",\n      \"options\": [\n        \"Probe 3, then empty slot 4; report absent after two probes.\",\n        \"Probe only slot 3; report absent after one probe.\",\n        \"Inspect all seven slots before an absent result is allowed.\",\n        \"Insert 24 into slot 4 as part of finding it.\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"Slot 3 holds a different key, so the search continues. Slot 4 has never held a key: insertion of 24 would have stopped there rather than skipping it. That empty slot proves absence. Find is read-only and does not insert anything.\",\n      \"transfer\": \"An occupied nonmatching slot cannot prove absence. A deleted slot cannot either: another key may have been placed farther along before the deletion. The never-used empty state is the stopping evidence.\"\n    },\n    {\n      \"id\": \"ht-probe-match\",\n      \"concept\": \"Probe order and stopping\",\n      \"prerequisites\": [\n        \"Home slots and collisions\"\n      ],\n      \"prompt\": \"Start empty with capacity 7; insert 10, 17 and 24 in that order. They occupy slots 3, 4 and 5. When finding 17, what result and probe count are correct?\",\n      \"options\": [\n        \"Found at home slot 3 after one probe.\",\n        \"Absent after two probes.\",\n        \"Found at slot 4 after two probes.\",\n        \"Found at slot 5 after three probes.\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"Finding 17 starts at its home slot 3. That slot holds 10, so the search continues to slot 4 and matches 17. A successful find stops at the match: slot 5 is not inspected. The stored key's equality, not merely a shared home index, determines success.\",\n      \"transfer\": \"Deleting 17 follows the same two probes, then changes slot 4 to deleted. It does not shift key 24 to the left in this model. The deletion questions explore why that distinction matters.\"\n    },\n    {\n      \"id\": \"ht-delete-chain\",\n      \"concept\": \"Deletion and duplicates\",\n      \"prerequisites\": [\n        \"Probe order and stopping\"\n      ],\n      \"prompt\": \"In a capacity-7 table, insert 10, 17 and 24, then delete 17. Key 24 remains at slot 5. How should slot 4 be marked so finding 24 from home slot 3 still works?\",\n      \"options\": [\n        \"Never-used empty, so the search can stop at slot 4.\",\n        \"Deleted, so the search continues through slot 4 to slot 5.\",\n        \"Occupied by 24, while also leaving 24 at slot 5.\",\n        \"Outside the table, so all later slot numbers decrease.\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"Slot 4 becomes a deleted marker, often called a tombstone. Finding 24 checks key 10 at slot 3, passes the tombstone at 4 and finds 24 at 5. Replacing slot 4 with never-used empty would falsely end that search before the existing key.\",\n      \"transfer\": \"Delete 10 as well. Finding 24 must now pass tombstones at both 3 and 4 before reaching 5. A tombstone records relevant history even though it contains no current key.\"\n    },\n    {\n      \"id\": \"ht-delete-duplicate\",\n      \"concept\": \"Deletion and duplicates\",\n      \"prerequisites\": [\n        \"Probe order and stopping\"\n      ],\n      \"prompt\": \"With capacity 7, insert 10, 17 and 24, then delete 10. Slot 3 is deleted, 4 holds 17 and 5 holds 24. Now insert 24 again. What must the set do?\",\n      \"options\": [\n        \"Immediately fill tombstone 3 with another 24.\",\n        \"Delete the older 24 at slot 5.\",\n        \"Stop at slot 4 and report the table full.\",\n        \"Remember slot 3, continue to the existing 24 at 5, and leave the table unchanged.\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"The tombstone is only a possible insertion location. The probe sequence 3, 4, 5 finds the existing key before any empty slot, so insertion reports present. Filling slot 3 immediately would create two copies of 24 and break the set's duplicate policy.\",\n      \"transfer\": \"Change the last operation to insert 31. It is a different key with the same home slot. If a later empty slot or one full cycle proves 31 absent, the remembered tombstone can then be reused.\"\n    },\n    {\n      \"id\": \"ht-delete-reuse\",\n      \"concept\": \"Deletion and duplicates\",\n      \"prerequisites\": [\n        \"Probe order and stopping\"\n      ],\n      \"prompt\": \"With capacity 7, insert 10, 17 and 24, then delete 17. Now insert 31. The relevant slots are 3:10, 4:deleted, 5:24 and 6:empty. Which result counts every inspected slot?\",\n      \"options\": [\n        \"Insert at 6 after one probe.\",\n        \"Insert at 4 immediately after two probes.\",\n        \"Probe 3, 4, 5, 6; prove absence at 6; insert at remembered slot 4.\",\n        \"Report full because the home slot is occupied.\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"31 starts at 3. The search remembers deleted slot 4 but keeps checking for an existing 31. Slot 5 holds 24; empty slot 6 proves absence. The insertion then uses the first remembered tombstone, slot 4. There are four probes and exactly one slot changes.\",\n      \"transfer\": \"With two tombstones on the probe path, retain the first one as the candidate. A later tombstone does not replace it. The first empty slot still ends the duplicate search, and a full cycle is the alternative absence proof.\"\n    },\n    {\n      \"id\": \"ht-capacity-full\",\n      \"concept\": \"Capacity and cost\",\n      \"prerequisites\": [\n        \"Deletion and duplicates\"\n      ],\n      \"prompt\": \"Start empty with capacity 3 and insert 0, 3 and 6. Slots 0, 1 and 2 are now occupied. This explorer keeps a fixed capacity and never resizes. What happens when inserting 9?\",\n      \"options\": [\n        \"The capacity automatically becomes 6.\",\n        \"After probes 0, 1 and 2, report full and preserve all three keys.\",\n        \"Overwrite key 0 because 9 shares its home slot.\",\n        \"Probe forever because no empty slot exists.\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"All three slots are visited once, no key equals 9 and no empty or deleted location is available. The bounded loop reports full without mutation. The capacity bound guarantees termination even when no empty slot exists. Other hash-table implementations may resize; this teaching model deliberately does not.\",\n      \"transfer\": \"Insert 6 again into the same full table. It is found after probes 0, 1, 2, so the result is present rather than full. A full table can still answer successful finds and duplicate inserts.\"\n    },\n    {\n      \"id\": \"ht-capacity-cycle-tombstone\",\n      \"concept\": \"Capacity and cost\",\n      \"prerequisites\": [\n        \"Deletion and duplicates\"\n      ],\n      \"prompt\": \"Start empty with capacity 3; insert 0, 3 and 6, then delete 3. Slots are 0:0, 1:deleted, 2:6. Insert 9. There are no never-used empty slots. What is correct?\",\n      \"options\": [\n        \"Report full as soon as slot 0 is occupied.\",\n        \"Treat deleted slot 1 as a match for key 9.\",\n        \"Insert at slot 2, replacing key 6.\",\n        \"Probe 0, 1, 2 once, prove 9 absent, then reuse slot 1.\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"The first tombstone is remembered at slot 1. A complete three-slot cycle proves that 9 is not already stored. Although there is no never-used empty slot, the tombstone provides room, so insertion succeeds there. Full means no usable slot after absence is established, not merely no never-used empty slot.\",\n      \"transfer\": \"Finding a missing key in this pre-insertion table also needs all three probes, but remains read-only. Deleting a missing key does the same and creates no new tombstone.\"\n    },\n    {\n      \"id\": \"ht-capacity-cost\",\n      \"concept\": \"Capacity and cost\",\n      \"prerequisites\": [\n        \"Deletion and duplicates\"\n      ],\n      \"prompt\": \"With capacity 7, insert 0, 7 and 14, then delete 7. Slots 0:0, 1:deleted, 2:14 are followed by empty slot 3. Find key 21. What are the current occupied-key fraction and number of probes?\",\n      \"options\": [\n        \"2/7 occupied; four probes, through slots 0, 1, 2 and 3.\",\n        \"3/7 occupied; one probe because hashing is always constant work.\",\n        \"2/7 occupied; two probes because deleted slots are free.\",\n        \"1/7 occupied; seven probes because every miss scans the whole table.\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"Two live keys occupy the seven-slot table, giving 2/7. The tombstone is not a live key, but it still extends the probe path. Finding 21 starts at 0, passes 0, deleted 1 and 14 at 2, then stops at empty 3: four probes. The visible count measures this operation, not an empirical average.\",\n      \"transfer\": \"Compare the same search in a fresh capacity-7 table made by inserting 14 and 5. Those two live keys occupy slots 0 and 5; finding 21 now checks occupied slot 0 and empty slot 1, taking two probes. Equal live-key counts do not describe cluster layout or deletion history. Expected fast hashing requires assumptions and capacity management; a bounded linear probe can inspect every slot.\"\n    }\n  ]\n}\n";
+
+const examples = {
+  tombstone: { capacity: 7, operations: [
+    ['insert', 10], ['insert', 17], ['insert', 24], ['delete', 17], ['find', 24], ['insert', 31],
+  ] },
+  duplicate: { capacity: 7, operations: [
+    ['insert', 10], ['insert', 17], ['insert', 24], ['delete', 10], ['insert', 24],
+  ] },
+  wrap: { capacity: 7, operations: [
+    ['insert', 6], ['insert', 13], ['insert', 20], ['find', 13], ['find', 27],
+  ] },
+  full: { capacity: 3, operations: [
+    ['insert', 0], ['insert', 3], ['insert', 6], ['insert', 9], ['delete', 3], ['insert', 9], ['find', 12],
+  ] },
+  negative: { capacity: 7, operations: [
+    ['insert', -1], ['insert', -8], ['find', -8], ['delete', -1], ['insert', -15],
+  ] },
+};
+
+const byId = id => document.getElementById(id);
+const elements = Object.fromEntries([
+  'scenario-form', 'capacity', 'operations', 'example', 'load-example', 'apply',
+  'revert', 'draft-status', 'error', 'table', 'step-heading', 'step-detail',
+  'step-counter', 'counts', 'probe-list', 'candidate', 'previous', 'next', 'restart',
+  'final', 'operation-picker', 'result-body', 'download-trace', 'download-course',
+  'lesson-title', 'lesson-credit', 'lesson-license', 'applied-summary',
+].map(id => [id, byId(id)]));
+let result;
+let cursor = 0;
+let dirty = false;
+
+function operationName(operation) {
+  return operation.type[0].toUpperCase() + operation.type.slice(1) + ' ' + operation.key;
+}
+function slotName(slot) {
+  return slot.kind === 'occupied' ? 'key ' + slot.key : slot.kind === 'empty' ? 'never-used empty' : 'deleted';
+}
+function setDraftStatus() {
+  elements['draft-status'].textContent = dirty
+    ? 'Unapplied edits. The table and downloads still show the last applied operations.'
+    : 'The table and downloads match the applied operations.';
+  elements['draft-status'].classList.toggle('dirty', dirty);
+  elements.revert.disabled = !dirty;
+}
+function writeEditor(scenario) {
+  elements.capacity.value = String(scenario.capacity);
+  elements.operations.value = scenario.operations.map(op => op.type + ' ' + op.key).join('\n');
+}
+function clearError() {
+  elements.error.textContent = '';
+  elements.error.hidden = true;
+  elements.capacity.removeAttribute('aria-invalid');
+  elements.operations.removeAttribute('aria-invalid');
+}
+function readEditor() {
+  const capacityText = elements.capacity.value.trim();
+  if (!/^[+-]?\d+$/.test(capacityText)) {
+    elements.capacity.setAttribute('aria-invalid', 'true');
+    throw new TypeError('Capacity must be a whole number from 3 to 17.');
+  }
+  const capacity = Number(capacityText);
+  if (capacity < LIMITS.minCapacity || capacity > LIMITS.maxCapacity) {
+    elements.capacity.setAttribute('aria-invalid', 'true');
+    throw new RangeError('Capacity must be between 3 and 17.');
+  }
+  const operations = [];
+  const lines = elements.operations.value.split(/\r?\n/);
+  for (let line = 0; line < lines.length; line += 1) {
+    const text = lines[line].trim();
+    if (!text) continue;
+    const match = /^(insert|find|delete)\s+([+-]?\d+)$/i.exec(text);
+    if (!match) {
+      elements.operations.setAttribute('aria-invalid', 'true');
+      throw new TypeError('Line ' + (line + 1) + ': use insert, find or delete followed by one whole-number key.');
+    }
+    const key = Number(match[2]);
+    if (!Number.isSafeInteger(key) || key < LIMITS.minKey || key > LIMITS.maxKey) {
+      elements.operations.setAttribute('aria-invalid', 'true');
+      throw new RangeError('Line ' + (line + 1) + ': key must be a whole number from -9999 to 9999.');
+    }
+    operations.push({ type: match[1].toLowerCase(), key });
+    if (operations.length > LIMITS.maxOperations) {
+      elements.operations.setAttribute('aria-invalid', 'true');
+      throw new RangeError('Use at most 24 operations. Blank lines do not count.');
+    }
+  }
+  return { capacity, operations };
+}
+function resultText(operation) {
+  const { status, index, probes } = operation;
+  const suffix = ' ' + probes.length + (probes.length === 1 ? ' probe.' : ' probes.');
+  if (status === 'inserted') return 'Inserted at slot ' + index + '.' + suffix;
+  if (status === 'present') return 'Already present at slot ' + index + '; no change.' + suffix;
+  if (status === 'found') return 'Found at slot ' + index + '; no change.' + suffix;
+  if (status === 'deleted') return 'Deleted at slot ' + index + '; tombstone retained.' + suffix;
+  if (status === 'full') return 'Full: no usable slot; no change.' + suffix;
+  return 'Absent; no change.' + suffix;
+}
+function probeText(operation, probe) {
+  const prefix = 'Slot ' + probe.index + ' is ' + slotName(probe.slot) + '. ';
+  if (probe.decision === 'match') return prefix + 'The key matches; stop probing.';
+  if (probe.decision === 'empty-stop') {
+    return prefix + 'This proves the key is absent; stop probing.';
+  }
+  if (operation.probes.length === operation.before.length && operation.probes.at(-1) === probe) {
+    return prefix + 'Every slot has now been inspected once, proving absence.' +
+      (operation.operation.type === 'insert' && probe.firstDeleted !== null
+        ? ' The first remembered tombstone can be used at the result step.' : '');
+  }
+  if (probe.decision === 'remember-deleted') {
+    return prefix + 'Remember it for insertion, then keep checking for an existing key.';
+  }
+  if (probe.decision === 'skip-deleted') {
+    return prefix + 'Deletion does not prove absence; continue probing.';
+  }
+  return prefix + 'A different key occupies it; continue to the next slot.';
+}
+function outcomeDetail(operation) {
+  const last = operation.probes.at(-1);
+  if (operation.status === 'present') {
+    return operation.probes.some(probe => probe.firstDeleted !== null)
+      ? 'An earlier tombstone is only a candidate. A matching key takes priority, so this set never gains a duplicate.'
+      : 'The existing key is already in the set. No duplicate copy is added and no slot changes.';
+  }
+  if (operation.status === 'inserted') {
+    const proof = last.decision === 'empty-stop'
+      ? 'Never-used empty slot ' + last.index + ' proved absence.'
+      : 'One complete cycle proved absence.';
+    const destination = operation.before[operation.index].kind === 'deleted'
+      ? ' The first remembered tombstone, slot ' + operation.index + ', is now reused.'
+      : ' That empty slot now holds the key.';
+    return proof + destination + ' Only this result step changes the table.';
+  }
+  if (operation.status === 'deleted') {
+    return 'The matching key is replaced by a deleted marker. Keys farther along the probe path stay searchable.';
+  }
+  if (operation.status === 'full') {
+    return 'One complete cycle found no match and no empty or deleted slot. Fixed capacity means refusal, with the table preserved.';
+  }
+  if (operation.status === 'found') {
+    return 'The matching key ends the search. Find does not change any slot.';
+  }
+  return last.decision === 'empty-stop'
+    ? 'A never-used empty slot ends the search. No slot changes.'
+    : 'Every slot was inspected once without a match. No slot changes.';
+}
+function render() {
+  const frame = result.trace[cursor];
+  const operation = frame.operationIndex === null ? null : result.operations[frame.operationIndex];
+  const probe = frame.kind === 'probe' ? operation.probes[frame.probeIndex] : null;
+  const focus = probe ? probe.index : frame.kind === 'result' ? operation.index : null;
+  const remembered = probe ? probe.firstDeleted : null;
+  elements.table.replaceChildren();
+  frame.slots.forEach((slot, index) => {
+    const li = document.createElement('li');
+    li.className = 'slot ' + slot.kind;
+    li.dataset.index = String(index);
+    li.dataset.kind = slot.kind;
+    if (slot.kind === 'occupied') li.dataset.key = String(slot.key);
+    if (index === focus) {
+      li.classList.add('focused');
+      li.setAttribute('aria-current', 'step');
+    }
+    if (index === remembered) li.classList.add('remembered');
+    li.setAttribute('aria-label', 'Slot ' + index + ': ' + slotName(slot) +
+      (index === focus ? '. Current slot.' : '') + (index === remembered ? ' Remembered insertion candidate.' : ''));
+    const label = document.createElement('span');
+    label.className = 'slot-index';
+    label.textContent = 'Slot ' + index;
+    const value = document.createElement('strong');
+    value.textContent = slot.kind === 'occupied' ? String(slot.key) : slot.kind === 'empty' ? 'Empty' : 'Deleted';
+    const state = document.createElement('span');
+    state.className = 'slot-state';
+    state.textContent = slot.kind === 'occupied' ? 'occupied' : slot.kind === 'empty' ? 'never used' : 'tombstone';
+    li.append(label, value, state);
+    elements.table.append(li);
+  });
+  const occupied = frame.slots.filter(slot => slot.kind === 'occupied').length;
+  const deleted = frame.slots.filter(slot => slot.kind === 'deleted').length;
+  elements.counts.textContent = occupied + ' occupied · ' + deleted + ' deleted · ' +
+    (frame.slots.length - occupied - deleted) + ' never-used empty. Occupied fraction: ' + occupied + '/' + frame.slots.length + '.';
+  elements['step-counter'].textContent = 'Step ' + cursor + ' of ' + (result.trace.length - 1);
+  elements['step-counter'].dataset.step = String(cursor);
+  elements.candidate.textContent = remembered === null ? 'Remembered insertion slot: none.' : 'Remembered insertion slot: ' + remembered + '.';
+  elements['probe-list'].replaceChildren();
+  if (!operation) {
+    elements['step-heading'].textContent = 'Start with an empty table';
+    elements['step-detail'].textContent = result.operations.length
+      ? 'Choose Next step to inspect the first slot. Probe steps observe the table; a result step applies any change.'
+      : 'No operations were supplied. This empty table is also the final table.';
+    const li = document.createElement('li');
+    li.textContent = 'No slot has been inspected.';
+    elements['probe-list'].append(li);
+  } else {
+    const name = operationName(operation.operation);
+    elements['step-heading'].textContent = frame.kind === 'probe'
+      ? name + ' · probe ' + (frame.probeIndex + 1) + ' at slot ' + probe.index
+      : name + ' · ' + resultText(operation);
+    elements['step-detail'].textContent = frame.kind === 'probe'
+      ? probeText(operation, probe) + (frame.probeIndex === operation.probes.length - 1 ? ' Next step shows the result.' : '')
+      : outcomeDetail(operation);
+    const seen = frame.kind === 'result' ? operation.probes : operation.probes.slice(0, frame.probeIndex + 1);
+    for (const step of seen) {
+      const li = document.createElement('li');
+      li.dataset.slot = String(step.index);
+      li.dataset.decision = step.decision;
+      li.textContent = probeText(operation, step);
+      elements['probe-list'].append(li);
+    }
+  }
+  elements['operation-picker'].value = frame.operationIndex === null ? '-1' : String(frame.operationIndex);
+  elements.previous.disabled = cursor === 0;
+  elements.restart.disabled = cursor === 0;
+  elements.next.disabled = cursor === result.trace.length - 1;
+  elements.final.disabled = cursor === result.trace.length - 1;
+}
+function populateResults() {
+  elements['operation-picker'].replaceChildren(new Option('Empty table', '-1'));
+  elements['result-body'].replaceChildren();
+  for (const operation of result.operations) {
+    elements['operation-picker'].append(new Option(
+      (operation.operationIndex + 1) + '. ' + operationName(operation.operation), String(operation.operationIndex)));
+    const row = document.createElement('tr');
+    row.dataset.operation = String(operation.operationIndex);
+    for (const text of [
+      (operation.operationIndex + 1) + '. ' + operationName(operation.operation),
+      String(operation.home), operation.probes.map(probe => probe.index).join(' → '), resultText(operation),
+    ]) {
+      const cell = document.createElement('td');
+      cell.textContent = text;
+      row.append(cell);
+    }
+    elements['result-body'].append(row);
+  }
+  if (!result.operations.length) {
+    const row = document.createElement('tr');
+    const cell = document.createElement('td');
+    cell.colSpan = 4;
+    cell.textContent = 'No operations. The table stays empty.';
+    row.append(cell);
+    elements['result-body'].append(row);
+  }
+}
+function applyScenario(scenario) {
+  const nextResult = runScenario(scenario);
+  result = nextResult;
+  cursor = 0;
+  dirty = false;
+  clearError();
+  writeEditor(result.scenario);
+  elements['applied-summary'].textContent = 'Applied: capacity ' + result.scenario.capacity + ' · ' +
+    result.operations.length + (result.operations.length === 1 ? ' operation.' : ' operations.');
+  setDraftStatus();
+  populateResults();
+  render();
+}
+function download(text, type, filename) {
+  const url = URL.createObjectURL(new Blob([text], { type }));
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 0);
+}
+elements['scenario-form'].addEventListener('submit', event => {
+  event.preventDefault();
+  clearError();
+  try {
+    applyScenario(readEditor());
+  } catch (error) {
+    elements.error.textContent = error.message + ' The last applied trace has been preserved.';
+    elements.error.hidden = false;
+    setDraftStatus();
+  }
+});
+for (const field of [elements.capacity, elements.operations]) {
+  field.addEventListener('input', () => {
+    dirty = true;
+    clearError();
+    setDraftStatus();
+  });
+}
+elements.revert.addEventListener('click', () => {
+  writeEditor(result.scenario);
+  dirty = false;
+  clearError();
+  setDraftStatus();
+});
+elements['load-example'].addEventListener('click', () => {
+  const example = examples[elements.example.value];
+  applyScenario({ capacity: example.capacity, operations: example.operations.map(([type, key]) => ({ type, key })) });
+});
+elements.previous.addEventListener('click', () => { cursor = Math.max(0, cursor - 1); render(); });
+elements.next.addEventListener('click', () => { cursor = Math.min(result.trace.length - 1, cursor + 1); render(); });
+elements.restart.addEventListener('click', () => { cursor = 0; render(); });
+elements.final.addEventListener('click', () => { cursor = result.trace.length - 1; render(); });
+elements['operation-picker'].addEventListener('change', () => {
+  const operationIndex = Number(elements['operation-picker'].value);
+  cursor = operationIndex === -1 ? 0 : result.trace.findIndex(frame => frame.operationIndex === operationIndex);
+  render();
+});
+elements['download-trace'].addEventListener('click', () => {
+  download(JSON.stringify({
+    format: 'recallweave-hash-trace/1',
+    convention: 'Integer set; nonnegative key mod capacity; linear probing; tombstones; fixed capacity; no resizing.',
+    scenario: result.scenario,
+    operations: result.operations,
+    finalSlots: result.finalSlots,
+  }, null, 2) + '\n', 'application/json;charset=utf-8', 'hash-table-trace.json');
+});
+elements['download-course'].addEventListener('click', () => {
+  download(COURSE_TEXT, 'application/json;charset=utf-8', 'hash-tables.json');
+});
+const course = JSON.parse(COURSE_TEXT);
+elements['lesson-title'].textContent = course.title;
+elements['lesson-credit'].textContent = course.attribution;
+elements['lesson-license'].textContent = course.license;
+elements['load-example'].click();
+document.documentElement.classList.add('ready');
+
+</script>
+</body>
+</html>
