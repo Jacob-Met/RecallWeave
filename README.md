@@ -2,6 +2,14 @@
 
 **ForgeHacks 2026 · AI + Education** — an original, static, browser-only learning experience whose bundled lesson connects ideas in cellular energy. Learners can also bring a local JSON lesson deck. The official track framing on ForgeHacks is “Reimagining how people learn and teach.” This demo responds to that brief by helping a learner retrieve concepts, see links, and apply them—not by generating chat answers.
 
+## Count samples without replacement
+
+Open **[Every possible sample](courses/hypergeometric-explorer.html)** directly to explore exact finite-population chances. Set a population of 1–200 distinct tokens, the marked count and a sample size, then apply an inclusive count event. Inspect the support, combination factors, exact favourable/total subset counts, reduced probabilities, expected count and finite-population variance. Impossible counts, empty samples, one-token populations and a whole-population sample remain explicit.
+
+The page counts equally likely subsets with BigInt; its bars and decimal labels are display approximations. Selecting a row shows one deterministic compatible subset, clearly labelled as an illustration. Draft edits retire prior results. Download the exact applied observation, the original [fourteen-question lesson](courses/hypergeometric.json) or its [worked guide](courses/hypergeometric.md). Import the course through **Bring your own lesson** to use the existing learner feedback, review, practice and notes.
+
+The self-contained page needs no server, account, connection or automatic browser storage. It assumes uniform sampling without replacement and makes no claim about observed data or real sampling designs. Rebuild with `node tools/build-hypergeometric.mjs`; use `--check` for exact model, UI, template, course and guide parity.
+
 ## Run it
 
 Open `demo.html` directly in a browser—no server, install, build step, internet, login, API key, or user data storage is required. It is a single self-contained file with embedded CSS, JavaScript and deck. The modular source is in `index.html`, `src/`, and `data/`; to test that version locally, serve this directory with `python3 -m http.server 8080` and visit `http://localhost:8080`. Rebuild the direct-open demo with `python3 tools/make_demo.py` after source changes. No hosted endpoint is called by either version.

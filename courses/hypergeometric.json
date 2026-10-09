@@ -1,0 +1,249 @@
+{
+  "format": "recallweave-deck/1",
+  "title": "Sampling without replacement: exact finite chances",
+  "attribution": "Original questions, fictional token examples and worked explanations by RecallWeave contributors with AI assistance, 2026. Mathematical background checked against UC Berkeley SticiGui by Philip B. Stark: Random Variables and Discrete Distributions, hypergeometric subsection (https://www.stat.berkeley.edu/~stark/SticiGui/Text/randomVariables.htm), and Standard Error, simple random sampling subsection (https://www.stat.berkeley.edu/~stark/SticiGui/Text/standardError.htm). No source exercises, prose or figures reproduced.",
+  "license": "CC0-1.0 for this original lesson content. Referenced sources retain their own terms and are not included.",
+  "concepts": [
+    "Uniform finite samples",
+    "Counting possible outcomes",
+    "Events and complements",
+    "Mean and spread",
+    "Boundary and model checks"
+  ],
+  "items": [
+    {
+      "id": "hg-uniform",
+      "concept": "Uniform finite samples",
+      "prerequisites": [],
+      "prompt": "Five distinct tokens are labelled A–E. A simple random sample selects two without replacement, and order is ignored. What probability does each particular two-token subset have?",
+      "options": [
+        "1/5, because the population has five tokens.",
+        "1/10, because all ten two-token subsets are equally likely.",
+        "1/20, because order must still be counted separately.",
+        "1/2, because two tokens are selected."
+      ],
+      "answer": 1,
+      "explanation": "There are C(5,2)=10 unordered subsets. A simple random sample assigns each the same probability, 1/10. There are 20 ordered draws, but each unordered pair corresponds to two of them, giving 2/20=1/10.",
+      "transfer": "With six distinct tokens and a three-token sample, there are C(6,3)=20 equally likely subsets. Each has probability 1/20; the number of marked tokens does not change this denominator."
+    },
+    {
+      "id": "hg-dependence",
+      "concept": "Uniform finite samples",
+      "prerequisites": [],
+      "prompt": "A box contains 8 distinct tokens, 3 marked and 5 unmarked. Draw uniformly without replacement. Given that the first token was marked, what is the probability that the second token is marked?",
+      "options": [
+        "3/8",
+        "3/7",
+        "2/7",
+        "2/8"
+      ],
+      "answer": 2,
+      "explanation": "The observed marked token has left the box. Seven tokens remain, two marked, so the conditional probability is 2/7. This differs from the first-draw probability 3/8. Without replacement, the mark indicators need not be independent.",
+      "transfer": "If the first token was unmarked instead, the second-draw probability is 3/7. Before seeing the first result, symmetry still gives the second token a marginal marked probability of 3/8."
+    },
+    {
+      "id": "hg-support",
+      "concept": "Counting possible outcomes",
+      "prerequisites": [
+        "Uniform finite samples"
+      ],
+      "prompt": "A population has N=10 distinct tokens, K=8 marked, and a sample has n=7 tokens drawn without replacement. Which values can the marked count X take?",
+      "options": [
+        "Every integer from 0 through 7.",
+        "Every integer from 5 through 7.",
+        "Every integer from 7 through 8.",
+        "Only 5."
+      ],
+      "answer": 1,
+      "explanation": "Only two unmarked tokens exist. A seven-token sample must therefore include at least five marked tokens. It can include no more than seven tokens in total and no more than eight marked tokens. The support is max(0,7−2)=5 through min(7,8)=7.",
+      "transfer": "For N=12, K=3 and n=10, only nine unmarked tokens exist. The support is 1,2,3: at least one marked token is necessary and no more than three are available."
+    },
+    {
+      "id": "hg-exact-count",
+      "concept": "Counting possible outcomes",
+      "prerequisites": [
+        "Uniform finite samples"
+      ],
+      "prompt": "A simple random sample of 4 comes from 8 distinct tokens, 3 marked. How many equally likely subsets contain exactly 2 marked tokens, and what is their total probability?",
+      "options": [
+        "6 subsets; probability 6/70.",
+        "30 subsets; probability 30/70 = 3/7.",
+        "35 subsets; probability 35/70 = 1/2.",
+        "30 subsets; probability 30/8."
+      ],
+      "answer": 1,
+      "explanation": "Choose two of the three marked tokens in C(3,2)=3 ways, and two of the five unmarked tokens in C(5,2)=10 ways. Each pair of choices determines one complete subset, so there are 30 favourable subsets. All C(8,4)=70 subsets are equally likely, giving 30/70=3/7.",
+      "transfer": "For the same population and sample size, exactly three marked tokens requires all three marked and one of five unmarked tokens. The count is C(3,3)C(5,1)=5, with probability 5/70=1/14."
+    },
+    {
+      "id": "hg-zero",
+      "concept": "Counting possible outcomes",
+      "prerequisites": [
+        "Uniform finite samples"
+      ],
+      "prompt": "A simple random sample of n=3 comes from N=9 distinct tokens with K=4 marked. What is P(X=0), the probability of no marked token?",
+      "options": [
+        "0, because some marked tokens exist.",
+        "(5/9)^3 = 125/729.",
+        "10/84 = 5/42.",
+        "1/9."
+      ],
+      "answer": 2,
+      "explanation": "A sample with zero marked tokens chooses all three from the five unmarked tokens: C(5,3)=10 favourable subsets among C(9,3)=84. Hence P(X=0)=5/42. Multiplying (5/9)^3 would reuse the same unmarked fraction after each draw, which does not describe sampling without replacement.",
+      "transfer": "The sequential calculation agrees: (5/9)(4/8)(3/7)=60/504=5/42. The shrinking numerators and denominators account for the removed unmarked tokens."
+    },
+    {
+      "id": "hg-complement",
+      "concept": "Events and complements",
+      "prerequisites": [
+        "Counting possible outcomes"
+      ],
+      "prompt": "For N=9, K=4 and n=3, suppose P(X=0)=5/42. What is the probability that the sample contains at least one marked token?",
+      "options": [
+        "5/42",
+        "37/42",
+        "4/9",
+        "1−(4/9)^3"
+      ],
+      "answer": 1,
+      "explanation": "The disjoint events X=0 and X≥1 cover every possible sample. The complement rule gives 1−5/42=37/42. The event 'at least one' includes one, two and three marked tokens.",
+      "transfer": "In a population of N=7 with K=2 marked and n=2, P(X=0)=C(5,2)/C(7,2)=10/21. Thus P(X≥1)=11/21, including both the one-marked and two-marked outcomes."
+    },
+    {
+      "id": "hg-interval",
+      "concept": "Events and complements",
+      "prerequisites": [
+        "Counting possible outcomes"
+      ],
+      "prompt": "For N=8, K=3, n=4, exactly 2 marked tokens occurs in 30 subsets and exactly 3 in 5 subsets, out of 70 equally likely subsets. What is P(2≤X≤3)?",
+      "options": [
+        "30/70, because only the lower endpoint counts.",
+        "150/4900, from multiplying the two probabilities.",
+        "35/70 = 1/2, from adding disjoint outcome counts.",
+        "1, because every X in the interval is possible."
+      ],
+      "answer": 2,
+      "explanation": "The endpoint counts are mutually exclusive: one sample cannot contain both exactly two and exactly three marked tokens. The inclusive interval therefore has 30+5=35 favourable subsets, giving 35/70=1/2. Possible values need not have equal probabilities.",
+      "transfer": "For this same system the counts for X=0,1,2,3 are 5,30,30,5. Therefore P(0≤X≤1)=35/70=1/2, while P(X=1)=30/70=3/7."
+    },
+    {
+      "id": "hg-mean",
+      "concept": "Mean and spread",
+      "prerequisites": [
+        "Uniform finite samples"
+      ],
+      "prompt": "A simple random sample has N=12, K=5 and n=4. What is the expected marked count, and must one particular sample equal it?",
+      "options": [
+        "5/3; no, an expectation can lie between attainable integer counts.",
+        "5/3; yes, each sample must contain exactly 5/3 marked tokens.",
+        "5; yes, the expectation always equals the marked population count.",
+        "4/5; no, the expectation is sample size divided by marked population size."
+      ],
+      "answer": 0,
+      "explanation": "Each of the four draw positions has marginal marked probability 5/12. Linearity of expectation gives 4×5/12=5/3 even though the indicators are dependent. Individual samples have integer counts; an expected count need not be attainable in one sample.",
+      "transfer": "For N=15, K=6 and n=5, the expected count is 5×6/15=2. An expectation that happens to be an integer still does not force every sample to contain that many marked tokens."
+    },
+    {
+      "id": "hg-variance",
+      "concept": "Mean and spread",
+      "prerequisites": [
+        "Uniform finite samples"
+      ],
+      "prompt": "For N=8, K=3 and n=4, the marked fraction is p=3/8. Which expression is the variance of X under simple random sampling without replacement?",
+      "options": [
+        "4p(1−p)=15/16, with no correction.",
+        "4p(1−p)×(8−4)/(8−1)=15/28.",
+        "4p=3/2.",
+        "[4p(1−p)]²=225/256."
+      ],
+      "answer": 1,
+      "explanation": "For N>1, Var(X)=np(1−p)(N−n)/(N−1). Substitution gives (15/16)(4/7)=15/28. The factor reflects dependence from sampling without replacement. It reduces the corresponding independent-draw variance when more than one token is sampled and both categories exist.",
+      "transfer": "For N=10, K=4 and n=5, the mean is 2 and the variance is 5×(4/10)×(6/10)×(5/9)=2/3. Variance measures squared count spread, not the expected count itself."
+    },
+    {
+      "id": "hg-census",
+      "concept": "Boundary and model checks",
+      "prerequisites": [
+        "Counting possible outcomes",
+        "Mean and spread"
+      ],
+      "prompt": "A simple random sample selects all n=9 tokens from a population with N=9 and K=4 marked. What are X and its variance?",
+      "options": [
+        "X can be any integer 0–9; variance is positive.",
+        "X is certainly 4; variance is 0.",
+        "X is certainly 9; variance is 0.",
+        "X is certainly 0; variance is 4."
+      ],
+      "answer": 1,
+      "explanation": "There is only one nine-token subset: the whole population. It contains all four marked tokens, so X=4 with probability one. A constant random variable has variance zero; the finite-population factor is also zero when n=N>1.",
+      "transfer": "For N=1, selecting the only token is also deterministic. The usual variance expression has a denominator N−1=0, so handle the one-token population directly rather than evaluating 0/0."
+    },
+    {
+      "id": "hg-empty",
+      "concept": "Boundary and model checks",
+      "prerequisites": [
+        "Counting possible outcomes"
+      ],
+      "prompt": "The model allows a sample size n=0 from N=7 tokens, K=2 marked. Which result is correct?",
+      "options": [
+        "There are no possible samples, so probabilities are undefined.",
+        "There are seven possible samples, each with one token.",
+        "There is one empty subset; P(X=0)=1 and the mean is 0.",
+        "The marked count is 2 because none of the marked tokens was removed."
+      ],
+      "answer": 2,
+      "explanation": "The empty set is one subset of size zero: C(7,0)=1. It contains zero marked tokens. Thus the distribution puts all its probability on X=0, and both mean and variance are zero. This is different from sampling from an empty population, which this explorer does not admit.",
+      "transfer": "For any allowed N and K, changing n to zero keeps this result. In the explorer the only permitted inclusive event endpoints are then 0 and 0."
+    },
+    {
+      "id": "hg-marginal",
+      "concept": "Uniform finite samples",
+      "prerequisites": [],
+      "prompt": "There are N=6 distinct tokens, only K=1 marked. Three tokens will be drawn uniformly without replacement. Before any results are observed, what is the probability that the third token is marked?",
+      "options": [
+        "1/6, because every token is equally likely to occupy the third draw position.",
+        "1/4, because only four tokens remain before the third draw.",
+        "1/3, because three draws are planned.",
+        "0, because the marked token must have appeared earlier."
+      ],
+      "answer": 0,
+      "explanation": "Unconditionally, each of the six token identities is equally likely to appear in any fixed draw position, so the third-draw marked probability is 1/6. The conditional chance after specific earlier observations can differ: if the marked token already appeared it is zero; if the first two were unmarked it is 1/4.",
+      "transfer": "In this system X can only be 0 or 1. The probability that the three-token sample contains the unique marked token is 3/6=1/2, which differs from the probability for one specified draw position."
+    },
+    {
+      "id": "hg-relabel",
+      "concept": "Events and complements",
+      "prerequisites": [
+        "Counting possible outcomes"
+      ],
+      "prompt": "A population has N=10 tokens with K=4 marked, and n=3 tokens are sampled. If the category names are swapped, how does the original event 'exactly 2 marked' translate?",
+      "options": [
+        "Exactly 2 tokens from the newly marked category.",
+        "Exactly 1 token from the newly marked category, with the same probability.",
+        "Exactly 3 tokens from the newly marked category, with a different probability.",
+        "It becomes impossible to compare the events."
+      ],
+      "answer": 1,
+      "explanation": "Each three-token sample contains X old-marked and 3−X old-unmarked tokens. Swapping names makes the new count 3−X, so X=2 becomes a new count of 1. It is the same set of underlying samples. Both counts give C(4,2)C(6,1)/C(10,3)=36/120=3/10.",
+      "transfer": "For an original event 1≤X≤2 in a sample of size 3, the relabelled count Y=3−X also lies between 1 and 2. More generally an inclusive interval [a,b] becomes [n−b,n−a]."
+    },
+    {
+      "id": "hg-design",
+      "concept": "Boundary and model checks",
+      "prerequisites": [
+        "Uniform finite samples",
+        "Counting possible outcomes"
+      ],
+      "prompt": "Four distinct tokens A,B,C,D are on a ring. A procedure chooses one of AB, BC, CD or DA, each with probability 1/4. Each token has inclusion probability 1/2. Is this a simple random sample of size 2 from the four tokens?",
+      "options": [
+        "Yes; equal inclusion probabilities alone make all two-token subsets equally likely.",
+        "Yes; every selected pair contains two distinct tokens.",
+        "No; AC and BD are never selected, so the six two-token subsets are not equally likely.",
+        "No; simple random sampling always requires replacement."
+      ],
+      "answer": 2,
+      "explanation": "A simple random sample requires equal probability for every subset of the specified size. Equal individual inclusion probabilities are not sufficient. This procedure assigns zero probability to AC and BD, while the four adjacent pairs have probability 1/4.",
+      "transfer": "If A and C are marked, this ring procedure always selects exactly one marked token. A simple random sample instead gives P(X=1)=C(2,1)C(2,1)/C(4,2)=4/6=2/3. Knowing only N,K,n does not repair a sampling design that violates the model."
+    }
+  ]
+}
