@@ -1,0 +1,369 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>Recall first · RecallWeave</title>
+<style>:root{font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#173e36;background:#f7f5ed;line-height:1.65;font-size:16px;--ink:#173e36;--muted:#46635c;--line:#c4d0c7;--accent:#145c48}
+*{box-sizing:border-box}body{margin:0}header,main,footer{width:min(100% - 3rem,850px);margin:auto}header{padding:4rem 0 2rem}.brand,.eyebrow{font-size:.75rem;letter-spacing:.14em;font-weight:750;color:var(--muted)}h1{font-family:Georgia,serif;font-weight:500;font-size:clamp(2.9rem,8vw,4.8rem);line-height:1.04;letter-spacing:-.045em;margin:1.2rem 0}h1 span{color:#68775b}h2{font-size:1.4rem;line-height:1.45;margin-top:0}h3{font-size:1rem;margin-bottom:.35rem}p{margin:.65rem 0 1rem}.intro{font-size:1.15rem;max-width:650px}.privacy{font-size:.85rem;color:var(--muted)}.course-picker{border:1px solid var(--line);border-radius:14px;background:#fffef9;padding:1.6rem}.preview{border-top:1px solid var(--line);margin-top:1.3rem;padding-top:1.3rem}.preview h2{font-size:1.1rem}.credits{font-size:.8rem;color:var(--muted);overflow-wrap:anywhere;border-top:1px solid var(--line);margin-top:1.4rem;padding-top:.6rem}.credits p{margin:.45rem 0}label{display:block;font-weight:650;margin:.8rem 0 .4rem}input[type=file]{display:block;width:100%;font:inherit;margin:.7rem 0 1rem}button{font:inherit;font-weight:650;cursor:pointer;background:var(--accent);color:white;border:1px solid var(--accent);border-radius:7px;min-height:44px;padding:.65rem 1rem;margin:.35rem .4rem .35rem 0;text-align:left}button:hover{background:#104b3b}button.secondary{color:var(--ink);background:#f7f5ed;border-color:#91a69a}button.secondary:hover{background:#edf0e6}button:focus-visible,input:focus-visible,textarea:focus-visible,summary:focus-visible,a:focus-visible{outline:3px solid #a15d0f;outline-offset:3px}[tabindex="-1"]:focus{outline:2px solid #b47e30;outline-offset:4px}#status:empty{display:none}#status{font-size:.9rem;color:var(--muted);margin-top:1rem}.session{padding-top:2.5rem}.course-title{font-size:.9rem;color:var(--muted);margin-bottom:1.2rem}.prompt-card{background:white;border:1px solid var(--line);border-radius:14px;padding:2rem}.concept{font-size:.85rem;color:var(--muted)}textarea{font:inherit;color:var(--ink);background:#fffefa;border:1px solid #96aaa0;border-radius:6px;width:100%;padding:.8rem;resize:vertical;min-height:135px}.hint{font-size:.8rem;color:var(--muted);margin:.3rem 0}#answer-count{text-align:right}.reference{padding:1rem 1.2rem;background:#eef4e9;border-left:4px solid #658251;margin:1.4rem 0}.own-answer{padding:1rem 1.2rem;border-left:4px solid #c7b68a;background:#faf6eb}.literal{white-space:pre-wrap;overflow-wrap:anywhere}.self-check{font-size:.95rem}.actions{display:flex;gap:.5rem;flex-wrap:wrap}.summary-line{font-weight:650}.attempts{margin:1.4rem 0}.attempts details{background:#fffef9;border:1px solid var(--line);border-radius:8px;padding:1rem;margin:.75rem 0;overflow-wrap:anywhere}.attempts summary{cursor:pointer;font-weight:650}.attempts h3{margin-top:1.2rem}.restart-area{margin:1.4rem 0}.confirmation{padding:1rem;background:#f9eedb;border:1px solid #bc9760;border-radius:8px}.about{border-top:1px solid var(--line);margin-top:3rem;padding-top:2rem;color:var(--muted);font-size:.9rem}.about h2{font-size:1.1rem}footer{padding:2rem 0 3rem;color:var(--muted);font-size:.8rem}.skip{position:absolute;top:-100px;left:1rem;background:white;padding:.7rem;z-index:2}.skip:focus{top:1rem}[hidden]{display:none!important}
+@media(max-width:520px){header,main,footer{width:calc(100% - 2rem)}header{padding-top:2.4rem}.course-picker,.prompt-card{padding:1.15rem}.actions{display:block}.actions button{display:block;width:100%}h2{font-size:1.25rem}.reference,.own-answer{padding:.8rem}}
+</style>
+</head>
+<body>
+<a class="skip" href="#session">Skip to your practice</a>
+<header>
+<p class="brand">RECALLWEAVE · A DIFFERENT WAY TO PRACTICE</p>
+<h1>Recall first.<br><span>Then compare.</span></h1>
+<p class="intro">Make space for your own explanation before seeing the reference answer. Decide what feels ready and what you want to revisit.</p>
+<p class="privacy">Offline · No account · Only in this tab</p>
+</header>
+<main>
+<section class="course-picker" aria-labelledby="course-heading">
+<h2 id="course-heading">Choose your course</h2>
+<p>Use the bundled energy-in-cells lesson, or a RecallWeave course JSON. A new course replaces your practice only when you select <strong>Start this course</strong>.</p>
+<label for="deck-file">Open a local course JSON (up to 256 KiB)</label>
+<input id="deck-file" type="file" accept=".json,application/json">
+<button id="bundled-course" type="button" class="secondary">Preview bundled course</button>
+<p id="status" role="status" aria-live="polite"></p>
+<div id="preview" class="preview"></div>
+</section>
+<section id="session" class="session" aria-label="Your recall practice" tabindex="-1"></section>
+<div id="restart-area" class="restart-area" hidden>
+<button id="restart" type="button" class="secondary">Start over</button>
+<div id="restart-confirm" class="confirmation" hidden>
+<p>Start this course again? This clears both passes and all written attempts in this tab.</p>
+<button id="confirm-restart" type="button">Start over and clear attempts</button>
+<button id="cancel-restart" type="button" class="secondary">Keep my work</button>
+</div>
+</div>
+<aside class="about">
+<h2>A practice tool, not a score</h2>
+<p>Ready and Revisit are your judgments. This page does not assess your writing, estimate mastery, or change your main RecallWeave lesson.</p>
+<p>Questions keep their original wording. If a prompt depends on seeing choices, reveal its reference when you need it. The reference answer, explanation and transfer prompt appear together.</p>
+<p>Nothing is saved automatically. Reloading or closing this page clears your attempts and returns to the bundled-course preview. The full course is embedded or loaded locally; hiding the reference on the card is a study aid, not a secure test.</p>
+</aside>
+</main>
+<footer>Retrieve an idea. Check the connection. Choose your next step.</footer>
+<script id="bundled-deck" type="application/json">{"title":"Energy in cells: from light to ATP","license":"Original question wording and distractors. Reference textbook content is licensed CC BY-NC-SA 4.0; see the cited OpenStax edition.","attribution":"Scientific references: OpenStax, Biology 2e, sections 6.4, 7.1, 7.4 and 8.1–8.3, by Mary Ann Clark, Matthew Douglas and Jung Choi (Rice University). Reference textbook content: CC BY-NC-SA 4.0. Access for free at https://openstax.org/books/biology-2e/pages/1-introduction. Questions and distractors are originally authored for RecallWeave.","concepts":["photosynthesis","glucose","cellular-respiration","atp"],"items":[{"id":"p1","concept":"photosynthesis","prerequisites":[],"prompt":"A plant has light, water and carbon dioxide, but makes much less chlorophyll. Which direct change is most likely in the light reactions?","options":["Less light energy is absorbed to drive electron transfer","Less carbon dioxide is absorbed directly by chlorophyll","More glucose is split to replace light absorption in photosystems","More oxygen is split to replace chlorophyll's supply of electrons"],"answer":0,"explanation":"Chlorophyll absorbs light energy that drives electron transfer in photosynthesis. Making much less chlorophyll reduces this light capture; chlorophyll does not absorb carbon dioxide or split oxygen.","transfer":"This links a visible input (light) to the first energy-conversion step."},{"id":"p2","concept":"photosynthesis","prerequisites":[],"prompt":"Which statement best describes the role of the Calvin cycle?","options":["It uses ATP and NADPH from light reactions to build carbohydrate from carbon dioxide","It uses chlorophyll to split water and store light energy as NADPH","It breaks glucose into pyruvate and captures energy in ATP and NADH","It transfers electrons to oxygen and uses their energy to generate ATP"],"answer":0,"explanation":"The Calvin cycle uses energy carriers produced by the light reactions to fix carbon dioxide into carbohydrate building blocks; it does not capture light directly.","transfer":"Keep the two linked stages distinct: light capture supplies chemical energy; carbon fixation uses it."},{"id":"g1","concept":"glucose","prerequisites":["photosynthesis"],"prompt":"A learner says, “Plants get their usable energy from soil.” Which correction best connects photosynthesis to stored chemical energy?","options":["Light supplies energy to build sugars; soil minerals supply nutrients for growth","Soil minerals supply the energy; light supplies the carbon used to build sugars","Carbon dioxide supplies energy; roots absorb the sugars that store that energy","Water supplies the energy; chlorophyll converts soil minerals into sugar molecules"],"answer":0,"explanation":"Photosynthesis uses light energy to build energy-rich carbohydrates from carbon dioxide (with water involved in the overall process). Soil minerals support growth but are not the energy source for sugar synthesis.","transfer":"Explain the energy path: light → chemical energy in sugars; nutrients and energy are different things."},{"id":"r1","concept":"cellular-respiration","prerequisites":["glucose"],"prompt":"A human muscle cell has glucose available, but oxygen becomes limiting. What is the strongest prediction for its mitochondrial electron transport chain?","options":["Electron flow slows because oxygen is the chain's final electron acceptor","Electron flow increases as glucose replaces oxygen as the final electron acceptor","The chain keeps working normally by passing its electrons to carbon dioxide instead","The chain stops using electrons and makes ATP directly from glucose instead"],"answer":0,"explanation":"In aerobic respiration, oxygen accepts electrons at the end of the mitochondrial electron transport chain. Limited oxygen constrains that pathway; cells may use other processes, but those are not the same as aerobic respiration.","transfer":"The stored energy in glucose is released through linked pathways; oxygen's role is at the chain's end."},{"id":"a1","concept":"atp","prerequisites":["cellular-respiration"],"prompt":"Why is ATP useful as an immediate energy carrier even though cells store much more energy in fuel molecules?","options":["Its hydrolysis can power cellular work through coupled chemical reactions","It forms a long-term energy store that a cell can use without regenerating it","Its formation releases energy whenever ADP gains another phosphate group","It contains more energy per molecule than glucose and replaces stored fuels"],"answer":0,"explanation":"ATP hydrolysis can be coupled to endergonic cellular processes. Cells continually regenerate ATP; it is an immediate transferable energy currency, not a long-term bulk store.","transfer":"Distinguish the fuel reservoir (for example, glucose) from the frequently regenerated spendable carrier (ATP)."},{"id":"x1","concept":"atp","prerequisites":["photosynthesis","cellular-respiration"],"prompt":"Which comparison best connects photosynthesis and cellular respiration?","options":["Photosynthesis stores captured light energy in sugars; respiration transfers some of that energy to ATP","They run the same chemical reactions in opposite directions inside the same cell compartment","Photosynthesis releases energy from sugars; respiration uses light energy to build those sugars","Photosynthesis and cellular respiration both store light energy, but in different organisms"],"answer":0,"explanation":"Photosynthesis stores captured light energy in organic molecules; cellular respiration transfers energy from organic molecules into ATP. The pathways are connected but are not simply identical reverse reactions.","transfer":"Use the model to explain why food webs depend on photosynthetic energy capture and why cells need respiration."}]}</script>
+<script>const Deck = (() => {
+/** Local lesson content. Imported data cannot replace the model or run code. */
+const DECK_FORMAT = 'recallweave-deck/1';
+const MAX_DECK_BYTES = 262144;
+
+function deckRecord(value, path) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    throw new Error(`${path} must be an object.`);
+  }
+  return value;
+}
+
+function deckText(value, path, limit) {
+  if (typeof value !== 'string' || !value.trim() || value.length > limit) {
+    throw new Error(`${path} must be nonempty text of at most ${limit} characters.`);
+  }
+  return value;
+}
+
+function deckList(value, path, minimum, maximum) {
+  if (!Array.isArray(value) || value.length < minimum || value.length > maximum) {
+    throw new Error(`${path} must contain ${minimum}–${maximum} entries.`);
+  }
+  return value;
+}
+
+/** Validate and copy only the content fields used by the existing lesson runtime. */
+function validateDeck(value) {
+  const input = deckRecord(value, 'Deck');
+  if (input.format !== undefined && input.format !== DECK_FORMAT) {
+    throw new Error(`Unsupported deck format. Use ${DECK_FORMAT}.`);
+  }
+  const title = deckText(input.title, 'title', 160);
+  const attribution = deckText(input.attribution, 'attribution', 2000);
+  const license = deckText(input.license, 'license', 2000);
+  const concepts = deckList(input.concepts, 'concepts', 1, 32).map((concept, index) =>
+    deckText(concept, `concepts[${index}]`, 80));
+  if (new Set(concepts).size !== concepts.length) throw new Error('Concept names must be unique.');
+  const knownConcepts = new Set(concepts);
+  const ids = new Set();
+  const coveredConcepts = new Set();
+  const links = new Map(concepts.map(concept => [concept, new Set()]));
+  const items = deckList(input.items, 'items', 1, 100).map((value, index) => {
+    const path = `items[${index}]`;
+    const item = deckRecord(value, path);
+    const id = deckText(item.id, `${path}.id`, 80);
+    if (ids.has(id)) throw new Error(`${path}.id duplicates another question ID.`);
+    ids.add(id);
+    const concept = deckText(item.concept, `${path}.concept`, 80);
+    if (!knownConcepts.has(concept)) throw new Error(`${path}.concept is not in concepts.`);
+    coveredConcepts.add(concept);
+    const prerequisites = deckList(item.prerequisites, `${path}.prerequisites`, 0, 31).map((name, p) => {
+      deckText(name, `${path}.prerequisites[${p}]`, 80);
+      if (!knownConcepts.has(name)) throw new Error(`${path}.prerequisites contains an unknown concept.`);
+      if (name === concept) throw new Error(`${path} cannot require its own concept.`);
+      links.get(concept).add(name);
+      return name;
+    });
+    if (new Set(prerequisites).size !== prerequisites.length) throw new Error(`${path}.prerequisites contains a duplicate.`);
+    const options = deckList(item.options, `${path}.options`, 2, 6).map((option, o) =>
+      deckText(option, `${path}.options[${o}]`, 1000));
+    if (new Set(options).size !== options.length) throw new Error(`${path}.options must be distinct.`);
+    if (!Number.isInteger(item.answer) || item.answer < 0 || item.answer >= options.length) {
+      throw new Error(`${path}.answer must be a zero-based index of an option.`);
+    }
+    return Object.freeze({
+      id, concept, prerequisites: Object.freeze(prerequisites),
+      prompt: deckText(item.prompt, `${path}.prompt`, 2000),
+      options: Object.freeze(options), answer: item.answer,
+      explanation: deckText(item.explanation, `${path}.explanation`, 4000),
+      transfer: deckText(item.transfer, `${path}.transfer`, 2000)
+    });
+  });
+  if (coveredConcepts.size !== concepts.length) throw new Error('Every concept must have at least one question.');
+  const visiting = new Set();
+  const visited = new Set();
+  const visit = concept => {
+    if (visiting.has(concept)) throw new Error('Prerequisite links must not form a cycle.');
+    if (visited.has(concept)) return;
+    visiting.add(concept);
+    for (const prerequisite of links.get(concept)) visit(prerequisite);
+    visiting.delete(concept);
+    visited.add(concept);
+  };
+  concepts.forEach(visit);
+  return Object.freeze({
+    format: DECK_FORMAT, title, attribution, license,
+    concepts: Object.freeze(concepts), items: Object.freeze(items)
+  });
+}
+
+/** The same size limit applies to a File and to programmatically supplied UTF-8 JSON. */
+function parseDeck(text) {
+  if (typeof text !== 'string' || new TextEncoder().encode(text).length > MAX_DECK_BYTES) {
+    throw new Error('Choose a JSON deck no larger than 256 KiB.');
+  }
+  let value;
+  try { value = JSON.parse(text); }
+  catch { throw new Error('The file is not valid JSON. Check its commas, quotes and brackets.'); }
+  return validateDeck(value);
+}
+
+/** Export the existing bundled lesson as an editable example of the same contract. */
+function serializeDeck(deck) {
+  return JSON.stringify(validateDeck(deck), null, 2) + '\n';
+}
+
+return {DECK_FORMAT,MAX_DECK_BYTES,validateDeck,parseDeck,serializeDeck};
+})();
+const RecallFirst = (() => {
+const { validateDeck } = Deck;
+
+const MAX_RECALL_TEXT = 4000;
+const freeze = Object.freeze;
+
+function state(fields) {
+  return freeze({ ...fields, queue: freeze([...fields.queue]), first: freeze([...fields.first]), revisit: freeze([...fields.revisit]) });
+}
+
+function createRecall(deck) {
+  const checked = validateDeck(deck);
+  return state({ deck: checked, pass: 'first', queue: checked.items.map((_, i) => i),
+    index: 0, revealed: false, draft: '', first: [], revisit: [] });
+}
+
+function currentRecall(session) {
+  return session.index < session.queue.length ? session.deck.items[session.queue[session.index]] : null;
+}
+
+function writeRecall(session, text) {
+  if (!currentRecall(session) || session.revealed) throw new Error('Write before revealing this prompt.');
+  if (typeof text !== 'string' || text.length > MAX_RECALL_TEXT) throw new Error('Keep your answer within 4,000 characters.');
+  return state({ ...session, draft: text });
+}
+
+function revealRecall(session) {
+  if (!currentRecall(session) || session.revealed) throw new Error('This prompt cannot be revealed again.');
+  return state({ ...session, revealed: true });
+}
+
+function judgeRecall(session, judgment) {
+  const item = currentRecall(session);
+  if (!item || !session.revealed) throw new Error('Reveal and compare before your self-check.');
+  if (!['ready', 'revisit'].includes(judgment)) throw new Error('Choose Ready for now or Revisit.');
+  const record = freeze({ item: item.id, text: session.draft, judgment });
+  return state({ ...session, [session.pass]: [...session[session.pass], record],
+    index: session.index + 1, revealed: false, draft: '' });
+}
+
+function beginRevisit(session) {
+  if (currentRecall(session) || session.pass !== 'first') throw new Error('Finish the first pass before the one revisit pass.');
+  const marked = new Set(session.first.filter(x => x.judgment === 'revisit').map(x => x.item));
+  if (!marked.size) throw new Error('No items were marked for revisiting.');
+  return state({ ...session, pass: 'revisit', queue: session.deck.items
+    .map((item, index) => marked.has(item.id) ? index : -1).filter(index => index >= 0),
+    index: 0, revealed: false, draft: '' });
+}
+
+function recallSummary(session) {
+  const completed = currentRecall(session) === null;
+  const latest = new Map(session.first.map(x => [x.item, x]));
+  for (const record of session.revisit) latest.set(record.item, record);
+  return freeze({ completed, pass: session.pass, total: session.deck.items.length,
+    firstChecked: session.first.length, revisitChecked: session.revisit.length,
+    markedFirst: session.first.filter(x => x.judgment === 'revisit').length,
+    revisitRemaining: [...latest.values()].filter(x => x.judgment === 'revisit').length });
+}
+
+return {MAX_RECALL_TEXT,createRecall,currentRecall,writeRecall,revealRecall,judgeRecall,beginRevisit,recallSummary};
+})();
+(() => {
+const { parseDeck, MAX_DECK_BYTES } = Deck;
+const { createRecall, currentRecall, writeRecall, revealRecall, judgeRecall, beginRevisit, recallSummary, MAX_RECALL_TEXT } = RecallFirst;
+
+const $ = id => document.getElementById(id);
+const bundled = parseDeck($('bundled-deck').textContent);
+let pending = bundled;
+let session = null;
+let request = 0;
+
+function element(tag, text, className) {
+  const node = document.createElement(tag);
+  if (text !== undefined) node.textContent = text;
+  if (className) node.className = className;
+  return node;
+}
+function button(text, id, action, secondary = false) {
+  const node = element('button', text, secondary ? 'secondary' : '');
+  node.id = id; node.type = 'button'; node.addEventListener('click', action); return node;
+}
+function message(text) { $('status').textContent = text; }
+function heading(text) {
+  const node = element('h2', text); node.tabIndex = -1; node.id = 'active-heading'; return node;
+}
+function focusHeading() { $('active-heading')?.focus({ preventScroll: true }); }
+function credits(parent, deck) {
+  const block = element('div', undefined, 'credits');
+  block.append(element('p', 'Source: ' + deck.attribution), element('p', 'License: ' + deck.license));
+  parent.append(block);
+}
+function renderPreview() {
+  const root = $('preview'); root.replaceChildren(); root.hidden = !pending;
+  if (!pending) return;
+  root.append(element('h2', 'Ready to start: ' + pending.title),
+    element('p', pending.items.length + ' prompts · ' + pending.concepts.length + ' concepts. Questions follow the course’s original order.'),
+    element('p', session ? 'Your current work stays below until you explicitly start this course. Starting replaces that work in this tab.' : 'Try each prompt before revealing its reference answer. Your judgments are your own; nothing is automatically marked.'));
+  credits(root, pending);
+  root.append(button('Start this course', 'start-course', () => {
+    request++; session = createRecall(pending); pending = null;
+    $('deck-file').value = ''; renderPreview(); renderSession(); message('Course started. Answers remain hidden until you reveal.'); focusHeading();
+  }), button('Cancel preview', 'cancel-preview', () => {
+    request++; pending = null; $('deck-file').value = ''; renderPreview(); message('Preview cancelled. Current work is unchanged.');
+  }, true));
+}
+
+function showRestart() {
+  const box = $('restart-confirm'); box.hidden = false; $('confirm-restart').focus();
+}
+function renderSession() {
+  const root = $('session'); root.replaceChildren();
+  $('restart-area').hidden = !session; $('restart-confirm').hidden = true;
+  if (!session) { root.append(element('p', 'Start the bundled course above or choose your own course JSON.', 'empty')); return; }
+  const item = currentRecall(session);
+  root.append(element('p', session.deck.title, 'course-title'));
+  if (item) {
+    root.append(element('p', (session.pass === 'first' ? 'FIRST PASS' : 'REVISIT PASS') + ' · ' + (session.index + 1) + ' OF ' + session.queue.length, 'eyebrow'));
+    const article = element('article', undefined, 'prompt-card'); article.id = 'prompt-card';
+    article.append(heading(item.prompt), element('p', 'Concept: ' + item.concept, 'concept'));
+    if (!session.revealed) {
+      article.append(element('p', 'Pause and explain the idea to yourself. You can write a short answer, say it aloud, or think it through.'));
+      const label = element('label', 'Your answer (optional)'); label.htmlFor = 'recall-answer';
+      const input = element('textarea'); input.id = 'recall-answer'; input.rows = 5; input.maxLength = MAX_RECALL_TEXT;
+      input.value = session.draft; input.setAttribute('aria-describedby', 'answer-hint');
+      input.addEventListener('input', () => { session = writeRecall(session, input.value); $('answer-count').textContent = input.value.length + ' / 4,000'; });
+      const hint = element('p', 'Only in this tab. Your answer is not automatically assessed.', 'hint'); hint.id = 'answer-hint';
+      const count = element('p', session.draft.length + ' / 4,000', 'hint'); count.id = 'answer-count';
+      article.append(label, input, hint, count, button('Reveal and compare', 'reveal', () => {
+        session = revealRecall(session); renderSession(); $('reference-heading').focus({ preventScroll: true });
+      }));
+    } else {
+      const own = element('section', undefined, 'own-answer');
+      own.append(element('h3', 'Your attempt'), element('p', session.draft || 'No written answer — you may have answered aloud or in your head.', 'literal'));
+      const reference = element('section', undefined, 'reference'); reference.id = 'reference';
+      const h = element('h3', 'Reference answer'); h.id = 'reference-heading'; h.tabIndex = -1;
+      reference.append(h, element('p', item.options[item.answer], 'literal'), element('h3', 'Why this connects'),
+        element('p', item.explanation, 'literal'), element('h3', 'Apply the idea'), element('p', item.transfer, 'literal'));
+      article.append(own, reference, element('p', 'Compare the ideas, not exact wording. Choose your own next step. These labels are self-reported, not a score.', 'self-check'));
+      const actions = element('div', undefined, 'actions');
+      for (const [value, label] of [['ready', 'Ready for now'], ['revisit', 'Revisit']]) {
+        actions.append(button(label, 'judge-' + value, () => {
+          session = judgeRecall(session, value); renderSession(); focusHeading();
+        }, value === 'revisit'));
+      }
+      article.append(actions);
+    }
+    root.append(article);
+  } else {
+    const summary = recallSummary(session);
+    root.append(heading(session.pass === 'first' ? 'First pass complete' : 'Revisit pass complete'),
+      element('p', 'These are your self-checks, not correctness or mastery estimates. A reference answer cannot decide whether your explanation is sound.'),
+      element('p', summary.markedFirst + ' of ' + summary.total + ' prompts marked Revisit on the first pass.', 'summary-line'));
+    if (session.pass === 'revisit') root.append(element('p', summary.revisitRemaining + ' still marked Revisit after the revisit pass. Keep these ideas for another study session.', 'summary-line'));
+    if (session.pass === 'first' && summary.markedFirst) {
+      root.append(button('Revisit marked prompts (' + summary.markedFirst + ')', 'begin-revisit', () => {
+        session = beginRevisit(session); renderSession(); focusHeading();
+      }), element('p', 'One extra pass, in the original course order. Each prompt starts with its reference hidden again.'));
+    } else if (session.pass === 'first') root.append(element('p', 'You marked every prompt Ready for now. You can inspect your attempts below or start over.'));
+    else root.append(element('p', 'The bounded revisit pass is finished. Your first attempts remain below alongside the revisit attempts.'));
+    const list = element('div', undefined, 'attempts');
+    for (const item of session.deck.items) {
+      const first = session.first.find(x => x.item === item.id);
+      const retry = session.revisit.find(x => x.item === item.id);
+      const detail = element('details');
+      detail.append(element('summary', item.prompt));
+      for (const [name, record] of [['First pass', first], ['Revisit pass', retry]]) {
+        if (!record) continue;
+        detail.append(element('h3', name + ' · ' + (record.judgment === 'ready' ? 'Ready for now' : 'Revisit') + ' (self-reported)'),
+          element('p', record.text || 'No written answer.', 'literal'));
+      }
+      detail.append(element('h3', 'Reference answer'), element('p', item.options[item.answer], 'literal'),
+        element('p', item.explanation, 'literal'), element('p', 'Apply the idea: ' + item.transfer, 'literal'));
+      list.append(detail);
+    }
+    root.append(list);
+  }
+  credits(root, session.deck);
+}
+
+$('deck-file').addEventListener('change', async event => {
+  const ticket = ++request; const file = event.target.files?.[0];
+  pending = null; renderPreview();
+  if (!file) { message('No course selected. Current work is unchanged.'); return; }
+  message('Checking the selected course. Current work is unchanged.');
+  try {
+    if (file.size > MAX_DECK_BYTES) throw new Error('Course files must be at most 262,144 bytes.');
+    const bytes = await file.arrayBuffer();
+    if (ticket !== request) return;
+    if (bytes.byteLength > MAX_DECK_BYTES) throw new Error('Course files must be at most 262,144 bytes.');
+    const text = new TextDecoder('utf-8', { fatal: true }).decode(bytes);
+    const deck = parseDeck(text);
+    if (ticket !== request) return;
+    pending = deck; renderPreview(); message('Course checked. Preview it, then explicitly Start this course.');
+  } catch (error) {
+    if (ticket !== request) return;
+    pending = null; renderPreview(); message('Course refused: ' + error.message + ' Current work is unchanged.');
+  }
+});
+$('bundled-course').addEventListener('click', () => {
+  request++; pending = bundled; $('deck-file').value = ''; renderPreview(); message('Bundled course preview ready. Current work is unchanged.');
+});
+$('restart').addEventListener('click', showRestart);
+$('cancel-restart').addEventListener('click', () => { $('restart-confirm').hidden = true; $('restart').focus(); });
+$('confirm-restart').addEventListener('click', () => {
+  session = createRecall(session.deck); renderSession(); message('Started over with the same checked course. Previous attempts were cleared.'); focusHeading();
+});
+renderPreview(); renderSession();
+
+})();
+</script>
+</body>
+</html>
