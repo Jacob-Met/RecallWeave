@@ -1,0 +1,316 @@
+{
+  "format": "recallweave-deck/1",
+  "title": "Polynomial interpolation: exact samples, divided differences and limits",
+  "attribution": "Original questions, explanations, distractors and worked examples authored for RecallWeave by estate-e82707f2bc62. Mathematical reference: NIST Digital Library of Mathematical Functions, §3.3 Interpolation, https://dlmf.nist.gov/3.3 (checked 2026-10-08). No reference passage, exercise or figure is reproduced. All sample data are authored mathematical examples.",
+  "license": "This original contribution makes no separate reuse-license grant. Linked references retain their own terms.",
+  "concepts": [
+    "Sample constraints",
+    "Divided differences",
+    "Construct and evaluate",
+    "Equivalent representations",
+    "Uniqueness and degree",
+    "Interpretation limits"
+  ],
+  "items": [
+    {
+      "id": "poly-constraints-unique",
+      "concept": "Sample constraints",
+      "prerequisites": [],
+      "prompt": "Three samples have distinct x coordinates. What degree bound guarantees one unique polynomial interpolating all three?",
+      "options": [
+        "Degree at most 2",
+        "Degree exactly 3",
+        "Degree at most 1",
+        "Any unrestricted degree"
+      ],
+      "answer": 0,
+      "explanation": "Three distinct nodes determine one polynomial of degree at most two. It may be a line or a constant. Allowing higher degrees removes uniqueness: a multiple of the product of the three node factors can be added without changing any sampled value.",
+      "transfer": "How does the guaranteed bound change for five distinct nodes?"
+    },
+    {
+      "id": "poly-constraints-conflict",
+      "concept": "Sample constraints",
+      "prerequisites": [],
+      "prompt": "A record contains (2, 5) and (2, 7). Can a single-valued polynomial interpolate both records exactly?",
+      "options": [
+        "Yes, if its degree is at least 2.",
+        "No, it cannot have two values at x = 2.",
+        "Yes, if the rows are reversed.",
+        "No, because the y values are positive."
+      ],
+      "answer": 1,
+      "explanation": "A function assigns one value to each input. These two requirements demand p(2)=5 and p(2)=7 simultaneously. Raising the degree or changing row order cannot repair the contradiction.",
+      "transfer": "What changes mathematically if both rows are (2, 5)? Why might an explicit-input tool still refuse the duplicate?"
+    },
+    {
+      "id": "poly-constraints-bound",
+      "concept": "Sample constraints",
+      "prerequisites": [],
+      "prompt": "The two samples (-1, 4) and (3, 4) determine a polynomial of degree at most 1. Which polynomial is it?",
+      "options": [
+        "p(x) = x + 4",
+        "p(x) = 4x",
+        "p(x) = 4",
+        "p(x) = x² + 3"
+      ],
+      "answer": 2,
+      "explanation": "The constant polynomial p(x)=4 satisfies both samples and is the unique interpolant under the degree-at-most-one bound. A bound does not force the highest allowed degree to occur.",
+      "transfer": "Give three distinct samples whose unique degree-at-most-two interpolant is still constant."
+    },
+    {
+      "id": "poly-differences-first",
+      "concept": "Divided differences",
+      "prerequisites": [
+        "Sample constraints"
+      ],
+      "prompt": "For samples (-1, 4) and (3, 12), what is their first divided difference?",
+      "options": [
+        "8",
+        "4",
+        "1/2",
+        "2"
+      ],
+      "answer": 3,
+      "explanation": "The change in y is 12−4=8 and the change in x is 3−(−1)=4. Their quotient is 2. This is the slope of the interpolating line; a raw y difference is not yet a divided difference.",
+      "transfer": "Evaluate this line at x=1, then check its two supplied endpoints."
+    },
+    {
+      "id": "poly-differences-second",
+      "concept": "Divided differences",
+      "prerequisites": [
+        "Sample constraints"
+      ],
+      "prompt": "For ordered nodes (0, 1), (2, 5), (5, 26), the first divided differences are 2 and 7. What is the second divided difference?",
+      "options": [
+        "1",
+        "5/2",
+        "5",
+        "9"
+      ],
+      "answer": 0,
+      "explanation": "Divide the change between the first differences by the span of the full three-node window: (7−2)/(5−0)=1. The denominator is not merely the final gap of 3 or the first gap of 2.",
+      "transfer": "Compute the first and second divided differences when the nodes are listed in reverse order."
+    },
+    {
+      "id": "poly-differences-spacing",
+      "concept": "Divided differences",
+      "prerequisites": [
+        "Sample constraints"
+      ],
+      "prompt": "Why does the first-difference row for (0, 1), (2, 5), (5, 26) contain 2 and 7 rather than 4 and 21?",
+      "options": [
+        "The y values must be divided by their x values.",
+        "Each y change is divided by its own x gap.",
+        "The rows must first be sorted by y.",
+        "The y changes are divided by the total span of 5."
+      ],
+      "answer": 1,
+      "explanation": "The adjacent x gaps are 2 and 3. Thus (5−1)/2=2 and (26−5)/3=7. Unequal spacing is handled by the divided-difference denominators; no equally spaced grid is assumed.",
+      "transfer": "For (0, 0), (1, 1), (4, 16), compute both first divided differences."
+    },
+    {
+      "id": "poly-construct-newton",
+      "concept": "Construct and evaluate",
+      "prerequisites": [
+        "Divided differences"
+      ],
+      "prompt": "The nodes (0, 1), (2, 5), (5, 26) give Newton coefficients 1, 2, 1 in that order. Which polynomial uses the correct Newton factors?",
+      "options": [
+        "1 + 2x + x²",
+        "1 + 2(x−2) + (x−5)²",
+        "1 + 2x + x(x−2)",
+        "1 + 2x(x−2) + x(x−2)(x−5)"
+      ],
+      "answer": 2,
+      "explanation": "Newton term k uses the product of the preceding k node factors. The terms here are 1, 2(x−0), and 1(x−0)(x−2). Expanding cancels the two linear contributions and gives 1+x².",
+      "transfer": "Substitute all three node x values into the unexpanded expression."
+    },
+    {
+      "id": "poly-construct-evaluate",
+      "concept": "Construct and evaluate",
+      "prerequisites": [
+        "Divided differences"
+      ],
+      "prompt": "For p(x)=1+x², what is the exact value at x=3/2?",
+      "options": [
+        "5/2",
+        "7/2",
+        "9/4",
+        "13/4"
+      ],
+      "answer": 3,
+      "explanation": "Squaring 3/2 gives 9/4; adding 1 gives 13/4. The exact result is 13/4; the rational output retains that fractional form.",
+      "transfer": "Evaluate the same polynomial at −3/2 and explain the relation between the two values."
+    },
+    {
+      "id": "poly-construct-lagrange",
+      "concept": "Construct and evaluate",
+      "prerequisites": [
+        "Divided differences"
+      ],
+      "prompt": "For nodes x=0, 2 and 5, which Lagrange basis polynomial equals 1 at the middle node and 0 at the other two?",
+      "options": [
+        "x(x−5)/(−6)",
+        "x(x−2)/15",
+        "(x−2)(x−5)/10",
+        "x(x−5)/6"
+      ],
+      "answer": 0,
+      "explanation": "The numerator x(x−5) vanishes at 0 and 5. At the middle node 2 it equals −6, so division by −6 makes the value 1. This basis term is then multiplied by the middle sample's y value.",
+      "transfer": "Check all three node values of the chosen basis, without expanding it."
+    },
+    {
+      "id": "poly-representation-order",
+      "concept": "Equivalent representations",
+      "prerequisites": [
+        "Construct and evaluate"
+      ],
+      "prompt": "The same three distinct (x,y) pairs are supplied in reverse order. In exact arithmetic, which statement is correct?",
+      "options": [
+        "The interpolating function changes sign.",
+        "The Newton coefficients can change; the polynomial remains the same.",
+        "The polynomial degree must increase.",
+        "The first supplied y value must remain the constant monomial coefficient."
+      ],
+      "answer": 1,
+      "explanation": "Changing authored order changes the Newton basis factors and often its coefficients. Both constructions still interpolate the same distinct pairs under the same degree bound, so uniqueness makes their expanded polynomial identical.",
+      "transfer": "Compare Newton coefficient lists [1,2,1] and [26,7,1] for forward and reverse ordering of the worked quadratic."
+    },
+    {
+      "id": "poly-representation-add",
+      "concept": "Equivalent representations",
+      "prerequisites": [
+        "Construct and evaluate"
+      ],
+      "prompt": "The polynomial 1+x² fits (0,1), (2,5) and (5,26). Append (3,10). What happens to the new highest-order Newton coefficient?",
+      "options": [
+        "It becomes 3.",
+        "It becomes 10.",
+        "It is zero; the quadratic already fits the new node.",
+        "It is undefined because 3 lies between existing nodes."
+      ],
+      "answer": 2,
+      "explanation": "The old polynomial already gives p(3)=10. The new degree-at-most-three interpolant is therefore the same quadratic, and the added cubic Newton coefficient is zero. Interior nodes are allowed if their x values are distinct.",
+      "transfer": "Append (3,11) instead. Does the old quadratic still satisfy every requirement?"
+    },
+    {
+      "id": "poly-representation-shift",
+      "concept": "Equivalent representations",
+      "prerequisites": [
+        "Construct and evaluate"
+      ],
+      "prompt": "Every y value in the worked dataset is increased by 3 while the x values stay fixed. Its original interpolant is 1+x². What is the new interpolant?",
+      "options": [
+        "1 + (x+3)²",
+        "3 + 3x²",
+        "1 + x²/3",
+        "4 + x²"
+      ],
+      "answer": 3,
+      "explanation": "Adding the constant 3 to the original polynomial raises its value at every x by 3, so it satisfies the shifted samples. Uniqueness under the same degree bound identifies 4+x² as the new interpolant.",
+      "transfer": "If every y is multiplied by −2 instead, write the new polynomial."
+    },
+    {
+      "id": "poly-uniqueness-proof",
+      "concept": "Uniqueness and degree",
+      "prerequisites": [
+        "Construct and evaluate"
+      ],
+      "prompt": "Why can two polynomials of degree at most 2 not disagree away from three distinct nodes where they both agree?",
+      "options": [
+        "Their difference has three distinct roots but degree at most 2, so it is identically zero.",
+        "Three data points force every polynomial to have degree 3.",
+        "Agreement at two nodes makes all functions equal.",
+        "Every quadratic is monotone between its nodes."
+      ],
+      "answer": 0,
+      "explanation": "Subtracting the two polynomials gives a polynomial of degree at most two with three distinct zeros. A nonzero polynomial cannot have more distinct roots than its degree. The difference must therefore be the zero polynomial.",
+      "transfer": "State the analogous argument for n distinct nodes and degree at most n−1."
+    },
+    {
+      "id": "poly-uniqueness-zero",
+      "concept": "Uniqueness and degree",
+      "prerequisites": [
+        "Sample constraints"
+      ],
+      "prompt": "Three distinct x values all have supplied y=0. What is the unique interpolating polynomial under the degree-at-most-two bound?",
+      "options": [
+        "A quadratic with three arbitrary nonzero coefficients.",
+        "The identically zero polynomial.",
+        "Any cubic with those three roots.",
+        "No polynomial, because the data lack variation."
+      ],
+      "answer": 1,
+      "explanation": "The zero polynomial meets every constraint. A nonzero polynomial of degree at most two cannot have three distinct roots. The zero polynomial has no highest nonzero coefficient; this tool records its effective degree as null rather than inventing a quadratic degree.",
+      "transfer": "How does adding the same nonzero y value to all three samples change the result?"
+    },
+    {
+      "id": "poly-uniqueness-function",
+      "concept": "Uniqueness and degree",
+      "prerequisites": [
+        "Construct and evaluate"
+      ],
+      "prompt": "Both f(x)=1+x² and g(x)=1+x²+x(x−2)(x−5) agree at x=0,2,5. What follows?",
+      "options": [
+        "The two functions agree at every x.",
+        "The three samples uniquely determine every possible underlying function.",
+        "The samples determine the degree-at-most-two interpolant, not every function that could produce them.",
+        "The divided-difference computation must have made an arithmetic error."
+      ],
+      "answer": 2,
+      "explanation": "The added cubic factor is zero at each sampled x but not everywhere. At x=1, f(1)=2 and g(1)=6. Uniqueness applies within the stated degree bound; the data alone do not prove that an unknown generating function obeys that bound.",
+      "transfer": "Find another nonsampled x at which the two functions differ."
+    },
+    {
+      "id": "poly-limits-extrapolate",
+      "concept": "Interpretation limits",
+      "prerequisites": [
+        "Construct and evaluate"
+      ],
+      "prompt": "The sampled x range is [0,5]. A learner evaluates the exact interpolating polynomial at x=7. What kind of evaluation is this?",
+      "options": [
+        "An original-node check",
+        "An interpolation strictly inside the sampled range",
+        "A confidence interval",
+        "An extrapolation outside the sampled range"
+      ],
+      "answer": 3,
+      "explanation": "The coordinate 7 is greater than the largest sampled x. Evaluating the polynomial there is algebraically defined, but it is extrapolation. Exact arithmetic does not supply an error bound for an unknown function at that location.",
+      "transfer": "Classify x=2, x=3 and x=−1 relative to the worked sample nodes 0,2,5."
+    },
+    {
+      "id": "poly-limits-noise",
+      "concept": "Interpretation limits",
+      "prerequisites": [
+        "Sample constraints"
+      ],
+      "prompt": "A polynomial reproduces every supplied measurement exactly. What is established by these zero node residuals alone?",
+      "options": [
+        "It matches the supplied values at the sampled coordinates.",
+        "It has removed all measurement noise.",
+        "It predicts future measurements accurately.",
+        "It is the physically correct model."
+      ],
+      "answer": 0,
+      "explanation": "Zero node residuals establish exact agreement with the supplied sample values. Those values can still include noise. Interpolation does not itself provide denoising, causal explanation, a physical law or an out-of-sample accuracy guarantee.",
+      "transfer": "Contrast this criterion with fitting a straight line by minimizing squared residuals."
+    },
+    {
+      "id": "poly-limits-close",
+      "concept": "Interpretation limits",
+      "prerequisites": [
+        "Divided differences"
+      ],
+      "prompt": "The two samples are (0,0) and (1/1000,1). Their degree-at-most-one interpolant is evaluated at x=1. What is the exact value?",
+      "options": [
+        "1",
+        "1000",
+        "1/1000",
+        "0"
+      ],
+      "answer": 1,
+      "explanation": "The slope is 1 divided by 1/1000, which is 1000; the line is p(x)=1000x. At x=1 it gives 1000, far outside the narrow sampled range. This result is exact arithmetic, not a reason to trust extrapolation.",
+      "transfer": "Change the second y value to 1001/1000. How much does the value at x=1 change?"
+    }
+  ]
+}

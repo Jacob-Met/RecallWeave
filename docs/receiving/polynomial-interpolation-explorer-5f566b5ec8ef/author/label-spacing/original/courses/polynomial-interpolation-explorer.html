@@ -1,0 +1,390 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src 'none'; object-src 'none'; base-uri 'none'">
+<title>Polynomial interpolation · RecallWeave</title>
+<style>
+:root{color-scheme:light;--ink:#172f3d;--muted:#526875;--blue:#176778;--line:#cadbe2;--paper:#fff;--bg:#eef4f6}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 system-ui,sans-serif}
+header,main,footer{max-width:1240px;margin:auto;padding:28px}header{padding-top:42px;padding-bottom:18px}
+.eyebrow{text-transform:uppercase;letter-spacing:.15em;font-size:.75rem;font-weight:800;color:var(--blue)}
+h1{font-size:clamp(2rem,5vw,3.4rem);line-height:1.1;margin:.5rem 0 1rem;letter-spacing:-.03em}
+header p{max-width:760px;margin:.7rem 0;color:var(--muted)}h2{font-size:1.3rem;line-height:1.3;margin:0 0 12px}p{overflow-wrap:anywhere}
+.workspace{display:grid;grid-template-columns:330px minmax(0,1fr);gap:24px;align-items:start;padding-top:8px}
+.card,.output{background:var(--paper);border:1px solid var(--line);border-radius:16px;box-shadow:0 4px 20px #173a4a08;padding:24px;min-width:0}
+.card h2{font-size:1.2rem}.sub{color:var(--muted);font-size:.9rem}.tag{display:inline-block;font-size:.76rem;color:var(--blue);font-weight:750;letter-spacing:.04em}
+label{display:block;font-size:.88rem;font-weight:650}input,select,textarea,button{font:inherit}input,select,textarea{width:100%;border:1px solid #a6bdc8;border-radius:7px;padding:9px 10px;background:#fff;color:var(--ink);min-width:0}
+textarea{resize:vertical;min-height:95px}input:focus,select:focus,textarea:focus,button:focus-visible,a:focus-visible{outline:3px solid #80bece;outline-offset:2px}
+button{border:1px solid var(--blue);border-radius:7px;padding:9px 12px;background:#fff;color:var(--blue);font-weight:700;cursor:pointer}
+button:disabled{cursor:default;opacity:.45}.primary{background:var(--blue);color:#fff;width:100%;padding:12px}
+.sample-row{border:1px solid var(--line);padding:10px;margin:12px 0;border-radius:9px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px}
+.sample-row legend{font-size:.8rem;font-weight:700;padding:0 5px}.sample-row button{grid-column:1/-1;padding:3px 8px;font-size:.78rem;justify-self:end;border-color:var(--line)}
+.add-row{display:flex;gap:12px;align-items:center;justify-content:space-between;margin:10px 0 20px}#sample-count{font-size:.8rem;color:var(--muted)}
+.query-label{margin-bottom:5px}.input-help{font-size:.79rem;color:var(--muted);margin:6px 0 18px}
+#status{background:#eef7f9;border-left:4px solid var(--blue);padding:14px 16px;margin:0 0 18px;overflow-wrap:anywhere}
+.downloads{display:flex;flex-wrap:wrap;gap:10px;margin:16px 0}.downloads button{font-size:.88rem}
+#results>section{padding-top:24px;margin-top:24px;border-top:1px solid var(--line)}#results>section:first-child{padding-top:0;margin-top:0;border-top:0}
+.degree{font-weight:750}.scroll{overflow:auto;max-width:100%;border:1px solid var(--line);border-radius:8px;margin:12px 0}
+table{border-collapse:collapse;width:100%;font-size:.86rem}th,td{text-align:left;vertical-align:top;padding:10px 12px;border-bottom:1px solid var(--line)}
+th{background:#edf4f6;font-size:.76rem;letter-spacing:.025em}td{font-variant-numeric:tabular-nums;white-space:pre-wrap;overflow-wrap:anywhere;min-width:90px}tr:last-child td{border-bottom:0}
+svg{width:100%;height:auto;display:block;overflow:hidden}.legend{font-size:.83rem;color:var(--muted)}
+a{color:var(--blue);text-underline-offset:3px}.learning{margin-top:24px;padding-top:20px;border-top:1px solid var(--line)}footer{font-size:.8rem;color:var(--muted);padding-top:0}
+code{font-family:ui-monospace,monospace;overflow-wrap:anywhere}[hidden]{display:none!important}
+@media(max-width:780px){.workspace{grid-template-columns:minmax(0,1fr)}header,main,footer{padding-left:16px;padding-right:16px}.card,.output{padding:18px}header{padding-top:26px}.downloads button{flex:1 1 155px}}
+@media print{body{background:#fff}.workspace{display:block}.card,button,.downloads{display:none}.output{border:0;padding:0}.scroll{overflow:auto}header,main{padding:0}footer{margin-top:20px}section{break-inside:avoid}}
+</style></head><body>
+<header><div class="eyebrow">RecallWeave · Exact samples, visible reasoning</div><h1>Polynomial interpolation</h1>
+<p>Build the polynomial that passes through your supplied points. Follow every divided difference, compare two equivalent forms, and distinguish a reproduced sample from an inside-range evaluation or extrapolation.</p>
+<p><span class="tag">LOCAL & OFFLINE</span> &nbsp; Exact rational tables · Approximate drawing · No storage or connection</p></header>
+<main class="workspace">
+<aside class="card"><h2>Choose the experiment</h2><form id="experiment">
+<label for="preset">Starting example</label><select id="preset"><option value="square">A square, entered out of order</option><option value="fraction">A line through fractional nodes</option><option value="collapse">Four samples, actual degree one</option><option value="single">One sample gives a constant</option><option value="zero">The zero polynomial</option></select>
+<p class="input-help">Presets fill the draft. Apply explicitly to calculate.</p>
+<div id="samples"></div><div class="add-row"><button id="add-sample" type="button">Add sample</button><span id="sample-count"></span></div>
+<label for="queries" class="query-label">Query x values · one per line</label><textarea id="queries" rows="3" spellcheck="false" aria-describedby="query-help"></textarea>
+<p id="query-help" class="input-help">Optional, up to16 values. A wholly blank box requests none. A blank line among values is refused.</p>
+<button class="primary" type="submit">Apply experiment</button>
+<p class="input-help">1–8 samples with distinct rational x values. Use integers, fractions such as <code>-3/4</code>, or decimals with up to6 places. Each entry is at most32 characters; numerator magnitude at most1,000,000,000 before reduction, denominator1–1,000,000. Exponents are not admitted.</p>
+</form></aside>
+<div class="output"><p id="status" role="status" aria-live="polite"></p>
+<div class="downloads"><button id="download-observation" disabled>Download observation JSON</button><button id="download-course">Download original course</button><button id="download-guide">Download worked guide</button></div>
+<div id="results" hidden></div>
+<section class="learning"><h2>Keep learning with the original lesson</h2><p>The course has18 questions on uniqueness, divided differences, equivalent forms and interpretation. Download it, open the <a href="../demo.html" target="_blank" rel="noopener">local RecallWeave learner</a>, then choose <strong>Bring your own lesson</strong>. Your current experiment is not automatically imported into a learner session.</p>
+<p class="sub">The original accepted model, corrected course and worked guide are preserved from issue172. This browser interface is a separate receiving increment. Exact arithmetic does not make sampled data accurate or establish an error bound for an unknown function.</p></section>
+</div></main>
+<footer>Everything stays in this page until you explicitly download a file. Editing retires the old observation. Wide exact tables may need horizontal scrolling; printing does not guarantee that every wide table fits a page.</footer>
+<script type="module">
+/** Exact, bounded interpolation of authored rational samples; no approximate fit. */
+const INTERPOLATION_LIMITS = Object.freeze({
+  maxPoints: 8, maxQueries: 16, maxTokenCharacters: 32,
+  maxNumerator: 1000000000, maxDenominator: 1000000, maxDecimalPlaces: 6
+});
+
+const abs = n => n < 0n ? -n : n;
+function gcd(a, b) {
+  a = abs(a); b = abs(b);
+  while (b) [a, b] = [b, a % b];
+  return a;
+}
+function rational(n, d = 1n) {
+  if (d === 0n) throw new Error('A rational denominator cannot be zero.');
+  if (d < 0n) { n = -n; d = -d; }
+  const g = gcd(n, d);
+  return { n: n / g, d: d / g };
+}
+const add = (a, b) => rational(a.n * b.d + b.n * a.d, a.d * b.d);
+const subtract = (a, b) => rational(a.n * b.d - b.n * a.d, a.d * b.d);
+const multiply = (a, b) => rational(a.n * b.n, a.d * b.d);
+const divide = (a, b) => rational(a.n * b.d, a.d * b.n);
+const compare = (a, b) => a.n * b.d < b.n * a.d ? -1 : a.n * b.d > b.n * a.d ? 1 : 0;
+const text = a => a.d === 1n ? String(a.n) : `${a.n}/${a.d}`;
+const zero = () => rational(0n);
+
+function coordinate(value, name) {
+  if (typeof value !== 'string' || value.length > INTERPOLATION_LIMITS.maxTokenCharacters) {
+    throw new Error(`${name} must be a rational string of at most 32 characters.`);
+  }
+  const token = value.trim();
+  let n, d;
+  const fraction = /^([+-]?\d+)\/(\d+)$/.exec(token);
+  const decimal = /^([+-]?)(\d+)\.(\d{1,6})$/.exec(token);
+  if (fraction) {
+    n = BigInt(fraction[1]); d = BigInt(fraction[2]);
+  } else if (decimal) {
+    n = BigInt(decimal[2] + decimal[3]) * (decimal[1] === '-' ? -1n : 1n);
+    d = 10n ** BigInt(decimal[3].length);
+  } else if (/^[+-]?\d+$/.test(token)) {
+    n = BigInt(token); d = 1n;
+  } else {
+    throw new Error(`${name} must be an integer, a decimal with at most six places, or a fraction with a positive denominator.`);
+  }
+  if (abs(n) > 1000000000n || d < 1n || d > 1000000n) {
+    throw new Error(`${name} exceeds the numerator or positive denominator limit.`);
+  }
+  return rational(n, d);
+}
+
+function record(value, keys, name) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)
+      || ![Object.prototype, null].includes(Object.getPrototypeOf(value))) {
+    throw new Error(`${name} must be a plain object.`);
+  }
+  const fields = Reflect.ownKeys(value);
+  if (fields.length !== keys.length || fields.some(key => !keys.includes(key))) {
+    throw new Error(`${name} needs exactly ${keys.join(' and ')}.`);
+  }
+  for (const key of keys) {
+    if (!Object.hasOwn(Object.getOwnPropertyDescriptor(value, key), 'value')) {
+      throw new Error(`${name}.${key} must be a data property.`);
+    }
+  }
+}
+
+function list(value, minimum, maximum, name) {
+  if (!Array.isArray(value) || Object.getPrototypeOf(value) !== Array.prototype
+      || value.length < minimum || value.length > maximum
+      || Reflect.ownKeys(value).length !== value.length + 1) {
+    throw new Error(`${name} must be a dense array of ${minimum} to ${maximum} entries.`);
+  }
+  for (let index = 0; index < value.length; index++) {
+    const property = Object.getOwnPropertyDescriptor(value, String(index));
+    if (!property || !Object.hasOwn(property, 'value')) throw new Error(`${name}[${index}] must be a data property.`);
+  }
+}
+
+function evaluate(coefficients, x) {
+  let result = zero();
+  for (let i = coefficients.length - 1; i >= 0; i--) result = add(multiply(result, x), coefficients[i]);
+  return result;
+}
+
+/**
+ * Return a detached JSON-compatible mathematical observation. Authored order is
+ * kept in the Newton basis; sorting is unnecessary and would hide that choice.
+ */
+function interpolatePolynomial(input) {
+  record(input, ['points', 'at'], 'Input');
+  list(input.points, 1, 8, 'points');
+  list(input.at, 0, 16, 'at');
+  const nodes = [];
+  const seen = new Set();
+  for (let index = 0; index < input.points.length; index++) {
+    const point = input.points[index];
+    record(point, ['x', 'y'], `points[${index}]`);
+    const x = coordinate(point.x, `points[${index}].x`);
+    const y = coordinate(point.y, `points[${index}].y`);
+    if (seen.has(text(x))) throw new Error(`points[${index}].x duplicates an earlier rational coordinate.`);
+    seen.add(text(x));
+    nodes.push({ x, y });
+  }
+  const queries = [];
+  for (let index = 0; index < input.at.length; index++) queries.push(coordinate(input.at[index], `at[${index}]`));
+
+  // Column k contains the differences on all contiguous k+1-node windows.
+  const differences = [nodes.map(node => node.y)];
+  for (let order = 1; order < nodes.length; order++) {
+    const previous = differences[order - 1];
+    const column = [];
+    for (let start = 0; start < nodes.length - order; start++) {
+      column.push(divide(subtract(previous[start + 1], previous[start]),
+        subtract(nodes[start + order].x, nodes[start].x)));
+    }
+    differences.push(column);
+  }
+  const newton = differences.map(column => column[0]);
+  let basis = [rational(1n)];
+  let coefficients = [zero()];
+  for (let order = 0; order < nodes.length; order++) {
+    while (coefficients.length < basis.length) coefficients.push(zero());
+    for (let power = 0; power < basis.length; power++) {
+      coefficients[power] = add(coefficients[power], multiply(newton[order], basis[power]));
+    }
+    if (order + 1 < nodes.length) {
+      const next = Array.from({ length: basis.length + 1 }, zero);
+      for (let power = 0; power < basis.length; power++) {
+        next[power] = subtract(next[power], multiply(nodes[order].x, basis[power]));
+        next[power + 1] = add(next[power + 1], basis[power]);
+      }
+      basis = next;
+    }
+  }
+  while (coefficients.length > 1 && coefficients.at(-1).n === 0n) coefficients.pop();
+  const degree = coefficients.length === 1 && coefficients[0].n === 0n ? null : coefficients.length - 1;
+  let min = nodes[0].x, max = nodes[0].x;
+  for (const node of nodes) {
+    if (compare(node.x, min) < 0) min = node.x;
+    if (compare(node.x, max) > 0) max = node.x;
+  }
+  const nodeChecks = nodes.map((node, index) => {
+    const actual = evaluate(coefficients, node.x);
+    if (compare(actual, node.y) !== 0) throw new Error('Internal interpolation reproduction check failed.');
+    return { index, x: text(node.x), expected: text(node.y), actual: text(actual), ok: true };
+  });
+  return {
+    format: 'recallweave-polynomial-interpolation/1',
+    input: { points: input.points.map(point => ({ x: point.x, y: point.y })), at: [...input.at] },
+    nodes: nodes.map((node, index) => ({ index, x: text(node.x), y: text(node.y) })),
+    dividedDifferences: differences.map(column => column.map(text)),
+    newtonCoefficients: newton.map(text), monomialCoefficients: coefficients.map(text), degree,
+    sampleRange: { min: text(min), max: text(max) }, nodeChecks,
+    evaluations: queries.map((x, index) => ({
+      index, input: input.at[index], x: text(x), value: text(evaluate(coefficients, x)),
+      relation: seen.has(text(x)) ? 'node' : compare(x, min) > 0 && compare(x, max) < 0 ? 'inside' : 'outside'
+    })),
+    limits: { ...INTERPOLATION_LIMITS },
+    interpretation: 'Exact interpolation reproduces the supplied nodes. It is not an error bound or a guarantee about a function between or outside those nodes.'
+  };
+}
+
+
+
+function queryLines(text) {
+  if (typeof text !== 'string') throw new TypeError('Queries must be text.');
+  return text.trim() === '' ? [] : text.split(/\r\n|\r|\n/);
+}
+function freeze(value) {
+  if (value && typeof value === 'object') {
+    Object.values(value).forEach(freeze);
+    Object.freeze(value);
+  }
+  return value;
+}
+/** One synchronous accepted observation; editing retires both display and export. */
+function createInterpolationSession() {
+  let report = null, serialized = null;
+  return Object.freeze({
+    retire() { report = null; serialized = null; },
+    apply(input) {
+      report = null; serialized = null;
+      const next = interpolatePolynomial(input);
+      serialized = JSON.stringify(next, null, 2) + '\n';
+      report = freeze(next);
+      return report;
+    },
+    get report() { return report; },
+    observation() {
+      if (!report) throw new Error('Apply a valid draft before downloading an observation.');
+      return serialized;
+    }
+  });
+}
+function approximateRational(text) {
+  const [n, d = '1'] = text.split('/');
+  return Number(n) / Number(d);
+}
+/** This approximate drawing never supplies the model's exact values or relations. */
+function plotInterpolation(report) {
+  const nodes = report.nodes.map(n => ({x: approximateRational(n.x), y: approximateRational(n.y)}));
+  const queries = report.evaluations.map(n => ({x: approximateRational(n.x), y: approximateRational(n.value)}));
+  const coefficients = report.monomialCoefficients.map(approximateRational);
+  if (![...nodes, ...queries].every(p => Number.isFinite(p.x) && Number.isFinite(p.y))
+      || !coefficients.every(Number.isFinite)) return null;
+  let minX = Math.min(...nodes.map(p => p.x), ...queries.map(p => p.x));
+  let maxX = Math.max(...nodes.map(p => p.x), ...queries.map(p => p.x));
+  const padX = minX === maxX ? Math.max(1, Math.abs(minX) * .05) : (maxX - minX) * .06;
+  minX -= padX; maxX += padX;
+  const curve = Array.from({length: 161}, (_, i) => {
+    const x = minX + (maxX - minX) * i / 160;
+    let y = 0;
+    for (let j = coefficients.length - 1; j >= 0; j--) y = y * x + coefficients[j];
+    return {x, y};
+  });
+  if (!curve.every(p => Number.isFinite(p.y))) return null;
+  let minY = Math.min(...curve.map(p => p.y), ...nodes.map(p => p.y), ...queries.map(p => p.y));
+  let maxY = Math.max(...curve.map(p => p.y), ...nodes.map(p => p.y), ...queries.map(p => p.y));
+  const padY = minY === maxY ? Math.max(1, Math.abs(minY) * .05) : (maxY - minY) * .08;
+  minY -= padY; maxY += padY;
+  const xSpan = maxX - minX, ySpan = maxY - minY;
+  if (!(xSpan > 0 && ySpan > 0 && Number.isFinite(xSpan) && Number.isFinite(ySpan))) return null;
+  const project = p => ({x: 45 + (p.x - minX) / xSpan * 630, y: 265 - (p.y - minY) / ySpan * 230});
+  const drawing = {curve: curve.map(project), nodes: nodes.map(project), queries: queries.map(project),
+    minX, maxX, minY, maxY, xZero: project({x: 0, y: 0}).x, yZero: project({x: 0, y: 0}).y};
+  return [...drawing.curve,...drawing.nodes,...drawing.queries].every(p => Number.isFinite(p.x) && Number.isFinite(p.y)) ? drawing : null;
+}
+
+function mountInterpolation(doc, resources) {
+  const byId = id => doc.getElementById(id);
+  const session = createInterpolationSession();
+  const form = byId('experiment'), rows = byId('samples'), query = byId('queries');
+  const results = byId('results'), status = byId('status'), download = byId('download-observation');
+  const el = (tag, text, className) => { const node = doc.createElement(tag); if (text !== undefined) node.textContent = text; if (className) node.className = className; return node; };
+  function retire(message = 'Draft changed. Apply to calculate this selection.') {
+    session.retire(); results.replaceChildren(); results.hidden = true; download.disabled = true; status.textContent = message;
+  }
+  function labels() {
+    [...rows.children].forEach((row, i) => {
+      row.querySelector('legend').textContent = 'Sample ' + (i + 1);
+      row.querySelectorAll('input').forEach((input,j) => input.setAttribute('aria-label', 'Sample ' + (i + 1) + (j === 0 ? ' x' : ' y')));
+      const remove = row.querySelector('button'); remove.disabled = rows.children.length === 1;
+      remove.setAttribute('aria-label','Remove sample ' + (i + 1));
+    });
+    byId('add-sample').disabled = rows.children.length === 8;
+    byId('sample-count').textContent = rows.children.length + ' of 8 samples';
+  }
+  function addRow(x = '', y = '') {
+    const row = el('fieldset',undefined,'sample-row'); row.append(el('legend'));
+    for (const [name,value] of [['x',x],['y',y]]) {
+      const label = el('label',name); const input = el('input'); input.type = 'text'; input.value = value; input.maxLength = 32; input.autocomplete = 'off'; input.spellcheck = false;
+      input.dataset.coordinate = name; label.append(input); row.append(label);
+    }
+    const remove = el('button','Remove'); remove.type = 'button'; remove.addEventListener('click',() => { retire(); row.remove(); labels(); byId('add-sample').focus(); });
+    row.append(remove); rows.append(row); labels();
+  }
+  const presets = {
+    square: {points: [['2','4'],['0','0'],['1','1']], at: '1/2\n3'},
+    fraction: {points: [['-1/2','0'],['3/2','4']], at: '-1/2\n1/2\n5/2'},
+    collapse: {points: [['-2','-3'],['0','1'],['2','5'],['3','7']], at: '1\n4'},
+    single: {points: [['3','-2']], at: '3\n0'},
+    zero: {points: [['-1','0'],['0','0'],['1','0']], at: '1/2\n2'}
+  };
+  function choosePreset(name) {
+    retire('Preset loaded as a draft. Apply to calculate.');
+    rows.replaceChildren(); const preset = presets[name];
+    preset.points.forEach(([x,y]) => addRow(x,y)); query.value = preset.at; labels();
+  }
+  form.addEventListener('input', () => retire());
+  byId('preset').addEventListener('change', event => choosePreset(event.target.value));
+  byId('add-sample').addEventListener('click', () => { if (rows.children.length < 8) { retire(); addRow(); rows.lastElementChild.querySelector('input').focus(); } });
+  function table(section, headers, data) {
+    const scroll = el('div',undefined,'scroll'), t = el('table'), head = el('thead'), tr = el('tr');
+    headers.forEach(h => { const th = el('th',h); th.scope = 'col'; tr.append(th); }); head.append(tr);t.append(head);
+    const body = el('tbody'); data.forEach(values => { const row = el('tr'); values.forEach(value => row.append(el('td',String(value))));body.append(row); }); t.append(body);scroll.append(t);section.append(scroll);
+  }
+  function section(title, id) { const s=el('section'); if(id)s.id=id; s.append(el('h2',title));results.append(s);return s; }
+  function graph(report) {
+    const s=section('A view of the polynomial','graph-section');
+    s.append(el('p','Approximate drawing only. The curve is sampled in floating-point; exact fractions and classifications are in the tables. Separate x and y scales are used.'));
+    const g=plotInterpolation(report);if(!g){s.append(el('p','A finite drawing is unavailable for this selection. All exact results remain below.'));return;}
+    const NS='http://www.w3.org/2000/svg';const svg=doc.createElementNS(NS,'svg');svg.setAttribute('viewBox','0 0 720 310');svg.setAttribute('role','img');svg.setAttribute('aria-label','Approximate polynomial curve, circular samples and square queries. Exact values follow.');
+    const append=(tag,attrs)=>{const node=doc.createElementNS(NS,tag);for(const [k,v]of Object.entries(attrs))node.setAttribute(k,String(v));svg.append(node);return node;};
+    append('rect',{x:45,y:35,width:630,height:230,fill:'#f3f8fa',stroke:'#91a9b3'});
+    if(g.xZero>=45&&g.xZero<=675)append('line',{x1:g.xZero,x2:g.xZero,y1:35,y2:265,stroke:'#91a9b3'});
+    if(g.yZero>=35&&g.yZero<=265)append('line',{x1:45,x2:675,y1:g.yZero,y2:g.yZero,stroke:'#91a9b3'});
+    append('polyline',{points:g.curve.map(p=>p.x.toFixed(3)+','+p.y.toFixed(3)).join(' '),fill:'none',stroke:'#176778','stroke-width':2.5});
+    g.nodes.forEach((p,i)=>{append('circle',{cx:p.x,cy:p.y,r:5,fill:'#142b38',stroke:'#fff','stroke-width':1});const text=append('text',{x:p.x+7,y:p.y-7,fill:'#142b38','font-size':12});text.textContent='S'+(i+1);});
+    g.queries.forEach(p=>append('rect',{x:p.x-4,y:p.y-4,width:8,height:8,fill:'#d17821',stroke:'#fff','stroke-width':1}));
+    for(const [x,y,anchor,value]of [[45,289,'start',g.minX],[675,289,'end',g.maxX],[40,42,'end',g.maxY],[40,265,'end',g.minY]]) {const text=append('text',{x,y,'text-anchor':anchor,'font-size':11,fill:'#435b68'});text.textContent=Number(value.toPrecision(4)).toString();}
+    s.append(svg,el('p','● Sample nodes (S1, S2, …)   ■ Requested evaluations','legend'));
+  }
+  function render(report) {
+    results.replaceChildren();results.hidden=false;
+    const overview=section('Accepted interpolation','accepted');
+    overview.append(el('p',report.degree===null?'Zero polynomial: every coefficient is zero; its degree is undefined.':'Actual polynomial degree: '+report.degree+'. '+report.nodes.length+' distinct nodes allow degree at most '+(report.nodes.length-1)+'.','degree'));
+    overview.append(el('p','Sample range: '+report.sampleRange.min+' to '+report.sampleRange.max+'. '+report.interpretation));
+    graph(report);
+    const authored=section('Authored samples, in their original order','authored');
+    authored.append(el('p','Raw entries are retained exactly, including surrounding spaces. Reduced coordinates appear beside them.'));
+    table(authored,['Sample','Entered x','Entered y','Reduced x','Reduced y'],report.nodes.map((n,i)=>[i+1,JSON.stringify(report.input.points[i].x),JSON.stringify(report.input.points[i].y),n.x,n.y]));
+    const diff=section('Complete divided differences','differences');
+    diff.append(el('p','Column k is the order-k divided difference on each consecutive k+1-node window in the authored order. An empty cell has no such window.'));
+    table(diff,['Start at sample',...report.dividedDifferences.map((_,i)=>'Order '+i)],report.nodes.map((n,i)=>[i+1,...report.dividedDifferences.map(col=>col[i]??'—')]));
+    const forms=section('Two equivalent polynomial forms','forms');
+    forms.append(el('p','Each row gives a coefficient and the factor it multiplies. Sum all rows. Newton order follows the entered nodes; monomial order is ascending power.'));
+    table(forms,['Newton coefficient','Basis factor'],report.newtonCoefficients.map((c,i)=>[c,i===0?'1':report.nodes.slice(0,i).map(n=>'(x − ('+n.x+'))').join(' × ')]));
+    table(forms,['Monomial coefficient','Power'],report.monomialCoefficients.map((c,i)=>[c,'x^'+i]));
+    const checks=section('Every supplied node is reproduced','node-checks');
+    table(checks,['Sample','x','Supplied y','Polynomial value','Exact match'],report.nodeChecks.map(n=>[n.index+1,n.x,n.expected,n.actual,n.ok?'Yes':'No']));
+    const queries=section('Requested evaluations','evaluations');
+    if(!report.evaluations.length)queries.append(el('p','No query points were requested.'));
+    else table(queries,['Entered x','Reduced x','Exact polynomial value','Relation to supplied samples'],report.evaluations.map(n=>[JSON.stringify(n.input),n.x,n.value,({node:'Sampled node',inside:'Inside sample range',outside:'Outside sample range'})[n.relation]]));
+    queries.append(el('p','An exact result belongs to this interpolating polynomial. Inside-range evaluation is not a guarantee about an unknown function; outside-range evaluation is extrapolation, not a forecast.'));
+  }
+  form.addEventListener('submit',event=>{
+    event.preventDefault();retire('Calculating the current draft…');
+    try {
+      const points=[...rows.children].map(row=>({x:row.querySelector('[data-coordinate=x]').value,y:row.querySelector('[data-coordinate=y]').value}));
+      const report=session.apply({points,at:queryLines(query.value)});render(report);download.disabled=false;
+      status.textContent='Accepted '+report.nodes.length+' samples and '+report.evaluations.length+' query points. The exact observation is ready.';
+    } catch(error) { retire('Cannot apply: '+error.message); }
+  });
+  function save(text,mime,name) {const blob=new Blob([text],{type:mime});const url=URL.createObjectURL(blob);const a=el('a');a.href=url;a.download=name;doc.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);}
+  download.addEventListener('click',()=>{if(session.report)save(session.observation(),'application/json','polynomial-interpolation-observation.json');});
+  byId('download-course').addEventListener('click',()=>save(resources.course,'application/json','polynomial-interpolation.json'));
+  byId('download-guide').addEventListener('click',()=>save(resources.guide,'text/markdown;charset=utf-8','polynomial-interpolation.md'));
+  choosePreset('square');
+  return Object.freeze({session});
+}
+
+const embeddedResources={"course":"{\n  \"format\": \"recallweave-deck/1\",\n  \"title\": \"Polynomial interpolation: exact samples, divided differences and limits\",\n  \"attribution\": \"Original questions, explanations, distractors and worked examples authored for RecallWeave by estate-e82707f2bc62. Mathematical reference: NIST Digital Library of Mathematical Functions, §3.3 Interpolation, https://dlmf.nist.gov/3.3 (checked 2026-10-08). No reference passage, exercise or figure is reproduced. All sample data are authored mathematical examples.\",\n  \"license\": \"This original contribution makes no separate reuse-license grant. Linked references retain their own terms.\",\n  \"concepts\": [\n    \"Sample constraints\",\n    \"Divided differences\",\n    \"Construct and evaluate\",\n    \"Equivalent representations\",\n    \"Uniqueness and degree\",\n    \"Interpretation limits\"\n  ],\n  \"items\": [\n    {\n      \"id\": \"poly-constraints-unique\",\n      \"concept\": \"Sample constraints\",\n      \"prerequisites\": [],\n      \"prompt\": \"Three samples have distinct x coordinates. What degree bound guarantees one unique polynomial interpolating all three?\",\n      \"options\": [\n        \"Degree at most 2\",\n        \"Degree exactly 3\",\n        \"Degree at most 1\",\n        \"Any unrestricted degree\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"Three distinct nodes determine one polynomial of degree at most two. It may be a line or a constant. Allowing higher degrees removes uniqueness: a multiple of the product of the three node factors can be added without changing any sampled value.\",\n      \"transfer\": \"How does the guaranteed bound change for five distinct nodes?\"\n    },\n    {\n      \"id\": \"poly-constraints-conflict\",\n      \"concept\": \"Sample constraints\",\n      \"prerequisites\": [],\n      \"prompt\": \"A record contains (2, 5) and (2, 7). Can a single-valued polynomial interpolate both records exactly?\",\n      \"options\": [\n        \"Yes, if its degree is at least 2.\",\n        \"No, it cannot have two values at x = 2.\",\n        \"Yes, if the rows are reversed.\",\n        \"No, because the y values are positive.\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"A function assigns one value to each input. These two requirements demand p(2)=5 and p(2)=7 simultaneously. Raising the degree or changing row order cannot repair the contradiction.\",\n      \"transfer\": \"What changes mathematically if both rows are (2, 5)? Why might an explicit-input tool still refuse the duplicate?\"\n    },\n    {\n      \"id\": \"poly-constraints-bound\",\n      \"concept\": \"Sample constraints\",\n      \"prerequisites\": [],\n      \"prompt\": \"The two samples (-1, 4) and (3, 4) determine a polynomial of degree at most 1. Which polynomial is it?\",\n      \"options\": [\n        \"p(x) = x + 4\",\n        \"p(x) = 4x\",\n        \"p(x) = 4\",\n        \"p(x) = x² + 3\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"The constant polynomial p(x)=4 satisfies both samples and is the unique interpolant under the degree-at-most-one bound. A bound does not force the highest allowed degree to occur.\",\n      \"transfer\": \"Give three distinct samples whose unique degree-at-most-two interpolant is still constant.\"\n    },\n    {\n      \"id\": \"poly-differences-first\",\n      \"concept\": \"Divided differences\",\n      \"prerequisites\": [\n        \"Sample constraints\"\n      ],\n      \"prompt\": \"For samples (-1, 4) and (3, 12), what is their first divided difference?\",\n      \"options\": [\n        \"8\",\n        \"4\",\n        \"1/2\",\n        \"2\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"The change in y is 12−4=8 and the change in x is 3−(−1)=4. Their quotient is 2. This is the slope of the interpolating line; a raw y difference is not yet a divided difference.\",\n      \"transfer\": \"Evaluate this line at x=1, then check its two supplied endpoints.\"\n    },\n    {\n      \"id\": \"poly-differences-second\",\n      \"concept\": \"Divided differences\",\n      \"prerequisites\": [\n        \"Sample constraints\"\n      ],\n      \"prompt\": \"For ordered nodes (0, 1), (2, 5), (5, 26), the first divided differences are 2 and 7. What is the second divided difference?\",\n      \"options\": [\n        \"1\",\n        \"5/2\",\n        \"5\",\n        \"9\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"Divide the change between the first differences by the span of the full three-node window: (7−2)/(5−0)=1. The denominator is not merely the final gap of 3 or the first gap of 2.\",\n      \"transfer\": \"Compute the first and second divided differences when the nodes are listed in reverse order.\"\n    },\n    {\n      \"id\": \"poly-differences-spacing\",\n      \"concept\": \"Divided differences\",\n      \"prerequisites\": [\n        \"Sample constraints\"\n      ],\n      \"prompt\": \"Why does the first-difference row for (0, 1), (2, 5), (5, 26) contain 2 and 7 rather than 4 and 21?\",\n      \"options\": [\n        \"The y values must be divided by their x values.\",\n        \"Each y change is divided by its own x gap.\",\n        \"The rows must first be sorted by y.\",\n        \"The y changes are divided by the total span of 5.\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"The adjacent x gaps are 2 and 3. Thus (5−1)/2=2 and (26−5)/3=7. Unequal spacing is handled by the divided-difference denominators; no equally spaced grid is assumed.\",\n      \"transfer\": \"For (0, 0), (1, 1), (4, 16), compute both first divided differences.\"\n    },\n    {\n      \"id\": \"poly-construct-newton\",\n      \"concept\": \"Construct and evaluate\",\n      \"prerequisites\": [\n        \"Divided differences\"\n      ],\n      \"prompt\": \"The nodes (0, 1), (2, 5), (5, 26) give Newton coefficients 1, 2, 1 in that order. Which polynomial uses the correct Newton factors?\",\n      \"options\": [\n        \"1 + 2x + x²\",\n        \"1 + 2(x−2) + (x−5)²\",\n        \"1 + 2x + x(x−2)\",\n        \"1 + 2x(x−2) + x(x−2)(x−5)\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"Newton term k uses the product of the preceding k node factors. The terms here are 1, 2(x−0), and 1(x−0)(x−2). Expanding cancels the two linear contributions and gives 1+x².\",\n      \"transfer\": \"Substitute all three node x values into the unexpanded expression.\"\n    },\n    {\n      \"id\": \"poly-construct-evaluate\",\n      \"concept\": \"Construct and evaluate\",\n      \"prerequisites\": [\n        \"Divided differences\"\n      ],\n      \"prompt\": \"For p(x)=1+x², what is the exact value at x=3/2?\",\n      \"options\": [\n        \"5/2\",\n        \"7/2\",\n        \"9/4\",\n        \"13/4\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"Squaring 3/2 gives 9/4; adding 1 gives 13/4. The exact result is 13/4; the rational output retains that fractional form.\",\n      \"transfer\": \"Evaluate the same polynomial at −3/2 and explain the relation between the two values.\"\n    },\n    {\n      \"id\": \"poly-construct-lagrange\",\n      \"concept\": \"Construct and evaluate\",\n      \"prerequisites\": [\n        \"Divided differences\"\n      ],\n      \"prompt\": \"For nodes x=0, 2 and 5, which Lagrange basis polynomial equals 1 at the middle node and 0 at the other two?\",\n      \"options\": [\n        \"x(x−5)/(−6)\",\n        \"x(x−2)/15\",\n        \"(x−2)(x−5)/10\",\n        \"x(x−5)/6\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"The numerator x(x−5) vanishes at 0 and 5. At the middle node 2 it equals −6, so division by −6 makes the value 1. This basis term is then multiplied by the middle sample's y value.\",\n      \"transfer\": \"Check all three node values of the chosen basis, without expanding it.\"\n    },\n    {\n      \"id\": \"poly-representation-order\",\n      \"concept\": \"Equivalent representations\",\n      \"prerequisites\": [\n        \"Construct and evaluate\"\n      ],\n      \"prompt\": \"The same three distinct (x,y) pairs are supplied in reverse order. In exact arithmetic, which statement is correct?\",\n      \"options\": [\n        \"The interpolating function changes sign.\",\n        \"The Newton coefficients can change; the polynomial remains the same.\",\n        \"The polynomial degree must increase.\",\n        \"The first supplied y value must remain the constant monomial coefficient.\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"Changing authored order changes the Newton basis factors and often its coefficients. Both constructions still interpolate the same distinct pairs under the same degree bound, so uniqueness makes their expanded polynomial identical.\",\n      \"transfer\": \"Compare Newton coefficient lists [1,2,1] and [26,7,1] for forward and reverse ordering of the worked quadratic.\"\n    },\n    {\n      \"id\": \"poly-representation-add\",\n      \"concept\": \"Equivalent representations\",\n      \"prerequisites\": [\n        \"Construct and evaluate\"\n      ],\n      \"prompt\": \"The polynomial 1+x² fits (0,1), (2,5) and (5,26). Append (3,10). What happens to the new highest-order Newton coefficient?\",\n      \"options\": [\n        \"It becomes 3.\",\n        \"It becomes 10.\",\n        \"It is zero; the quadratic already fits the new node.\",\n        \"It is undefined because 3 lies between existing nodes.\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"The old polynomial already gives p(3)=10. The new degree-at-most-three interpolant is therefore the same quadratic, and the added cubic Newton coefficient is zero. Interior nodes are allowed if their x values are distinct.\",\n      \"transfer\": \"Append (3,11) instead. Does the old quadratic still satisfy every requirement?\"\n    },\n    {\n      \"id\": \"poly-representation-shift\",\n      \"concept\": \"Equivalent representations\",\n      \"prerequisites\": [\n        \"Construct and evaluate\"\n      ],\n      \"prompt\": \"Every y value in the worked dataset is increased by 3 while the x values stay fixed. Its original interpolant is 1+x². What is the new interpolant?\",\n      \"options\": [\n        \"1 + (x+3)²\",\n        \"3 + 3x²\",\n        \"1 + x²/3\",\n        \"4 + x²\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"Adding the constant 3 to the original polynomial raises its value at every x by 3, so it satisfies the shifted samples. Uniqueness under the same degree bound identifies 4+x² as the new interpolant.\",\n      \"transfer\": \"If every y is multiplied by −2 instead, write the new polynomial.\"\n    },\n    {\n      \"id\": \"poly-uniqueness-proof\",\n      \"concept\": \"Uniqueness and degree\",\n      \"prerequisites\": [\n        \"Construct and evaluate\"\n      ],\n      \"prompt\": \"Why can two polynomials of degree at most 2 not disagree away from three distinct nodes where they both agree?\",\n      \"options\": [\n        \"Their difference has three distinct roots but degree at most 2, so it is identically zero.\",\n        \"Three data points force every polynomial to have degree 3.\",\n        \"Agreement at two nodes makes all functions equal.\",\n        \"Every quadratic is monotone between its nodes.\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"Subtracting the two polynomials gives a polynomial of degree at most two with three distinct zeros. A nonzero polynomial cannot have more distinct roots than its degree. The difference must therefore be the zero polynomial.\",\n      \"transfer\": \"State the analogous argument for n distinct nodes and degree at most n−1.\"\n    },\n    {\n      \"id\": \"poly-uniqueness-zero\",\n      \"concept\": \"Uniqueness and degree\",\n      \"prerequisites\": [\n        \"Sample constraints\"\n      ],\n      \"prompt\": \"Three distinct x values all have supplied y=0. What is the unique interpolating polynomial under the degree-at-most-two bound?\",\n      \"options\": [\n        \"A quadratic with three arbitrary nonzero coefficients.\",\n        \"The identically zero polynomial.\",\n        \"Any cubic with those three roots.\",\n        \"No polynomial, because the data lack variation.\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"The zero polynomial meets every constraint. A nonzero polynomial of degree at most two cannot have three distinct roots. The zero polynomial has no highest nonzero coefficient; this tool records its effective degree as null rather than inventing a quadratic degree.\",\n      \"transfer\": \"How does adding the same nonzero y value to all three samples change the result?\"\n    },\n    {\n      \"id\": \"poly-uniqueness-function\",\n      \"concept\": \"Uniqueness and degree\",\n      \"prerequisites\": [\n        \"Construct and evaluate\"\n      ],\n      \"prompt\": \"Both f(x)=1+x² and g(x)=1+x²+x(x−2)(x−5) agree at x=0,2,5. What follows?\",\n      \"options\": [\n        \"The two functions agree at every x.\",\n        \"The three samples uniquely determine every possible underlying function.\",\n        \"The samples determine the degree-at-most-two interpolant, not every function that could produce them.\",\n        \"The divided-difference computation must have made an arithmetic error.\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"The added cubic factor is zero at each sampled x but not everywhere. At x=1, f(1)=2 and g(1)=6. Uniqueness applies within the stated degree bound; the data alone do not prove that an unknown generating function obeys that bound.\",\n      \"transfer\": \"Find another nonsampled x at which the two functions differ.\"\n    },\n    {\n      \"id\": \"poly-limits-extrapolate\",\n      \"concept\": \"Interpretation limits\",\n      \"prerequisites\": [\n        \"Construct and evaluate\"\n      ],\n      \"prompt\": \"The sampled x range is [0,5]. A learner evaluates the exact interpolating polynomial at x=7. What kind of evaluation is this?\",\n      \"options\": [\n        \"An original-node check\",\n        \"An interpolation strictly inside the sampled range\",\n        \"A confidence interval\",\n        \"An extrapolation outside the sampled range\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"The coordinate 7 is greater than the largest sampled x. Evaluating the polynomial there is algebraically defined, but it is extrapolation. Exact arithmetic does not supply an error bound for an unknown function at that location.\",\n      \"transfer\": \"Classify x=2, x=3 and x=−1 relative to the worked sample nodes 0,2,5.\"\n    },\n    {\n      \"id\": \"poly-limits-noise\",\n      \"concept\": \"Interpretation limits\",\n      \"prerequisites\": [\n        \"Sample constraints\"\n      ],\n      \"prompt\": \"A polynomial reproduces every supplied measurement exactly. What is established by these zero node residuals alone?\",\n      \"options\": [\n        \"It matches the supplied values at the sampled coordinates.\",\n        \"It has removed all measurement noise.\",\n        \"It predicts future measurements accurately.\",\n        \"It is the physically correct model.\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"Zero node residuals establish exact agreement with the supplied sample values. Those values can still include noise. Interpolation does not itself provide denoising, causal explanation, a physical law or an out-of-sample accuracy guarantee.\",\n      \"transfer\": \"Contrast this criterion with fitting a straight line by minimizing squared residuals.\"\n    },\n    {\n      \"id\": \"poly-limits-close\",\n      \"concept\": \"Interpretation limits\",\n      \"prerequisites\": [\n        \"Divided differences\"\n      ],\n      \"prompt\": \"The two samples are (0,0) and (1/1000,1). Their degree-at-most-one interpolant is evaluated at x=1. What is the exact value?\",\n      \"options\": [\n        \"1\",\n        \"1000\",\n        \"1/1000\",\n        \"0\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"The slope is 1 divided by 1/1000, which is 1000; the line is p(x)=1000x. At x=1 it gives 1000, far outside the narrow sampled range. This result is exact arithmetic, not a reason to trust extrapolation.\",\n      \"transfer\": \"Change the second y value to 1001/1000. How much does the value at x=1 change?\"\n    }\n  ]\n}\n","guide":"# Polynomial interpolation: exact samples and their limits\n\nThis original lesson connects sample constraints, divided differences and the\npolynomial they determine. The examples are authored mathematical data, not\nmeasurements. An exact fit at the supplied nodes does not establish the behavior\nof an unknown function elsewhere.\n\nThe companion `polynomial-interpolation.json` uses the existing RecallWeave lesson\nformat: 18 questions across six linked concepts, with worked explanations and\ntransfer prompts. It can be selected through the existing **Bring your own\nlesson** flow. The native lesson validator, adaptive selector, review and bounded\npractice round retain their own behavior. This contribution does not change the\nlearning model or make a learning-effectiveness claim.\n\nThe separate dependency-free Node command below makes the arithmetic usable from\na terminal. This contribution supplies no new browser interface; native model and\ncommand receiving do not establish browser rendering or file-picker behavior.\n\n## Run an exact experiment\n\nSave this UTF-8 JSON as `points.json`:\n\n```json\n{\n  \"points\": [\n    {\"x\": \"0\", \"y\": \"1\"},\n    {\"x\": \"2\", \"y\": \"5\"},\n    {\"x\": \"5\", \"y\": \"26\"}\n  ],\n  \"at\": [\"0\", \"3/2\", \"5\", \"7\"]\n}\n```\n\nFrom the repository root, with Node 20 or later:\n\n```sh\nnode tools/interpolate-polynomial.mjs points.json --format text\nnode tools/interpolate-polynomial.mjs points.json\n```\n\nThe default output is complete JSON. `--format text` displays every order of\ndivided differences, both coefficient forms, every original-node check and the\nrequested values. A lone `-` reads the JSON from stdin; `./-` names a literal file.\n`--help` prints the command syntax. The command creates no output files and does\nnot change the input. It performs no network calls or dependency installation.\n\nFor this experiment the ascending monomial coefficients are `[\"1\",\"0\",\"1\"]`,\nmeaning `1 + 0x + 1x²`. The requested values are `1`, `13/4`, `26` and `50`.\nTheir location labels are respectively `node`, `inside`, `node` and `outside`.\nThe last label identifies extrapolation; it does not forbid evaluating the\npolynomial or turn the result into a prediction guarantee.\n\n## What the supplied samples determine\n\nWith `n` distinct x coordinates, exactly one polynomial of degree at most `n−1`\npasses through all `n` supplied pairs. The degree can be lower than the bound.\nFor example, `(-1,4)` and `(3,4)` determine the constant polynomial `4`.\n\nThe restriction on degree matters. If `p` fits the samples at `x₀,…,xₙ₋₁`, then\n\n```text\np(x) + c (x−x₀)(x−x₁)…(x−xₙ₋₁)\n```\n\nalso fits them for any constant `c`. The added term vanishes at each supplied x,\nbut can change other values. Without the degree bound the fit is not unique.\n\nFor the worked samples, both `1+x²` and `1+x²+x(x−2)(x−5)` agree at `0,2,5`.\nAt `x=1` they give `2` and `6`. The data identify the degree-at-most-two\ninterpolant; they do not prove that an unknown generating function is quadratic.\n\nTwo rows requiring different y values at the same x are inconsistent with a\nsingle-valued function. Equal duplicate rows are redundant mathematically, but\nthis experiment refuses *all* repeated rational x coordinates. It neither\nsilently drops rows nor treats repeats as derivative data for Hermite\ninterpolation. Thus `0.5`, `1/2` and `2/4` are the same x for admission.\n\n## Build the complete divided-difference table\n\nStart with each y value. A first divided difference is a secant slope. Higher\norders divide the change between two neighboring lower-order differences by\nthe span of the complete node window:\n\n```text\nD[i,0] = y[i]\nD[i,k] = (D[i+1,k−1] − D[i,k−1]) / (x[i+k] − x[i])\n```\n\nFor the authored order `(0,1), (2,5), (5,26)`:\n\n| Order | Contiguous node windows | Exact values |\n| --- | --- | --- |\n| 0 | individual nodes | 1, 5, 26 |\n| 1 | [0,2] and [2,5] | (5−1)/2 = 2; (26−5)/3 = 7 |\n| 2 | [0,2,5] | (7−2)/(5−0) = 1 |\n\nThe distinct denominators account for unequal spacing. The tool preserves the\nauthored node order instead of sorting it. Each array in `dividedDifferences`\nis one order, with every contiguous window for that order from left to right.\n\n## Read Newton form and check equivalent representations\n\nThe first value of each table order is a Newton coefficient. Coefficient `k`\nmultiplies the product of the first `k` node factors. The worked example gives\n\n```text\np(x) = 1 + 2(x−0) + 1(x−0)(x−2)\n     = 1 + x².\n```\n\nThe output retains both forms: `newtonCoefficients` and the expanded\n`monomialCoefficients` in ascending powers. Trailing zero monomial coefficients\nare removed. The zero polynomial is represented by `[\"0\"]` with `degree:null`,\nbecause there is no highest nonzero coefficient; a nonzero constant has degree 0.\n\nReversing the worked order gives Newton coefficients `[\"26\",\"7\",\"1\"]`:\n\n```text\n26 + 7(x−5) + (x−5)(x−2) = 1 + x².\n```\n\nThe Newton description changes, but the polynomial does not. Two candidate\npolynomials of degree at most two which agree at three distinct nodes have a\ndifference with three roots and degree at most two. That difference must be\nidentically zero. The same argument works for `n` nodes and degree at most `n−1`.\n\nLagrange form supplies another exact representation. For the middle node `2`\namong `0,2,5`, the basis polynomial is `x(x−5)/(−6)`. It is 1 at `2` and 0 at\nthe other nodes. Multiplying each node's basis by its y value and adding gives\nthe same interpolant. The implementation uses divided differences, while\nindependent receiving checks equivalent polynomial identities.\n\n## Add a point, change values and evaluate between nodes\n\nAppending `(3,10)` to the worked samples adds no new polynomial term, because\n`1+3²=10` already holds. The new highest-order Newton coefficient is zero and\nthe effective degree remains two. Appending `(3,11)` instead changes the fit;\nthe old polynomial cannot satisfy that additional requirement.\n\nAdding 3 to every y value gives `4+x²`. Multiplying every y by −2 gives\n`−2−2x²`. These transformations preserve exact sample reproduction. They do\nnot move the x coordinates or add information between them.\n\nAt `x=3/2`, the original polynomial gives `1+9/4=13/4`. The result is exactly\nthe same at `−3/2`, but their location labels differ: `3/2` lies inside `[0,5]`,\nwhereas `−3/2` is outside. The label refers to the sampled range, not the sign\nor magnitude of the resulting y value.\n\nVery close x values can lead to a large slope. The samples `(0,0)` and\n`(1/1000,1)` determine `p(x)=1000x`, so `p(1)=1000`. Changing the second y\nto `1001/1000` gives slope `1001` and changes `p(1)` by 1. Exact arithmetic\npreserves both calculations; it does not establish that either line is a\nreliable extrapolation of an unknown process.\n\n## Input and output boundaries\n\nSupply exactly `points` and `at`. Each point has exactly `x` and `y`.\nBoth coordinates and queries are strings. There must be 1–8 points and 0–16\nqueries. An empty query list still returns the polynomial and all node checks.\n\nAn admitted token has at most 32 characters and is an integer, a decimal with\n1–6 digits after the decimal point, or a fraction with a positive integer\ndenominator. Integer numerators may have a leading `+` or `-`. Decimal input\nneeds digits on both sides of the point. Outer whitespace is retained in the\n`input` evidence but ignored for numeric admission. Exponents, `NaN`, infinity,\nJSON numeric values, empty tokens and signed fraction denominators are refused.\n\nThe absolute numerator is at most 1,000,000,000, before reduction and after\ndecimal expansion. The denominator is at most 1,000,000, before reduction.\nFor example, `1000.000001` exceeds the expanded-numerator limit, even though\nthe decimal's magnitude is modest. These are explicit bounded-experiment\nlimits, not mathematical restrictions on interpolation. Intermediate and final\nresults may exceed those input limits; they remain exact reduced BigInt\nrationals rather than clamped Numbers.\n\nOutput rational strings are canonical: reduced fraction, positive denominator,\nno denominator when it is 1, and `0` for zero. Authored raw strings and row order\nstay available alongside the normalized nodes. `nodeChecks` evaluates the\nexpanded polynomial at every input node and records exact reproduction.\n\nInput is limited to 65,536 bytes and must be valid UTF-8. Invalid arguments,\nUTF-8, JSON or mathematical admission exit with status 2 and no stdout.\nInput or output I/O errors exit with status 1. The complete result is prepared\nbefore ordinary output starts; an output I/O error can occur after bytes have\nbeen emitted, so consumers must check the exit status. The command does not\nauthenticate input, identify a source file cryptographically, or provide a\nreport importer. Trusted JavaScript callers must supply ordinary own data\nproperties and dense arrays, not accessors or sparse sequences.\n\n## Native checks and qualification\n\n```sh\nnode --test tests/polynomial-interpolation.test.mjs\nnode --test tests/polynomial-interpolation-receiving.test.mjs\n```\n\nThe first suite includes the unchanged original lesson control, exact\nreconstruction, input refusals, real command processes and the new course's\nnative adaptive/review/practice flow. The independent suite uses separately\nfrozen polynomial oracles and also receives actual file/stdin and output-I/O\nbehavior. Synthetic mathematical examples qualify software arithmetic and\ncontracts; they are not learner study results or scientific measurements.\n\nThe source is locally received while GitHub Actions and triggering publication\nremain held by the project owner's direction. No hosted, merged, deployed or\nbrowser acceptance is implied by these native checks.\n\n## Reference and original authorship\n\nThe uniqueness, Lagrange and Newton/divided-difference formulas can be checked\nin [NIST DLMF §3.3: Interpolation](https://dlmf.nist.gov/3.3), especially parts\n(i), (iii) and (iv), read on 2026-10-08. This guide's prose, examples, questions\nand calculations are original. No reference passage, figure or exercise is\nreproduced. Referenced material retains its own terms; this contribution makes\nno separate reuse-license grant. See the repository's AI-tool disclosure for\nits educational-content review guidance.\n"};
+mountInterpolation(document,embeddedResources);
+
+</script></body></html>
