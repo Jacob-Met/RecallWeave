@@ -433,3 +433,9 @@ Open [the minimum-spanning-forest explorer](courses/minimum-spanning-forest-expl
 
 Download the full trace with its original entered text and selected frame, or save the original [twelve-question course](courses/minimum-spanning-forest.json) and [worked guide](courses/minimum-spanning-forest.md). Open the JSON through the learner's existing **Bring your own lesson** preview and **Start this deck** flow. No network, account, automatic storage or learner-session modification is involved. Rebuild the standalone page with `node tools/build-minimum-spanning-forest.mjs`; add `--check` to verify exact source parity.
 
+
+## Read causal order with logical clocks
+
+Study the original [sixteen-question logical-clocks course](courses/logical-clocks.json) with its [worked guide](courses/logical-clocks.md). Follow a complete ten-event execution, calculate Lamport and vector timestamps, and distinguish causal order, concurrency and an agreed total order. The guide includes the exact receive calculations, counterexamples and original transfer responses.
+
+Open `demo.html`, choose the JSON under **Bring your own lesson**, inspect the preview and select **Start this deck**. Review, separate practice and downloaded notes use the existing offline learner. Run the focused course checks with `node --test tests/logical-clocks-course.test.mjs`.
