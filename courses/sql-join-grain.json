@@ -1,0 +1,221 @@
+{
+  "format": "recallweave-deck/1",
+  "title": "SQL join grain — keep each original record in the right total",
+  "attribution": "RecallWeave contributors. Original fictional dataset, questions and worked explanations. Source-derived outcomes for SQLite. Primary references: https://www.sqlite.org/lang_select.html ; https://www.sqlite.org/lang_aggfunc.html ; https://www.sqlite.org/lang_expr.html .",
+  "license": "Original course material: you may use, adapt and redistribute it with attribution to RecallWeave contributors. Linked SQLite documentation retains its own terms and is not reproduced here.",
+  "concepts": [
+    "pairs",
+    "identity",
+    "regrouping",
+    "policies"
+  ],
+  "items": [
+    {
+      "id": "grain-01-pairs",
+      "concept": "pairs",
+      "prerequisites": [],
+      "prompt": "SQLite; only these fictional rows.\nprojects(project_id, name): (1, 'Atlas'); (2, 'Birch'); (3, 'Cedar'); (4, 'Dune').\nwork_sessions(session_id, project_id, minutes): (101, 1, 30); (102, 1, 30); (103, 1, 15); (201, 2, 20); (202, 2, 0).\nreviews(review_id, project_id, label): (11, 1, 'ready'); (12, 1, 'hold'); (21, 2, 'ready'); (22, 2, 'ready'); (23, 2, 'hold'); (31, 3, 'ready').\nIDs are distinct non-NULL keys in their own tables; every child project_id exists. All minutes are nonnegative integers. Repeated minute values and labels still belong to separate records.\n\nWhich complete ordered (session_id, review_id) rows are returned for project 1?\nSQL:\nSELECT e.session_id, r.review_id\nFROM work_sessions AS e\nJOIN reviews AS r ON r.project_id = e.project_id\nWHERE e.project_id = 1\nORDER BY e.session_id, r.review_id;\nEach tuple denotes one output row.",
+      "options": [
+        "(101, 11); (101, 12); (102, 11); (102, 12); (103, 11); (103, 12)",
+        "(101, 11); (102, 12)",
+        "(101, 11); (102, 11); (103, 11)",
+        "(101, 11); (101, 12); (102, 11); (102, 12)"
+      ],
+      "answer": 0,
+      "explanation": "The join condition connects a session to every review with the same project_id. Project 1 has three sessions and two reviews, so each of its three session IDs appears with both review IDs. The six ordered pairs are the actual joined-row identities. Nothing in these tables pairs a particular session with just one review, and an equality join does not zip records by their positions.",
+      "transfer": "Write a sentence naming the two record IDs that identify one joined row, and explain why project_id alone does not identify that row."
+    },
+    {
+      "id": "grain-02-count-identities",
+      "concept": "pairs",
+      "prerequisites": [],
+      "prompt": "SQLite; only these fictional rows.\nprojects(project_id, name): (1, 'Atlas'); (2, 'Birch'); (3, 'Cedar'); (4, 'Dune').\nwork_sessions(session_id, project_id, minutes): (101, 1, 30); (102, 1, 30); (103, 1, 15); (201, 2, 20); (202, 2, 0).\nreviews(review_id, project_id, label): (11, 1, 'ready'); (12, 1, 'hold'); (21, 2, 'ready'); (22, 2, 'ready'); (23, 2, 'hold'); (31, 3, 'ready').\nIDs are distinct non-NULL keys in their own tables; every child project_id exists. All minutes are nonnegative integers. Repeated minute values and labels still belong to separate records.\n\nWhich ordered rows distinguish joined row occurrences from distinct session and review IDs? Columns: (project_id, joined_rows, session_ids, review_ids).\nSQL:\nSELECT p.project_id, COUNT(*) AS joined_rows,\n       COUNT(DISTINCT e.session_id) AS session_ids,\n       COUNT(DISTINCT r.review_id) AS review_ids\nFROM projects AS p\nLEFT JOIN work_sessions AS e ON e.project_id = p.project_id\nLEFT JOIN reviews AS r ON r.project_id = p.project_id\nGROUP BY p.project_id\nORDER BY p.project_id;\nEach tuple denotes one output row.",
+      "options": [
+        "(1, 5, 3, 2); (2, 5, 2, 3); (3, 1, 0, 1); (4, 0, 0, 0)",
+        "(1, 6, 3, 2); (2, 6, 2, 3); (3, 1, 0, 1); (4, 1, 0, 0)",
+        "(1, 6, 6, 6); (2, 6, 6, 6); (3, 1, 1, 1); (4, 1, 1, 1)",
+        "(1, 3, 3, 2); (2, 2, 2, 3); (3, 1, 0, 1); (4, 1, 0, 0)"
+      ],
+      "answer": 1,
+      "explanation": "Project 1 contributes 3 x 2 joined pairs, and project 2 contributes 2 x 3. COUNT(*) counts those six row occurrences in each group. Distinct non-NULL session IDs and review IDs still identify three/two records and two/three records respectively. Project 3 has one actual review and a NULL session placeholder; project 4 has a NULL placeholder for both children. Each still contributes one joined row, but a NULL child ID is not an actual child record.",
+      "transfer": "Explain why the project 3 and project 4 joined-row counts are the same even though their numbers of actual review records differ."
+    },
+    {
+      "id": "grain-03-multiplied-sums",
+      "concept": "pairs",
+      "prerequisites": [],
+      "prompt": "SQLite; only these fictional rows.\nprojects(project_id, name): (1, 'Atlas'); (2, 'Birch'); (3, 'Cedar'); (4, 'Dune').\nwork_sessions(session_id, project_id, minutes): (101, 1, 30); (102, 1, 30); (103, 1, 15); (201, 2, 20); (202, 2, 0).\nreviews(review_id, project_id, label): (11, 1, 'ready'); (12, 1, 'hold'); (21, 2, 'ready'); (22, 2, 'ready'); (23, 2, 'hold'); (31, 3, 'ready').\nIDs are distinct non-NULL keys in their own tables; every child project_id exists. All minutes are nonnegative integers. Repeated minute values and labels still belong to separate records.\n\nWhat ordered (project_id, joined_minutes) rows does this query produce? NULL denotes an SQL NULL, not a zero.\nSQL:\nSELECT p.project_id, SUM(e.minutes) AS joined_minutes\nFROM projects AS p\nLEFT JOIN work_sessions AS e ON e.project_id = p.project_id\nLEFT JOIN reviews AS r ON r.project_id = p.project_id\nGROUP BY p.project_id\nORDER BY p.project_id;\nEach tuple denotes one output row.",
+      "options": [
+        "(1, 75); (2, 20); (3, NULL); (4, NULL)",
+        "(1, 150); (2, 60); (3, 0); (4, 0)",
+        "(1, 150); (2, 60); (3, NULL); (4, NULL)",
+        "(1, 45); (2, 20); (3, NULL); (4, NULL)"
+      ],
+      "answer": 2,
+      "explanation": "Project 1's original minutes are 30 + 30 + 15 = 75, but every session appears twice after the review join, so SUM reads 150. Project 2's 20 + 0 = 20 appears three times, producing 60. Neither project 3 nor project 4 has an actual session value. Their left-join rows contain NULL for e.minutes, so the uncoalesced SUM is NULL. The result is neither a per-session total nor a count of independent review/session work.",
+      "transfer": "Describe separately the effect of repeated session rows and the effect of an absent session value in this result."
+    },
+    {
+      "id": "grain-04-distinct-values",
+      "concept": "identity",
+      "prerequisites": [
+        "pairs"
+      ],
+      "prompt": "SQLite; only these fictional rows.\nprojects(project_id, name): (1, 'Atlas'); (2, 'Birch'); (3, 'Cedar'); (4, 'Dune').\nwork_sessions(session_id, project_id, minutes): (101, 1, 30); (102, 1, 30); (103, 1, 15); (201, 2, 20); (202, 2, 0).\nreviews(review_id, project_id, label): (11, 1, 'ready'); (12, 1, 'hold'); (21, 2, 'ready'); (22, 2, 'ready'); (23, 2, 'hold'); (31, 3, 'ready').\nIDs are distinct non-NULL keys in their own tables; every child project_id exists. All minutes are nonnegative integers. Repeated minute values and labels still belong to separate records.\n\nWhich single row is returned? The scalar subquery reads the original sessions directly. Columns: (joined_sum, distinct_value_sum, session_sum).\nSQL:\nSELECT SUM(e.minutes) AS joined_sum,\n       SUM(DISTINCT e.minutes) AS distinct_value_sum,\n       (SELECT SUM(minutes) FROM work_sessions\n        WHERE project_id = 1) AS session_sum\nFROM work_sessions AS e\nJOIN reviews AS r ON r.project_id = e.project_id\nWHERE e.project_id = 1;\nEach tuple denotes one output row.",
+      "options": [
+        "(150, 75, 75)",
+        "(75, 45, 75)",
+        "(150, 45, 45)",
+        "(150, 45, 75)"
+      ],
+      "answer": 3,
+      "explanation": "SUM reads every joined minute occurrence and returns 150. SUM(DISTINCT e.minutes) first collapses equal numeric values: only 15 and 30 remain, totaling 45. That also collapses the two separate 30-minute sessions, 101 and 102. The scalar subquery reads the three original session records once each and returns 75. Distinct values and distinct entity identities answer different questions.",
+      "transfer": "Explain why two equal minute amounts can both belong in a total when their session IDs differ."
+    },
+    {
+      "id": "grain-05-distinct-after-grouping",
+      "concept": "identity",
+      "prerequisites": [
+        "pairs"
+      ],
+      "prompt": "SQLite; only these fictional rows.\nprojects(project_id, name): (1, 'Atlas'); (2, 'Birch'); (3, 'Cedar'); (4, 'Dune').\nwork_sessions(session_id, project_id, minutes): (101, 1, 30); (102, 1, 30); (103, 1, 15); (201, 2, 20); (202, 2, 0).\nreviews(review_id, project_id, label): (11, 1, 'ready'); (12, 1, 'hold'); (21, 2, 'ready'); (22, 2, 'ready'); (23, 2, 'hold'); (31, 3, 'ready').\nIDs are distinct non-NULL keys in their own tables; every child project_id exists. All minutes are nonnegative integers. Repeated minute values and labels still belong to separate records.\n\nWhat ordered rows are returned when DISTINCT is applied to these already-grouped result rows? Columns: (project_id, counted_sessions).\nSQL:\nSELECT DISTINCT p.project_id,\n       COUNT(e.session_id) AS counted_sessions\nFROM projects AS p\nLEFT JOIN work_sessions AS e ON e.project_id = p.project_id\nLEFT JOIN reviews AS r ON r.project_id = p.project_id\nGROUP BY p.project_id\nORDER BY p.project_id;\nEach tuple denotes one output row.",
+      "options": [
+        "(1, 6); (2, 6); (3, 0); (4, 0)",
+        "(1, 3); (2, 2); (3, 0); (4, 0)",
+        "(1, 1); (2, 1); (3, 0); (4, 0)",
+        "(1, 6); (2, 6)"
+      ],
+      "answer": 0,
+      "explanation": "GROUP BY first produces one aggregate result row for each project. In each populated group, COUNT(e.session_id) has already counted six non-NULL joined copies. SELECT DISTINCT then removes duplicate complete output rows, but project_id already makes these four rows distinct. It does not revisit the aggregate inputs or reduce the count to the number of session identities. The two projects without sessions each retain a zero count.",
+      "transfer": "Describe the stage at which output DISTINCT acts, and why it cannot change a count already calculated from repeated input rows."
+    },
+    {
+      "id": "grain-06-retain-record-id",
+      "concept": "identity",
+      "prerequisites": [
+        "pairs"
+      ],
+      "prompt": "SQLite; only these fictional rows.\nprojects(project_id, name): (1, 'Atlas'); (2, 'Birch'); (3, 'Cedar'); (4, 'Dune').\nwork_sessions(session_id, project_id, minutes): (101, 1, 30); (102, 1, 30); (103, 1, 15); (201, 2, 20); (202, 2, 0).\nreviews(review_id, project_id, label): (11, 1, 'ready'); (12, 1, 'hold'); (21, 2, 'ready'); (22, 2, 'ready'); (23, 2, 'hold'); (31, 3, 'ready').\nIDs are distinct non-NULL keys in their own tables; every child project_id exists. All minutes are nonnegative integers. Repeated minute values and labels still belong to separate records.\n\nWhat single (session_total) row remains when the subquery retains session_id before removing repeated joined copies?\nSQL:\nSELECT SUM(minutes) AS session_total\nFROM (\n  SELECT DISTINCT e.session_id, e.project_id, e.minutes\n  FROM work_sessions AS e\n  JOIN reviews AS r ON r.project_id = e.project_id\n  WHERE e.project_id = 1\n) AS selected_sessions;\nEach tuple denotes one output row.",
+      "options": [
+        "(45)",
+        "(75)",
+        "(150)",
+        "(90)"
+      ],
+      "answer": 1,
+      "explanation": "The inner join produces repeated copies of each selected session record. The subquery keeps session_id as well as project_id and minutes, so DISTINCT removes copies of the same full record while retaining sessions 101 and 102 as different records. SUM then reads 30, 30 and 15 once each, giving 75. This query still selects only sessions that match a review; it does not guarantee preservation of unreviewed sessions in another fixture.",
+      "transfer": "State which selected entity key the subquery preserves, and explain the remaining restriction imposed by its inner join."
+    },
+    {
+      "id": "grain-07-one-rollup-is-not-enough",
+      "concept": "regrouping",
+      "prerequisites": [
+        "pairs",
+        "identity"
+      ],
+      "prompt": "SQLite; only these fictional rows.\nprojects(project_id, name): (1, 'Atlas'); (2, 'Birch'); (3, 'Cedar'); (4, 'Dune').\nwork_sessions(session_id, project_id, minutes): (101, 1, 30); (102, 1, 30); (103, 1, 15); (201, 2, 20); (202, 2, 0).\nreviews(review_id, project_id, label): (11, 1, 'ready'); (12, 1, 'hold'); (21, 2, 'ready'); (22, 2, 'ready'); (23, 2, 'hold'); (31, 3, 'ready').\nIDs are distinct non-NULL keys in their own tables; every child project_id exists. All minutes are nonnegative integers. Repeated minute values and labels still belong to separate records.\n\nThe session table is grouped first, but its total is then joined to raw reviews and summed again. What ordered (project_id, minutes) rows result?\nSQL:\nWITH session_totals AS (\n  SELECT project_id, SUM(minutes) AS minutes\n  FROM work_sessions\n  GROUP BY project_id\n)\nSELECT p.project_id, COALESCE(SUM(s.minutes), 0) AS minutes\nFROM projects AS p\nLEFT JOIN session_totals AS s ON s.project_id = p.project_id\nLEFT JOIN reviews AS r ON r.project_id = p.project_id\nGROUP BY p.project_id\nORDER BY p.project_id;\nEach tuple denotes one output row.",
+      "options": [
+        "(1, 75); (2, 20); (3, 0); (4, 0)",
+        "(1, 150); (2, 60); (3, NULL); (4, NULL)",
+        "(1, 150); (2, 60); (3, 0); (4, 0)",
+        "(1, 45); (2, 20); (3, 0); (4, 0)"
+      ],
+      "answer": 2,
+      "explanation": "session_totals initially contains one row for each project with sessions: 75 for project 1 and 20 for project 2. Joining those rows to raw reviews repeats the entire first total twice and the second total three times. The outer SUM therefore returns 150 and 60. COALESCE changes the two absent totals to zero; it does not undo multiplication. Aggregating one input does not prevent a later join from repeating its aggregate.",
+      "transfer": "Name the row grain before and after the join to raw reviews. Identify the later operation that repeats a previously computed total."
+    },
+    {
+      "id": "grain-08-two-rollups",
+      "concept": "regrouping",
+      "prerequisites": [
+        "pairs",
+        "identity"
+      ],
+      "prompt": "SQLite; only these fictional rows.\nprojects(project_id, name): (1, 'Atlas'); (2, 'Birch'); (3, 'Cedar'); (4, 'Dune').\nwork_sessions(session_id, project_id, minutes): (101, 1, 30); (102, 1, 30); (103, 1, 15); (201, 2, 20); (202, 2, 0).\nreviews(review_id, project_id, label): (11, 1, 'ready'); (12, 1, 'hold'); (21, 2, 'ready'); (22, 2, 'ready'); (23, 2, 'hold'); (31, 3, 'ready').\nIDs are distinct non-NULL keys in their own tables; every child project_id exists. All minutes are nonnegative integers. Repeated minute values and labels still belong to separate records.\n\nBoth child tables now have one grouped row per project before the joins. What ordered rows result? Columns: (project_id, session_count, session_minutes, review_count).\nSQL:\nWITH session_totals AS (\n  SELECT project_id, COUNT(*) AS session_count,\n         SUM(minutes) AS session_minutes\n  FROM work_sessions GROUP BY project_id\n), review_totals AS (\n  SELECT project_id, COUNT(*) AS review_count\n  FROM reviews GROUP BY project_id\n)\nSELECT p.project_id,\n       COALESCE(s.session_count, 0) AS session_count,\n       COALESCE(s.session_minutes, 0) AS session_minutes,\n       COALESCE(r.review_count, 0) AS review_count\nFROM projects AS p\nLEFT JOIN session_totals AS s ON s.project_id = p.project_id\nLEFT JOIN review_totals AS r ON r.project_id = p.project_id\nORDER BY p.project_id;\nEach tuple denotes one output row.",
+      "options": [
+        "(1, 6, 150, 6); (2, 6, 60, 6); (3, 0, 0, 1); (4, 0, 0, 0)",
+        "(1, 3, 45, 2); (2, 2, 20, 2); (3, 0, 0, 1); (4, 0, 0, 0)",
+        "(1, 3, 75, 2); (2, 2, 20, 3)",
+        "(1, 3, 75, 2); (2, 2, 20, 3); (3, 0, 0, 1); (4, 0, 0, 0)"
+      ],
+      "answer": 3,
+      "explanation": "Each common-table expression groups its own child table by project_id, so it has at most one row per project. The joins therefore attach one session summary and one review summary to each unique project row. Project 1 has three sessions totaling 75 and two reviews; project 2 has two sessions totaling 20 and three reviews. Project 3 contributes one review and no sessions. Project 4 has neither. COALESCE explicitly represents the absent child counts and minutes as zero.",
+      "transfer": "Explain how a one-row-per-project guarantee for each child summary prevents this particular multiplication."
+    },
+    {
+      "id": "grain-09-counting-rollup-rows",
+      "concept": "regrouping",
+      "prerequisites": [
+        "pairs",
+        "identity"
+      ],
+      "prompt": "SQLite; only these fictional rows.\nprojects(project_id, name): (1, 'Atlas'); (2, 'Birch'); (3, 'Cedar'); (4, 'Dune').\nwork_sessions(session_id, project_id, minutes): (101, 1, 30); (102, 1, 30); (103, 1, 15); (201, 2, 20); (202, 2, 0).\nreviews(review_id, project_id, label): (11, 1, 'ready'); (12, 1, 'hold'); (21, 2, 'ready'); (22, 2, 'ready'); (23, 2, 'hold'); (31, 3, 'ready').\nIDs are distinct non-NULL keys in their own tables; every child project_id exists. All minutes are nonnegative integers. Repeated minute values and labels still belong to separate records.\n\nThis join has one row per project. What single row distinguishes projects, present rollups and original sessions? Columns: (project_rows, projects_with_sessions, total_sessions).\nSQL:\nWITH session_totals AS (\n  SELECT project_id, COUNT(*) AS session_count\n  FROM work_sessions GROUP BY project_id\n)\nSELECT COUNT(*) AS project_rows,\n       COUNT(s.session_count) AS projects_with_sessions,\n       COALESCE(SUM(s.session_count), 0) AS total_sessions\nFROM projects AS p\nLEFT JOIN session_totals AS s ON s.project_id = p.project_id;\nEach tuple denotes one output row.",
+      "options": [
+        "(4, 2, 5)",
+        "(4, 4, 4)",
+        "(4, 5, 5)",
+        "(2, 2, 5)"
+      ],
+      "answer": 0,
+      "explanation": "There are four unique project rows after the join. Only two projects have a session_totals row, so COUNT(s.session_count) is two. The non-NULL session_count values are three and two; summing those stored counts recovers five original sessions. A count of grouped rows measures the number of represented projects, not the number of original records summarized by those rows.",
+      "transfer": "Describe the different questions answered by counting project rows, counting present summary rows, and summing the summary's session_count."
+    },
+    {
+      "id": "grain-10-existence-without-copying",
+      "concept": "policies",
+      "prerequisites": [
+        "pairs",
+        "identity",
+        "regrouping"
+      ],
+      "prompt": "SQLite; only these fictional rows.\nprojects(project_id, name): (1, 'Atlas'); (2, 'Birch'); (3, 'Cedar'); (4, 'Dune').\nwork_sessions(session_id, project_id, minutes): (101, 1, 30); (102, 1, 30); (103, 1, 15); (201, 2, 20); (202, 2, 0).\nreviews(review_id, project_id, label): (11, 1, 'ready'); (12, 1, 'hold'); (21, 2, 'ready'); (22, 2, 'ready'); (23, 2, 'hold'); (31, 3, 'ready').\nIDs are distinct non-NULL keys in their own tables; every child project_id exists. All minutes are nonnegative integers. Repeated minute values and labels still belong to separate records.\n\nA project qualifies if it has at least one 'ready' review. What ordered rows does this EXISTS filter return? Columns: (project_id, session_count, session_minutes).\nSQL:\nSELECT e.project_id, COUNT(*) AS session_count,\n       SUM(e.minutes) AS session_minutes\nFROM work_sessions AS e\nWHERE EXISTS (\n  SELECT 1 FROM reviews AS r\n  WHERE r.project_id = e.project_id AND r.label = 'ready'\n)\nGROUP BY e.project_id\nORDER BY e.project_id;\nEach tuple denotes one output row.",
+      "options": [
+        "(1, 3, 75); (2, 4, 40)",
+        "(1, 3, 75); (2, 2, 20)",
+        "(1, 3, 75); (2, 2, 20); (3, 0, 0)",
+        "(1, 2, 45); (2, 2, 20)"
+      ],
+      "answer": 1,
+      "explanation": "EXISTS is a predicate on each original session. Project 1 has a ready review, and project 2 has two ready reviews, but either positive number makes the predicate true just once for the session being considered. The three and two original session records remain, totaling 75 and 20. Project 3 has a ready review but no row in work_sessions to retain, so this session-based query does not emit a project 3 group.",
+      "transfer": "Explain why checking that a ready review exists does not require producing one output session copy for every ready review."
+    },
+    {
+      "id": "grain-11-unequal-repetition",
+      "concept": "policies",
+      "prerequisites": [
+        "pairs",
+        "identity",
+        "regrouping"
+      ],
+      "prompt": "SQLite; only these fictional rows.\nprojects(project_id, name): (1, 'Atlas'); (2, 'Birch'); (3, 'Cedar'); (4, 'Dune').\nwork_sessions(session_id, project_id, minutes): (101, 1, 30); (102, 1, 30); (103, 1, 15); (201, 2, 20); (202, 2, 0).\nreviews(review_id, project_id, label): (11, 1, 'ready'); (12, 1, 'hold'); (21, 2, 'ready'); (22, 2, 'ready'); (23, 2, 'hold'); (31, 3, 'ready').\nIDs are distinct non-NULL keys in their own tables; every child project_id exists. All minutes are nonnegative integers. Repeated minute values and labels still belong to separate records.\n\nThe first average reads joined session/review pairs; the scalar subquery reads original sessions. Which single (joined_mean, session_mean) row is returned? Both columns are SQLite REAL values; numerically equal decimal spellings mean the same value.\nSQL:\nSELECT AVG(e.minutes) AS joined_mean,\n       (SELECT AVG(minutes) FROM work_sessions) AS session_mean\nFROM work_sessions AS e\nJOIN reviews AS r ON r.project_id = e.project_id;\nEach tuple denotes one output row.",
+      "options": [
+        "(19.0, 19.0)",
+        "(19.0, 17.5)",
+        "(17.5, 19.0)",
+        "(21.0, 19.0)"
+      ],
+      "answer": 2,
+      "explanation": "The joined rows contain six copies associated with project 1 and six with project 2: their minute sums are 150 and 60, so the first average is 210 / 12 = 17.5. The original five sessions sum to 95, giving 95 / 5 = 19.0. Sessions in project 2 receive a repetition factor of three instead of two, which changes their weight. Repetition can leave an average unchanged in other data; this specific unequal weighting changes it.",
+      "transfer": "Describe how review counts act as repetition weights here. Distinguish this mechanism from a claim that every join must change every average."
+    },
+    {
+      "id": "grain-12-general-condition",
+      "concept": "policies",
+      "prerequisites": [
+        "pairs",
+        "identity",
+        "regrouping"
+      ],
+      "prompt": "SQLite; only these fictional rows.\nprojects(project_id, name): (1, 'Atlas'); (2, 'Birch'); (3, 'Cedar'); (4, 'Dune').\nwork_sessions(session_id, project_id, minutes): (101, 1, 30); (102, 1, 30); (103, 1, 15); (201, 2, 20); (202, 2, 0).\nreviews(review_id, project_id, label): (11, 1, 'ready'); (12, 1, 'hold'); (21, 2, 'ready'); (22, 2, 'ready'); (23, 2, 'hold'); (31, 3, 'ready').\nIDs are distinct non-NULL keys in their own tables; every child project_id exists. All minutes are nonnegative integers. Repeated minute values and labels still belong to separate records.\n\nThis question concerns every finite table instance satisfying the stated keys and references, not just the displayed rows. Minutes remain nonnegative integers, and every intermediate sum fits SQLite's signed 64-bit integer range. Define the true total for each project as the sum of its original work_sessions rows, with zero for none. Which ONE additional condition guarantees that the query below returns those true totals for EVERY such instance satisfying that condition? It asks for a sufficient condition, not a necessary condition for accidental equality in one fixture.\nSQL:\nSELECT p.project_id, COALESCE(SUM(e.minutes), 0) AS minutes\nFROM projects AS p\nLEFT JOIN work_sessions AS e ON e.project_id = p.project_id\nLEFT JOIN reviews AS r ON r.project_id = p.project_id\nGROUP BY p.project_id\nORDER BY p.project_id;",
+      "options": [
+        "Every project has at least one review.",
+        "Within each project, all session minute values are different.",
+        "Within each project, all review label strings are different.",
+        "Every project has at most one review."
+      ],
+      "answer": 3,
+      "explanation": "At most one review per project is sufficient. With zero matching reviews, LEFT JOIN supplies one NULL review placeholder per incoming session row; with one review, each incoming session matches once. Every original session minute value is therefore summed once, and a project with no sessions becomes zero through COALESCE. The other proposed conditions permit multiple reviews and do not stop repetition. This is an all-instances guarantee, not a claim that the condition is necessary for one fixture to happen to give the right total.",
+      "transfer": "In your own words, separate an all-instances sufficient-condition guarantee from an observed equality for a particular dataset."
+    }
+  ]
+}

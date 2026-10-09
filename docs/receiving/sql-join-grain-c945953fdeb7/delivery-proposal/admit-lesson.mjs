@@ -1,0 +1,26 @@
+// One admission of the physically delivered SQL lesson using the exact unchanged ESM parser.
+import fs from 'node:fs';
+import crypto from 'node:crypto';
+import assert from 'node:assert/strict';
+const pin = b => ({bytes:b.length,sha256:crypto.createHash('sha256').update(b).digest('hex'),git_blob:crypto.createHash('sha1').update(Buffer.from('blob '+b.length+'\0')).update(b).digest('hex')});
+const inputBytes=fs.readFileSync(0);assert.ok(inputBytes.length<=32768,'parser input budget');
+const input=JSON.parse(inputBytes.toString('utf8'));
+assert.equal(process.version,'v22.22.1','offered existing Node version');
+const executable=fs.realpathSync(process.execPath);
+const runtimeBytes=fs.readFileSync(executable);assert.deepEqual(pin(runtimeBytes),input.node_pin,'Node executable identity');
+const original=Buffer.from(input.original_parser.content,'utf8');
+assert.deepEqual(pin(original),input.original_parser.pin,'unchanged original ESM identity');
+const before=fs.lstatSync(input.course_path,{bigint:true});
+assert.ok(before.isFile()&&!before.isSymbolicLink(),'physical course regular file');
+assert.equal(Number(before.mode&0o7777n),0o444,'delivered read-only course');
+const textBytes=fs.readFileSync(input.course_path);assert.deepEqual(pin(textBytes),input.course_pin,'physical course bytes');
+const {parseDeck}=await import('data:text/javascript;base64,'+original.toString('base64'));
+const parsed=parseDeck(textBytes.toString('utf8'));
+assert.deepEqual(parsed,JSON.parse(textBytes.toString('utf8')),'original parser returns exactly the delivered content fields');
+assert.equal(parsed.items.length,12);assert.deepEqual(parsed.items.map(x=>x.id),input.expected_ids);
+assert.deepEqual(parsed.concepts,input.expected_concepts);assert.equal(parsed.title,'SQL join grain — keep each original record in the right total');
+const after=fs.lstatSync(input.course_path,{bigint:true});
+for(const key of ['size','mode','mtimeNs','ino'])assert.equal(after[key],before[key],'course preservation '+key);
+assert.deepEqual(pin(fs.readFileSync(input.course_path)),input.course_pin,'course content after parse');
+assert.deepEqual(pin(fs.readFileSync(executable)),input.node_pin,'Node content after parse');
+process.stdout.write(JSON.stringify({schema:'recallweave-sql-lesson-parser-admission/v1',accepted:true,pid:process.pid,node_version:process.version,node_executable:executable,node:pin(runtimeBytes),original_parser:input.original_parser.pin,transport:'Exact original ESM bytes imported through a data URL; no export rewriting or dependency substitution.',course_path:input.course_path,course:pin(textBytes),title:parsed.title,concepts:parsed.concepts,item_ids:parsed.items.map(x=>x.id),questions:parsed.items.length,parseDeck_calls:1,full_returned_fields_equal_delivered_JSON:true,course_bytes_mode_mtime_inode_unchanged:true,scope:'Structural compatibility of this new course; no subject accuracy, old importer matrix or SQL execution claim.'})+'\n');

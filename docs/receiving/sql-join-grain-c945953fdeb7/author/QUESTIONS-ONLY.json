@@ -1,0 +1,759 @@
+{
+  "schema": "recallweave.sql-join-grain.questions-only/v1",
+  "title": "SQL join grain — keep each original record in the right total",
+  "owner": "estate-c945953fdeb7/product_execution_next",
+  "repository": "Jacob-Met/RecallWeave",
+  "reservation": "https://github.com/Jacob-Met/RecallWeave/issues/276",
+  "source_parent": "ec07bf3989132130759e5c00c6cb02eef19709d3",
+  "source_tree": "a839b6877bf2824f134443829d1ce62e1bd79e50",
+  "source_paths": [
+    "courses/sql-join-grain.json",
+    "courses/sql-join-grain.md",
+    "courses/sql-join-grain.sql"
+  ],
+  "evidence_prefix": "docs/receiving/sql-join-grain-c945953fdeb7/",
+  "private_drafting_started_utc": "2026-10-09 13:21:27 UTC",
+  "questions_text_sealed_at_utc": "2026-10-09 13:28:12 UTC",
+  "chronology": "Question design, distractor design and private solution reasoning began together during private drafting. This packet withholds every authored choice index, explanation, transfer prompt, worked guide and expected-result table. Source/answer artifacts will be sealed separately before this questions-only body is sent to root. The independent reviewer derives its own authority from these exact complete questions.",
+  "native_status": {
+    "SQL_connections": 0,
+    "SQL_statements": 0,
+    "deck_parser_calls": 0,
+    "learner_or_browser_calls": 0,
+    "runtime_or_host_admission": false,
+    "Mac": "Existing collector UNKNOWN/offline hold remains; no device call here."
+  },
+  "language": {
+    "dialect": "SQLite",
+    "source_semantics_target": "SQLite 3.50.4; no actual query qualification has occurred for this lesson.",
+    "primary_sources": [
+      {
+        "url": "https://www.sqlite.org/lang_select.html",
+        "retrieved_on": "2026-10-09",
+        "focus": "Cartesian row combinations, ON filtering, outer placeholders, grouped aggregates, output DISTINCT and explicit ordering."
+      },
+      {
+        "url": "https://www.sqlite.org/lang_aggfunc.html",
+        "retrieved_on": "2026-10-09",
+        "focus": "COUNT, aggregate DISTINCT, SUM over non-NULL integers, empty SUM and REAL AVG."
+      },
+      {
+        "url": "https://www.sqlite.org/lang_expr.html",
+        "focus": "Existing SQLite EXISTS predicate semantics; original membership lesson #257 retains its teaching scope."
+      }
+    ],
+    "execution_model": "A fresh empty SQLite database with built-in functions and foreign_keys=ON; no extensions, custom collation, custom functions, attached database or user data. This is an exact relational-result contract, not a physical query-plan promise.",
+    "result_notation": "Each option tuple denotes one result row; semicolons separate ordered rows. NULL is SQL NULL. Text literal comparisons use the original default SQLite collation. Every multirow query has an ORDER BY unique for its selected row identities. Single-row aggregate outputs have no ordering ambiguity.",
+    "type_contract": "Schema and the per-query types below determine SQLite semantic types. Every expected count and non-NULL sum is INTEGER; absent uncoalesced sums are NULL; both averages are REAL. Decimal spellings of the same REAL value are equivalent for a multiple-choice answer. Root should retain exact value and type in its separate expected-result record.",
+    "option_identity": "A/B/C/D mean original option indices0/1/2/3 respectively. They do not predict shuffled screen positions. An independent key must name original_index and exact selected option text."
+  },
+  "schema_statements": [
+    "CREATE TABLE projects (\n  project_id INTEGER PRIMARY KEY,\n  name TEXT NOT NULL\n);",
+    "CREATE TABLE work_sessions (\n  session_id INTEGER PRIMARY KEY,\n  project_id INTEGER NOT NULL REFERENCES projects(project_id),\n  minutes INTEGER NOT NULL CHECK (typeof(minutes) = 'integer' AND minutes >= 0)\n);",
+    "CREATE TABLE reviews (\n  review_id INTEGER PRIMARY KEY,\n  project_id INTEGER NOT NULL REFERENCES projects(project_id),\n  label TEXT NOT NULL\n);"
+  ],
+  "setup_pragmas": [
+    "PRAGMA foreign_keys = ON;"
+  ],
+  "insert_statements": [
+    "INSERT INTO projects(project_id, name) VALUES\n  (1, 'Atlas'), (2, 'Birch'), (3, 'Cedar'), (4, 'Dune');",
+    "INSERT INTO work_sessions(session_id, project_id, minutes) VALUES\n  (101, 1, 30), (102, 1, 30), (103, 1, 15),\n  (201, 2, 20), (202, 2, 0);",
+    "INSERT INTO reviews(review_id, project_id, label) VALUES\n  (11, 1, 'ready'), (12, 1, 'hold'),\n  (21, 2, 'ready'), (22, 2, 'ready'), (23, 2, 'hold'),\n  (31, 3, 'ready');"
+  ],
+  "fixture_rows": {
+    "projects": [
+      [
+        1,
+        "Atlas"
+      ],
+      [
+        2,
+        "Birch"
+      ],
+      [
+        3,
+        "Cedar"
+      ],
+      [
+        4,
+        "Dune"
+      ]
+    ],
+    "work_sessions": [
+      [
+        101,
+        1,
+        30
+      ],
+      [
+        102,
+        1,
+        30
+      ],
+      [
+        103,
+        1,
+        15
+      ],
+      [
+        201,
+        2,
+        20
+      ],
+      [
+        202,
+        2,
+        0
+      ]
+    ],
+    "reviews": [
+      [
+        11,
+        1,
+        "ready"
+      ],
+      [
+        12,
+        1,
+        "hold"
+      ],
+      [
+        21,
+        2,
+        "ready"
+      ],
+      [
+        22,
+        2,
+        "ready"
+      ],
+      [
+        23,
+        2,
+        "hold"
+      ],
+      [
+        31,
+        3,
+        "ready"
+      ]
+    ]
+  },
+  "fixture_interpretation": "The four projects, five work sessions and six reviews are fictional. A repeated minute amount or review label is not a duplicate record identity. Project3 has a review but no session; project4 has neither. No relationship between one particular session and one particular review is stored beyond their common project.",
+  "concepts": [
+    "pairs",
+    "identity",
+    "regrouping",
+    "policies"
+  ],
+  "questions": [
+    {
+      "id": "grain-01-pairs",
+      "concept": "pairs",
+      "prerequisites": [],
+      "kind": "rows",
+      "prompt": "SQLite; only these fictional rows.\nprojects(project_id, name): (1, 'Atlas'); (2, 'Birch'); (3, 'Cedar'); (4, 'Dune').\nwork_sessions(session_id, project_id, minutes): (101, 1, 30); (102, 1, 30); (103, 1, 15); (201, 2, 20); (202, 2, 0).\nreviews(review_id, project_id, label): (11, 1, 'ready'); (12, 1, 'hold'); (21, 2, 'ready'); (22, 2, 'ready'); (23, 2, 'hold'); (31, 3, 'ready').\nIDs are distinct non-NULL keys in their own tables; every child project_id exists. All minutes are nonnegative integers. Repeated minute values and labels still belong to separate records.\n\nWhich complete ordered (session_id, review_id) rows are returned for project 1?\nSQL:\nSELECT e.session_id, r.review_id\nFROM work_sessions AS e\nJOIN reviews AS r ON r.project_id = e.project_id\nWHERE e.project_id = 1\nORDER BY e.session_id, r.review_id;\nEach tuple denotes one output row.",
+      "request": "Which complete ordered (session_id, review_id) rows are returned for project 1?",
+      "sql": "SELECT e.session_id, r.review_id\nFROM work_sessions AS e\nJOIN reviews AS r ON r.project_id = e.project_id\nWHERE e.project_id = 1\nORDER BY e.session_id, r.review_id;",
+      "columns": [
+        "session_id",
+        "review_id"
+      ],
+      "types": [
+        "INTEGER",
+        "INTEGER"
+      ],
+      "options": [
+        "(101, 11); (101, 12); (102, 11); (102, 12); (103, 11); (103, 12)",
+        "(101, 11); (102, 12)",
+        "(101, 11); (102, 11); (103, 11)",
+        "(101, 11); (101, 12); (102, 11); (102, 12)"
+      ],
+      "option_identities": [
+        {
+          "original_index": 0,
+          "label": "A",
+          "text": "(101, 11); (101, 12); (102, 11); (102, 12); (103, 11); (103, 12)"
+        },
+        {
+          "original_index": 1,
+          "label": "B",
+          "text": "(101, 11); (102, 12)"
+        },
+        {
+          "original_index": 2,
+          "label": "C",
+          "text": "(101, 11); (102, 11); (103, 11)"
+        },
+        {
+          "original_index": 3,
+          "label": "D",
+          "text": "(101, 11); (101, 12); (102, 11); (102, 12)"
+        }
+      ]
+    },
+    {
+      "id": "grain-02-count-identities",
+      "concept": "pairs",
+      "prerequisites": [],
+      "kind": "rows",
+      "prompt": "SQLite; only these fictional rows.\nprojects(project_id, name): (1, 'Atlas'); (2, 'Birch'); (3, 'Cedar'); (4, 'Dune').\nwork_sessions(session_id, project_id, minutes): (101, 1, 30); (102, 1, 30); (103, 1, 15); (201, 2, 20); (202, 2, 0).\nreviews(review_id, project_id, label): (11, 1, 'ready'); (12, 1, 'hold'); (21, 2, 'ready'); (22, 2, 'ready'); (23, 2, 'hold'); (31, 3, 'ready').\nIDs are distinct non-NULL keys in their own tables; every child project_id exists. All minutes are nonnegative integers. Repeated minute values and labels still belong to separate records.\n\nWhich ordered rows distinguish joined row occurrences from distinct session and review IDs? Columns: (project_id, joined_rows, session_ids, review_ids).\nSQL:\nSELECT p.project_id, COUNT(*) AS joined_rows,\n       COUNT(DISTINCT e.session_id) AS session_ids,\n       COUNT(DISTINCT r.review_id) AS review_ids\nFROM projects AS p\nLEFT JOIN work_sessions AS e ON e.project_id = p.project_id\nLEFT JOIN reviews AS r ON r.project_id = p.project_id\nGROUP BY p.project_id\nORDER BY p.project_id;\nEach tuple denotes one output row.",
+      "request": "Which ordered rows distinguish joined row occurrences from distinct session and review IDs? Columns: (project_id, joined_rows, session_ids, review_ids).",
+      "sql": "SELECT p.project_id, COUNT(*) AS joined_rows,\n       COUNT(DISTINCT e.session_id) AS session_ids,\n       COUNT(DISTINCT r.review_id) AS review_ids\nFROM projects AS p\nLEFT JOIN work_sessions AS e ON e.project_id = p.project_id\nLEFT JOIN reviews AS r ON r.project_id = p.project_id\nGROUP BY p.project_id\nORDER BY p.project_id;",
+      "columns": [
+        "project_id",
+        "joined_rows",
+        "session_ids",
+        "review_ids"
+      ],
+      "types": [
+        "INTEGER",
+        "INTEGER",
+        "INTEGER",
+        "INTEGER"
+      ],
+      "options": [
+        "(1, 5, 3, 2); (2, 5, 2, 3); (3, 1, 0, 1); (4, 0, 0, 0)",
+        "(1, 6, 3, 2); (2, 6, 2, 3); (3, 1, 0, 1); (4, 1, 0, 0)",
+        "(1, 6, 6, 6); (2, 6, 6, 6); (3, 1, 1, 1); (4, 1, 1, 1)",
+        "(1, 3, 3, 2); (2, 2, 2, 3); (3, 1, 0, 1); (4, 1, 0, 0)"
+      ],
+      "option_identities": [
+        {
+          "original_index": 0,
+          "label": "A",
+          "text": "(1, 5, 3, 2); (2, 5, 2, 3); (3, 1, 0, 1); (4, 0, 0, 0)"
+        },
+        {
+          "original_index": 1,
+          "label": "B",
+          "text": "(1, 6, 3, 2); (2, 6, 2, 3); (3, 1, 0, 1); (4, 1, 0, 0)"
+        },
+        {
+          "original_index": 2,
+          "label": "C",
+          "text": "(1, 6, 6, 6); (2, 6, 6, 6); (3, 1, 1, 1); (4, 1, 1, 1)"
+        },
+        {
+          "original_index": 3,
+          "label": "D",
+          "text": "(1, 3, 3, 2); (2, 2, 2, 3); (3, 1, 0, 1); (4, 1, 0, 0)"
+        }
+      ]
+    },
+    {
+      "id": "grain-03-multiplied-sums",
+      "concept": "pairs",
+      "prerequisites": [],
+      "kind": "rows",
+      "prompt": "SQLite; only these fictional rows.\nprojects(project_id, name): (1, 'Atlas'); (2, 'Birch'); (3, 'Cedar'); (4, 'Dune').\nwork_sessions(session_id, project_id, minutes): (101, 1, 30); (102, 1, 30); (103, 1, 15); (201, 2, 20); (202, 2, 0).\nreviews(review_id, project_id, label): (11, 1, 'ready'); (12, 1, 'hold'); (21, 2, 'ready'); (22, 2, 'ready'); (23, 2, 'hold'); (31, 3, 'ready').\nIDs are distinct non-NULL keys in their own tables; every child project_id exists. All minutes are nonnegative integers. Repeated minute values and labels still belong to separate records.\n\nWhat ordered (project_id, joined_minutes) rows does this query produce? NULL denotes an SQL NULL, not a zero.\nSQL:\nSELECT p.project_id, SUM(e.minutes) AS joined_minutes\nFROM projects AS p\nLEFT JOIN work_sessions AS e ON e.project_id = p.project_id\nLEFT JOIN reviews AS r ON r.project_id = p.project_id\nGROUP BY p.project_id\nORDER BY p.project_id;\nEach tuple denotes one output row.",
+      "request": "What ordered (project_id, joined_minutes) rows does this query produce? NULL denotes an SQL NULL, not a zero.",
+      "sql": "SELECT p.project_id, SUM(e.minutes) AS joined_minutes\nFROM projects AS p\nLEFT JOIN work_sessions AS e ON e.project_id = p.project_id\nLEFT JOIN reviews AS r ON r.project_id = p.project_id\nGROUP BY p.project_id\nORDER BY p.project_id;",
+      "columns": [
+        "project_id",
+        "joined_minutes"
+      ],
+      "types": [
+        "INTEGER",
+        "INTEGER or NULL"
+      ],
+      "options": [
+        "(1, 75); (2, 20); (3, NULL); (4, NULL)",
+        "(1, 150); (2, 60); (3, 0); (4, 0)",
+        "(1, 150); (2, 60); (3, NULL); (4, NULL)",
+        "(1, 45); (2, 20); (3, NULL); (4, NULL)"
+      ],
+      "option_identities": [
+        {
+          "original_index": 0,
+          "label": "A",
+          "text": "(1, 75); (2, 20); (3, NULL); (4, NULL)"
+        },
+        {
+          "original_index": 1,
+          "label": "B",
+          "text": "(1, 150); (2, 60); (3, 0); (4, 0)"
+        },
+        {
+          "original_index": 2,
+          "label": "C",
+          "text": "(1, 150); (2, 60); (3, NULL); (4, NULL)"
+        },
+        {
+          "original_index": 3,
+          "label": "D",
+          "text": "(1, 45); (2, 20); (3, NULL); (4, NULL)"
+        }
+      ]
+    },
+    {
+      "id": "grain-04-distinct-values",
+      "concept": "identity",
+      "prerequisites": [
+        "pairs"
+      ],
+      "kind": "rows",
+      "prompt": "SQLite; only these fictional rows.\nprojects(project_id, name): (1, 'Atlas'); (2, 'Birch'); (3, 'Cedar'); (4, 'Dune').\nwork_sessions(session_id, project_id, minutes): (101, 1, 30); (102, 1, 30); (103, 1, 15); (201, 2, 20); (202, 2, 0).\nreviews(review_id, project_id, label): (11, 1, 'ready'); (12, 1, 'hold'); (21, 2, 'ready'); (22, 2, 'ready'); (23, 2, 'hold'); (31, 3, 'ready').\nIDs are distinct non-NULL keys in their own tables; every child project_id exists. All minutes are nonnegative integers. Repeated minute values and labels still belong to separate records.\n\nWhich single row is returned? The scalar subquery reads the original sessions directly. Columns: (joined_sum, distinct_value_sum, session_sum).\nSQL:\nSELECT SUM(e.minutes) AS joined_sum,\n       SUM(DISTINCT e.minutes) AS distinct_value_sum,\n       (SELECT SUM(minutes) FROM work_sessions\n        WHERE project_id = 1) AS session_sum\nFROM work_sessions AS e\nJOIN reviews AS r ON r.project_id = e.project_id\nWHERE e.project_id = 1;\nEach tuple denotes one output row.",
+      "request": "Which single row is returned? The scalar subquery reads the original sessions directly. Columns: (joined_sum, distinct_value_sum, session_sum).",
+      "sql": "SELECT SUM(e.minutes) AS joined_sum,\n       SUM(DISTINCT e.minutes) AS distinct_value_sum,\n       (SELECT SUM(minutes) FROM work_sessions\n        WHERE project_id = 1) AS session_sum\nFROM work_sessions AS e\nJOIN reviews AS r ON r.project_id = e.project_id\nWHERE e.project_id = 1;",
+      "columns": [
+        "joined_sum",
+        "distinct_value_sum",
+        "session_sum"
+      ],
+      "types": [
+        "INTEGER",
+        "INTEGER",
+        "INTEGER"
+      ],
+      "options": [
+        "(150, 75, 75)",
+        "(75, 45, 75)",
+        "(150, 45, 45)",
+        "(150, 45, 75)"
+      ],
+      "option_identities": [
+        {
+          "original_index": 0,
+          "label": "A",
+          "text": "(150, 75, 75)"
+        },
+        {
+          "original_index": 1,
+          "label": "B",
+          "text": "(75, 45, 75)"
+        },
+        {
+          "original_index": 2,
+          "label": "C",
+          "text": "(150, 45, 45)"
+        },
+        {
+          "original_index": 3,
+          "label": "D",
+          "text": "(150, 45, 75)"
+        }
+      ]
+    },
+    {
+      "id": "grain-05-distinct-after-grouping",
+      "concept": "identity",
+      "prerequisites": [
+        "pairs"
+      ],
+      "kind": "rows",
+      "prompt": "SQLite; only these fictional rows.\nprojects(project_id, name): (1, 'Atlas'); (2, 'Birch'); (3, 'Cedar'); (4, 'Dune').\nwork_sessions(session_id, project_id, minutes): (101, 1, 30); (102, 1, 30); (103, 1, 15); (201, 2, 20); (202, 2, 0).\nreviews(review_id, project_id, label): (11, 1, 'ready'); (12, 1, 'hold'); (21, 2, 'ready'); (22, 2, 'ready'); (23, 2, 'hold'); (31, 3, 'ready').\nIDs are distinct non-NULL keys in their own tables; every child project_id exists. All minutes are nonnegative integers. Repeated minute values and labels still belong to separate records.\n\nWhat ordered rows are returned when DISTINCT is applied to these already-grouped result rows? Columns: (project_id, counted_sessions).\nSQL:\nSELECT DISTINCT p.project_id,\n       COUNT(e.session_id) AS counted_sessions\nFROM projects AS p\nLEFT JOIN work_sessions AS e ON e.project_id = p.project_id\nLEFT JOIN reviews AS r ON r.project_id = p.project_id\nGROUP BY p.project_id\nORDER BY p.project_id;\nEach tuple denotes one output row.",
+      "request": "What ordered rows are returned when DISTINCT is applied to these already-grouped result rows? Columns: (project_id, counted_sessions).",
+      "sql": "SELECT DISTINCT p.project_id,\n       COUNT(e.session_id) AS counted_sessions\nFROM projects AS p\nLEFT JOIN work_sessions AS e ON e.project_id = p.project_id\nLEFT JOIN reviews AS r ON r.project_id = p.project_id\nGROUP BY p.project_id\nORDER BY p.project_id;",
+      "columns": [
+        "project_id",
+        "counted_sessions"
+      ],
+      "types": [
+        "INTEGER",
+        "INTEGER"
+      ],
+      "options": [
+        "(1, 6); (2, 6); (3, 0); (4, 0)",
+        "(1, 3); (2, 2); (3, 0); (4, 0)",
+        "(1, 1); (2, 1); (3, 0); (4, 0)",
+        "(1, 6); (2, 6)"
+      ],
+      "option_identities": [
+        {
+          "original_index": 0,
+          "label": "A",
+          "text": "(1, 6); (2, 6); (3, 0); (4, 0)"
+        },
+        {
+          "original_index": 1,
+          "label": "B",
+          "text": "(1, 3); (2, 2); (3, 0); (4, 0)"
+        },
+        {
+          "original_index": 2,
+          "label": "C",
+          "text": "(1, 1); (2, 1); (3, 0); (4, 0)"
+        },
+        {
+          "original_index": 3,
+          "label": "D",
+          "text": "(1, 6); (2, 6)"
+        }
+      ]
+    },
+    {
+      "id": "grain-06-retain-record-id",
+      "concept": "identity",
+      "prerequisites": [
+        "pairs"
+      ],
+      "kind": "rows",
+      "prompt": "SQLite; only these fictional rows.\nprojects(project_id, name): (1, 'Atlas'); (2, 'Birch'); (3, 'Cedar'); (4, 'Dune').\nwork_sessions(session_id, project_id, minutes): (101, 1, 30); (102, 1, 30); (103, 1, 15); (201, 2, 20); (202, 2, 0).\nreviews(review_id, project_id, label): (11, 1, 'ready'); (12, 1, 'hold'); (21, 2, 'ready'); (22, 2, 'ready'); (23, 2, 'hold'); (31, 3, 'ready').\nIDs are distinct non-NULL keys in their own tables; every child project_id exists. All minutes are nonnegative integers. Repeated minute values and labels still belong to separate records.\n\nWhat single (session_total) row remains when the subquery retains session_id before removing repeated joined copies?\nSQL:\nSELECT SUM(minutes) AS session_total\nFROM (\n  SELECT DISTINCT e.session_id, e.project_id, e.minutes\n  FROM work_sessions AS e\n  JOIN reviews AS r ON r.project_id = e.project_id\n  WHERE e.project_id = 1\n) AS selected_sessions;\nEach tuple denotes one output row.",
+      "request": "What single (session_total) row remains when the subquery retains session_id before removing repeated joined copies?",
+      "sql": "SELECT SUM(minutes) AS session_total\nFROM (\n  SELECT DISTINCT e.session_id, e.project_id, e.minutes\n  FROM work_sessions AS e\n  JOIN reviews AS r ON r.project_id = e.project_id\n  WHERE e.project_id = 1\n) AS selected_sessions;",
+      "columns": [
+        "session_total"
+      ],
+      "types": [
+        "INTEGER"
+      ],
+      "options": [
+        "(45)",
+        "(75)",
+        "(150)",
+        "(90)"
+      ],
+      "option_identities": [
+        {
+          "original_index": 0,
+          "label": "A",
+          "text": "(45)"
+        },
+        {
+          "original_index": 1,
+          "label": "B",
+          "text": "(75)"
+        },
+        {
+          "original_index": 2,
+          "label": "C",
+          "text": "(150)"
+        },
+        {
+          "original_index": 3,
+          "label": "D",
+          "text": "(90)"
+        }
+      ]
+    },
+    {
+      "id": "grain-07-one-rollup-is-not-enough",
+      "concept": "regrouping",
+      "prerequisites": [
+        "pairs",
+        "identity"
+      ],
+      "kind": "rows",
+      "prompt": "SQLite; only these fictional rows.\nprojects(project_id, name): (1, 'Atlas'); (2, 'Birch'); (3, 'Cedar'); (4, 'Dune').\nwork_sessions(session_id, project_id, minutes): (101, 1, 30); (102, 1, 30); (103, 1, 15); (201, 2, 20); (202, 2, 0).\nreviews(review_id, project_id, label): (11, 1, 'ready'); (12, 1, 'hold'); (21, 2, 'ready'); (22, 2, 'ready'); (23, 2, 'hold'); (31, 3, 'ready').\nIDs are distinct non-NULL keys in their own tables; every child project_id exists. All minutes are nonnegative integers. Repeated minute values and labels still belong to separate records.\n\nThe session table is grouped first, but its total is then joined to raw reviews and summed again. What ordered (project_id, minutes) rows result?\nSQL:\nWITH session_totals AS (\n  SELECT project_id, SUM(minutes) AS minutes\n  FROM work_sessions\n  GROUP BY project_id\n)\nSELECT p.project_id, COALESCE(SUM(s.minutes), 0) AS minutes\nFROM projects AS p\nLEFT JOIN session_totals AS s ON s.project_id = p.project_id\nLEFT JOIN reviews AS r ON r.project_id = p.project_id\nGROUP BY p.project_id\nORDER BY p.project_id;\nEach tuple denotes one output row.",
+      "request": "The session table is grouped first, but its total is then joined to raw reviews and summed again. What ordered (project_id, minutes) rows result?",
+      "sql": "WITH session_totals AS (\n  SELECT project_id, SUM(minutes) AS minutes\n  FROM work_sessions\n  GROUP BY project_id\n)\nSELECT p.project_id, COALESCE(SUM(s.minutes), 0) AS minutes\nFROM projects AS p\nLEFT JOIN session_totals AS s ON s.project_id = p.project_id\nLEFT JOIN reviews AS r ON r.project_id = p.project_id\nGROUP BY p.project_id\nORDER BY p.project_id;",
+      "columns": [
+        "project_id",
+        "minutes"
+      ],
+      "types": [
+        "INTEGER",
+        "INTEGER"
+      ],
+      "options": [
+        "(1, 75); (2, 20); (3, 0); (4, 0)",
+        "(1, 150); (2, 60); (3, NULL); (4, NULL)",
+        "(1, 150); (2, 60); (3, 0); (4, 0)",
+        "(1, 45); (2, 20); (3, 0); (4, 0)"
+      ],
+      "option_identities": [
+        {
+          "original_index": 0,
+          "label": "A",
+          "text": "(1, 75); (2, 20); (3, 0); (4, 0)"
+        },
+        {
+          "original_index": 1,
+          "label": "B",
+          "text": "(1, 150); (2, 60); (3, NULL); (4, NULL)"
+        },
+        {
+          "original_index": 2,
+          "label": "C",
+          "text": "(1, 150); (2, 60); (3, 0); (4, 0)"
+        },
+        {
+          "original_index": 3,
+          "label": "D",
+          "text": "(1, 45); (2, 20); (3, 0); (4, 0)"
+        }
+      ]
+    },
+    {
+      "id": "grain-08-two-rollups",
+      "concept": "regrouping",
+      "prerequisites": [
+        "pairs",
+        "identity"
+      ],
+      "kind": "rows",
+      "prompt": "SQLite; only these fictional rows.\nprojects(project_id, name): (1, 'Atlas'); (2, 'Birch'); (3, 'Cedar'); (4, 'Dune').\nwork_sessions(session_id, project_id, minutes): (101, 1, 30); (102, 1, 30); (103, 1, 15); (201, 2, 20); (202, 2, 0).\nreviews(review_id, project_id, label): (11, 1, 'ready'); (12, 1, 'hold'); (21, 2, 'ready'); (22, 2, 'ready'); (23, 2, 'hold'); (31, 3, 'ready').\nIDs are distinct non-NULL keys in their own tables; every child project_id exists. All minutes are nonnegative integers. Repeated minute values and labels still belong to separate records.\n\nBoth child tables now have one grouped row per project before the joins. What ordered rows result? Columns: (project_id, session_count, session_minutes, review_count).\nSQL:\nWITH session_totals AS (\n  SELECT project_id, COUNT(*) AS session_count,\n         SUM(minutes) AS session_minutes\n  FROM work_sessions GROUP BY project_id\n), review_totals AS (\n  SELECT project_id, COUNT(*) AS review_count\n  FROM reviews GROUP BY project_id\n)\nSELECT p.project_id,\n       COALESCE(s.session_count, 0) AS session_count,\n       COALESCE(s.session_minutes, 0) AS session_minutes,\n       COALESCE(r.review_count, 0) AS review_count\nFROM projects AS p\nLEFT JOIN session_totals AS s ON s.project_id = p.project_id\nLEFT JOIN review_totals AS r ON r.project_id = p.project_id\nORDER BY p.project_id;\nEach tuple denotes one output row.",
+      "request": "Both child tables now have one grouped row per project before the joins. What ordered rows result? Columns: (project_id, session_count, session_minutes, review_count).",
+      "sql": "WITH session_totals AS (\n  SELECT project_id, COUNT(*) AS session_count,\n         SUM(minutes) AS session_minutes\n  FROM work_sessions GROUP BY project_id\n), review_totals AS (\n  SELECT project_id, COUNT(*) AS review_count\n  FROM reviews GROUP BY project_id\n)\nSELECT p.project_id,\n       COALESCE(s.session_count, 0) AS session_count,\n       COALESCE(s.session_minutes, 0) AS session_minutes,\n       COALESCE(r.review_count, 0) AS review_count\nFROM projects AS p\nLEFT JOIN session_totals AS s ON s.project_id = p.project_id\nLEFT JOIN review_totals AS r ON r.project_id = p.project_id\nORDER BY p.project_id;",
+      "columns": [
+        "project_id",
+        "session_count",
+        "session_minutes",
+        "review_count"
+      ],
+      "types": [
+        "INTEGER",
+        "INTEGER",
+        "INTEGER",
+        "INTEGER"
+      ],
+      "options": [
+        "(1, 6, 150, 6); (2, 6, 60, 6); (3, 0, 0, 1); (4, 0, 0, 0)",
+        "(1, 3, 45, 2); (2, 2, 20, 2); (3, 0, 0, 1); (4, 0, 0, 0)",
+        "(1, 3, 75, 2); (2, 2, 20, 3)",
+        "(1, 3, 75, 2); (2, 2, 20, 3); (3, 0, 0, 1); (4, 0, 0, 0)"
+      ],
+      "option_identities": [
+        {
+          "original_index": 0,
+          "label": "A",
+          "text": "(1, 6, 150, 6); (2, 6, 60, 6); (3, 0, 0, 1); (4, 0, 0, 0)"
+        },
+        {
+          "original_index": 1,
+          "label": "B",
+          "text": "(1, 3, 45, 2); (2, 2, 20, 2); (3, 0, 0, 1); (4, 0, 0, 0)"
+        },
+        {
+          "original_index": 2,
+          "label": "C",
+          "text": "(1, 3, 75, 2); (2, 2, 20, 3)"
+        },
+        {
+          "original_index": 3,
+          "label": "D",
+          "text": "(1, 3, 75, 2); (2, 2, 20, 3); (3, 0, 0, 1); (4, 0, 0, 0)"
+        }
+      ]
+    },
+    {
+      "id": "grain-09-counting-rollup-rows",
+      "concept": "regrouping",
+      "prerequisites": [
+        "pairs",
+        "identity"
+      ],
+      "kind": "rows",
+      "prompt": "SQLite; only these fictional rows.\nprojects(project_id, name): (1, 'Atlas'); (2, 'Birch'); (3, 'Cedar'); (4, 'Dune').\nwork_sessions(session_id, project_id, minutes): (101, 1, 30); (102, 1, 30); (103, 1, 15); (201, 2, 20); (202, 2, 0).\nreviews(review_id, project_id, label): (11, 1, 'ready'); (12, 1, 'hold'); (21, 2, 'ready'); (22, 2, 'ready'); (23, 2, 'hold'); (31, 3, 'ready').\nIDs are distinct non-NULL keys in their own tables; every child project_id exists. All minutes are nonnegative integers. Repeated minute values and labels still belong to separate records.\n\nThis join has one row per project. What single row distinguishes projects, present rollups and original sessions? Columns: (project_rows, projects_with_sessions, total_sessions).\nSQL:\nWITH session_totals AS (\n  SELECT project_id, COUNT(*) AS session_count\n  FROM work_sessions GROUP BY project_id\n)\nSELECT COUNT(*) AS project_rows,\n       COUNT(s.session_count) AS projects_with_sessions,\n       COALESCE(SUM(s.session_count), 0) AS total_sessions\nFROM projects AS p\nLEFT JOIN session_totals AS s ON s.project_id = p.project_id;\nEach tuple denotes one output row.",
+      "request": "This join has one row per project. What single row distinguishes projects, present rollups and original sessions? Columns: (project_rows, projects_with_sessions, total_sessions).",
+      "sql": "WITH session_totals AS (\n  SELECT project_id, COUNT(*) AS session_count\n  FROM work_sessions GROUP BY project_id\n)\nSELECT COUNT(*) AS project_rows,\n       COUNT(s.session_count) AS projects_with_sessions,\n       COALESCE(SUM(s.session_count), 0) AS total_sessions\nFROM projects AS p\nLEFT JOIN session_totals AS s ON s.project_id = p.project_id;",
+      "columns": [
+        "project_rows",
+        "projects_with_sessions",
+        "total_sessions"
+      ],
+      "types": [
+        "INTEGER",
+        "INTEGER",
+        "INTEGER"
+      ],
+      "options": [
+        "(4, 2, 5)",
+        "(4, 4, 4)",
+        "(4, 5, 5)",
+        "(2, 2, 5)"
+      ],
+      "option_identities": [
+        {
+          "original_index": 0,
+          "label": "A",
+          "text": "(4, 2, 5)"
+        },
+        {
+          "original_index": 1,
+          "label": "B",
+          "text": "(4, 4, 4)"
+        },
+        {
+          "original_index": 2,
+          "label": "C",
+          "text": "(4, 5, 5)"
+        },
+        {
+          "original_index": 3,
+          "label": "D",
+          "text": "(2, 2, 5)"
+        }
+      ]
+    },
+    {
+      "id": "grain-10-existence-without-copying",
+      "concept": "policies",
+      "prerequisites": [
+        "pairs",
+        "identity",
+        "regrouping"
+      ],
+      "kind": "rows",
+      "prompt": "SQLite; only these fictional rows.\nprojects(project_id, name): (1, 'Atlas'); (2, 'Birch'); (3, 'Cedar'); (4, 'Dune').\nwork_sessions(session_id, project_id, minutes): (101, 1, 30); (102, 1, 30); (103, 1, 15); (201, 2, 20); (202, 2, 0).\nreviews(review_id, project_id, label): (11, 1, 'ready'); (12, 1, 'hold'); (21, 2, 'ready'); (22, 2, 'ready'); (23, 2, 'hold'); (31, 3, 'ready').\nIDs are distinct non-NULL keys in their own tables; every child project_id exists. All minutes are nonnegative integers. Repeated minute values and labels still belong to separate records.\n\nA project qualifies if it has at least one 'ready' review. What ordered rows does this EXISTS filter return? Columns: (project_id, session_count, session_minutes).\nSQL:\nSELECT e.project_id, COUNT(*) AS session_count,\n       SUM(e.minutes) AS session_minutes\nFROM work_sessions AS e\nWHERE EXISTS (\n  SELECT 1 FROM reviews AS r\n  WHERE r.project_id = e.project_id AND r.label = 'ready'\n)\nGROUP BY e.project_id\nORDER BY e.project_id;\nEach tuple denotes one output row.",
+      "request": "A project qualifies if it has at least one 'ready' review. What ordered rows does this EXISTS filter return? Columns: (project_id, session_count, session_minutes).",
+      "sql": "SELECT e.project_id, COUNT(*) AS session_count,\n       SUM(e.minutes) AS session_minutes\nFROM work_sessions AS e\nWHERE EXISTS (\n  SELECT 1 FROM reviews AS r\n  WHERE r.project_id = e.project_id AND r.label = 'ready'\n)\nGROUP BY e.project_id\nORDER BY e.project_id;",
+      "columns": [
+        "project_id",
+        "session_count",
+        "session_minutes"
+      ],
+      "types": [
+        "INTEGER",
+        "INTEGER",
+        "INTEGER"
+      ],
+      "options": [
+        "(1, 3, 75); (2, 4, 40)",
+        "(1, 3, 75); (2, 2, 20)",
+        "(1, 3, 75); (2, 2, 20); (3, 0, 0)",
+        "(1, 2, 45); (2, 2, 20)"
+      ],
+      "option_identities": [
+        {
+          "original_index": 0,
+          "label": "A",
+          "text": "(1, 3, 75); (2, 4, 40)"
+        },
+        {
+          "original_index": 1,
+          "label": "B",
+          "text": "(1, 3, 75); (2, 2, 20)"
+        },
+        {
+          "original_index": 2,
+          "label": "C",
+          "text": "(1, 3, 75); (2, 2, 20); (3, 0, 0)"
+        },
+        {
+          "original_index": 3,
+          "label": "D",
+          "text": "(1, 2, 45); (2, 2, 20)"
+        }
+      ]
+    },
+    {
+      "id": "grain-11-unequal-repetition",
+      "concept": "policies",
+      "prerequisites": [
+        "pairs",
+        "identity",
+        "regrouping"
+      ],
+      "kind": "rows",
+      "prompt": "SQLite; only these fictional rows.\nprojects(project_id, name): (1, 'Atlas'); (2, 'Birch'); (3, 'Cedar'); (4, 'Dune').\nwork_sessions(session_id, project_id, minutes): (101, 1, 30); (102, 1, 30); (103, 1, 15); (201, 2, 20); (202, 2, 0).\nreviews(review_id, project_id, label): (11, 1, 'ready'); (12, 1, 'hold'); (21, 2, 'ready'); (22, 2, 'ready'); (23, 2, 'hold'); (31, 3, 'ready').\nIDs are distinct non-NULL keys in their own tables; every child project_id exists. All minutes are nonnegative integers. Repeated minute values and labels still belong to separate records.\n\nThe first average reads joined session/review pairs; the scalar subquery reads original sessions. Which single (joined_mean, session_mean) row is returned? Both columns are SQLite REAL values; numerically equal decimal spellings mean the same value.\nSQL:\nSELECT AVG(e.minutes) AS joined_mean,\n       (SELECT AVG(minutes) FROM work_sessions) AS session_mean\nFROM work_sessions AS e\nJOIN reviews AS r ON r.project_id = e.project_id;\nEach tuple denotes one output row.",
+      "request": "The first average reads joined session/review pairs; the scalar subquery reads original sessions. Which single (joined_mean, session_mean) row is returned? Both columns are SQLite REAL values; numerically equal decimal spellings mean the same value.",
+      "sql": "SELECT AVG(e.minutes) AS joined_mean,\n       (SELECT AVG(minutes) FROM work_sessions) AS session_mean\nFROM work_sessions AS e\nJOIN reviews AS r ON r.project_id = e.project_id;",
+      "columns": [
+        "joined_mean",
+        "session_mean"
+      ],
+      "types": [
+        "REAL",
+        "REAL"
+      ],
+      "options": [
+        "(19.0, 19.0)",
+        "(19.0, 17.5)",
+        "(17.5, 19.0)",
+        "(21.0, 19.0)"
+      ],
+      "option_identities": [
+        {
+          "original_index": 0,
+          "label": "A",
+          "text": "(19.0, 19.0)"
+        },
+        {
+          "original_index": 1,
+          "label": "B",
+          "text": "(19.0, 17.5)"
+        },
+        {
+          "original_index": 2,
+          "label": "C",
+          "text": "(17.5, 19.0)"
+        },
+        {
+          "original_index": 3,
+          "label": "D",
+          "text": "(21.0, 19.0)"
+        }
+      ]
+    },
+    {
+      "id": "grain-12-general-condition",
+      "concept": "policies",
+      "prerequisites": [
+        "pairs",
+        "identity",
+        "regrouping"
+      ],
+      "kind": "general-policy",
+      "prompt": "SQLite; only these fictional rows.\nprojects(project_id, name): (1, 'Atlas'); (2, 'Birch'); (3, 'Cedar'); (4, 'Dune').\nwork_sessions(session_id, project_id, minutes): (101, 1, 30); (102, 1, 30); (103, 1, 15); (201, 2, 20); (202, 2, 0).\nreviews(review_id, project_id, label): (11, 1, 'ready'); (12, 1, 'hold'); (21, 2, 'ready'); (22, 2, 'ready'); (23, 2, 'hold'); (31, 3, 'ready').\nIDs are distinct non-NULL keys in their own tables; every child project_id exists. All minutes are nonnegative integers. Repeated minute values and labels still belong to separate records.\n\nThis question concerns every finite table instance satisfying the stated keys and references, not just the displayed rows. Minutes remain nonnegative integers, and every intermediate sum fits SQLite's signed 64-bit integer range. Define the true total for each project as the sum of its original work_sessions rows, with zero for none. Which ONE additional condition guarantees that the query below returns those true totals for EVERY such instance satisfying that condition? It asks for a sufficient condition, not a necessary condition for accidental equality in one fixture.\nSQL:\nSELECT p.project_id, COALESCE(SUM(e.minutes), 0) AS minutes\nFROM projects AS p\nLEFT JOIN work_sessions AS e ON e.project_id = p.project_id\nLEFT JOIN reviews AS r ON r.project_id = p.project_id\nGROUP BY p.project_id\nORDER BY p.project_id;",
+      "request": "This question concerns every finite table instance satisfying the stated keys and references, not just the displayed rows. Minutes remain nonnegative integers, and every intermediate sum fits SQLite's signed 64-bit integer range. Define the true total for each project as the sum of its original work_sessions rows, with zero for none. Which ONE additional condition guarantees that the query below returns those true totals for EVERY such instance satisfying that condition? It asks for a sufficient condition, not a necessary condition for accidental equality in one fixture.",
+      "sql": "SELECT p.project_id, COALESCE(SUM(e.minutes), 0) AS minutes\nFROM projects AS p\nLEFT JOIN work_sessions AS e ON e.project_id = p.project_id\nLEFT JOIN reviews AS r ON r.project_id = p.project_id\nGROUP BY p.project_id\nORDER BY p.project_id;",
+      "columns": [
+        "project_id",
+        "minutes"
+      ],
+      "types": [
+        "INTEGER",
+        "INTEGER"
+      ],
+      "options": [
+        "Every project has at least one review.",
+        "Within each project, all session minute values are different.",
+        "Within each project, all review label strings are different.",
+        "Every project has at most one review."
+      ],
+      "option_identities": [
+        {
+          "original_index": 0,
+          "label": "A",
+          "text": "Every project has at least one review."
+        },
+        {
+          "original_index": 1,
+          "label": "B",
+          "text": "Within each project, all session minute values are different."
+        },
+        {
+          "original_index": 2,
+          "label": "C",
+          "text": "Within each project, all review label strings are different."
+        },
+        {
+          "original_index": 3,
+          "label": "D",
+          "text": "Every project has at most one review."
+        }
+      ]
+    }
+  ],
+  "general_policy_contract": {
+    "question_id": "grain-12-general-condition",
+    "fixed_query_also_runs_on_original_fixture": true,
+    "quantifier": "For every finite schema-conforming instance that satisfies the chosen additional condition, each returned project's value equals the sum of all its original work_sessions minutes, with the empty sum defined as0.",
+    "domain": "Distinct non-NULL table keys; child project_id values reference existing projects; nonnegative integer minutes. All intermediate sums in the compared queries fit SQLite signed64-bit INTEGER. Rows, project count and review count may otherwise vary.",
+    "required_answer_scope": "Choose exactly one sufficient additional condition among the four fixed options. A condition need not be necessary for equality in a particular fixture. Independently explain the guarantee and supply a schema-conforming finite counterexample for every incorrect option; one common counterexample may refute more than one option.",
+    "no_new_business_policy": "This evaluates the given query under declared mathematical constraints; it does not recommend suppressing genuine review records in a real application."
+  },
+  "independent_request": [
+    "Derive the complete ordered rows, column names and INTEGER/REAL/NULL types for each of the twelve literal queries on the fixed fixture. The policy item's query also has a fixed-fixture result independent of its universal question.",
+    "Choose the original option index/text for all twelve cards, without author key or guide exposure.",
+    "For the general-policy card, establish its quantified sufficient-condition claim and refute each incorrect alternative with valid data.",
+    "Flag ambiguity, missing ordering/type information, an incorrect distractor collision or a scope overlap before candidate exposure. Do not run SQL, a parser, a browser, a model or scientific/native tool; this is the root's source-derived authority.",
+    "Preserve root's complete independent authority before requesting the authored source/key/guide. No execution permission follows from that source review."
+  ],
+  "original_context_pins": {
+    "foundation_guide": "7036315770d281dab1782e4af3bf4921a4a4dea1",
+    "foundation_course": "e03736a410aed36404b1cb0cf251c6d91c93b64d",
+    "unchanged_deck_parser": "f0f8a4b234489c2388f427633f548d56c6ed4c03",
+    "unchanged_standalone_learner": "ef7bc3e27e7f161d917ced6a457fad8822802f3f"
+  },
+  "not_included": [
+    "Authored correct indices",
+    "Authored expected rows",
+    "Authored explanations and transfer prompts",
+    "Worked answer guide",
+    "Native or browser evidence"
+  ],
+  "source_scope": "Only the three reserved new course files and unique receiving evidence. Preserve all existing source and owner spans. No new runner, model, learner, catalog, build or validator framework."
+}

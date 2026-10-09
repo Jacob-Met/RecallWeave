@@ -1,0 +1,1616 @@
+{
+  "schema": "recallweave.sql-join-grain.root-independent-source-authority/v1",
+  "owner": "estate-c945953fdeb7/root",
+  "repository": "Jacob-Met/RecallWeave",
+  "reservation": "https://github.com/Jacob-Met/RecallWeave/issues/276",
+  "status": "INDEPENDENT_SOURCE_DERIVATION_FROZEN_BEFORE_AUTHORED_ANSWER_EXPOSURE; NATIVE_EXECUTION_UNRUN",
+  "questions_source": {
+    "git_blob": "05e62ac4da79eea3607847ab7d1ec7f50ff7b93e",
+    "bytes": 40943,
+    "sha256": "6237565a788088969eba201d22125b618ff469654800af85fde41544e72fd60f",
+    "initial_chronology_git": "3bc95049cbd96ee075f02dbcb1173b8794434c10",
+    "source_parent": "ec07bf3989132130759e5c00c6cb02eef19709d3",
+    "source_paths": [
+      "courses/sql-join-grain.json",
+      "courses/sql-join-grain.md",
+      "courses/sql-join-grain.sql"
+    ],
+    "evidence_prefix": "docs/receiving/sql-join-grain-c945953fdeb7/"
+  },
+  "chronology": {
+    "author_private_drafting_started": "2026-10-09 13:21:27 UTC",
+    "questions_sealed": "2026-10-09 13:28:12 UTC",
+    "author_private_materials_sealed": "2026-10-09 13:34:32 UTC",
+    "author_object_uploads_by": "2026-10-09 13:34:35 UTC",
+    "author_exact_readbacks_by": "2026-10-09 13:35:14 UTC",
+    "root_complete_questions_read_at": "2026-10-09 13:38:31 UTC",
+    "root_authored_answer_handles_received": false,
+    "root_authored_answer_guide_course_content_received": false,
+    "scope": "Root read only the complete questions-only packet and initial chronology, including opaque source hashes. All expected rows, types, answer choices and universal arguments below were derived without the author's key/guide/course answer fields or any SQL/parser/browser/native execution."
+  },
+  "schema_statements": [
+    "CREATE TABLE projects (\n  project_id INTEGER PRIMARY KEY,\n  name TEXT NOT NULL\n);",
+    "CREATE TABLE work_sessions (\n  session_id INTEGER PRIMARY KEY,\n  project_id INTEGER NOT NULL REFERENCES projects(project_id),\n  minutes INTEGER NOT NULL CHECK (typeof(minutes) = 'integer' AND minutes >= 0)\n);",
+    "CREATE TABLE reviews (\n  review_id INTEGER PRIMARY KEY,\n  project_id INTEGER NOT NULL REFERENCES projects(project_id),\n  label TEXT NOT NULL\n);"
+  ],
+  "setup_pragmas": [
+    "PRAGMA foreign_keys = ON;"
+  ],
+  "insert_statements": [
+    "INSERT INTO projects(project_id, name) VALUES\n  (1, 'Atlas'), (2, 'Birch'), (3, 'Cedar'), (4, 'Dune');",
+    "INSERT INTO work_sessions(session_id, project_id, minutes) VALUES\n  (101, 1, 30), (102, 1, 30), (103, 1, 15),\n  (201, 2, 20), (202, 2, 0);",
+    "INSERT INTO reviews(review_id, project_id, label) VALUES\n  (11, 1, 'ready'), (12, 1, 'hold'),\n  (21, 2, 'ready'), (22, 2, 'ready'), (23, 2, 'hold'),\n  (31, 3, 'ready');"
+  ],
+  "original_fixture_rows": {
+    "projects": [
+      [
+        1,
+        "Atlas"
+      ],
+      [
+        2,
+        "Birch"
+      ],
+      [
+        3,
+        "Cedar"
+      ],
+      [
+        4,
+        "Dune"
+      ]
+    ],
+    "work_sessions": [
+      [
+        101,
+        1,
+        30
+      ],
+      [
+        102,
+        1,
+        30
+      ],
+      [
+        103,
+        1,
+        15
+      ],
+      [
+        201,
+        2,
+        20
+      ],
+      [
+        202,
+        2,
+        0
+      ]
+    ],
+    "reviews": [
+      [
+        11,
+        1,
+        "ready"
+      ],
+      [
+        12,
+        1,
+        "hold"
+      ],
+      [
+        21,
+        2,
+        "ready"
+      ],
+      [
+        22,
+        2,
+        "ready"
+      ],
+      [
+        23,
+        2,
+        "hold"
+      ],
+      [
+        31,
+        3,
+        "ready"
+      ]
+    ]
+  },
+  "fixture_analysis": {
+    "projects": [
+      {
+        "id": 1,
+        "session_ids": [
+          101,
+          102,
+          103
+        ],
+        "session_minutes": [
+          30,
+          30,
+          15
+        ],
+        "original_session_total": 75,
+        "review_ids": [
+          11,
+          12
+        ],
+        "ready_review_ids": [
+          11
+        ],
+        "left_join_row_count": 6
+      },
+      {
+        "id": 2,
+        "session_ids": [
+          201,
+          202
+        ],
+        "session_minutes": [
+          20,
+          0
+        ],
+        "original_session_total": 20,
+        "review_ids": [
+          21,
+          22,
+          23
+        ],
+        "ready_review_ids": [
+          21,
+          22
+        ],
+        "left_join_row_count": 6
+      },
+      {
+        "id": 3,
+        "session_ids": [],
+        "session_minutes": [],
+        "original_session_total": 0,
+        "review_ids": [
+          31
+        ],
+        "ready_review_ids": [
+          31
+        ],
+        "left_join_row_count": 1
+      },
+      {
+        "id": 4,
+        "session_ids": [],
+        "session_minutes": [],
+        "original_session_total": 0,
+        "review_ids": [],
+        "ready_review_ids": [],
+        "left_join_row_count": 1
+      }
+    ],
+    "original_session_sum": 95,
+    "original_session_count": 5,
+    "all_inner_session_review_pairs": 12,
+    "all_inner_joined_minutes": 210,
+    "zero_minute_record": "Session202 is a real non-NULL record and counts even though its amount is0.",
+    "equal_values": "Sessions101 and102 remain distinct genuine30-minute records; reviews21 and22 remain distinct genuine ready-labelled records."
+  },
+  "questions": [
+    {
+      "id": "grain-01-pairs",
+      "concept": "pairs",
+      "kind": "rows",
+      "literal_sql": "SELECT e.session_id, r.review_id\nFROM work_sessions AS e\nJOIN reviews AS r ON r.project_id = e.project_id\nWHERE e.project_id = 1\nORDER BY e.session_id, r.review_id;",
+      "columns": [
+        "session_id",
+        "review_id"
+      ],
+      "declared_types": [
+        "INTEGER",
+        "INTEGER"
+      ],
+      "complete_ordered_rows": [
+        [
+          101,
+          11
+        ],
+        [
+          101,
+          12
+        ],
+        [
+          102,
+          11
+        ],
+        [
+          102,
+          12
+        ],
+        [
+          103,
+          11
+        ],
+        [
+          103,
+          12
+        ]
+      ],
+      "typed_ordered_rows": [
+        {
+          "values": [
+            101,
+            11
+          ],
+          "types": [
+            "INTEGER",
+            "INTEGER"
+          ]
+        },
+        {
+          "values": [
+            101,
+            12
+          ],
+          "types": [
+            "INTEGER",
+            "INTEGER"
+          ]
+        },
+        {
+          "values": [
+            102,
+            11
+          ],
+          "types": [
+            "INTEGER",
+            "INTEGER"
+          ]
+        },
+        {
+          "values": [
+            102,
+            12
+          ],
+          "types": [
+            "INTEGER",
+            "INTEGER"
+          ]
+        },
+        {
+          "values": [
+            103,
+            11
+          ],
+          "types": [
+            "INTEGER",
+            "INTEGER"
+          ]
+        },
+        {
+          "values": [
+            103,
+            12
+          ],
+          "types": [
+            "INTEGER",
+            "INTEGER"
+          ]
+        }
+      ],
+      "row_count": 6,
+      "ordering": "Ascending session_id then review_id; pair of distinct primary keys gives complete deterministic order.",
+      "selected_original_index": 0,
+      "selected_original_label": "A",
+      "selected_exact_option_text": "(101, 11); (101, 12); (102, 11); (102, 12); (103, 11); (103, 12)",
+      "derivation": "Project1 has three distinct sessions and two distinct reviews. The join condition matches every one of those sessions with both reviews because it compares only project_id. Listing session IDs in ascending order and then review IDs gives all six stated pairs. No per-session review relationship or zip operation exists.",
+      "all_original_options": [
+        {
+          "original_index": 0,
+          "label": "A",
+          "exact_text": "(101, 11); (101, 12); (102, 11); (102, 12); (103, 11); (103, 12)",
+          "correct": true,
+          "independent_assessment": "All3*2=6 matching pairs are present and the two-key ORDER BY is respected."
+        },
+        {
+          "original_index": 1,
+          "label": "B",
+          "exact_text": "(101, 11); (102, 12)",
+          "correct": false,
+          "independent_assessment": "This incorrectly pairs rows positionally, omits session103 and omits other valid project-level combinations."
+        },
+        {
+          "original_index": 2,
+          "label": "C",
+          "exact_text": "(101, 11); (102, 11); (103, 11)",
+          "correct": false,
+          "independent_assessment": "This uses only review11; review12 also matches each of the three sessions."
+        },
+        {
+          "original_index": 3,
+          "label": "D",
+          "exact_text": "(101, 11); (101, 12); (102, 11); (102, 12)",
+          "correct": false,
+          "independent_assessment": "This omits both matching pairs for the existing session103."
+        }
+      ]
+    },
+    {
+      "id": "grain-02-count-identities",
+      "concept": "pairs",
+      "kind": "rows",
+      "literal_sql": "SELECT p.project_id, COUNT(*) AS joined_rows,\n       COUNT(DISTINCT e.session_id) AS session_ids,\n       COUNT(DISTINCT r.review_id) AS review_ids\nFROM projects AS p\nLEFT JOIN work_sessions AS e ON e.project_id = p.project_id\nLEFT JOIN reviews AS r ON r.project_id = p.project_id\nGROUP BY p.project_id\nORDER BY p.project_id;",
+      "columns": [
+        "project_id",
+        "joined_rows",
+        "session_ids",
+        "review_ids"
+      ],
+      "declared_types": [
+        "INTEGER",
+        "INTEGER",
+        "INTEGER",
+        "INTEGER"
+      ],
+      "complete_ordered_rows": [
+        [
+          1,
+          6,
+          3,
+          2
+        ],
+        [
+          2,
+          6,
+          2,
+          3
+        ],
+        [
+          3,
+          1,
+          0,
+          1
+        ],
+        [
+          4,
+          1,
+          0,
+          0
+        ]
+      ],
+      "typed_ordered_rows": [
+        {
+          "values": [
+            1,
+            6,
+            3,
+            2
+          ],
+          "types": [
+            "INTEGER",
+            "INTEGER",
+            "INTEGER",
+            "INTEGER"
+          ]
+        },
+        {
+          "values": [
+            2,
+            6,
+            2,
+            3
+          ],
+          "types": [
+            "INTEGER",
+            "INTEGER",
+            "INTEGER",
+            "INTEGER"
+          ]
+        },
+        {
+          "values": [
+            3,
+            1,
+            0,
+            1
+          ],
+          "types": [
+            "INTEGER",
+            "INTEGER",
+            "INTEGER",
+            "INTEGER"
+          ]
+        },
+        {
+          "values": [
+            4,
+            1,
+            0,
+            0
+          ],
+          "types": [
+            "INTEGER",
+            "INTEGER",
+            "INTEGER",
+            "INTEGER"
+          ]
+        }
+      ],
+      "row_count": 4,
+      "ordering": "Ascending project_id; grouping or unique parent/rollup keys gives complete deterministic order.",
+      "selected_original_index": 1,
+      "selected_original_label": "B",
+      "selected_exact_option_text": "(1, 6, 3, 2); (2, 6, 2, 3); (3, 1, 0, 1); (4, 1, 0, 0)",
+      "derivation": "For project1 the two left joins yield3*2=6 rows; for project2 they yield2*3=6. Project3 has one NULL-session placeholder combined with its one review, so COUNT(*)=1 but distinct session IDs=0. Project4 has one placeholder from each left join, leaving one joined row with no non-NULL child IDs. DISTINCT counts use record keys rather than repeated labels or minute values.",
+      "all_original_options": [
+        {
+          "original_index": 0,
+          "label": "A",
+          "exact_text": "(1, 5, 3, 2); (2, 5, 2, 3); (3, 1, 0, 1); (4, 0, 0, 0)",
+          "correct": false,
+          "independent_assessment": "Joined multiplicity is a product, not the sum3+2 or2+3; project4 also retains one placeholder row."
+        },
+        {
+          "original_index": 1,
+          "label": "B",
+          "exact_text": "(1, 6, 3, 2); (2, 6, 2, 3); (3, 1, 0, 1); (4, 1, 0, 0)",
+          "correct": true,
+          "independent_assessment": "Products6/6 and the two distinct key counts are correct, with correct outer placeholders for projects3/4."
+        },
+        {
+          "original_index": 2,
+          "label": "C",
+          "exact_text": "(1, 6, 6, 6); (2, 6, 6, 6); (3, 1, 1, 1); (4, 1, 1, 1)",
+          "correct": false,
+          "independent_assessment": "COUNT(DISTINCT child_id) does not count every joined occurrence and ignores NULL placeholders; counts6/6 or1/1 are wrong."
+        },
+        {
+          "original_index": 3,
+          "label": "D",
+          "exact_text": "(1, 3, 3, 2); (2, 2, 2, 3); (3, 1, 0, 1); (4, 1, 0, 0)",
+          "correct": false,
+          "independent_assessment": "COUNT(*) counts multiplied joined rows, so its first two values are6 rather than original-session counts3 and2."
+        }
+      ]
+    },
+    {
+      "id": "grain-03-multiplied-sums",
+      "concept": "pairs",
+      "kind": "rows",
+      "literal_sql": "SELECT p.project_id, SUM(e.minutes) AS joined_minutes\nFROM projects AS p\nLEFT JOIN work_sessions AS e ON e.project_id = p.project_id\nLEFT JOIN reviews AS r ON r.project_id = p.project_id\nGROUP BY p.project_id\nORDER BY p.project_id;",
+      "columns": [
+        "project_id",
+        "joined_minutes"
+      ],
+      "declared_types": [
+        "INTEGER",
+        "INTEGER or NULL"
+      ],
+      "complete_ordered_rows": [
+        [
+          1,
+          150
+        ],
+        [
+          2,
+          60
+        ],
+        [
+          3,
+          null
+        ],
+        [
+          4,
+          null
+        ]
+      ],
+      "typed_ordered_rows": [
+        {
+          "values": [
+            1,
+            150
+          ],
+          "types": [
+            "INTEGER",
+            "INTEGER"
+          ]
+        },
+        {
+          "values": [
+            2,
+            60
+          ],
+          "types": [
+            "INTEGER",
+            "INTEGER"
+          ]
+        },
+        {
+          "values": [
+            3,
+            null
+          ],
+          "types": [
+            "INTEGER",
+            "NULL"
+          ]
+        },
+        {
+          "values": [
+            4,
+            null
+          ],
+          "types": [
+            "INTEGER",
+            "NULL"
+          ]
+        }
+      ],
+      "row_count": 4,
+      "ordering": "Ascending project_id; grouping or unique parent/rollup keys gives complete deterministic order.",
+      "selected_original_index": 2,
+      "selected_original_label": "C",
+      "selected_exact_option_text": "(1, 150); (2, 60); (3, NULL); (4, NULL)",
+      "derivation": "All three project1 amounts occur twice:2*(30+30+15)=150. Both project2 amounts occur three times:3*(20+0)=60. Projects3 and4 have no non-NULL minutes; SUM over their placeholder rows is NULL because the query has no COALESCE. The zero-minute real session is included but adds0.",
+      "all_original_options": [
+        {
+          "original_index": 0,
+          "label": "A",
+          "exact_text": "(1, 75); (2, 20); (3, NULL); (4, NULL)",
+          "correct": false,
+          "independent_assessment": "75 and20 are true original-session totals; the given join repeats those contributions2 and3 times."
+        },
+        {
+          "original_index": 1,
+          "label": "B",
+          "exact_text": "(1, 150); (2, 60); (3, 0); (4, 0)",
+          "correct": false,
+          "independent_assessment": "The multiplied nonempty sums are correct, but uncoalesced empty sums are NULL rather than0."
+        },
+        {
+          "original_index": 2,
+          "label": "C",
+          "exact_text": "(1, 150); (2, 60); (3, NULL); (4, NULL)",
+          "correct": true,
+          "independent_assessment": "150/60 incorporate all copies, while projects3/4 have no non-NULL SUM input."
+        },
+        {
+          "original_index": 3,
+          "label": "D",
+          "exact_text": "(1, 45); (2, 20); (3, NULL); (4, NULL)",
+          "correct": false,
+          "independent_assessment": "45 removes a legitimate equal-valued30-minute session and also fails to represent the given non-DISTINCT aggregation."
+        }
+      ]
+    },
+    {
+      "id": "grain-04-distinct-values",
+      "concept": "identity",
+      "kind": "rows",
+      "literal_sql": "SELECT SUM(e.minutes) AS joined_sum,\n       SUM(DISTINCT e.minutes) AS distinct_value_sum,\n       (SELECT SUM(minutes) FROM work_sessions\n        WHERE project_id = 1) AS session_sum\nFROM work_sessions AS e\nJOIN reviews AS r ON r.project_id = e.project_id\nWHERE e.project_id = 1;",
+      "columns": [
+        "joined_sum",
+        "distinct_value_sum",
+        "session_sum"
+      ],
+      "declared_types": [
+        "INTEGER",
+        "INTEGER",
+        "INTEGER"
+      ],
+      "complete_ordered_rows": [
+        [
+          150,
+          45,
+          75
+        ]
+      ],
+      "typed_ordered_rows": [
+        {
+          "values": [
+            150,
+            45,
+            75
+          ],
+          "types": [
+            "INTEGER",
+            "INTEGER",
+            "INTEGER"
+          ]
+        }
+      ],
+      "row_count": 1,
+      "ordering": "Single aggregate result row.",
+      "selected_original_index": 3,
+      "selected_original_label": "D",
+      "selected_exact_option_text": "(150, 45, 75)",
+      "derivation": "The project1 join yields the multiset30,30,30,30,15,15, totaling150. Aggregate DISTINCT keeps distinct minute values{15,30}, totaling45, even though two different original sessions each genuinely contribute30. The independent scalar subquery sums the original sessions30+30+15=75.",
+      "all_original_options": [
+        {
+          "original_index": 0,
+          "label": "A",
+          "exact_text": "(150, 75, 75)",
+          "correct": false,
+          "independent_assessment": "SUM(DISTINCT minutes) is45, not75: DISTINCT applies to scalar values, not session identities."
+        },
+        {
+          "original_index": 1,
+          "label": "B",
+          "exact_text": "(75, 45, 75)",
+          "correct": false,
+          "independent_assessment": "The first SUM consumes all six joined rows and is150, not75."
+        },
+        {
+          "original_index": 2,
+          "label": "C",
+          "exact_text": "(150, 45, 45)",
+          "correct": false,
+          "independent_assessment": "The scalar subquery directly sums all three original sessions and is75, not45."
+        },
+        {
+          "original_index": 3,
+          "label": "D",
+          "exact_text": "(150, 45, 75)",
+          "correct": true,
+          "independent_assessment": "The three deliberately different operations yield150,45,75."
+        }
+      ]
+    },
+    {
+      "id": "grain-05-distinct-after-grouping",
+      "concept": "identity",
+      "kind": "rows",
+      "literal_sql": "SELECT DISTINCT p.project_id,\n       COUNT(e.session_id) AS counted_sessions\nFROM projects AS p\nLEFT JOIN work_sessions AS e ON e.project_id = p.project_id\nLEFT JOIN reviews AS r ON r.project_id = p.project_id\nGROUP BY p.project_id\nORDER BY p.project_id;",
+      "columns": [
+        "project_id",
+        "counted_sessions"
+      ],
+      "declared_types": [
+        "INTEGER",
+        "INTEGER"
+      ],
+      "complete_ordered_rows": [
+        [
+          1,
+          6
+        ],
+        [
+          2,
+          6
+        ],
+        [
+          3,
+          0
+        ],
+        [
+          4,
+          0
+        ]
+      ],
+      "typed_ordered_rows": [
+        {
+          "values": [
+            1,
+            6
+          ],
+          "types": [
+            "INTEGER",
+            "INTEGER"
+          ]
+        },
+        {
+          "values": [
+            2,
+            6
+          ],
+          "types": [
+            "INTEGER",
+            "INTEGER"
+          ]
+        },
+        {
+          "values": [
+            3,
+            0
+          ],
+          "types": [
+            "INTEGER",
+            "INTEGER"
+          ]
+        },
+        {
+          "values": [
+            4,
+            0
+          ],
+          "types": [
+            "INTEGER",
+            "INTEGER"
+          ]
+        }
+      ],
+      "row_count": 4,
+      "ordering": "Ascending project_id; grouping or unique parent/rollup keys gives complete deterministic order.",
+      "selected_original_index": 0,
+      "selected_original_label": "A",
+      "selected_exact_option_text": "(1, 6); (2, 6); (3, 0); (4, 0)",
+      "derivation": "Grouping computes COUNT(e.session_id) on the multiplied rows first:6,6,0,0 by project. SELECT DISTINCT then sees four result tuples with distinct project_id values, so it removes nothing. It neither rewinds the join nor changes the already calculated counts; NULL session IDs remain uncounted.",
+      "all_original_options": [
+        {
+          "original_index": 0,
+          "label": "A",
+          "exact_text": "(1, 6); (2, 6); (3, 0); (4, 0)",
+          "correct": true,
+          "independent_assessment": "All four grouped rows survive final DISTINCT because their project IDs differ; session occurrence counts are6,6,0,0."
+        },
+        {
+          "original_index": 1,
+          "label": "B",
+          "exact_text": "(1, 3); (2, 2); (3, 0); (4, 0)",
+          "correct": false,
+          "independent_assessment": "This substitutes distinct original-session counts3/2 for the query's ordinary COUNT on joined occurrences."
+        },
+        {
+          "original_index": 2,
+          "label": "C",
+          "exact_text": "(1, 1); (2, 1); (3, 0); (4, 0)",
+          "correct": false,
+          "independent_assessment": "One row per output group does not make its already computed COUNT equal1."
+        },
+        {
+          "original_index": 3,
+          "label": "D",
+          "exact_text": "(1, 6); (2, 6)",
+          "correct": false,
+          "independent_assessment": "The left joins retain projects3 and4; their COUNT(e.session_id)=0 groups are not filtered out."
+        }
+      ]
+    },
+    {
+      "id": "grain-06-retain-record-id",
+      "concept": "identity",
+      "kind": "rows",
+      "literal_sql": "SELECT SUM(minutes) AS session_total\nFROM (\n  SELECT DISTINCT e.session_id, e.project_id, e.minutes\n  FROM work_sessions AS e\n  JOIN reviews AS r ON r.project_id = e.project_id\n  WHERE e.project_id = 1\n) AS selected_sessions;",
+      "columns": [
+        "session_total"
+      ],
+      "declared_types": [
+        "INTEGER"
+      ],
+      "complete_ordered_rows": [
+        [
+          75
+        ]
+      ],
+      "typed_ordered_rows": [
+        {
+          "values": [
+            75
+          ],
+          "types": [
+            "INTEGER"
+          ]
+        }
+      ],
+      "row_count": 1,
+      "ordering": "Single aggregate result row.",
+      "selected_original_index": 1,
+      "selected_original_label": "B",
+      "selected_exact_option_text": "(75)",
+      "derivation": "Each project1 session has two identical copies of its selected(session_id,project_id,minutes) tuple after the join. DISTINCT retains three tuples because session_id101 and102 distinguish the equal30-minute amounts. Summing those three retained rows gives30+30+15=75. The inner join remains an eligibility restriction in general; on this fixture all project1 sessions have reviews.",
+      "all_original_options": [
+        {
+          "original_index": 0,
+          "label": "A",
+          "exact_text": "(45)",
+          "correct": false,
+          "independent_assessment": "45 would follow value-only distinctness; the selected session_id preserves both30-minute sessions."
+        },
+        {
+          "original_index": 1,
+          "label": "B",
+          "exact_text": "(75)",
+          "correct": true,
+          "independent_assessment": "Three distinct session tuples remain; their minute amounts sum to75."
+        },
+        {
+          "original_index": 2,
+          "label": "C",
+          "exact_text": "(150)",
+          "correct": false,
+          "independent_assessment": "150 retains the two copies of every selected session tuple despite SELECT DISTINCT."
+        },
+        {
+          "original_index": 3,
+          "label": "D",
+          "exact_text": "(90)",
+          "correct": false,
+          "independent_assessment": "90 neither sums the surviving30,30,15 nor follows the selected key-preserving distinct tuples."
+        }
+      ]
+    },
+    {
+      "id": "grain-07-one-rollup-is-not-enough",
+      "concept": "regrouping",
+      "kind": "rows",
+      "literal_sql": "WITH session_totals AS (\n  SELECT project_id, SUM(minutes) AS minutes\n  FROM work_sessions\n  GROUP BY project_id\n)\nSELECT p.project_id, COALESCE(SUM(s.minutes), 0) AS minutes\nFROM projects AS p\nLEFT JOIN session_totals AS s ON s.project_id = p.project_id\nLEFT JOIN reviews AS r ON r.project_id = p.project_id\nGROUP BY p.project_id\nORDER BY p.project_id;",
+      "columns": [
+        "project_id",
+        "minutes"
+      ],
+      "declared_types": [
+        "INTEGER",
+        "INTEGER"
+      ],
+      "complete_ordered_rows": [
+        [
+          1,
+          150
+        ],
+        [
+          2,
+          60
+        ],
+        [
+          3,
+          0
+        ],
+        [
+          4,
+          0
+        ]
+      ],
+      "typed_ordered_rows": [
+        {
+          "values": [
+            1,
+            150
+          ],
+          "types": [
+            "INTEGER",
+            "INTEGER"
+          ]
+        },
+        {
+          "values": [
+            2,
+            60
+          ],
+          "types": [
+            "INTEGER",
+            "INTEGER"
+          ]
+        },
+        {
+          "values": [
+            3,
+            0
+          ],
+          "types": [
+            "INTEGER",
+            "INTEGER"
+          ]
+        },
+        {
+          "values": [
+            4,
+            0
+          ],
+          "types": [
+            "INTEGER",
+            "INTEGER"
+          ]
+        }
+      ],
+      "row_count": 4,
+      "ordering": "Ascending project_id; grouping or unique parent/rollup keys gives complete deterministic order.",
+      "selected_original_index": 2,
+      "selected_original_label": "C",
+      "selected_exact_option_text": "(1, 150); (2, 60); (3, 0); (4, 0)",
+      "derivation": "The session CTE emits one total per project:1->75 and2->20. Joining those rows to raw reviews copies the75 twice and the20 three times. The outer SUM therefore yields150 and60. Missing session totals for projects3/4 give SUM(NULL)=NULL and then explicit COALESCE(...,0)=0. Preaggregation on one side alone does not prevent later duplication of its total.",
+      "all_original_options": [
+        {
+          "original_index": 0,
+          "label": "A",
+          "exact_text": "(1, 75); (2, 20); (3, 0); (4, 0)",
+          "correct": false,
+          "independent_assessment": "The precomputed75/20 are each still copied by raw reviews before the outer SUM."
+        },
+        {
+          "original_index": 1,
+          "label": "B",
+          "exact_text": "(1, 150); (2, 60); (3, NULL); (4, NULL)",
+          "correct": false,
+          "independent_assessment": "Although150/60 are correct, explicit COALESCE makes the absent totals0 rather than NULL."
+        },
+        {
+          "original_index": 2,
+          "label": "C",
+          "exact_text": "(1, 150); (2, 60); (3, 0); (4, 0)",
+          "correct": true,
+          "independent_assessment": "Raw review multiplicity still creates150/60; explicit COALESCE supplies the final zeros."
+        },
+        {
+          "original_index": 3,
+          "label": "D",
+          "exact_text": "(1, 45); (2, 20); (3, 0); (4, 0)",
+          "correct": false,
+          "independent_assessment": "This uses distinct minute values to erase a real session and does not follow either aggregate in the query."
+        }
+      ]
+    },
+    {
+      "id": "grain-08-two-rollups",
+      "concept": "regrouping",
+      "kind": "rows",
+      "literal_sql": "WITH session_totals AS (\n  SELECT project_id, COUNT(*) AS session_count,\n         SUM(minutes) AS session_minutes\n  FROM work_sessions GROUP BY project_id\n), review_totals AS (\n  SELECT project_id, COUNT(*) AS review_count\n  FROM reviews GROUP BY project_id\n)\nSELECT p.project_id,\n       COALESCE(s.session_count, 0) AS session_count,\n       COALESCE(s.session_minutes, 0) AS session_minutes,\n       COALESCE(r.review_count, 0) AS review_count\nFROM projects AS p\nLEFT JOIN session_totals AS s ON s.project_id = p.project_id\nLEFT JOIN review_totals AS r ON r.project_id = p.project_id\nORDER BY p.project_id;",
+      "columns": [
+        "project_id",
+        "session_count",
+        "session_minutes",
+        "review_count"
+      ],
+      "declared_types": [
+        "INTEGER",
+        "INTEGER",
+        "INTEGER",
+        "INTEGER"
+      ],
+      "complete_ordered_rows": [
+        [
+          1,
+          3,
+          75,
+          2
+        ],
+        [
+          2,
+          2,
+          20,
+          3
+        ],
+        [
+          3,
+          0,
+          0,
+          1
+        ],
+        [
+          4,
+          0,
+          0,
+          0
+        ]
+      ],
+      "typed_ordered_rows": [
+        {
+          "values": [
+            1,
+            3,
+            75,
+            2
+          ],
+          "types": [
+            "INTEGER",
+            "INTEGER",
+            "INTEGER",
+            "INTEGER"
+          ]
+        },
+        {
+          "values": [
+            2,
+            2,
+            20,
+            3
+          ],
+          "types": [
+            "INTEGER",
+            "INTEGER",
+            "INTEGER",
+            "INTEGER"
+          ]
+        },
+        {
+          "values": [
+            3,
+            0,
+            0,
+            1
+          ],
+          "types": [
+            "INTEGER",
+            "INTEGER",
+            "INTEGER",
+            "INTEGER"
+          ]
+        },
+        {
+          "values": [
+            4,
+            0,
+            0,
+            0
+          ],
+          "types": [
+            "INTEGER",
+            "INTEGER",
+            "INTEGER",
+            "INTEGER"
+          ]
+        }
+      ],
+      "row_count": 4,
+      "ordering": "Ascending project_id; grouping or unique parent/rollup keys gives complete deterministic order.",
+      "selected_original_index": 3,
+      "selected_original_label": "D",
+      "selected_exact_option_text": "(1, 3, 75, 2); (2, 2, 20, 3); (3, 0, 0, 1); (4, 0, 0, 0)",
+      "derivation": "The session CTE yields(1,3,75),(2,2,20); the review CTE yields(1,2),(2,3),(3,1). Each CTE is unique by project_id. Joining each once to the four original project rows yields one row per project, and COALESCE turns missing totals/counts into integer0. Review21 and22 count separately despite their equal ready labels; session101 and102 both contribute30.",
+      "all_original_options": [
+        {
+          "original_index": 0,
+          "label": "A",
+          "exact_text": "(1, 6, 150, 6); (2, 6, 60, 6); (3, 0, 0, 1); (4, 0, 0, 0)",
+          "correct": false,
+          "independent_assessment": "These values count/sum raw joined child occurrences; each given CTE already has one grouped row per project."
+        },
+        {
+          "original_index": 1,
+          "label": "B",
+          "exact_text": "(1, 3, 45, 2); (2, 2, 20, 2); (3, 0, 0, 1); (4, 0, 0, 0)",
+          "correct": false,
+          "independent_assessment": "Session minutes include both distinct30-minute records, giving75; review count includes both ready-labelled records, giving3 for project2."
+        },
+        {
+          "original_index": 2,
+          "label": "C",
+          "exact_text": "(1, 3, 75, 2); (2, 2, 20, 3)",
+          "correct": false,
+          "independent_assessment": "The first two tuples are correct, but the left joins also return projects3 and4."
+        },
+        {
+          "original_index": 3,
+          "label": "D",
+          "exact_text": "(1, 3, 75, 2); (2, 2, 20, 3); (3, 0, 0, 1); (4, 0, 0, 0)",
+          "correct": true,
+          "independent_assessment": "Both child summaries are unique by project ID; every original project is preserved with correct integer zeros."
+        }
+      ]
+    },
+    {
+      "id": "grain-09-counting-rollup-rows",
+      "concept": "regrouping",
+      "kind": "rows",
+      "literal_sql": "WITH session_totals AS (\n  SELECT project_id, COUNT(*) AS session_count\n  FROM work_sessions GROUP BY project_id\n)\nSELECT COUNT(*) AS project_rows,\n       COUNT(s.session_count) AS projects_with_sessions,\n       COALESCE(SUM(s.session_count), 0) AS total_sessions\nFROM projects AS p\nLEFT JOIN session_totals AS s ON s.project_id = p.project_id;",
+      "columns": [
+        "project_rows",
+        "projects_with_sessions",
+        "total_sessions"
+      ],
+      "declared_types": [
+        "INTEGER",
+        "INTEGER",
+        "INTEGER"
+      ],
+      "complete_ordered_rows": [
+        [
+          4,
+          2,
+          5
+        ]
+      ],
+      "typed_ordered_rows": [
+        {
+          "values": [
+            4,
+            2,
+            5
+          ],
+          "types": [
+            "INTEGER",
+            "INTEGER",
+            "INTEGER"
+          ]
+        }
+      ],
+      "row_count": 1,
+      "ordering": "Single aggregate result row.",
+      "selected_original_index": 0,
+      "selected_original_label": "A",
+      "selected_exact_option_text": "(4, 2, 5)",
+      "derivation": "After joining projects to the grouped session relation there are four project rows. The grouped session_count is non-NULL only on projects1 and2, so COUNT(s.session_count)=2; it counts present grouped records. SUM(s.session_count)=3+2=5 counts original sessions through the stored totals. COUNT(*) counts every project row, including the two NULL placeholders.",
+      "all_original_options": [
+        {
+          "original_index": 0,
+          "label": "A",
+          "exact_text": "(4, 2, 5)",
+          "correct": true,
+          "independent_assessment": "Four project rows, two non-NULL grouped session_count values, and stored counts summing to5 match the three expressions."
+        },
+        {
+          "original_index": 1,
+          "label": "B",
+          "exact_text": "(4, 4, 4)",
+          "correct": false,
+          "independent_assessment": "COUNT(s.session_count) excludes the missing summaries; SUM sums their values rather than returning the number of projects."
+        },
+        {
+          "original_index": 2,
+          "label": "C",
+          "exact_text": "(4, 5, 5)",
+          "correct": false,
+          "independent_assessment": "The value5 is the sum of original-session counts, not the number of non-NULL grouped summary records."
+        },
+        {
+          "original_index": 3,
+          "label": "D",
+          "exact_text": "(2, 2, 5)",
+          "correct": false,
+          "independent_assessment": "COUNT(*) still includes both projects with NULL summaries, producing4 rather than2."
+        }
+      ]
+    },
+    {
+      "id": "grain-10-existence-without-copying",
+      "concept": "policies",
+      "kind": "rows",
+      "literal_sql": "SELECT e.project_id, COUNT(*) AS session_count,\n       SUM(e.minutes) AS session_minutes\nFROM work_sessions AS e\nWHERE EXISTS (\n  SELECT 1 FROM reviews AS r\n  WHERE r.project_id = e.project_id AND r.label = 'ready'\n)\nGROUP BY e.project_id\nORDER BY e.project_id;",
+      "columns": [
+        "project_id",
+        "session_count",
+        "session_minutes"
+      ],
+      "declared_types": [
+        "INTEGER",
+        "INTEGER",
+        "INTEGER"
+      ],
+      "complete_ordered_rows": [
+        [
+          1,
+          3,
+          75
+        ],
+        [
+          2,
+          2,
+          20
+        ]
+      ],
+      "typed_ordered_rows": [
+        {
+          "values": [
+            1,
+            3,
+            75
+          ],
+          "types": [
+            "INTEGER",
+            "INTEGER",
+            "INTEGER"
+          ]
+        },
+        {
+          "values": [
+            2,
+            2,
+            20
+          ],
+          "types": [
+            "INTEGER",
+            "INTEGER",
+            "INTEGER"
+          ]
+        }
+      ],
+      "row_count": 2,
+      "ordering": "Ascending project_id; grouping or unique parent/rollup keys gives complete deterministic order.",
+      "selected_original_index": 1,
+      "selected_original_label": "B",
+      "selected_exact_option_text": "(1, 3, 75); (2, 2, 20)",
+      "derivation": "EXISTS is a truth condition for each original session, not a relation added to the result. Project1 has one ready review and project2 has two, but each of their sessions passes once. Grouping the five surviving original sessions yields(1,3,75),(2,2,20). Project3 has a ready review but no driving work_sessions row, so it cannot form a group here.",
+      "all_original_options": [
+        {
+          "original_index": 0,
+          "label": "A",
+          "exact_text": "(1, 3, 75); (2, 4, 40)",
+          "correct": false,
+          "independent_assessment": "The two ready reviews for project2 affect truth only and do not copy its two session rows."
+        },
+        {
+          "original_index": 1,
+          "label": "B",
+          "exact_text": "(1, 3, 75); (2, 2, 20)",
+          "correct": true,
+          "independent_assessment": "Each qualifying original session remains once; the two grouped totals are3/75 and2/20."
+        },
+        {
+          "original_index": 2,
+          "label": "C",
+          "exact_text": "(1, 3, 75); (2, 2, 20); (3, 0, 0)",
+          "correct": false,
+          "independent_assessment": "The driving table contains no project3 session, so there is no third group despite its ready review."
+        },
+        {
+          "original_index": 3,
+          "label": "D",
+          "exact_text": "(1, 2, 45); (2, 2, 20)",
+          "correct": false,
+          "independent_assessment": "Equal30-minute values belong to two valid session records; EXISTS does not deduplicate them."
+        }
+      ]
+    },
+    {
+      "id": "grain-11-unequal-repetition",
+      "concept": "policies",
+      "kind": "rows",
+      "literal_sql": "SELECT AVG(e.minutes) AS joined_mean,\n       (SELECT AVG(minutes) FROM work_sessions) AS session_mean\nFROM work_sessions AS e\nJOIN reviews AS r ON r.project_id = e.project_id;",
+      "columns": [
+        "joined_mean",
+        "session_mean"
+      ],
+      "declared_types": [
+        "REAL",
+        "REAL"
+      ],
+      "complete_ordered_rows": [
+        [
+          17.5,
+          19
+        ]
+      ],
+      "typed_ordered_rows": [
+        {
+          "values": [
+            17.5,
+            19
+          ],
+          "types": [
+            "REAL",
+            "REAL"
+          ]
+        }
+      ],
+      "row_count": 1,
+      "ordering": "Single aggregate result row.",
+      "selected_original_index": 2,
+      "selected_original_label": "C",
+      "selected_exact_option_text": "(17.5, 19.0)",
+      "derivation": "Project1 contributes six joined rows and150 minutes, while project2 contributes six joined rows and60 minutes. The joined average is(150+60)/(6+6)=210/12=17.5. The original-session average is(30+30+15+20+0)/5=95/5=19.0. Different review multiplicities reweight the projects; dividing does not cancel unequal replication across the whole joined dataset. Both AVG outputs have SQLite REAL type.",
+      "all_original_options": [
+        {
+          "original_index": 0,
+          "label": "A",
+          "exact_text": "(19.0, 19.0)",
+          "correct": false,
+          "independent_assessment": "19.0 is the original-session mean, but different review multiplicities make the joined mean17.5."
+        },
+        {
+          "original_index": 1,
+          "label": "B",
+          "exact_text": "(19.0, 17.5)",
+          "correct": false,
+          "independent_assessment": "This reverses the two queries' results; first joined17.5, then original19.0."
+        },
+        {
+          "original_index": 2,
+          "label": "C",
+          "exact_text": "(17.5, 19.0)",
+          "correct": true,
+          "independent_assessment": "Joined210/12=17.5 and original95/5=19.0 are both exact representable REAL results."
+        },
+        {
+          "original_index": 3,
+          "label": "D",
+          "exact_text": "(21.0, 19.0)",
+          "correct": false,
+          "independent_assessment": "210 joined minutes divided by the actual12 joined rows is17.5;21.0 uses an incorrect denominator."
+        }
+      ]
+    },
+    {
+      "id": "grain-12-general-condition",
+      "concept": "policies",
+      "kind": "general-policy",
+      "literal_sql": "SELECT p.project_id, COALESCE(SUM(e.minutes), 0) AS minutes\nFROM projects AS p\nLEFT JOIN work_sessions AS e ON e.project_id = p.project_id\nLEFT JOIN reviews AS r ON r.project_id = p.project_id\nGROUP BY p.project_id\nORDER BY p.project_id;",
+      "columns": [
+        "project_id",
+        "minutes"
+      ],
+      "declared_types": [
+        "INTEGER",
+        "INTEGER"
+      ],
+      "complete_ordered_rows": [
+        [
+          1,
+          150
+        ],
+        [
+          2,
+          60
+        ],
+        [
+          3,
+          0
+        ],
+        [
+          4,
+          0
+        ]
+      ],
+      "typed_ordered_rows": [
+        {
+          "values": [
+            1,
+            150
+          ],
+          "types": [
+            "INTEGER",
+            "INTEGER"
+          ]
+        },
+        {
+          "values": [
+            2,
+            60
+          ],
+          "types": [
+            "INTEGER",
+            "INTEGER"
+          ]
+        },
+        {
+          "values": [
+            3,
+            0
+          ],
+          "types": [
+            "INTEGER",
+            "INTEGER"
+          ]
+        },
+        {
+          "values": [
+            4,
+            0
+          ],
+          "types": [
+            "INTEGER",
+            "INTEGER"
+          ]
+        }
+      ],
+      "row_count": 4,
+      "ordering": "Ascending project_id; grouping or unique parent/rollup keys gives complete deterministic order.",
+      "selected_original_index": 3,
+      "selected_original_label": "D",
+      "selected_exact_option_text": "Every project has at most one review.",
+      "derivation": "On the displayed fixture, the literal query yields(1,150),(2,60),(3,0),(4,0). Its multiple-choice question asks about all finite schema-conforming instances. A project with r review rows copies each real session max(1,r) times because this is a left join. At most one review makes that factor1 for every project. Empty session sets still yield one or more NULL placeholders, and COALESCE returns the required0. The complete quantified proof and counterexamples are separate below.",
+      "all_original_options": [
+        {
+          "original_index": 0,
+          "label": "A",
+          "exact_text": "Every project has at least one review.",
+          "correct": false,
+          "independent_assessment": "At least one review allows two or more, so positive session totals can still multiply. Counterexample C refutes this sufficient-condition claim."
+        },
+        {
+          "original_index": 1,
+          "label": "B",
+          "exact_text": "Within each project, all session minute values are different.",
+          "correct": false,
+          "independent_assessment": "Distinct session amounts do not constrain review multiplicity. Counterexample C has one positive session, so this uniqueness holds but the total doubles."
+        },
+        {
+          "original_index": 2,
+          "label": "C",
+          "exact_text": "Within each project, all review label strings are different.",
+          "correct": false,
+          "independent_assessment": "Distinct review labels still allow two reviews for a project; both join and duplicate its session. Counterexample C has two different labels."
+        },
+        {
+          "original_index": 3,
+          "label": "D",
+          "exact_text": "Every project has at most one review.",
+          "correct": true,
+          "independent_assessment": "At most one review ensures the left-join repetition factor max(1,r) is1 for every nonempty session set; empty totals remain0."
+        }
+      ]
+    }
+  ],
+  "general_policy": {
+    "question_id": "grain-12-general-condition",
+    "fixed_fixture_query_rows": [
+      [
+        1,
+        150
+      ],
+      [
+        2,
+        60
+      ],
+      [
+        3,
+        0
+      ],
+      [
+        4,
+        0
+      ]
+    ],
+    "selected_original_index": 3,
+    "selected_exact_text": "Every project has at most one review.",
+    "quantifier": "For every finite schema-conforming instance that satisfies the chosen additional condition, each returned project's value equals the sum of all its original work_sessions minutes, with the empty sum defined as0.",
+    "domain": "Distinct non-NULL table keys; child project_id values reference existing projects; nonnegative integer minutes. All intermediate sums in the compared queries fit SQLite signed64-bit INTEGER. Rows, project count and review count may otherwise vary.",
+    "notation": "For each project p let n_p be its original session count, r_p its review count and S_p the sum of original nonnegative integer minutes, defining S_p=0 when n_p=0.",
+    "derivation": [
+      "For n_p>0, the first left join contributes exactly one row for each original session. The second left join is on the project key only: each session matches r_p real review rows if r_p>0, or one NULL-review placeholder if r_p=0.",
+      "Thus each original minute value is counted m_p=max(1,r_p) times, so the query's coalesced value is m_p*S_p when n_p>0. All sums are within the declared safe-integer domain.",
+      "For n_p=0 the first left join contributes a NULL-session placeholder, which the second join can copy r_p times or leave once. Every e.minutes is still NULL; SUM is NULL and COALESCE returns the specified0. This is also m_p*S_p because S_p=0.",
+      "If every project has at most one review, r_p is0 or1 and therefore m_p=1. Every returned value equals S_p, and both left joins retain every project. With no projects the claim holds vacuously.",
+      "The condition need not be necessary for one fixture: if a project's true total is0, even multiple reviews leave its coalesced total0. Under the nonnegative-minute domain, per-instance equality is exactly S_p=0 or r_p<=1, for every project. The selected sufficient condition guarantees it without imposing session values.",
+      "Counterexample C is one valid finite instance satisfying each of optionsA/B/C while returning10 for a true total5. This refutes all three separate universal sufficiency claims; distinct values/labels or at-least-one presence do not bound multiplicity."
+    ],
+    "counterexamples": [
+      {
+        "id": "C",
+        "fixture_rows": {
+          "projects": [
+            [
+              1,
+              "Counter"
+            ]
+          ],
+          "work_sessions": [
+            [
+              101,
+              1,
+              5
+            ]
+          ],
+          "reviews": [
+            [
+              11,
+              1,
+              "ready"
+            ],
+            [
+              12,
+              1,
+              "hold"
+            ]
+          ]
+        },
+        "schema_admissibility": "One finite project, one nonnegative integer5-minute session, two reviews. Every primary key is distinct and non-NULL in its table, both child foreign keys point to project1, and all integer sums5/10 are safely within signed64-bit range.",
+        "additional_conditions_satisfied": {
+          "original_index_0_at_least_one_review": true,
+          "original_index_1_all_session_minutes_different": true,
+          "original_index_2_all_review_labels_different": true,
+          "original_index_3_at_most_one_review": false
+        },
+        "joined_rows_for_sum": [
+          {
+            "project_id": 1,
+            "session_id": 101,
+            "review_id": 11,
+            "minutes": 5
+          },
+          {
+            "project_id": 1,
+            "session_id": 101,
+            "review_id": 12,
+            "minutes": 5
+          }
+        ],
+        "actual_query_rows_derived": [
+          [
+            1,
+            10
+          ]
+        ],
+        "required_true_total_rows": [
+          [
+            1,
+            5
+          ]
+        ],
+        "typed_query_rows": [
+          {
+            "values": [
+              1,
+              10
+            ],
+            "types": [
+              "INTEGER",
+              "INTEGER"
+            ]
+          }
+        ],
+        "query_executed": false
+      }
+    ],
+    "separate_refutations": [
+      {
+        "original_index": 0,
+        "counterexample": "C",
+        "reason": "Two reviews satisfy at least one, but multiply5 to10."
+      },
+      {
+        "original_index": 1,
+        "counterexample": "C",
+        "reason": "One session makes within-project amount distinctness true, while its two joined copies still sum to10."
+      },
+      {
+        "original_index": 2,
+        "counterexample": "C",
+        "reason": "The review strings ready and hold are distinct, and both produce a matching row for the same session."
+      }
+    ],
+    "no_new_business_policy": true,
+    "query_execution": false
+  },
+  "source_semantics": {
+    "primary_reference_urls": [
+      "https://www.sqlite.org/lang_select.html",
+      "https://www.sqlite.org/lang_aggfunc.html",
+      "https://www.sqlite.org/lang_expr.html"
+    ],
+    "consulted_at_date": "2026-10-09",
+    "role": "Primary SQL semantics support only; no authored lesson answer source.",
+    "principles": [
+      "Project-key joins permit every matching combination; left joins preserve an unmatched input as a NULL-filled row.",
+      "Aggregates count or sum their input expressions. Aggregate DISTINCT uses expression values; final SELECT DISTINCT compares completed output rows.",
+      "Explicit ORDER BY and original integer/null/real contracts determine these complete expected results. AVG returns REAL and EXISTS filters each driving row once by truth."
+    ],
+    "scope": "Source-derived relational results. No query-plan, timing, current runtime/version, SQL CLI or engine execution claim."
+  },
+  "review_findings": {
+    "missing_fixture_information": [],
+    "missing_ordering_information": [],
+    "missing_type_information": [],
+    "ambiguous_correct_options": [],
+    "distractor_value_collisions": [],
+    "general_quantifier_ambiguity": [],
+    "source_scope": "Distinct two-independent-child cardinality/aggregation lesson. Existing NULL/membership course remains owned; EXISTS appears only as the multiplicity-preserving qualification example. No changes to parser, learner, model, catalog or framework are required.",
+    "balanced_original_key": "The derived original indices repeat0,1,2,3 three times; original labels are not shuffled UI positions. This observation did not determine any answer."
+  },
+  "expected_summary": {
+    "cards": 12,
+    "option_assessments": 48,
+    "query_rows": 36,
+    "typed_cells": 91,
+    "integer_cells": 87,
+    "real_cells": 2,
+    "null_cells": 2,
+    "correct_original_indices": [
+      0,
+      1,
+      2,
+      3,
+      0,
+      1,
+      2,
+      3,
+      0,
+      1,
+      2,
+      3
+    ],
+    "all_query_texts_copied_exactly_from_questions": true
+  },
+  "execution": {
+    "SQL_connections": 0,
+    "SQL_statements": 0,
+    "SQL_CLI_calls": 0,
+    "deck_parser_calls": 0,
+    "source_interpreter_calls": 0,
+    "learner_browser_calls": 0,
+    "native_or_scientific_runs": 0,
+    "engine_simulation_calls": 0,
+    "method": "Manual relational derivation and literal coordinator serialization of the independently chosen complete expected rows; no SQL executor or candidate answer lookup."
+  },
+  "runtime_gate": "The question source names SQLite3.50.4 as its semantic target. No runtime for this new lesson is qualified. A later different observed runtime requires a separate prospective amendment and exact source/command review before SQL or parser execution.",
+  "future_comparison": "After this full record is an actual immutable Git blob with exact readback, disclose the already sealed authored materials and compare all twelve queries/options/keys/rows/typed cells plus the quantified proof without changing this authority.",
+  "frozen_at": "2026-10-09 13:42:31 UTC"
+}

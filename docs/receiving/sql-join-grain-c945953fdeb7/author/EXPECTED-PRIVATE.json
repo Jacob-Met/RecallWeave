@@ -1,0 +1,575 @@
+{
+  "schema": "recallweave.sql-join-grain.private-authored-authority/v1",
+  "status": "PRIVATE_AUTHORED_EXPECTATIONS; SOURCE_DERIVED_AND_UNEXECUTED",
+  "questions_pin": {
+    "bytes": 40943,
+    "sha256": "6237565a788088969eba201d22125b618ff469654800af85fde41544e72fd60f",
+    "sealed_at_utc": "2026-10-09 13:28:12 UTC"
+  },
+  "authorship": "Authored during the disclosed private drafting interval, before root's independent answer exposure. No SQL connection, query, parser, browser or learner execution produced these values.",
+  "answers": [
+    {
+      "id": "grain-01-pairs",
+      "original_index": 0,
+      "selected_option": "(101, 11); (101, 12); (102, 11); (102, 12); (103, 11); (103, 12)",
+      "columns": [
+        "session_id",
+        "review_id"
+      ],
+      "rows": [
+        [
+          101,
+          11
+        ],
+        [
+          101,
+          12
+        ],
+        [
+          102,
+          11
+        ],
+        [
+          102,
+          12
+        ],
+        [
+          103,
+          11
+        ],
+        [
+          103,
+          12
+        ]
+      ],
+      "sqlite_types": [
+        [
+          "integer",
+          "integer"
+        ],
+        [
+          "integer",
+          "integer"
+        ],
+        [
+          "integer",
+          "integer"
+        ],
+        [
+          "integer",
+          "integer"
+        ],
+        [
+          "integer",
+          "integer"
+        ],
+        [
+          "integer",
+          "integer"
+        ]
+      ],
+      "explanation": "The join condition connects a session to every review with the same project_id. Project 1 has three sessions and two reviews, so each of its three session IDs appears with both review IDs. The six ordered pairs are the actual joined-row identities. Nothing in these tables pairs a particular session with just one review, and an equality join does not zip records by their positions.",
+      "transfer": "Write a sentence naming the two record IDs that identify one joined row, and explain why project_id alone does not identify that row."
+    },
+    {
+      "id": "grain-02-count-identities",
+      "original_index": 1,
+      "selected_option": "(1, 6, 3, 2); (2, 6, 2, 3); (3, 1, 0, 1); (4, 1, 0, 0)",
+      "columns": [
+        "project_id",
+        "joined_rows",
+        "session_ids",
+        "review_ids"
+      ],
+      "rows": [
+        [
+          1,
+          6,
+          3,
+          2
+        ],
+        [
+          2,
+          6,
+          2,
+          3
+        ],
+        [
+          3,
+          1,
+          0,
+          1
+        ],
+        [
+          4,
+          1,
+          0,
+          0
+        ]
+      ],
+      "sqlite_types": [
+        [
+          "integer",
+          "integer",
+          "integer",
+          "integer"
+        ],
+        [
+          "integer",
+          "integer",
+          "integer",
+          "integer"
+        ],
+        [
+          "integer",
+          "integer",
+          "integer",
+          "integer"
+        ],
+        [
+          "integer",
+          "integer",
+          "integer",
+          "integer"
+        ]
+      ],
+      "explanation": "Project 1 contributes 3 x 2 joined pairs, and project 2 contributes 2 x 3. COUNT(*) counts those six row occurrences in each group. Distinct non-NULL session IDs and review IDs still identify three/two records and two/three records respectively. Project 3 has one actual review and a NULL session placeholder; project 4 has a NULL placeholder for both children. Each still contributes one joined row, but a NULL child ID is not an actual child record.",
+      "transfer": "Explain why the project 3 and project 4 joined-row counts are the same even though their numbers of actual review records differ."
+    },
+    {
+      "id": "grain-03-multiplied-sums",
+      "original_index": 2,
+      "selected_option": "(1, 150); (2, 60); (3, NULL); (4, NULL)",
+      "columns": [
+        "project_id",
+        "joined_minutes"
+      ],
+      "rows": [
+        [
+          1,
+          150
+        ],
+        [
+          2,
+          60
+        ],
+        [
+          3,
+          null
+        ],
+        [
+          4,
+          null
+        ]
+      ],
+      "sqlite_types": [
+        [
+          "integer",
+          "integer"
+        ],
+        [
+          "integer",
+          "integer"
+        ],
+        [
+          "integer",
+          "null"
+        ],
+        [
+          "integer",
+          "null"
+        ]
+      ],
+      "explanation": "Project 1's original minutes are 30 + 30 + 15 = 75, but every session appears twice after the review join, so SUM reads 150. Project 2's 20 + 0 = 20 appears three times, producing 60. Neither project 3 nor project 4 has an actual session value. Their left-join rows contain NULL for e.minutes, so the uncoalesced SUM is NULL. The result is neither a per-session total nor a count of independent review/session work.",
+      "transfer": "Describe separately the effect of repeated session rows and the effect of an absent session value in this result."
+    },
+    {
+      "id": "grain-04-distinct-values",
+      "original_index": 3,
+      "selected_option": "(150, 45, 75)",
+      "columns": [
+        "joined_sum",
+        "distinct_value_sum",
+        "session_sum"
+      ],
+      "rows": [
+        [
+          150,
+          45,
+          75
+        ]
+      ],
+      "sqlite_types": [
+        [
+          "integer",
+          "integer",
+          "integer"
+        ]
+      ],
+      "explanation": "SUM reads every joined minute occurrence and returns 150. SUM(DISTINCT e.minutes) first collapses equal numeric values: only 15 and 30 remain, totaling 45. That also collapses the two separate 30-minute sessions, 101 and 102. The scalar subquery reads the three original session records once each and returns 75. Distinct values and distinct entity identities answer different questions.",
+      "transfer": "Explain why two equal minute amounts can both belong in a total when their session IDs differ."
+    },
+    {
+      "id": "grain-05-distinct-after-grouping",
+      "original_index": 0,
+      "selected_option": "(1, 6); (2, 6); (3, 0); (4, 0)",
+      "columns": [
+        "project_id",
+        "counted_sessions"
+      ],
+      "rows": [
+        [
+          1,
+          6
+        ],
+        [
+          2,
+          6
+        ],
+        [
+          3,
+          0
+        ],
+        [
+          4,
+          0
+        ]
+      ],
+      "sqlite_types": [
+        [
+          "integer",
+          "integer"
+        ],
+        [
+          "integer",
+          "integer"
+        ],
+        [
+          "integer",
+          "integer"
+        ],
+        [
+          "integer",
+          "integer"
+        ]
+      ],
+      "explanation": "GROUP BY first produces one aggregate result row for each project. In each populated group, COUNT(e.session_id) has already counted six non-NULL joined copies. SELECT DISTINCT then removes duplicate complete output rows, but project_id already makes these four rows distinct. It does not revisit the aggregate inputs or reduce the count to the number of session identities. The two projects without sessions each retain a zero count.",
+      "transfer": "Describe the stage at which output DISTINCT acts, and why it cannot change a count already calculated from repeated input rows."
+    },
+    {
+      "id": "grain-06-retain-record-id",
+      "original_index": 1,
+      "selected_option": "(75)",
+      "columns": [
+        "session_total"
+      ],
+      "rows": [
+        [
+          75
+        ]
+      ],
+      "sqlite_types": [
+        [
+          "integer"
+        ]
+      ],
+      "explanation": "The inner join produces repeated copies of each selected session record. The subquery keeps session_id as well as project_id and minutes, so DISTINCT removes copies of the same full record while retaining sessions 101 and 102 as different records. SUM then reads 30, 30 and 15 once each, giving 75. This query still selects only sessions that match a review; it does not guarantee preservation of unreviewed sessions in another fixture.",
+      "transfer": "State which selected entity key the subquery preserves, and explain the remaining restriction imposed by its inner join."
+    },
+    {
+      "id": "grain-07-one-rollup-is-not-enough",
+      "original_index": 2,
+      "selected_option": "(1, 150); (2, 60); (3, 0); (4, 0)",
+      "columns": [
+        "project_id",
+        "minutes"
+      ],
+      "rows": [
+        [
+          1,
+          150
+        ],
+        [
+          2,
+          60
+        ],
+        [
+          3,
+          0
+        ],
+        [
+          4,
+          0
+        ]
+      ],
+      "sqlite_types": [
+        [
+          "integer",
+          "integer"
+        ],
+        [
+          "integer",
+          "integer"
+        ],
+        [
+          "integer",
+          "integer"
+        ],
+        [
+          "integer",
+          "integer"
+        ]
+      ],
+      "explanation": "session_totals initially contains one row for each project with sessions: 75 for project 1 and 20 for project 2. Joining those rows to raw reviews repeats the entire first total twice and the second total three times. The outer SUM therefore returns 150 and 60. COALESCE changes the two absent totals to zero; it does not undo multiplication. Aggregating one input does not prevent a later join from repeating its aggregate.",
+      "transfer": "Name the row grain before and after the join to raw reviews. Identify the later operation that repeats a previously computed total."
+    },
+    {
+      "id": "grain-08-two-rollups",
+      "original_index": 3,
+      "selected_option": "(1, 3, 75, 2); (2, 2, 20, 3); (3, 0, 0, 1); (4, 0, 0, 0)",
+      "columns": [
+        "project_id",
+        "session_count",
+        "session_minutes",
+        "review_count"
+      ],
+      "rows": [
+        [
+          1,
+          3,
+          75,
+          2
+        ],
+        [
+          2,
+          2,
+          20,
+          3
+        ],
+        [
+          3,
+          0,
+          0,
+          1
+        ],
+        [
+          4,
+          0,
+          0,
+          0
+        ]
+      ],
+      "sqlite_types": [
+        [
+          "integer",
+          "integer",
+          "integer",
+          "integer"
+        ],
+        [
+          "integer",
+          "integer",
+          "integer",
+          "integer"
+        ],
+        [
+          "integer",
+          "integer",
+          "integer",
+          "integer"
+        ],
+        [
+          "integer",
+          "integer",
+          "integer",
+          "integer"
+        ]
+      ],
+      "explanation": "Each common-table expression groups its own child table by project_id, so it has at most one row per project. The joins therefore attach one session summary and one review summary to each unique project row. Project 1 has three sessions totaling 75 and two reviews; project 2 has two sessions totaling 20 and three reviews. Project 3 contributes one review and no sessions. Project 4 has neither. COALESCE explicitly represents the absent child counts and minutes as zero.",
+      "transfer": "Explain how a one-row-per-project guarantee for each child summary prevents this particular multiplication."
+    },
+    {
+      "id": "grain-09-counting-rollup-rows",
+      "original_index": 0,
+      "selected_option": "(4, 2, 5)",
+      "columns": [
+        "project_rows",
+        "projects_with_sessions",
+        "total_sessions"
+      ],
+      "rows": [
+        [
+          4,
+          2,
+          5
+        ]
+      ],
+      "sqlite_types": [
+        [
+          "integer",
+          "integer",
+          "integer"
+        ]
+      ],
+      "explanation": "There are four unique project rows after the join. Only two projects have a session_totals row, so COUNT(s.session_count) is two. The non-NULL session_count values are three and two; summing those stored counts recovers five original sessions. A count of grouped rows measures the number of represented projects, not the number of original records summarized by those rows.",
+      "transfer": "Describe the different questions answered by counting project rows, counting present summary rows, and summing the summary's session_count."
+    },
+    {
+      "id": "grain-10-existence-without-copying",
+      "original_index": 1,
+      "selected_option": "(1, 3, 75); (2, 2, 20)",
+      "columns": [
+        "project_id",
+        "session_count",
+        "session_minutes"
+      ],
+      "rows": [
+        [
+          1,
+          3,
+          75
+        ],
+        [
+          2,
+          2,
+          20
+        ]
+      ],
+      "sqlite_types": [
+        [
+          "integer",
+          "integer",
+          "integer"
+        ],
+        [
+          "integer",
+          "integer",
+          "integer"
+        ]
+      ],
+      "explanation": "EXISTS is a predicate on each original session. Project 1 has a ready review, and project 2 has two ready reviews, but either positive number makes the predicate true just once for the session being considered. The three and two original session records remain, totaling 75 and 20. Project 3 has a ready review but no row in work_sessions to retain, so this session-based query does not emit a project 3 group.",
+      "transfer": "Explain why checking that a ready review exists does not require producing one output session copy for every ready review."
+    },
+    {
+      "id": "grain-11-unequal-repetition",
+      "original_index": 2,
+      "selected_option": "(17.5, 19.0)",
+      "columns": [
+        "joined_mean",
+        "session_mean"
+      ],
+      "rows": [
+        [
+          17.5,
+          19
+        ]
+      ],
+      "sqlite_types": [
+        [
+          "real",
+          "real"
+        ]
+      ],
+      "explanation": "The joined rows contain six copies associated with project 1 and six with project 2: their minute sums are 150 and 60, so the first average is 210 / 12 = 17.5. The original five sessions sum to 95, giving 95 / 5 = 19.0. Sessions in project 2 receive a repetition factor of three instead of two, which changes their weight. Repetition can leave an average unchanged in other data; this specific unequal weighting changes it.",
+      "transfer": "Describe how review counts act as repetition weights here. Distinguish this mechanism from a claim that every join must change every average."
+    },
+    {
+      "id": "grain-12-general-condition",
+      "original_index": 3,
+      "selected_option": "Every project has at most one review.",
+      "columns": [
+        "project_id",
+        "minutes"
+      ],
+      "rows": [
+        [
+          1,
+          150
+        ],
+        [
+          2,
+          60
+        ],
+        [
+          3,
+          0
+        ],
+        [
+          4,
+          0
+        ]
+      ],
+      "sqlite_types": [
+        [
+          "integer",
+          "integer"
+        ],
+        [
+          "integer",
+          "integer"
+        ],
+        [
+          "integer",
+          "integer"
+        ],
+        [
+          "integer",
+          "integer"
+        ]
+      ],
+      "explanation": "At most one review per project is sufficient. With zero matching reviews, LEFT JOIN supplies one NULL review placeholder per incoming session row; with one review, each incoming session matches once. Every original session minute value is therefore summed once, and a project with no sessions becomes zero through COALESCE. The other proposed conditions permit multiple reviews and do not stop repetition. This is an all-instances guarantee, not a claim that the condition is necessary for one fixture to happen to give the right total.",
+      "transfer": "In your own words, separate an all-instances sufficient-condition guarantee from an observed equality for a particular dataset."
+    }
+  ],
+  "general_policy": {
+    "question_id": "grain-12-general-condition",
+    "sufficient_original_index": 3,
+    "proof": "For each project with m sessions, zero or one review leaves exactly one review-side row per incoming session under LEFT JOIN. Each original session's minutes enters SUM once. If m=0, the placeholder contributes NULL, and COALESCE returns0. This holds for every stated finite instance with safe integer sums.",
+    "common_counterexample_to_indices": [
+      0,
+      1,
+      2
+    ],
+    "counterexample": {
+      "projects": [
+        [
+          1,
+          "Counterexample"
+        ]
+      ],
+      "work_sessions": [
+        [
+          1,
+          1,
+          10
+        ],
+        [
+          2,
+          1,
+          20
+        ]
+      ],
+      "reviews": [
+        [
+          1,
+          1,
+          "ready"
+        ],
+        [
+          2,
+          1,
+          "hold"
+        ]
+      ],
+      "satisfies": "One project with two distinct session minute values and two distinct review label strings; all IDs/foreign keys valid, at least one review, small nonnegative sums.",
+      "true_minutes": 30,
+      "queried_minutes": 60,
+      "reason": "The two sessions each match both reviews. This one instance satisfies each of A/B/C yet disproves its claimed all-instances guarantee.",
+      "execution": false
+    },
+    "not_necessary": "Equality in an individual instance may occur despite more than one review, for example when a repeated project's true total is0. This possibility does not weaken the sufficient-condition proof."
+  },
+  "expected_fixed_query_rows": 36,
+  "expected_fixed_query_cells": 91,
+  "type_note": "JSON numeric spelling alone does not encode SQLite storage type. The explicit sqlite_types arrays are normative; in particular both values in item11 are REAL, including19.0."
+}

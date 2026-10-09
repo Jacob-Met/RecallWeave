@@ -1,0 +1,414 @@
+{
+  "schema": "estate.recallweave.sql-join-grain.receiver-source-input-revision.v2",
+  "frozen_at_utc": "2026-10-09 14:15:56 UTC",
+  "status": "ALL_REVISIONS_UNEXECUTED",
+  "original_source": {
+    "path": "retained/qualify-22-call-v1.py",
+    "git_blob": "f214495eb267003d80258d80aeab4f8b20affbf9",
+    "bytes": 26452,
+    "sha256": "154184efd126e22a0ead440d35dc2b161af12def83f10ce315ad9afa5b51ca5f"
+  },
+  "effective_source": {
+    "path": "qualify.py",
+    "git_blob": "e5bbdedd3dc3aa8e1c4e051f091e8e180d14738a",
+    "bytes": 29817,
+    "sha256": "dc119832f0286041bba732b2a9f81abbb3e5efab03c26a38ddd39389932281e7"
+  },
+  "original_payload": {
+    "path": "retained/PAYLOAD-22-call-v1.json",
+    "git_blob": "a8cd5cacd479254dee8d6f2bd62ef220206243a6",
+    "bytes": 21464,
+    "sha256": "1647d97c4cc7ec09f8bc3d02f7bf3df1056e1bf53e667dd75e616a8eea12dd7b"
+  },
+  "effective_payload": {
+    "path": "PAYLOAD.json",
+    "git_blob": "faa39a4608d958e8c9c6b22da96ad6adda4e5fe8",
+    "bytes": 22396,
+    "sha256": "f49e7789a152227ecd4535bb4a39df9d99e3c5de7f5a5fb3ff04b8e14f795129"
+  },
+  "reasons": [
+    "Root required an explicit compile-options prerequisite to refuse TEMP_STORE=0 or unknown/ambiguous builds before original lesson setup. Exact SQL schedule23 replaces proposed22.",
+    "The first23-call draft's overflow-sentinel capture flag was made literal; its existing256-row refusal was not relaxed.",
+    "The actual prospective amendment2596338f... narrows runtime read binding to its seven Python/SQLite files and supplies1024-byte-per-option/65536-total compile-option limits.",
+    "The final proposed output cap is512KiB to retain the amendment's bounded metadata including JSON escaping. This is a source-only cap proposal for final root review, not an execution or lowered resource floor."
+  ],
+  "source_replacements_in_exact_order": [
+    {
+      "old": "EXPECTED_PAYLOAD_SHA256 = \"1647d97c4cc7ec09f8bc3d02f7bf3df1056e1bf53e667dd75e616a8eea12dd7b\"",
+      "new": "EXPECTED_PAYLOAD_SHA256 = \"0883c8cd4cd96feb1d42ba950bb20be94469347fb4e49838ffa709c82378ee15\""
+    },
+    {
+      "old": "need(R[\"sql_execute_calls\"] < 22, \"Frozen SQL statement-count cap\")",
+      "new": "need(R[\"sql_execute_calls\"] < 23, \"Frozen SQL statement-count cap\")"
+    },
+    {
+      "old": "def close_database():",
+      "new": "def run_compile_options(control):\n    need(R[\"sql_execute_calls\"] == 0, \"Compile options must be the first SQL call\")\n    need(time.monotonic() - SQL_START < 5, \"SQL interval before compile metadata\")\n    sql = control[\"literal_sql\"]\n    entry = {\"index\": 0, \"phase\": \"receiver-metadata\", \"id\": \"compile_options\",\n             \"literal_sql\": sql, \"started_seconds\": time.monotonic() - START,\n             \"execute_returned\": False, \"cursor_closed\": False, \"completed\": False,\n             \"retained_one_column_string_rows\": [], \"capture_truncated\": False}\n    R[\"sql_calls\"].append(entry)\n    R[\"sql_execute_calls\"] += 1\n    cursor = DB.cursor()\n    before_changes = DB.total_changes\n    entry[\"total_changes_before\"] = before_changes\n    try:\n        cursor.execute(sql)\n        entry[\"execute_returned\"] = True\n        entry[\"columns\"] = [x[0] for x in cursor.description] if cursor.description else []\n        need(entry[\"columns\"] == control[\"columns\"], \"Compile metadata column differs\")\n        rows = cursor.fetchmany(257)\n        entry[\"row_count_observed_including_overflow_sentinel\"] = len(rows)\n        entry[\"end_of_rows_observed\"] = len(rows) < 257\n        total_bytes = 0\n        for row in rows[:256]:\n            if len(row) != 1 or type(row[0]) is not str:\n                entry[\"invalid_row_preview\"] = [typed_value(v) for v in row[:16]]\n                raise RuntimeError(\"Compile metadata must be one-column string rows\")\n            size = len(row[0].encode(\"utf-8\"))\n            if size > 512 or total_bytes + size > 16384:\n                entry[\"capture_truncated\"] = True\n                entry[\"next_row_utf8_bytes\"] = size\n                entry[\"next_row_prefix\"] = row[0][:128]\n                raise RuntimeError(\"Compile metadata string/capture cap\")\n            total_bytes += size\n            entry[\"retained_one_column_string_rows\"].append([row[0]])\n        entry[\"retained_value_utf8_bytes\"] = total_bytes\n        need(entry[\"end_of_rows_observed\"], \"Compile metadata exceeds256 retained rows\")\n        options = [row[0] for row in rows]\n        temp_options = [value for value in options if value.startswith(\"TEMP_STORE\")]\n        entry[\"literal_temp_store_entries\"] = temp_options\n        need(len(temp_options) == 1 and temp_options[0] in\n             (\"TEMP_STORE=1\", \"TEMP_STORE=2\", \"TEMP_STORE=3\"),\n             \"Compile-time TEMP_STORE absent, ambiguous or outside1/2/3\")\n        entry[\"total_changes_after\"] = DB.total_changes\n        entry[\"in_transaction_after\"] = DB.in_transaction\n        need(DB.total_changes == before_changes == 0 and DB.in_transaction is False,\n             \"Compile metadata changed the fresh memory database\")\n        R[\"admitted_compile_temp_store\"] = temp_options[0]\n        entry[\"completed\"] = True\n    finally:\n        cursor.close()\n        entry[\"cursor_closed\"] = True\n        entry[\"elapsed_seconds\"] = time.monotonic() - START - entry[\"started_seconds\"]\n\ndef close_database():"
+    },
+    {
+      "old": "    try:\n        for index, sql in enumerate(payload[\"setup_pragmas\"]):",
+      "new": "    try:\n        run_compile_options(payload[\"receiver_setup_extension\"][\"compile_options_readback\"])\n        for index, sql in enumerate(payload[\"setup_pragmas\"]):"
+    },
+    {
+      "old": "        expected_trace = (payload[\"setup_pragmas\"] +",
+      "new": "        expected_trace = ([payload[\"receiver_setup_extension\"][\"compile_options_readback\"][\"literal_sql\"]] +\n                          payload[\"setup_pragmas\"] +"
+    },
+    {
+      "old": "len(R[\"actual_trace\"]) == R[\"sql_execute_calls\"] == 22,",
+      "new": "len(R[\"actual_trace\"]) == R[\"sql_execute_calls\"] == 23,"
+    },
+    {
+      "old": "need(R[\"actual_trace\"] == expected_trace and len(R[\"actual_trace\"]) == 22,",
+      "new": "need(R[\"actual_trace\"] == expected_trace and len(R[\"actual_trace\"]) == 23,"
+    },
+    {
+      "old": "        entry[\"end_of_rows_observed\"] = len(rows) < 257\n        total_bytes = 0",
+      "new": "        entry[\"end_of_rows_observed\"] = len(rows) < 257\n        entry[\"capture_truncated\"] = len(rows) > 256\n        total_bytes = 0"
+    },
+    {
+      "old": "EXPECTED_PAYLOAD_SHA256 = \"0883c8cd4cd96feb1d42ba950bb20be94469347fb4e49838ffa709c82378ee15\"",
+      "new": "EXPECTED_PAYLOAD_SHA256 = \"f49e7789a152227ecd4535bb4a39df9d99e3c5de7f5a5fb3ff04b8e14f795129\""
+    },
+    {
+      "old": "            if size > 512 or total_bytes + size > 16384:",
+      "new": "            if size > 1024 or total_bytes + size > 65536:"
+    },
+    {
+      "old": "    need(len(runtime[\"expected_files\"]) == 8, \"Eight measured runtime files required\")",
+      "new": "    need(len(runtime[\"expected_files\"]) == 7, \"Seven required measured runtime files\")"
+    },
+    {
+      "old": "         \"Only root independent authority\")\n    resources(\"before-runtime\")",
+      "new": "         \"Only root independent authority\")\n    need(payload[\"runtime_amendment\"][\"git_blob\"] ==\n         \"2596338f155db91609c629ba650e2b7159b6351e\",\n         \"Exact prospective root runtime/control amendment required\")\n    resources(\"before-runtime\")"
+    },
+    {
+      "old": "if len(body.encode(\"utf-8\")) > 65536:",
+      "new": "if len(body.encode(\"utf-8\")) > 524288:"
+    },
+    {
+      "old": "\"failure\": \"64 KiB receipt cap\"",
+      "new": "\"failure\": \"512 KiB receipt cap\""
+    }
+  ],
+  "exact_unique_forward_source_reconstruction": true,
+  "exact_unique_reverse_source_reconstruction": true,
+  "payload_field_operations_in_order": [
+    {
+      "op": "replace",
+      "path": [
+        "runtime",
+        "expected_files"
+      ],
+      "old": [
+        {
+          "path": "/usr/bin/python3.14",
+          "requested_path": "/usr/bin/python3",
+          "roles": [
+            "actual Python executable"
+          ],
+          "bytes": 7477160,
+          "mode": 493,
+          "mtime_ns": "1787222518000000000",
+          "inode": "10881178",
+          "device": "66306",
+          "sha256": "52e0a13e60a981d8c4b6478be2ba5176f69da07948a056bf49cf6f077e30cb41",
+          "git_blob": "7b80a4c7dd84e362a605aa22d30e46309ef2e460"
+        },
+        {
+          "path": "/usr/lib/python3.14/sqlite3/__init__.py",
+          "requested_path": "/usr/lib/python3.14/sqlite3/__init__.py",
+          "roles": [
+            "module sqlite3"
+          ],
+          "bytes": 2014,
+          "mode": 420,
+          "mtime_ns": "1787222518000000000",
+          "inode": "10881032",
+          "device": "66306",
+          "sha256": "24b0d5e0b2c2ddee085bc316a71164a8f40b84d3f173cfecbdcc7787fb0e1d83",
+          "git_blob": "ed727fae609d1dfc282bb0fe95ffc025ad8e0673"
+        },
+        {
+          "path": "/usr/lib/python3.14/sqlite3/__pycache__/__init__.cpython-314.pyc",
+          "requested_path": "/usr/lib/python3.14/sqlite3/__pycache__/__init__.cpython-314.pyc",
+          "roles": [
+            "existing bytecode candidate sqlite3"
+          ],
+          "bytes": 1183,
+          "mode": 420,
+          "mtime_ns": "1790564241472536986",
+          "inode": "11929401",
+          "device": "66306",
+          "sha256": "ee71b5edfbf2c8f5653f5ecef34b54261ad13a59492cc33e6adf6800433f0fe1",
+          "git_blob": "27ab6fd9519fdf86bf31dc3b02d7cae58a968b17"
+        },
+        {
+          "path": "/usr/lib/python3.14/sqlite3/dbapi2.py",
+          "requested_path": "/usr/lib/python3.14/sqlite3/dbapi2.py",
+          "roles": [
+            "module sqlite3.dbapi2"
+          ],
+          "bytes": 3120,
+          "mode": 420,
+          "mtime_ns": "1787222518000000000",
+          "inode": "10881034",
+          "device": "66306",
+          "sha256": "a79d47b93dba1aa26c3908d0d960b513e498e125bb54812cb52fbc75ec0e9f3a",
+          "git_blob": "0315760516edf825dc9069e1690b0ff810236c7b"
+        },
+        {
+          "path": "/usr/lib/python3.14/sqlite3/__pycache__/dbapi2.cpython-314.pyc",
+          "requested_path": "/usr/lib/python3.14/sqlite3/__pycache__/dbapi2.cpython-314.pyc",
+          "roles": [
+            "existing bytecode candidate sqlite3.dbapi2"
+          ],
+          "bytes": 4316,
+          "mode": 420,
+          "mtime_ns": "1790564241474511419",
+          "inode": "11929403",
+          "device": "66306",
+          "sha256": "fe4fe747de9180d6f22e9fef095ac6575ee1dc04d35884afce737dc7f58b419d",
+          "git_blob": "e13b857864ac25c6551100f013b894f4f0603d0e"
+        },
+        {
+          "path": "/usr/lib/python3.14/lib-dynload/_sqlite3.cpython-314-x86_64-linux-gnu.so",
+          "requested_path": "/usr/lib/python3.14/lib-dynload/_sqlite3.cpython-314-x86_64-linux-gnu.so",
+          "roles": [
+            "module _sqlite3"
+          ],
+          "bytes": 149216,
+          "mode": 420,
+          "mtime_ns": "1787222518000000000",
+          "inode": "10880958",
+          "device": "66306",
+          "sha256": "d1cfe7116cd7683b0ec01eb6de449f6d4fe1bee45046ae4c289599d2e4ee69f6",
+          "git_blob": "2618ca407caab055d7deed5573c2f8403b915643"
+        },
+        {
+          "path": "/usr/lib/x86_64-linux-gnu/libsqlite3.so.0.8.6",
+          "requested_path": "/usr/lib/x86_64-linux-gnu/libsqlite3.so.0.8.6",
+          "roles": [
+            "actual mapped SQLite/Python shared library"
+          ],
+          "bytes": 1522152,
+          "mode": 420,
+          "mtime_ns": "1788446725000000000",
+          "inode": "10880188",
+          "device": "66306",
+          "sha256": "4633a4be13fdf05cb0f859e04fb06077a1fe30a90e405721a23873bd1f3d88a8",
+          "git_blob": "070ac18d1db481a9b9abdc9d09057cf0fc0e9421"
+        },
+        {
+          "path": "/usr/bin/node",
+          "requested_path": "/usr/bin/node",
+          "roles": [
+            "selected existing Node executable"
+          ],
+          "bytes": 26856,
+          "mode": 493,
+          "mtime_ns": "1773302731000000000",
+          "inode": "10886131",
+          "device": "66306",
+          "sha256": "d0efb6fcb9d023ba4e2b160ec2384dc28fe4f17732141ef47f676828fa960505",
+          "git_blob": "2b3baba30cacfd7c3d46d8654af3cdf1b540c213"
+        }
+      ],
+      "value": [
+        {
+          "path": "/usr/bin/python3.14",
+          "requested_path": "/usr/bin/python3",
+          "roles": [
+            "actual Python executable"
+          ],
+          "bytes": 7477160,
+          "mode": 493,
+          "mtime_ns": "1787222518000000000",
+          "inode": "10881178",
+          "device": "66306",
+          "sha256": "52e0a13e60a981d8c4b6478be2ba5176f69da07948a056bf49cf6f077e30cb41",
+          "git_blob": "7b80a4c7dd84e362a605aa22d30e46309ef2e460"
+        },
+        {
+          "path": "/usr/lib/python3.14/sqlite3/__init__.py",
+          "requested_path": "/usr/lib/python3.14/sqlite3/__init__.py",
+          "roles": [
+            "module sqlite3"
+          ],
+          "bytes": 2014,
+          "mode": 420,
+          "mtime_ns": "1787222518000000000",
+          "inode": "10881032",
+          "device": "66306",
+          "sha256": "24b0d5e0b2c2ddee085bc316a71164a8f40b84d3f173cfecbdcc7787fb0e1d83",
+          "git_blob": "ed727fae609d1dfc282bb0fe95ffc025ad8e0673"
+        },
+        {
+          "path": "/usr/lib/python3.14/sqlite3/__pycache__/__init__.cpython-314.pyc",
+          "requested_path": "/usr/lib/python3.14/sqlite3/__pycache__/__init__.cpython-314.pyc",
+          "roles": [
+            "existing bytecode candidate sqlite3"
+          ],
+          "bytes": 1183,
+          "mode": 420,
+          "mtime_ns": "1790564241472536986",
+          "inode": "11929401",
+          "device": "66306",
+          "sha256": "ee71b5edfbf2c8f5653f5ecef34b54261ad13a59492cc33e6adf6800433f0fe1",
+          "git_blob": "27ab6fd9519fdf86bf31dc3b02d7cae58a968b17"
+        },
+        {
+          "path": "/usr/lib/python3.14/sqlite3/dbapi2.py",
+          "requested_path": "/usr/lib/python3.14/sqlite3/dbapi2.py",
+          "roles": [
+            "module sqlite3.dbapi2"
+          ],
+          "bytes": 3120,
+          "mode": 420,
+          "mtime_ns": "1787222518000000000",
+          "inode": "10881034",
+          "device": "66306",
+          "sha256": "a79d47b93dba1aa26c3908d0d960b513e498e125bb54812cb52fbc75ec0e9f3a",
+          "git_blob": "0315760516edf825dc9069e1690b0ff810236c7b"
+        },
+        {
+          "path": "/usr/lib/python3.14/sqlite3/__pycache__/dbapi2.cpython-314.pyc",
+          "requested_path": "/usr/lib/python3.14/sqlite3/__pycache__/dbapi2.cpython-314.pyc",
+          "roles": [
+            "existing bytecode candidate sqlite3.dbapi2"
+          ],
+          "bytes": 4316,
+          "mode": 420,
+          "mtime_ns": "1790564241474511419",
+          "inode": "11929403",
+          "device": "66306",
+          "sha256": "fe4fe747de9180d6f22e9fef095ac6575ee1dc04d35884afce737dc7f58b419d",
+          "git_blob": "e13b857864ac25c6551100f013b894f4f0603d0e"
+        },
+        {
+          "path": "/usr/lib/python3.14/lib-dynload/_sqlite3.cpython-314-x86_64-linux-gnu.so",
+          "requested_path": "/usr/lib/python3.14/lib-dynload/_sqlite3.cpython-314-x86_64-linux-gnu.so",
+          "roles": [
+            "module _sqlite3"
+          ],
+          "bytes": 149216,
+          "mode": 420,
+          "mtime_ns": "1787222518000000000",
+          "inode": "10880958",
+          "device": "66306",
+          "sha256": "d1cfe7116cd7683b0ec01eb6de449f6d4fe1bee45046ae4c289599d2e4ee69f6",
+          "git_blob": "2618ca407caab055d7deed5573c2f8403b915643"
+        },
+        {
+          "path": "/usr/lib/x86_64-linux-gnu/libsqlite3.so.0.8.6",
+          "requested_path": "/usr/lib/x86_64-linux-gnu/libsqlite3.so.0.8.6",
+          "roles": [
+            "actual mapped SQLite/Python shared library"
+          ],
+          "bytes": 1522152,
+          "mode": 420,
+          "mtime_ns": "1788446725000000000",
+          "inode": "10880188",
+          "device": "66306",
+          "sha256": "4633a4be13fdf05cb0f859e04fb06077a1fe30a90e405721a23873bd1f3d88a8",
+          "git_blob": "070ac18d1db481a9b9abdc9d09057cf0fc0e9421"
+        }
+      ]
+    },
+    {
+      "op": "replace",
+      "path": [
+        "runtime",
+        "identity_note"
+      ],
+      "old": "All eight intake file identities are rechecked, including the unused Node executable read as bytes only. No Node/child execution. SQLite3.46.1 is the prospective observed-runtime amendment, not a silent replacement of the source's3.50.4 declaration.",
+      "value": "Exactly the seven required Python/SQLite runtime files from root's prospective amendment are rechecked. Node executable/module files are outside this invocation, and no child or Node call occurs."
+    },
+    {
+      "op": "replace",
+      "path": [
+        "receiver_setup_extension",
+        "root_source_only_instruction"
+      ],
+      "old": "Root explicitly approved these three setup controls for the prospective plan: original foreign_keys pragma readback and memory-only temporary-storage setter/readback. They are receiver filelessness controls, not extra lesson queries or changed answer authority. No execution admission was issued.",
+      "value": "Root explicitly approved exactly four receiver controls for the prospective plan: bounded PRAGMA compile_options before original lesson setup, original foreign_keys pragma readback, and temporary-storage MEMORY setter/integer2 readback. These controls do not alter any original statement, lesson query or expected result. No execution admission was issued."
+    },
+    {
+      "op": "replace",
+      "path": [
+        "receiver_setup_extension",
+        "execution_call_total"
+      ],
+      "old": 22,
+      "value": 23
+    },
+    {
+      "op": "add",
+      "path": [
+        "receiver_setup_extension",
+        "compile_options_readback"
+      ],
+      "value": {
+        "literal_sql": "PRAGMA compile_options;",
+        "columns": [
+          "compile_options"
+        ],
+        "maximum_retained_rows": 256,
+        "maximum_row_utf8_bytes": 1024,
+        "maximum_total_value_utf8_bytes": 65536,
+        "required_literal_temp_store_entries": 1,
+        "allowed_literal_temp_store_entries": [
+          "TEMP_STORE=1",
+          "TEMP_STORE=2",
+          "TEMP_STORE=3"
+        ],
+        "refusal": "Refuse row/capture overflow, any non-one-column/non-string row, missing or ambiguous TEMP_STORE entry, or any value outside1/2/3 before original lesson setup. No normalization or assumption that a pragma overrides a build compiled with TEMP_STORE=0."
+      }
+    },
+    {
+      "op": "replace",
+      "path": [
+        "runtime_amendment_status"
+      ],
+      "old": "Observed Python3.14.4/SQLite3.46.1 proposed for this one fixed-fixture execution; root must separately freeze the prospective runtime amendment and admit exact source/command before any connection.",
+      "value": "Prospective root source authority is frozen and bound above. A separate exact final-source/command execution admission is still required."
+    },
+    {
+      "op": "add",
+      "path": [
+        "runtime_amendment"
+      ],
+      "value": {
+        "repository": "Jacob-Met/RecallWeave",
+        "git_blob": "2596338f155db91609c629ba650e2b7159b6351e",
+        "bytes": 10315,
+        "sha256": "7ef4484cf92022bd453b64fd72c0dd2f87a3e8d2db1d08c054a9d579bca36619",
+        "frozen_at": "2026-10-09 14:09:48 UTC",
+        "status": "PROSPECTIVE SOURCE AUTHORITY ONLY; NOT A NATIVE ADMISSION",
+        "meaning": "Any eventual accepted result will qualify these unchanged queries on the exact measured ThinkPad Python3.14.4/SQLite3.46.1 runtime only. It will not be represented as a SQLite3.50.4 native run or as universal version compatibility. The independent relational arguments remain prospective mathematical reasoning until their fixed actual execution is separately reviewed."
+      }
+    }
+  ],
+  "exact_payload_text_reconstruction": true,
+  "preserved_intermediate_sources": [
+    {
+      "path": "retained/qualify-23-call-pre-review.py",
+      "git_blob": "7f273f70a1734dee9b1853692ace70ba06949108",
+      "bytes": 29585,
+      "sha256": "f70b8376489df9f783372c98bab3325b655066e599fa65487497cad2805734a0"
+    },
+    {
+      "path": "retained/qualify-23-call-pre-amendment.py",
+      "git_blob": "08fb3dc6175ab6efbdedfce2ea5a0ab1360cb982",
+      "bytes": 29638,
+      "sha256": "91671f5c7d9f3a1590965d1897636320cfe1ea081e97d23c9920251e563e1fda"
+    }
+  ],
+  "preserved_intermediate_payload": {
+    "path": "retained/PAYLOAD-23-call-pre-amendment.json",
+    "git_blob": "9bd71b996c26e955ca162919c6a6c1f05a6121e1",
+    "bytes": 22230,
+    "sha256": "0883c8cd4cd96feb1d42ba950bb20be94469347fb4e49838ffa709c82378ee15"
+  },
+  "no_original_setup_query_answer_type_or_general_proof_change": true,
+  "native_connections_queries_interpreter_or_syntax_executions": 0
+}
