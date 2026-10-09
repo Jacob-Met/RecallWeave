@@ -1,0 +1,122 @@
+{
+  "schema": "recallweave.root-receiving-review.v1",
+  "reviewed_utc": "2026-10-09 00:55:06 UTC",
+  "verifier_python_utf8": "import base64,gzip,hashlib,json,re,sys,termios,platform\nold=termios.tcgetattr(0)\nq=termios.tcgetattr(0);q[3]&=~termios.ECHO;termios.tcsetattr(0,termios.TCSANOW,q)\nprint(\"ROOT_EVIDENCE_READY\",flush=True)\nparts=[]\nwhile True:\n    line=sys.stdin.readline()\n    if not line:raise RuntimeError(\"EOF before evidence\")\n    if line.rstrip(\"\\r\\n\")==\"ROOT_EVIDENCE_END\":break\n    parts.append(line.rstrip(\"\\r\\n\"))\npayload=json.loads(\"\".join(parts))\ndef pin(data):\n    return {\"bytes\":len(data),\"git_blob\":hashlib.sha1(b\"blob \"+str(len(data)).encode()+b\"\\0\"+data).hexdigest(),\"sha256\":hashlib.sha256(data).hexdigest()}\nencoded=payload[\"packet\"].encode(\"utf-8\")\nassert pin(encoded)[\"git_blob\"]==\"a68a2c71bc5dd343cad4394c9832d58d0a0c4943\"\ncompressed=base64.b64decode(payload[\"packet\"],validate=False);raw=gzip.decompress(compressed)\nassert pin(compressed)=={\"bytes\":387403,\"git_blob\":\"6e9d437dea1b42c40ea32f0cc39d6b9543ad2e92\",\"sha256\":\"dd3932d1d478c0ea1757c1e7742644f03713ed046d67813780bb56ee102349e4\"}\nassert len(raw)==1862719 and hashlib.sha256(raw).hexdigest()==\"cc2361ae46b2ac8c4f6a7f57415b3253d189b7eb2c2d3bdf20c8ce4e7557e6db\"\npacket=json.loads(raw);r=packet[\"receipt\"];f=payload[\"freeze\"];t=payload[\"tree\"]\nassert t[\"sha\"]==\"25548d4b5f3afad5233ea4c03fdb0b9533f8cd90\" and not t[\"truncated\"]\nrows=t[\"tree\"];leaves={x[\"path\"]:x for x in rows if x[\"type\"]!=\"tree\"}\nassert len(rows)==3413 and len(leaves)==2916 and len(leaves)==len([x for x in rows if x[\"type\"]!=\"tree\"])\ndirs={\"\": []}\nfor row in rows:\n    parent,_,name=row[\"path\"].rpartition(\"/\")\n    dirs.setdefault(parent,[]).append((name,row))\n    if row[\"type\"]==\"tree\":dirs.setdefault(row[\"path\"],[])\ntree_pins={}\nfor path in sorted(dirs,key=lambda x:(x.count(\"/\"),len(x)),reverse=True):\n    entries=[]\n    for name,row in sorted(dirs[path],key=lambda x:(x[0]+(\"/\" if x[1][\"type\"]==\"tree\" else \"\")).encode()):\n        sha=tree_pins[row[\"path\"]] if row[\"type\"]==\"tree\" else row[\"sha\"]\n        if row[\"type\"]==\"tree\":assert sha==row[\"sha\"],row[\"path\"]\n        mode=\"40000\" if row[\"type\"]==\"tree\" else row[\"mode\"]\n        entries.append(mode.encode()+b\" \"+name.encode()+b\"\\0\"+bytes.fromhex(sha))\n    data=b\"\".join(entries);tree_pins[path]=hashlib.sha1(b\"tree \"+str(len(data)).encode()+b\"\\0\"+data).hexdigest()\nassert tree_pins[\"\"]==t[\"sha\"]\nassert f[\"source_head\"]==r[\"candidate_head\"]==\"8508f9e19a42501057311559b291f3e359eee170\"\nassert f[\"source_tree\"]==r[\"candidate_tree\"]==t[\"sha\"]\nselected={x[\"path\"]:x for x in f[\"selected_files\"]};admission={x[\"path\"]:x for x in r[\"admission\"]}\nassert len(selected)==len(admission)==546 and set(selected)==set(admission)\nfor path,x in selected.items():\n    y=admission[path];z=leaves[path]\n    assert x[\"sha\"]==y[\"sha\"]==z[\"sha\"] and x[\"mode\"]==y[\"mode\"]==z[\"mode\"] and x[\"bytes\"]==y[\"bytes\"]==z[\"size\"],path\nassert sum(x[\"bytes\"] for x in admission.values())==9122523\ntests={x[\"path\"]:x for x in f[\"frozen_test_files\"]}\nactual_tests={p:x for p,x in leaves.items() if re.fullmatch(r\"tests/[^/]+\\.test\\.mjs\",p)}\nassert len(tests)==len(actual_tests)==len(r[\"all84_exact_test_files\"])==84 and set(tests)==set(actual_tests)\nfor p,x in tests.items():\n    z=actual_tests[p];assert x[\"sha\"]==z[\"sha\"] and x[\"mode\"]==z[\"mode\"] and x[\"size\"]==z[\"size\"],p\nomissions=r[\"omitted_historical_docs\"]\nomitted={x if isinstance(x,str) else x[\"path\"] for x in omissions}\nassert len(omissions)==len(omitted)==2370 and omitted==set(leaves)-set(selected)\nembedded=r[\"full_git_tree\"]\nembedded_rows=embedded[\"tree\"] if isinstance(embedded,dict) else embedded\nassert {x[\"path\"]:(x[\"mode\"],x[\"type\"],x[\"sha\"],x.get(\"size\")) for x in embedded_rows}=={x[\"path\"]:(x[\"mode\"],x[\"type\"],x[\"sha\"],x.get(\"size\")) for x in rows}\nartifacts={}\nfor a in packet[\"artifacts\"]:\n    data=base64.b64decode(a[\"content\"],validate=True);p=pin(data)\n    assert p[\"bytes\"]==a[\"bytes\"] and p[\"git_blob\"]==a[\"sha\"] and p[\"sha256\"]==a[\"sha256\"],a[\"path\"]\n    assert a[\"path\"] not in artifacts;artifacts[a[\"path\"]]=data\nassert len(artifacts)==6\nout=artifacts[\"candidate-full-node.stdout.log\"].decode(\"utf-8\")\nclean=re.sub(r\"\\x1b\\[[0-9;]*m\",\"\",out)\ncounts={k:int(v) for k,v in re.findall(r\"^[ℹ#] (tests|suites|pass|fail|cancelled|skipped|todo) (\\d+)\\s*$\",clean,re.M)}\nassert counts=={\"tests\":740,\"suites\":0,\"pass\":740,\"fail\":0,\"cancelled\":0,\"skipped\":0,\"todo\":0},counts\nassert [x[\"command\"] for x in r[\"runs\"]]==[\"node --test tests/*.test.mjs\",\"python3 tools/make_demo.py\"]\nfor x in r[\"runs\"]:\n    assert x[\"exit_code\"]==0 and not x[\"timed_out\"] and not x[\"owned_group_present_after_child\"]\nassert not r[\"candidate_changes\"] and r[\"own_stage_removed\"] and not r[\"baseline_control_executed\"]\nassert artifacts[\"demo-before.html\"]==artifacts[\"demo-after.html\"]\nassert pin(artifacts[\"demo-after.html\"])[\"git_blob\"]==leaves[\"demo.html\"][\"sha\"]==\"ef7bc3e27e7f161d917ced6a457fad8822802f3f\"\nassert artifacts[\"candidate-full-node.stderr.log\"]==artifacts[\"candidate-demo-builder.stderr.log\"]==b\"\"\nreport={\"schema\":\"recallweave.author-utf8-linux-root-packet-verification.v1\",\"reviewer\":\"estate-7c2609b6545f/root\",\"verification_runtime\":platform.python_version(),\"source_head\":r[\"candidate_head\"],\"source_tree\":tree_pins[\"\"],\"full_tree_entries\":len(rows),\"full_tree_leaves\":len(leaves),\"native_admitted_leaves\":len(admission),\"native_admitted_bytes\":sum(x[\"bytes\"] for x in admission.values()),\"exact_maintained_test_files\":len(tests),\"omitted_paths\":len(omitted),\"all_six_artifacts_exact\":True,\"packet_text\":pin(encoded),\"gzip\":pin(compressed),\"json\":pin(raw),\"counts\":counts,\"runs\":r[\"runs\"],\"demo\":pin(artifacts[\"demo-after.html\"]),\"native_identity\":r[\"identity\"],\"root_scope\":\"Memory-only existing evidence decoding/hash/tree/receipt review. No source materialization or suite/builder/browser rerun. Node24 receiving remains distinct from workflow Node20 and prior Windows failures.\",\"source_changes\":[],\"private_stage_removed_recorded\":True}\nprint(\"ROOT_EVIDENCE_VERIFIED \"+json.dumps(report,ensure_ascii=True,sort_keys=True),flush=True)\ntermios.tcsetattr(0,termios.TCSANOW,old)\n",
+  "result": {
+    "all_six_artifacts_exact": true,
+    "counts": {
+      "cancelled": 0,
+      "fail": 0,
+      "pass": 740,
+      "skipped": 0,
+      "suites": 0,
+      "tests": 740,
+      "todo": 0
+    },
+    "demo": {
+      "bytes": 98468,
+      "git_blob": "ef7bc3e27e7f161d917ced6a457fad8822802f3f",
+      "sha256": "fe7d44d125f9797c867251c05f02868a7cacf91c7d5129f46bbca3c69dc7ae1d"
+    },
+    "exact_maintained_test_files": 84,
+    "full_tree_entries": 3413,
+    "full_tree_leaves": 2916,
+    "gzip": {
+      "bytes": 387403,
+      "git_blob": "6e9d437dea1b42c40ea32f0cc39d6b9543ad2e92",
+      "sha256": "dd3932d1d478c0ea1757c1e7742644f03713ed046d67813780bb56ee102349e4"
+    },
+    "json": {
+      "bytes": 1862719,
+      "git_blob": "193836cc3d4ede5b9df7d8a924bf0985772972a6",
+      "sha256": "cc2361ae46b2ac8c4f6a7f57415b3253d189b7eb2c2d3bdf20c8ce4e7557e6db"
+    },
+    "native_admitted_bytes": 9122523,
+    "native_admitted_leaves": 546,
+    "native_identity": {
+      "environment_overrides": {
+        "PYTHONDONTWRITEBYTECODE": "1",
+        "TMPDIR": "/dev/recall181-8d5ac72a6fae-2/tmp"
+      },
+      "inherited_HOME_unchanged": true,
+      "node": {
+        "availableParallelism": 8,
+        "icu": "78.3",
+        "version": "v24.19.0"
+      },
+      "node_path": "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node",
+      "platform": "Linux-6.18.44-x86_64-with-glibc2.39",
+      "python3": "Python 3.12.14",
+      "python3_path": "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3"
+    },
+    "omitted_paths": 2370,
+    "packet_text": {
+      "bytes": 516541,
+      "git_blob": "a68a2c71bc5dd343cad4394c9832d58d0a0c4943",
+      "sha256": "06d940cde76db70b2daec11ef8cd86ec7f45846e5eb6c1a3751e4fad953c9b9c"
+    },
+    "private_stage_removed_recorded": true,
+    "reviewer": "estate-7c2609b6545f/root",
+    "root_scope": "Memory-only existing evidence decoding/hash/tree/receipt review. No source materialization or suite/builder/browser rerun. Node24 receiving remains distinct from workflow Node20 and prior Windows failures.",
+    "runs": [
+      {
+        "command": "node --test tests/*.test.mjs",
+        "completed_at": "2026-10-09T00:07:33Z",
+        "cwd": "/dev/recall181-8d5ac72a6fae-2/candidate",
+        "elapsed_seconds": 4.6130837330129,
+        "exit_code": 0,
+        "failure_names": [],
+        "label": "candidate-full-node",
+        "owned_group_present_after_child": false,
+        "started_at": "2026-10-09T00:07:28Z",
+        "stderr": {
+          "bytes": 0,
+          "sha": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stdout": {
+          "bytes": 67883,
+          "sha": "9d6871217338ac58d3c6bd2fc7955ac2b72841b6",
+          "sha256": "37596892c27ceeb8eed527633d93e0577f2771caf543684e0b4244be6b4dda47"
+        },
+        "tap_counts": {},
+        "timed_out": false
+      },
+      {
+        "command": "python3 tools/make_demo.py",
+        "completed_at": "2026-10-09T00:07:33Z",
+        "cwd": "/dev/recall181-8d5ac72a6fae-2/candidate",
+        "elapsed_seconds": 0.20085330998699646,
+        "exit_code": 0,
+        "failure_names": [],
+        "label": "candidate-demo-builder",
+        "owned_group_present_after_child": false,
+        "started_at": "2026-10-09T00:07:33Z",
+        "stderr": {
+          "bytes": 0,
+          "sha": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stdout": {
+          "bytes": 70,
+          "sha": "97fb3ed230a83cf2ec6faf203230bf60a86e77d8",
+          "sha256": "9f789a55e291e165763eacf9e12c41136902c5fdb6c74417d8a64ecfbfb72245"
+        },
+        "tap_counts": {},
+        "timed_out": false
+      }
+    ],
+    "schema": "recallweave.author-utf8-linux-root-packet-verification.v1",
+    "source_changes": [],
+    "source_head": "8508f9e19a42501057311559b291f3e359eee170",
+    "source_tree": "25548d4b5f3afad5233ea4c03fdb0b9533f8cd90",
+    "verification_runtime": "3.12.14"
+  },
+  "process_receipt": {
+    "chunk_id": "b65bca",
+    "wall_time_seconds": 0.025208239,
+    "exit_code": 0,
+    "original_token_count": 845,
+    "output": "ROOT_EVIDENCE_VERIFIED {\"all_six_artifacts_exact\": true, \"counts\": {\"cancelled\": 0, \"fail\": 0, \"pass\": 740, \"skipped\": 0, \"suites\": 0, \"tests\": 740, \"todo\": 0}, \"demo\": {\"bytes\": 98468, \"git_blob\": \"ef7bc3e27e7f161d917ced6a457fad8822802f3f\", \"sha256\": \"fe7d44d125f9797c867251c05f02868a7cacf91c7d5129f46bbca3c69dc7ae1d\"}, \"exact_maintained_test_files\": 84, \"full_tree_entries\": 3413, \"full_tree_leaves\": 2916, \"gzip\": {\"bytes\": 387403, \"git_blob\": \"6e9d437dea1b42c40ea32f0cc39d6b9543ad2e92\", \"sha256\": \"dd3932d1d478c0ea1757c1e7742644f03713ed046d67813780bb56ee102349e4\"}, \"json\": {\"bytes\": 1862719, \"git_blob\": \"193836cc3d4ede5b9df7d8a924bf0985772972a6\", \"sha256\": \"cc2361ae46b2ac8c4f6a7f57415b3253d189b7eb2c2d3bdf20c8ce4e7557e6db\"}, \"native_admitted_bytes\": 9122523, \"native_admitted_leaves\": 546, \"native_identity\": {\"environment_overrides\": {\"PYTHONDONTWRITEBYTECODE\": \"1\", \"TMPDIR\": \"/dev/recall181-8d5ac72a6fae-2/tmp\"}, \"inherited_HOME_unchanged\": true, \"node\": {\"availableParallelism\": 8, \"icu\": \"78.3\", \"version\": \"v24.19.0\"}, \"node_path\": \"/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node\", \"platform\": \"Linux-6.18.44-x86_64-with-glibc2.39\", \"python3\": \"Python 3.12.14\", \"python3_path\": \"/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3\"}, \"omitted_paths\": 2370, \"packet_text\": {\"bytes\": 516541, \"git_blob\": \"a68a2c71bc5dd343cad4394c9832d58d0a0c4943\", \"sha256\": \"06d940cde76db70b2daec11ef8cd86ec7f45846e5eb6c1a3751e4fad953c9b9c\"}, \"private_stage_removed_recorded\": true, \"reviewer\": \"estate-7c2609b6545f/root\", \"root_scope\": \"Memory-only existing evidence decoding/hash/tree/receipt review. No source materialization or suite/builder/browser rerun. Node24 receiving remains distinct from workflow Node20 and prior Windows failures.\", \"runs\": [{\"command\": \"node --test tests/*.test.mjs\", \"completed_at\": \"2026-10-09T00:07:33Z\", \"cwd\": \"/dev/recall181-8d5ac72a6fae-2/candidate\", \"elapsed_seconds\": 4.6130837330129, \"exit_code\": 0, \"failure_names\": [], \"label\": \"candidate-full-node\", \"owned_group_present_after_child\": false, \"started_at\": \"2026-10-09T00:07:28Z\", \"stderr\": {\"bytes\": 0, \"sha\": \"e69de29bb2d1d6434b8b29ae775ad8c2e48c5391\", \"sha256\": \"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\"}, \"stdout\": {\"bytes\": 67883, \"sha\": \"9d6871217338ac58d3c6bd2fc7955ac2b72841b6\", \"sha256\": \"37596892c27ceeb8eed527633d93e0577f2771caf543684e0b4244be6b4dda47\"}, \"tap_counts\": {}, \"timed_out\": false}, {\"command\": \"python3 tools/make_demo.py\", \"completed_at\": \"2026-10-09T00:07:33Z\", \"cwd\": \"/dev/recall181-8d5ac72a6fae-2/candidate\", \"elapsed_seconds\": 0.20085330998699646, \"exit_code\": 0, \"failure_names\": [], \"label\": \"candidate-demo-builder\", \"owned_group_present_after_child\": false, \"started_at\": \"2026-10-09T00:07:33Z\", \"stderr\": {\"bytes\": 0, \"sha\": \"e69de29bb2d1d6434b8b29ae775ad8c2e48c5391\", \"sha256\": \"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\"}, \"stdout\": {\"bytes\": 70, \"sha\": \"97fb3ed230a83cf2ec6faf203230bf60a86e77d8\", \"sha256\": \"9f789a55e291e165763eacf9e12c41136902c5fdb6c74417d8a64ecfbfb72245\"}, \"tap_counts\": {}, \"timed_out\": false}], \"schema\": \"recallweave.author-utf8-linux-root-packet-verification.v1\", \"source_changes\": [], \"source_head\": \"8508f9e19a42501057311559b291f3e359eee170\", \"source_tree\": \"25548d4b5f3afad5233ea4c03fdb0b9533f8cd90\", \"verification_runtime\": \"3.12.14\"}\r\n"
+  }
+}
