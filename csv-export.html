@@ -1,0 +1,627 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>CSV question bank · RecallWeave</title>
+  <style>
+    :root { color-scheme:light; font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; color:#17343b; background:#f5f7f4; line-height:1.55; }
+    * { box-sizing:border-box; } body { margin:0; } button,input { font:inherit; } a { color:#116979; text-underline-offset:.2em; }
+    .site-header { max-width:1120px; margin:auto; padding:24px 28px; display:flex; align-items:center; justify-content:space-between; gap:24px; border-bottom:1px solid #d8e2df; }
+    .brand { display:flex; align-items:center; gap:10px; font-weight:750; color:#17343b; text-decoration:none; }
+    .brand-mark { background:#17343b; color:white; border-radius:10px; width:34px; height:34px; text-align:center; line-height:32px; font-size:25px; }
+    main { max-width:1120px; padding:48px 28px 24px; margin:auto; } .eyebrow { font-size:.78rem; letter-spacing:.13em; text-transform:uppercase; font-weight:750; color:#40717a; }
+    h1 { font-size:clamp(2.1rem,5vw,3.5rem); letter-spacing:-.045em; line-height:1.12; max-width:750px; margin:10px 0 20px; }
+    .intro { font-size:1.12rem; max-width:720px; color:#4b6367; margin-bottom:32px; }
+    .layout { display:grid; grid-template-columns:minmax(260px,.82fr) minmax(0,1.4fr); gap:24px; align-items:start; }
+    .card { border:1px solid #d7e2dd; border-radius:18px; background:#fff; padding:25px; box-shadow:0 7px 25px #17343b06; }
+    h2 { margin:6px 0 12px; font-size:1.35rem; line-height:1.3; } h3 { font-size:.95rem; margin:0 0 6px; } p { margin:0 0 16px; }
+    .step { font-size:.75rem; color:#57716f; letter-spacing:.07em; text-transform:uppercase; font-weight:750; }
+    .button { padding:12px 16px; border:1px solid #b5cbc7; border-radius:9px; background:#fff; color:#17343b; cursor:pointer; font-weight:650; min-height:46px; text-align:center; }
+    .button.primary { color:#fff; background:#126c76; border-color:#126c76; } .button:hover:enabled { filter:brightness(.96); }
+    .button:disabled { color:#71817f; background:#edf1ee; border-color:#dfe6e2; cursor:not-allowed; } .button:focus-visible,a:focus-visible,summary:focus-visible { outline:3px solid #db9d26; outline-offset:4px; }
+    .actions { display:flex; flex-wrap:wrap; gap:10px; margin:20px 0; } .choose { width:100%; margin:4px 0 10px; }
+    .quiet { color:#5c7475; font-size:.88rem; } .status { margin-top:20px; padding:14px; border-left:3px solid #93b9b1; background:#f4f8f6; font-size:.92rem; overflow-wrap:anywhere; }
+    .privacy { padding-top:18px; border-top:1px solid #e1e9e4; margin-top:20px; } .download-card { margin-top:20px; }
+    .download-card .button { width:100%; margin:8px 0; } .download-note { font-size:.88rem; color:#5c7475; margin-top:10px; }
+    .empty { min-height:380px; display:flex; flex-direction:column; justify-content:center; align-items:flex-start; background:linear-gradient(140deg,#e8f1ed,#f8faf7); }
+    .empty p { max-width:380px; } .empty-symbol { font:700 2rem ui-monospace,monospace; color:#7da29a; margin-bottom:28px; letter-spacing:.15em; }
+    .preview-heading { border-bottom:1px solid #dce7e1; padding-bottom:16px; margin-bottom:20px; } .literal { white-space:pre-wrap; overflow-wrap:anywhere; }
+    dl { margin:0; } dt { font-size:.75rem; text-transform:uppercase; letter-spacing:.07em; font-weight:750; color:#5c7475; margin-top:20px; } dd { margin:6px 0 0; }
+    .hash { font: .76rem/1.7 ui-monospace,SFMono-Regular,Consolas,monospace; overflow-wrap:anywhere; } details { margin-top:24px; padding-top:18px; border-top:1px solid #dce7e1; }
+    summary { cursor:pointer; font-weight:650; } pre { padding:14px; background:#f4f7f4; border-radius:8px; max-height:280px; overflow:auto; font-size:.75rem; white-space:pre; }
+    [hidden] { display:none!important; } footer { color:#6b8180; font-size:.8rem; margin-top:36px; padding-top:20px; border-top:1px solid #d8e2df; }
+    @media(max-width:720px) { .site-header { padding:20px; gap:12px; } .site-header nav { font-size:.85rem; } main { padding:32px 20px 20px; } .layout { grid-template-columns:1fr; } .card { padding:22px; } .empty { min-height:220px; } h1 { font-size:2.35rem; } }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="demo.html"><span class="brand-mark" aria-hidden="true">r</span> RecallWeave</a>
+    <nav aria-label="Related tools"><a href="author.html">Deck studio</a></nav>
+  </header>
+  <main>
+    <p class="eyebrow">For teachers · CSV question bank</p>
+    <h1>Your lesson, ready to edit.</h1>
+    <p class="intro">Turn a checked lesson JSON into an editable question bank. Keep the original wording and choice order, with source credit saved in a separate metadata receipt.</p>
+    <div class="layout">
+      <aside aria-label="Prepare and download your question bank">
+        <section class="card">
+          <p class="step">01 · Choose your lesson</p>
+          <h2>Start with the checked JSON.</h2>
+          <p>Use a lesson saved from Deck studio or a supplied RecallWeave course. The source file stays unchanged.</p>
+          <input id="csv-export-file" type="file" accept=".json,application/json" hidden>
+          <button id="choose-csv-export-file" class="button primary choose" type="button">Choose lesson JSON</button>
+          <button id="clear-csv-export" class="button" type="button">Clear selection</button>
+          <p id="csv-export-status" class="status" role="status" aria-live="polite">Choose a checked lesson JSON to begin.</p>
+          <p class="quiet privacy">Local file only · Maximum 256 KiB<br>No upload, account or automatic saving.</p>
+        </section>
+        <section class="card download-card">
+          <p class="step">02 · Keep both files</p>
+          <h2>Questions and source credit.</h2>
+          <p>The CSV holds the questions. Its separate JSON receipt holds the lesson title, attribution and license needed when importing it again.</p>
+          <button id="download-course-csv" class="button primary" type="button" disabled>Download CSV question bank</button>
+          <button id="download-csv-metadata" class="button" type="button" disabled>Download metadata receipt</button>
+          <p class="download-note">Save both downloads with the original lesson JSON. Choosing or cancelling another file clears the current result.</p>
+        </section>
+      </aside>
+      <section aria-label="Checked lesson preview">
+        <div id="csv-export-empty" class="card empty">
+          <div class="empty-symbol" aria-hidden="true">“a”,“b”,“c”</div>
+          <p class="eyebrow">Original text · Editable rows</p>
+          <h2>A question bank you can keep.</h2>
+          <p>Choose a lesson to check its contents, review its source credit and prepare both downloads.</p>
+          <p class="quiet">Question order, correct choices and prerequisites stay together. The existing importer checks the export before it is offered.</p>
+        </div>
+        <article id="csv-export-preview" class="card" hidden>
+          <div class="preview-heading">
+            <p class="eyebrow">Checked and ready</p>
+            <h2 id="csv-lesson-title" class="literal"></h2>
+            <p id="csv-lesson-counts" class="quiet"></p>
+          </div>
+          <dl>
+            <dt>Selected file</dt><dd id="csv-source-name" class="literal"></dd>
+            <dt>Attribution</dt><dd id="csv-attribution" class="literal"></dd>
+            <dt>License</dt><dd id="csv-license" class="literal"></dd>
+            <dt>Original JSON · SHA-256</dt><dd id="csv-source-hash" class="hash"></dd>
+            <dt>CSV download · SHA-256</dt><dd id="csv-output-hash" class="hash"></dd>
+          </dl>
+          <details><summary>Inspect the CSV text</summary><pre id="csv-text-preview"></pre></details>
+        </article>
+      </section>
+    </div>
+    <footer>RecallWeave / CSV question bank · A checked format preserves structure; it does not verify teaching accuracy or reuse rights.</footer>
+  </main>
+  <script>
+(() => {
+'use strict';
+const __recallweaveCsvExportModules = Object.create(null);
+__recallweaveCsvExportModules['./deck.mjs'] = (() => {
+/** Local lesson content. Imported data cannot replace the model or run code. */
+const DECK_FORMAT = 'recallweave-deck/1';
+const MAX_DECK_BYTES = 262144;
+
+function deckRecord(value, path) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    throw new Error(`${path} must be an object.`);
+  }
+  return value;
+}
+
+function deckText(value, path, limit) {
+  if (typeof value !== 'string' || !value.trim() || value.length > limit) {
+    throw new Error(`${path} must be nonempty text of at most ${limit} characters.`);
+  }
+  return value;
+}
+
+function deckList(value, path, minimum, maximum) {
+  if (!Array.isArray(value) || value.length < minimum || value.length > maximum) {
+    throw new Error(`${path} must contain ${minimum}–${maximum} entries.`);
+  }
+  return value;
+}
+
+/** Validate and copy only the content fields used by the existing lesson runtime. */
+function validateDeck(value) {
+  const input = deckRecord(value, 'Deck');
+  if (input.format !== undefined && input.format !== DECK_FORMAT) {
+    throw new Error(`Unsupported deck format. Use ${DECK_FORMAT}.`);
+  }
+  const title = deckText(input.title, 'title', 160);
+  const attribution = deckText(input.attribution, 'attribution', 2000);
+  const license = deckText(input.license, 'license', 2000);
+  const concepts = deckList(input.concepts, 'concepts', 1, 32).map((concept, index) =>
+    deckText(concept, `concepts[${index}]`, 80));
+  if (new Set(concepts).size !== concepts.length) throw new Error('Concept names must be unique.');
+  const knownConcepts = new Set(concepts);
+  const ids = new Set();
+  const coveredConcepts = new Set();
+  const links = new Map(concepts.map(concept => [concept, new Set()]));
+  const items = deckList(input.items, 'items', 1, 100).map((value, index) => {
+    const path = `items[${index}]`;
+    const item = deckRecord(value, path);
+    const id = deckText(item.id, `${path}.id`, 80);
+    if (ids.has(id)) throw new Error(`${path}.id duplicates another question ID.`);
+    ids.add(id);
+    const concept = deckText(item.concept, `${path}.concept`, 80);
+    if (!knownConcepts.has(concept)) throw new Error(`${path}.concept is not in concepts.`);
+    coveredConcepts.add(concept);
+    const prerequisites = deckList(item.prerequisites, `${path}.prerequisites`, 0, 31).map((name, p) => {
+      deckText(name, `${path}.prerequisites[${p}]`, 80);
+      if (!knownConcepts.has(name)) throw new Error(`${path}.prerequisites contains an unknown concept.`);
+      if (name === concept) throw new Error(`${path} cannot require its own concept.`);
+      links.get(concept).add(name);
+      return name;
+    });
+    if (new Set(prerequisites).size !== prerequisites.length) throw new Error(`${path}.prerequisites contains a duplicate.`);
+    const options = deckList(item.options, `${path}.options`, 2, 6).map((option, o) =>
+      deckText(option, `${path}.options[${o}]`, 1000));
+    if (new Set(options).size !== options.length) throw new Error(`${path}.options must be distinct.`);
+    if (!Number.isInteger(item.answer) || item.answer < 0 || item.answer >= options.length) {
+      throw new Error(`${path}.answer must be a zero-based index of an option.`);
+    }
+    return Object.freeze({
+      id, concept, prerequisites: Object.freeze(prerequisites),
+      prompt: deckText(item.prompt, `${path}.prompt`, 2000),
+      options: Object.freeze(options), answer: item.answer,
+      explanation: deckText(item.explanation, `${path}.explanation`, 4000),
+      transfer: deckText(item.transfer, `${path}.transfer`, 2000)
+    });
+  });
+  if (coveredConcepts.size !== concepts.length) throw new Error('Every concept must have at least one question.');
+  const visiting = new Set();
+  const visited = new Set();
+  const visit = concept => {
+    if (visiting.has(concept)) throw new Error('Prerequisite links must not form a cycle.');
+    if (visited.has(concept)) return;
+    visiting.add(concept);
+    for (const prerequisite of links.get(concept)) visit(prerequisite);
+    visiting.delete(concept);
+    visited.add(concept);
+  };
+  concepts.forEach(visit);
+  return Object.freeze({
+    format: DECK_FORMAT, title, attribution, license,
+    concepts: Object.freeze(concepts), items: Object.freeze(items)
+  });
+}
+
+/** The same size limit applies to a File and to programmatically supplied UTF-8 JSON. */
+function parseDeck(text) {
+  if (typeof text !== 'string' || new TextEncoder().encode(text).length > MAX_DECK_BYTES) {
+    throw new Error('Choose a JSON deck no larger than 256 KiB.');
+  }
+  let value;
+  try { value = JSON.parse(text); }
+  catch { throw new Error('The file is not valid JSON. Check its commas, quotes and brackets.'); }
+  return validateDeck(value);
+}
+
+/** Export the existing bundled lesson as an editable example of the same contract. */
+function serializeDeck(deck) {
+  return JSON.stringify(validateDeck(deck), null, 2) + '\n';
+}
+
+return { DECK_FORMAT, MAX_DECK_BYTES, validateDeck, parseDeck, serializeDeck };
+})();
+
+__recallweaveCsvExportModules['./course-csv.mjs'] = (() => {
+const { MAX_DECK_BYTES, parseDeck, serializeDeck } = __recallweaveCsvExportModules['./deck.mjs'];
+
+const MAX_COURSE_CSV_BYTES = MAX_DECK_BYTES;
+const COURSE_CSV_COLUMNS = Object.freeze([
+  'id', 'concept', 'prompt', 'option_1', 'option_2', 'option_3', 'option_4',
+  'option_5', 'option_6', 'correct_option', 'explanation', 'transfer', 'prerequisites'
+]);
+const requiredColumns = ['id', 'concept', 'prompt', 'option_1', 'option_2',
+  'correct_option', 'explanation', 'transfer'];
+
+const exampleRows = [
+  COURSE_CSV_COLUMNS,
+  ['observe-1', 'observation', 'Which sentence reports an observation?',
+    'The next step will fail.', 'The log says "ready" at 09:00.', '', '', '', '', '2',
+    'The second sentence reports a recorded event. The first predicts an outcome.',
+    'Write one observation from an event log.', '[]'],
+  ['order-2', 'sequence', 'A is recorded at 09:00 and B at 09:02. Which is earlier?',
+    'A', 'B', '', '', '', '', '1',
+    'In this example, 09:00 precedes 09:02.',
+    'Describe an order without inventing a cause.', '["observation"]']
+];
+const COURSE_CSV_TEMPLATE = exampleRows.map(row =>
+  row.map(value => '"' + value.replaceAll('"', '""') + '"').join(',')
+).join('\r\n') + '\r\n';
+
+/** Comma and doubled-quote parsing; preserve every field's literal text. */
+function csvRecords(text) {
+  if (typeof text !== 'string' || new TextEncoder().encode(text).length > MAX_COURSE_CSV_BYTES) {
+    throw new Error('Choose a UTF-8 CSV no larger than 256 KiB.');
+  }
+  if (text.startsWith('\uFEFF')) text = text.slice(1);
+  const records = [];
+  let fields = [], field = '', state = 'start', line = 1, startLine = 1;
+  const fail = message => {
+    throw new Error('CSV record ' + (records.length + 1) + ', line ' + line + ': ' + message);
+  };
+  const finishField = () => {
+    fields.push(field);
+    if (fields.length > COURSE_CSV_COLUMNS.length) fail('there are more than 13 columns.');
+    field = '';
+    state = 'start';
+  };
+  const finishRecord = () => {
+    finishField();
+    if (records.length === 101) fail('a course can contain at most 100 question records.');
+    records.push({ fields, line: startLine });
+    fields = [];
+    startLine = line;
+  };
+  for (let index = 0; index < text.length; index++) {
+    const character = text[index];
+    if (state === 'quoted') {
+      if (character === '"') {
+        if (text[index + 1] === '"') { field += '"'; index++; }
+        else state = 'closed';
+      } else {
+        field += character;
+        if (character === '\n' || (character === '\r' && text[index + 1] !== '\n')) line++;
+      }
+      continue;
+    }
+    if (character === ',') { finishField(); continue; }
+    if (character === '\r' || character === '\n') {
+      if (character === '\r') {
+        if (text[index + 1] !== '\n') fail('use CRLF or LF between records; a bare CR is ambiguous.');
+        index++;
+      }
+      line++;
+      finishRecord();
+      continue;
+    }
+    if (character === '"') {
+      if (state !== 'start') fail('a quote must start a field or be doubled inside a quoted field.');
+      state = 'quoted';
+    } else {
+      if (state === 'closed') fail('only a comma, record ending or end of file may follow a closing quote.');
+      field += character;
+      state = 'plain';
+    }
+  }
+  if (state === 'quoted') fail('the quoted field has no closing quote.');
+  if (fields.length || state !== 'start' || field) finishRecord();
+  if (!records.length) throw new Error('The CSV needs a header and at least one question record.');
+  return records;
+}
+
+function csvHeader(record) {
+  const positions = new Map();
+  record.fields.forEach((name, index) => {
+    if (!COURSE_CSV_COLUMNS.includes(name)) {
+      throw new Error('CSV header column ' + (index + 1) + ' is unknown: ' + JSON.stringify(name) + '. Use the exact template names.');
+    }
+    if (positions.has(name)) {
+      throw new Error('CSV header repeats ' + JSON.stringify(name) + ' in columns ' +
+        (positions.get(name) + 1) + ' and ' + (index + 1) + '.');
+    }
+    positions.set(name, index);
+  });
+  for (const name of requiredColumns) {
+    if (!positions.has(name)) throw new Error('CSV header is missing required column ' + JSON.stringify(name) + '.');
+  }
+  for (let number = 3; number <= 6; number++) {
+    if (positions.has('option_' + number) && !positions.has('option_' + (number - 1))) {
+      throw new Error('CSV header has "option_' + number + '" without "option_' + (number - 1) + '".');
+    }
+  }
+  return positions;
+}
+
+/**
+ * Convert a declared question-bank CSV into one native, fully checked deck.
+ * Metadata is supplied explicitly. The returned JSON is the exact downloadable
+ * serializeDeck output and passes parseDeck's byte limit before admission.
+ */
+function convertCourseCsv(csvText, metadata) {
+  const records = csvRecords(csvText);
+  const header = records[0];
+  const positions = csvHeader(header);
+  const rows = records.slice(1);
+  if (!rows.length) throw new Error('The CSV needs at least one question record after its header.');
+  const concepts = [];
+  const seenConcepts = new Set();
+  const items = rows.map((record, index) => {
+    const location = 'CSV record ' + (index + 2) + ' (starts on line ' + record.line + ')';
+    const fail = message => { throw new Error(location + ': ' + message); };
+    if (record.fields.length !== header.fields.length) {
+      fail('expected ' + header.fields.length + ' fields, received ' + record.fields.length + '.');
+    }
+    const get = name => positions.has(name) ? record.fields[positions.get(name)] : '';
+    const options = [];
+    let gap = false;
+    for (let number = 1; number <= 6; number++) {
+      const value = get('option_' + number);
+      if (value === '') gap = true;
+      else {
+        if (gap) fail('"option_' + number + '" follows an empty option. Keep supplied options contiguous from option_1.');
+        options.push(value);
+      }
+    }
+    const correct = get('correct_option');
+    if (!/^[1-6]$/.test(correct) || Number(correct) > options.length) {
+      fail('"correct_option" must be one digit from 1 to 6 naming a supplied option (1 means option_1).');
+    }
+    const prerequisiteText = get('prerequisites');
+    let prerequisites = [];
+    if (prerequisiteText !== '') {
+      try { prerequisites = JSON.parse(prerequisiteText); }
+      catch { fail('"prerequisites" must be empty or a JSON array of exact concept names.'); }
+    }
+    const concept = get('concept');
+    if (!seenConcepts.has(concept)) { seenConcepts.add(concept); concepts.push(concept); }
+    return {
+      id: get('id'), concept, prerequisites,
+      prompt: get('prompt'), options, answer: Number(correct) - 1,
+      explanation: get('explanation'), transfer: get('transfer')
+    };
+  });
+  try {
+    const json = serializeDeck({
+      title: metadata?.title, attribution: metadata?.attribution, license: metadata?.license,
+      concepts, items
+    });
+    const deck = parseDeck(json);
+    return Object.freeze({ deck, json });
+  } catch (error) {
+    const match = /^items\[(\d+)\]/.exec(error.message);
+    if (match && rows[Number(match[1])]) {
+      const index = Number(match[1]);
+      throw new Error('CSV record ' + (index + 2) + ' (starts on line ' + rows[index].line + '): ' + error.message);
+    }
+    throw error;
+  }
+}
+
+return { MAX_COURSE_CSV_BYTES, COURSE_CSV_COLUMNS, COURSE_CSV_TEMPLATE, convertCourseCsv };
+})();
+
+__recallweaveCsvExportModules['./course-csv-export.mjs'] = (() => {
+const { parseDeck, serializeDeck } = __recallweaveCsvExportModules['./deck.mjs'];
+const { COURSE_CSV_COLUMNS, MAX_COURSE_CSV_BYTES, convertCourseCsv } = __recallweaveCsvExportModules['./course-csv.mjs'];
+
+const deckFields = new Set(['format', 'title', 'attribution', 'license', 'concepts', 'items']);
+const questionFields = new Set([
+  'id', 'concept', 'prerequisites', 'prompt', 'options', 'answer', 'explanation', 'transfer'
+]);
+
+function knownFields(value, fields, path) {
+  for (const key of Object.keys(value)) {
+    if (!fields.has(key)) throw new Error(path + ': unsupported field ' + JSON.stringify(key) +
+      '. CSV export cannot preserve this data.');
+  }
+}
+
+function wellFormedText(value, path) {
+  if (typeof value === 'string') {
+    for (let index = 0; index < value.length; index++) {
+      const unit = value.charCodeAt(index);
+      if (unit >= 0xD800 && unit <= 0xDBFF) {
+        const next = value.charCodeAt(++index);
+        if (!(next >= 0xDC00 && next <= 0xDFFF)) {
+          throw new Error(path + ' contains an unpaired Unicode surrogate; UTF-8 CSV cannot preserve it.');
+        }
+      } else if (unit >= 0xDC00 && unit <= 0xDFFF) {
+        throw new Error(path + ' contains an unpaired Unicode surrogate; UTF-8 CSV cannot preserve it.');
+      }
+    }
+  } else if (Array.isArray(value)) {
+    value.forEach((entry, index) => wellFormedText(entry, path + '[' + index + ']'));
+  } else if (value && typeof value === 'object') {
+    for (const [key, entry] of Object.entries(value)) wellFormedText(entry, path + '.' + key);
+  }
+}
+
+const quote = value => '"' + value.replaceAll('"', '""') + '"';
+
+/**
+ * Export one checked JSON lesson to the existing thirteen-column question bank.
+ * Title, attribution and license are returned separately: the CSV schema has no
+ * metadata columns. The actual importer must reproduce the checked source before
+ * a caller receives bytes suitable for saving.
+ */
+function exportCourseCsv(jsonText) {
+  const deck = parseDeck(jsonText);
+  const raw = JSON.parse(jsonText);
+  knownFields(raw, deckFields, 'Deck');
+  raw.items.forEach((question, index) => knownFields(question, questionFields, 'items[' + index + ']'));
+  wellFormedText(deck, 'Deck');
+  const firstSeen = [...new Set(deck.items.map(question => question.concept))];
+  if (firstSeen.some((concept, index) => concept !== deck.concepts[index])) {
+    throw new Error('The declared concept order differs from first question occurrence. ' +
+      'The CSV importer cannot preserve this concept order; no export was produced.');
+  }
+  const metadata = Object.freeze({
+    title: deck.title, attribution: deck.attribution, license: deck.license
+  });
+  const rows = [COURSE_CSV_COLUMNS, ...deck.items.map(question => [
+    question.id, question.concept, question.prompt,
+    ...Array.from({ length: 6 }, (_, index) => question.options[index] ?? ''),
+    String(question.answer + 1), question.explanation, question.transfer,
+    JSON.stringify(question.prerequisites)
+  ])];
+  const csv = rows.map(row => row.map(quote).join(',')).join('\r\n') + '\r\n';
+  if (new TextEncoder().encode(csv).length > MAX_COURSE_CSV_BYTES) {
+    throw new Error('The exported CSV would exceed the importer limit of 256 KiB.');
+  }
+  const roundTrip = convertCourseCsv(csv, metadata);
+  if (roundTrip.json !== serializeDeck(deck)) {
+    throw new Error('The existing CSV importer cannot preserve this checked lesson; no export was produced.');
+  }
+  return Object.freeze({
+    csv, metadata, questionCount: deck.items.length, conceptCount: deck.concepts.length
+  });
+}
+
+return { exportCourseCsv };
+})();
+
+__recallweaveCsvExportModules['./course-csv-export-ui.mjs'] = (() => {
+const { MAX_DECK_BYTES } = __recallweaveCsvExportModules['./deck.mjs'];
+const { exportCourseCsv } = __recallweaveCsvExportModules['./course-csv-export.mjs'];
+
+async function sha256(bytes) {
+  if (!globalThis.crypto?.subtle) {
+    throw new Error('This browser cannot compute the required SHA-256 receipt. Open this file in a current browser.');
+  }
+  const digest = await globalThis.crypto.subtle.digest('SHA-256', bytes);
+  return Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, '0')).join('');
+}
+
+/** Mount one local, in-memory file-to-CSV preparation surface. */
+function mountCourseCsvExport(document, platform = {}) {
+  const byId = id => document.getElementById(id);
+  const fileInput = byId('csv-export-file');
+  const status = byId('csv-export-status');
+  const preview = byId('csv-export-preview');
+  const empty = byId('csv-export-empty');
+  const csvButton = byId('download-course-csv');
+  const receiptButton = byId('download-csv-metadata');
+  const hash = platform.hash ?? sha256;
+  const createURL = platform.createObjectURL ?? (value => URL.createObjectURL(value));
+  const revokeURL = platform.revokeObjectURL ?? (value => URL.revokeObjectURL(value));
+  const later = platform.setTimeout ?? setTimeout;
+  const BlobType = platform.Blob ?? Blob;
+  const listeners = [];
+  const urls = new Set();
+  let generation = 0;
+  let selected = null;
+
+  function on(element, event, action) {
+    element.addEventListener(event, action);
+    listeners.push(() => element.removeEventListener(event, action));
+  }
+
+  function revoke(url) {
+    if (urls.delete(url)) revokeURL(url);
+  }
+
+  function retire(message) {
+    generation++;
+    selected = null;
+    preview.hidden = true;
+    empty.hidden = false;
+    csvButton.disabled = true;
+    receiptButton.disabled = true;
+    for (const url of [...urls]) revoke(url);
+    for (const id of ['csv-source-name', 'csv-lesson-title', 'csv-lesson-counts',
+      'csv-attribution', 'csv-license', 'csv-source-hash', 'csv-output-hash', 'csv-text-preview']) {
+      byId(id).textContent = '';
+    }
+    status.textContent = message;
+    return generation;
+  }
+
+  async function readSelection() {
+    const version = retire('Checking the selected lesson…');
+    const file = fileInput.files?.[0];
+    if (!file) {
+      status.textContent = 'Selection cancelled. Choose a lesson JSON to begin.';
+      return;
+    }
+    try {
+      if (fileInput.files.length !== 1) throw new Error('Choose one lesson JSON at a time.');
+      if (!Number.isSafeInteger(file.size) || file.size < 0 || file.size > MAX_DECK_BYTES) {
+        throw new Error('Choose a JSON deck no larger than 256 KiB.');
+      }
+      const buffer = await file.arrayBuffer();
+      if (version !== generation) return;
+      const bytes = new Uint8Array(buffer);
+      if (bytes.byteLength > MAX_DECK_BYTES) throw new Error('Choose a JSON deck no larger than 256 KiB.');
+      let text;
+      try { text = new TextDecoder('utf-8', { fatal: true, ignoreBOM: true }).decode(bytes); }
+      catch { throw new Error('The input must contain valid UTF-8; invalid bytes were not replaced.'); }
+      const result = exportCourseCsv(text);
+      const csvBytes = new TextEncoder().encode(result.csv);
+      const [inputHash, csvHash] = await Promise.all([hash(bytes), hash(csvBytes)]);
+      if (version !== generation) return;
+      if (![inputHash, csvHash].every(value => typeof value === 'string' && /^[0-9a-f]{64}$/.test(value))) {
+        throw new Error('The required SHA-256 receipt could not be prepared.');
+      }
+      const receipt = {
+        format: 'recallweave-course-csv-export/1',
+        input: file.name, input_sha256: inputHash, output: 'question-bank.csv',
+        csv_sha256: csvHash, question_count: result.questionCount,
+        concept_count: result.conceptCount, metadata: result.metadata
+      };
+      selected = Object.freeze({ csv: result.csv, receipt: JSON.stringify(receipt, null, 2) + '\n' });
+      byId('csv-source-name').textContent = file.name;
+      byId('csv-lesson-title').textContent = result.metadata.title;
+      byId('csv-lesson-counts').textContent = result.questionCount + (result.questionCount === 1 ? ' question' : ' questions')
+        + ' · ' + result.conceptCount + (result.conceptCount === 1 ? ' concept' : ' concepts');
+      byId('csv-attribution').textContent = result.metadata.attribution;
+      byId('csv-license').textContent = result.metadata.license;
+      byId('csv-source-hash').textContent = inputHash;
+      byId('csv-output-hash').textContent = csvHash;
+      byId('csv-text-preview').textContent = result.csv;
+      preview.hidden = false;
+      empty.hidden = true;
+      csvButton.disabled = false;
+      receiptButton.disabled = false;
+      status.textContent = 'Lesson checked. Download both files: the CSV question bank and its separate metadata receipt.';
+    } catch (error) {
+      if (version !== generation) return;
+      retire(error instanceof Error ? error.message : 'The file could not be read. Choose another lesson JSON.');
+    }
+  }
+
+  function download(kind) {
+    if (!selected) return;
+    const isCsv = kind === 'csv';
+    try {
+      const url = createURL(new BlobType([isCsv ? selected.csv : selected.receipt], {
+        type: isCsv ? 'text/csv;charset=utf-8' : 'application/json;charset=utf-8'
+      }));
+      urls.add(url);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = isCsv ? 'question-bank.csv' : 'question-bank.metadata.json';
+      document.body.append(link);
+      try { link.click(); } finally { link.remove(); }
+      later(() => revoke(url), 1000);
+      status.textContent = (isCsv ? 'CSV' : 'Metadata receipt') + ' download requested. Keep both files and the original lesson JSON.';
+    } catch {
+      retire('The download could not be prepared. Choose the lesson again and retry.');
+    }
+  }
+
+  on(byId('choose-csv-export-file'), 'click', () => {
+    retire('Choose a lesson JSON. The previous preview and downloads have been cleared.');
+    fileInput.value = '';
+    fileInput.click();
+  });
+  on(fileInput, 'change', readSelection);
+  on(fileInput, 'cancel', () => {
+    retire('Selection cancelled. Choose a lesson JSON to begin.');
+    fileInput.value = '';
+  });
+  on(byId('clear-csv-export'), 'click', () => {
+    retire('Selection cleared. Choose a lesson JSON to begin.');
+    fileInput.value = '';
+  });
+  on(csvButton, 'click', () => download('csv'));
+  on(receiptButton, 'click', () => download('receipt'));
+  retire('Choose a checked lesson JSON to begin.');
+  return () => {
+    retire('CSV export closed.');
+    listeners.forEach(remove => remove());
+  };
+}
+
+if (typeof document !== 'undefined') mountCourseCsvExport(document);
+
+return { mountCourseCsvExport };
+})();
+
+})();
+</script>
+</body>
+</html>

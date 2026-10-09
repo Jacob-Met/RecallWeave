@@ -442,3 +442,17 @@ The new file preserves literal question data; the JSON receipt retains the
 separate title, attribution and license needed for reimport. See
 [CSV export](docs/CSV_EXPORT.md) for the existing-importer dependency, explicit
 losslessness refusals, and create-only output behavior.
+
+## Export a CSV question bank without a terminal
+
+Open [CSV question bank](csv-export.html) directly in your browser, choose a checked
+lesson JSON, and download the editable CSV plus its separate metadata receipt.
+The page preserves literal title, attribution and license and records hashes of
+the exact source and CSV bytes. Keep both downloads with the original lesson.
+
+Selecting, cancelling or clearing another file immediately retires the previous
+preview and downloads. Everything stays in memory until you request a download;
+the standalone page needs no server or connection and uses no automatic storage.
+See the [browser export guide](docs/CSV_EXPORT_BROWSER.md) for limits, the existing
+importer dependency and reimport instructions. Rebuild with
+`python3 tools/make_csv_export.py`, or add `--check` to verify source parity.
