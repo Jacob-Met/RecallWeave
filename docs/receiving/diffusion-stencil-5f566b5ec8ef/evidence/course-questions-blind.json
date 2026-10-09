@@ -1,0 +1,189 @@
+{
+  "format": "recallweave-deck/1",
+  "title": "Periodic diffusion: conserved does not mean stable",
+  "concepts": [
+    "Periodic steps",
+    "Conserved quantities",
+    "Convex weights",
+    "Alternating patterns"
+  ],
+  "items": [
+    {
+      "id": "diffusion-periodic-neighbors",
+      "concept": "Periodic steps",
+      "prerequisites": [],
+      "prompt": "Eight cells are numbered 0 through 7 around a ring. Which cells are the left and right neighbors used to update cell 0?",
+      "options": [
+        "0 and 1",
+        "7 and 1",
+        "7 and 0",
+        "1 and 2"
+      ],
+      "transfer": "For cell 7, list the left, center and right indices in the order used by the stencil."
+    },
+    {
+      "id": "diffusion-simultaneous-pulse",
+      "concept": "Periodic steps",
+      "prerequisites": [],
+      "prompt": "Start with [8,0,0,0,0,0,0,0] and r=1/4. Use u_new[j]=r*u_old[j-1]+(1-2r)*u_old[j]+r*u_old[j+1]. What is cell 1 after one simultaneous step?",
+      "options": [
+        "4",
+        "1",
+        "0",
+        "2"
+      ],
+      "transfer": "Compute all eight values after one step, then explain why overwriting cell 0 before reading it for cell 1 would change the answer."
+    },
+    {
+      "id": "diffusion-zero-ratio",
+      "concept": "Periodic steps",
+      "prerequisites": [],
+      "prompt": "With r=0, how does one step change an arbitrary admitted initial vector?",
+      "options": [
+        "Every cell keeps its value.",
+        "Every cell becomes zero.",
+        "Every cell becomes the mean.",
+        "The cells rotate one position."
+      ],
+      "transfer": "For the constant vector [3,3,3,3,3,3,3,3], compute one step at r=3/4. Explain why this does not demonstrate stability for all inputs."
+    },
+    {
+      "id": "diffusion-sum-pulse",
+      "concept": "Conserved quantities",
+      "prerequisites": [
+        "Periodic steps"
+      ],
+      "prompt": "Start with [8,0,0,0,0,0,0,0] and r=3/4. The first step is [-4,6,0,0,0,0,0,6]. What is the sum after that step?",
+      "options": [
+        "0",
+        "4",
+        "8",
+        "12"
+      ],
+      "transfer": "Compute the mean of both vectors. Does the unchanged sum prevent the new -4 value?"
+    },
+    {
+      "id": "diffusion-mean-ring",
+      "concept": "Conserved quantities",
+      "prerequisites": [
+        "Periodic steps"
+      ],
+      "prompt": "An eight-cell ring has initial values [4,4,0,0,0,0,0,0]. What is its mean after any number of exact simultaneous steps at one fixed admitted ratio?",
+      "options": [
+        "1",
+        "2",
+        "4",
+        "8"
+      ],
+      "transfer": "For [-2,6,0,0,0,0,0,0], find the conserved sum and mean. Explain why signed values cause no exception."
+    },
+    {
+      "id": "diffusion-conservation-limit",
+      "concept": "Conserved quantities",
+      "prerequisites": [
+        "Periodic steps"
+      ],
+      "prompt": "Two successive rows have the same sum, but their distance from the mean grows. Which conclusion follows?",
+      "options": [
+        "All values must be nonnegative.",
+        "The scheme must converge to its mean.",
+        "The rows must be identical.",
+        "Conservation alone does not establish stability."
+      ],
+      "transfer": "Starting from [1,-1,1,-1,1,-1,1,-1] at r=3/4, compute the next row and compare sums and squared deviations."
+    },
+    {
+      "id": "diffusion-convex-quarter",
+      "concept": "Convex weights",
+      "prerequisites": [
+        "Periodic steps"
+      ],
+      "prompt": "At r=1/4, what are the left, center and right weights in that order?",
+      "options": [
+        "1/4, 1/4, 1/2",
+        "1/4, 1/2, 1/4",
+        "1/2, 0, 1/2",
+        "1/4, -1/2, 1/4"
+      ],
+      "transfer": "Use old neighbors [-4,4,12] with r=1/4. Compute the new center value and locate it within the old three-value range."
+    },
+    {
+      "id": "diffusion-range-bound",
+      "concept": "Convex weights",
+      "prerequisites": [
+        "Periodic steps"
+      ],
+      "prompt": "Every old cell lies between -3 and 9. At r=2/5, which interval must contain every new value?",
+      "options": [
+        "[-9,27]",
+        "[-3,9]",
+        "[0,9]",
+        "[3,3]"
+      ],
+      "transfer": "At r=3/5, write the weights and give an old three-value neighborhood for which the new center leaves that neighborhood's range."
+    },
+    {
+      "id": "diffusion-center-bound",
+      "concept": "Convex weights",
+      "prerequisites": [
+        "Periodic steps"
+      ],
+      "prompt": "For 0<=r<=1, which condition makes all three stencil weights nonnegative?",
+      "options": [
+        "r>=1/2",
+        "r=1 only",
+        "r<=1/4",
+        "r<=1/2"
+      ],
+      "transfer": "At r=1/2, is the center weight positive, zero or negative? Why does this boundary not promise strict damping of every nonconstant pattern?"
+    },
+    {
+      "id": "diffusion-alternating-quarter",
+      "concept": "Alternating patterns",
+      "prerequisites": [
+        "Convex weights",
+        "Conserved quantities"
+      ],
+      "prompt": "The vector [1,-1,1,-1,1,-1,1,-1] is multiplied by 1-4r at each step. What happens after one step at r=1/4?",
+      "options": [
+        "It changes sign without shrinking.",
+        "Its amplitude doubles.",
+        "Every cell becomes zero.",
+        "It remains unchanged."
+      ],
+      "transfer": "Starting from [3,1,3,1,3,1,3,1], separate mean 2 and alternating amplitude 1. Compute one step at r=1/4."
+    },
+    {
+      "id": "diffusion-alternating-boundary",
+      "concept": "Alternating patterns",
+      "prerequisites": [
+        "Convex weights",
+        "Conserved quantities"
+      ],
+      "prompt": "Start with [1,-1,1,-1,1,-1,1,-1] at r=1/2. What is cell 0 after two steps?",
+      "options": [
+        "1",
+        "-1",
+        "0",
+        "2"
+      ],
+      "transfer": "Compute the sum of squared deviations from the mean at steps 0,1,2. Contrast this with a claim of strict smoothing."
+    },
+    {
+      "id": "diffusion-alternating-growing",
+      "concept": "Alternating patterns",
+      "prerequisites": [
+        "Convex weights",
+        "Conserved quantities"
+      ],
+      "prompt": "Start with [1,-1,1,-1,1,-1,1,-1] at r=3/4. What is cell 0 after three steps?",
+      "options": [
+        "-2",
+        "6",
+        "-8",
+        "8"
+      ],
+      "transfer": "For initial [2,0,2,0,2,0,2,0] at r=3/4, compute the first two rows using mean 1 plus an alternating component. Identify a negative value."
+    }
+  ]
+}

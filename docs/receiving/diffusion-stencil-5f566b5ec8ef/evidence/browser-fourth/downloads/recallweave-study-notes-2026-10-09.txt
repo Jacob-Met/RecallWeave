@@ -1,0 +1,153 @@
+RecallWeave — study notes
+Periodic diffusion: conserved does not mean stable
+Saved: 2026-10-09T02:34:03.747Z
+
+FIRST SESSION
+11 of 12 connections correct on the first try.
+This count describes this session; it is not a measure of your ability.
+
+ESTIMATED MASTERY — MODEL STATE, NOT A GRADE
+These estimates come from the demo’s learning model. They are not a validated assessment.
+Practice does not change the first-session estimates.
+Periodic steps: 90%
+Conserved quantities: 98%
+Convex weights: 98%
+Alternating patterns: 98%
+
+PRACTICE
+Complete: 1 of 1 practice answers recorded; 1 correct on retry.
+Practice follows the explanations and is recorded separately from the first answers.
+
+REVIEW THE CONNECTIONS
+
+1. For 0<=r<=1, which condition makes all three stencil weights nonnegative?
+Concept: Convex weights
+Your first answer: r<=1/2
+First try: correct
+Correct answer: r<=1/2
+Explanation: The neighbor weights are already nonnegative. The remaining condition is 1-2r>=0, which is r<=1/2.
+Apply the idea: At r=1/2, is the center weight positive, zero or negative? Why does this boundary not promise strict damping of every nonconstant pattern?
+Your explanation — reflection, not scored:
+  Not written.
+
+2. Two successive rows have the same sum, but their distance from the mean grows. Which conclusion follows?
+Concept: Conserved quantities
+Your first answer: Conservation alone does not establish stability.
+First try: correct
+Correct answer: Conservation alone does not establish stability.
+Explanation: Sum preservation constrains one aggregate. An alternating positive/negative component can grow while its sum remains zero.
+Apply the idea: Starting from [1,-1,1,-1,1,-1,1,-1] at r=3/4, compute the next row and compare sums and squared deviations.
+Your explanation — reflection, not scored:
+  Not written.
+
+3. Eight cells are numbered 0 through 7 around a ring. Which cells are the left and right neighbors used to update cell 0?
+Concept: Periodic steps
+Your first answer: 7 and 0
+First try: needs review
+Correct answer: 7 and 1
+Explanation: Periodic indexing wraps the left neighbor of cell 0 to cell 7. The right neighbor remains cell 1.
+Apply the idea: For cell 7, list the left, center and right indices in the order used by the stencil.
+Your explanation — reflection, not scored:
+  > Conservation is one constraint; the alternating component can grow. <literal note>
+Practice answer: 7 and 1
+Practice result: correct on retry
+
+4. Start with [8,0,0,0,0,0,0,0] and r=1/4. Use u_new[j]=r*u_old[j-1]+(1-2r)*u_old[j]+r*u_old[j+1]. What is cell 1 after one simultaneous step?
+Concept: Periodic steps
+Your first answer: 2
+First try: correct
+Correct answer: 2
+Explanation: Cell 1 uses the old values 8,0,0, giving (1/4)*8+(1/2)*0+(1/4)*0=2. Reusing a newly updated cell would be a different scheme.
+Apply the idea: Compute all eight values after one step, then explain why overwriting cell 0 before reading it for cell 1 would change the answer.
+Your explanation — reflection, not scored:
+  Not written.
+
+5. With r=0, how does one step change an arbitrary admitted initial vector?
+Concept: Periodic steps
+Your first answer: Every cell keeps its value.
+First try: correct
+Correct answer: Every cell keeps its value.
+Explanation: The weights are 0,1,0, so each new value is exactly its own previous value.
+Apply the idea: For the constant vector [3,3,3,3,3,3,3,3], compute one step at r=3/4. Explain why this does not demonstrate stability for all inputs.
+Your explanation — reflection, not scored:
+  Not written.
+
+6. At r=1/4, what are the left, center and right weights in that order?
+Concept: Convex weights
+Your first answer: 1/4, 1/2, 1/4
+First try: correct
+Correct answer: 1/4, 1/2, 1/4
+Explanation: The center coefficient is 1-2*(1/4)=1/2. All three weights are nonnegative and add to one.
+Apply the idea: Use old neighbors [-4,4,12] with r=1/4. Compute the new center value and locate it within the old three-value range.
+Your explanation — reflection, not scored:
+  Not written.
+
+7. An eight-cell ring has initial values [4,4,0,0,0,0,0,0]. What is its mean after any number of exact simultaneous steps at one fixed admitted ratio?
+Concept: Conserved quantities
+Your first answer: 1
+First try: correct
+Correct answer: 1
+Explanation: The initial sum is 8 and periodic updates preserve it. Dividing by eight cells gives mean 1 at every step.
+Apply the idea: For [-2,6,0,0,0,0,0,0], find the conserved sum and mean. Explain why signed values cause no exception.
+Your explanation — reflection, not scored:
+  Not written.
+
+8. Start with [1,-1,1,-1,1,-1,1,-1] at r=1/2. What is cell 0 after two steps?
+Concept: Alternating patterns
+Your first answer: 1
+First try: correct
+Correct answer: 1
+Explanation: The multiplier is -1. Each step reverses the pattern; after two steps cell 0 returns to 1. The amplitude does not shrink.
+Apply the idea: Compute the sum of squared deviations from the mean at steps 0,1,2. Contrast this with a claim of strict smoothing.
+Your explanation — reflection, not scored:
+  Not written.
+
+9. Start with [1,-1,1,-1,1,-1,1,-1] at r=3/4. What is cell 0 after three steps?
+Concept: Alternating patterns
+Your first answer: -8
+First try: correct
+Correct answer: -8
+Explanation: The multiplier is 1-4*(3/4)=-2. Three steps give (-2)^3=-8 at cell 0, while the vector sum remains zero.
+Apply the idea: For initial [2,0,2,0,2,0,2,0] at r=3/4, compute the first two rows using mean 1 plus an alternating component. Identify a negative value.
+Your explanation — reflection, not scored:
+  Not written.
+
+10. Every old cell lies between -3 and 9. At r=2/5, which interval must contain every new value?
+Concept: Convex weights
+Your first answer: [-3,9]
+First try: correct
+Correct answer: [-3,9]
+Explanation: The weights 2/5,1/5,2/5 form a convex combination. Each new value stays between its old neighbors and therefore within the old global range.
+Apply the idea: At r=3/5, write the weights and give an old three-value neighborhood for which the new center leaves that neighborhood's range.
+Your explanation — reflection, not scored:
+  Not written.
+
+11. Start with [8,0,0,0,0,0,0,0] and r=3/4. The first step is [-4,6,0,0,0,0,0,6]. What is the sum after that step?
+Concept: Conserved quantities
+Your first answer: 8
+First try: correct
+Correct answer: 8
+Explanation: The sum is -4+6+6=8. Each old cell contributes total weight r+(1-2r)+r=1 across the ring, even when the center weight is negative.
+Apply the idea: Compute the mean of both vectors. Does the unchanged sum prevent the new -4 value?
+Your explanation — reflection, not scored:
+  Not written.
+
+12. The vector [1,-1,1,-1,1,-1,1,-1] is multiplied by 1-4r at each step. What happens after one step at r=1/4?
+Concept: Alternating patterns
+Your first answer: Every cell becomes zero.
+First try: correct
+Correct answer: Every cell becomes zero.
+Explanation: The multiplier is 1-4*(1/4)=0, so this particular alternating component vanishes in one step.
+Apply the idea: Starting from [3,1,3,1,3,1,3,1], separate mean 2 and alternating amplitude 1. Compute one step at r=1/4.
+Your explanation — reflection, not scored:
+  Not written.
+
+YOUR APPLICATION REFLECTION — NOT SCORED
+Prompt: Choose one connection from this deck and explain how it relates to another idea in your own words.
+  > At r=1/2, the alternating amplitude stays fixed while its sign flips.
+
+DECK ATTRIBUTION
+Original questions and explanations by HAMON / ChatGPT, 2026. Mathematical background: Gilbert Strang, Computational Science and Engineering, section 5.4 (MIT), https://math.mit.edu/classes/18.086/2006/am54.pdf. All numerical examples are authored for this course.
+Original course text: CC BY 4.0. Referenced sources retain their own terms.
+
+Saved from this browser session. The download does not upload the session or restore it after a refresh.

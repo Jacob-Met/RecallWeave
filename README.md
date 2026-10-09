@@ -433,3 +433,11 @@ Open [the minimum-spanning-forest explorer](courses/minimum-spanning-forest-expl
 
 Download the full trace with its original entered text and selected frame, or save the original [twelve-question course](courses/minimum-spanning-forest.json) and [worked guide](courses/minimum-spanning-forest.md). Open the JSON through the learner's existing **Bring your own lesson** preview and **Start this deck** flow. No network, account, automatic storage or learner-session modification is involved. Rebuild the standalone page with `node tools/build-minimum-spanning-forest.mjs`; add `--check` to verify exact source parity.
 
+
+## Periodic diffusion: conserved does not mean stable
+
+Open [the standalone diffusion lab](courses/diffusion-stencil-lab.html) to follow exact simultaneous updates around an eight-cell ring. Inspect the periodic neighbors and weighted terms, compare conserved sum with squared deviations, and contrast damping, the undamped alternating boundary, and a growing alternating mode. Draft edits retire observation export until explicitly applied. Exact rational tables accompany approximate diagrams; this is a bounded discrete teaching scheme, not a physical forecast.
+
+Download the original [twelve-question lesson](courses/diffusion-stencil.json) and [worked guide](courses/diffusion-stencil.md), or obtain their exact copies from the offline lab. Import the JSON through **Bring your own lesson** in the unchanged learner; **Start this deck** begins question 1 directly. Existing review, missed-item practice and study-note downloads remain unchanged.
+
+Build or verify with `node tools/build-diffusion-stencil.mjs [--check]`; focused native tests are `node --test tests/diffusion-stencil.test.mjs tests/diffusion-stencil-build.test.mjs`. The dedicated browser receiver accepts an installed browser, private output directory and independently frozen answer JSON; it installs nothing. Native receiving and the Actions/integration hold are recorded in [the contribution packet](docs/receiving/diffusion-stencil-5f566b5ec8ef/README.md).
