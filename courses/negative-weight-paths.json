@@ -1,0 +1,212 @@
+{
+  "format": "recallweave-deck/1",
+  "title": "Negative-weight paths: finite routes, edge budgets and cycle influence",
+  "attribution": "Original graphs, questions, distractors, worked explanations and transfer prompts for RecallWeave. Algorithm background: MIT OpenCourseWare, 6.006 Introduction to Algorithms (Spring 2020), Erik Demaine, Jason Ku and Justin Solomon, Lecture 12: https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/resources/mit6_006s20_lec12/. No reference exercise, figure or passage is copied. AI assistance was used in drafting and implementation.",
+  "license": "Original course content authored for Jacob’s RecallWeave project; no additional reuse license is granted here. Linked reference material retains its published terms.",
+  "concepts": [
+    "signed-routes",
+    "edge-budgets",
+    "cycle-influence",
+    "reading-results"
+  ],
+  "items": [
+    {
+      "id": "nw-finite",
+      "concept": "signed-routes",
+      "prerequisites": [],
+      "prompt": "The only edges are S → T (2), S → A (5), and A → T (−4). What is the shortest S-to-T route and its cost?",
+      "options": [
+        "S → T, cost 2",
+        "S → A → T, cost 1",
+        "A → T alone, cost −4",
+        "No finite shortest route exists"
+      ],
+      "answer": 1,
+      "explanation": "Both S-to-T routes can be listed: the direct edge costs 2, while S → A → T costs 5 + (−4) = 1. This graph is acyclic, so repeated negative cycles cannot lower the cost further. A negative edge can coexist with a finite shortest route.",
+      "transfer": "Change A → T to −2. Which of the two routes is now cheaper?"
+    },
+    {
+      "id": "nw-shift",
+      "concept": "signed-routes",
+      "prerequisites": [],
+      "prompt": "A graph has vertices S, A, T and only S → T (2), S → A (5), A → T (−4). Add 4 to every edge weight. What happens to the direct and two-edge S-to-T costs?",
+      "options": [
+        "They become 6 and 5, preserving the ordering",
+        "They become 2 and 1, because a common shift cancels",
+        "They become 6 and 9, reversing the ordering",
+        "Both become 6"
+      ],
+      "answer": 2,
+      "explanation": "The direct edge changes from 2 to 6. The two-edge route changes from 5 + (−4) = 1 to 9 + 0 = 9. A per-edge shift adds a different total to routes with different edge counts; it is not a general way to remove negative weights while preserving shortest routes.",
+      "transfer": "If two routes have exactly the same number of edges, how does a common per-edge shift change their cost difference?"
+    },
+    {
+      "id": "nw-domain",
+      "concept": "signed-routes",
+      "prerequisites": [],
+      "prompt": "A graph has vertices S, A, T and only S → T (2), S → A (5), A → T (−4). The S → A → T route has finite cost 1. Why does the existing Dijkstra explorer refuse this graph?",
+      "options": [
+        "Every negative edge makes every target unreachable",
+        "Its settlement guarantee requires nonnegative weights, even though another method can solve this example",
+        "The route cost 1 cannot be represented as an integer",
+        "A negative edge proves a negative cycle exists"
+      ],
+      "answer": 1,
+      "explanation": "The existing explorer deliberately admits only nonnegative weights. The acyclic negative-edge example lies outside that method's stated guarantee, not outside the definition of a finite shortest route. This continuation uses Bellman–Ford rather than changing Dijkstra's admission rules.",
+      "transfer": "Distinguish 'this algorithm does not admit the input' from 'this input has no finite optimum' using the example."
+    },
+    {
+      "id": "nw-zero-round",
+      "concept": "edge-budgets",
+      "prerequisites": [
+        "signed-routes"
+      ],
+      "prompt": "Round k of this synchronous trace permits at most k edges. With source S, what does round 0 contain?",
+      "options": [
+        "Every vertex has distance 0",
+        "Only S has distance 0 and route [S]; all other entries are unreached",
+        "Only vertices joined to S by a negative edge are reached",
+        "Every entry is already classified as unbounded-below"
+      ],
+      "answer": 1,
+      "explanation": "A walk using zero edges can remain at S and has cost 0. It cannot reach a different vertex. The round's null entries mean no route within that edge budget; final unreachable or unbounded-below classifications are made separately.",
+      "transfer": "For a one-vertex graph with a negative self-loop, compare round 0 with round 1."
+    },
+    {
+      "id": "nw-two-rounds",
+      "concept": "edge-budgets",
+      "prerequisites": [
+        "signed-routes"
+      ],
+      "prompt": "For S → T (2), S → A (5), A → T (−4), what are T's distances in synchronous rounds 1 and 2?",
+      "options": [
+        "1 then 1, because every edge is scanned in round 1",
+        "2 then 1, because round 2 can use round 1's route to A",
+        "2 then 2, because the first route must remain final",
+        "Unreached then −4"
+      ],
+      "answer": 1,
+      "explanation": "Round 1 reads only round 0, where A is unreached. It can use the direct S → T edge but cannot chain the newly discovered S → A route within that same round. Round 2 reads A's previous value 5 and offers 5 − 4 = 1 to T. An in-place edge scan has different intermediate-round semantics.",
+      "transfer": "Reverse the order of the three input edges. Which distance rows should remain unchanged? What can still differ when equal-cost routes exist?"
+    },
+    {
+      "id": "nw-simple-bound",
+      "concept": "edge-budgets",
+      "prerequisites": [
+        "signed-routes"
+      ],
+      "prompt": "For an n-vertex graph, why is n−1 the relevant edge bound for a vertex whose shortest-walk cost is finite?",
+      "options": [
+        "Every directed walk has at most n−1 edges",
+        "All negative edges can be removed without changing costs",
+        "A finite optimum has a simple route; repeated nonnegative cycles can be removed without increasing cost",
+        "Every graph with a cycle has no finite routes"
+      ],
+      "answer": 2,
+      "explanation": "If a finite optimal walk repeats a vertex, its intervening cycle cannot have negative total cost: repeating that cycle would destroy finiteness. Removing a nonnegative cycle does not increase the cost. Repeating this yields an optimal simple route, which visits at most n vertices and uses at most n−1 edges.",
+      "transfer": "Why does this argument not permit reporting the n−1-round estimate as a finite optimum for a vertex downstream of a reachable negative cycle?"
+    },
+    {
+      "id": "nw-cycle-cost",
+      "concept": "cycle-influence",
+      "prerequisites": [
+        "edge-budgets"
+      ],
+      "prompt": "The edges A → B (−3) and B → A (1) form a directed cycle. What happens when a source-reachable walk makes two additional circuits before continuing?",
+      "options": [
+        "Its cost decreases by 4",
+        "Its cost decreases by 2",
+        "Its cost increases by 4",
+        "Its cost stays unchanged"
+      ],
+      "answer": 0,
+      "explanation": "One circuit costs −3 + 1 = −2. Two additional circuits change the cost by 2 × (−2) = −4. If the source can reach this cycle and the cycle can reach a target, there is no lowest finite source-to-target walk cost: another circuit always lowers it.",
+      "transfer": "Keep A → B at −3. What B → A weight makes the cycle cost zero instead?"
+    },
+    {
+      "id": "nw-affected",
+      "concept": "cycle-influence",
+      "prerequisites": [
+        "edge-budgets"
+      ],
+      "prompt": "Use S → A (2), A → B (−3), B → A (1), B → T (4), S → U (7), X → Y (−2), Y → X (1), with no other edges. Which vertices are unbounded-below from S?",
+      "options": [
+        "Every vertex, because the graph contains a negative cycle",
+        "A, B, and T only",
+        "A and B only; a target outside the cycle is always finite",
+        "X and Y only"
+      ],
+      "answer": 1,
+      "explanation": "S can reach the negative A-B-A cycle, which can reach A, B, and T. It cannot return to S or reach U. Thus S remains finite at 0 and U at 7. X and Y have their own negative cycle but are unreachable from S. Cycle influence follows directed reachability, not the mere presence of a cycle somewhere in the graph.",
+      "transfer": "Add T → U with weight 0. How does U's classification change even though its direct edge from S still costs 7?"
+    },
+    {
+      "id": "nw-witness",
+      "concept": "cycle-influence",
+      "prerequisites": [
+        "edge-budgets"
+      ],
+      "prompt": "Use source S and exactly seven vertices S, A, B, T, U, X, Y. The only edges are S → A (2), A → B (−3), B → A (1), B → T (4), S → U (7), X → Y (−2), Y → X (1). T improves from 1 in round 6 to −1 in round 7 and has no outgoing edges. What does this establish?",
+      "options": [
+        "T must itself lie on a negative cycle",
+        "The round 6 value was the final finite optimum",
+        "T is an improvement witness and is downstream of a reachable negative cycle; it need not lie on that cycle",
+        "The graph must contain an eighth vertex"
+      ],
+      "answer": 2,
+      "explanation": "A decrease between the n−1 and n edge budgets is an improvement witness. A finite optimum would already have a simple route within n−1 edges, so this decrease identifies unbounded influence. T is not on a cycle because it has no outgoing edges; here it is reached after the A-B-A cycle. Witness vertices and cycle vertices are different notions.",
+      "transfer": "A vertex can be affected without improving in this exact final round. Why must the solver also follow outgoing paths from all witnesses?"
+    },
+    {
+      "id": "nw-disconnected",
+      "concept": "reading-results",
+      "prerequisites": [
+        "cycle-influence"
+      ],
+      "prompt": "The only edges are S → T (3), X → Y (−2), and Y → X (1). From source S, what should the final report say?",
+      "options": [
+        "S and T are finite at 0 and 3; X and Y are unreachable",
+        "Every vertex is unbounded-below",
+        "T is unbounded-below, while X and Y are finite",
+        "The report must reject the graph because it contains any negative cycle"
+      ],
+      "answer": 0,
+      "explanation": "There is no directed route from S into the X-Y component. Its negative cycle cannot occur on an S-to-T walk or on any walk from S. S and T therefore retain their finite distances; X and Y are unreachable from this source.",
+      "transfer": "Change the source to X. Which component becomes unbounded, and which vertices become unreachable?"
+    },
+    {
+      "id": "nw-zero-cycle",
+      "concept": "reading-results",
+      "prerequisites": [
+        "cycle-influence"
+      ],
+      "prompt": "Use source S and vertices S, A, B, T, U, X, Y. The only edges are S → A (2), A → B (−3), B → A (3), B → T (4), S → U (7), X → Y (−2), Y → X (1). What is T's final result from S?",
+      "options": [
+        "Unbounded-below because the graph still has a negative edge",
+        "Finite at 3 via S → A → B → T",
+        "Finite at −1 because two circuits are mandatory",
+        "Unreachable because zero-cost cycles forbid traversal"
+      ],
+      "answer": 1,
+      "explanation": "The A-B-A cycle now costs −3 + 3 = 0. Extra circuits do not lower the total. The route S → A → B → T costs 2 − 3 + 4 = 3 and is finite. The disconnected negative X-Y cycle remains unreachable from S. Strict improvement, not merely repeated traversal or a negative individual edge, matters.",
+      "transfer": "What result should an isolated source with a zero-weight self-loop receive?"
+    },
+    {
+      "id": "nw-source-return",
+      "concept": "reading-results",
+      "prerequisites": [
+        "cycle-influence"
+      ],
+      "prompt": "Use source S and vertices S, A, B, T, U, X, Y. The only edges are S → A (2), A → B (−3), B → A (1), B → T (4), S → U (7), X → Y (−2), Y → X (1), and B → S (0). What should the final result for S contain?",
+      "options": [
+        "Finite distance 0 because a source can never be affected",
+        "The last bounded-round number as its final optimum",
+        "Unbounded-below, with no finite distance or shortest route",
+        "Unreachable because it has an incoming edge"
+      ],
+      "answer": 2,
+      "explanation": "The source can enter a reachable negative cycle and now return to itself. For example S → A → B → S costs 2 − 3 + 0 = −1, so repeated circuits lower the S-to-S cost. The report must label S unbounded-below and withhold a finite optimum/route; a bounded-round estimate is only one walk's cost.",
+      "transfer": "S can still reach U along the edge of weight 7. After adding the return edge, why does U also become unbounded-below?"
+    }
+  ]
+}
