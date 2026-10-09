@@ -1,0 +1,299 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src 'none'; base-uri 'none'; form-action 'none'">
+<title>Majority vote · RecallWeave</title>
+<style>
+:root{color-scheme:light;--ink:#182c3c;--muted:#526370;--paper:#faf8f2;--line:#c8d1d5;--blue:#174c70;--warm:#8a3812;--soft:#edf3f5;--error:#9b2020}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:17px/1.55 system-ui,sans-serif}main{max-width:1160px;margin:auto;padding:32px 24px 48px}h1,h2,h3,p{margin-top:0}h1{font-size:clamp(2rem,5vw,3.5rem);line-height:1.1;letter-spacing:-.035em;margin-bottom:16px}h2{font-size:1.35rem}h3{font-size:1.08rem}.eyebrow{letter-spacing:.12em;text-transform:uppercase;font-size:.76rem;font-weight:750;color:var(--blue)}.intro{max-width:760px;color:var(--muted);font-size:1.12rem}.badge{display:inline-block;background:var(--soft);padding:5px 10px;border-radius:5px;font-size:.85rem}.two-pass{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:24px 0}.two-pass>div{border-top:4px solid var(--blue);padding:12px 16px;background:white}.two-pass>div+div{border-color:var(--warm)}.two-pass p{margin:0;font-size:.95rem}.work{display:grid;grid-template-columns:minmax(260px,.85fr) minmax(0,1.65fr);gap:24px;align-items:start}.panel{background:white;border:1px solid var(--line);border-radius:10px;padding:20px;min-width:0}label{display:block;font-weight:650;margin-bottom:5px}textarea{width:100%;min-height:235px;resize:vertical;font:16px/1.55 ui-monospace,monospace;white-space:pre;tab-size:2}textarea,select,button{border:1px solid #84949c;border-radius:5px;padding:10px;background:white;color:var(--ink);max-width:100%}button,select{font:inherit;min-height:44px}button{cursor:pointer;font-weight:650}button.primary{background:var(--blue);border-color:var(--blue);color:white}button:disabled,select:disabled{opacity:.5;cursor:default}button:hover:not(:disabled){filter:brightness(.93)}:focus-visible{outline:3px solid #bc6429;outline-offset:3px}[aria-invalid=true]{border:2px solid var(--error)}.help{font-size:.88rem;color:var(--muted);margin:8px 0 14px}.controls{display:flex;flex-wrap:wrap;gap:8px;align-items:end}.controls>*{min-width:0}.preset{margin-top:20px}.preset select{width:100%;margin-bottom:8px}.status{min-height:1.6em;margin:14px 0 0;color:var(--muted);overflow-wrap:anywhere}.status.error{color:var(--error)}.phase{font-size:1.15rem;font-weight:750;margin:16px 0 10px}.metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.metric{background:var(--soft);padding:12px;border-radius:5px;overflow-wrap:anywhere}.metric dt{font-size:.75rem;text-transform:uppercase;letter-spacing:.045em}.metric dd{margin:5px 0 0;font-size:1.1rem;font-weight:700;white-space:pre-wrap}.decision{border-left:4px solid var(--warm);padding:12px 14px;background:#fff3e9;min-height:3.6em;overflow-wrap:anywhere}.sequence{display:flex;flex-wrap:wrap;gap:7px;list-style:none;padding:0;counter-reset:position}.sequence li{counter-increment:position;background:var(--soft);border:1px solid var(--line);border-radius:4px;padding:6px 9px;font:14px ui-monospace,monospace;overflow-wrap:anywhere;max-width:100%;white-space:pre-wrap}.sequence li::before{content:counter(position) " · ";color:var(--muted)}.table-scroll{overflow:auto;max-height:360px;border:1px solid var(--line);border-radius:5px;margin-bottom:20px}table{border-collapse:collapse;width:100%;font-size:.88rem}th,td{text-align:left;padding:9px 11px;border-bottom:1px solid #dce3e6;vertical-align:top}th{background:var(--soft);position:sticky;top:0;font-size:.78rem}td{white-space:pre-wrap;overflow-wrap:anywhere;min-width:70px}.literal{font-family:ui-monospace,monospace}.downloads{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px}.foot{margin-top:30px;color:var(--muted);font-size:.86rem;max-width:850px}.phase-select{width:100%}.phase-select select{width:100%}@media(max-width:720px){main{padding:22px 14px}.work,.two-pass{grid-template-columns:1fr}.panel{padding:15px}.metrics{grid-template-columns:1fr}.metric{display:flex;gap:12px;align-items:baseline}.metric dt{min-width:110px}.metric dd{margin:0}.controls button{flex:1 1 120px}.two-pass{gap:8px}.intro{font-size:1rem}}@media print{body{font-size:11pt;background:white}main{max-width:none;padding:0}form,.controls,.phase-select,.downloads,.preset{display:none}.work{display:block}.panel{break-inside:avoid}.table-scroll{overflow:visible;max-height:none}.two-pass{display:block}.metric,.decision{background:white}th{position:static}}
+</style>
+</head>
+<body>
+<main>
+<header>
+<p class="eyebrow">RecallWeave · algorithms in two passes</p>
+<h1>Majority vote</h1>
+<p class="intro">Cancellation narrows the question to one candidate. A separate count decides whether that candidate appears <strong>more than half the time</strong>.</p>
+<span class="badge">Literal labels · local file · no saved browser state</span>
+</header>
+<div class="two-pass">
+<div><h2>1. Propose</h2><p>Different values cancel. The balance is a residue, not an occurrence count.</p></div>
+<div><h2>2. Verify</h2><p>Count the proposed value in the original input. Exactly half is not enough.</p></div>
+</div>
+<div class="work">
+<section class="panel" aria-labelledby="input-heading">
+<h2 id="input-heading">Your sequence</h2>
+<form id="sequence-form">
+<label for="values-input">One literal label per line</label>
+<textarea id="values-input" spellcheck="false" aria-describedby="input-help">cedar
+cedar
+birch
+cedar
+birch</textarea>
+<p class="help" id="input-help">0–40 entries; 1–48 UTF-16 units each. Spaces and case matter. Exactly empty input is valid; a blank row or trailing newline is not.</p>
+<button id="apply" class="primary" type="submit">Apply sequence</button>
+</form>
+<div class="preset">
+<label for="preset-select">Examples</label>
+<select id="preset-select"><option value="majority">A verified majority</option><option value="candidate">A candidate, no majority</option><option value="tie">Exactly half</option><option value="literal">Literal labels</option><option value="empty">Empty sequence</option></select>
+<button id="load-preset" type="button">Load example draft</button>
+</div>
+<p id="status" class="status" role="status" aria-live="polite">Draft only. Apply the sequence to begin.</p>
+</section>
+<section class="panel" aria-labelledby="trace-heading">
+<h2 id="trace-heading">Inspect the applied trace</h2>
+<div class="phase-select"><label for="phase-index">Phase</label><select id="phase-index" disabled><option>No applied trace</option></select></div>
+<p id="phase-label" class="phase">No applied trace</p>
+<div class="controls" aria-label="Trace navigation"><button id="first" disabled>First</button><button id="previous" disabled>Previous</button><button id="next" disabled>Next</button><button id="last" disabled>Last</button></div>
+<dl class="metrics">
+<div class="metric"><dt>Stored candidate</dt><dd id="candidate">— none —</dd></div>
+<div class="metric"><dt>Balance</dt><dd id="balance">—</dd></div>
+<div class="metric"><dt>Verified count</dt><dd id="verified-count">Not started</dd></div>
+</dl>
+<p id="decision" class="decision">Apply a sequence. A stored candidate is not a majority decision.</p>
+<h3>Applied input</h3><ol id="sequence" class="sequence" aria-label="Applied values in occurrence order"></ol>
+<h3>Cancellation history</h3>
+<div class="table-scroll" role="region" aria-label="Cancellation history table" tabindex="0"><table><thead><tr><th>Position</th><th>Value</th><th>Action</th><th>Stored candidate</th><th>Balance</th></tr></thead><tbody id="cancellation-rows"></tbody></table></div>
+<h3>Verification history</h3>
+<div class="table-scroll" role="region" aria-label="Verification history table" tabindex="0"><table><thead><tr><th>Position</th><th>Value</th><th>Matches candidate?</th><th>Matches so far</th></tr></thead><tbody id="verification-rows"></tbody></table></div>
+</section>
+</div>
+<div class="downloads" aria-label="Local downloads"><button id="download-observation" disabled>Download observation</button><button id="download-course">Download lesson</button><button id="download-guide">Download guide</button></div>
+<p class="foot">Boyer–Moore majority vote, distinct from their string-search algorithm. The scan uses constant working registers; this explorer stores the sequence and snapshots for inspection, so its trace storage grows with input length. Downloaded observations are records of this demonstration, not authority over an external vote. Import the downloaded lesson into the unchanged RecallWeave learner supplied with this package.</p>
+</main>
+<script id="lesson-assets" type="application/json">{"course":"{\n  \"format\": \"recallweave-deck/1\",\n  \"title\": \"Majority vote: propose, then verify\",\n  \"attribution\": \"Original lesson, examples and implementation for RecallWeave. Algorithm: Boyer–Moore majority vote, introduced by Robert S. Boyer and J Strother Moore. Primary references: https://www.cs.utexas.edu/~moore/best-ideas/mjrty/index.html and https://www.cs.utexas.edu/~boyer/ftp/ics-reports/cmp32.pdf . This is distinct from the Boyer–Moore string-search algorithm.\",\n  \"license\": \"Original lesson content provided for use, modification and redistribution under CC BY 4.0. The cited papers retain their own rights; no paper text or examples are reproduced.\",\n  \"concepts\": [\n    \"strict-majority\",\n    \"cancellation\",\n    \"verification\",\n    \"invariants\"\n  ],\n  \"items\": [\n    {\n      \"id\": \"majority-01\",\n      \"concept\": \"strict-majority\",\n      \"prerequisites\": [],\n      \"prompt\": \"A sequence has six entries. What is the smallest occurrence count that makes one literal value a strict majority?\",\n      \"options\": [\n        \"Three\",\n        \"Four\",\n        \"Five\",\n        \"Six\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"A strict majority is more than half of all entries. Half of six is three, so the smallest qualifying integer count is four. Being tied with the rest is insufficient.\",\n      \"transfer\": \"For eleven entries, compute floor(11 / 2) + 1. Then distinguish that threshold from the largest observed count.\"\n    },\n    {\n      \"id\": \"majority-02\",\n      \"concept\": \"strict-majority\",\n      \"prerequisites\": [],\n      \"prompt\": \"In an eight-entry sequence, one value occurs three times and every other value occurs fewer times. What follows?\",\n      \"options\": [\n        \"It is a strict majority because it occurs most often\",\n        \"It is a strict majority only if it appears first\",\n        \"It has the largest count, but it is not a strict majority\",\n        \"The sequence must have two strict majorities\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"Three is the largest individual count in this example, but it is below the strict-majority threshold of five for eight entries. A most frequent value need not outnumber all other entries combined.\",\n      \"transfer\": \"Construct a sequence with one most frequent value but no strict majority. Check its largest count against n / 2.\"\n    },\n    {\n      \"id\": \"majority-03\",\n      \"concept\": \"strict-majority\",\n      \"prerequisites\": [],\n      \"prompt\": \"What should this lab report for an empty input sequence?\",\n      \"options\": [\n        \"No strict majority and no proposed candidate\",\n        \"A strict majority with zero occurrences\",\n        \"The first preset's candidate\",\n        \"An input error because zero entries cannot be compared\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"An empty sequence proposes no candidate and has no strict majority. The threshold formula gives one, but no value occurs even once. Empty input is an ordinary result in this lab.\",\n      \"transfer\": \"Compare empty input with a one-entry sequence. The first has no candidate; the second necessarily has a strict majority.\"\n    },\n    {\n      \"id\": \"majority-04\",\n      \"concept\": \"cancellation\",\n      \"prerequisites\": [\n        \"strict-majority\"\n      ],\n      \"prompt\": \"Start with balance zero and process A, B, B. When the balance is zero, the next value becomes the stored candidate with balance one. What is the final stored candidate and balance?\",\n      \"options\": [\n        \"A with balance one\",\n        \"B with balance two\",\n        \"A with balance zero\",\n        \"B with balance one\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"A chooses A with balance one. B differs and reduces the balance to zero, leaving A stored but inactive. The final B then chooses B with balance one.\",\n      \"transfer\": \"Trace P, Q, Q, P by hand. Keep the stored candidate visible when the balance reaches zero.\"\n    },\n    {\n      \"id\": \"majority-05\",\n      \"concept\": \"cancellation\",\n      \"prerequisites\": [\n        \"strict-majority\"\n      ],\n      \"prompt\": \"After processing an entry, balance becomes zero while the register still stores P. The next entry is Q. What does the next cancellation step do?\",\n      \"options\": [\n        \"Refuse Q because P is still stored\",\n        \"Choose Q as the candidate and set balance to one\",\n        \"Keep P and decrement balance to minus one\",\n        \"Count all previous Q entries immediately\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"A zero balance means the stored label has no active residue. The next occurrence replaces that register and starts a new balance of one. Retaining P in the register at zero does not give P authority over the next step.\",\n      \"transfer\": \"Pause a trace at balance zero. Predict which label the next occurrence will choose before advancing.\"\n    },\n    {\n      \"id\": \"majority-06\",\n      \"concept\": \"cancellation\",\n      \"prerequisites\": [\n        \"strict-majority\"\n      ],\n      \"prompt\": \"Process A, A, B, A, B using the stated cancellation rules. A occurs three times. What is the final balance, and what does it represent?\",\n      \"options\": [\n        \"Three; the total occurrence count of A\",\n        \"Two; the number of distinct labels\",\n        \"One; a cancellation balance rather than A's total frequency\",\n        \"Five; the number of processed entries\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"The balances are one, two, one, two, one. The final balance is one even though A occurs three times. Balance records the uncanceled residue of the first pass; verification counts actual occurrences in the original sequence.\",\n      \"transfer\": \"Find two sequences with the same final balance but different candidate frequencies. Use verification to separate them.\"\n    },\n    {\n      \"id\": \"majority-07\",\n      \"concept\": \"verification\",\n      \"prerequisites\": [\n        \"cancellation\"\n      ],\n      \"prompt\": \"The sequence red, blue, green leaves green as the stored candidate with balance one. What does the separate verification pass conclude?\",\n      \"options\": [\n        \"Green is a strict majority because its final balance is positive\",\n        \"No strict majority: green occurs once out of three entries\",\n        \"Blue is a strict majority because it canceled red\",\n        \"The final candidate cannot be checked without rerunning a model\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"The first two different entries cancel, and green becomes the final candidate. Verification finds only one green among three entries, below the required count of two. A positive cancellation balance alone does not prove a majority.\",\n      \"transfer\": \"Try three different labels. Inspect the proposed candidate and wait for the second pass before deciding.\"\n    },\n    {\n      \"id\": \"majority-08\",\n      \"concept\": \"verification\",\n      \"prerequisites\": [\n        \"cancellation\"\n      ],\n      \"prompt\": \"The sequence R, R, S leaves R as the candidate. Verification counts two R entries. Which decision is correct?\",\n      \"options\": [\n        \"R is a strict majority because two is greater than three divided by two\",\n        \"R is not a majority because its cancellation balance is only one\",\n        \"R is a majority only if the input is sorted first\",\n        \"S is the majority because it was processed last\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"Verification finds two R entries out of three. Since two is strictly greater than one and a half, R passes. The cancellation balance and the frequency count answer different questions.\",\n      \"transfer\": \"For a verified candidate count c in a sequence of length n, decide using c > n / 2 rather than the first-pass balance.\"\n    },\n    {\n      \"id\": \"majority-09\",\n      \"concept\": \"verification\",\n      \"prerequisites\": [\n        \"cancellation\"\n      ],\n      \"prompt\": \"A candidate appears exactly four times in an eight-entry sequence. What should the final decision be?\",\n      \"options\": [\n        \"Verified strict majority\",\n        \"Verified strict majority if the candidate register is nonempty\",\n        \"Insufficient source identity to decide\",\n        \"No strict majority: exactly half does not satisfy more than half\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"A count of four among eight is exactly half. Strict majority requires at least five. The candidate can be perfectly well defined while the final decision is no majority.\",\n      \"transfer\": \"For an even-length sequence, build an exact-half tie and check that the final decision refuses a strict majority.\"\n    },\n    {\n      \"id\": \"majority-10\",\n      \"concept\": \"invariants\",\n      \"prerequisites\": [\n        \"verification\"\n      ],\n      \"prompt\": \"Why does canceling pairs of different values preserve the ability to identify an existing strict majority?\",\n      \"options\": [\n        \"Every canceled pair must contain two copies of the majority\",\n        \"Cancellation sorts all remaining values by frequency\",\n        \"A different pair removes either one majority occurrence and one other occurrence, or zero majority occurrences and two other occurrences, so cancellation cannot eliminate a value that originally outnumbered all other entries combined\",\n        \"Cancellation guarantees that every surviving candidate was originally a strict majority\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"Remove a pair of different values. If one is the majority value, one other value also disappears, preserving the majority’s numerical advantage. If neither is the majority value, its advantage increases. Repeating this cannot eliminate an original strict majority. The converse fails: a residue can remain even when no majority existed.\",\n      \"transfer\": \"Explain why the preservation argument runs from an existing majority to the final candidate, not from every final candidate to an existing majority.\"\n    },\n    {\n      \"id\": \"majority-11\",\n      \"concept\": \"invariants\",\n      \"prerequisites\": [\n        \"verification\"\n      ],\n      \"prompt\": \"This lab preserves exact labels. Its input is the three strings \\\"m\\\", \\\"M\\\" and \\\"m \\\" (the last has a trailing space). Which statement is correct?\",\n      \"options\": [\n        \"All three are equal after automatic normalization\",\n        \"They are three distinct labels, so there is no strict majority\",\n        \"The two lowercase labels are automatically merged\",\n        \"Only the shortest label is eligible to be the candidate\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"JavaScript string equality here compares the literal strings without trimming, case folding or Unicode normalization. The three labels differ. Each occurs once, so none reaches the strict-majority threshold of two.\",\n      \"transfer\": \"Try labels that differ only by a trailing space or by composed versus decomposed Unicode. They remain different unless their actual strings are equal.\"\n    },\n    {\n      \"id\": \"majority-12\",\n      \"concept\": \"invariants\",\n      \"prerequisites\": [\n        \"verification\"\n      ],\n      \"prompt\": \"The underlying two-pass algorithm can keep only a candidate and counters. This explorer also keeps the input and every step snapshot. Which storage statement is accurate?\",\n      \"options\": [\n        \"The explorer stores no sequence because the algorithm uses counters\",\n        \"Every implementation must store a frequency map for all values\",\n        \"The explorer has constant total storage regardless of input length\",\n        \"The underlying scan uses constant working state, while this recorded teaching trace uses storage that grows with the input\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"The underlying algorithm scans with a candidate and counters, then verifies with another count. The explorer deliberately retains the input and two sequences of snapshots so you can inspect its history. That teaching record grows linearly with the number of entries.\",\n      \"transfer\": \"When evaluating a space claim, separate the scan’s working registers from input storage, output traces and a verification pass that needs the input again.\"\n    }\n  ]\n}\n","guide":"# Majority vote: propose, then verify\n\nOpen `majority-vote-explorer.html` in a modern browser. Everything needed by the explorer is inside that file. It makes no network requests and does not save browser state.\n\nEnter one literal label per line and choose **Apply sequence**. Exactly empty input is allowed; a blank row inside a nonempty sequence is not. Labels are never trimmed, case-folded or normalized. The limits are 40 entries and 48 UTF-16 code units per label. A trailing newline introduces a blank row and is refused. Quoted label displays expose spaces and control characters without changing the values.\n\n## Follow two different passes\n\n**Cancellation proposes a candidate.** Begin with balance zero. At zero, choose the next value and set balance to one. Otherwise increment for an equal value, or decrement for a different value. When balance reaches zero, the register still displays its last label, but it has no active residue. The next value will replace it.\n\n**Verification decides strict majority.** Count the proposed label throughout the original input. It is a strict majority only if its count is greater than half the number of entries. Exactly half is insufficient. An empty sequence has no candidate and no majority.\n\nThe phase control moves through cancellation first, then verification. At the end of cancellation, the candidate is explicitly unverified. The final majority decision appears only after the complete verification pass. Navigation only changes what you inspect. Editing the input or loading a preset retires the old applied trace; press Apply again.\n\nTry these original examples:\n\n- `cedar, cedar, birch, cedar, birch` has candidate cedar, cancellation balance 1 and verified count 3 out of 5.\n- `red, blue, green` leaves a candidate but no strict majority.\n- `m, M, m ` contains three distinct literal labels, including a trailing space on the last one.\n\nThese comma-separated examples describe sequences; use a separate line for each label in the explorer.\n\n## Why cancellation helps, and what it does not prove\n\nCanceling a pair of different values removes either one occurrence of an existing strict majority and one other occurrence, or no majority occurrence and two other occurrences. It cannot allow the other values, taken together, to eliminate a value that originally outnumbered them. If a strict majority exists, it must therefore be the final candidate.\n\nThat statement has a direction: it does not say every final candidate is a majority. Three distinct labels supply an immediate counterexample. The second pass is needed when the existence of a majority was not guaranteed beforehand. The final balance is not the candidate's frequency.\n\nThe underlying scan keeps a candidate and counters, followed by a verification count: linear scans and constant working state. This explorer deliberately stores input and every snapshot, so its teaching trace uses linear storage. It does not demonstrate a one-pass exact decision for an unreplayable stream, measure performance, or confer authority over an election or other external record.\n\n## Keep a particular observation\n\n**Download observation** writes `majority-vote-observation.json` with the exact applied textarea string, selected phase and complete immutable trace. It contains no timestamps or inferred source identity. Editing a draft disables that download until another successful Apply.\n\n**Download lesson** writes the original `majority-vote.json` course. Open the unchanged RecallWeave learner supplied beside this explorer, choose the lesson file, inspect the preview and explicitly start it. The twelve questions cover strict majority, cancellation, verification and the invariant. Learner answers and study notes are separate from the explorer's trace.\n\n**Download guide** writes this exact document. Closing the page loses its current draft and applied trace unless you explicitly downloaded an observation. There is no observation importer.\n\n## References and scope\n\nAlgorithm: Boyer–Moore majority vote, distinct from their string-search algorithm.\n\n- Robert S. Boyer and J Strother Moore, algorithm overview: https://www.cs.utexas.edu/~moore/best-ideas/mjrty/index.html\n- Boyer and Moore, *A Fast Majority Vote Algorithm*, technical report: https://www.cs.utexas.edu/~boyer/ftp/ics-reports/cmp32.pdf\n\nThis lesson uses original prose, questions, examples and code. The references supply the algorithm and proof basis; their examples and text are not reproduced.\n"}</script>
+<script type="module">
+/** Boyer–Moore cancellation followed by an explicit strict-majority count.
+ * Labels use literal JavaScript string equality. This teaching trace retains O(n) snapshots.
+ */
+function admit(values) {
+  if (!Array.isArray(values)) throw new TypeError('Values must be an array.');
+  if (values.length > 40) throw new RangeError('Use at most 40 values.');
+  const copy = [];
+  for (let i = 0; i < values.length; i++) {
+    if (!Object.hasOwn(values, i)) throw new TypeError('The sequence must not contain missing entries.');
+    const value = values[i];
+    if (typeof value !== 'string') throw new TypeError('Every value must be a literal string.');
+    if (!value.length || value.length > 48 || !value.trim() || /[\r\n]/u.test(value)) {
+      throw new RangeError('Each value must contain 1–48 UTF-16 units, some non-whitespace text, and no line break.');
+    }
+    copy.push(value);
+  }
+  return copy;
+}
+
+function freeze(value) {
+  if (value && typeof value === 'object') {
+    for (const item of Object.values(value)) freeze(item);
+    Object.freeze(value);
+  }
+  return value;
+}
+
+export function parseMajorityLines(text) {
+  if (typeof text !== 'string') throw new TypeError('The input must be text.');
+  if (text.length > 4096) throw new RangeError('Use at most 4096 UTF-16 units of input.');
+  return Object.freeze(admit(text === '' ? [] : text.split(/\r\n|\r|\n/u)));
+}
+
+export function traceMajority(values) {
+  const labels = admit(values);
+  let candidate = null;
+  let balance = 0;
+  const cancellation = [{ position: 0, candidate, balance, action: 'initial', lastValue: null }];
+  for (let i = 0; i < labels.length; i++) {
+    const value = labels[i];
+    let action;
+    if (balance === 0) {
+      candidate = value;
+      balance = 1;
+      action = 'choose';
+    } else if (value === candidate) {
+      balance++;
+      action = 'increment';
+    } else {
+      balance--;
+      action = 'decrement';
+    }
+    cancellation.push({ position: i + 1, candidate, balance, action, lastValue: value });
+  }
+  let matches = 0;
+  const verification = [{ position: 0, matches, lastValue: null, matched: null }];
+  for (let i = 0; i < labels.length; i++) {
+    const matched = labels[i] === candidate;
+    if (matched) matches++;
+    verification.push({ position: i + 1, matches, lastValue: labels[i], matched });
+  }
+  const hasMajority = labels.length > 0 && matches > labels.length / 2;
+  return freeze({
+    schema: 'recallweave-majority-vote/1',
+    values: labels, cancellation, candidate, balance, verification,
+    candidateCount: matches,
+    threshold: Math.floor(labels.length / 2) + 1,
+    hasMajority,
+    majority: hasMajority ? candidate : null
+  });
+}
+
+
+const $ = id => document.getElementById(id);
+const assets = JSON.parse($('lesson-assets').textContent);
+const presets = Object.freeze({
+  majority: 'cedar\ncedar\nbirch\ncedar\nbirch',
+  candidate: 'red\nblue\ngreen',
+  tie: 'north\nsouth\nnorth\nsouth',
+  literal: 'm\nM\nm ',
+  empty: ''
+});
+let applied = null;
+let phaseIndex = 0;
+const literal = value => value === null ? '— none —' : JSON.stringify(value);
+
+function announce(text, error = false) {
+  $('status').textContent = text;
+  $('status').classList.toggle('error', error);
+}
+
+function clearApplied() {
+  applied = null;
+  phaseIndex = 0;
+  $('phase-index').replaceChildren(new Option('No applied trace', ''));
+  $('phase-index').disabled = true;
+  $('phase-label').textContent = 'No applied trace';
+  for (const id of ['first', 'previous', 'next', 'last', 'download-observation']) $(id).disabled = true;
+  $('candidate').textContent = '— none —';
+  $('balance').textContent = '—';
+  $('verified-count').textContent = 'Not started';
+  $('decision').textContent = 'Apply a sequence. A stored candidate is not a majority decision.';
+  for (const id of ['sequence', 'cancellation-rows', 'verification-rows']) $(id).replaceChildren();
+}
+
+function phaseName(index, n) {
+  if (n === 0) return 'Final · empty sequence · no strict majority';
+  if (index < n) return 'Cancellation · ' + index + ' / ' + n;
+  if (index === n) return 'Candidate proposed · verification 0 / ' + n;
+  if (index === 2 * n) return 'Final · verification ' + n + ' / ' + n;
+  return 'Verification · ' + (index - n) + ' / ' + n;
+}
+
+function row(body, values) {
+  const tr = document.createElement('tr');
+  values.forEach(value => {
+    const td = document.createElement('td');
+    td.textContent = String(value);
+    tr.append(td);
+  });
+  body.append(tr);
+}
+
+function render() {
+  const { trace } = applied;
+  const n = trace.values.length;
+  const cancel = trace.cancellation[Math.min(phaseIndex, n)];
+  const verifying = phaseIndex >= n;
+  const count = verifying ? trace.verification[Math.max(0, phaseIndex - n)].matches : null;
+  const final = phaseIndex === 2 * n;
+  $('phase-index').value = String(phaseIndex);
+  $('phase-label').textContent = phaseName(phaseIndex, n);
+  $('first').disabled = $('previous').disabled = phaseIndex === 0;
+  $('last').disabled = $('next').disabled = final;
+  $('candidate').textContent = literal(cancel.candidate);
+  $('balance').textContent = String(cancel.balance);
+  $('verified-count').textContent = count === null ? 'Not started' : count + ' / ' + n;
+  if (final) {
+    $('decision').textContent = n === 0
+      ? 'No strict majority. Empty input has no proposed candidate.'
+      : trace.hasMajority
+        ? 'Verified strict majority: ' + literal(trace.majority) + ' occurs ' + trace.candidateCount + ' of ' + n + ' times (requires at least ' + trace.threshold + ').'
+        : 'No strict majority. The proposed candidate ' + literal(trace.candidate) + ' occurs ' + trace.candidateCount + ' of ' + n + ' times (requires at least ' + trace.threshold + ').';
+  } else if (verifying) {
+    $('decision').textContent = 'Unverified proposal: ' + literal(trace.candidate) + '. Count the whole sequence before deciding.';
+  } else {
+    $('decision').textContent = cancel.balance === 0
+      ? 'Cancellation in progress. Balance zero means no active residue; the stored label, if any, is inactive.'
+      : 'Cancellation in progress. A positive balance is not a frequency count or a majority decision.';
+  }
+  $('cancellation-rows').replaceChildren();
+  for (const step of trace.cancellation.slice(0, Math.min(phaseIndex, n) + 1)) {
+    row($('cancellation-rows'), [step.position, literal(step.lastValue), step.action, literal(step.candidate), step.balance]);
+  }
+  $('verification-rows').replaceChildren();
+  if (verifying) {
+    for (const step of trace.verification.slice(0, Math.max(0, phaseIndex - n) + 1)) {
+      row($('verification-rows'), [step.position, literal(step.lastValue), step.matched === null ? '— none —' : step.matched ? 'Yes' : 'No', step.matches]);
+    }
+  }
+}
+
+$('sequence-form').addEventListener('submit', event => {
+  event.preventDefault();
+  clearApplied();
+  const rawText = $('values-input').value;
+  try {
+    const trace = traceMajority(parseMajorityLines(rawText));
+    applied = Object.freeze({ rawText, trace });
+    $('values-input').removeAttribute('aria-invalid');
+    const n = trace.values.length;
+    $('phase-index').replaceChildren();
+    for (let i = 0; i <= 2 * n; i++) $('phase-index').append(new Option(phaseName(i, n), String(i)));
+    $('phase-index').disabled = false;
+    $('download-observation').disabled = false;
+    for (const value of trace.values) {
+      const li = document.createElement('li');
+      li.textContent = literal(value);
+      $('sequence').append(li);
+    }
+    render();
+    announce('Applied ' + n + ' literal values. ' + (n === 0 ? 'Empty input has no strict majority.' : 'Begin with cancellation; verify the proposed candidate afterward.'));
+  } catch (error) {
+    $('values-input').setAttribute('aria-invalid', 'true');
+    $('values-input').focus();
+    announce(error.message, true);
+  }
+});
+
+$('values-input').addEventListener('input', () => {
+  clearApplied();
+  $('values-input').removeAttribute('aria-invalid');
+  announce('Draft changed. Apply the sequence to create a new trace.');
+});
+$('load-preset').addEventListener('click', () => {
+  $('values-input').value = presets[$('preset-select').value];
+  clearApplied();
+  $('values-input').removeAttribute('aria-invalid');
+  announce('Example loaded as a draft. Apply the sequence to begin.');
+});
+function go(index) {
+  if (!applied) return;
+  phaseIndex = Math.max(0, Math.min(2 * applied.trace.values.length, index));
+  render();
+}
+$('first').addEventListener('click', () => go(0));
+$('previous').addEventListener('click', () => go(phaseIndex - 1));
+$('next').addEventListener('click', () => go(phaseIndex + 1));
+$('last').addEventListener('click', () => { if (applied) go(2 * applied.trace.values.length); });
+$('phase-index').addEventListener('change', () => go(Number($('phase-index').value)));
+
+function download(name, type, text) {
+  const url = URL.createObjectURL(new Blob([text], { type }));
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = name;
+  document.body.append(link);
+  link.click();
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+$('download-observation').addEventListener('click', () => {
+  if (!applied) return;
+  const observation = { schema: 'recallweave-majority-observation/1', rawText: applied.rawText, phaseIndex, trace: applied.trace };
+  download('majority-vote-observation.json', 'application/json;charset=utf-8', JSON.stringify(observation, null, 2) + '\n');
+});
+$('download-course').addEventListener('click', () => download('majority-vote.json', 'application/json;charset=utf-8', assets.course));
+$('download-guide').addEventListener('click', () => download('majority-vote.md', 'text/markdown;charset=utf-8', assets.guide));
+
+</script>
+</body>
+</html>

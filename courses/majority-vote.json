@@ -1,0 +1,212 @@
+{
+  "format": "recallweave-deck/1",
+  "title": "Majority vote: propose, then verify",
+  "attribution": "Original lesson, examples and implementation for RecallWeave. Algorithm: Boyer–Moore majority vote, introduced by Robert S. Boyer and J Strother Moore. Primary references: https://www.cs.utexas.edu/~moore/best-ideas/mjrty/index.html and https://www.cs.utexas.edu/~boyer/ftp/ics-reports/cmp32.pdf . This is distinct from the Boyer–Moore string-search algorithm.",
+  "license": "Original lesson content provided for use, modification and redistribution under CC BY 4.0. The cited papers retain their own rights; no paper text or examples are reproduced.",
+  "concepts": [
+    "strict-majority",
+    "cancellation",
+    "verification",
+    "invariants"
+  ],
+  "items": [
+    {
+      "id": "majority-01",
+      "concept": "strict-majority",
+      "prerequisites": [],
+      "prompt": "A sequence has six entries. What is the smallest occurrence count that makes one literal value a strict majority?",
+      "options": [
+        "Three",
+        "Four",
+        "Five",
+        "Six"
+      ],
+      "answer": 1,
+      "explanation": "A strict majority is more than half of all entries. Half of six is three, so the smallest qualifying integer count is four. Being tied with the rest is insufficient.",
+      "transfer": "For eleven entries, compute floor(11 / 2) + 1. Then distinguish that threshold from the largest observed count."
+    },
+    {
+      "id": "majority-02",
+      "concept": "strict-majority",
+      "prerequisites": [],
+      "prompt": "In an eight-entry sequence, one value occurs three times and every other value occurs fewer times. What follows?",
+      "options": [
+        "It is a strict majority because it occurs most often",
+        "It is a strict majority only if it appears first",
+        "It has the largest count, but it is not a strict majority",
+        "The sequence must have two strict majorities"
+      ],
+      "answer": 2,
+      "explanation": "Three is the largest individual count in this example, but it is below the strict-majority threshold of five for eight entries. A most frequent value need not outnumber all other entries combined.",
+      "transfer": "Construct a sequence with one most frequent value but no strict majority. Check its largest count against n / 2."
+    },
+    {
+      "id": "majority-03",
+      "concept": "strict-majority",
+      "prerequisites": [],
+      "prompt": "What should this lab report for an empty input sequence?",
+      "options": [
+        "No strict majority and no proposed candidate",
+        "A strict majority with zero occurrences",
+        "The first preset's candidate",
+        "An input error because zero entries cannot be compared"
+      ],
+      "answer": 0,
+      "explanation": "An empty sequence proposes no candidate and has no strict majority. The threshold formula gives one, but no value occurs even once. Empty input is an ordinary result in this lab.",
+      "transfer": "Compare empty input with a one-entry sequence. The first has no candidate; the second necessarily has a strict majority."
+    },
+    {
+      "id": "majority-04",
+      "concept": "cancellation",
+      "prerequisites": [
+        "strict-majority"
+      ],
+      "prompt": "Start with balance zero and process A, B, B. When the balance is zero, the next value becomes the stored candidate with balance one. What is the final stored candidate and balance?",
+      "options": [
+        "A with balance one",
+        "B with balance two",
+        "A with balance zero",
+        "B with balance one"
+      ],
+      "answer": 3,
+      "explanation": "A chooses A with balance one. B differs and reduces the balance to zero, leaving A stored but inactive. The final B then chooses B with balance one.",
+      "transfer": "Trace P, Q, Q, P by hand. Keep the stored candidate visible when the balance reaches zero."
+    },
+    {
+      "id": "majority-05",
+      "concept": "cancellation",
+      "prerequisites": [
+        "strict-majority"
+      ],
+      "prompt": "After processing an entry, balance becomes zero while the register still stores P. The next entry is Q. What does the next cancellation step do?",
+      "options": [
+        "Refuse Q because P is still stored",
+        "Choose Q as the candidate and set balance to one",
+        "Keep P and decrement balance to minus one",
+        "Count all previous Q entries immediately"
+      ],
+      "answer": 1,
+      "explanation": "A zero balance means the stored label has no active residue. The next occurrence replaces that register and starts a new balance of one. Retaining P in the register at zero does not give P authority over the next step.",
+      "transfer": "Pause a trace at balance zero. Predict which label the next occurrence will choose before advancing."
+    },
+    {
+      "id": "majority-06",
+      "concept": "cancellation",
+      "prerequisites": [
+        "strict-majority"
+      ],
+      "prompt": "Process A, A, B, A, B using the stated cancellation rules. A occurs three times. What is the final balance, and what does it represent?",
+      "options": [
+        "Three; the total occurrence count of A",
+        "Two; the number of distinct labels",
+        "One; a cancellation balance rather than A's total frequency",
+        "Five; the number of processed entries"
+      ],
+      "answer": 2,
+      "explanation": "The balances are one, two, one, two, one. The final balance is one even though A occurs three times. Balance records the uncanceled residue of the first pass; verification counts actual occurrences in the original sequence.",
+      "transfer": "Find two sequences with the same final balance but different candidate frequencies. Use verification to separate them."
+    },
+    {
+      "id": "majority-07",
+      "concept": "verification",
+      "prerequisites": [
+        "cancellation"
+      ],
+      "prompt": "The sequence red, blue, green leaves green as the stored candidate with balance one. What does the separate verification pass conclude?",
+      "options": [
+        "Green is a strict majority because its final balance is positive",
+        "No strict majority: green occurs once out of three entries",
+        "Blue is a strict majority because it canceled red",
+        "The final candidate cannot be checked without rerunning a model"
+      ],
+      "answer": 1,
+      "explanation": "The first two different entries cancel, and green becomes the final candidate. Verification finds only one green among three entries, below the required count of two. A positive cancellation balance alone does not prove a majority.",
+      "transfer": "Try three different labels. Inspect the proposed candidate and wait for the second pass before deciding."
+    },
+    {
+      "id": "majority-08",
+      "concept": "verification",
+      "prerequisites": [
+        "cancellation"
+      ],
+      "prompt": "The sequence R, R, S leaves R as the candidate. Verification counts two R entries. Which decision is correct?",
+      "options": [
+        "R is a strict majority because two is greater than three divided by two",
+        "R is not a majority because its cancellation balance is only one",
+        "R is a majority only if the input is sorted first",
+        "S is the majority because it was processed last"
+      ],
+      "answer": 0,
+      "explanation": "Verification finds two R entries out of three. Since two is strictly greater than one and a half, R passes. The cancellation balance and the frequency count answer different questions.",
+      "transfer": "For a verified candidate count c in a sequence of length n, decide using c > n / 2 rather than the first-pass balance."
+    },
+    {
+      "id": "majority-09",
+      "concept": "verification",
+      "prerequisites": [
+        "cancellation"
+      ],
+      "prompt": "A candidate appears exactly four times in an eight-entry sequence. What should the final decision be?",
+      "options": [
+        "Verified strict majority",
+        "Verified strict majority if the candidate register is nonempty",
+        "Insufficient source identity to decide",
+        "No strict majority: exactly half does not satisfy more than half"
+      ],
+      "answer": 3,
+      "explanation": "A count of four among eight is exactly half. Strict majority requires at least five. The candidate can be perfectly well defined while the final decision is no majority.",
+      "transfer": "For an even-length sequence, build an exact-half tie and check that the final decision refuses a strict majority."
+    },
+    {
+      "id": "majority-10",
+      "concept": "invariants",
+      "prerequisites": [
+        "verification"
+      ],
+      "prompt": "Why does canceling pairs of different values preserve the ability to identify an existing strict majority?",
+      "options": [
+        "Every canceled pair must contain two copies of the majority",
+        "Cancellation sorts all remaining values by frequency",
+        "A different pair removes either one majority occurrence and one other occurrence, or zero majority occurrences and two other occurrences, so cancellation cannot eliminate a value that originally outnumbered all other entries combined",
+        "Cancellation guarantees that every surviving candidate was originally a strict majority"
+      ],
+      "answer": 2,
+      "explanation": "Remove a pair of different values. If one is the majority value, one other value also disappears, preserving the majority’s numerical advantage. If neither is the majority value, its advantage increases. Repeating this cannot eliminate an original strict majority. The converse fails: a residue can remain even when no majority existed.",
+      "transfer": "Explain why the preservation argument runs from an existing majority to the final candidate, not from every final candidate to an existing majority."
+    },
+    {
+      "id": "majority-11",
+      "concept": "invariants",
+      "prerequisites": [
+        "verification"
+      ],
+      "prompt": "This lab preserves exact labels. Its input is the three strings \"m\", \"M\" and \"m \" (the last has a trailing space). Which statement is correct?",
+      "options": [
+        "All three are equal after automatic normalization",
+        "They are three distinct labels, so there is no strict majority",
+        "The two lowercase labels are automatically merged",
+        "Only the shortest label is eligible to be the candidate"
+      ],
+      "answer": 1,
+      "explanation": "JavaScript string equality here compares the literal strings without trimming, case folding or Unicode normalization. The three labels differ. Each occurs once, so none reaches the strict-majority threshold of two.",
+      "transfer": "Try labels that differ only by a trailing space or by composed versus decomposed Unicode. They remain different unless their actual strings are equal."
+    },
+    {
+      "id": "majority-12",
+      "concept": "invariants",
+      "prerequisites": [
+        "verification"
+      ],
+      "prompt": "The underlying two-pass algorithm can keep only a candidate and counters. This explorer also keeps the input and every step snapshot. Which storage statement is accurate?",
+      "options": [
+        "The explorer stores no sequence because the algorithm uses counters",
+        "Every implementation must store a frequency map for all values",
+        "The explorer has constant total storage regardless of input length",
+        "The underlying scan uses constant working state, while this recorded teaching trace uses storage that grows with the input"
+      ],
+      "answer": 3,
+      "explanation": "The underlying algorithm scans with a candidate and counters, then verifies with another count. The explorer deliberately retains the input and two sequences of snapshots so you can inspect its history. That teaching record grows linearly with the number of entries.",
+      "transfer": "When evaluating a space claim, separate the scan’s working registers from input storage, output traces and a verification pass that needs the input again."
+    }
+  ]
+}

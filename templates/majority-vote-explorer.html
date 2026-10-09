@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src 'none'; base-uri 'none'; form-action 'none'">
+<title>Majority vote · RecallWeave</title>
+<style>
+:root{color-scheme:light;--ink:#182c3c;--muted:#526370;--paper:#faf8f2;--line:#c8d1d5;--blue:#174c70;--warm:#8a3812;--soft:#edf3f5;--error:#9b2020}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:17px/1.55 system-ui,sans-serif}main{max-width:1160px;margin:auto;padding:32px 24px 48px}h1,h2,h3,p{margin-top:0}h1{font-size:clamp(2rem,5vw,3.5rem);line-height:1.1;letter-spacing:-.035em;margin-bottom:16px}h2{font-size:1.35rem}h3{font-size:1.08rem}.eyebrow{letter-spacing:.12em;text-transform:uppercase;font-size:.76rem;font-weight:750;color:var(--blue)}.intro{max-width:760px;color:var(--muted);font-size:1.12rem}.badge{display:inline-block;background:var(--soft);padding:5px 10px;border-radius:5px;font-size:.85rem}.two-pass{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:24px 0}.two-pass>div{border-top:4px solid var(--blue);padding:12px 16px;background:white}.two-pass>div+div{border-color:var(--warm)}.two-pass p{margin:0;font-size:.95rem}.work{display:grid;grid-template-columns:minmax(260px,.85fr) minmax(0,1.65fr);gap:24px;align-items:start}.panel{background:white;border:1px solid var(--line);border-radius:10px;padding:20px;min-width:0}label{display:block;font-weight:650;margin-bottom:5px}textarea{width:100%;min-height:235px;resize:vertical;font:16px/1.55 ui-monospace,monospace;white-space:pre;tab-size:2}textarea,select,button{border:1px solid #84949c;border-radius:5px;padding:10px;background:white;color:var(--ink);max-width:100%}button,select{font:inherit;min-height:44px}button{cursor:pointer;font-weight:650}button.primary{background:var(--blue);border-color:var(--blue);color:white}button:disabled,select:disabled{opacity:.5;cursor:default}button:hover:not(:disabled){filter:brightness(.93)}:focus-visible{outline:3px solid #bc6429;outline-offset:3px}[aria-invalid=true]{border:2px solid var(--error)}.help{font-size:.88rem;color:var(--muted);margin:8px 0 14px}.controls{display:flex;flex-wrap:wrap;gap:8px;align-items:end}.controls>*{min-width:0}.preset{margin-top:20px}.preset select{width:100%;margin-bottom:8px}.status{min-height:1.6em;margin:14px 0 0;color:var(--muted);overflow-wrap:anywhere}.status.error{color:var(--error)}.phase{font-size:1.15rem;font-weight:750;margin:16px 0 10px}.metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.metric{background:var(--soft);padding:12px;border-radius:5px;overflow-wrap:anywhere}.metric dt{font-size:.75rem;text-transform:uppercase;letter-spacing:.045em}.metric dd{margin:5px 0 0;font-size:1.1rem;font-weight:700;white-space:pre-wrap}.decision{border-left:4px solid var(--warm);padding:12px 14px;background:#fff3e9;min-height:3.6em;overflow-wrap:anywhere}.sequence{display:flex;flex-wrap:wrap;gap:7px;list-style:none;padding:0;counter-reset:position}.sequence li{counter-increment:position;background:var(--soft);border:1px solid var(--line);border-radius:4px;padding:6px 9px;font:14px ui-monospace,monospace;overflow-wrap:anywhere;max-width:100%;white-space:pre-wrap}.sequence li::before{content:counter(position) " · ";color:var(--muted)}.table-scroll{overflow:auto;max-height:360px;border:1px solid var(--line);border-radius:5px;margin-bottom:20px}table{border-collapse:collapse;width:100%;font-size:.88rem}th,td{text-align:left;padding:9px 11px;border-bottom:1px solid #dce3e6;vertical-align:top}th{background:var(--soft);position:sticky;top:0;font-size:.78rem}td{white-space:pre-wrap;overflow-wrap:anywhere;min-width:70px}.literal{font-family:ui-monospace,monospace}.downloads{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px}.foot{margin-top:30px;color:var(--muted);font-size:.86rem;max-width:850px}.phase-select{width:100%}.phase-select select{width:100%}@media(max-width:720px){main{padding:22px 14px}.work,.two-pass{grid-template-columns:1fr}.panel{padding:15px}.metrics{grid-template-columns:1fr}.metric{display:flex;gap:12px;align-items:baseline}.metric dt{min-width:110px}.metric dd{margin:0}.controls button{flex:1 1 120px}.two-pass{gap:8px}.intro{font-size:1rem}}@media print{body{font-size:11pt;background:white}main{max-width:none;padding:0}form,.controls,.phase-select,.downloads,.preset{display:none}.work{display:block}.panel{break-inside:avoid}.table-scroll{overflow:visible;max-height:none}.two-pass{display:block}.metric,.decision{background:white}th{position:static}}
+</style>
+</head>
+<body>
+<main>
+<header>
+<p class="eyebrow">RecallWeave · algorithms in two passes</p>
+<h1>Majority vote</h1>
+<p class="intro">Cancellation narrows the question to one candidate. A separate count decides whether that candidate appears <strong>more than half the time</strong>.</p>
+<span class="badge">Literal labels · local file · no saved browser state</span>
+</header>
+<div class="two-pass">
+<div><h2>1. Propose</h2><p>Different values cancel. The balance is a residue, not an occurrence count.</p></div>
+<div><h2>2. Verify</h2><p>Count the proposed value in the original input. Exactly half is not enough.</p></div>
+</div>
+<div class="work">
+<section class="panel" aria-labelledby="input-heading">
+<h2 id="input-heading">Your sequence</h2>
+<form id="sequence-form">
+<label for="values-input">One literal label per line</label>
+<textarea id="values-input" spellcheck="false" aria-describedby="input-help">cedar
+cedar
+birch
+cedar
+birch</textarea>
+<p class="help" id="input-help">0–40 entries; 1–48 UTF-16 units each. Spaces and case matter. Exactly empty input is valid; a blank row or trailing newline is not.</p>
+<button id="apply" class="primary" type="submit">Apply sequence</button>
+</form>
+<div class="preset">
+<label for="preset-select">Examples</label>
+<select id="preset-select"><option value="majority">A verified majority</option><option value="candidate">A candidate, no majority</option><option value="tie">Exactly half</option><option value="literal">Literal labels</option><option value="empty">Empty sequence</option></select>
+<button id="load-preset" type="button">Load example draft</button>
+</div>
+<p id="status" class="status" role="status" aria-live="polite">Draft only. Apply the sequence to begin.</p>
+</section>
+<section class="panel" aria-labelledby="trace-heading">
+<h2 id="trace-heading">Inspect the applied trace</h2>
+<div class="phase-select"><label for="phase-index">Phase</label><select id="phase-index" disabled><option>No applied trace</option></select></div>
+<p id="phase-label" class="phase">No applied trace</p>
+<div class="controls" aria-label="Trace navigation"><button id="first" disabled>First</button><button id="previous" disabled>Previous</button><button id="next" disabled>Next</button><button id="last" disabled>Last</button></div>
+<dl class="metrics">
+<div class="metric"><dt>Stored candidate</dt><dd id="candidate">— none —</dd></div>
+<div class="metric"><dt>Balance</dt><dd id="balance">—</dd></div>
+<div class="metric"><dt>Verified count</dt><dd id="verified-count">Not started</dd></div>
+</dl>
+<p id="decision" class="decision">Apply a sequence. A stored candidate is not a majority decision.</p>
+<h3>Applied input</h3><ol id="sequence" class="sequence" aria-label="Applied values in occurrence order"></ol>
+<h3>Cancellation history</h3>
+<div class="table-scroll" role="region" aria-label="Cancellation history table" tabindex="0"><table><thead><tr><th>Position</th><th>Value</th><th>Action</th><th>Stored candidate</th><th>Balance</th></tr></thead><tbody id="cancellation-rows"></tbody></table></div>
+<h3>Verification history</h3>
+<div class="table-scroll" role="region" aria-label="Verification history table" tabindex="0"><table><thead><tr><th>Position</th><th>Value</th><th>Matches candidate?</th><th>Matches so far</th></tr></thead><tbody id="verification-rows"></tbody></table></div>
+</section>
+</div>
+<div class="downloads" aria-label="Local downloads"><button id="download-observation" disabled>Download observation</button><button id="download-course">Download lesson</button><button id="download-guide">Download guide</button></div>
+<p class="foot">Boyer–Moore majority vote, distinct from their string-search algorithm. The scan uses constant working registers; this explorer stores the sequence and snapshots for inspection, so its trace storage grows with input length. Downloaded observations are records of this demonstration, not authority over an external vote. Import the downloaded lesson into the unchanged RecallWeave learner supplied with this package.</p>
+</main>
+<script id="lesson-assets" type="application/json">__ASSETS__</script>
+<script type="module">
+__SCRIPT__
+</script>
+</body>
+</html>
