@@ -1,0 +1,118 @@
+{
+  "format": "recallweave-course-revision-comparison-contract/1",
+  "frozenBeforeCandidate": true,
+  "repository": "Jacob-Met/RecallWeave",
+  "sourceBase": "698902f9c9c1d5c5023092b85b3632a7cb7a01ed",
+  "beneficiary": "A teacher or learner can inspect literal differences between two locally authored course revisions before choosing which material to teach or import.",
+  "scope": [
+    "src/course-comparison.mjs",
+    "tools/compare-course.mjs",
+    "tests/course-comparison.test.mjs",
+    "docs/course-comparison.md",
+    "unique docs/receiving/course-comparison-3dab/ evidence"
+  ],
+  "unchangedDependencies": [
+    {
+      "path": "src/deck.mjs",
+      "gitBlob": "f0f8a4b234489c2388f427633f548d56c6ed4c03",
+      "sha256": "621438c166ec4bfafd9d87c698a1d46cb1722f4fb92dcbb8d9f52fce682c338b"
+    }
+  ],
+  "preserved": "Do not edit learner, importer, model, author studio, focus, handout, archive/reflection/notebook, catalog, existing decks, dependencies, workflows or other owners' source. No trace migration, answer remapping, adoption, file writes or automatic replacement.",
+  "helper": {
+    "signature": "compareCourses(beforeText: string, afterText: string) -> deeply frozen JSON-safe plain record",
+    "validation": "Pass each string through the existing unchanged parseDeck. Both inputs must satisfy that exact 256 KiB UTF-8 text/format/metadata/concept/question/answer/prerequisite contract; propagate refusal before producing a comparison. Do not add independent course semantics.",
+    "equality": "Compare validated copied content, not raw JSON spelling. Optional omitted format normalizes to recallweave-deck/1; whitespace, object-key order and ignored unknown fields can differ while sameContent is true. Admitted field strings and array order remain literal, without trimming, case folding or Unicode normalization. The CLI separately reports exact raw-byte equality.",
+    "format": "recallweave-course-comparison/1",
+    "resultKeys": [
+      "format",
+      "sameContent",
+      "metadataChanges",
+      "concepts",
+      "questions"
+    ],
+    "metadataChanges": "Array containing changed fields only in fixed order title, attribution, license. Each row is {field,before,after} with exact strings.",
+    "concepts": {
+      "keys": [
+        "beforeOrder",
+        "afterOrder",
+        "added",
+        "removed",
+        "retainedOrderChanged"
+      ],
+      "beforeOrder": "Original validated concepts array before.",
+      "afterOrder": "Original validated concepts array after.",
+      "added": "Concept labels present only after, in after order.",
+      "removed": "Concept labels present only before, in before order.",
+      "retainedOrderChanged": "Whether filtering each concept list to labels present on both sides produces different sequences. Addition/removal alone does not imply retained reordering."
+    },
+    "questions": {
+      "keys": [
+        "beforeOrder",
+        "afterOrder",
+        "added",
+        "removed",
+        "retained",
+        "retainedOrderChanged",
+        "summary"
+      ],
+      "beforeOrder": "Exact question IDs in original before order.",
+      "afterOrder": "Exact question IDs in original after order.",
+      "added": "Complete validated item records present only after, in after order.",
+      "removed": "Complete validated item records present only before, in before order.",
+      "retained": "One row per exact ID present on both sides, in before order. Match by literal ID only, never prompt, position or similarity. A renamed ID is one removal plus one addition, even when all other fields match.",
+      "retainedKeys": [
+        "id",
+        "beforeIndex",
+        "afterIndex",
+        "positionChanged",
+        "changedFields",
+        "answerIndexChanged",
+        "answerTextChanged",
+        "before",
+        "after"
+      ],
+      "indices": "beforeIndex and afterIndex are zero-based native integers. positionChanged is their inequality; an insertion can change positions without changing relative order.",
+      "changedFields": "Changed content fields only, in fixed order concept, prerequisites, prompt, options, answer, explanation, transfer. Arrays compare exact ordered elements. ID is the matched identity, so is not in changedFields.",
+      "answerIndexChanged": "Exact inequality of the validated before.answer and after.answer integers.",
+      "answerTextChanged": "Exact string inequality of before.options[before.answer] and after.options[after.answer]. An option reorder with corrected answer index can change the index without changing its text; edited correct-option text can change text without changing the index. This is literal text comparison, not a claim about meaning or factual correctness.",
+      "beforeAfter": "Complete unchanged validated item records on each retained row. No field, option, prerequisite, explanation or transfer is rewritten. All nested arrays/records in the result are frozen.",
+      "retainedOrderChanged": "Whether filtering each question ID list to IDs present on both sides produces different sequences.",
+      "summaryKeys": [
+        "beforeCount",
+        "afterCount",
+        "added",
+        "removed",
+        "changed",
+        "unchanged",
+        "positionChanged"
+      ],
+      "summary": "All counts are native integers. changed counts retained rows with a nonempty changedFields; unchanged counts the other retained rows even if positions differ. positionChanged independently counts retained rows whose absolute indices differ. beforeCount=removed+changed+unchanged and afterCount=added+changed+unchanged."
+    },
+    "sameContent": "True exactly when JSON.stringify of the two existing validated deck records is equal; false for any admitted metadata, concept order, item order or item field change."
+  },
+  "cli": {
+    "usage": "node tools/compare-course.mjs BEFORE.json AFTER.json [--format json|text]",
+    "grammar": "Exactly two positional nonempty paths, optionally followed by exactly --format and json or text. Default json. Paths cannot start with '-' (use ./ for such filenames) or contain NUL. --help alone exits 0 with usage; every other argument shape refuses before file access. No stdin, output path, network or provider option.",
+    "files": "Read each existing regular file through its own opened descriptor; retain at most MAX_DECK_BYTES+1 raw bytes. Refuse directories and non-regular files. Raw size is bounded by existing MAX_DECK_BYTES=262144, including UTF-8 bytes. Decode UTF-8 fatally and preserve a leading BOM into text so the unchanged JSON parser refuses it. Malformed UTF-8 refuses. No locale, replacement decoding or byte normalization.",
+    "beforeOutput": "Read and validate both inputs and compute the entire report before writing ordinary output. Second-input I/O or content failure produces no success stdout. Neither input is modified. Concurrent mutation or cross-file transactional snapshot isolation is not claimed.",
+    "json": {
+      "format": "recallweave-course-comparison-files/1",
+      "keys": [
+        "format",
+        "files",
+        "sameBytes",
+        "comparison"
+      ],
+      "files": "{before:{path,bytes,sha256},after:{path,bytes,sha256}}. path is the exact supplied argument spelling; bytes is the actual captured raw length; sha256 is lowercase hexadecimal SHA-256 of those exact captured bytes.",
+      "sameBytes": "Exact captured-byte equality, independently of normalized comparison.sameContent.",
+      "comparison": "The complete helper record.",
+      "serialization": "JSON.stringify(wrapper,null,2) plus one LF to stdout."
+    },
+    "text": "Deterministic human-readable report contains both input paths/byte counts/SHA-256, separate same-bytes/same-validated-content statements, metadata/concept/order changes and question summary. It then lists every added, removed and changed/position-changed retained question with literal ID and complete relevant before/after validated records as JSON. JSON string rendering keeps embedded newlines/control characters unambiguous. Unchanged unmoved rows may be summarized. It must not claim course validity beyond the existing parser, scientific correctness, learning benefit or archive compatibility.",
+    "exits": "0 for either equal or differing valid courses (and help); 2 for arguments, oversize raw input, malformed UTF-8 or invalid deck content; 1 for open/read/stat/stdout I/O failure. Errors emit one JSON object {error:message} plus LF to stderr. Successful normal output has empty stderr. An output stream error can occur after partial bytes and is not falsely described as pre-output refusal. No automatic retry.",
+    "clockOrEnvironment": "No timestamp in report. No environment-controlled model, provider or persistence. Existing native Node only, no dependency installation."
+  },
+  "independentReceiving": "Freeze independently authored course pairs and exact expected ID/field/order/answer flags before candidate or author-test intake. Receive real CLI stdout/stderr/exit and input preservation, invalid second file without partial output, strict UTF-8/raw-byte limits, byte-versus-content identity and output-failure boundary on available native runtime. Keep source/function evidence distinct from ordinary-file/CLI execution. Native devices are currently held Offline; any unrun gate remains unrun.",
+  "actionsHold": "Jacob's no-new-GitHub-Actions direction remains active. No source/ref/commit/PR/merge/dispatch/rerun or workflow-changing operation is authorized. Immutable blobs and verified non-triggering scope coordination only."
+}

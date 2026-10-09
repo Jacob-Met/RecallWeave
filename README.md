@@ -433,3 +433,7 @@ Open [the minimum-spanning-forest explorer](courses/minimum-spanning-forest-expl
 
 Download the full trace with its original entered text and selected frame, or save the original [twelve-question course](courses/minimum-spanning-forest.json) and [worked guide](courses/minimum-spanning-forest.md). Open the JSON through the learner's existing **Bring your own lesson** preview and **Start this deck** flow. No network, account, automatic storage or learner-session modification is involved. Rebuild the standalone page with `node tools/build-minimum-spanning-forest.mjs`; add `--check` to verify exact source parity.
 
+
+## Review course revisions in the browser
+
+Open [Compare course revisions](course-compare.html) to choose an earlier and a revised checked course file, review their literal metadata, concept, question, answer and order changes, and keep an exact JSON comparison report. The page uses the native course-comparison helper without changing either course or any learner record. It distinguishes captured-byte equality from admitted-content equality and keeps correct-answer positions separate from correct-option text. The report includes full question records and answer keys plus reported differences; keep the original course files for complete metadata. See [browser comparison usage](docs/course-comparison-page.md) for local-file limits, replacement behavior and privacy.
