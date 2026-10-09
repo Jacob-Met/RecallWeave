@@ -1,31 +1,53 @@
-# Convex-hull visual correction: focused native receiving pending
+# Convex-hull visual correction: focused native receiving accepted
 
-The original independent native receiver passed 15 browser groups on the exact 18-file source closure. Its original packet and audits are retained in [the native receiver directory](../../convex-hull-native-8d5ac72a6fae/). Root independently decoded and verified all 43 members and 18 source pins, read the original raw outcomes, and viewed the original desktop and phone diagram captures. Those two images show a concrete overlap between labels and markers for compact points. The 15 automated groups remain accepted separately.
+The exact V3 correction passed its focused native builder and browser gate: **five groups passed on the first attempt**, with actual 1280 × 1000 and 390 × 844 browser observations. The source owner root and independent reviewer each received the complete original packet, checked all 18 source files and personally viewed all five original JPEGs. The compact point labels, duplicate identity table and `[[0,1]]` top-axis boundary are accepted within that scope.
+
+The visible qualification is retained: the rectangle's polygon fill or border partly covers some axis tick numerals. The explicit equal-scale caption remains readable. This acceptance covers the compact point-label remedy and top-axis separation; it does not promise readable ticks or non-overlapping labels for every arbitrary 16-point arrangement.
 
 ## Corrected display
 
-V3 changes the UI, its HTML template and the generated page. One scale fits all input coordinates and remains fixed through trace inspection. Signed extent ticks and a visible equal-scale note explain the zoom. Point labels grow with zoom, up to 22 px in SVG coordinates. At an extent of 20, the original point positions, label size, offsets and anchoring remain exact. The y-axis title moves above the highest possible point label.
+V3 changes the UI, its HTML template and the generated page. One scale fits all input coordinates and stays fixed through trace inspection. Signed extent ticks and an equal-scale note explain the zoom. Point labels grow with zoom, up to 22 px in SVG coordinates. At an extent of 20, the original positions, label size, offsets and anchoring remain exact. The y-axis title moves above the highest possible point label.
 
-The model, lesson JSON, worked guide, identity table, input controls and all download and event-handler code remain byte-for-byte identical to the original source. [The source freeze](source-freeze.json) records all 18 input pins, the three changed paths, exact formulas, static corrections and pending gates.
+The model, lesson JSON, worked guide, identity table, input controls and all download and event-handler code remain byte-for-byte identical to the original source. [The source freeze](source-freeze.json) records all 18 source pins, the three changed paths, exact formulas and source-review history.
 
-[Independent expectations](../visual-v2/independent-expectations.json) were frozen before any changed implementation was exposed. The compact witness is:
+[Independent expectations](../visual-v2/independent-expectations.json) were frozen before changed implementation exposure. The compact witness remains:
 
 ```json
 [[-2,-1],[2,-1],[2,2],[-2,2],[0,0],[2,0],[-2,-1]]
 ```
 
-## Preserved review history
+## Actual native result
 
-The frozen V2 correction, its native syntax-only receipt and independent source review remain in [visual-v2](../visual-v2/), including the three unsubmitted source bodies. Static review found that fixed 22 px labels could crowd full-range inputs; V3 preserves the original full-range spacing. A V3 draft before the freeze also exposed a possible y-axis-title collision for `[[0,1]]`, corrected by moving that title upward. These are source-review findings. Neither candidate had a failed native product run.
+The existing native receiver ran the unchanged builder and `--check` against the exact 280206-byte, 18-file closure. Both commands exited 0 with empty stderr. The generated page remained exactly 45015 bytes. The subsequent Chromium 153.0.8010.0 receiving used existing Node 24.19.0 and completed these five groups:
 
-[The independent V3 source review](independent-static-review.json) binds the exact closure, preserves these findings, and accepts the source for focused native receiving. It does not establish visual acceptance.
+1. Native builder and exact source checks.
+2. Compact rectangle at 1280 × 1000.
+3. Compact rectangle at 390 × 844.
+4. Empty, duplicate, full-range and `[[0,1]]` finite/clipping guards at both widths.
+5. Page, console, request and source preservation checks.
 
-## Actual checks and remaining receiving
+The recorded browser phase ran from 01:26:43.093 to 01:26:45.620 UTC on 2026-10-09. The complete outer receiver child exited 0 without signal or timeout. All 17 DOM snapshots had finite recorded coordinates and boxes within the SVG boundary; document widths were 1265 ≤ 1280 and 375 ≤ 390. The compact rectangle retained six separate coordinate labels and all seven exact table rows. Point positions stayed fixed during first/next/previous/final inspection.
 
-The generated V3 page was assembled with the unchanged builder's exact text-substitution recipe. That same recipe reproduced the canonical original page exactly. The final UI and embedded page script both passed actual native Node syntax checks; [the complete syntax receipt](native-syntax-receipt.json) preserves the raw commands, inputs and outcomes. These checks did not import or execute the product.
+Three genuine trace downloads retained the original bytes for selected steps 0, 1 and 21. They preserve all 22 steps, P1–P4 as the hull, twice-area 24, P5 as interior, P6 on an edge and the P7-to-P1 duplicate relation. No learner or mathematical suite was replayed.
 
-The actual V3 builder and its `--check` have not run in this source-custody lane. [The receiving handoff](receiving-handoff.json) and [the delivered owner request](https://github.com/Jacob-Met/RecallWeave/issues/163#issuecomment-6072156826) ask the existing native receiver to run those unchanged commands on the exact owned closure before focused visual review.
+Page errors, console errors and remote HTTP requests were zero. Chromium's own stderr was **not empty**: all 6308 bytes of its native diagnostic output remain in the packet. The native controller removed only its private stage after capturing evidence; this record does not claim physical fixture retention.
 
-Required receiving covers actual 1280 × 1000 and 390 × 844 captures: six separately readable unique point labels, the preserved P7-to-P1 duplicate relation, the unchanged result/table/trace, stable uniform scale during stepping, and no clipping or page overflow. The existing empty, single-point and full-range finite guards remain in scope. The `[[0,1]]` title boundary is included because source review identified its concrete collision risk. The receiver must preserve the first native failure and capture, then stop without repairing assertions or source during receiving.
+## Original evidence and independent receiving
 
-This correction does not guarantee non-overlapping labels for every arbitrary 16-point arrangement. The original mathematical, course, learner and baseline suites are not requested again. Main integration and hosted, installed or deployed acceptance remain unqualified. Source custody makes no change to workflows, installed hosts or browser evidence.
+- [Complete native packet, controller, raw streams and five original JPEGs](../../convex-hull-native-8d5ac72a6fae/v3/).
+- [Actual native handoff](https://github.com/Jacob-Met/RecallWeave/issues/163#issuecomment-6072451859).
+- [Independent focused-native expectations](independent-native-expectations.json), frozen before local image exposure after the external native claims were received.
+- [Independent native review](independent-native-review.json), including all 44 packet-member identities, 18 unchanged source files, DOM comparisons and original image observations.
+- [Root native intake](root-native-intake.json), including independent standard Node/zlib decoding, all five personal image observations, exact trace comparisons, complete small raw streams and preserved receiving utility errors.
+
+The images are locator-panel captures. The overflow claim comes from actual DOM widths, not from inferred full-page screenshots. Native source files were physically mode 0600 before and after; their logical Git export mode 100644 is recorded separately.
+
+## Preserved review history and remaining scope
+
+The original independent native receiver passed 15 browser groups on its original 18-file closure. Its [packet and audits](../../convex-hull-native-8d5ac72a6fae/) remain intact, including original desktop and phone captures showing compact label/marker overlap.
+
+The [V2 correction](../visual-v2/), syntax-only receipt and source review are preserved. Static review identified the risk from fixed 22 px labels at full range, and a V3 draft exposed a possible y-title collision for `[[0,1]]`. These were source-review findings; neither version had a failed native product run. [The independent V3 source review](independent-static-review.json) and [native syntax receipt](native-syntax-receipt.json) retain their original, narrower claims.
+
+The former pending-receiving README remains byte-exact in [README-before-native-acceptance.md](README-before-native-acceptance.md). Its earlier source-freeze predecessor is also retained. Current acceptance adds focused native evidence without rewriting those historical statements.
+
+The original mathematical, course, learner and baseline results remain separate. Main integration, hosted deployment, installed use and other browser/platform acceptance are still pending. No workflow, host or product source change is included in this receiving update.
