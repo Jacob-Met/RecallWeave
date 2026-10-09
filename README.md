@@ -433,3 +433,9 @@ Open [the minimum-spanning-forest explorer](courses/minimum-spanning-forest-expl
 
 Download the full trace with its original entered text and selected frame, or save the original [twelve-question course](courses/minimum-spanning-forest.json) and [worked guide](courses/minimum-spanning-forest.md). Open the JSON through the learner's existing **Bring your own lesson** preview and **Start this deck** flow. No network, account, automatic storage or learner-session modification is involved. Rebuild the standalone page with `node tools/build-minimum-spanning-forest.mjs`; add `--check` to verify exact source parity.
 
+
+## Review a course’s prerequisites
+
+Open [prerequisites.html](prerequisites.html) directly, or serve [prerequisites/index.html](prerequisites/index.html), then choose a saved course JSON file. Inspect each concept’s direct requirements and longer chains, see which other concepts depend on it, and expand the original questions that declare every link. Source concept and question numbers preserve the file’s order, including distinct names that look alike.
+
+The review is read-only and stays on this device. Attribution and license remain exact. **Download review JSON** saves the current selection, complete relationship report and captured-file provenance; it contains question prompts and is not a lesson file. Declared links and structural depth are not a learner mastery score or a recommended teaching order. See the [course prerequisite review guide](docs/course-prerequisites.md) for semantics, limits, rebuild and focused test commands.
