@@ -433,3 +433,12 @@ Open [the minimum-spanning-forest explorer](courses/minimum-spanning-forest-expl
 
 Download the full trace with its original entered text and selected frame, or save the original [twelve-question course](courses/minimum-spanning-forest.json) and [worked guide](courses/minimum-spanning-forest.md). Open the JSON through the learner's existing **Bring your own lesson** preview and **Start this deck** flow. No network, account, automatic storage or learner-session modification is involved. Rebuild the standalone page with `node tools/build-minimum-spanning-forest.mjs`; add `--check` to verify exact source parity.
 
+
+## Export a lesson to a CSV question bank
+
+Teachers can turn an existing checked lesson into an editable thirteen-column
+question bank with `node tools/export_course_csv.mjs --input lesson.json --output question-bank.csv`.
+The new file preserves literal question data; the JSON receipt retains the
+separate title, attribution and license needed for reimport. See
+[CSV export](docs/CSV_EXPORT.md) for the existing-importer dependency, explicit
+losslessness refusals, and create-only output behavior.
