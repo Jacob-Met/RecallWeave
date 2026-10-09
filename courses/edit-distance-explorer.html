@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>Edit distance, one cell at a time · RecallWeave</title>
+<style>
+:root{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:#162b35;background:#f5f5ed;font-size:16px;line-height:1.55;--green:#176c5b;--ink:#163b37}
+*{box-sizing:border-box}body{margin:0}main{max-width:1140px;margin:auto;padding:40px 24px 70px}header{max-width:840px;margin-bottom:30px}
+.eyebrow{font-size:.76rem;font-weight:750;letter-spacing:.16em;text-transform:uppercase;color:var(--green)}
+h1{font-size:clamp(2.2rem,5vw,3.7rem);line-height:1.06;letter-spacing:-.045em;margin:13px 0 18px}h2{font-size:1.3rem;line-height:1.3;margin:0 0 12px}p{margin:10px 0}.intro{font-size:1.1rem;max-width:700px;color:#40565c}.small{font-size:.9rem;color:#465d60}
+.card{background:#fff;border:1px solid #d5dfd7;border-radius:17px;padding:24px;margin:20px 0;box-shadow:0 5px 18px #142c2010}
+.inputs{display:grid;grid-template-columns:1fr 1fr auto;gap:18px;align-items:end}label{display:block;font-size:.91rem;font-weight:700}
+input[type=text],select{width:100%;font:inherit;color:inherit;border:1px solid #a4b8af;border-radius:8px;background:#fff;padding:11px 12px;margin-top:6px}
+button{font:inherit;font-weight:650;border:1px solid #91a89d;border-radius:8px;background:#fff;color:var(--ink);padding:10px 15px;cursor:pointer}
+button.primary{background:var(--green);color:#fff;border-color:var(--green)}button:disabled{opacity:.43;cursor:default}
+button:hover:not(:disabled){filter:brightness(.93)}:focus-visible{outline:3px solid #df8c22;outline-offset:3px}
+.examples,.toolbar,.downloads{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.examples{margin-top:18px}.examples label{font-weight:500}.examples select{width:auto;max-width:100%;margin:0}.toolbar{margin:15px 0}
+#step{flex:1;min-width:120px;accent-color:var(--green)}#step-count{font-variant-numeric:tabular-nums;min-width:112px}
+.trace-heading{display:flex;justify-content:space-between;gap:25px;align-items:center}.metric{background:#e9f4ed;padding:12px 21px;border-radius:12px;min-width:154px;text-align:center}.metric strong{font-size:2.7rem;line-height:1.1;display:block}.metric span{font-size:.77rem;display:block}
+.matrix-wrap{overflow:auto;border:1px solid #d5dfd7;border-radius:10px;margin:20px 0;max-height:520px;overscroll-behavior:contain}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}caption{text-align:left;padding:14px;font-size:.86rem;color:#40565c}th,td{padding:9px 12px;border:1px solid #e0e7e1;text-align:center;white-space:nowrap}th{background:#f3f6ef;font-size:.8rem;font-weight:650}td.boundary{background:#f0f6ed;color:#446349}td.current{background:#176c5b;color:#fff;font-weight:800;outline:3px solid #df8c22;outline-offset:-3px}
+.explanation{background:#f5f7f2;border-radius:10px;padding:16px 20px;min-height:108px}#candidates{margin:10px 0 0;padding-left:22px;font-size:.92rem}.alignment{max-width:650px;margin-top:12px}
+#error{color:#972f18;font-weight:650;min-height:1.5em}#status{min-height:1.5em}footer{padding-top:12px;border-top:1px solid #cbd8cc;color:#455d57;font-size:.85rem}.downloads{margin:16px 0}.rule{border-left:3px solid #cc872c;padding-left:14px}
+[hidden]{display:none!important}@media(max-width:640px){main{padding:25px 14px 45px}.card{padding:18px 15px}.inputs{grid-template-columns:1fr}.inputs button{width:100%}.trace-heading{align-items:flex-start}.metric{min-width:105px;padding:10px}.metric strong{font-size:2rem}th,td{padding:8px}.toolbar button{flex:1}.examples{align-items:stretch}.examples label{width:100%}}
+</style>
+</head>
+<body>
+<main>
+<header>
+<div class="eyebrow">RecallWeave / algorithm lab</div>
+<h1>Edit distance,<br>one cell at a time.</h1>
+<p class="intro">Turn one sequence into another using insertions, deletions and substitutions. Build the prefix table, inspect each choice, then follow one cheapest alignment.</p>
+</header>
+<section class="card" aria-labelledby="input-heading">
+<h2 id="input-heading">Choose two sequences</h2>
+<form id="inputs" class="inputs">
+<label for="source">Source<input id="source" type="text" value="kitten" autocomplete="off" spellcheck="false"></label>
+<label for="target">Target<input id="target" type="text" value="sitting" autocomplete="off" spellcheck="false"></label>
+<button class="primary" type="submit">Build trace</button>
+</form>
+<p class="small">Up to <span id="input-limit">24</span> Unicode code points each. Empty inputs are allowed; spaces count. Case is significant; no normalization is applied.</p>
+<div class="examples"><label for="preset">Try an example</label><select id="preset">
+<option value="classic">kitten → sitting</option><option value="empty">Empty → cat</option><option value="ties">ab → ba: tied paths</option><option value="unicode">Composed vs decomposed accent</option><option value="spaces">A space is a character</option><option value="emoji">Emoji count as one code point</option>
+</select><button id="load-example" type="button">Load example</button></div>
+<p id="error" role="alert"></p>
+<p id="status" class="small" aria-live="polite"></p>
+</section>
+<section id="trace-view" class="card" aria-labelledby="trace-heading">
+<div class="trace-heading"><div><div class="eyebrow">Prefix by prefix</div><h2 id="trace-heading">Build the distance matrix</h2><p class="small">Rows consume source characters. Columns consume target characters.</p></div><div class="metric"><strong id="distance">…</strong><span id="distance-label">Minimum edit cost</span></div></div>
+<div class="toolbar" aria-label="Trace controls"><button id="first" type="button">First</button><button id="previous" type="button">Previous</button><button id="next" type="button">Next</button><button id="finish" type="button">Finish</button><label class="small" for="step">Inspect step</label><input id="step" type="range" min="0" value="0"><output id="step-count" for="step"></output></div>
+<div class="explanation"><p id="explanation"></p><ul id="candidates"></ul></div>
+<div id="matrix" class="matrix-wrap" tabindex="0" aria-label="Distance matrix; scroll horizontally for wider sequences"></div>
+<p class="small">Header <strong>0: ∅</strong> means the empty prefix. Later headers show prefix length and its last code point, quoted so spaces stay visible. A dot marks a cell not computed yet.</p>
+<section id="alignment-section" hidden aria-labelledby="alignment-heading">
+<h2 id="alignment-heading">One optimal alignment</h2>
+<p class="small">Read top to bottom. ∅ is a gap. Matches cost 0; every other row costs 1. Equal-cost choices prefer a diagonal move, then deletion, then insertion. Other optimal alignments can exist.</p>
+<table class="alignment"><thead><tr><th scope="col">Source</th><th scope="col">Target</th><th scope="col">Operation</th><th scope="col">Cost</th></tr></thead><tbody id="alignment-body"></tbody></table>
+</section>
+<div class="downloads"><button id="download-trace" type="button">Download full trace JSON</button></div>
+<p class="small">The export includes every cell and the complete alignment, even while you inspect an earlier step. It records your selected step separately.</p>
+</section>
+<section class="card" aria-labelledby="practice-heading"><div class="eyebrow">Explain it, then practise</div><h2 id="practice-heading">Carry the idea into a lesson</h2>
+<p>Download the optional RecallWeave deck and open it through “Bring your own lesson” in the learner. Preview it, then choose “Start this deck”. The companion guide includes a worked table and questions to ask while tracing.</p>
+<div class="downloads"><button id="download-course" type="button">Download lesson JSON</button><button id="download-guide" type="button">Download worked guide</button></div>
+<p class="rule small">This is unit-cost Levenshtein distance. Swapping adjacent characters is not a single operation. Code points can differ from what looks like one letter: combining marks are separate, and text is not normalized.</p>
+</section>
+<footer>This explorer works offline as one HTML file. Inputs stay in this page; it uses no account, storage, analytics or network request. Downloads happen only when you select a download button. Original RecallWeave learning material.</footer>
+</main>
+<script id="course-resources" type="application/json">{"course":"{\n  \"format\": \"recallweave-deck/1\",\n  \"title\": \"Edit distance: build and explain an optimal alignment\",\n  \"attribution\": \"Original questions, worked examples and explanations for RecallWeave, 2026. Background references: NIST Dictionary of Algorithms and Data Structures, Levenshtein distance (https://xlinux.nist.gov/dads/HTML/Levenshtein.html); ECMAScript String iteration (https://tc39.es/ecma262/multipage/text-processing.html#sec-string.prototype-%symbol.iterator%); Unicode UAX #29, grapheme clusters (https://www.unicode.org/reports/tr29/), and UAX #15, normalization (https://www.unicode.org/reports/tr15/). References explain the underlying definitions; no source exercises, prose or figures are reproduced.\",\n  \"license\": \"CC0-1.0 for this original course content. Referenced materials retain their own terms and are not included in this deck.\",\n  \"concepts\": [\n    \"Allowed edits\",\n    \"Prefix boundaries\",\n    \"Table recurrence\",\n    \"Reading alignments\",\n    \"Checking minimality\",\n    \"Unicode sequences\"\n  ],\n  \"items\": [\n    {\n      \"id\": \"ed-operations-substitute\",\n      \"concept\": \"Allowed edits\",\n      \"prerequisites\": [],\n      \"prompt\": \"Use unit-cost Levenshtein distance: insert, delete or substitute one symbol for cost 1; keeping an equal symbol costs 0. What is the distance from \\\"cat\\\" to \\\"cut\\\"?\",\n      \"options\": [\n        \"0, because both strings have three symbols.\",\n        \"1, by substituting u for a.\",\n        \"2, because every substitution must be a deletion followed by an insertion.\",\n        \"3, because every position must be edited.\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"Keep c and t, and replace a with u. This is one allowed substitution. Zero edits would leave cat unchanged, so the distance cannot be 0. A one-edit construction and the impossibility of zero edits together establish distance 1. Deleting a and inserting u would also work, but would cost 2.\",\n      \"transfer\": \"For cat → cats, insert s at the end: distance 1. For cats → cat, delete that s: also distance 1. The permitted operations each have their own unit cost; a substitution does not have to be implemented as two edits.\"\n    },\n    {\n      \"id\": \"ed-operations-no-swap\",\n      \"concept\": \"Allowed edits\",\n      \"prerequisites\": [],\n      \"prompt\": \"This course permits single-symbol insertion, deletion and substitution; swapping two symbols is not a primitive operation. What is the distance from \\\"ab\\\" to \\\"ba\\\"?\",\n      \"options\": [\n        \"1, because a neighboring swap always counts as one edit.\",\n        \"0, because the strings contain the same symbols.\",\n        \"2, for example by substituting both positions.\",\n        \"The transformation is impossible without a swap operation.\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"Substitute the first a with b and the second b with a, for total cost 2. One substitution cannot correct both positions, and a single insertion or deletion changes the length. Thus no one-edit transformation works. Deleting the first a and inserting an a after b is another two-edit solution.\",\n      \"transfer\": \"Changing the allowed operations changes the problem. If an adjacent swap were explicitly available for cost 1, this pair could have distance 1. The explorer implements the three-operation rule stated here, so do not import a swap rule from another distance definition.\"\n    },\n    {\n      \"id\": \"ed-boundary-empty\",\n      \"concept\": \"Prefix boundaries\",\n      \"prerequisites\": [\n        \"Allowed edits\"\n      ],\n      \"prompt\": \"Let D[i,j] be the distance from the first i source symbols to the first j target symbols. For source \\\"ink\\\" and an empty target, what are D[0,0] and D[3,0]?\",\n      \"options\": [\n        \"D[0,0] = 0 and D[3,0] = 3.\",\n        \"D[0,0] = 1 and D[3,0] = 3.\",\n        \"D[0,0] = 0 and D[3,0] = 0.\",\n        \"Both values are undefined because the target is empty.\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"Two empty prefixes already match, so D[0,0] = 0. Turning ink into the empty string requires deleting its three symbols, so D[3,0] = 3. In general the left boundary is D[i,0] = i and the top boundary is D[0,j] = j. These values give the interior recurrence usable starting points.\",\n      \"transfer\": \"Reverse the direction: the empty source becomes ink with three insertions, so D[0,3] = 3. The empty prefix occupies a genuine row and column in the table; it is not a missing input or a symbol that costs an edit to remove.\"\n    },\n    {\n      \"id\": \"ed-boundary-length-bound\",\n      \"concept\": \"Prefix boundaries\",\n      \"prerequisites\": [\n        \"Allowed edits\"\n      ],\n      \"prompt\": \"A source has 7 symbols and a target has 3. Their symbols are otherwise unspecified. What is the strongest lower bound on unit-cost edit distance that follows from the lengths alone?\",\n      \"options\": [\n        \"At least 7 edits.\",\n        \"At least 3 edits.\",\n        \"At least 4 edits.\",\n        \"At least 0 edits is the strongest available bound.\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"The net length must decrease by 4. Each deletion decreases it by 1, each insertion increases it by 1, and substitution does not change it. Therefore at least 4 edits are necessary. This is a lower bound, not an exact answer: aaaaaaa → aaa attains 4 deletions, while abcdefg → xyz needs 7 edits.\",\n      \"transfer\": \"Equal lengths give the length-only lower bound 0, but they do not imply equal strings. For abc → xyz the actual distance is 3. Use the bound to rule out impossible low answers, then inspect the symbols to find the true minimum.\"\n    },\n    {\n      \"id\": \"ed-recurrence-delete\",\n      \"concept\": \"Table recurrence\",\n      \"prerequisites\": [\n        \"Prefix boundaries\"\n      ],\n      \"prompt\": \"Rows consume source symbols and columns consume target symbols. At D[3,2] for \\\"car\\\" → \\\"ca\\\", the available neighbors are D[2,2] = 0, D[3,1] = 2 and D[2,1] = 1. The last source symbol r differs from the last target symbol a. Which candidate gives the minimum?\",\n      \"options\": [\n        \"Insertion: D[3,1] + 1 = 3.\",\n        \"Substitution: D[2,1] + 1 = 2.\",\n        \"Matching r with a at no cost: D[2,1] + 0 = 1.\",\n        \"Deletion: D[2,2] + 1 = 1.\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"Delete the final source r. The remaining prefixes are ca and ca, whose distance is D[2,2] = 0; adding the deletion gives 1. The insertion candidate is 3, and the diagonal substitution candidate is 2. The diagonal has cost 0 only when the compared symbols are equal, which r and a are not.\",\n      \"transfer\": \"At an interior cell, compare three candidates: D[i-1,j] + 1 for deletion, D[i,j-1] + 1 for insertion, and D[i-1,j-1] plus 0 for an equal pair or 1 for a substitution. Each candidate includes the best cost for its smaller prefixes.\"\n    },\n    {\n      \"id\": \"ed-recurrence-match-prefix\",\n      \"concept\": \"Table recurrence\",\n      \"prerequisites\": [\n        \"Prefix boundaries\"\n      ],\n      \"prompt\": \"For \\\"ab\\\" → \\\"cb\\\", the final symbols b and b match. The diagonal neighbor D[1,1], comparing \\\"a\\\" with \\\"c\\\", is 1. Both insertion and deletion candidates at D[2,2] cost 3. What is D[2,2]?\",\n      \"options\": [\n        \"0, because the final symbols match.\",\n        \"2, because each two-symbol string contributes one edit.\",\n        \"3, because insertion and deletion both cost 3 here.\",\n        \"1, because the matching pair adds 0 to the earlier cost 1.\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"The diagonal candidate is D[1,1] + 0 = 1. Keeping the final b does not erase the earlier a-to-c substitution. A table entry is the total distance between entire prefixes, not just the cost of comparing their last symbols. The minimum of 3, 3 and 1 is 1.\",\n      \"transfer\": \"For ab → ab, that earlier diagonal cost would instead be 0, giving total distance 0. The same matching last pair can follow prefixes with different costs; the recurrence must carry the neighbor's accumulated value forward.\"\n    },\n    {\n      \"id\": \"ed-alignment-cost\",\n      \"concept\": \"Reading alignments\",\n      \"prerequisites\": [\n        \"Table recurrence\"\n      ],\n      \"prompt\": \"An alignment for \\\"pan\\\" → \\\"plan\\\" has four columns: p/p, gap/l, a/a, n/n. A gap means that one side has no symbol in that column. What is the alignment's edit cost?\",\n      \"options\": [\n        \"4, because there are four alignment columns.\",\n        \"1, because only the gap/l column is an edit.\",\n        \"2, because a gap costs once on each side.\",\n        \"0, because every source symbol occurs in the target.\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"The three equal pairs are matches costing 0. The gap on the source side pairs with the target l and represents one insertion costing 1. Thus the alignment costs 1, although it has four columns. Its source symbols in order reconstruct pan; its target symbols reconstruct plan.\",\n      \"transfer\": \"Reverse the direction and the l/gap column becomes a deletion, still costing 1. Count inserted, deleted and substituted symbols to obtain edit cost; counting all alignment columns also counts the zero-cost matches.\"\n    },\n    {\n      \"id\": \"ed-alignment-ties\",\n      \"concept\": \"Reading alignments\",\n      \"prerequisites\": [\n        \"Table recurrence\"\n      ],\n      \"prompt\": \"For \\\"ab\\\" → \\\"ba\\\", one alignment uses two substitutions. Another deletes the first a, keeps b and inserts a at the end. Both cost 2, and no one-edit transformation works. What should you conclude if the explorer displays only the first alignment?\",\n      \"options\": [\n        \"Both are optimal; the displayed tie choice does not make the other alignment wrong.\",\n        \"Only the displayed alignment can be optimal.\",\n        \"The distance is 4 because the costs of both alignments must be added.\",\n        \"The algorithm failed because an optimum must be unique.\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"Distance is the minimum cost, which is 2 here. Multiple alignments may attain that minimum. The explorer chooses one reproducible path by preferring a diagonal predecessor, then deletion, then insertion when candidate costs tie. That display rule selects one answer without proving it is the only optimal alignment.\",\n      \"transfer\": \"When comparing two implementations, first check that each alignment reconstructs both inputs and has the claimed minimum cost. Different gap placement alone need not be a defect. A particular tie policy is useful for reproducible displays, but it is separate from the value of the distance.\"\n    },\n    {\n      \"id\": \"ed-minimality-shift\",\n      \"concept\": \"Checking minimality\",\n      \"prerequisites\": [\n        \"Reading alignments\"\n      ],\n      \"prompt\": \"All three same-position pairs differ in \\\"abc\\\" → \\\"bca\\\". However, deleting the first a and inserting a at the end gives two edits. What is the unit-cost Levenshtein distance?\",\n      \"options\": [\n        \"3, because three positions differ.\",\n        \"1, because the symbols only rotate.\",\n        \"2: the two-edit construction works, and no single permitted edit can work.\",\n        \"0, because the two strings have the same symbol counts.\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"The construction abc → bc → bca has cost 2. One insertion or deletion would change the length; one substitution could fix only one of the three differing positions. So distance is at least 2 and at most 2, establishing exactly 2. Counting same-position mismatches considers only substitutions and can miss cheaper alignments with gaps.\",\n      \"transfer\": \"This is a reusable proof pattern: supply an edit script for an upper bound and rule out all smaller costs for a lower bound. A valid script alone establishes only that the distance is no larger than its cost.\"\n    },\n    {\n      \"id\": \"ed-minimality-concatenate\",\n      \"concept\": \"Checking minimality\",\n      \"prerequisites\": [\n        \"Reading alignments\"\n      ],\n      \"prompt\": \"You have a valid 2-edit script from sequence A to sequence B and a valid 3-edit script from B to C. You have not checked whether either script is shortest. What can you conclude about the distance from A to C?\",\n      \"options\": [\n        \"It must equal 5.\",\n        \"It must be at least 5.\",\n        \"Nothing can be concluded because B is an intermediate sequence.\",\n        \"It is at most 5; a shorter direct script might exist.\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"Perform the first script and then the second to obtain a valid five-edit transformation from A to C. Since distance chooses the cheapest valid transformation, it is at most 5. The route through B might take unnecessary edits or even undo earlier edits, so this does not establish equality or a lower bound.\",\n      \"transfer\": \"A simple extreme case is A = C. You can take an edited detour through a different B and return, but the direct distance from A to itself is 0. An available route and a shortest route answer different questions.\"\n    },\n    {\n      \"id\": \"ed-unicode-codepoints\",\n      \"concept\": \"Unicode sequences\",\n      \"prerequisites\": [\n        \"Allowed edits\"\n      ],\n      \"prompt\": \"This explorer treats Unicode code points as symbols. The source is \\\"A😀\\\" and the target is \\\"A\\\". The emoji 😀 is one code point even though JavaScript stores it using two UTF-16 code units. What is the distance?\",\n      \"options\": [\n        \"1, by deleting the one emoji code point.\",\n        \"2, because the emoji occupies two UTF-16 code units.\",\n        \"0, because emoji are ignored.\",\n        \"3, because all stored code units must be replaced.\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"The source has two symbols under the stated rule: A and 😀. Keep A and delete 😀 for cost 1. The explorer iterates code points rather than splitting that emoji into its two UTF-16 code units. Choosing a symbol unit is part of defining the problem, not an incidental detail of the display.\",\n      \"transfer\": \"Code points also differ from user-perceived characters. An accented letter or an emoji sequence can consist of several code points that appear together. This course uses code points consistently; it does not claim to measure how many visual keystrokes a person would need.\"\n    },\n    {\n      \"id\": \"ed-unicode-normalization\",\n      \"concept\": \"Unicode sequences\",\n      \"prerequisites\": [\n        \"Allowed edits\"\n      ],\n      \"prompt\": \"No normalization is performed. Compare precomposed \\\"é\\\" (one code point, U+00E9) with \\\"é\\\" (two code points: U+0065 followed by combining acute accent U+0301). They may look the same. What is their code-point edit distance?\",\n      \"options\": [\n        \"0, because identical-looking text always has identical code points.\",\n        \"2, by replacing U+00E9 with U+0065 and inserting U+0301.\",\n        \"1, because a visual accent is always a single inserted symbol.\",\n        \"The inputs must be rejected because Unicode permits only one spelling.\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"The source sequence contains one code point and the target contains two different code points. Substitute e for precomposed é, then insert the combining accent: two edits. A single substitution cannot increase the length, and a single insertion would leave the original U+00E9 in the result. Therefore one edit cannot suffice, and the distance is 2.\",\n      \"transfer\": \"Normalizing both sequences to NFC before comparison would make this pair equal and give distance 0. That is a different preprocessing policy, which this explorer deliberately does not apply. Case is also preserved: Cat → cat has distance 1 here.\"\n    }\n  ]\n}\n","guide":"# Edit distance: build and explain an optimal alignment\n\n**What you will learn:** define the allowed edits, fill a table of prefix\ndistances, read an alignment, and explain why an answer is minimal. The companion\nlesson contains 12 questions in six concepts.\n\nOpen [the edit-distance explorer](edit-distance-explorer.html) to try the\nexamples. It works as a self-contained offline page. To practise in the existing\nRecallWeave learner, choose **Bring your own lesson**, select\n[edit-distance.json](edit-distance.json), inspect the preview, and choose\n**Start this deck**.\n\n## 1. Agree on what one edit means\n\nHere, inserting one symbol, deleting one symbol, or substituting one symbol for\nanother costs **1**. Keeping two equal symbols aligned costs **0**. Distance is\nthe lowest total cost among valid transformations. This is the three-operation\nLevenshtein definition described by [NIST][nist].\n\nFor `cat → cut`, keep `c`, substitute `u` for `a`, and keep `t`. The cost is\n1. Zero edits would leave the original string unchanged, so the answer is\nexactly 1.\n\nThe operation set matters. For `ab → ba`, two substitutions cost 2. Deleting\nthe first `a` and inserting `a` at the end also costs 2. A swap is not a\none-step operation in this explorer. One insertion or deletion would change the\nlength; one substitution cannot fix both positions. That proves this pair's\ndistance is 2.\n\n**Try it:** build traces for `cat → cut`, `cat → cats`, and `cats → cat`.\nIdentify a substitution, an insertion, and a deletion. Reversing a valid\ntransformation reverses each edit; with these equal unit costs, the distance is\nthe same in the reverse direction.\n\n## 2. Solve smaller prefixes first\n\nA prefix is the beginning of a sequence, possibly empty. Let **D[i,j]** mean\nthe distance from the first **i source symbols** to the first **j target\nsymbols**. Rows consume source symbols; columns consume target symbols.\n\nStart with the empty prefixes:\n\n- **D[0,0] = 0:** nothing needs changing.\n- **D[i,0] = i:** delete the source prefix.\n- **D[0,j] = j:** insert the target prefix.\n\nAt an interior cell, consider the last alignment column:\n\n| Last action | Smaller prefixes | Candidate total |\n|---|---|---|\n| Delete the final source symbol | First i−1 source symbols, first j target symbols | D[i−1,j] + 1 |\n| Insert the final target symbol | First i source symbols, first j−1 target symbols | D[i,j−1] + 1 |\n| Match or substitute the final pair | First i−1 source symbols, first j−1 target symbols | D[i−1,j−1] + pair cost |\n\nThe **pair cost is 0 when the compared symbols are equal, otherwise 1**.\nTake the minimum of the three candidate totals. Every candidate includes the\ndistance of its smaller prefixes; matching the final pair does not erase\nearlier edits.\n\nThis gives an exact method because every valid alignment ends in one of those\nthree kinds of column. If the preceding part were needlessly expensive, a\ncheaper alignment of those smaller prefixes would improve the whole result.\nStore those smaller answers once and reuse them.\n\nHere is the complete table for source `car` and target `ca`. The labels name\nwhole prefixes; `\"\"` means empty.\n\n| Source prefix | Target `\"\"` | Target `c` | Target `ca` |\n|---|---:|---:|---:|\n| `\"\"` | 0 | 1 | 2 |\n| `c` | 1 | 0 | 1 |\n| `ca` | 2 | 1 | 0 |\n| `car` | 3 | 2 | 1 |\n\nAt the bottom-right cell, deletion gives **0 + 1 = 1**, insertion gives\n**2 + 1 = 3**, and substitution gives **1 + 1 = 2**. Deleting the final\n`r` wins.\n\n**Try it:** use **First**, **Next**, and **Previous**, or **Inspect step**, to\nfollow the calculation. For `ab → cb`, predict the final value before choosing\n**Finish**. The final `b/b` pair is free, but the earlier `a → c` substitution\nstill contributes 1.\n\n## 3. Read the alignment as well as the number\n\nAn alignment preserves each input's symbol order and may place a gap on one\nside of a column. Remove the gaps from its source row to recover the source;\nremove them from its target row to recover the target.\n\nFor `pan → plan`:\n\n| | Column 1 | Column 2 | Column 3 | Column 4 |\n|---|---|---|---|---|\n| Source | p | gap | a | n |\n| Target | p | l | a | n |\n| Action | match | insert l | match | match |\n| Cost | 0 | 1 | 0 | 0 |\n\nThere are four columns but only one edit. A gap is an alignment marker,\nnot a literal character added to the input.\n\nThe matrix can be traced backward from the final cell through predecessors\nthat justify its cost. Reading that path forward gives an optimal alignment.\nTies can produce several correct alignments. This explorer selects one\nreproducible path by preferring a diagonal predecessor, then deletion, then\ninsertion when candidate costs tie. Another optimal path can be equally valid.\n\n**Try it:** inspect `ab → ba`. Compare the displayed alignment with the\ndelete-then-insert solution from section 1. Check the reconstructed strings and\nthe total cost before deciding whether two displays disagree.\n\nUse **Download full trace JSON** to keep the full calculation and selected\nalignment for later inspection. Moving the display slider does not change the\nmathematical problem.\n\n## 4. Explain why an answer is minimal\n\nA valid edit script supplies an **upper bound**: the distance is no larger\nthan that script's cost. To establish an exact value, also rule out smaller\ncosts.\n\nFor `abc → bca`, three positions differ. Yet `abc → bc → bca` uses only two\nedits. One substitution cannot fix all three differing positions, and one\ninsertion or deletion would leave unequal lengths. The distance is therefore\nat least 2 and at most 2: exactly 2.\n\nThe length difference supplies a useful lower bound:\n\n**distance ≥ absolute difference between the two sequence lengths.**\n\nEach insertion or deletion changes the length by one; substitution does not\nchange it. A source of length 7 and target of length 3 therefore need at least\n4 edits. That does not make every such pair distance 4: `aaaaaaa → aaa`\nattains 4, while `abcdefg → xyz` requires 7.\n\nCombining available scripts gives another upper bound. A two-edit route from\nA to B followed by a three-edit route from B to C is a five-edit route from A\nto C. A shorter direct route may exist; the detour does not prove distance 5.\n\n**Try it:** write down a script and a lower-bound argument before revealing the\nexplorer's answer for `abc → bca`. Then explain why comparing only symbols at\nthe same positions misses the cheaper alignment.\n\n## 5. Understand what the explorer counts\n\nThe symbol unit here is a **Unicode code point**. For example, `A😀 → A`\ncosts one deletion: `😀` is one code point, although JavaScript represents it\nwith two UTF-16 code units. [ECMAScript string iteration][ecma] keeps such a pair\ntogether.\n\nCode points need not correspond one for one with visible characters.\n[Unicode's grapheme-cluster guidance][graphemes] describes text elements that\nmay contain several code points. This explorer consistently uses code points.\n\nIt also performs **no normalization or case folding**. Compare these exact\nsequences:\n\n| Input | Code points |\n|---|---|\n| Precomposed `é` | U+00E9 |\n| `e` followed by a combining acute accent | U+0065, U+0301 |\n\nWithout preprocessing, replace U+00E9 with U+0065 and insert U+0301: distance 2.\nThe strings may look identical. Applying NFC normalization to both before\ncomparison would make this pair equal, yielding 0; that is a different input\npolicy described by [Unicode normalization][normalization]. Similarly,\n`Cat → cat` costs 1 under the explorer's exact comparison.\n\n**Try it:** use `A😀 → A`, then precomposed `é → é`. Inspect the sequence\nlengths as well as the visible text. The lesson includes the exact code-point\nspellings so the distinction does not depend on your font.\n\n## 6. Keep the table's size in perspective\n\nFor source length **m** and target length **n**, the complete table has\n**(m+1)(n+1) cells**, including its empty-prefix row and column. There are\n**m × n interior cells**, each comparing three candidates. The numeric\ncalculation also initializes the boundary row and column. Keeping the complete\nnumeric matrix requires **(m+1)(n+1) stored values**, including when one input\nis empty. For nonempty inputs, the calculation and matrix storage scale with\nthe product of the lengths.\n\nThe explorer accepts up to **24 code points per input** so the full table stays\ninspectable. Two maximum-length inputs produce 25 × 25 = **625 cells**.\nThis is a display limit, not a mathematical limit on edit distance. Rendering\nsteps and retaining an exported trace are additional work beyond filling the\nnumeric matrix.\n\nAfter exploring, use **Download lesson JSON** for the optional RecallWeave\nquestions and **Download worked guide** for a local copy of this guide.\n\n## Lesson route\n\n| Concept | What the questions check |\n|---|---|\n| Allowed edits | Unit costs and the absence of a primitive swap |\n| Prefix boundaries | Empty prefixes and the length lower bound |\n| Table recurrence | Comparing candidates and carrying earlier cost |\n| Reading alignments | Gaps, zero-cost matches, and multiple optima |\n| Checking minimality | Constructive upper bounds and proofs of optimality |\n| Unicode sequences | Code points, visual characters, and normalization policy |\n\nThe first five concepts build toward explaining a shortest transformation.\nThe Unicode questions branch from the allowed-edit definition, because the\nchoice of symbol unit affects the problem before any matrix is filled.\n\n## References and reuse\n\nAll questions, examples, tables, and explanatory prose in this lesson were\nwritten for RecallWeave. This original course content is **CC0-1.0**. The\nreferences below provide background definitions and retain their own terms;\ntheir exercises, prose, and figures are not reproduced here. References were\nchecked on 2026-10-08.\n\n- [NIST Dictionary of Algorithms and Data Structures: Levenshtein distance][nist]\n  — the edit operations and standard matrix-computation cost.\n- [ECMAScript: String.prototype[Symbol.iterator]][ecma]\n  — string iteration and code-point boundaries.\n- [Unicode Standard Annex #29: Unicode Text Segmentation][graphemes]\n  — the distinction between code points and grapheme clusters.\n- [Unicode Standard Annex #15: Unicode Normalization Forms][normalization]\n  — canonical equivalence and normalization.\n\n[nist]: https://xlinux.nist.gov/dads/HTML/Levenshtein.html\n[ecma]: https://tc39.es/ecma262/multipage/text-processing.html#sec-string.prototype-%symbol.iterator%\n[graphemes]: https://www.unicode.org/reports/tr29/\n[normalization]: https://www.unicode.org/reports/tr15/\n"}</script>
+<script>/** Unit-cost Levenshtein distance over Unicode code points; no normalization. */
+const MAX_SEQUENCE_LENGTH = 24;
+
+function tokens(value, name) {
+  if (typeof value !== 'string') throw new TypeError(name + ' must be text.');
+  const result = Array.from(value);
+  if (result.some(token => token.length === 1 && token.charCodeAt(0) >= 0xd800 && token.charCodeAt(0) <= 0xdfff)) {
+    throw new RangeError(name + ' contains an unpaired Unicode surrogate.');
+  }
+  if (result.length > MAX_SEQUENCE_LENGTH) {
+    throw new RangeError(name + ' has ' + result.length + ' code points; use at most ' + MAX_SEQUENCE_LENGTH + '.');
+  }
+  return result;
+}
+
+/** Each event fills one interior cell. Step zero consists of the boundary cells. */
+function computeDistanceTrace(source, target) {
+  const a = tokens(source, 'Source'), b = tokens(target, 'Target');
+  const matrix = Array.from({ length: a.length + 1 }, () => Array(b.length + 1).fill(0));
+  for (let i = 0; i <= a.length; i++) matrix[i][0] = i;
+  for (let j = 0; j <= b.length; j++) matrix[0][j] = j;
+  const steps = [];
+  for (let i = 1; i <= a.length; i++) {
+    for (let j = 1; j <= b.length; j++) {
+      const same = a[i - 1] === b[j - 1];
+      const candidates = [
+        { operation: same ? 'match' : 'substitute', from: [i - 1, j - 1], previous: matrix[i - 1][j - 1], cost: same ? 0 : 1 },
+        { operation: 'delete', from: [i - 1, j], previous: matrix[i - 1][j], cost: 1 },
+        { operation: 'insert', from: [i, j - 1], previous: matrix[i][j - 1], cost: 1 }
+      ].map(candidate => ({ ...candidate, total: candidate.previous + candidate.cost }));
+      const value = Math.min(...candidates.map(candidate => candidate.total));
+      matrix[i][j] = value;
+      steps.push({ i, j, value, candidates, chosen: candidates.find(candidate => candidate.total === value).operation });
+    }
+  }
+  let i = a.length, j = b.length;
+  const alignment = [];
+  while (i > 0 || j > 0) {
+    let operation, cost, sourceToken = null, targetToken = null;
+    const end = [i, j];
+    // One deterministic optimum: diagonal, then deletion, then insertion.
+    if (i > 0 && j > 0 && matrix[i][j] === matrix[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1)) {
+      sourceToken = a[--i]; targetToken = b[--j];
+      cost = sourceToken === targetToken ? 0 : 1;
+      operation = cost ? 'substitute' : 'match';
+    } else if (i > 0 && matrix[i][j] === matrix[i - 1][j] + 1) {
+      sourceToken = a[--i]; operation = 'delete'; cost = 1;
+    } else {
+      targetToken = b[--j]; operation = 'insert'; cost = 1;
+    }
+    alignment.push({ operation, sourceToken, targetToken, cost, from: [i, j], to: end });
+  }
+  alignment.reverse();
+  return {
+    format: 'recallweave-edit-distance/1',
+    source, target, sourceTokens: a, targetTokens: b,
+    conventions: {
+      unit: 'Unicode code point', normalization: 'none', caseSensitive: true,
+      costs: { match: 0, insert: 1, delete: 1, substitute: 1 },
+      transposition: 'not an operation',
+      tieBreak: ['diagonal', 'delete', 'insert'],
+      inputLimit: MAX_SEQUENCE_LENGTH
+    },
+    matrix, steps, alignment, distance: matrix[a.length][b.length]
+  };
+}
+
+function serializeTrace(trace, inspectedStep = trace.steps.length) {
+  if (!Number.isInteger(inspectedStep) || inspectedStep < 0 || inspectedStep > trace.steps.length) {
+    throw new RangeError('Inspected step must be an available trace step.');
+  }
+  return JSON.stringify({ ...trace, inspectedStep, exportScope: 'complete trace, including steps after the inspected step' }, null, 2) + '\n';
+}
+
+
+const $ = id => document.getElementById(id);
+const source = $('source'), target = $('target'), view = $('trace-view');
+let trace = null, inspectedStep = 0;
+const label = token => token === null ? '∅' : JSON.stringify(token);
+const node = (tag, text, className) => {
+  const result = document.createElement(tag);
+  if (text !== undefined) result.textContent = text;
+  if (className) result.className = className;
+  return result;
+};
+const presets = {
+  classic: ['kitten', 'sitting'],
+  empty: ['', 'cat'],
+  ties: ['ab', 'ba'],
+  unicode: ['café', 'cafe\u0301'],
+  spaces: ['a b', 'ab'],
+  emoji: ['🐈a', '🐈b']
+};
+
+function setControls() {
+  const ready = trace !== null;
+  $('first').disabled = !ready || inspectedStep === 0;
+  $('previous').disabled = !ready || inspectedStep === 0;
+  $('next').disabled = !ready || inspectedStep === trace.steps.length;
+  $('finish').disabled = !ready || inspectedStep === trace.steps.length;
+  $('step').disabled = !ready || trace.steps.length === 0;
+  $('download-trace').disabled = !ready;
+}
+function retire() {
+  trace = null;
+  view.hidden = true;
+  $('error').textContent = '';
+  $('status').textContent = 'Inputs changed. Build a trace to use these values.';
+  setControls();
+}
+function renderMatrix() {
+  const table = node('table');
+  const caption = node('caption', 'D[i, j]: minimum cost for source prefix i and target prefix j. Rows are source prefixes; columns are target prefixes.');
+  table.append(caption);
+  const head = node('thead'), header = node('tr');
+  header.append(node('th', 'i \\ j'));
+  [null, ...trace.targetTokens].forEach((token, j) => {
+    const th = node('th', j + ': ' + label(token)); th.scope = 'col'; header.append(th);
+  });
+  head.append(header); table.append(head);
+  const body = node('tbody');
+  for (let i = 0; i < trace.matrix.length; i++) {
+    const row = node('tr');
+    const th = node('th', i + ': ' + label(i === 0 ? null : trace.sourceTokens[i - 1]));
+    th.scope = 'row'; row.append(th);
+    for (let j = 0; j < trace.matrix[i].length; j++) {
+      const eventNumber = (i - 1) * trace.targetTokens.length + j;
+      const known = i === 0 || j === 0 || eventNumber <= inspectedStep;
+      const current = i > 0 && j > 0 && eventNumber === inspectedStep;
+      const td = node('td', known ? String(trace.matrix[i][j]) : '·', current ? 'current' : (i === 0 || j === 0 ? 'boundary' : ''));
+      td.dataset.cell = i + ',' + j;
+      td.setAttribute('aria-label', 'D[' + i + ', ' + j + ']: ' + (known ? trace.matrix[i][j] : 'not computed yet'));
+      if (current) td.setAttribute('aria-current', 'step');
+      row.append(td);
+    }
+    body.append(row);
+  }
+  table.append(body); $('matrix').replaceChildren(table);
+}
+function render() {
+  view.hidden = false;
+  const done = inspectedStep === trace.steps.length;
+  $('step').max = String(trace.steps.length); $('step').value = String(inspectedStep);
+  $('step-count').textContent = 'Step ' + inspectedStep + ' of ' + trace.steps.length;
+  $('distance').textContent = done ? String(trace.distance) : '…';
+  $('distance-label').textContent = done ? 'Minimum edit cost' : 'Finish the trace to reveal the distance';
+  $('status').textContent = done ? 'Trace complete. Minimum cost ' + trace.distance + '.' : 'Inspecting step ' + inspectedStep + ' of ' + trace.steps.length + '.';
+  const candidates = $('candidates'); candidates.replaceChildren();
+  if (inspectedStep === 0) {
+    $('explanation').textContent = 'Start with D[i, 0] = i deletions and D[0, j] = j insertions. ' +
+      (done ? 'One sequence is empty, so the boundary already gives the answer.' : 'Each interior cell compares three ways to extend a smaller prefix solution.');
+  } else {
+    const event = trace.steps[inspectedStep - 1];
+    $('explanation').textContent = 'D[' + event.i + ', ' + event.j + '] compares ' +
+      label(trace.sourceTokens[event.i - 1]) + ' with ' + label(trace.targetTokens[event.j - 1]) +
+      '. The smallest candidate cost is ' + event.value + '.';
+    for (const candidate of event.candidates) {
+      candidates.append(node('li', candidate.operation + ': D[' + candidate.from.join(', ') + '] = ' + candidate.previous +
+        ', plus ' + candidate.cost + ' → ' + candidate.total +
+        (candidate.total === event.value ? ' (minimum)' : '')));
+    }
+  }
+  renderMatrix();
+  $('alignment-section').hidden = !done;
+  const alignment = $('alignment-body'); alignment.replaceChildren();
+  if (done) {
+    for (const item of trace.alignment) {
+      const row = node('tr');
+      [label(item.sourceToken), label(item.targetToken), item.operation, String(item.cost)].forEach(text => row.append(node('td', text)));
+      alignment.append(row);
+    }
+    if (!trace.alignment.length) {
+      const row = node('tr'), cell = node('td', 'Both sequences are empty. No operations are needed.');
+      cell.colSpan = 4; row.append(cell); alignment.append(row);
+    }
+  }
+  setControls();
+}
+function build(event) {
+  if (event) event.preventDefault();
+  try {
+    trace = computeDistanceTrace(source.value, target.value);
+    inspectedStep = 0;
+    $('error').textContent = '';
+    render();
+  } catch (error) {
+    trace = null; view.hidden = true; setControls();
+    $('error').textContent = error.message;
+    $('status').textContent = 'Trace could not be built.';
+  }
+}
+function download(name, content, type) {
+  const url = URL.createObjectURL(new Blob([content], { type }));
+  const link = node('a'); link.href = url; link.download = name;
+  document.body.append(link); link.click(); link.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+$('inputs').addEventListener('submit', build);
+[source, target].forEach(input => input.addEventListener('input', retire));
+$('load-example').addEventListener('click', () => {
+  [source.value, target.value] = presets[$('preset').value]; build();
+});
+for (const [id, move] of [['first', () => 0], ['previous', () => inspectedStep - 1], ['next', () => inspectedStep + 1], ['finish', () => trace.steps.length]]) {
+  $(id).addEventListener('click', () => { inspectedStep = move(); render(); });
+}
+$('step').addEventListener('input', () => { inspectedStep = Number($('step').value); render(); });
+$('download-trace').addEventListener('click', () => download('edit-distance-trace.json', serializeTrace(trace, inspectedStep), 'application/json'));
+const resources = JSON.parse($('course-resources').textContent);
+$('download-course').addEventListener('click', () => download('edit-distance.json', resources.course, 'application/json'));
+$('download-guide').addEventListener('click', () => download('edit-distance.md', resources.guide, 'text/markdown;charset=utf-8'));
+$('input-limit').textContent = String(MAX_SEQUENCE_LENGTH);
+build();
+</script>
+</body>
+</html>

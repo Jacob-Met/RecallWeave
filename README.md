@@ -6,6 +6,12 @@
 
 Open `demo.html` directly in a browser—no server, install, build step, internet, login, API key, or user data storage is required. It is a single self-contained file with embedded CSS, JavaScript and deck. The modular source is in `index.html`, `src/`, and `data/`; to test that version locally, serve this directory with `python3 -m http.server 8080` and visit `http://localhost:8080`. Rebuild the direct-open demo with `python3 tools/make_demo.py` after source changes. No hosted endpoint is called by either version.
 
+## Explore edit distance
+
+Open **[the edit-distance explorer](courses/edit-distance-explorer.html)** directly in a browser. Compare two strings of up to 24 Unicode code points, step through the prefix table, and inspect one alignment with minimum cost using insertion, deletion and substitution. The page saves the complete trace, original course and [worked guide](courses/edit-distance.md) through explicit download controls.
+
+The original [twelve-question course](courses/edit-distance.json) is also available in the [course catalog](catalog.html) and matching [offline course pack](offline/). Download it, choose it under **Bring your own lesson**, inspect the preview and select **Start this deck**. Rebuild the explorer with `node tools/build-edit-distance.mjs`; `--check` verifies the generated page against its sources.
+
 ## Explore RC transients
 
 Open **[RC transients: where the energy goes](courses/rc-transients-lab.html)** directly in a browser to follow the response of one resistor and capacitor after an ideal source step. Compare charging, discharge, reversed polarity, a precharged capacitor returning energy to the source, resistance scaling and equilibrium. Voltage, signed current, charge, stored energy, resistor heat and source work share the same applied circuit and time cursor.

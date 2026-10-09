@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>Edit distance, one cell at a time · RecallWeave</title>
+<style>
+:root{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:#162b35;background:#f5f5ed;font-size:16px;line-height:1.55;--green:#176c5b;--ink:#163b37}
+*{box-sizing:border-box}body{margin:0}main{max-width:1140px;margin:auto;padding:40px 24px 70px}header{max-width:840px;margin-bottom:30px}
+.eyebrow{font-size:.76rem;font-weight:750;letter-spacing:.16em;text-transform:uppercase;color:var(--green)}
+h1{font-size:clamp(2.2rem,5vw,3.7rem);line-height:1.06;letter-spacing:-.045em;margin:13px 0 18px}h2{font-size:1.3rem;line-height:1.3;margin:0 0 12px}p{margin:10px 0}.intro{font-size:1.1rem;max-width:700px;color:#40565c}.small{font-size:.9rem;color:#465d60}
+.card{background:#fff;border:1px solid #d5dfd7;border-radius:17px;padding:24px;margin:20px 0;box-shadow:0 5px 18px #142c2010}
+.inputs{display:grid;grid-template-columns:1fr 1fr auto;gap:18px;align-items:end}label{display:block;font-size:.91rem;font-weight:700}
+input[type=text],select{width:100%;font:inherit;color:inherit;border:1px solid #a4b8af;border-radius:8px;background:#fff;padding:11px 12px;margin-top:6px}
+button{font:inherit;font-weight:650;border:1px solid #91a89d;border-radius:8px;background:#fff;color:var(--ink);padding:10px 15px;cursor:pointer}
+button.primary{background:var(--green);color:#fff;border-color:var(--green)}button:disabled{opacity:.43;cursor:default}
+button:hover:not(:disabled){filter:brightness(.93)}:focus-visible{outline:3px solid #df8c22;outline-offset:3px}
+.examples,.toolbar,.downloads{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.examples{margin-top:18px}.examples label{font-weight:500}.examples select{width:auto;max-width:100%;margin:0}.toolbar{margin:15px 0}
+#step{flex:1;min-width:120px;accent-color:var(--green)}#step-count{font-variant-numeric:tabular-nums;min-width:112px}
+.trace-heading{display:flex;justify-content:space-between;gap:25px;align-items:center}.metric{background:#e9f4ed;padding:12px 21px;border-radius:12px;min-width:154px;text-align:center}.metric strong{font-size:2.7rem;line-height:1.1;display:block}.metric span{font-size:.77rem;display:block}
+.matrix-wrap{overflow:auto;border:1px solid #d5dfd7;border-radius:10px;margin:20px 0;max-height:520px;overscroll-behavior:contain}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}caption{text-align:left;padding:14px;font-size:.86rem;color:#40565c}th,td{padding:9px 12px;border:1px solid #e0e7e1;text-align:center;white-space:nowrap}th{background:#f3f6ef;font-size:.8rem;font-weight:650}td.boundary{background:#f0f6ed;color:#446349}td.current{background:#176c5b;color:#fff;font-weight:800;outline:3px solid #df8c22;outline-offset:-3px}
+.explanation{background:#f5f7f2;border-radius:10px;padding:16px 20px;min-height:108px}#candidates{margin:10px 0 0;padding-left:22px;font-size:.92rem}.alignment{max-width:650px;margin-top:12px}
+#error{color:#972f18;font-weight:650;min-height:1.5em}#status{min-height:1.5em}footer{padding-top:12px;border-top:1px solid #cbd8cc;color:#455d57;font-size:.85rem}.downloads{margin:16px 0}.rule{border-left:3px solid #cc872c;padding-left:14px}
+[hidden]{display:none!important}@media(max-width:640px){main{padding:25px 14px 45px}.card{padding:18px 15px}.inputs{grid-template-columns:1fr}.inputs button{width:100%}.trace-heading{align-items:flex-start}.metric{min-width:105px;padding:10px}.metric strong{font-size:2rem}th,td{padding:8px}.toolbar button{flex:1}.examples{align-items:stretch}.examples label{width:100%}}
+</style>
+</head>
+<body>
+<main>
+<header>
+<div class="eyebrow">RecallWeave / algorithm lab</div>
+<h1>Edit distance,<br>one cell at a time.</h1>
+<p class="intro">Turn one sequence into another using insertions, deletions and substitutions. Build the prefix table, inspect each choice, then follow one cheapest alignment.</p>
+</header>
+<section class="card" aria-labelledby="input-heading">
+<h2 id="input-heading">Choose two sequences</h2>
+<form id="inputs" class="inputs">
+<label for="source">Source<input id="source" type="text" value="kitten" autocomplete="off" spellcheck="false"></label>
+<label for="target">Target<input id="target" type="text" value="sitting" autocomplete="off" spellcheck="false"></label>
+<button class="primary" type="submit">Build trace</button>
+</form>
+<p class="small">Up to <span id="input-limit">24</span> Unicode code points each. Empty inputs are allowed; spaces count. Case is significant; no normalization is applied.</p>
+<div class="examples"><label for="preset">Try an example</label><select id="preset">
+<option value="classic">kitten → sitting</option><option value="empty">Empty → cat</option><option value="ties">ab → ba: tied paths</option><option value="unicode">Composed vs decomposed accent</option><option value="spaces">A space is a character</option><option value="emoji">Emoji count as one code point</option>
+</select><button id="load-example" type="button">Load example</button></div>
+<p id="error" role="alert"></p>
+<p id="status" class="small" aria-live="polite"></p>
+</section>
+<section id="trace-view" class="card" aria-labelledby="trace-heading">
+<div class="trace-heading"><div><div class="eyebrow">Prefix by prefix</div><h2 id="trace-heading">Build the distance matrix</h2><p class="small">Rows consume source characters. Columns consume target characters.</p></div><div class="metric"><strong id="distance">…</strong><span id="distance-label">Minimum edit cost</span></div></div>
+<div class="toolbar" aria-label="Trace controls"><button id="first" type="button">First</button><button id="previous" type="button">Previous</button><button id="next" type="button">Next</button><button id="finish" type="button">Finish</button><label class="small" for="step">Inspect step</label><input id="step" type="range" min="0" value="0"><output id="step-count" for="step"></output></div>
+<div class="explanation"><p id="explanation"></p><ul id="candidates"></ul></div>
+<div id="matrix" class="matrix-wrap" tabindex="0" aria-label="Distance matrix; scroll horizontally for wider sequences"></div>
+<p class="small">Header <strong>0: ∅</strong> means the empty prefix. Later headers show prefix length and its last code point, quoted so spaces stay visible. A dot marks a cell not computed yet.</p>
+<section id="alignment-section" hidden aria-labelledby="alignment-heading">
+<h2 id="alignment-heading">One optimal alignment</h2>
+<p class="small">Read top to bottom. ∅ is a gap. Matches cost 0; every other row costs 1. Equal-cost choices prefer a diagonal move, then deletion, then insertion. Other optimal alignments can exist.</p>
+<table class="alignment"><thead><tr><th scope="col">Source</th><th scope="col">Target</th><th scope="col">Operation</th><th scope="col">Cost</th></tr></thead><tbody id="alignment-body"></tbody></table>
+</section>
+<div class="downloads"><button id="download-trace" type="button">Download full trace JSON</button></div>
+<p class="small">The export includes every cell and the complete alignment, even while you inspect an earlier step. It records your selected step separately.</p>
+</section>
+<section class="card" aria-labelledby="practice-heading"><div class="eyebrow">Explain it, then practise</div><h2 id="practice-heading">Carry the idea into a lesson</h2>
+<p>Download the optional RecallWeave deck and open it through “Bring your own lesson” in the learner. Preview it, then choose “Start this deck”. The companion guide includes a worked table and questions to ask while tracing.</p>
+<div class="downloads"><button id="download-course" type="button">Download lesson JSON</button><button id="download-guide" type="button">Download worked guide</button></div>
+<p class="rule small">This is unit-cost Levenshtein distance. Swapping adjacent characters is not a single operation. Code points can differ from what looks like one letter: combining marks are separate, and text is not normalized.</p>
+</section>
+<footer>This explorer works offline as one HTML file. Inputs stay in this page; it uses no account, storage, analytics or network request. Downloads happen only when you select a download button. Original RecallWeave learning material.</footer>
+</main>
+<script id="course-resources" type="application/json">__RESOURCES__</script>
+<script>__SCRIPT__</script>
+</body>
+</html>

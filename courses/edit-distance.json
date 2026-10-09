@@ -1,0 +1,216 @@
+{
+  "format": "recallweave-deck/1",
+  "title": "Edit distance: build and explain an optimal alignment",
+  "attribution": "Original questions, worked examples and explanations for RecallWeave, 2026. Background references: NIST Dictionary of Algorithms and Data Structures, Levenshtein distance (https://xlinux.nist.gov/dads/HTML/Levenshtein.html); ECMAScript String iteration (https://tc39.es/ecma262/multipage/text-processing.html#sec-string.prototype-%symbol.iterator%); Unicode UAX #29, grapheme clusters (https://www.unicode.org/reports/tr29/), and UAX #15, normalization (https://www.unicode.org/reports/tr15/). References explain the underlying definitions; no source exercises, prose or figures are reproduced.",
+  "license": "CC0-1.0 for this original course content. Referenced materials retain their own terms and are not included in this deck.",
+  "concepts": [
+    "Allowed edits",
+    "Prefix boundaries",
+    "Table recurrence",
+    "Reading alignments",
+    "Checking minimality",
+    "Unicode sequences"
+  ],
+  "items": [
+    {
+      "id": "ed-operations-substitute",
+      "concept": "Allowed edits",
+      "prerequisites": [],
+      "prompt": "Use unit-cost Levenshtein distance: insert, delete or substitute one symbol for cost 1; keeping an equal symbol costs 0. What is the distance from \"cat\" to \"cut\"?",
+      "options": [
+        "0, because both strings have three symbols.",
+        "1, by substituting u for a.",
+        "2, because every substitution must be a deletion followed by an insertion.",
+        "3, because every position must be edited."
+      ],
+      "answer": 1,
+      "explanation": "Keep c and t, and replace a with u. This is one allowed substitution. Zero edits would leave cat unchanged, so the distance cannot be 0. A one-edit construction and the impossibility of zero edits together establish distance 1. Deleting a and inserting u would also work, but would cost 2.",
+      "transfer": "For cat → cats, insert s at the end: distance 1. For cats → cat, delete that s: also distance 1. The permitted operations each have their own unit cost; a substitution does not have to be implemented as two edits."
+    },
+    {
+      "id": "ed-operations-no-swap",
+      "concept": "Allowed edits",
+      "prerequisites": [],
+      "prompt": "This course permits single-symbol insertion, deletion and substitution; swapping two symbols is not a primitive operation. What is the distance from \"ab\" to \"ba\"?",
+      "options": [
+        "1, because a neighboring swap always counts as one edit.",
+        "0, because the strings contain the same symbols.",
+        "2, for example by substituting both positions.",
+        "The transformation is impossible without a swap operation."
+      ],
+      "answer": 2,
+      "explanation": "Substitute the first a with b and the second b with a, for total cost 2. One substitution cannot correct both positions, and a single insertion or deletion changes the length. Thus no one-edit transformation works. Deleting the first a and inserting an a after b is another two-edit solution.",
+      "transfer": "Changing the allowed operations changes the problem. If an adjacent swap were explicitly available for cost 1, this pair could have distance 1. The explorer implements the three-operation rule stated here, so do not import a swap rule from another distance definition."
+    },
+    {
+      "id": "ed-boundary-empty",
+      "concept": "Prefix boundaries",
+      "prerequisites": [
+        "Allowed edits"
+      ],
+      "prompt": "Let D[i,j] be the distance from the first i source symbols to the first j target symbols. For source \"ink\" and an empty target, what are D[0,0] and D[3,0]?",
+      "options": [
+        "D[0,0] = 0 and D[3,0] = 3.",
+        "D[0,0] = 1 and D[3,0] = 3.",
+        "D[0,0] = 0 and D[3,0] = 0.",
+        "Both values are undefined because the target is empty."
+      ],
+      "answer": 0,
+      "explanation": "Two empty prefixes already match, so D[0,0] = 0. Turning ink into the empty string requires deleting its three symbols, so D[3,0] = 3. In general the left boundary is D[i,0] = i and the top boundary is D[0,j] = j. These values give the interior recurrence usable starting points.",
+      "transfer": "Reverse the direction: the empty source becomes ink with three insertions, so D[0,3] = 3. The empty prefix occupies a genuine row and column in the table; it is not a missing input or a symbol that costs an edit to remove."
+    },
+    {
+      "id": "ed-boundary-length-bound",
+      "concept": "Prefix boundaries",
+      "prerequisites": [
+        "Allowed edits"
+      ],
+      "prompt": "A source has 7 symbols and a target has 3. Their symbols are otherwise unspecified. What is the strongest lower bound on unit-cost edit distance that follows from the lengths alone?",
+      "options": [
+        "At least 7 edits.",
+        "At least 3 edits.",
+        "At least 4 edits.",
+        "At least 0 edits is the strongest available bound."
+      ],
+      "answer": 2,
+      "explanation": "The net length must decrease by 4. Each deletion decreases it by 1, each insertion increases it by 1, and substitution does not change it. Therefore at least 4 edits are necessary. This is a lower bound, not an exact answer: aaaaaaa → aaa attains 4 deletions, while abcdefg → xyz needs 7 edits.",
+      "transfer": "Equal lengths give the length-only lower bound 0, but they do not imply equal strings. For abc → xyz the actual distance is 3. Use the bound to rule out impossible low answers, then inspect the symbols to find the true minimum."
+    },
+    {
+      "id": "ed-recurrence-delete",
+      "concept": "Table recurrence",
+      "prerequisites": [
+        "Prefix boundaries"
+      ],
+      "prompt": "Rows consume source symbols and columns consume target symbols. At D[3,2] for \"car\" → \"ca\", the available neighbors are D[2,2] = 0, D[3,1] = 2 and D[2,1] = 1. The last source symbol r differs from the last target symbol a. Which candidate gives the minimum?",
+      "options": [
+        "Insertion: D[3,1] + 1 = 3.",
+        "Substitution: D[2,1] + 1 = 2.",
+        "Matching r with a at no cost: D[2,1] + 0 = 1.",
+        "Deletion: D[2,2] + 1 = 1."
+      ],
+      "answer": 3,
+      "explanation": "Delete the final source r. The remaining prefixes are ca and ca, whose distance is D[2,2] = 0; adding the deletion gives 1. The insertion candidate is 3, and the diagonal substitution candidate is 2. The diagonal has cost 0 only when the compared symbols are equal, which r and a are not.",
+      "transfer": "At an interior cell, compare three candidates: D[i-1,j] + 1 for deletion, D[i,j-1] + 1 for insertion, and D[i-1,j-1] plus 0 for an equal pair or 1 for a substitution. Each candidate includes the best cost for its smaller prefixes."
+    },
+    {
+      "id": "ed-recurrence-match-prefix",
+      "concept": "Table recurrence",
+      "prerequisites": [
+        "Prefix boundaries"
+      ],
+      "prompt": "For \"ab\" → \"cb\", the final symbols b and b match. The diagonal neighbor D[1,1], comparing \"a\" with \"c\", is 1. Both insertion and deletion candidates at D[2,2] cost 3. What is D[2,2]?",
+      "options": [
+        "0, because the final symbols match.",
+        "2, because each two-symbol string contributes one edit.",
+        "3, because insertion and deletion both cost 3 here.",
+        "1, because the matching pair adds 0 to the earlier cost 1."
+      ],
+      "answer": 3,
+      "explanation": "The diagonal candidate is D[1,1] + 0 = 1. Keeping the final b does not erase the earlier a-to-c substitution. A table entry is the total distance between entire prefixes, not just the cost of comparing their last symbols. The minimum of 3, 3 and 1 is 1.",
+      "transfer": "For ab → ab, that earlier diagonal cost would instead be 0, giving total distance 0. The same matching last pair can follow prefixes with different costs; the recurrence must carry the neighbor's accumulated value forward."
+    },
+    {
+      "id": "ed-alignment-cost",
+      "concept": "Reading alignments",
+      "prerequisites": [
+        "Table recurrence"
+      ],
+      "prompt": "An alignment for \"pan\" → \"plan\" has four columns: p/p, gap/l, a/a, n/n. A gap means that one side has no symbol in that column. What is the alignment's edit cost?",
+      "options": [
+        "4, because there are four alignment columns.",
+        "1, because only the gap/l column is an edit.",
+        "2, because a gap costs once on each side.",
+        "0, because every source symbol occurs in the target."
+      ],
+      "answer": 1,
+      "explanation": "The three equal pairs are matches costing 0. The gap on the source side pairs with the target l and represents one insertion costing 1. Thus the alignment costs 1, although it has four columns. Its source symbols in order reconstruct pan; its target symbols reconstruct plan.",
+      "transfer": "Reverse the direction and the l/gap column becomes a deletion, still costing 1. Count inserted, deleted and substituted symbols to obtain edit cost; counting all alignment columns also counts the zero-cost matches."
+    },
+    {
+      "id": "ed-alignment-ties",
+      "concept": "Reading alignments",
+      "prerequisites": [
+        "Table recurrence"
+      ],
+      "prompt": "For \"ab\" → \"ba\", one alignment uses two substitutions. Another deletes the first a, keeps b and inserts a at the end. Both cost 2, and no one-edit transformation works. What should you conclude if the explorer displays only the first alignment?",
+      "options": [
+        "Both are optimal; the displayed tie choice does not make the other alignment wrong.",
+        "Only the displayed alignment can be optimal.",
+        "The distance is 4 because the costs of both alignments must be added.",
+        "The algorithm failed because an optimum must be unique."
+      ],
+      "answer": 0,
+      "explanation": "Distance is the minimum cost, which is 2 here. Multiple alignments may attain that minimum. The explorer chooses one reproducible path by preferring a diagonal predecessor, then deletion, then insertion when candidate costs tie. That display rule selects one answer without proving it is the only optimal alignment.",
+      "transfer": "When comparing two implementations, first check that each alignment reconstructs both inputs and has the claimed minimum cost. Different gap placement alone need not be a defect. A particular tie policy is useful for reproducible displays, but it is separate from the value of the distance."
+    },
+    {
+      "id": "ed-minimality-shift",
+      "concept": "Checking minimality",
+      "prerequisites": [
+        "Reading alignments"
+      ],
+      "prompt": "All three same-position pairs differ in \"abc\" → \"bca\". However, deleting the first a and inserting a at the end gives two edits. What is the unit-cost Levenshtein distance?",
+      "options": [
+        "3, because three positions differ.",
+        "1, because the symbols only rotate.",
+        "2: the two-edit construction works, and no single permitted edit can work.",
+        "0, because the two strings have the same symbol counts."
+      ],
+      "answer": 2,
+      "explanation": "The construction abc → bc → bca has cost 2. One insertion or deletion would change the length; one substitution could fix only one of the three differing positions. So distance is at least 2 and at most 2, establishing exactly 2. Counting same-position mismatches considers only substitutions and can miss cheaper alignments with gaps.",
+      "transfer": "This is a reusable proof pattern: supply an edit script for an upper bound and rule out all smaller costs for a lower bound. A valid script alone establishes only that the distance is no larger than its cost."
+    },
+    {
+      "id": "ed-minimality-concatenate",
+      "concept": "Checking minimality",
+      "prerequisites": [
+        "Reading alignments"
+      ],
+      "prompt": "You have a valid 2-edit script from sequence A to sequence B and a valid 3-edit script from B to C. You have not checked whether either script is shortest. What can you conclude about the distance from A to C?",
+      "options": [
+        "It must equal 5.",
+        "It must be at least 5.",
+        "Nothing can be concluded because B is an intermediate sequence.",
+        "It is at most 5; a shorter direct script might exist."
+      ],
+      "answer": 3,
+      "explanation": "Perform the first script and then the second to obtain a valid five-edit transformation from A to C. Since distance chooses the cheapest valid transformation, it is at most 5. The route through B might take unnecessary edits or even undo earlier edits, so this does not establish equality or a lower bound.",
+      "transfer": "A simple extreme case is A = C. You can take an edited detour through a different B and return, but the direct distance from A to itself is 0. An available route and a shortest route answer different questions."
+    },
+    {
+      "id": "ed-unicode-codepoints",
+      "concept": "Unicode sequences",
+      "prerequisites": [
+        "Allowed edits"
+      ],
+      "prompt": "This explorer treats Unicode code points as symbols. The source is \"A😀\" and the target is \"A\". The emoji 😀 is one code point even though JavaScript stores it using two UTF-16 code units. What is the distance?",
+      "options": [
+        "1, by deleting the one emoji code point.",
+        "2, because the emoji occupies two UTF-16 code units.",
+        "0, because emoji are ignored.",
+        "3, because all stored code units must be replaced."
+      ],
+      "answer": 0,
+      "explanation": "The source has two symbols under the stated rule: A and 😀. Keep A and delete 😀 for cost 1. The explorer iterates code points rather than splitting that emoji into its two UTF-16 code units. Choosing a symbol unit is part of defining the problem, not an incidental detail of the display.",
+      "transfer": "Code points also differ from user-perceived characters. An accented letter or an emoji sequence can consist of several code points that appear together. This course uses code points consistently; it does not claim to measure how many visual keystrokes a person would need."
+    },
+    {
+      "id": "ed-unicode-normalization",
+      "concept": "Unicode sequences",
+      "prerequisites": [
+        "Allowed edits"
+      ],
+      "prompt": "No normalization is performed. Compare precomposed \"é\" (one code point, U+00E9) with \"é\" (two code points: U+0065 followed by combining acute accent U+0301). They may look the same. What is their code-point edit distance?",
+      "options": [
+        "0, because identical-looking text always has identical code points.",
+        "2, by replacing U+00E9 with U+0065 and inserting U+0301.",
+        "1, because a visual accent is always a single inserted symbol.",
+        "The inputs must be rejected because Unicode permits only one spelling."
+      ],
+      "answer": 1,
+      "explanation": "The source sequence contains one code point and the target contains two different code points. Substitute e for precomposed é, then insert the combining accent: two edits. A single substitution cannot increase the length, and a single insertion would leave the original U+00E9 in the result. Therefore one edit cannot suffice, and the distance is 2.",
+      "transfer": "Normalizing both sequences to NFC before comparison would make this pair equal and give distance 0. That is a different preprocessing policy, which this explorer deliberately does not apply. Case is also preserved: Cat → cat has distance 1 here."
+    }
+  ]
+}
