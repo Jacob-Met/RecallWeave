@@ -1,0 +1,156 @@
+{
+  "schema": "recallweave.convex-hull.visual-correction-source/1",
+  "worker": "estate-234cae4aee53/root",
+  "frozenAtUtc": "2026-10-09 00:44:36 UTC",
+  "issue": 163,
+  "baselineCustodyCommit": "a9c36fed1a0b9ea53d47d916fb6c944b827b9360",
+  "baselineCustodyTree": "720e366e2a68fade26bde0e17b5a98703a646399",
+  "expectations": {
+    "gitBlob": "10e83a3ca94a7539d48b6fd41437bc7d386a0e13",
+    "bytes": 4702,
+    "sha256": "840a52c087d1c03771fab4d390b056f457cc4fe0b98518b442665907720452f9",
+    "tree": "9af605f6757dace1fb67573c79770e3eb3dce647",
+    "frozenBeforeChangedSourceExposure": true
+  },
+  "finding": {
+    "nativeEnvelope": "74f94cf5be44426ef77c8cb1fcb616605ac9bc3a",
+    "ownerHandoff": 6071322256,
+    "rootAudit": "5815d507f30a2f2a718300dcdf819aff0f701e33",
+    "witness": [
+      [
+        -2,
+        -1
+      ],
+      [
+        2,
+        -1
+      ],
+      [
+        2,
+        2
+      ],
+      [
+        -2,
+        2
+      ],
+      [
+        0,
+        0
+      ],
+      [
+        2,
+        0
+      ],
+      [
+        -2,
+        -1
+      ]
+    ],
+    "rootOriginalCapturesViewed": [
+      "output/screenshots/desktop-complete.jpg",
+      "output/screenshots/phone-diagram.jpg"
+    ],
+    "observed": "Original fixed-scale compact rectangle has overlapping point labels and markers at desktop and390px."
+  },
+  "sourcePins": [
+    {
+      "path": "src/convex-hull-ui.mjs",
+      "bytes": 8531,
+      "sha256": "cafc80525a8735320f10912640af509d927b17243e677ac0fc2f2c4f2ea70b03",
+      "gitBlob": "3ce5a1a62ee6bf56c306157a7642452d7c910a5f"
+    },
+    {
+      "path": "templates/convex-hull-explorer.html",
+      "bytes": 7000,
+      "sha256": "8a5d51c09ae2b947bcf1b23459b73cceac65fa58295675fdfec7a12b2183aed4",
+      "gitBlob": "780a67d78af2a007fa9d615bfd3cee14a2b7f6bc"
+    },
+    {
+      "path": "courses/convex-hull-explorer.html",
+      "bytes": 44753,
+      "sha256": "142f36241cf436ed5db4b297da394216bff14fbb9e15527387868c28f852db57",
+      "gitBlob": "ccf4ec7469a324572ee5cc0834a56c2182ea6f3b"
+    }
+  ],
+  "sourceOnlyChanges": [
+    "Use one equal x/y scale from all unique input coordinates, with minimum finite extent1 and empty/no-result extent20.",
+    "Keep fitted input positions stable across inspected trace steps; preserve origin-centered x-right/y-up axes.",
+    "Show exact positive/negative extent ticks and visible equal-scale caption.",
+    "Increase point-label font to22 SVGunits, move right-half labels inward, and use a light text outline for legibility."
+  ],
+  "scopePreserved": [
+    "All geometry/model bytes",
+    "All course and guide bytes",
+    "Original input/representative identities and table",
+    "All event handlers, input admission, trace serialization, lesson/guide download code",
+    "Existing tests and builder"
+  ],
+  "materialization": {
+    "method": "In-memory JavaScript text assembly using exact unchanged builder substitution recipe",
+    "recipeReproducedOriginalPageByteExactly": true,
+    "courseAdmissionRerun": false,
+    "nativeBuilderExecutedForNewCandidate": false,
+    "nativeBuilderAndCheckRequiredBeforeVisualAcceptance": true
+  },
+  "gates": {
+    "nativeSyntax": "unrun at freeze",
+    "nativeBuilder": "unrun at freeze",
+    "focusedNativeVisual": "unrun at freeze",
+    "old15BrowserGroups": "received separately; unchanged original receipt retained",
+    "mainIntegration": "held"
+  },
+  "boundaries": [
+    "No universal nonoverlap guarantee for every16-point arrangement.",
+    "No geometry, model, lesson or learner gate replay requested.",
+    "Actual existing receiving owner must separately receive changed source and retain full original result on failure.",
+    "No browser generated mockup, host install, new host probe, Actions, PR, ref or merge accompanies source freeze."
+  ],
+  "sourceDelta": {
+    "uiReplacements": [
+      {
+        "before": "    const svg = get('#hull-diagram');\n    svg.replaceChildren();",
+        "after": "    const svg = get('#hull-diagram');\n    // Fit every input coordinate, including points outside the inspected stack.\n    // A single scale preserves angles and stays fixed while stepping the trace.\n    const extent = result && result.unique.length\n      ? Math.max(1, ...result.unique.flatMap(point => [Math.abs(point.x), Math.abs(point.y)]))\n      : 20;\n    const scale = 180 / extent;\n    const position = point => ({x:260 + point.x * scale,y:260 - point.y * scale});\n    get('#plot-scale').textContent = 'Both axes use the same scale. Marked ticks: −' + extent + ' and ' + extent + '.';\n    svg.replaceChildren();"
+      },
+      {
+        "before": "      svgNode('text', {x:267,y:38,class:'axis-label'}, 'y'));\n",
+        "after": "      svgNode('text', {x:267,y:38,class:'axis-label'}, 'y'));\n    for (const [x, label] of [[80, '−' + extent], [440, String(extent)]]) {\n      svg.append(svgNode('line', {x1:x,y1:254,x2:x,y2:266,class:'axis'}),\n        svgNode('text', {x,y:290,'text-anchor':'middle',class:'axis-label'}, label));\n    }\n    for (const [y, label] of [[80, String(extent)], [440, '−' + extent]]) {\n      svg.append(svgNode('line', {x1:254,y1:y,x2:266,y2:y,class:'axis'}),\n        svgNode('text', {x:242,y:y+6,'text-anchor':'end',class:'axis-label'}, label));\n    }\n"
+      },
+      {
+        "before": "    const pixel = id => { const p = byId.get(id); return (260 + p.x * 10) + ',' + (260 - p.y * 10); };",
+        "after": "    const pixel = id => { const p = position(byId.get(id)); return p.x + ',' + p.y; };"
+      },
+      {
+        "before": "      const cx = 260 + point.x * 10, cy = 260 - point.y * 10;",
+        "after": "      const {x:cx,y:cy} = position(point);"
+      },
+      {
+        "before": "      svg.append(circle, svgNode('text', {x:cx + (point.x > 10 ? -8 : 8),y:cy-8,\n        'text-anchor':point.x > 10 ? 'end' : 'start',class:'point-label'}, label));",
+        "after": "      svg.append(circle, svgNode('text', {x:cx + (cx > 260 ? -12 : 12),y:cy-12,\n        'text-anchor':cx > 260 ? 'end' : 'start',class:'point-label'}, label));"
+      }
+    ],
+    "templateReplacements": [
+      {
+        "before": ".axis-label{fill:#637b78;font-size:14px}",
+        "after": ".axis-label{fill:#637b78;font-size:18px}"
+      },
+      {
+        "before": ".point-label{fill:var(--ink);font:13px system-ui}",
+        "after": ".point-label{fill:var(--ink);font:22px system-ui;paint-order:stroke;stroke:#fbfcf8;stroke-width:3px;stroke-linejoin:round}"
+      },
+      {
+        "before": "<p class=\"small\">Solid line: inspected chain or completed hull.",
+        "after": "<p id=\"plot-scale\" class=\"small\"></p>\n<p class=\"small\">Solid line: inspected chain or completed hull."
+      }
+    ],
+    "execution": "unexecuted; native builder and focused receiving pending",
+    "checkpointUtc": "2026-10-09 00:43:45 UTC",
+    "pageAssembly": "Exact unchanged builder text-substitution recipe in JavaScript; reproduces canonical original page. Actual native builder/check for changed sources remains pending with receiving owner."
+  },
+  "hashReceipt": {
+    "chunk_id": "800863",
+    "wall_time_seconds": 0.000029234,
+    "exit_code": 0,
+    "original_token_count": 156,
+    "output": "{\"at\":\"2026-10-09T00:44:15.285Z\",\"sourceCodeExecuted\":false,\"rows\":[{\"path\":\"src/convex-hull-ui.mjs\",\"bytes\":8531,\"sha256\":\"cafc80525a8735320f10912640af509d927b17243e677ac0fc2f2c4f2ea70b03\",\"gitBlob\":\"3ce5a1a62ee6bf56c306157a7642452d7c910a5f\"},{\"path\":\"templates/convex-hull-explorer.html\",\"bytes\":7000,\"sha256\":\"8a5d51c09ae2b947bcf1b23459b73cceac65fa58295675fdfec7a12b2183aed4\",\"gitBlob\":\"780a67d78af2a007fa9d615bfd3cee14a2b7f6bc\"},{\"path\":\"courses/convex-hull-explorer.html\",\"bytes\":44753,\"sha256\":\"142f36241cf436ed5db4b297da394216bff14fbb9e15527387868c28f852db57\",\"gitBlob\":\"ccf4ec7469a324572ee5cc0834a56c2182ea6f3b\"}]}\n"
+  }
+}

@@ -28,22 +28,19 @@ export function mountHull(documentRoot, deckText, guideText) {
     const extent = result && result.unique.length
       ? Math.max(1, ...result.unique.flatMap(point => [Math.abs(point.x), Math.abs(point.y)]))
       : 20;
-    const scale = 200 / extent;
-    const labelSize = Math.min(22, 13 * scale / 10);
-    const labelOffset = Math.min(12, 8 * scale / 10);
-    const labelOutline = scale === 10 ? 0 : 3;
+    const scale = 180 / extent;
     const position = point => ({x:260 + point.x * scale,y:260 - point.y * scale});
     get('#plot-scale').textContent = 'Both axes use the same scale. Marked ticks: −' + extent + ' and ' + extent + '.';
     svg.replaceChildren();
     svg.append(svgNode('line', {x1:40,y1:260,x2:480,y2:260,class:'axis'}),
       svgNode('line', {x1:260,y1:40,x2:260,y2:480,class:'axis'}),
       svgNode('text', {x:484,y:254,class:'axis-label'}, 'x'),
-      svgNode('text', {x:267,y:22,class:'axis-label'}, 'y'));
-    for (const [x, label] of [[60, '−' + extent], [460, String(extent)]]) {
+      svgNode('text', {x:267,y:38,class:'axis-label'}, 'y'));
+    for (const [x, label] of [[80, '−' + extent], [440, String(extent)]]) {
       svg.append(svgNode('line', {x1:x,y1:254,x2:x,y2:266,class:'axis'}),
         svgNode('text', {x,y:290,'text-anchor':'middle',class:'axis-label'}, label));
     }
-    for (const [y, label] of [[60, String(extent)], [460, '−' + extent]]) {
+    for (const [y, label] of [[80, String(extent)], [440, '−' + extent]]) {
       svg.append(svgNode('line', {x1:254,y1:y,x2:266,y2:y,class:'axis'}),
         svgNode('text', {x:242,y:y+6,'text-anchor':'end',class:'axis-label'}, label));
     }
@@ -61,9 +58,8 @@ export function mountHull(documentRoot, deckText, guideText) {
       const circle = svgNode('circle', {cx,cy,r:5,class:step.after.includes(point.id) ? 'point active-point' : 'point'});
       circle.append(svgNode('title', {}, point.inputIds.join(', ') + ': (' + point.x + ', ' + point.y + ')'));
       const label = point.id + (point.inputIds.length > 1 ? ' ×' + point.inputIds.length : '');
-      svg.append(circle, svgNode('text', {x:cx + (cx > 360 ? -labelOffset : labelOffset),y:cy-labelOffset,
-        'text-anchor':cx > 360 ? 'end' : 'start',class:'point-label',
-        style:'font-size:' + labelSize + 'px;stroke-width:' + labelOutline + 'px'}, label));
+      svg.append(circle, svgNode('text', {x:cx + (cx > 260 ? -12 : 12),y:cy-12,
+        'text-anchor':cx > 260 ? 'end' : 'start',class:'point-label'}, label));
     }
     svg.setAttribute('aria-label', 'Input points and ' + (step.phase === 'complete' ? 'completed ' + result.kind : step.phase + ' chain') + '; exact identities and coordinates follow below.');
   }

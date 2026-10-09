@@ -1,0 +1,97 @@
+{
+  "schema": "recallweave-independent-hull-archive-audit/1",
+  "canonicalEnvelopeBlob": "74f94cf5be44426ef77c8cb1fcb616605ac9bc3a",
+  "verifierSource": "import sys,termios,json,hashlib,base64,gzip\na=termios.tcgetattr(0);a[3]&=~(termios.ECHO|termios.ICANON);termios.tcsetattr(0,termios.TCSANOW,a)\nprint(\"HULL_ARCHIVE_VERIFY_READY\",flush=True)\nenvelope=json.loads(sys.stdin.readline());p=envelope[\"packet\"]\npacked=base64.b64decode(p[\"content\"],validate=True)\nassert len(packed)==p[\"gzipBytes\"] and hashlib.sha256(packed).hexdigest()==p[\"gzipSha256\"]\nraw=gzip.decompress(packed);assert len(raw)==p[\"decodedBytes\"]\npacket=json.loads(raw);decoded={}\nfor name,entry in packet[\"files\"].items():\n b=base64.b64decode(entry[\"content\"],validate=True)\n assert len(b)==entry[\"bytes\"] and hashlib.sha256(b).hexdigest()==entry[\"sha256\"],name\n decoded[name]=b\nfor pin in envelope[\"candidatePins\"]:\n b=decoded[pin[\"path\"]]\n assert len(b)==pin[\"bytes\"] and hashlib.sha256(b).hexdigest()==pin[\"sha256\"],pin[\"path\"]\n assert hashlib.sha1(b\"blob \"+str(len(b)).encode()+b\"\\0\"+b).hexdigest()==pin[\"gitBlob\"],pin[\"path\"]\nfor name,expected in [(\"independent-browser.mjs\",envelope[\"receiverBlob\"]),(\"recipient-contract.json\",envelope[\"recipientContractBlob\"])]:\n b=decoded[name];assert hashlib.sha1(b\"blob \"+str(len(b)).encode()+b\"\\0\"+b).hexdigest()==expected\nreceipt=json.loads(decoded[\"output/receipt.json\"]);native=json.loads(decoded[\"native.json\"])\nassert receipt==packet[\"receipt\"] and native==packet[\"native\"]\nassert native[\"exitCode\"]==0 and native[\"timeout\"] is False\nassert receipt[\"status\"]==\"pass\" and len(receipt[\"groups\"])==15 and all(g[\"status\"]==\"pass\" for g in receipt[\"groups\"])\nassert receipt[\"sourcePreserved\"] and receipt[\"rawStreamsComplete\"] and receipt[\"cleanupErrors\"]==[]\nassert receipt[\"childLifecycle\"][\"closed\"] and receipt[\"childLifecycle\"][\"exitCode\"]==0 and receipt[\"childLifecycle\"][\"signal\"] is None\nassert decoded[\"output/downloads/actual-convex-hull.json\"]==decoded[\"courses/convex-hull.json\"]\nassert decoded[\"output/downloads/actual-convex-hull.md\"]==decoded[\"courses/convex-hull.md\"]\nimages=[{\"path\":n,\"bytes\":len(b),\"sha256\":hashlib.sha256(b).hexdigest()} for n,b in decoded.items() if n.startswith(\"output/screenshots/\")]\nassert len(images)==5 and all(decoded[i[\"path\"]].startswith(b\"\\xff\\xd8\") and decoded[i[\"path\"]].endswith(b\"\\xff\\xd9\") for i in images)\nprint(json.dumps({\"schema\":\"recallweave-independent-hull-archive-integrity/1\",\"status\":\"pass\",\"canonicalEnvelopeBlob\":\"74f94cf5be44426ef77c8cb1fcb616605ac9bc3a\",\"gzipSha256\":p[\"gzipSha256\"],\"gzipBytes\":len(packed),\"decodedBytes\":len(raw),\"verifiedFiles\":len(decoded),\"verifiedOwnerPins\":len(envelope[\"candidatePins\"]),\"receiverGitBlob\":envelope[\"receiverBlob\"],\"nativeExit\":native[\"exitCode\"],\"groups\":len(receipt[\"groups\"]),\"sourcePreserved\":True,\"rawStreamsComplete\":True,\"exactLessonGuideDownloads\":True,\"images\":images}),flush=True)\n",
+  "native": {
+    "chunk_id": "bc1c29",
+    "wall_time_seconds": 0.000039159,
+    "exit_code": 0,
+    "original_token_count": 311,
+    "output": "{\"schema\": \"recallweave-independent-hull-archive-integrity/1\", \"status\": \"pass\", \"canonicalEnvelopeBlob\": \"74f94cf5be44426ef77c8cb1fcb616605ac9bc3a\", \"gzipSha256\": \"549fbbfb77d397c2105fdb18c6fefbf8ecf0f833f3462abf84668152a326e17e\", \"gzipBytes\": 621532, \"decodedBytes\": 1302668, \"verifiedFiles\": 43, \"verifiedOwnerPins\": 18, \"receiverGitBlob\": \"6ff36384f860d1307f1a75bb3b18e5cf628de1f4\", \"nativeExit\": 0, \"groups\": 15, \"sourcePreserved\": true, \"rawStreamsComplete\": true, \"exactLessonGuideDownloads\": true, \"images\": [{\"path\": \"output/screenshots/desktop-complete.jpg\", \"bytes\": 210949, \"sha256\": \"3e573fcaf7f2a499ab75edf799edbbf46ec686b726fe6e4631c33838d0607c83\"}, {\"path\": \"output/screenshots/learner-review.jpg\", \"bytes\": 132252, \"sha256\": \"f908182a5c8277acffbc35566a8ba7d2606195757849bef1d006508d69eb87da\"}, {\"path\": \"output/screenshots/phone-controls.jpg\", \"bytes\": 52225, \"sha256\": \"caa53b21ab449f2fb3e457ba5cfd27eb195fee248378857485252a5c0ba2bd8e\"}, {\"path\": \"output/screenshots/phone-diagram.jpg\", \"bytes\": 41265, \"sha256\": \"7a04de44970eb2314c4581d2dd6c072c075c8bd6cfb1d2332df6229b30c4eb4e\"}, {\"path\": \"output/screenshots/phone-top.jpg\", \"bytes\": 60683, \"sha256\": \"9a7ef9d52f68f8d7177610c742ed3f794ddbcf0a39c673b2ccc4b3bd7a089121\"}]}\r\n"
+  },
+  "result": {
+    "schema": "recallweave-independent-hull-archive-integrity/1",
+    "status": "pass",
+    "canonicalEnvelopeBlob": "74f94cf5be44426ef77c8cb1fcb616605ac9bc3a",
+    "gzipSha256": "549fbbfb77d397c2105fdb18c6fefbf8ecf0f833f3462abf84668152a326e17e",
+    "gzipBytes": 621532,
+    "decodedBytes": 1302668,
+    "verifiedFiles": 43,
+    "verifiedOwnerPins": 18,
+    "receiverGitBlob": "6ff36384f860d1307f1a75bb3b18e5cf628de1f4",
+    "nativeExit": 0,
+    "groups": 15,
+    "sourcePreserved": true,
+    "rawStreamsComplete": true,
+    "exactLessonGuideDownloads": true,
+    "images": [
+      {
+        "path": "output/screenshots/desktop-complete.jpg",
+        "bytes": 210949,
+        "sha256": "3e573fcaf7f2a499ab75edf799edbbf46ec686b726fe6e4631c33838d0607c83"
+      },
+      {
+        "path": "output/screenshots/learner-review.jpg",
+        "bytes": 132252,
+        "sha256": "f908182a5c8277acffbc35566a8ba7d2606195757849bef1d006508d69eb87da"
+      },
+      {
+        "path": "output/screenshots/phone-controls.jpg",
+        "bytes": 52225,
+        "sha256": "caa53b21ab449f2fb3e457ba5cfd27eb195fee248378857485252a5c0ba2bd8e"
+      },
+      {
+        "path": "output/screenshots/phone-diagram.jpg",
+        "bytes": 41265,
+        "sha256": "7a04de44970eb2314c4581d2dd6c072c075c8bd6cfb1d2332df6229b30c4eb4e"
+      },
+      {
+        "path": "output/screenshots/phone-top.jpg",
+        "bytes": 60683,
+        "sha256": "9a7ef9d52f68f8d7177610c742ed3f794ddbcf0a39c673b2ccc4b3bd7a089121"
+      }
+    ]
+  },
+  "visualObservation": {
+    "reviewer": "estate-8d5ac72a6fae/product",
+    "status": "Concrete caveat retained for root/source-owner disposition",
+    "observed": "Desktop and 390px page headings, controls, summaries, identity table and learner trace are readable. The compact frozen rectangle places multiple SVG point labels close enough to overlap at both captured widths. Exact values and roles remain readable in the separate table; this is not a geometry or download mismatch.",
+    "witnessPoints": [
+      [
+        -2,
+        -1
+      ],
+      [
+        2,
+        -1
+      ],
+      [
+        2,
+        2
+      ],
+      [
+        -2,
+        2
+      ],
+      [
+        0,
+        0
+      ],
+      [
+        2,
+        0
+      ],
+      [
+        -2,
+        -1
+      ]
+    ],
+    "affectedArtifacts": [
+      "output/screenshots/desktop-complete.jpg",
+      "output/screenshots/phone-diagram.jpg"
+    ],
+    "automatedBoundsAreNotVisualLabelAcceptance": true,
+    "productSourceChanges": []
+  },
+  "remainingOwnership": "Source/course/repair/integration remain estate-234cae4aee53. Root is independently inspecting all five original captures. No visual repair has been attempted."
+}
