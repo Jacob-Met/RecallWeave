@@ -1,0 +1,215 @@
+{
+  "format": "recallweave-deck/1",
+  "title": "Optimal stopping: when the next record is enough",
+  "attribution": "Original RecallWeave lesson, examples and explorer by HAMON estate contributor estate-81ba1ed0179c. Mathematical background: Thomas S. Ferguson, Optimal Stopping and Applications, Chapter 2 section 2.1, https://math.ucla.edu/~tom/Stopping/sr2.pdf . The finite count derivation, questions and worked examples here are original; no source exercises or diagrams reproduced.",
+  "license": "Original lesson text and examples: CC0-1.0. Referenced works retain their own rights.",
+  "concepts": [
+    "Relative information",
+    "Stopping trace",
+    "Exact probability",
+    "Model boundaries"
+  ],
+  "items": [
+    {
+      "id": "os-01",
+      "concept": "Relative information",
+      "prerequisites": [],
+      "prompt": "In this explorer, larger ranks are better. An arrival is a record when it is better than every earlier arrival. What information does the stopping rule use at that moment?",
+      "options": [
+        "The ranks of all future arrivals.",
+        "Whether the current rank is the global maximum n.",
+        "Only comparisons with arrivals already observed.",
+        "A numerical score threshold learned from past hiring."
+      ],
+      "answer": 2,
+      "explanation": "Absolute ranks explain the authored example, but the rule checks only whether the current arrival beats the observed prefix. A record need not be best overall.",
+      "transfer": "Give two different unseen suffixes that produce the same decision at the current record."
+    },
+    {
+      "id": "os-02",
+      "concept": "Stopping trace",
+      "prerequisites": [
+        "Relative information"
+      ],
+      "prompt": "Use n=5, skip=2 and arrival order 2,4,1,5,3. After rejecting the first two arrivals, which arrival is selected?",
+      "options": [
+        "Arrival 3, rank 1.",
+        "Arrival 4, rank 5.",
+        "Arrival 2, rank 4.",
+        "Arrival 5, rank 3."
+      ],
+      "answer": 1,
+      "explanation": "The observed benchmark after the first two arrivals is 4. Rank 1 does not beat it. Rank 5 is the first later record, so arrival 4 is selected and arrival 5 is not observed.",
+      "transfer": "Change only the last rank while keeping a valid distinct order: what else would have to change, and why cannot a later arrival change an earlier decision?"
+    },
+    {
+      "id": "os-03",
+      "concept": "Relative information",
+      "prerequisites": [],
+      "prompt": "For n=5 and skip=0, the authored order starts 3,1,5,2,4. What does this rule select?",
+      "options": [
+        "The first arrival, rank 3.",
+        "The first rank at least 4.",
+        "Rank 5 at arrival 3.",
+        "The last arrival by default."
+      ],
+      "answer": 0,
+      "explanation": "With no observation-only prefix, the first arrival is a record because no earlier rank exists. It is selected immediately; knowing n does not allow the rule to wait for the label n.",
+      "transfer": "Explain why displaying the whole authored order is not the same as giving future information to the rule."
+    },
+    {
+      "id": "os-04",
+      "concept": "Stopping trace",
+      "prerequisites": [
+        "Relative information"
+      ],
+      "prompt": "Use n=4, skip=1 and order 4,1,3,2. What does the mandatory last-item fallback do?",
+      "options": [
+        "Recalls rank 4 from arrival 1.",
+        "Selects rank 3 because it is best after the skipped prefix.",
+        "Makes no selection.",
+        "Selects arrival 4, rank 2, even though it is not a record."
+      ],
+      "answer": 3,
+      "explanation": "Rank 4 is observed and rejected. No later arrival beats it. The rule must choose the last arrival, so it selects rank 2 using select-last. Rejected arrivals cannot be recalled.",
+      "transfer": "Describe why this fallback changes a no-selection outcome but cannot rescue success when the global best was already rejected."
+    },
+    {
+      "id": "os-05",
+      "concept": "Stopping trace",
+      "prerequisites": [
+        "Relative information"
+      ],
+      "prompt": "Use n=4, skip=1 and order 1,3,4,2. What separates the decision from its eventual success?",
+      "options": [
+        "It waits for rank 4 because that rank is globally best.",
+        "It selects rank 3 and counts any record as success.",
+        "It selects rank 3 at arrival 2, but fails the objective of selecting rank 4.",
+        "It selects the last arrival because rank 3 is not globally best."
+      ],
+      "answer": 2,
+      "explanation": "Rank 3 beats the observed rank 1, so selection happens at arrival 2. Success is evaluated separately against the authored global best, rank 4. Later arrivals cannot revise the choice.",
+      "transfer": "Create an order where the same n and skip succeeds, then explain why one successful example does not prove a probability."
+    },
+    {
+      "id": "os-06",
+      "concept": "Relative information",
+      "prerequisites": [],
+      "prompt": "After the rule selects at arrival 2, how should the trace describe authored arrivals 3 through n?",
+      "options": [
+        "Observed rejections, because their ranks appear on the teaching page.",
+        "Not observed by the rule, with no record or benchmark decision attached.",
+        "New opportunities to replace the selected item.",
+        "Evidence that the policy used future information."
+      ],
+      "answer": 1,
+      "explanation": "The page retains the full authored order for explanation. The decision process has already stopped, so later rows are marked not-observed and their comparison fields are null. Displaying them does not extend the actual decision history.",
+      "transfer": "Distinguish a teacher's complete worked example from the information available to a decision maker in the example."
+    },
+    {
+      "id": "os-07",
+      "concept": "Exact probability",
+      "prerequisites": [
+        "Relative information",
+        "Stopping trace"
+      ],
+      "prompt": "For n=3 and skip=1, all six distinct orders are equally likely. Exactly three select rank 3. What is the exact modeled success probability?",
+      "options": [
+        "3/6 = 1/2.",
+        "1/3 because only one rank is best.",
+        "2/3 because two arrivals remain after skipping.",
+        "3 because there are three successful orders."
+      ],
+      "answer": 0,
+      "explanation": "Probability is successful equally likely orders divided by all orders: 3/6. The selected rank label and the number of remaining arrivals are not the denominator of this sample space.",
+      "transfer": "List the three successful orders and verify each with the rule."
+    },
+    {
+      "id": "os-08",
+      "concept": "Exact probability",
+      "prerequisites": [
+        "Relative information",
+        "Stopping trace"
+      ],
+      "prompt": "For n=4 and skip=1, success can occur when the best arrives at positions 2,3,4. The corresponding counts are 6,3,2 out of 24 orders. Which total follows?",
+      "options": [
+        "1/4.",
+        "1/2.",
+        "6/24.",
+        "11/24."
+      ],
+      "answer": 3,
+      "explanation": "These positions are mutually exclusive, so successful counts add: 6+3+2=11. Dividing by 24 gives 11/24. The counts are exact finite outcomes, not simulation estimates.",
+      "transfer": "Explain why adding probabilities is valid for these separate positions of the unique best item."
+    },
+    {
+      "id": "os-09",
+      "concept": "Exact probability",
+      "prerequisites": [
+        "Relative information",
+        "Stopping trace"
+      ],
+      "prompt": "For n=2, skip=0 wins one of the two possible orders and skip=1 also wins one. What should the best-skip table retain?",
+      "options": [
+        "Only skip=1, because observation is always beneficial.",
+        "Only skip=0, because it stops sooner.",
+        "Both skips 0 and 1 as an exact tie at 1/2.",
+        "Neither rule, because neither guarantees success."
+      ],
+      "answer": 2,
+      "explanation": "Both rules have the maximum modeled success probability 1/2. Choosing a single winner would hide a real tie. The objective here does not add a preference for earlier stopping.",
+      "transfer": "Suggest an additional cost that could break this tie, and explain why it would define a different objective."
+    },
+    {
+      "id": "os-10",
+      "concept": "Model boundaries",
+      "prerequisites": [
+        "Exact probability"
+      ],
+      "prompt": "If skip=n−1, the rule always chooses the final arrival. Under uniform random order, what is its probability of choosing the best?",
+      "options": [
+        "1 because all other arrivals were inspected.",
+        "1/n because each position is equally likely to contain the best.",
+        "(n−1)/n because that many arrivals were rejected.",
+        "Approximately 37% for every n."
+      ],
+      "answer": 1,
+      "explanation": "The final arrival is selected whether it is a record or the fallback. Under the stated uniform-order model the best occupies each of n positions equally often, so the chance is 1/n.",
+      "transfer": "For n=1, explain why this same statement gives certainty rather than an undefined edge case."
+    },
+    {
+      "id": "os-11",
+      "concept": "Model boundaries",
+      "prerequisites": [
+        "Exact probability"
+      ],
+      "prompt": "Suppose arrival orders are systematically sorted so stronger items usually come later. What can the explorer's uniform-permutation table establish about that new setting?",
+      "options": [
+        "Only results for its stated uniform model; the new order distribution needs a new calculation.",
+        "The same exact probability, because n has not changed.",
+        "Guaranteed success if the best skip from the table is used.",
+        "A measured success rate in the real setting."
+      ],
+      "answer": 0,
+      "explanation": "The table weights every distinct order equally. A different arrival distribution changes those weights and can change which rule performs best. The authored trace remains a valid rule demonstration, but it is not an empirical study.",
+      "transfer": "Name one observation you would need before assigning probabilities to the new arrival process."
+    },
+    {
+      "id": "os-12",
+      "concept": "Model boundaries",
+      "prerequisites": [
+        "Exact probability"
+      ],
+      "prompt": "A large-n approximation suggests skipping about 37% in the classical model. Which use is justified for this finite n≤8 explorer?",
+      "options": [
+        "Round 37% and suppress any finite tie.",
+        "Claim a 37% success chance for every authored order.",
+        "Treat 37% as a universal instruction for real decisions.",
+        "Compare exact finite counts for every allowed skip; use the approximation only as broader context."
+      ],
+      "answer": 3,
+      "explanation": "Small finite cases can have different best skip counts and exact ties. An asymptotic rule describes a limit under assumptions, not the exact answer for each finite case or a recommendation for real choices.",
+      "transfer": "Compare n=2 and n=4. Explain why a memorable percentage should not replace the exact table for either case."
+    }
+  ]
+}
