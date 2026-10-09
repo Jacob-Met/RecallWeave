@@ -1,0 +1,212 @@
+{
+  "format": "recallweave-deck/1",
+  "title": "Coalition power: when a weight changes the result",
+  "attribution": "Original lesson wording, questions, worked examples and implementation by the HAMON estate contribution estate-81ba1ed0179c, with AI assistance. Mathematical definitions checked against Jean-Luc Marichal and Pierre Mathonet, Weighted Banzhaf power and interaction indexes (arXiv:1001.3052, equation 3), and Julie Zelenski's Stanford CS106B Voting Power assignment. No source questions, passages or figures are copied.",
+  "license": "Original lesson wording and worked examples: CC BY 4.0. Linked source references retain their own terms.",
+  "concepts": [
+    "Coalitions and quota",
+    "Critical members",
+    "Two denominators",
+    "Model and limits"
+  ],
+  "items": [
+    {
+      "id": "cp-01",
+      "concept": "Coalitions and quota",
+      "prerequisites": [],
+      "prompt": "An authored committee has weights A=6, B=4, C=2 and quota 7. Only B and C say yes. What does the rule return?",
+      "options": [
+        "Passes, because two of three players support it.",
+        "Passes, because every positive-weight coalition wins.",
+        "Fails: the yes weight is 6, below 7.",
+        "The result cannot be decided without an arrival order."
+      ],
+      "answer": 2,
+      "explanation": "The rule compares the sum of yes weights with the stated quota. B+C contributes 4+2=6, which is less than 7. Head count and arrival order do not enter this model.",
+      "transfer": "Keep the same weights and yes coalition. What changes if the quota is 6?"
+    },
+    {
+      "id": "cp-02",
+      "concept": "Coalitions and quota",
+      "prerequisites": [],
+      "prompt": "Four distinct players each either belong to a yes coalition or do not. How many coalitions must a complete table contain, including nobody and everybody?",
+      "options": [
+        "16",
+        "4",
+        "8",
+        "24"
+      ],
+      "answer": 0,
+      "explanation": "Each of four distinct players has two membership choices, giving 2×2×2×2=16 subsets. The empty and all-player coalitions are both part of that count.",
+      "transfer": "How many other-player coalitions are examined when one of these four players is set aside for a swing test?"
+    },
+    {
+      "id": "cp-03",
+      "concept": "Coalitions and quota",
+      "prerequisites": [],
+      "prompt": "Weights are A=4, B=3, C=2 and the explicit quota is 5. Coalition {B,C} has weight exactly 5. Which interpretation matches the rule?",
+      "options": [
+        "It loses because a tie always fails.",
+        "It wins only if A abstains.",
+        "It is unresolved until the quota is replaced by a majority.",
+        "It wins because reaching the explicit quota is sufficient."
+      ],
+      "answer": 3,
+      "explanation": "Here quota means the smallest accepted yes total: weight(S) ≥ quota. A strict-majority rule can be represented by choosing its corresponding integer quota, but the explorer does not silently substitute one.",
+      "transfer": "For total weight 9, what integer quota represents a strict majority of weight?"
+    },
+    {
+      "id": "cp-04",
+      "concept": "Critical members",
+      "prerequisites": [
+        "Coalitions and quota"
+      ],
+      "prompt": "With weights [6,4,2] and quota 7, all three players are in the winning coalition. Which members are critical in this particular coalition?",
+      "options": [
+        "A, B and C",
+        "A only",
+        "B and C only",
+        "Nobody"
+      ],
+      "answer": 1,
+      "explanation": "The total is 12. Removing A leaves 6 and makes the coalition lose. Removing B leaves 8; removing C leaves 10. Those two removals still pass. Membership in a winner is not enough to be critical.",
+      "transfer": "For the same game, inspect coalition {A,B}. Which of its members are critical?"
+    },
+    {
+      "id": "cp-05",
+      "concept": "Critical members",
+      "prerequisites": [
+        "Coalitions and quota"
+      ],
+      "prompt": "Weights are [5,3,1] with quota 7. A coalition wins exactly when it contains both A and B. What is C's swing count?",
+      "options": [
+        "0, despite C's positive weight.",
+        "1, because C has weight 1.",
+        "2, because C belongs to two winning coalitions.",
+        "4, because there are four other-player coalitions."
+      ],
+      "answer": 0,
+      "explanation": "C cannot change a losing coalition into a winner: A+C totals 6, B+C totals 4, and A+B already wins. A positive weight can be irrelevant to every threshold crossing under a particular quota.",
+      "transfer": "Change the quota to 6. Give one other-player coalition for which adding C now changes the result."
+    },
+    {
+      "id": "cp-06",
+      "concept": "Critical members",
+      "prerequisites": [
+        "Coalitions and quota"
+      ],
+      "prompt": "Weights are [4,3,2] with quota 5. Every two-player coalition wins and every one-player coalition loses. What follows about the players' critical-coalition counts?",
+      "options": [
+        "The counts are proportional to 4:3:2.",
+        "A has all the critical votes because A has the largest weight.",
+        "All three have two swings and equal normalized shares.",
+        "Only C is critical because C has the smallest weight."
+      ],
+      "answer": 2,
+      "explanation": "Each player is critical in the two winning pairs containing that player. Nobody is critical in the all-player coalition, since any remaining pair wins. The swing counts are [2,2,2], even though the weights differ.",
+      "transfer": "Keep these weights but raise the quota to 8. Which players must belong to every winning coalition?"
+    },
+    {
+      "id": "cp-07",
+      "concept": "Two denominators",
+      "prerequisites": [
+        "Critical members"
+      ],
+      "prompt": "For weights [6,4,2] and quota 7, A has three swing coalitions among the four possible choices of the other two players. What is A's absolute swing probability under independent fair yes/no choices by those others?",
+      "options": [
+        "3/5",
+        "3/4",
+        "6/12",
+        "3/8"
+      ],
+      "answer": 1,
+      "explanation": "The denominator is 2^(3−1)=4 other-player coalitions. Three are swings for A, so the probability is 3/4. It is not divided by the total swing count or by the full eight-coalition table.",
+      "transfer": "B has one swing in this game. What is B's absolute swing probability under the same assumption?"
+    },
+    {
+      "id": "cp-08",
+      "concept": "Two denominators",
+      "prerequisites": [
+        "Critical members"
+      ],
+      "prompt": "A game's swing counts are A=3, B=1, C=1. What is A's normalized Banzhaf share?",
+      "options": [
+        "3/4",
+        "6/12",
+        "1/3",
+        "3/5"
+      ],
+      "answer": 3,
+      "explanation": "Normalized share uses the total number of swings across players: 3+1+1=5. A's share is 3/5. This normalization answers a different question from the absolute probability 3/4.",
+      "transfer": "Write all three normalized shares and check their exact sum."
+    },
+    {
+      "id": "cp-09",
+      "concept": "Two denominators",
+      "prerequisites": [
+        "Critical members"
+      ],
+      "prompt": "The absolute swing probabilities in one three-player game are 3/4, 1/4 and 1/4. Their sum is 5/4. Is this a counting error?",
+      "options": [
+        "Yes: every probability list must sum to one.",
+        "Yes: the largest probability must be clipped to one half.",
+        "No: these are different players' influence events, not a partition; normalized shares use another denominator.",
+        "No: probabilities are allowed to be negative to compensate."
+      ],
+      "answer": 2,
+      "explanation": "Each number concerns whether changing one specified player's choice can change the result while the others vary. These events do not assign one exclusive winner to each outcome. Their sum need not be one. Dividing each swing count by total swings produces normalized shares that do sum to one.",
+      "transfer": "What would the normalized shares be if all three players instead had the same nonzero swing count?"
+    },
+    {
+      "id": "cp-10",
+      "concept": "Model and limits",
+      "prerequisites": [
+        "Two denominators"
+      ],
+      "prompt": "Weights are [6,2,1] with quota 6. A can pass alone, while B and C together cannot pass. What do the two measures say about A?",
+      "options": [
+        "Its absolute probability is 6/9 and normalized share is 6/9.",
+        "Both are 1: every other-player coalition is a swing for A, and nobody else has a swing.",
+        "Its absolute probability is 1/4 because only the empty coalition matters.",
+        "Its normalized share is zero because A needs no partner."
+      ],
+      "answer": 1,
+      "explanation": "Without A, the largest possible total is 3, below 6. With A, every total reaches 6. All four other-player coalitions are swings for A; B and C have none. A's absolute measure is 4/4 and normalized share is 4/4.",
+      "transfer": "What happens if a new player with weight zero is added? Distinguish the raw swing count from the reduced fractions."
+    },
+    {
+      "id": "cp-11",
+      "concept": "Model and limits",
+      "prerequisites": [
+        "Two denominators"
+      ],
+      "prompt": "Append a distinct zero-weight player to [6,4,2] at quota 7. How do the original players' swing counts and absolute probabilities change?",
+      "options": [
+        "Counts and probabilities both double.",
+        "Counts stay fixed, but probabilities halve.",
+        "The zero-weight player takes one quarter of every normalized share.",
+        "Counts double because each old coalition has two copies; the denominator doubles too, so probabilities and normalized shares stay the same."
+      ],
+      "answer": 3,
+      "explanation": "The new player's presence or absence does not alter a weight total. Each original swing therefore appears twice, and the number of other-player coalitions also doubles. The new player has zero swings. Reduced absolute probabilities and normalized shares are unchanged.",
+      "transfer": "Compare [1] at quota 1 with [1,0] at quota 1. List the positive player's raw count and absolute fraction in each."
+    },
+    {
+      "id": "cp-12",
+      "concept": "Model and limits",
+      "prerequisites": [
+        "Two denominators"
+      ],
+      "prompt": "An actual committee's members coordinate, and some yes coalitions are much more likely than others. What can this explorer's uniform-coalition calculation establish by itself?",
+      "options": [
+        "The exact counts for its stated abstract rule, but not the committee's real probability of influence.",
+        "A calibrated forecast of each member's future behavior.",
+        "That the committee is fair because normalized shares sum to one.",
+        "The arrival-order pivot probabilities of a different model."
+      ],
+      "answer": 0,
+      "explanation": "The exhaustive table is exact for the authored weights and quota. Interpreting the absolute count ratio as a probability needs the stated independent fair-choice model. Coordination, unequal coalition likelihoods, abstention and arrival order are not supplied here; normalized shares also do not certify fairness.",
+      "transfer": "Name one additional kind of evidence needed before interpreting a power measure as a model of observed behavior."
+    }
+  ]
+}
