@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A sample as the stream grows — RecallWeave</title>
+<style>
+:root{color-scheme:light;--ink:#19312d;--muted:#50645e;--line:#c8d5ce;--paper:#fcfcf7;--accent:#17634f}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font:17px/1.55 system-ui,sans-serif}
+main{max-width:1050px;margin:auto;padding:32px 24px 60px}
+h1{font-size:clamp(2rem,5vw,3.1rem);line-height:1.1;max-width:760px;margin:.3em 0}
+h2{font-size:1.45rem;line-height:1.3;margin-top:0}h3{font-size:1.1rem}
+p{max-width:78ch}.eyebrow{letter-spacing:.09em;text-transform:uppercase;font-size:.8rem;font-weight:700;color:var(--accent)}
+.lead{font-size:1.1rem;color:var(--muted)}.note{padding:12px 16px;border-left:4px solid var(--accent);background:#edf3eb}
+section{margin-top:28px}.panel{padding:24px;border:1px solid var(--line);border-radius:12px;background:white}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:22px}
+label{display:block;font-weight:650;margin-bottom:6px}
+textarea,input{width:100%;min-width:0;font:inherit;color:inherit;border:1px solid #80958a;border-radius:6px;background:white;padding:10px}
+textarea{resize:vertical;min-height:185px;white-space:pre}
+input{min-height:46px}.field{margin-bottom:16px}
+.help{display:block;font-size:.88rem;color:var(--muted);margin-top:5px}
+button,.link-button{font:inherit;min-height:44px;padding:9px 15px;border-radius:6px;border:1px solid var(--accent);background:white;color:var(--accent);cursor:pointer}
+button.primary{background:var(--accent);color:white;font-weight:700}
+button:disabled{cursor:default;color:#68746f;border-color:#c7cfca;background:#f0f2ee}
+button:hover:not(:disabled),.link-button:hover{background:#e8f1e8}button.primary:hover{background:#104936}
+:focus-visible{outline:3px solid #cb721b;outline-offset:3px}
+.actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.link-button{display:inline-flex;align-items:center;text-decoration:none}
+#status{min-height:1.6em;margin-bottom:0;overflow-wrap:anywhere}
+#step-label{font-weight:650;overflow-wrap:anywhere}
+#reservoir{list-style:none;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:12px}
+#reservoir li{border:2px solid var(--accent);border-radius:8px;padding:14px;min-width:0;background:#f2f7ee}
+.slot{display:block;color:var(--muted)}.position{display:block;font-size:1.4rem}
+.label,.literal{white-space:pre-wrap;overflow-wrap:anywhere}
+.table-wrap{overflow:auto;max-width:100%;border:1px solid var(--line);border-radius:6px;margin:12px 0}
+table{border-collapse:collapse;width:100%;font-size:.92rem;text-align:left}
+th,td{padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{background:#eef3e9;font-weight:650}tbody tr:last-child td{border-bottom:0}
+tr[aria-current=step]{background:#e5f2dd;box-shadow:inset 4px 0 var(--accent)}
+#step-table{min-width:570px}#marginal-table{min-width:540px}#subset-table{min-width:360px}
+details{margin-top:16px}summary{cursor:pointer;font-weight:650;min-height:44px;padding:8px 0}
+footer{margin-top:36px;border-top:1px solid var(--line);padding-top:18px;font-size:.88rem;color:var(--muted)}
+code{background:#edf0e8;padding:1px 4px;border-radius:3px}
+[hidden]{display:none!important}
+@media(max-width:640px){main{padding:22px 14px 40px}.panel{padding:17px}.grid{grid-template-columns:1fr;gap:0}.actions button{flex:1 1 auto}}
+@media print{.actions,.grid,#status,.help{display:none}main{max-width:none;padding:0}.panel{border:0;padding:0}.table-wrap{overflow:visible}table{min-width:0!important}.note{border-color:#333}}
+</style>
+</head>
+<body>
+<main>
+<header>
+<div class="eyebrow">RecallWeave · a bounded sampling lab</div>
+<h1>A sample as the stream grows</h1>
+<p class="lead">Keep a fixed number of occurrences while arrivals continue. Follow a chosen Algorithm R history, then inspect the exact counts across every possible history.</p>
+<p class="note">This lab makes no random draws. You choose the integer draws for the trace. Distribution tables separately assume independent, uniform draws from 1 through the incoming position.</p>
+</header>
+<section class="panel" aria-labelledby="input-heading">
+<h2 id="input-heading">Choose a short stream</h2>
+<div class="grid">
+<div class="field">
+<label for="labels">Literal record labels, one per line</label>
+<textarea id="labels" rows="5" spellcheck="false" aria-describedby="labels-help">A
+B
+C
+D
+E</textarea>
+<small id="labels-help" class="help">1–8 records, 1–48 UTF-16 units each. Preserve meaningful spaces; no blank or trailing empty lines. Repeated labels remain distinct positions.</small>
+</div>
+<div>
+<div class="field"><label for="capacity">Reservoir capacity</label><input id="capacity" value="2" inputmode="numeric" autocomplete="off" aria-describedby="capacity-help"><small id="capacity-help" class="help">1–3, no greater than the record count. Use a positive decimal integer without leading zeroes.</small></div>
+<div class="field"><label for="draws">Chosen draws, in arrival order</label><input id="draws" value="2,4,1" autocomplete="off" aria-describedby="draws-help"><small id="draws-help" class="help">One comma-separated integer per arrival after the initial fill. For arrival i, use 1 through i. Spaces or tabs around draws are allowed. Leave empty when all records fit.</small></div>
+</div>
+</div>
+<div class="actions"><button id="apply" class="primary" type="button">Apply</button><button id="download-observation" type="button" disabled>Download observation</button></div>
+<p id="status" role="status" aria-live="polite">Apply the input to create a trace. Editing an input clears the previous applied result.</p>
+</section>
+<div id="results" hidden>
+<section class="panel" aria-labelledby="trace-heading">
+<h2 id="trace-heading">One chosen history</h2>
+<p>The first records fill the slots. A later draw names a slot to replace when it is within capacity; otherwise the incoming record is skipped. Slot order and unordered subset order are different views of the same occurrences.</p>
+<div class="actions" aria-label="Trace navigation"><button id="first" type="button" disabled>First</button><button id="previous" type="button" disabled>Previous</button><button id="next" type="button" disabled>Next</button><button id="last" type="button" disabled>Last</button></div>
+<p id="step-label" aria-live="polite"></p>
+<ol id="reservoir" aria-label="Reservoir in slot order"></ol>
+<div class="table-wrap" tabindex="0" role="region" aria-label="Chosen trace table, scroll horizontally if needed"><table id="step-table"><thead><tr><th scope="col">Seen</th><th scope="col">Incoming</th><th scope="col">Draw</th><th scope="col">Action</th><th scope="col">Reservoir slots</th></tr></thead><tbody></tbody></table></div>
+</section>
+<section class="panel" aria-labelledby="distribution-heading">
+<h2 id="distribution-heading">After all arrivals: every possible history</h2>
+<p>These exact counts concern the final stream length, regardless of the selected trace step. Each legal draw history has equal probability only under the independent uniform-draw assumption. No measured frequencies or random simulation are used.</p>
+<p id="distribution-summary"></p>
+<h3>Unordered positional subsets</h3>
+<div class="table-wrap" tabindex="0" role="region" aria-label="Subset counts table, scroll horizontally if needed"><table id="subset-table"><thead><tr><th scope="col">Positions</th><th scope="col">Histories</th><th scope="col">Exact probability</th></tr></thead><tbody></tbody></table></div>
+<h3>Individual inclusion</h3>
+<div class="table-wrap" tabindex="0" role="region" aria-label="Marginal counts table, scroll horizontally if needed"><table id="marginal-table"><thead><tr><th scope="col">Position</th><th scope="col">Literal label</th><th scope="col">Histories containing position</th><th scope="col">Inclusion probability</th></tr></thead><tbody></tbody></table></div>
+<p class="note">Equal individual inclusion chances alone do not prove uniform subsets. Choosing {1,2} or {3,4} with equal chance gives every position probability 1/2, but never produces four of the six pairs.</p>
+</section>
+</div>
+<section class="panel" aria-labelledby="lesson-heading">
+<h2 id="lesson-heading">Explain it, then test your reasoning</h2>
+<p>The guide develops a subset-level proof and a biased-replacement counterexample. The twelve-question lesson opens in the unchanged RecallWeave learner: download the JSON, open the learner, choose the file, review its preview and explicitly start.</p>
+<div class="actions"><button id="download-course" type="button">Download lesson</button><button id="download-guide" type="button">Download guide</button><a class="link-button" href="../demo.html" target="_blank" rel="noopener">Open learner</a></div>
+<details><summary>Scope and assumptions</summary><p>The bounded lab enumerates at most 40,320 histories per input. Positions identify occurrences, even when labels repeat. It does not generate random numbers, estimate unknown distributions or guarantee representative categories in a particular sample. The method can process a continuing stream without knowing its final length; the bounded enumeration here is a teaching aid.</p></details>
+</section>
+<footer>Original companion text and lesson: CC0-1.0. Algorithm R is credited to Alan Waterman in Jeffrey S. Vitter’s 1985 paper, <a href="https://www.ittc.ku.edu/~jsv/Papers/Vit85.Reservoir.pdf">Random Sampling with a Reservoir</a>, section 2. The downloaded guide includes references and the full mathematical argument. This page works locally without an account or installation.</footer>
+</main>
+<script type="module">
+/*__ASSETS__*/
+/*__CORE__*/
+/*__UI__*/
+</script>
+</body>
+</html>

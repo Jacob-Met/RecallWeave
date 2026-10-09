@@ -1,0 +1,212 @@
+{
+  "format": "recallweave-deck/1",
+  "title": "A sample as the stream grows",
+  "attribution": "Original RecallWeave lesson and examples. Mathematical background: Algorithm R, credited to Alan Waterman in Jeffrey S. Vitter, Random Sampling with a Reservoir (1985), section 2. This deterministic teaching lab does not use or validate a random generator.",
+  "license": "CC0-1.0 for this original lesson and worked guide.",
+  "concepts": [
+    "Positions and reservoirs",
+    "Draws and replacement",
+    "Uniform subsets",
+    "Assumptions and limits"
+  ],
+  "items": [
+    {
+      "id": "reservoir-01",
+      "prompt": "Two arriving records both have the label “oak”. What identity should a reservoir trace use to tell them apart?",
+      "options": [
+        "Their shared label; they are one record.",
+        "The number of times “oak” appears in the sample.",
+        "Their original stream positions; equal labels can name distinct records.",
+        "Their alphabetical order after sorting labels."
+      ],
+      "concept": "Positions and reservoirs",
+      "prerequisites": [],
+      "answer": 2,
+      "explanation": "The two occurrences have different positions even though their labels match. Sampling operates on records or occurrences. Collapsing equal labels would silently change the population being sampled.",
+      "transfer": "If two logs have identical text, explain why their occurrence positions still matter when auditing a sample."
+    },
+    {
+      "id": "reservoir-02",
+      "prompt": "A reservoir has capacity 3 and the stream begins A, B, C, D, E. What is in the reservoir immediately after its initial fill?",
+      "options": [
+        "A randomly reordered choice of any three of the five records.",
+        "Positions 1, 2 and 3 in slots 1, 2 and 3.",
+        "Only position 3, because it arrived most recently.",
+        "All five positions until the stream ends."
+      ],
+      "concept": "Positions and reservoirs",
+      "prerequisites": [],
+      "answer": 1,
+      "explanation": "The initial fill takes the first three arrivals into three distinct slots. Later arrivals can replace slots according to their own draws; the initial fill does not inspect or choose among future records.",
+      "transfer": "Describe the state after the initial fill for a stream prefix shorter than its eventual length, without looking at later records."
+    },
+    {
+      "id": "reservoir-03",
+      "prompt": "Why can Algorithm R process a stream whose final length is unknown?",
+      "options": [
+        "Its next decision uses the number seen so far and the fixed capacity, not the eventual length.",
+        "It first scans the whole stream to learn its final length.",
+        "It silently stores all earlier records outside the reservoir.",
+        "It assumes that exactly twice the reservoir capacity will arrive."
+      ],
+      "concept": "Positions and reservoirs",
+      "prerequisites": [],
+      "answer": 0,
+      "explanation": "At arrival i, the rule uses a draw from 1 through i and the fixed capacity k. It only needs the count already seen. The finite lab shows the whole input for inspection, but the streaming algorithm need not know its eventual length.",
+      "transfer": "Which two integer quantities must the streaming implementation know before deciding what to do with the next record?"
+    },
+    {
+      "id": "reservoir-04",
+      "prompt": "Use capacity 2. After filling positions [1, 2], the draws at arrivals 3, 4 and 5 are respectively 2, 4 and 1. What are the final reservoir slots?",
+      "options": [
+        "[1, 5]",
+        "[3, 4]",
+        "[3, 5]",
+        "[5, 3]"
+      ],
+      "concept": "Draws and replacement",
+      "prerequisites": [
+        "Positions and reservoirs"
+      ],
+      "answer": 3,
+      "explanation": "Arrival 3 with draw 2 replaces slot 2, giving [1, 3]. Draw 4 at arrival 4 exceeds capacity 2, so nothing changes. Arrival 5 with draw 1 replaces slot 1, giving [5, 3]. The same unordered subset is {3, 5}, but slot order is [5, 3].",
+      "transfer": "Change only the last draw to 5 and determine which earlier slots survive, keeping slot order distinct from a sorted subset."
+    },
+    {
+      "id": "reservoir-05",
+      "prompt": "At arrival 4 with capacity 2, the current reservoir slots are [1, 3] and the draw is 3. What happens?",
+      "options": [
+        "Position 4 replaces slot 1 because it is the newest record.",
+        "The draw exceeds capacity, so the reservoir stays [1, 3].",
+        "Position 4 replaces the record whose stream position is 3.",
+        "The capacity grows to 3 and position 4 is appended."
+      ],
+      "concept": "Draws and replacement",
+      "prerequisites": [
+        "Positions and reservoirs"
+      ],
+      "answer": 1,
+      "explanation": "Draw 3 is a draw value, not an instruction to find stream position 3. Only values 1 and 2 name replaceable reservoir slots. Since 3 > 2, the incoming fourth position is skipped and both current slots remain.",
+      "transfer": "For capacity 3 at arrival 7, identify all draw values that cause replacement and the slot each selects."
+    },
+    {
+      "id": "reservoir-06",
+      "prompt": "Use capacity 1 on positions 1, 2, 3. The draw at arrival 2 is 1, and the draw at arrival 3 is 3. Which position remains?",
+      "options": [
+        "Position 1",
+        "Position 3",
+        "Position 2",
+        "Both positions 2 and 3"
+      ],
+      "concept": "Draws and replacement",
+      "prerequisites": [
+        "Positions and reservoirs"
+      ],
+      "answer": 2,
+      "explanation": "At arrival 2, draw 1 replaces the only slot with position 2. At arrival 3, draw 3 exceeds capacity 1, so position 3 is skipped. The slot therefore still contains position 2.",
+      "transfer": "Construct two different legal draw histories that finish with the same one-position sample."
+    },
+    {
+      "id": "reservoir-07",
+      "prompt": "For four positions and capacity 2, independent uniform draws have 3 choices at arrival 3 and 4 choices at arrival 4. How many equally likely histories lead to each unordered two-position subset?",
+      "options": [
+        "2 of 12 histories, giving probability 1/6 per subset.",
+        "1 of 12 histories, giving probability 1/12 per subset.",
+        "3 of 12 histories, giving probability 1/4 per subset.",
+        "The six subsets are possible, but their probabilities cannot be determined."
+      ],
+      "concept": "Uniform subsets",
+      "prerequisites": [
+        "Draws and replacement"
+      ],
+      "answer": 0,
+      "explanation": "There are 3 × 4 = 12 independent uniform draw histories, each with probability 1/12. Exact enumeration assigns two histories to each of the six unordered pairs, so every pair has probability 2/12 = 1/6.",
+      "transfer": "Explain why equal history weights require independent uniform draws, not merely a count of legal choices."
+    },
+    {
+      "id": "reservoir-08",
+      "prompt": "A uniform capacity-2 sample is taken from five distinct positions. What are the inclusion probability for one specified position and the probability for one specified pair?",
+      "options": [
+        "Both probabilities are 2/5.",
+        "The position has probability 1/5 and the pair 1/25.",
+        "The position has probability 2/5 and the pair 4/25, because inclusions are independent.",
+        "The position has probability 2/5 and the pair 1/10; inclusions are not independent."
+      ],
+      "concept": "Uniform subsets",
+      "prerequisites": [
+        "Draws and replacement"
+      ],
+      "answer": 3,
+      "explanation": "Each specified position belongs to four of the ten two-position subsets, so its inclusion probability is 4/10 = 2/5. One specified pair is exactly one subset, with probability 1/10. This differs from (2/5)²; fixed-size inclusions are not independent.",
+      "transfer": "For a uniform three-of-six sample, compare one-position inclusion with the probability of a particular three-position subset."
+    },
+    {
+      "id": "reservoir-09",
+      "prompt": "A different procedure chooses {1, 2} with probability 1/2 and {3, 4} otherwise. Each position has inclusion probability 1/2. Is this a uniform sample of two of four positions?",
+      "options": [
+        "Yes; equal individual inclusion probabilities always imply uniform subsets.",
+        "No; four of the six possible pairs can never be selected.",
+        "No; at least one position has inclusion probability zero.",
+        "Yes; the order within a pair is the only remaining issue."
+      ],
+      "concept": "Uniform subsets",
+      "prerequisites": [
+        "Draws and replacement"
+      ],
+      "answer": 1,
+      "explanation": "Equal marginals do not characterize the joint distribution. Positions 1 and 2 are always together, as are 3 and 4; the other four pairs have probability zero. Uniform two-of-four sampling requires all six unordered pairs to have probability 1/6.",
+      "transfer": "Give a fixed-size selection procedure with equal individual inclusion probabilities that still forbids some subsets."
+    },
+    {
+      "id": "reservoir-10",
+      "prompt": "For capacity 1, suppose a flawed procedure starts with A and then replaces the reservoir with each incoming record on a fresh fair coin flip. After B and then C arrive, what are the final probabilities for A, B and C?",
+      "options": [
+        "1/3, 1/3, 1/3",
+        "1/2, 1/4, 1/4",
+        "1/4, 1/4, 1/2",
+        "0, 1/2, 1/2"
+      ],
+      "concept": "Assumptions and limits",
+      "prerequisites": [
+        "Uniform subsets"
+      ],
+      "answer": 2,
+      "explanation": "A survives only if neither later coin causes replacement, probability 1/4. B is final only if its coin replaces A and C's does not, probability 1/4. C is final whenever its coin replaces the current item, probability 1/2. Algorithm R instead reduces admission probability as the seen count grows.",
+      "transfer": "Explain why a constant replacement chance gives late arrivals an advantage in this three-record example."
+    },
+    {
+      "id": "reservoir-11",
+      "prompt": "A learner types one legal sequence of draws and sees its exact trace. What does that establish?",
+      "options": [
+        "The algorithm's deterministic behavior for those draws; it does not establish that a random generator is uniform or independent.",
+        "That every legal draw history is equally likely in the learner's input.",
+        "That the final sample must reflect every category in the stream.",
+        "That repeating those same typed draws generates independent samples."
+      ],
+      "concept": "Assumptions and limits",
+      "prerequisites": [
+        "Uniform subsets"
+      ],
+      "answer": 0,
+      "explanation": "A legal typed history determines one exact run. The lab's separate distribution counts all histories under a stated independent-uniform assumption; it does not test an actual random generator. A uniform sample can also omit a category by chance.",
+      "transfer": "What additional evidence would be needed before trusting a deployed sampler's random draws or real data coverage?"
+    },
+    {
+      "id": "reservoir-12",
+      "prompt": "There are three positions and capacity 3. How many post-fill draws, draw histories and final unordered subsets are there?",
+      "options": [
+        "Three draws, three histories and three subsets.",
+        "No draws, no histories and no subset.",
+        "One draw, one history and three subsets.",
+        "No draws, one empty draw history and one subset containing all three positions."
+      ],
+      "concept": "Assumptions and limits",
+      "prerequisites": [
+        "Uniform subsets"
+      ],
+      "answer": 3,
+      "explanation": "All three positions are retained during initialization, so there is no later random decision. The empty sequence is one possible history, not zero histories. The only three-position subset contains all three positions, with probability 1.",
+      "transfer": "Explain the difference between an empty collection of possibilities and the one possibility consisting of an empty history."
+    }
+  ]
+}

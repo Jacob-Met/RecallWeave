@@ -1,0 +1,344 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A sample as the stream grows — RecallWeave</title>
+<style>
+:root{color-scheme:light;--ink:#19312d;--muted:#50645e;--line:#c8d5ce;--paper:#fcfcf7;--accent:#17634f}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font:17px/1.55 system-ui,sans-serif}
+main{max-width:1050px;margin:auto;padding:32px 24px 60px}
+h1{font-size:clamp(2rem,5vw,3.1rem);line-height:1.1;max-width:760px;margin:.3em 0}
+h2{font-size:1.45rem;line-height:1.3;margin-top:0}h3{font-size:1.1rem}
+p{max-width:78ch}.eyebrow{letter-spacing:.09em;text-transform:uppercase;font-size:.8rem;font-weight:700;color:var(--accent)}
+.lead{font-size:1.1rem;color:var(--muted)}.note{padding:12px 16px;border-left:4px solid var(--accent);background:#edf3eb}
+section{margin-top:28px}.panel{padding:24px;border:1px solid var(--line);border-radius:12px;background:white}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:22px}
+label{display:block;font-weight:650;margin-bottom:6px}
+textarea,input{width:100%;min-width:0;font:inherit;color:inherit;border:1px solid #80958a;border-radius:6px;background:white;padding:10px}
+textarea{resize:vertical;min-height:185px;white-space:pre}
+input{min-height:46px}.field{margin-bottom:16px}
+.help{display:block;font-size:.88rem;color:var(--muted);margin-top:5px}
+button,.link-button{font:inherit;min-height:44px;padding:9px 15px;border-radius:6px;border:1px solid var(--accent);background:white;color:var(--accent);cursor:pointer}
+button.primary{background:var(--accent);color:white;font-weight:700}
+button:disabled{cursor:default;color:#68746f;border-color:#c7cfca;background:#f0f2ee}
+button:hover:not(:disabled),.link-button:hover{background:#e8f1e8}button.primary:hover{background:#104936}
+:focus-visible{outline:3px solid #cb721b;outline-offset:3px}
+.actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.link-button{display:inline-flex;align-items:center;text-decoration:none}
+#status{min-height:1.6em;margin-bottom:0;overflow-wrap:anywhere}
+#step-label{font-weight:650;overflow-wrap:anywhere}
+#reservoir{list-style:none;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:12px}
+#reservoir li{border:2px solid var(--accent);border-radius:8px;padding:14px;min-width:0;background:#f2f7ee}
+.slot{display:block;color:var(--muted)}.position{display:block;font-size:1.4rem}
+.label,.literal{white-space:pre-wrap;overflow-wrap:anywhere}
+.table-wrap{overflow:auto;max-width:100%;border:1px solid var(--line);border-radius:6px;margin:12px 0}
+table{border-collapse:collapse;width:100%;font-size:.92rem;text-align:left}
+th,td{padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{background:#eef3e9;font-weight:650}tbody tr:last-child td{border-bottom:0}
+tr[aria-current=step]{background:#e5f2dd;box-shadow:inset 4px 0 var(--accent)}
+#step-table{min-width:570px}#marginal-table{min-width:540px}#subset-table{min-width:360px}
+details{margin-top:16px}summary{cursor:pointer;font-weight:650;min-height:44px;padding:8px 0}
+footer{margin-top:36px;border-top:1px solid var(--line);padding-top:18px;font-size:.88rem;color:var(--muted)}
+code{background:#edf0e8;padding:1px 4px;border-radius:3px}
+[hidden]{display:none!important}
+@media(max-width:640px){main{padding:22px 14px 40px}.panel{padding:17px}.grid{grid-template-columns:1fr;gap:0}.actions button{flex:1 1 auto}}
+@media print{.actions,.grid,#status,.help{display:none}main{max-width:none;padding:0}.panel{border:0;padding:0}.table-wrap{overflow:visible}table{min-width:0!important}.note{border-color:#333}}
+</style>
+</head>
+<body>
+<main>
+<header>
+<div class="eyebrow">RecallWeave · a bounded sampling lab</div>
+<h1>A sample as the stream grows</h1>
+<p class="lead">Keep a fixed number of occurrences while arrivals continue. Follow a chosen Algorithm R history, then inspect the exact counts across every possible history.</p>
+<p class="note">This lab makes no random draws. You choose the integer draws for the trace. Distribution tables separately assume independent, uniform draws from 1 through the incoming position.</p>
+</header>
+<section class="panel" aria-labelledby="input-heading">
+<h2 id="input-heading">Choose a short stream</h2>
+<div class="grid">
+<div class="field">
+<label for="labels">Literal record labels, one per line</label>
+<textarea id="labels" rows="5" spellcheck="false" aria-describedby="labels-help">A
+B
+C
+D
+E</textarea>
+<small id="labels-help" class="help">1–8 records, 1–48 UTF-16 units each. Preserve meaningful spaces; no blank or trailing empty lines. Repeated labels remain distinct positions.</small>
+</div>
+<div>
+<div class="field"><label for="capacity">Reservoir capacity</label><input id="capacity" value="2" inputmode="numeric" autocomplete="off" aria-describedby="capacity-help"><small id="capacity-help" class="help">1–3, no greater than the record count. Use a positive decimal integer without leading zeroes.</small></div>
+<div class="field"><label for="draws">Chosen draws, in arrival order</label><input id="draws" value="2,4,1" autocomplete="off" aria-describedby="draws-help"><small id="draws-help" class="help">One comma-separated integer per arrival after the initial fill. For arrival i, use 1 through i. Spaces or tabs around draws are allowed. Leave empty when all records fit.</small></div>
+</div>
+</div>
+<div class="actions"><button id="apply" class="primary" type="button">Apply</button><button id="download-observation" type="button" disabled>Download observation</button></div>
+<p id="status" role="status" aria-live="polite">Apply the input to create a trace. Editing an input clears the previous applied result.</p>
+</section>
+<div id="results" hidden>
+<section class="panel" aria-labelledby="trace-heading">
+<h2 id="trace-heading">One chosen history</h2>
+<p>The first records fill the slots. A later draw names a slot to replace when it is within capacity; otherwise the incoming record is skipped. Slot order and unordered subset order are different views of the same occurrences.</p>
+<div class="actions" aria-label="Trace navigation"><button id="first" type="button" disabled>First</button><button id="previous" type="button" disabled>Previous</button><button id="next" type="button" disabled>Next</button><button id="last" type="button" disabled>Last</button></div>
+<p id="step-label" aria-live="polite"></p>
+<ol id="reservoir" aria-label="Reservoir in slot order"></ol>
+<div class="table-wrap" tabindex="0" role="region" aria-label="Chosen trace table, scroll horizontally if needed"><table id="step-table"><thead><tr><th scope="col">Seen</th><th scope="col">Incoming</th><th scope="col">Draw</th><th scope="col">Action</th><th scope="col">Reservoir slots</th></tr></thead><tbody></tbody></table></div>
+</section>
+<section class="panel" aria-labelledby="distribution-heading">
+<h2 id="distribution-heading">After all arrivals: every possible history</h2>
+<p>These exact counts concern the final stream length, regardless of the selected trace step. Each legal draw history has equal probability only under the independent uniform-draw assumption. No measured frequencies or random simulation are used.</p>
+<p id="distribution-summary"></p>
+<h3>Unordered positional subsets</h3>
+<div class="table-wrap" tabindex="0" role="region" aria-label="Subset counts table, scroll horizontally if needed"><table id="subset-table"><thead><tr><th scope="col">Positions</th><th scope="col">Histories</th><th scope="col">Exact probability</th></tr></thead><tbody></tbody></table></div>
+<h3>Individual inclusion</h3>
+<div class="table-wrap" tabindex="0" role="region" aria-label="Marginal counts table, scroll horizontally if needed"><table id="marginal-table"><thead><tr><th scope="col">Position</th><th scope="col">Literal label</th><th scope="col">Histories containing position</th><th scope="col">Inclusion probability</th></tr></thead><tbody></tbody></table></div>
+<p class="note">Equal individual inclusion chances alone do not prove uniform subsets. Choosing {1,2} or {3,4} with equal chance gives every position probability 1/2, but never produces four of the six pairs.</p>
+</section>
+</div>
+<section class="panel" aria-labelledby="lesson-heading">
+<h2 id="lesson-heading">Explain it, then test your reasoning</h2>
+<p>The guide develops a subset-level proof and a biased-replacement counterexample. The twelve-question lesson opens in the unchanged RecallWeave learner: download the JSON, open the learner, choose the file, review its preview and explicitly start.</p>
+<div class="actions"><button id="download-course" type="button">Download lesson</button><button id="download-guide" type="button">Download guide</button><a class="link-button" href="../demo.html" target="_blank" rel="noopener">Open learner</a></div>
+<details><summary>Scope and assumptions</summary><p>The bounded lab enumerates at most 40,320 histories per input. Positions identify occurrences, even when labels repeat. It does not generate random numbers, estimate unknown distributions or guarantee representative categories in a particular sample. The method can process a continuing stream without knowing its final length; the bounded enumeration here is a teaching aid.</p></details>
+</section>
+<footer>Original companion text and lesson: CC0-1.0. Algorithm R is credited to Alan Waterman in Jeffrey S. Vitter’s 1985 paper, <a href="https://www.ittc.ku.edu/~jsv/Papers/Vit85.Reservoir.pdf">Random Sampling with a Reservoir</a>, section 2. The downloaded guide includes references and the full mathematical argument. This page works locally without an account or installation.</footer>
+</main>
+<script type="module">
+const COURSE_TEXT = "{\n  \"format\": \"recallweave-deck/1\",\n  \"title\": \"A sample as the stream grows\",\n  \"attribution\": \"Original RecallWeave lesson and examples. Mathematical background: Algorithm R, credited to Alan Waterman in Jeffrey S. Vitter, Random Sampling with a Reservoir (1985), section 2. This deterministic teaching lab does not use or validate a random generator.\",\n  \"license\": \"CC0-1.0 for this original lesson and worked guide.\",\n  \"concepts\": [\n    \"Positions and reservoirs\",\n    \"Draws and replacement\",\n    \"Uniform subsets\",\n    \"Assumptions and limits\"\n  ],\n  \"items\": [\n    {\n      \"id\": \"reservoir-01\",\n      \"prompt\": \"Two arriving records both have the label “oak”. What identity should a reservoir trace use to tell them apart?\",\n      \"options\": [\n        \"Their shared label; they are one record.\",\n        \"The number of times “oak” appears in the sample.\",\n        \"Their original stream positions; equal labels can name distinct records.\",\n        \"Their alphabetical order after sorting labels.\"\n      ],\n      \"concept\": \"Positions and reservoirs\",\n      \"prerequisites\": [],\n      \"answer\": 2,\n      \"explanation\": \"The two occurrences have different positions even though their labels match. Sampling operates on records or occurrences. Collapsing equal labels would silently change the population being sampled.\",\n      \"transfer\": \"If two logs have identical text, explain why their occurrence positions still matter when auditing a sample.\"\n    },\n    {\n      \"id\": \"reservoir-02\",\n      \"prompt\": \"A reservoir has capacity 3 and the stream begins A, B, C, D, E. What is in the reservoir immediately after its initial fill?\",\n      \"options\": [\n        \"A randomly reordered choice of any three of the five records.\",\n        \"Positions 1, 2 and 3 in slots 1, 2 and 3.\",\n        \"Only position 3, because it arrived most recently.\",\n        \"All five positions until the stream ends.\"\n      ],\n      \"concept\": \"Positions and reservoirs\",\n      \"prerequisites\": [],\n      \"answer\": 1,\n      \"explanation\": \"The initial fill takes the first three arrivals into three distinct slots. Later arrivals can replace slots according to their own draws; the initial fill does not inspect or choose among future records.\",\n      \"transfer\": \"Describe the state after the initial fill for a stream prefix shorter than its eventual length, without looking at later records.\"\n    },\n    {\n      \"id\": \"reservoir-03\",\n      \"prompt\": \"Why can Algorithm R process a stream whose final length is unknown?\",\n      \"options\": [\n        \"Its next decision uses the number seen so far and the fixed capacity, not the eventual length.\",\n        \"It first scans the whole stream to learn its final length.\",\n        \"It silently stores all earlier records outside the reservoir.\",\n        \"It assumes that exactly twice the reservoir capacity will arrive.\"\n      ],\n      \"concept\": \"Positions and reservoirs\",\n      \"prerequisites\": [],\n      \"answer\": 0,\n      \"explanation\": \"At arrival i, the rule uses a draw from 1 through i and the fixed capacity k. It only needs the count already seen. The finite lab shows the whole input for inspection, but the streaming algorithm need not know its eventual length.\",\n      \"transfer\": \"Which two integer quantities must the streaming implementation know before deciding what to do with the next record?\"\n    },\n    {\n      \"id\": \"reservoir-04\",\n      \"prompt\": \"Use capacity 2. After filling positions [1, 2], the draws at arrivals 3, 4 and 5 are respectively 2, 4 and 1. What are the final reservoir slots?\",\n      \"options\": [\n        \"[1, 5]\",\n        \"[3, 4]\",\n        \"[3, 5]\",\n        \"[5, 3]\"\n      ],\n      \"concept\": \"Draws and replacement\",\n      \"prerequisites\": [\n        \"Positions and reservoirs\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"Arrival 3 with draw 2 replaces slot 2, giving [1, 3]. Draw 4 at arrival 4 exceeds capacity 2, so nothing changes. Arrival 5 with draw 1 replaces slot 1, giving [5, 3]. The same unordered subset is {3, 5}, but slot order is [5, 3].\",\n      \"transfer\": \"Change only the last draw to 5 and determine which earlier slots survive, keeping slot order distinct from a sorted subset.\"\n    },\n    {\n      \"id\": \"reservoir-05\",\n      \"prompt\": \"At arrival 4 with capacity 2, the current reservoir slots are [1, 3] and the draw is 3. What happens?\",\n      \"options\": [\n        \"Position 4 replaces slot 1 because it is the newest record.\",\n        \"The draw exceeds capacity, so the reservoir stays [1, 3].\",\n        \"Position 4 replaces the record whose stream position is 3.\",\n        \"The capacity grows to 3 and position 4 is appended.\"\n      ],\n      \"concept\": \"Draws and replacement\",\n      \"prerequisites\": [\n        \"Positions and reservoirs\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"Draw 3 is a draw value, not an instruction to find stream position 3. Only values 1 and 2 name replaceable reservoir slots. Since 3 > 2, the incoming fourth position is skipped and both current slots remain.\",\n      \"transfer\": \"For capacity 3 at arrival 7, identify all draw values that cause replacement and the slot each selects.\"\n    },\n    {\n      \"id\": \"reservoir-06\",\n      \"prompt\": \"Use capacity 1 on positions 1, 2, 3. The draw at arrival 2 is 1, and the draw at arrival 3 is 3. Which position remains?\",\n      \"options\": [\n        \"Position 1\",\n        \"Position 3\",\n        \"Position 2\",\n        \"Both positions 2 and 3\"\n      ],\n      \"concept\": \"Draws and replacement\",\n      \"prerequisites\": [\n        \"Positions and reservoirs\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"At arrival 2, draw 1 replaces the only slot with position 2. At arrival 3, draw 3 exceeds capacity 1, so position 3 is skipped. The slot therefore still contains position 2.\",\n      \"transfer\": \"Construct two different legal draw histories that finish with the same one-position sample.\"\n    },\n    {\n      \"id\": \"reservoir-07\",\n      \"prompt\": \"For four positions and capacity 2, independent uniform draws have 3 choices at arrival 3 and 4 choices at arrival 4. How many equally likely histories lead to each unordered two-position subset?\",\n      \"options\": [\n        \"2 of 12 histories, giving probability 1/6 per subset.\",\n        \"1 of 12 histories, giving probability 1/12 per subset.\",\n        \"3 of 12 histories, giving probability 1/4 per subset.\",\n        \"The six subsets are possible, but their probabilities cannot be determined.\"\n      ],\n      \"concept\": \"Uniform subsets\",\n      \"prerequisites\": [\n        \"Draws and replacement\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"There are 3 × 4 = 12 independent uniform draw histories, each with probability 1/12. Exact enumeration assigns two histories to each of the six unordered pairs, so every pair has probability 2/12 = 1/6.\",\n      \"transfer\": \"Explain why equal history weights require independent uniform draws, not merely a count of legal choices.\"\n    },\n    {\n      \"id\": \"reservoir-08\",\n      \"prompt\": \"A uniform capacity-2 sample is taken from five distinct positions. What are the inclusion probability for one specified position and the probability for one specified pair?\",\n      \"options\": [\n        \"Both probabilities are 2/5.\",\n        \"The position has probability 1/5 and the pair 1/25.\",\n        \"The position has probability 2/5 and the pair 4/25, because inclusions are independent.\",\n        \"The position has probability 2/5 and the pair 1/10; inclusions are not independent.\"\n      ],\n      \"concept\": \"Uniform subsets\",\n      \"prerequisites\": [\n        \"Draws and replacement\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"Each specified position belongs to four of the ten two-position subsets, so its inclusion probability is 4/10 = 2/5. One specified pair is exactly one subset, with probability 1/10. This differs from (2/5)²; fixed-size inclusions are not independent.\",\n      \"transfer\": \"For a uniform three-of-six sample, compare one-position inclusion with the probability of a particular three-position subset.\"\n    },\n    {\n      \"id\": \"reservoir-09\",\n      \"prompt\": \"A different procedure chooses {1, 2} with probability 1/2 and {3, 4} otherwise. Each position has inclusion probability 1/2. Is this a uniform sample of two of four positions?\",\n      \"options\": [\n        \"Yes; equal individual inclusion probabilities always imply uniform subsets.\",\n        \"No; four of the six possible pairs can never be selected.\",\n        \"No; at least one position has inclusion probability zero.\",\n        \"Yes; the order within a pair is the only remaining issue.\"\n      ],\n      \"concept\": \"Uniform subsets\",\n      \"prerequisites\": [\n        \"Draws and replacement\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"Equal marginals do not characterize the joint distribution. Positions 1 and 2 are always together, as are 3 and 4; the other four pairs have probability zero. Uniform two-of-four sampling requires all six unordered pairs to have probability 1/6.\",\n      \"transfer\": \"Give a fixed-size selection procedure with equal individual inclusion probabilities that still forbids some subsets.\"\n    },\n    {\n      \"id\": \"reservoir-10\",\n      \"prompt\": \"For capacity 1, suppose a flawed procedure starts with A and then replaces the reservoir with each incoming record on a fresh fair coin flip. After B and then C arrive, what are the final probabilities for A, B and C?\",\n      \"options\": [\n        \"1/3, 1/3, 1/3\",\n        \"1/2, 1/4, 1/4\",\n        \"1/4, 1/4, 1/2\",\n        \"0, 1/2, 1/2\"\n      ],\n      \"concept\": \"Assumptions and limits\",\n      \"prerequisites\": [\n        \"Uniform subsets\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"A survives only if neither later coin causes replacement, probability 1/4. B is final only if its coin replaces A and C's does not, probability 1/4. C is final whenever its coin replaces the current item, probability 1/2. Algorithm R instead reduces admission probability as the seen count grows.\",\n      \"transfer\": \"Explain why a constant replacement chance gives late arrivals an advantage in this three-record example.\"\n    },\n    {\n      \"id\": \"reservoir-11\",\n      \"prompt\": \"A learner types one legal sequence of draws and sees its exact trace. What does that establish?\",\n      \"options\": [\n        \"The algorithm's deterministic behavior for those draws; it does not establish that a random generator is uniform or independent.\",\n        \"That every legal draw history is equally likely in the learner's input.\",\n        \"That the final sample must reflect every category in the stream.\",\n        \"That repeating those same typed draws generates independent samples.\"\n      ],\n      \"concept\": \"Assumptions and limits\",\n      \"prerequisites\": [\n        \"Uniform subsets\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"A legal typed history determines one exact run. The lab's separate distribution counts all histories under a stated independent-uniform assumption; it does not test an actual random generator. A uniform sample can also omit a category by chance.\",\n      \"transfer\": \"What additional evidence would be needed before trusting a deployed sampler's random draws or real data coverage?\"\n    },\n    {\n      \"id\": \"reservoir-12\",\n      \"prompt\": \"There are three positions and capacity 3. How many post-fill draws, draw histories and final unordered subsets are there?\",\n      \"options\": [\n        \"Three draws, three histories and three subsets.\",\n        \"No draws, no histories and no subset.\",\n        \"One draw, one history and three subsets.\",\n        \"No draws, one empty draw history and one subset containing all three positions.\"\n      ],\n      \"concept\": \"Assumptions and limits\",\n      \"prerequisites\": [\n        \"Uniform subsets\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"All three positions are retained during initialization, so there is no later random decision. The empty sequence is one possible history, not zero histories. The only three-position subset contains all three positions, with probability 1.\",\n      \"transfer\": \"Explain the difference between an empty collection of possibilities and the one possibility consisting of an empty history.\"\n    }\n  ]\n}\n";
+const GUIDE_TEXT = "# A sample as the stream grows\n\nThis lab follows **Algorithm R**, a reservoir method credited to Alan Waterman in Jeffrey S. Vitter's 1985 paper. Its job is to retain a fixed-size sample while arrivals continue, without first learning the stream's final length.\n\nThe lab makes no random draws. You supply a legal sequence of integer draws and inspect that deterministic run. A separate exact count considers every possible history under the assumption that each draw is independent and uniform in its stated range.\n\n## Positions are the identities\n\nA record's position identifies its occurrence. Two records may both be called “oak”; position 1 and position 2 remain different records. The displayed labels are literal text and never merge occurrences.\n\nWith capacity k, first retain positions 1 through k in slots 1 through k. For each later arrival at position i, consider a draw j from 1 through i:\n\n- If j is at most k, replace reservoir slot j with the new occurrence.\n- Otherwise, skip this arrival.\n\nThe number on a draw selects a **slot**, not a record with that stream position. No later decision needs to revisit a skipped record.\n\n## A chosen history\n\nUse labels A, B, C, D, E; capacity 2; draws 2,4,1.\n\n| Arrival | Draw | Action | Slots afterward |\n|---|---:|---|---|\n| Initial fill | — | Keep positions 1 and 2 | [1,2] |\n| Position 3 | 2 | Replace slot 2, removing position 2 | [1,3] |\n| Position 4 | 4 | Skip because 4 exceeds capacity 2 | [1,3] |\n| Position 5 | 1 | Replace slot 1, removing position 1 | [5,3] |\n\nThe final slot order is [5,3]. Its unordered positional subset is {3,5}. These are two presentations of the same selected occurrences; the uniform-subset claim does not assert that every slot permutation has equal probability.\n\nPrevious/Next inspect this already computed history. They do not make another draw. Editing any input retires the applied trace and its observation download until Apply succeeds again.\n\n## Why the complete subset matters\n\nFor n=4 and k=2, there are 3×4=12 equally likely histories under the stated draw assumption. Every one of the six unordered pairs occurs in two histories, so each has probability 1/6. A specified position occurs in six histories, giving inclusion probability 1/2.\n\nEqual individual inclusion chances alone are insufficient. A procedure that selects {1,2} half the time and {3,4} otherwise gives every position probability 1/2, yet never selects four of the six pairs. The lab therefore shows complete subset counts as well as marginals.\n\nA subset-level induction explains Algorithm R beyond the displayed finite examples. Suppose every k-subset of the first i−1 positions is equally likely. For a target k-subset omitting the new position i, the preceding subset must already be that target and the incoming record must be skipped. Its probability is:\n\n    (1 / C(i−1,k)) × ((i−k) / i) = 1 / C(i,k).\n\nFor a target containing i, its other k−1 members must already be present together with exactly one outside member. There are i−k possible outside members. Each preceding subset has probability 1/C(i−1,k), and the single draw naming that outside member's reservoir slot has probability 1/i. Summing gives the same 1/C(i,k). The initial k positions form the sole k-subset, starting the induction. This argument concerns unordered positional subsets and uses independent uniform draws.\n\n## What the tables count\n\nThe bounded interface admits 1–8 records and capacity 1–3, no larger than the record count. It enumerates at most 40,320 histories. Every history has the same probability 1 divided by the product (k+1)×…×n. If n=k, the product is empty and equals 1: there is one empty history and one final subset, not zero possibilities.\n\nFor every unordered subset, “Histories” is the number of legal draw sequences that produce it. Its exact probability is that count divided by the total, reduced to a fraction. A marginal count adds all histories whose final subset contains that position. Counts and fractions in the lab are exact bounded integers; they are not measured frequencies or rounded estimates.\n\nThe distribution tables always describe the result after **all** input records arrive. The selected step above them describes one chosen history at its own current prefix. Neither display changes the other.\n\n## A tempting biased alternative\n\nFor capacity 1, start with A and replace on a fresh fair coin at each of B and C. A survives both coins with probability 1/4; B is final with probability 1/4; C is final with probability 1/2. Constant replacement probability favors the latest arrival here. Algorithm R instead makes the incoming i-th record eligible with probability 1/i for capacity 1.\n\nA uniform sample can still miss a category or contain an unusual combination. Sampling positions does not repair biased collection, missing data, malicious ordering or a faulty random generator. The lab proves its finite mathematical counts under explicit assumptions, not the quality of a deployed data pipeline or the effectiveness of a lesson.\n\n## Use the lab and lesson\n\nOpen courses/reservoir-sampling-lab.html directly in a browser. Labels are one per line; preserve intended spaces, and omit blank or trailing empty lines. Capacity is a canonical positive decimal integer. Draws are comma-separated canonical positive integers; spaces or tabs around each draw are accepted. Use no draws when capacity equals the number of records.\n\nApply produces the trace and tables. Download observation records the literal applied input text, selected step, complete trace and complete distribution. It does not import data or reopen an untrusted computation.\n\nDownload lesson produces reservoir-sampling.json, containing twelve original questions. Open the unchanged RecallWeave learner in demo.html, choose that JSON, inspect its preview and explicitly start. Download guide preserves this document. No account, network, storage or installation is needed for these local interactions.\n\n## References and attribution\n\n- Jeffrey S. Vitter, [Random Sampling with a Reservoir](https://www.ittc.ku.edu/~jsv/Papers/Vit85.Reservoir.pdf), ACM Transactions on Mathematical Software 11(1),37–57 (1985), section 2. The paper credits Algorithm R to Alan Waterman and develops faster reservoir algorithms.\n- Tim Roughgarden and Gregory Valiant, [CS168 lecture 13: Reservoir Sampling](https://timroughgarden.org/s17/l/l13.pdf). Its inclusion-probability argument is useful for marginals; the separate subset induction above supplies the stronger joint-distribution claim.\n\nAll questions, worked examples and explanatory text in this companion are original and offered under CC0-1.0. Referenced publications keep their own rights.\n";
+/** Bounded teaching model for Algorithm R. No random generator is used here. */
+const integer = (value, min, max, name) => {
+  if (!Number.isInteger(value) || value < min || value > max) {
+    throw new TypeError(name + ' must be an integer from ' + min + ' through ' + max + '.');
+  }
+  return value;
+};
+function record(value) {
+  if (value === null || typeof value !== 'object' || Array.isArray(value)) {
+    throw new TypeError('Supply an input object.');
+  }
+  return value;
+}
+function dense(value, length, name) {
+  if (!Array.isArray(value) || value.length !== length) {
+    throw new TypeError(name + ' must contain exactly ' + length + ' entries.');
+  }
+  for (let i = 0; i < length; i += 1) {
+    if (!Object.prototype.hasOwnProperty.call(value, i)) {
+      throw new TypeError(name + ' cannot have missing entries.');
+    }
+  }
+  return value;
+}
+function freeze(value) {
+  if (value && typeof value === 'object' && !Object.isFrozen(value)) {
+    Object.values(value).forEach(freeze);
+    Object.freeze(value);
+  }
+  return value;
+}
+function dimensions(itemCount, capacity) {
+  integer(itemCount, 1, 8, 'Item count');
+  integer(capacity, 1, Math.min(3, itemCount), 'Capacity');
+}
+function fraction(numerator, denominator) {
+  let a = numerator, b = denominator;
+  while (b) [a, b] = [b, a % b];
+  return {numerator: numerator / a, denominator: denominator / a};
+}
+
+/** A complete deterministic history for explicitly supplied legal integer draws. */
+function traceReservoir(input) {
+  const {items: labels, capacity, draws: proposed} = record(input);
+  if (!Array.isArray(labels)) throw new TypeError('Items must be an array.');
+  dimensions(labels.length, capacity);
+  dense(labels, labels.length, 'Items');
+  const items = labels.map((label, index) => {
+    if (typeof label !== 'string' || !label.trim() || label.length > 48 || /[\r\n]/.test(label)) {
+      throw new TypeError('Each label needs 1–48 literal text units, non-whitespace and no line break.');
+    }
+    return {position: index + 1, label};
+  });
+  dense(proposed, items.length - capacity, 'Draws');
+  const draws = proposed.map((draw, index) => integer(draw, 1, capacity + index + 1, 'Draw ' + (index + 1)));
+  // Derivation starts only after the complete proposed input has been admitted.
+  let reservoir = Array.from({length: capacity}, (_, index) => index + 1);
+  const steps = [{seen: capacity, incoming: null, draw: null, action: 'initial',
+    slot: null, removed: null, before: [], after: [...reservoir]}];
+  for (let index = capacity; index < items.length; index += 1) {
+    const draw = draws[index - capacity], before = [...reservoir];
+    const replacement = draw <= capacity;
+    const removed = replacement ? reservoir[draw - 1] : null;
+    if (replacement) reservoir[draw - 1] = index + 1;
+    steps.push({seen: index + 1, incoming: {...items[index]}, draw,
+      action: replacement ? 'replace' : 'skip', slot: replacement ? draw : null,
+      removed, before, after: [...reservoir]});
+  }
+  return freeze({schema: 'recallweave-reservoir-trace/1', items, capacity, draws,
+    steps, sample: [...reservoir], subset: [...reservoir].sort((a, b) => a - b)});
+}
+
+/** Exact finite enumeration under independent uniform draws; no simulated trials. */
+function distributionReservoir(input) {
+  const {itemCount, capacity} = record(input);
+  dimensions(itemCount, capacity);
+  const counts = new Map();
+  let histories = 0;
+  const visit = (seen, reservoir) => {
+    if (seen === itemCount) {
+      const key = [...reservoir].sort((a, b) => a - b).join(',');
+      counts.set(key, (counts.get(key) ?? 0) + 1);
+      histories += 1;
+      return;
+    }
+    const incoming = seen + 1;
+    for (let draw = 1; draw <= incoming; draw += 1) {
+      const next = [...reservoir];
+      if (draw <= capacity) next[draw - 1] = incoming;
+      visit(incoming, next);
+    }
+  };
+  visit(capacity, Array.from({length: capacity}, (_, index) => index + 1));
+  const subsets = [...counts].map(([key, count]) => ({
+    positions: key.split(',').map(Number), count, probability: fraction(count, histories)
+  })).sort((a, b) => {
+    for (let i = 0; i < capacity; i += 1) {
+      if (a.positions[i] !== b.positions[i]) return a.positions[i] - b.positions[i];
+    }
+    return 0;
+  });
+  const marginals = Array.from({length: itemCount}, (_, index) => {
+    const position = index + 1;
+    const count = subsets.reduce((sum, subset) => sum + (subset.positions.includes(position) ? subset.count : 0), 0);
+    return {position, count, probability: fraction(count, histories)};
+  });
+  return freeze({schema: 'recallweave-reservoir-distribution/1', itemCount, capacity,
+    assumption: 'independent uniform integer draw1..i at each arrival',
+    histories, subsets, marginals, uniformSubsets: subsets.every(s => s.count === subsets[0].count)});
+}
+
+const byId = id => document.getElementById(id);
+let applied = null, selectedStep = 0;
+const stepButtons = ['first', 'previous', 'next', 'last'];
+function node(tag, text, className) {
+  const e = document.createElement(tag);
+  if (text !== undefined) e.textContent = text;
+  if (className) e.className = className;
+  return e;
+}
+function probability(p) { return p.numerator + '/' + p.denominator; }
+function positions(ids) { return ids.map(id => '#' + id).join(', '); }
+function tableRow(values) {
+  const row = node('tr');
+  values.forEach(value => row.append(node('td', String(value))));
+  return row;
+}
+function save(text, type, name) {
+  const url = URL.createObjectURL(new Blob([text], {type}));
+  const a = node('a'); a.href = url; a.download = name;
+  document.body.append(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+function controls() {
+  byId('first').disabled = !applied || selectedStep === 0;
+  byId('previous').disabled = !applied || selectedStep === 0;
+  byId('next').disabled = !applied || selectedStep === applied.trace.steps.length - 1;
+  byId('last').disabled = !applied || selectedStep === applied.trace.steps.length - 1;
+  byId('download-observation').disabled = !applied;
+}
+function retire(message) {
+  applied = null; selectedStep = 0; controls();
+  byId('results').hidden = true;
+  byId('reservoir').replaceChildren();
+  for (const id of ['step-table', 'subset-table', 'marginal-table']) byId(id).tBodies[0].replaceChildren();
+  byId('step-label').textContent = '';
+  byId('distribution-summary').textContent = '';
+  byId('status').textContent = message;
+}
+function renderStep() {
+  if (!applied) return;
+  const t = applied.trace, step = t.steps[selectedStep];
+  byId('step-label').textContent = 'Step ' + selectedStep + ' of ' + (t.steps.length - 1) +
+    ' · ' + step.seen + ' seen · ' + (step.action === 'initial' ? 'Initial fill' :
+      step.action === 'replace' ? 'Replace slot ' + step.slot + ' (was #' + step.removed + ')' :
+      'Skip incoming #' + step.incoming.position);
+  const list = byId('reservoir'); list.replaceChildren();
+  step.after.forEach((position, index) => {
+    const li = node('li'); li.dataset.position = String(position); li.dataset.slot = String(index + 1);
+    li.append(node('small', 'Slot ' + (index + 1), 'slot'), node('strong', '#' + position, 'position'),
+      node('span', t.items[position - 1].label, 'label')); list.append(li);
+  });
+  for (const row of byId('step-table').tBodies[0].rows) {
+    if (Number(row.dataset.step) === selectedStep) row.setAttribute('aria-current', 'step');
+    else row.removeAttribute('aria-current');
+  }
+  controls();
+}
+function render() {
+  const {trace: t, distribution: d} = applied;
+  byId('results').hidden = false;
+  const steps = byId('step-table').tBodies[0]; steps.replaceChildren();
+  t.steps.forEach((s, index) => {
+    const action = s.action === 'initial' ? 'Initial fill' :
+      s.action === 'replace' ? 'Replace slot ' + s.slot + ' (was #' + s.removed + ')' :
+      'Skip incoming #' + s.incoming.position;
+    const row = tableRow([s.seen, s.incoming ? '#' + s.incoming.position : '—',
+      s.draw === null ? '—' : s.draw, action, positions(s.after)]);
+    row.dataset.step = String(index); steps.append(row);
+  });
+  const subsets = byId('subset-table').tBodies[0]; subsets.replaceChildren();
+  d.subsets.forEach(s => subsets.append(tableRow([positions(s.positions), s.count, probability(s.probability)])));
+  const marginals = byId('marginal-table').tBodies[0]; marginals.replaceChildren();
+  d.marginals.forEach(m => {
+    const row = tableRow(['#' + m.position, t.items[m.position - 1].label, m.count, probability(m.probability)]);
+    row.cells[1].className = 'literal'; marginals.append(row);
+  });
+  byId('distribution-summary').textContent = d.histories + ' equally likely draw histories · ' +
+    d.subsets.length + ' unordered positional subsets · ' +
+    (d.uniformSubsets ? d.subsets[0].count + ' histories per subset.' : 'Subset counts differ.');
+  byId('distribution-heading').textContent = 'After all ' + d.itemCount + ' arrivals: every possible history';
+  renderStep();
+}
+function decimal(text, name) {
+  if (!/^[1-9][0-9]*$/.test(text)) throw new TypeError(name + ' needs a positive decimal integer without leading zeroes.');
+  const value = Number(text);
+  if (!Number.isSafeInteger(value)) throw new TypeError(name + ' is outside the exact integer range.');
+  return value;
+}
+for (const id of ['labels', 'capacity', 'draws']) byId(id).addEventListener('input', () =>
+  retire('Draft changed. Apply the complete input to create a new trace.'));
+byId('apply').addEventListener('click', () => {
+  retire('');
+  try {
+    const raw = {labelsText: byId('labels').value, capacityText: byId('capacity').value, drawsText: byId('draws').value};
+    const items = raw.labelsText.replace(/\r\n?/g, '\n').split('\n');
+    const capacity = decimal(raw.capacityText, 'Capacity');
+    const draws = raw.drawsText === '' ? [] : raw.drawsText.split(',').map((token, index) =>
+      decimal(token.replace(/^[ \t]+|[ \t]+$/g, ''), 'Draw ' + (index + 1)));
+    const trace = traceReservoir({items, capacity, draws});
+    const distribution = distributionReservoir({itemCount: items.length, capacity});
+    applied = Object.freeze({raw: Object.freeze(raw), trace, distribution}); selectedStep = 0;
+    render();
+    byId('status').textContent = 'Applied ' + items.length + ' literal records with capacity ' + capacity +
+      '. This chosen history is deterministic; the tables separately assume independent uniform draws.';
+  } catch (error) { retire(error.message); }
+});
+for (const id of stepButtons) byId(id).addEventListener('click', () => {
+  if (!applied) return;
+  selectedStep = id === 'first' ? 0 : id === 'last' ? applied.trace.steps.length - 1 :
+    id === 'previous' ? Math.max(0, selectedStep - 1) : Math.min(applied.trace.steps.length - 1, selectedStep + 1);
+  renderStep();
+});
+byId('download-observation').addEventListener('click', () => {
+  if (!applied) return;
+  const observation = {schema: 'recallweave-reservoir-observation/1', raw: applied.raw,
+    selectedStep, trace: applied.trace, distribution: applied.distribution};
+  save(JSON.stringify(observation, null, 2) + '\n', 'application/json;charset=utf-8', 'reservoir-observation.json');
+});
+byId('download-course').addEventListener('click', () => save(COURSE_TEXT, 'application/json;charset=utf-8', 'reservoir-sampling.json'));
+byId('download-guide').addEventListener('click', () => save(GUIDE_TEXT, 'text/markdown;charset=utf-8', 'reservoir-sampling.md'));
+controls();
+
+</script>
+</body>
+</html>
