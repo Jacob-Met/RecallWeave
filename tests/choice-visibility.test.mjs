@@ -80,6 +80,14 @@ test('stand-alone page deterministically embeds exact unchanged native importer'
  assert.equal(output.includes('<script src='),false);
  execFileSync(process.execPath,[path.resolve(here,'../tools/build-choice-visibility.mjs'),'--check']);
 });
+test('native-valid long single-token titles and identifiers have explicit browser wrap surfaces',()=>{
+ const d=fixture(['A',' A ']);d.title='T'.repeat(160);d.items[0].id='Q'.repeat(80);
+ const report=inspectChoices(parseDeck(JSON.stringify(d)));
+ assert.equal(report.title,d.title);assert.equal(report.collisions[0].questionId,d.items[0].id);
+ const template=readFileSync(path.resolve(here,'../templates/choice-visibility.html'),'utf8');
+ assert.match(template, /#status\{overflow-wrap:anywhere\}/);
+ assert.match(template, /\.finding h3\{[^}]*overflow-wrap:anywhere\}/);
+});
 test('changed importer source must invalidate generated page in --check mode',()=>{
  const output=path.resolve(here,'../courses/choice-visibility-review.html');
  const current=readFileSync(output,'utf8');
