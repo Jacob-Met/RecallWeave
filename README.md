@@ -372,6 +372,14 @@ This public source repository supports the ForgeHacks 2026 demo. The Devpost acc
 Import the course through the existing local-file preview and **Start this deck** flow, then use the learner's review, separate missed-item practice and study-note downloads. All traits are hypothetical plant examples; the model gives probabilities, not guaranteed finite offspring counts. Build and optional browser-receiving commands are in the guide.
 
 
+## Explore genetic linkage
+
+[Open the offline linkage lab](courses/genetic-linkage-lab.html), [download the twelve-question course](courses/genetic-linkage.json), or [read the worked guide](courses/genetic-linkage.md). Compare **AB / ab** and **Ab / aB** in an **AaBb × aabb** testcross. Apply a whole recombinant-gamete percentage from 0 to 50 and inspect exact parental/recombinant gamete and offspring fractions alongside the independent-assortment comparison.
+
+Choose the course through **Bring your own lesson**, preview it, then select **Start this deck** for the existing review, separate practice and study notes. The observation download keeps the applied cross.
+
+For both inheritance lessons and the learner in one folder, save the [offline lesson kit](docs/receiving/genetic-linkage-60b2c08feb01/genetic-linkage-offline-kit.zip), extract it completely, and open `START-HERE.html`. [Kit instructions](docs/receiving/genetic-linkage-60b2c08feb01/offline-kit.md) explain the included files.
+
 ## Explore cache decisions
 
 Open **[Cache decisions: FIFO and LRU](courses/cache-replacement.html)** directly in a browser to inspect both policies on the same request sequence. Step through hits and evictions, compare complete-sequence misses across capacities, and download the accepted experiment. The worked examples include a trace where FIFO has fewer misses than LRU and the classic FIFO capacity anomaly; counts describe those inputs, not measured computer performance.
