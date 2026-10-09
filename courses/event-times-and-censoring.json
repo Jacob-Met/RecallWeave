@@ -1,0 +1,215 @@
+{
+  "format": "recallweave-deck/1",
+  "title": "Event times and right-censoring",
+  "attribution": "Original questions, fictional machine records and worked examples by HAMON estate. Conceptual background: Kaplan and Meier (1958), NIST Engineering Statistics Handbook, and the R survival package documentation; source links and limits are in the companion guide.",
+  "license": "Creative Commons Attribution 4.0 (CC BY 4.0): https://creativecommons.org/licenses/by/4.0/. Attribute HAMON estate — Event times and right-censoring, retain the license link and indicate changes. This covers the original course content, not the cited sources or app code.",
+  "concepts": [
+    "Observed follow-up",
+    "At-risk sets",
+    "Product-limit estimates",
+    "Assumptions and limits"
+  ],
+  "items": [
+    {
+      "id": "followup-1",
+      "concept": "Observed follow-up",
+      "prerequisites": [],
+      "prompt": "A fictional machine begins operating at time 0. The event is its first failure, measured in hours. It is still working when observation ends at hour 3, so the record is right-censored at 3. What does that record establish?",
+      "options": [
+        "The machine had no first failure through hour 3; its later event time is unknown.",
+        "Its first failure occurred at hour 3.",
+        "It will never fail.",
+        "It failed at an unknown time before hour 3."
+      ],
+      "answer": 0,
+      "explanation": "Right-censoring records event-free follow-up through the stopping time, not an event at that time. Here the first-failure time is later than 3 hours, but its value is unknown. Treating 3 as the failure time would invent an event; treating the machine as permanently reliable would invent its future.",
+      "transfer": "Another fictional machine is still working when observation ends at hour 7. Write one sentence about what is known and one about what is unknown."
+    },
+    {
+      "id": "followup-2",
+      "concept": "Observed follow-up",
+      "prerequisites": [],
+      "prompt": "Four fictional machines all start at hour 0. A first fails at hour 2; B is still working when observation ends at 3; C first fails at 4; D is still working when observation ends at 5. Which record format preserves the information needed to distinguish failures from right-censoring?",
+      "options": [
+        "One column containing 2, 3, 4 and 5, with every value treated as a failure time.",
+        "A time and a status for each machine: A (2, event), B (3, censored), C (4, event), D (5, censored).",
+        "Only the two observed failure times, 2 and 4; discard B and D.",
+        "A time for A and C, and a time of 0 for B and D."
+      ],
+      "answer": 1,
+      "explanation": "The stopping time and status together distinguish an observed event from a limit on follow-up. B contributes 3 hours and D 5 hours of event-free observation. Deleting them loses that information; coding their times as zero or treating their stopping times as failures misstates it.",
+      "transfer": "Create two fictional records with the same stopping time of 6 hours but different statuses. Explain why the time column alone cannot distinguish them."
+    },
+    {
+      "id": "followup-3",
+      "concept": "Observed follow-up",
+      "prerequisites": [],
+      "prompt": "A, B, C and D start at hour 0. A fails at 2 and C at 4; B and D are still working when observation ends at 3 and 5. The four recorded stopping times average (2 + 3 + 4 + 5)/4 = 3.5 hours. What does 3.5 measure?",
+      "options": [
+        "The mean first-failure time of all four machines.",
+        "The mean of the two observed failure times.",
+        "The mean observed follow-up duration, which is not the mean first-failure time of all four machines.",
+        "The mean number of machines at risk."
+      ],
+      "answer": 2,
+      "explanation": "The 3 and 5 are follow-up limits, not failure times. Thus 3.5 hours averages observation durations. The observed failures alone average (2 + 4)/2 = 3 hours, but that average also does not supply the unobserved failure times of B and D. The full cohort's mean first-failure time is not known from these records.",
+      "transfer": "Give two possible pairs of later failure times for B and D that respect censoring at 3 and 5, but produce different full-cohort mean failure times. Do not claim either pair was observed."
+    },
+    {
+      "id": "risk-1",
+      "concept": "At-risk sets",
+      "prerequisites": [
+        "Observed follow-up"
+      ],
+      "prompt": "Four machines begin observation while working at hour 0. A fails at 2; B is censored at 3; C fails at 4; D is censored at 5. An at-risk set contains machines still observed and not yet failed immediately before an event. How many are at risk immediately before hour 2?",
+      "options": [
+        "1, because one failure is observed at hour 2.",
+        "2, because only A and C eventually have observed failures.",
+        "3, because A is about to fail.",
+        "4, because none has yet failed or left observation."
+      ],
+      "answer": 3,
+      "explanation": "All four are still being observed and event-free immediately before 2. A belongs in the denominator even though it fails at that event time. Later censoring does not retrospectively remove B or D from earlier at-risk sets.",
+      "transfer": "Five fictional machines start together. One is censored at hour 1 and the first observed failure is at hour 2. How many are at risk immediately before 2, and why?"
+    },
+    {
+      "id": "risk-2",
+      "concept": "At-risk sets",
+      "prerequisites": [
+        "Observed follow-up"
+      ],
+      "prompt": "A, B, C and D all begin at hour 0. A fails at 2; B is censored while still working at 3; C fails at 4; D is censored at 5. Which machines form the at-risk set immediately before the failure at hour 4?",
+      "options": [
+        "C and D only.",
+        "A, C and D.",
+        "B, C and D.",
+        "A, B, C and D."
+      ],
+      "answer": 0,
+      "explanation": "A has already failed and B is no longer observed. C and D remain under observation without a prior failure, so the denominator at 4 is 2. Being censored does not mean B failed, but it does mean B's unobserved later time cannot contribute to this observed risk set.",
+      "transfer": "Suppose B instead remained observed and event-free until being censored at hour 4.5. With the other records unchanged, identify the at-risk set immediately before 4."
+    },
+    {
+      "id": "risk-3",
+      "concept": "At-risk sets",
+      "prerequisites": [
+        "Observed follow-up"
+      ],
+      "prompt": "In the four-machine record, A fails at 2, B is censored while still working at 3, C fails at 4 and D is censored at 5. The Kaplan–Meier estimate drops only at observed failures, by a factor 1 − d/n, where d is the number of failures and n is the at-risk count. What happens at B's censoring time, hour 3?",
+      "options": [
+        "Count B as a failure and multiply the estimate by 2/3.",
+        "Keep the estimate unchanged, but remove B from at-risk sets for later event times.",
+        "Keep B in every later at-risk set because no failure was observed.",
+        "Discard B's earlier follow-up and recalculate the first denominator as 3."
+      ],
+      "answer": 1,
+      "explanation": "There is no observed failure at 3, so censoring causes no downward jump. B contributed to the risk set before 2 and leaves observation at 3. Censoring changes eligibility for later denominators; it does not erase earlier follow-up or supply an event.",
+      "transfer": "At a time with only a censoring record and no observed failures, explain separately what happens to the curve height and to the number remaining under observation."
+    },
+    {
+      "id": "estimate-1",
+      "concept": "Product-limit estimates",
+      "prerequisites": [
+        "At-risk sets"
+      ],
+      "prompt": "All four machines start at 0: A fails at 2, B is censored at 3, C fails at 4, and D is censored at 5. The Kaplan–Meier estimate starts at 1 and multiplies by 1 − d/n at each observed failure. At 2, n = 4 and d = 1; at 4, n = 2 and d = 1. What is the estimated probability of remaining event-free beyond hour 4?",
+      "options": [
+        "1/2, because half of the original four have observed failures.",
+        "9/16, by using the original denominator 4 at both failures.",
+        "3/8, by multiplying (1 − 1/4)(1 − 1/2).",
+        "0, because hour 4 is the last observed failure."
+      ],
+      "answer": 2,
+      "explanation": "The first factor is 3/4 and the second is 1/2, so their product is 3/8. The second factor describes surviving that event time among its at-risk set; it is not the complete survival estimate from time 0. A fixed denominator of 4 ignores B's departure before 4. The final observed failure does not force the curve to zero when someone remains at risk afterward.",
+      "transfer": "In another fictional record, the only two observed failure times have (n, d) = (5, 1) and (3, 1). Compute the product-limit estimate just after the second failure and identify each denominator."
+    },
+    {
+      "id": "estimate-2",
+      "concept": "Product-limit estimates",
+      "prerequisites": [
+        "At-risk sets"
+      ],
+      "prompt": "For A failing at 2, B censored at 3, C failing at 4 and D censored at 5, all starting at 0, the estimated event-free probability is 1 before 2, 3/4 from 2 up to 4, and 3/8 from 4 through 5. What is the estimate at hour 3.5?",
+      "options": [
+        "3/8, because the next failure is at hour 4.",
+        "1/2, because B's censoring creates another downward step.",
+        "9/16, found by drawing a straight line from hour 2 to hour 4.",
+        "3/4, because no observed failure occurs between 2 and 3.5."
+      ],
+      "answer": 3,
+      "explanation": "The product-limit curve is a step function. It does not drop at B's censoring time or interpolate a slope between events. Its height at 3.5 remains 3/4. The drop to 3/8 occurs at 4, using the risk set immediately before that failure.",
+      "transfer": "Using the stated curve, give its values at hours 1.5 and 4.5. State why each value applies without drawing a sloped segment."
+    },
+    {
+      "id": "estimate-3",
+      "concept": "Product-limit estimates",
+      "prerequisites": [
+        "At-risk sets"
+      ],
+      "prompt": "The four-machine example gives a Kaplan–Meier estimate of 3/8 beyond hour 4. Which interpretation respects the distinction between an estimate and the observed records?",
+      "options": [
+        "3/8 is an estimated event-free proportion under the stated observation assumptions, not a count of observed machines.",
+        "Exactly 1.5 of the four observed machines are still working at hour 4.",
+        "Each named machine has a known, exact probability of 3/8 of surviving beyond hour 4.",
+        "The data prove that the true population event-free probability is exactly 3/8."
+      ],
+      "answer": 0,
+      "explanation": "A probability estimate need not equal an observed whole-machine count divided by four when follow-up is censored. Multiplying 4 by 3/8 gives 1.5, but no half-machine was observed. Nor does the small record prove an exact population parameter or an individual machine's probability. Its broader interpretation depends on comparability and the observation assumptions.",
+      "transfer": "A colleague describes 3/8 as 'one and a half surviving machines'. Rewrite that statement using the words estimate, observed records and assumptions."
+    },
+    {
+      "id": "limits-1",
+      "concept": "Assumptions and limits",
+      "prerequisites": [
+        "Observed follow-up",
+        "Product-limit estimates"
+      ],
+      "prompt": "When interpreting the simple pooled Kaplan–Meier curve for comparable fictional machines, which assumption is relevant to right-censoring?",
+      "options": [
+        "Every censored machine must fail immediately after observation ends.",
+        "Censoring must be non-informative about later failure risk among otherwise comparable machines; the observed table alone cannot verify this.",
+        "At least one machine must remain working forever.",
+        "Each machine must have the same observed follow-up length."
+      ],
+      "answer": 1,
+      "explanation": "The remaining observed machines must provide appropriate information about later risk for comparable machines that leave observation. Informative censoring can break that interpretation. Independent, comparable observations and a suitable censoring process are assumptions, not consequences of completing the arithmetic. A planned ending unrelated to machine condition may motivate the assumption but does not prove it.",
+      "transfer": "Describe one fictional reason observation might end independently of a machine's condition, then name one fact you would check before treating that explanation as credible."
+    },
+    {
+      "id": "limits-2",
+      "concept": "Assumptions and limits",
+      "prerequisites": [
+        "Observed follow-up",
+        "Product-limit estimates"
+      ],
+      "prompt": "An observer removes fictional machines from follow-up as soon as unusual vibrations suggest that failure is near, records those removals as right-censoring, and then interprets a simple pooled Kaplan–Meier curve. What concern follows?",
+      "options": [
+        "Censoring automatically removes all statistical uncertainty.",
+        "The removed machines should be assigned failure times equal to their removal times.",
+        "Removal depends on signs of later failure risk, so non-informative censoring may be violated and the simple interpretation may be misleading.",
+        "Using a larger number of similarly removed machines guarantees an unbiased curve."
+      ],
+      "answer": 2,
+      "explanation": "Condition-driven removal can make those who leave systematically different in later risk from those who remain observed. Coding a real censoring time is still an honest record, but it does not repair the inference problem. Inventing failures at removal is not a solution, and more observations under the same biased process do not automatically solve it.",
+      "transfer": "Propose one useful change to follow-up or data collection for the vibration example, and state one limitation that would still need attention."
+    },
+    {
+      "id": "limits-3",
+      "concept": "Assumptions and limits",
+      "prerequisites": [
+        "Observed follow-up",
+        "Product-limit estimates"
+      ],
+      "prompt": "All four machines start at 0: A fails at 2, B is censored at 3, C fails at 4, and D is censored at 5. The estimated curve is 3/8 from hour 4 through the final observed time, hour 5. What can these records alone establish about the later tail and the unrestricted mean failure time?",
+      "options": [
+        "The curve stays at 3/8 forever, proving that 3/8 of machines never fail.",
+        "The curve must become zero immediately after hour 5.",
+        "The true unrestricted mean failure time is infinite.",
+        "They do not identify the tail beyond 5 or an unrestricted mean without additional follow-up or assumptions."
+      ],
+      "answer": 3,
+      "explanation": "No machine remains under observation after 5. A positive final plateau is not evidence of an immortal fraction, a forced drop, or an infinite true mean. The unrestricted mean depends on the unobserved tail. Do not extrapolate the displayed plateau indefinitely or substitute the mean stopping time for the mean event time.",
+      "transfer": "Before someone extrapolates this curve to hour 20, write two questions about the additional follow-up or assumptions that would support that extrapolation."
+    }
+  ]
+}
