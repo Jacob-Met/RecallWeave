@@ -1,0 +1,119 @@
+{
+  "schema": "recallweave.lp.mac-receiving-identity-amendment/1",
+  "owner": "autonomous-e3a41d2b3368/foundation_recovery",
+  "stage": "Before first installed-command/browser receiving. Original helper source placement refusal and fresh identity observations are preserved. No browser, installed use, or receiver native execution occurred before this amendment.",
+  "originalFreeze": {
+    "gitBlob": "66d4e6a9d3a2f12507aff55de865617b43c647e0",
+    "bytes": 18569,
+    "sha256": "b894b230a64638aa9cf6f324ded29afebdb60ca3d26896f4e90e3a952e35e56e"
+  },
+  "supersededReceiver": {
+    "gitBlob": "b6af6e4fb78150905442633b2bbaf170152042d6",
+    "bytes": 42315,
+    "sha256": "f515e454f6a0c50082cd2594b26a457e95ef0a65f979a74f9925050eb5fe392f",
+    "nativeExecution": false
+  },
+  "reason": "The source-placement controller correctly refused an exact boottime-tuple mismatch before writes. Apple exposes calendar-adjustable boot time and a separate read-only boot-session UUID. The receiver used the same unsuitable exact timeval predicate and has not yet run.",
+  "observations": [
+    {
+      "observer": "root native admission",
+      "at": "2026-10-09T05:58:34Z",
+      "pid": 98905,
+      "boottime": {
+        "seconds": 1790407646,
+        "microseconds": 911351
+      },
+      "bootSessionUuid": "not observed at that time",
+      "status": "Original successful read-only runtime/resource admission; not proof of equality to a later kernel session."
+    },
+    {
+      "observer": "root source-placement controller",
+      "at": "2026-10-09T06:30:20Z",
+      "pid": 51183,
+      "outerExit": 3,
+      "milliseconds": 960,
+      "boottime": {
+        "seconds": 1790407646,
+        "microseconds": 858517
+      },
+      "writes": 0,
+      "nodeRuns": 0,
+      "installRuns": 0,
+      "browserRuns": 0,
+      "status": "Retained pre-write refusal; no product attempt."
+    },
+    {
+      "observer": "root first stable-identity read",
+      "start": "2026-10-09T06:32:37.830Z",
+      "end": "2026-10-09T06:32:37.858Z",
+      "pid": 54124,
+      "sysctlExit": 0,
+      "stdout": "47865B22-BECE-4090-92BD-88664552E3A6\n",
+      "boottime": {
+        "seconds": 1790407646,
+        "microseconds": 858517
+      },
+      "status": "First observed session UUID; original outer closure is retained by root."
+    },
+    {
+      "observer": "root successful source placement",
+      "start": "2026-10-09T06:40:37.311Z",
+      "end": "2026-10-09T06:40:37.451Z",
+      "pid": 66415,
+      "outerExit": 0,
+      "reportedRuntimeSeconds": 1.29,
+      "bootSessionUuid": "47865B22-BECE-4090-92BD-88664552E3A6",
+      "receiptGitBlob": "1445a8f35cf428779599f5013cdb8e096f0e3e00",
+      "installRuns": 0,
+      "browserRuns": 0,
+      "status": "Original source placement and existing Node capability observation; not installed-product use."
+    }
+  ],
+  "primaryResearch": {
+    "repository": "apple-oss-distributions/xnu",
+    "commit": "f6217f891ac0bb64f3d375211650a4c1ff8ca1ea",
+    "sourceVersion": "xnu-12377.1.9",
+    "sources": [
+      {
+        "path": "osfmk/kern/clock.c",
+        "url": "https://github.com/apple-oss-distributions/xnu/blob/f6217f891ac0bb64f3d375211650a4c1ff8ca1ea/osfmk/kern/clock.c",
+        "lines": "718-839 and 1485-1504",
+        "finding": "clock_set_calendar_microtime adjusts clock_boottime and clock_boottime_usec by the forward or backward calendar delta. clock_get_boottime_microtime returns these stored values."
+      },
+      {
+        "path": "bsd/kern/kern_time.c",
+        "url": "https://github.com/apple-oss-distributions/xnu/blob/f6217f891ac0bb64f3d375211650a4c1ff8ca1ea/bsd/kern/kern_time.c",
+        "lines": "279-288",
+        "finding": "boottime_timeval obtains seconds and microseconds from clock_get_boottime_microtime."
+      },
+      {
+        "path": "bsd/kern/kern_sysctl.c",
+        "url": "https://github.com/apple-oss-distributions/xnu/blob/f6217f891ac0bb64f3d375211650a4c1ff8ca1ea/bsd/kern/kern_sysctl.c",
+        "gitBlob": "1e9baecfcbe6e56d8deac42fe59022266ab7db46",
+        "lines": "2921-2950",
+        "finding": "kern.boottime uses boottime_timeval. kern.bootsessionuuid separately exports bootsessionuuid_string with read-only and locked sysctl flags."
+      }
+    ],
+    "inference": "Exact boottime seconds/microseconds equality is unsuitable as an immutable boot-session predicate. This source supports the narrower session-UUID check; it does not establish the cause of this Mac's observed timestamp change.",
+    "limits": "The running Mac kernel build was not equated to this public source commit. Earlier observations without a session UUID remain historically unbound to the new UUID. No clock, time service, system configuration, kernel property or environment was repaired or changed."
+  },
+  "changedPredicate": {
+    "bootIdentity": "Require fresh /usr/sbin/sysctl -n kern.bootsessionuuid to equal plan.identity.bootSessionUuid and the newly observed 47865B22-BECE-4090-92BD-88664552E3A6. Missing, malformed, changed or unreadable UUID refuses before receiver writes/spawn.",
+    "boottime": "Read and preserve the exact raw kern.boottime text and parsed tuple for provenance only. Do not gate on tuple equality or relabel the first refusal as successful.",
+    "hardwareAndAccount": "All existing exact Darwin/user501/me/home/hardware UUID and runtime/source/installation predicates remain required.",
+    "planBinding": "The exact receiving plan must cite this amendment's Git blob and retain raw prior boottime/session evidence; the original freeze remains immutable."
+  },
+  "sourceReviewRefinements": {
+    "scope": "Root separately authorized these two bounded read-only evidence changes before any receiving execution.",
+    "processCensus": "Select only each receiver-created PGID with explicit per-command COMMAND_MODE=unix2003 and LC_ALL=C. Use wide bounded output. Retire closed groups on the specific created-child record. Retain exact-profile pgrep plus exact-PID ps observation for possible escaped helpers; unresolved ownership is a closure failure, never blanket signaling authority.",
+    "runtimeAfter": "Re-read and compare the same four pinned runtime files after use, retaining native large metadata fields as strings.",
+    "primaryPsReference": {
+      "repository": "apple-oss-distributions/adv_cmds",
+      "commit": "6bed8737a34dbb54782a18f47dccf933a9967a12",
+      "man": "https://github.com/apple-oss-distributions/adv_cmds/blob/6bed8737a34dbb54782a18f47dccf933a9967a12/ps/ps.1",
+      "source": "https://github.com/apple-oss-distributions/adv_cmds/blob/6bed8737a34dbb54782a18f47dccf933a9967a12/ps/ps.c",
+      "finding": "The documented -g selector names process-group leaders; legacy mode ignores -g. Explicit UNIX2003 mode avoids a silent broad selection. lstart identifies the reported process start, and -ww preserves long command arguments under the receiver's byte cap."
+    }
+  },
+  "unchanged": "All original application/asset/source pins, fourteen installed files/four directories, actual executable shebang entry, one fractional witness, three physical downloads, fresh-tab reopen, owned child closure, memory/disk/capture/time limits and exclusions remain unchanged. No floor relaxation, new dependency, new service, native replay or expansion into a mathematics campaign."
+}
