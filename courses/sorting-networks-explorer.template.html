@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sorting networks · RecallWeave</title>
+<style>
+:root{color-scheme:light;--ink:#182d39;--muted:#435c68;--line:#c6d4d8;--paper:#f4f7f5;--accent:#075d62;--pale:#e5f1ef;--bad:#8e331a}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 system-ui,sans-serif}main{max-width:1150px;margin:auto;padding:32px 24px 60px}header{max-width:800px;margin-bottom:28px}.eyebrow{font-size:.8rem;letter-spacing:.13em;text-transform:uppercase;color:var(--accent);font-weight:800}h1{font:700 clamp(2rem,5vw,3.2rem)/1.12 Georgia,serif;margin:.4em 0}h2{font:700 1.5rem/1.25 Georgia,serif}h3{font-size:1.05rem}p{margin:.65em 0}a{color:var(--accent)}.intro{font-size:1.12rem;color:var(--muted)}.card{background:white;border:1px solid var(--line);border-radius:14px;padding:24px;margin:18px 0}.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px}label{display:block;font-weight:700;margin:14px 0 5px}input,textarea,select{font:inherit;color:inherit;border:1px solid #869ba5;background:white;border-radius:6px;padding:9px;max-width:100%;width:100%}textarea{min-height:170px;font-family:ui-monospace,monospace;line-height:1.45;resize:vertical}button{font:600 .96rem/1.3 system-ui;color:white;background:var(--accent);border:1px solid var(--accent);border-radius:7px;padding:11px 15px;cursor:pointer;min-height:44px}button.secondary{background:white;color:var(--accent)}button:disabled{opacity:.45;cursor:default}button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:3px solid #efb230;outline-offset:3px}.actions{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0}.hint{font-size:.9rem;color:var(--muted)}.status{border-left:4px solid var(--accent);background:var(--pale);padding:12px 16px;margin:16px 0}.status.error{border-color:var(--bad);background:#fff0e9}.pill{font-size:.82rem;font-weight:700;border-radius:30px;padding:3px 9px;background:var(--pale);white-space:nowrap}.pill.fail{background:#fff0e9;color:var(--bad)}.scroller{max-width:100%;overflow:auto;border:1px solid var(--line);border-radius:8px}table{border-collapse:collapse;width:100%;white-space:nowrap;font-variant-numeric:tabular-nums}th,td{text-align:left;padding:9px 12px;border-bottom:1px solid #dee6e7}th{font-size:.86rem;background:#edf3f2}caption{text-align:left;white-space:normal;padding:10px;color:var(--muted)}tr.active td{background:#fff6d9}.smallbtn{font-size:.8rem;padding:6px 10px;min-height:34px}.numbers{font-family:ui-monospace,monospace;letter-spacing:.08em}.trace-line{font-size:1.15rem;font-weight:700}.diagram{background:#f8faf9;margin:16px 0}.diagram svg{display:block;max-width:none}.notes{padding-left:20px}.lesson{background:#e6eeea}footer{color:var(--muted);font-size:.87rem;margin-top:28px}[hidden]{display:none!important}
+@media(max-width:680px){main{padding:20px 14px 40px}.card{padding:18px 14px}.two{grid-template-columns:1fr;gap:6px}.actions button{flex:1 1 135px}th,td{padding:8px}.intro{font-size:1rem}.trace-line{font-size:1rem}}
+@media print{button,input,textarea,select,.editor,.actions{display:none}body{background:white}.card{break-inside:avoid}}
+</style>
+</head>
+<body><main>
+<header><div class="eyebrow">RecallWeave · Algorithm lab</div><h1>One network.<br>Every binary input.</h1>
+<p class="intro">A few successful examples can be misleading. Follow each fixed comparison, then test every zero–one input to find out whether this network really sorts.</p></header>
+<section class="card editor" aria-labelledby="edit-title"><h2 id="edit-title">Write a fixed comparator network</h2>
+<div class="two"><div>
+<label for="preset">Example to explore</label><select id="preset"><option value="0">Three wires — complete</option><option value="1" selected>Four wires — complete</option><option value="2">Four wires — missing the final comparator</option></select>
+<button id="load-preset" class="secondary" type="button">Use example as draft</button>
+<label for="wires">Number of wires</label><input id="wires" inputmode="numeric" value="4" maxlength="20" aria-describedby="limits">
+<label for="values">Input values, from wire 1 downward</label><input id="values" value="4 1 3 2" maxlength="200" spellcheck="false" aria-describedby="values-help">
+<p class="hint" id="values-help">One integer per wire, separated by spaces. Values can repeat or be negative.</p>
+</div><div>
+<label for="comparators">Comparators, in order</label><textarea id="comparators" maxlength="2000" spellcheck="false" aria-describedby="pairs-help">1 2
+3 4
+1 3
+2 4
+2 3</textarea>
+<p id="pairs-help" class="hint">One pair per line: smaller wire number first. Each pair sends its smaller value to the smaller-numbered wire. A blank list is allowed.</p>
+</div></div>
+<p class="hint" id="limits">2–6 wires · up to 30 comparators · integer values from −999 to 999. Editing retires the last result. Nothing runs until you choose Run.</p>
+<div class="actions"><button id="run" type="button">Run network</button><button id="download-config" class="secondary" type="button" disabled>Download configuration</button><button id="download-observation" class="secondary" type="button" disabled>Download full observation</button></div>
+<div id="status" class="status" role="status" aria-live="polite">Ready to inspect your draft. Choose Run network.</div>
+</section>
+<div id="results" hidden>
+<section class="card" aria-labelledby="verdict-title"><h2 id="verdict-title">Does this fixed network sort?</h2><p id="verdict" class="trace-line"></p><p id="verdict-detail"></p>
+<p class="hint">This is an exhaustive check of this exact pair sequence. It does not measure speed, prove minimum size, or claim stable ordering of equal-valued record identities.</p></section>
+<section class="card" aria-labelledby="trace-title"><h2 id="trace-title">Follow the values</h2><p id="trace-source"></p>
+<div class="actions"><button id="authored" class="secondary" type="button">Show authored input</button><button id="previous" class="secondary" type="button">Previous step</button><button id="next" class="secondary" type="button">Next step</button></div>
+<p id="step-summary" class="trace-line"></p><p id="current-values" class="numbers"></p>
+<div id="diagram" class="scroller diagram" tabindex="0" aria-label="Scrollable network diagram"></div>
+<p class="hint">The diagram follows the written order from left to right; it does not group comparisons into parallel stages. On a narrow screen, scroll inside the diagram. The complete values are also listed below.</p>
+<div class="scroller" tabindex="0" aria-label="Complete selected trace"><table id="trace-table"><caption>Initial values and every comparator, including unchanged steps.</caption><thead></thead><tbody></tbody></table></div></section>
+<section class="card" aria-labelledby="binary-title"><h2 id="binary-title">Check every binary input</h2><p id="binary-summary"></p>
+<p>Choose <strong>Trace</strong> beside any case to inspect it above. This changes only the displayed trace; your authored input and downloads stay bound to the accepted configuration.</p>
+<div class="scroller" tabindex="0" aria-label="Complete binary test table"><table id="binary-table"><thead><tr><th scope="col">Case</th><th scope="col">Input</th><th scope="col">Output</th><th scope="col">Result</th><th scope="col">Inspect</th></tr></thead><tbody></tbody></table></div></section>
+</div>
+<section class="card lesson" aria-labelledby="lesson-title"><h2 id="lesson-title">Why zeros and ones are enough</h2>
+<p>If an ordered input leaves a larger value before a smaller one, a threshold between them maps that inversion to 1 before 0. Applying the same nondecreasing threshold map before or after any min/max comparator gives the same result. A fixed network that sorts every binary input therefore cannot leave such an inversion.</p>
+<p>The original 12-question lesson works in the ordinary RecallWeave learner. Download it, open the learner, choose the JSON file, review its preview, and explicitly start the deck.</p>
+<div class="actions"><button id="download-course" type="button">Download lesson JSON</button><a href="../demo.html" id="learner-link">Open RecallWeave learner</a></div>
+<p class="hint">In the portable archive, open <strong>demo.html</strong>. No server, account, upload or installation is needed.</p></section>
+<footer><p>Original lab and exercises. Mathematical background: <a href="https://sarielhp.org/teach/notes/algos/files/24_sortnet.pdf">Sariel Har-Peled, Sorting Networks, §§24.2–24.3</a>. That reference opens only if you choose the link; the lab itself works offline.</p><p>No draft or result is saved automatically. Download the files you want to keep.</p></footer>
+</main>
+<script id="course-data" type="application/octet-stream">@@COURSE_BASE64@@</script>
+<script>
+@@SCRIPT@@
+</script>
+</body></html>

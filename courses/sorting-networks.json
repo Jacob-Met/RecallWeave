@@ -1,0 +1,205 @@
+{
+  "format": "recallweave-deck/1",
+  "title": "Sorting networks: one trace, every binary input",
+  "attribution": "Original lesson and authored examples for RecallWeave. Mathematical background: Sariel Har-Peled, Sorting Networks (2018), §§24.2–24.3, https://sarielhp.org/teach/notes/algos/files/24_sortnet.pdf. No source prose or diagrams copied.",
+  "license": "Original lesson text and examples: CC0-1.0. Referenced works retain their own terms.",
+  "concepts": [
+    "Compare-exchange",
+    "Fixed order",
+    "Counterexamples",
+    "Binary completeness",
+    "Threshold reasoning",
+    "Interpreting results"
+  ],
+  "items": [
+    {
+      "id": "sn-compare",
+      "concept": "Compare-exchange",
+      "prerequisites": [],
+      "prompt": "A comparator joins wires 1 and 3. Their incoming values are 7 and -2; wire 2 holds 5. What is the full vector after that comparator?",
+      "options": [
+        "[-2, 5, 7]",
+        "[7, 5, -2]",
+        "[-2, 7, 5]"
+      ],
+      "answer": 0,
+      "explanation": "Only the joined wires change: wire 1 receives min(7, -2), wire 3 receives max(7, -2), and wire 2 stays 5.",
+      "transfer": "Write the result for a different pair of nonadjacent wires."
+    },
+    {
+      "id": "sn-equal",
+      "concept": "Compare-exchange",
+      "prerequisites": [],
+      "prompt": "A comparator receives 4 on both of its wires. Under this lab's strict swap rule, what should the trace record?",
+      "options": [
+        "The comparator is skipped and no trace row is kept.",
+        "A trace row is kept, both values stay 4, and swapped is false.",
+        "The values change because every comparator must swap."
+      ],
+      "answer": 1,
+      "explanation": "Every listed comparator executes and produces a row. Equal inputs already meet the required order, so no strict greater-than swap occurs.",
+      "transfer": "Explain why a no-swap step still belongs in the trace."
+    },
+    {
+      "id": "sn-order",
+      "concept": "Fixed order",
+      "prerequisites": [
+        "Compare-exchange"
+      ],
+      "prompt": "Start with [3, 1, 2]. Run comparators (1,2), then (2,3), then (1,2). Which sequence lists the three after-vectors?",
+      "options": [
+        "[1,3,2] → [1,2,3] → [1,2,3]",
+        "[1,3,2] → [1,3,2] → [1,2,3]",
+        "[3,1,2] → [3,1,2] → [1,2,3]"
+      ],
+      "answer": 0,
+      "explanation": "The first comparator exchanges 3 and 1. The second exchanges 3 and 2. The last compares 1 and 2 and leaves them alone; that unchanged step is retained.",
+      "transfer": "Trace the same fixed pairs on [2, 2, -1]."
+    },
+    {
+      "id": "sn-adaptive",
+      "concept": "Fixed order",
+      "prerequisites": [
+        "Compare-exchange"
+      ],
+      "prompt": "Which procedure is a fixed comparator network?",
+      "options": [
+        "After seeing the values, choose whichever pair currently looks most out of order.",
+        "Always compare (1,2), (2,3), (1,2), in that order, whatever values arrive.",
+        "Sort the input by calling an unspecified library function."
+      ],
+      "answer": 1,
+      "explanation": "The pair sequence of a comparator network is fixed before it sees the data. Swap decisions depend on values, but the next wire pair does not.",
+      "transfer": "Distinguish a value-dependent swap from a value-dependent choice of the next pair."
+    },
+    {
+      "id": "sn-witness",
+      "concept": "Counterexamples",
+      "prerequisites": [
+        "Fixed order"
+      ],
+      "prompt": "On [2,4,1,3], run (1,2), (3,4), (1,3), (2,4). The output is [1,3,2,4]. What does this establish?",
+      "options": [
+        "The network sorts because the first and last values are correct.",
+        "The network fails to sort all inputs: 3 remains before 2.",
+        "The input is outside the model because it contains four distinct numbers."
+      ],
+      "answer": 1,
+      "explanation": "A sorted vector must be nondecreasing at every adjacent pair. The middle inversion is a concrete counterexample to the universal sorting claim.",
+      "transfer": "Identify one extra comparator that fixes this output; then explain why fixing one output alone is not a general proof."
+    },
+    {
+      "id": "sn-repair",
+      "concept": "Counterexamples",
+      "prerequisites": [
+        "Fixed order"
+      ],
+      "prompt": "Apply one additional comparator (2,3) to [1,3,2,4]. What is the result, and what has this single computation established?",
+      "options": [
+        "[1,2,3,4]; it establishes success for this input, not by itself for every input.",
+        "[1,2,3,4]; it proves that every possible four-wire network sorts.",
+        "[1,3,2,4]; nonadjacent values cannot move."
+      ],
+      "answer": 0,
+      "explanation": "The extra comparator exchanges the middle values. This is a local computation on one input; a universal claim still needs a complete argument or the applicable exhaustive binary test.",
+      "transfer": "Try the repaired fixed sequence on another input before checking its full binary table."
+    },
+    {
+      "id": "sn-count",
+      "concept": "Binary completeness",
+      "prerequisites": [
+        "Counterexamples"
+      ],
+      "prompt": "How many distinct binary input vectors must a six-wire network sort for a complete zero–one check?",
+      "options": [
+        "6",
+        "12",
+        "64"
+      ],
+      "answer": 2,
+      "explanation": "Each of six labeled wires independently carries 0 or 1, giving 2^6 = 64 complete inputs. Testing only six single-one inputs omits many arrangements.",
+      "transfer": "Count the binary vectors for two, three and four wires."
+    },
+    {
+      "id": "sn-binary",
+      "concept": "Binary completeness",
+      "prerequisites": [
+        "Counterexamples"
+      ],
+      "prompt": "A four-wire network's complete 16-row binary table contains one output [0,1,0,1]. What conclusion is justified?",
+      "options": [
+        "The network is certified because it passed most rows.",
+        "The network is not a sorting network; this row is an unsorted binary witness.",
+        "The row should be discarded because its input has repeated values."
+      ],
+      "answer": 1,
+      "explanation": "The adjacent 1,0 is out of order. A single counterexample defeats a claim about every input, even when all other rows pass.",
+      "transfer": "Read the failing input as well as the output, and trace where the inversion survives."
+    },
+    {
+      "id": "sn-threshold",
+      "concept": "Threshold reasoning",
+      "prerequisites": [
+        "Binary completeness"
+      ],
+      "prompt": "An output has 7 before 4. Map every value x to 0 when x ≤ 4 and to 1 when x > 4. What happens to this out-of-order pair?",
+      "options": [
+        "It becomes 0 before 1.",
+        "It becomes 1 before 0.",
+        "Both values become 0."
+      ],
+      "answer": 1,
+      "explanation": "The larger value 7 maps to 1 and 4 maps to 0, so the inversion remains visible in binary form. The same fixed map must be applied to the entire input.",
+      "transfer": "Choose a threshold for a different strict inversion."
+    },
+    {
+      "id": "sn-commute",
+      "concept": "Threshold reasoning",
+      "prerequisites": [
+        "Compare-exchange",
+        "Binary completeness"
+      ],
+      "prompt": "Why can the same threshold map be moved through each min/max comparator in the zero–one argument?",
+      "options": [
+        "The threshold map preserves weak order, so mapping min/max agrees with taking min/max after mapping.",
+        "Threshold maps make all input values distinct.",
+        "A comparator may choose a different pair after the values are mapped."
+      ],
+      "answer": 0,
+      "explanation": "A nondecreasing threshold map can merge equal-side values but cannot reverse their order. It therefore commutes with min and max. Applying this fact at every fixed comparator links the mapped input to the mapped output.",
+      "transfer": "Check the commuting identity once when the two values are on the same side of the threshold and once when they are on opposite sides."
+    },
+    {
+      "id": "sn-universal",
+      "concept": "Threshold reasoning",
+      "prerequisites": [
+        "Binary completeness"
+      ],
+      "prompt": "A fixed min/max network passes every binary input of its wire count. What follows from the zero–one principle?",
+      "options": [
+        "It sorts all vectors of ordered values of that length under the same comparison order.",
+        "It has the fewest possible comparators.",
+        "It preserves the original identity order of all equal-valued records."
+      ],
+      "answer": 0,
+      "explanation": "If any ordered input failed, a threshold placed between an inverted output pair would yield a failing binary input. Exhaustive binary success rules that out. It establishes sorting, not size optimality or stable handling of record identities.",
+      "transfer": "Explain why this implication requires a fixed min/max network rather than an arbitrary program that special-cases binary inputs."
+    },
+    {
+      "id": "sn-limits",
+      "concept": "Interpreting results",
+      "prerequisites": [
+        "Binary completeness"
+      ],
+      "prompt": "The lab reports 16 of 16 binary cases sorted for a five-comparator, four-wire network. Which report keeps the evidence within its scope?",
+      "options": [
+        "This is the fastest hardware sorter on every machine.",
+        "This fixed network sorts four ordered values; the lab has not measured hardware time or proved minimum size.",
+        "Any list of five comparisons must sort four values."
+      ],
+      "answer": 1,
+      "explanation": "The exhaustive certificate concerns this exact ordered comparator list and wire count. The lab does not benchmark hardware, compare every smaller network, or assert a stable sort of labeled records.",
+      "transfer": "Name a separate experiment or proof that would be needed for a performance or optimality claim."
+    }
+  ]
+}

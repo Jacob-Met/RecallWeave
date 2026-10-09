@@ -1,0 +1,143 @@
+import fs from "node:fs/promises";
+import path from "node:path";
+import {pathToFileURL} from "node:url";
+import crypto from "node:crypto";
+import assert from "node:assert/strict";
+const options = {};
+for(let i=2;i<process.argv.length;i+=2) {
+  const key=process.argv[i], value=process.argv[i+1];
+  if(!["--root","--browser","--playwright","--output"].includes(key)||!value||options[key]) throw new Error("Use --root --browser --playwright --output once each.");
+  options[key]=value;
+}
+for(const key of ["--root","--browser","--playwright","--output"]) if(!options[key])throw new Error("Missing "+key);
+const root=path.resolve(options["--root"]), output=path.resolve(options["--output"]);
+await fs.mkdir(output); // New-run admission precedes the runtime/finally boundary.
+const receipt={started:new Date().toISOString(),pid:process.pid,argv:process.argv,groups:[],downloads:[],pageErrors:[],external:[],screenshots:[],error:null};
+const pin=b=>({bytes:b.length,sha256:crypto.createHash("sha256").update(b).digest("hex")});
+let browser;
+const saveReceipt=()=>fs.writeFile(path.join(output,"receipt.json"),JSON.stringify(receipt,null,2)+"\n");
+const group=(name,details)=>{receipt.groups.push({name,at:new Date().toISOString(),...details});};
+async function getDownload(page,selector,name) {
+ const waiting=page.waitForEvent("download");
+ await page.locator(selector).click();
+ const d=await waiting, target=path.join(output,name);
+ assert.equal(await d.failure(),null);
+ await d.saveAs(target);
+ const bytes=await fs.readFile(target);
+ receipt.downloads.push({name,suggested:d.suggestedFilename(),...pin(bytes)});
+ return bytes;
+}
+try {
+ const {chromium}=await import(pathToFileURL(options["--playwright"]).href);
+ browser=await chromium.launch({executablePath:options["--browser"],headless:true,chromiumSandbox:true,timeout:45000});
+ const context=await browser.newContext({viewport:{width:1200,height:860},acceptDownloads:true});
+ context.setDefaultTimeout(12000);
+ context.on("page",page=>{
+  page.on("pageerror",e=>receipt.pageErrors.push(e.message));
+  page.on("request",r=>{if(/^https?:/.test(r.url()))receipt.external.push(r.url());});
+ });
+ await context.route(/^https?:/,r=>r.abort());
+ const page=await context.newPage();
+ const lab=pathToFileURL(path.join(root,"courses/sorting-networks-explorer.html")).href;
+ await page.goto(lab);
+ assert.equal(await page.locator("#results").isVisible(),false);
+ assert.equal(await page.locator("#download-observation").isEnabled(),false);
+ await page.locator("#run").click();
+ assert.equal(await page.locator("#verdict").textContent(),"All 16 binary inputs sort.");
+ assert.equal(await page.locator("#binary-table tbody tr").count(),16);
+ await page.locator("#next").click();await page.locator("#next").click();
+ assert.equal(await page.locator("#current-values").textContent(),"W1: 1   W2: 4   W3: 2   W4: 3");
+ const rawConfig=await getDownload(page,"#download-config","default-configuration.json");
+ assert.deepEqual(JSON.parse(rawConfig),{wires:4,values:[4,1,3,2],comparators:[[1,2],[3,4],[1,3],[2,4],[2,3]]});
+ const rawObservation=await getDownload(page,"#download-observation","default-observation.json");
+ const observation=JSON.parse(rawObservation);assert.equal(observation.binary.failed,0);assert.deepEqual(observation.authored.output,[1,2,3,4]);
+ const rawCourse=await getDownload(page,"#download-course","lesson.json");
+ assert.deepEqual(rawCourse,await fs.readFile(path.join(root,"courses/sorting-networks.json")));
+ group("B1-direct-open-default-and-three-actual-downloads",{binaryCases:16,traceSteps:observation.authored.steps.length});
+ await page.locator("#preset").selectOption("2");await page.locator("#load-preset").click();
+ assert.equal(await page.locator("#results").isVisible(),false);
+ await page.locator("#run").click();
+ assert.equal(await page.locator("#verdict").textContent(),"4 of 16 binary inputs fail.");
+ await page.getByRole("button",{name:"Trace binary case 5",exact:true}).click();
+ assert.match(await page.locator("#trace-source").textContent(),/Binary case 5: 0 1 0 1/);
+ for(let i=0;i<4;i++)await page.locator("#next").click();
+ assert.equal(await page.locator("#current-values").textContent(),"W1: 0   W2: 1   W3: 0   W4: 1");
+ const badNetwork=JSON.parse(await getDownload(page,"#download-observation","incomplete-observation.json"));
+ assert.deepEqual(badNetwork.configuration.values,[2,4,1,3]);assert.deepEqual(badNetwork.binary.failingOrdinals,[5,6,9,10]);
+ await page.locator("#values").fill("9999 1 2 3");
+ assert.equal(await page.locator("#results").isVisible(),false);
+ assert.equal(await page.locator("#download-config").isEnabled(),false);
+ await page.locator("#run").click();
+ assert.match(await page.locator("#status").textContent(),/999/);
+ assert.equal(await page.locator("#results").isVisible(),false);
+ assert.deepEqual(await getDownload(page,"#download-course","lesson-during-invalid.json"),rawCourse);
+ group("B2-counterexample-trace-and-retired-invalid-draft",{failures:badNetwork.binary.failingOrdinals});
+ await page.locator("#wires").fill("2");await page.locator("#values").fill("-999 999");await page.locator("#comparators").fill("");
+ await page.locator("#run").click();
+ assert.equal(await page.locator("#verdict").textContent(),"1 of 4 binary inputs fail.");
+ assert.equal(await page.locator("#trace-table tbody tr").count(),1);
+ assert.equal(await page.locator("#next").isEnabled(),false);
+ await page.locator("#wires").fill("6");await page.locator("#values").fill("6 5 4 3 2 1");await page.locator("#comparators").fill(Array(30).fill("1 2").join("\n"));
+ await page.locator("#run").click();
+ assert.equal(await page.locator("#binary-table tbody tr").count(),64);
+ assert.equal(await page.locator("#trace-table tbody tr").count(),31);
+ group("B3-empty-and-maximum-network-consumers",{cases:64,rows:31});
+ await page.setViewportSize({width:390,height:844});
+ await page.locator("#preset").selectOption("0");await page.locator("#load-preset").click();
+ await page.locator("#run").focus();await page.keyboard.press("Enter");
+ assert.equal(await page.locator("#verdict").textContent(),"All 8 binary inputs sort.");
+ assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
+ for(let i=0;i<3;i++)await page.locator("#next").click();
+ assert.equal(await page.locator("#current-values").textContent(),"W1: 1   W2: 2   W3: 3");
+ group("B4-phone-keyboard-and-contained-layout",{viewport:390});
+ const learner=await context.newPage();
+ await learner.goto(pathToFileURL(path.join(root,"demo.html")).href);
+ const before=await learner.locator("#step-count").textContent();
+ await learner.locator("#deck-file").setInputFiles(path.join(output,"lesson.json"));
+ assert.equal(await learner.locator("#deck-preview-title").textContent(),JSON.parse(rawCourse).title);
+ assert.equal(await learner.locator("#step-count").textContent(),before);
+ await learner.locator("#start-deck").click();
+ const course=JSON.parse(rawCourse),answered=[];
+ for(let i=0;i<12;i++){
+  const prompt=await learner.locator("#session-content h2").textContent();
+  const item=course.items.find(x=>x.prompt===prompt);assert.ok(item);
+  assert.ok(!answered.includes(item.id));
+  const choice=i===0?(item.answer+1)%item.options.length:item.answer;
+  await learner.locator('[data-choice="'+choice+'"]').click();
+  assert.ok((await learner.locator("#feedback-slot").textContent()).includes(item.explanation));
+  answered.push(item.id);await learner.locator("#next-button").click();
+ }
+ const first=await learner.locator("#first-try-summary").textContent();
+ assert.match(first,/11 of 12/);
+ await learner.locator("#practice-button").click();
+ const prompt=await learner.locator("#session-content h2").textContent(),item=course.items.find(x=>x.prompt===prompt);
+ await learner.locator('[data-practice-choice="'+item.answer+'"]').click();
+ await learner.locator("#practice-next").click();
+ assert.equal(await learner.locator("#first-try-summary").textContent(),first);
+ const notes=await getDownload(learner,"#save-notes-button","study-notes.txt");
+ assert.ok(notes.toString("utf8").includes(course.title));
+ for(const item of course.items)assert.ok(notes.toString("utf8").includes(item.prompt));
+ group("B5-real-original-learner-preview-answer-review-practice-notes",{answered,firstTry:first,notes:pin(notes)});
+ await page.evaluate(()=>scrollTo(0,0));
+ await page.screenshot({path:path.join(output,"phone-controls.png"),fullPage:false});
+ receipt.screenshots.push("phone-controls.png");
+ await page.locator("#verdict-title").scrollIntoViewIfNeeded();
+ await page.screenshot({path:path.join(output,"phone-result.png"),fullPage:false});
+ receipt.screenshots.push("phone-result.png");
+ await learner.screenshot({path:path.join(output,"learner-review.png"),fullPage:false});
+ receipt.screenshots.push("learner-review.png");
+ await page.setViewportSize({width:1200,height:860});
+ await page.evaluate(()=>scrollTo(0,0));
+ await page.screenshot({path:path.join(output,"desktop-lab.png"),fullPage:true});
+ receipt.screenshots.push("desktop-lab.png");
+ assert.deepEqual(receipt.external,[]);assert.deepEqual(receipt.pageErrors,[]);
+ group("B6-photography-and-no-external-requests",{screenshots:receipt.screenshots});
+ await context.close();
+} catch(error) {
+ receipt.error=error.stack??String(error);process.exitCode=1;
+} finally {
+ if(browser){try{await browser.close();receipt.browserClosed=true;}catch(e){receipt.closeError=String(e);process.exitCode=1;}}
+ receipt.finished=new Date().toISOString();
+ await saveReceipt();
+ console.log(JSON.stringify({groups:receipt.groups.map(x=>x.name),downloads:receipt.downloads.length,error:receipt.error,browserClosed:receipt.browserClosed}));
+}

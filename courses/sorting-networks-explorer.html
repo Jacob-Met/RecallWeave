@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sorting networks · RecallWeave</title>
+<style>
+:root{color-scheme:light;--ink:#182d39;--muted:#435c68;--line:#c6d4d8;--paper:#f4f7f5;--accent:#075d62;--pale:#e5f1ef;--bad:#8e331a}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 system-ui,sans-serif}main{max-width:1150px;margin:auto;padding:32px 24px 60px}header{max-width:800px;margin-bottom:28px}.eyebrow{font-size:.8rem;letter-spacing:.13em;text-transform:uppercase;color:var(--accent);font-weight:800}h1{font:700 clamp(2rem,5vw,3.2rem)/1.12 Georgia,serif;margin:.4em 0}h2{font:700 1.5rem/1.25 Georgia,serif}h3{font-size:1.05rem}p{margin:.65em 0}a{color:var(--accent)}.intro{font-size:1.12rem;color:var(--muted)}.card{background:white;border:1px solid var(--line);border-radius:14px;padding:24px;margin:18px 0}.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px}label{display:block;font-weight:700;margin:14px 0 5px}input,textarea,select{font:inherit;color:inherit;border:1px solid #869ba5;background:white;border-radius:6px;padding:9px;max-width:100%;width:100%}textarea{min-height:170px;font-family:ui-monospace,monospace;line-height:1.45;resize:vertical}button{font:600 .96rem/1.3 system-ui;color:white;background:var(--accent);border:1px solid var(--accent);border-radius:7px;padding:11px 15px;cursor:pointer;min-height:44px}button.secondary{background:white;color:var(--accent)}button:disabled{opacity:.45;cursor:default}button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:3px solid #efb230;outline-offset:3px}.actions{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0}.hint{font-size:.9rem;color:var(--muted)}.status{border-left:4px solid var(--accent);background:var(--pale);padding:12px 16px;margin:16px 0}.status.error{border-color:var(--bad);background:#fff0e9}.pill{font-size:.82rem;font-weight:700;border-radius:30px;padding:3px 9px;background:var(--pale);white-space:nowrap}.pill.fail{background:#fff0e9;color:var(--bad)}.scroller{max-width:100%;overflow:auto;border:1px solid var(--line);border-radius:8px}table{border-collapse:collapse;width:100%;white-space:nowrap;font-variant-numeric:tabular-nums}th,td{text-align:left;padding:9px 12px;border-bottom:1px solid #dee6e7}th{font-size:.86rem;background:#edf3f2}caption{text-align:left;white-space:normal;padding:10px;color:var(--muted)}tr.active td{background:#fff6d9}.smallbtn{font-size:.8rem;padding:6px 10px;min-height:34px}.numbers{font-family:ui-monospace,monospace;letter-spacing:.08em}.trace-line{font-size:1.15rem;font-weight:700}.diagram{background:#f8faf9;margin:16px 0}.diagram svg{display:block;max-width:none}.notes{padding-left:20px}.lesson{background:#e6eeea}footer{color:var(--muted);font-size:.87rem;margin-top:28px}[hidden]{display:none!important}
+@media(max-width:680px){main{padding:20px 14px 40px}.card{padding:18px 14px}.two{grid-template-columns:1fr;gap:6px}.actions button{flex:1 1 135px}th,td{padding:8px}.intro{font-size:1rem}.trace-line{font-size:1rem}}
+@media print{button,input,textarea,select,.editor,.actions{display:none}body{background:white}.card{break-inside:avoid}}
+</style>
+</head>
+<body><main>
+<header><div class="eyebrow">RecallWeave · Algorithm lab</div><h1>One network.<br>Every binary input.</h1>
+<p class="intro">A few successful examples can be misleading. Follow each fixed comparison, then test every zero–one input to find out whether this network really sorts.</p></header>
+<section class="card editor" aria-labelledby="edit-title"><h2 id="edit-title">Write a fixed comparator network</h2>
+<div class="two"><div>
+<label for="preset">Example to explore</label><select id="preset"><option value="0">Three wires — complete</option><option value="1" selected>Four wires — complete</option><option value="2">Four wires — missing the final comparator</option></select>
+<button id="load-preset" class="secondary" type="button">Use example as draft</button>
+<label for="wires">Number of wires</label><input id="wires" inputmode="numeric" value="4" maxlength="20" aria-describedby="limits">
+<label for="values">Input values, from wire 1 downward</label><input id="values" value="4 1 3 2" maxlength="200" spellcheck="false" aria-describedby="values-help">
+<p class="hint" id="values-help">One integer per wire, separated by spaces. Values can repeat or be negative.</p>
+</div><div>
+<label for="comparators">Comparators, in order</label><textarea id="comparators" maxlength="2000" spellcheck="false" aria-describedby="pairs-help">1 2
+3 4
+1 3
+2 4
+2 3</textarea>
+<p id="pairs-help" class="hint">One pair per line: smaller wire number first. Each pair sends its smaller value to the smaller-numbered wire. A blank list is allowed.</p>
+</div></div>
+<p class="hint" id="limits">2–6 wires · up to 30 comparators · integer values from −999 to 999. Editing retires the last result. Nothing runs until you choose Run.</p>
+<div class="actions"><button id="run" type="button">Run network</button><button id="download-config" class="secondary" type="button" disabled>Download configuration</button><button id="download-observation" class="secondary" type="button" disabled>Download full observation</button></div>
+<div id="status" class="status" role="status" aria-live="polite">Ready to inspect your draft. Choose Run network.</div>
+</section>
+<div id="results" hidden>
+<section class="card" aria-labelledby="verdict-title"><h2 id="verdict-title">Does this fixed network sort?</h2><p id="verdict" class="trace-line"></p><p id="verdict-detail"></p>
+<p class="hint">This is an exhaustive check of this exact pair sequence. It does not measure speed, prove minimum size, or claim stable ordering of equal-valued record identities.</p></section>
+<section class="card" aria-labelledby="trace-title"><h2 id="trace-title">Follow the values</h2><p id="trace-source"></p>
+<div class="actions"><button id="authored" class="secondary" type="button">Show authored input</button><button id="previous" class="secondary" type="button">Previous step</button><button id="next" class="secondary" type="button">Next step</button></div>
+<p id="step-summary" class="trace-line"></p><p id="current-values" class="numbers"></p>
+<div id="diagram" class="scroller diagram" tabindex="0" aria-label="Scrollable network diagram"></div>
+<p class="hint">The diagram follows the written order from left to right; it does not group comparisons into parallel stages. On a narrow screen, scroll inside the diagram. The complete values are also listed below.</p>
+<div class="scroller" tabindex="0" aria-label="Complete selected trace"><table id="trace-table"><caption>Initial values and every comparator, including unchanged steps.</caption><thead></thead><tbody></tbody></table></div></section>
+<section class="card" aria-labelledby="binary-title"><h2 id="binary-title">Check every binary input</h2><p id="binary-summary"></p>
+<p>Choose <strong>Trace</strong> beside any case to inspect it above. This changes only the displayed trace; your authored input and downloads stay bound to the accepted configuration.</p>
+<div class="scroller" tabindex="0" aria-label="Complete binary test table"><table id="binary-table"><thead><tr><th scope="col">Case</th><th scope="col">Input</th><th scope="col">Output</th><th scope="col">Result</th><th scope="col">Inspect</th></tr></thead><tbody></tbody></table></div></section>
+</div>
+<section class="card lesson" aria-labelledby="lesson-title"><h2 id="lesson-title">Why zeros and ones are enough</h2>
+<p>If an ordered input leaves a larger value before a smaller one, a threshold between them maps that inversion to 1 before 0. Applying the same nondecreasing threshold map before or after any min/max comparator gives the same result. A fixed network that sorts every binary input therefore cannot leave such an inversion.</p>
+<p>The original 12-question lesson works in the ordinary RecallWeave learner. Download it, open the learner, choose the JSON file, review its preview, and explicitly start the deck.</p>
+<div class="actions"><button id="download-course" type="button">Download lesson JSON</button><a href="../demo.html" id="learner-link">Open RecallWeave learner</a></div>
+<p class="hint">In the portable archive, open <strong>demo.html</strong>. No server, account, upload or installation is needed.</p></section>
+<footer><p>Original lab and exercises. Mathematical background: <a href="https://sarielhp.org/teach/notes/algos/files/24_sortnet.pdf">Sariel Har-Peled, Sorting Networks, §§24.2–24.3</a>. That reference opens only if you choose the link; the lab itself works offline.</p><p>No draft or result is saved automatically. Download the files you want to keep.</p></footer>
+</main>
+<script id="course-data" type="application/octet-stream">ewogICJmb3JtYXQiOiAicmVjYWxsd2VhdmUtZGVjay8xIiwKICAidGl0bGUiOiAiU29ydGluZyBuZXR3b3Jrczogb25lIHRyYWNlLCBldmVyeSBiaW5hcnkgaW5wdXQiLAogICJhdHRyaWJ1dGlvbiI6ICJPcmlnaW5hbCBsZXNzb24gYW5kIGF1dGhvcmVkIGV4YW1wbGVzIGZvciBSZWNhbGxXZWF2ZS4gTWF0aGVtYXRpY2FsIGJhY2tncm91bmQ6IFNhcmllbCBIYXItUGVsZWQsIFNvcnRpbmcgTmV0d29ya3MgKDIwMTgpLCDCp8KnMjQuMuKAkzI0LjMsIGh0dHBzOi8vc2FyaWVsaHAub3JnL3RlYWNoL25vdGVzL2FsZ29zL2ZpbGVzLzI0X3NvcnRuZXQucGRmLiBObyBzb3VyY2UgcHJvc2Ugb3IgZGlhZ3JhbXMgY29waWVkLiIsCiAgImxpY2Vuc2UiOiAiT3JpZ2luYWwgbGVzc29uIHRleHQgYW5kIGV4YW1wbGVzOiBDQzAtMS4wLiBSZWZlcmVuY2VkIHdvcmtzIHJldGFpbiB0aGVpciBvd24gdGVybXMuIiwKICAiY29uY2VwdHMiOiBbCiAgICAiQ29tcGFyZS1leGNoYW5nZSIsCiAgICAiRml4ZWQgb3JkZXIiLAogICAgIkNvdW50ZXJleGFtcGxlcyIsCiAgICAiQmluYXJ5IGNvbXBsZXRlbmVzcyIsCiAgICAiVGhyZXNob2xkIHJlYXNvbmluZyIsCiAgICAiSW50ZXJwcmV0aW5nIHJlc3VsdHMiCiAgXSwKICAiaXRlbXMiOiBbCiAgICB7CiAgICAgICJpZCI6ICJzbi1jb21wYXJlIiwKICAgICAgImNvbmNlcHQiOiAiQ29tcGFyZS1leGNoYW5nZSIsCiAgICAgICJwcmVyZXF1aXNpdGVzIjogW10sCiAgICAgICJwcm9tcHQiOiAiQSBjb21wYXJhdG9yIGpvaW5zIHdpcmVzIDEgYW5kIDMuIFRoZWlyIGluY29taW5nIHZhbHVlcyBhcmUgNyBhbmQgLTI7IHdpcmUgMiBob2xkcyA1LiBXaGF0IGlzIHRoZSBmdWxsIHZlY3RvciBhZnRlciB0aGF0IGNvbXBhcmF0b3I/IiwKICAgICAgIm9wdGlvbnMiOiBbCiAgICAgICAgIlstMiwgNSwgN10iLAogICAgICAgICJbNywgNSwgLTJdIiwKICAgICAgICAiWy0yLCA3LCA1XSIKICAgICAgXSwKICAgICAgImFuc3dlciI6IDAsCiAgICAgICJleHBsYW5hdGlvbiI6ICJPbmx5IHRoZSBqb2luZWQgd2lyZXMgY2hhbmdlOiB3aXJlIDEgcmVjZWl2ZXMgbWluKDcsIC0yKSwgd2lyZSAzIHJlY2VpdmVzIG1heCg3LCAtMiksIGFuZCB3aXJlIDIgc3RheXMgNS4iLAogICAgICAidHJhbnNmZXIiOiAiV3JpdGUgdGhlIHJlc3VsdCBmb3IgYSBkaWZmZXJlbnQgcGFpciBvZiBub25hZGphY2VudCB3aXJlcy4iCiAgICB9LAogICAgewogICAgICAiaWQiOiAic24tZXF1YWwiLAogICAgICAiY29uY2VwdCI6ICJDb21wYXJlLWV4Y2hhbmdlIiwKICAgICAgInByZXJlcXVpc2l0ZXMiOiBbXSwKICAgICAgInByb21wdCI6ICJBIGNvbXBhcmF0b3IgcmVjZWl2ZXMgNCBvbiBib3RoIG9mIGl0cyB3aXJlcy4gVW5kZXIgdGhpcyBsYWIncyBzdHJpY3Qgc3dhcCBydWxlLCB3aGF0IHNob3VsZCB0aGUgdHJhY2UgcmVjb3JkPyIsCiAgICAgICJvcHRpb25zIjogWwogICAgICAgICJUaGUgY29tcGFyYXRvciBpcyBza2lwcGVkIGFuZCBubyB0cmFjZSByb3cgaXMga2VwdC4iLAogICAgICAgICJBIHRyYWNlIHJvdyBpcyBrZXB0LCBib3RoIHZhbHVlcyBzdGF5IDQsIGFuZCBzd2FwcGVkIGlzIGZhbHNlLiIsCiAgICAgICAgIlRoZSB2YWx1ZXMgY2hhbmdlIGJlY2F1c2UgZXZlcnkgY29tcGFyYXRvciBtdXN0IHN3YXAuIgogICAgICBdLAogICAgICAiYW5zd2VyIjogMSwKICAgICAgImV4cGxhbmF0aW9uIjogIkV2ZXJ5IGxpc3RlZCBjb21wYXJhdG9yIGV4ZWN1dGVzIGFuZCBwcm9kdWNlcyBhIHJvdy4gRXF1YWwgaW5wdXRzIGFscmVhZHkgbWVldCB0aGUgcmVxdWlyZWQgb3JkZXIsIHNvIG5vIHN0cmljdCBncmVhdGVyLXRoYW4gc3dhcCBvY2N1cnMuIiwKICAgICAgInRyYW5zZmVyIjogIkV4cGxhaW4gd2h5IGEgbm8tc3dhcCBzdGVwIHN0aWxsIGJlbG9uZ3MgaW4gdGhlIHRyYWNlLiIKICAgIH0sCiAgICB7CiAgICAgICJpZCI6ICJzbi1vcmRlciIsCiAgICAgICJjb25jZXB0IjogIkZpeGVkIG9yZGVyIiwKICAgICAgInByZXJlcXVpc2l0ZXMiOiBbCiAgICAgICAgIkNvbXBhcmUtZXhjaGFuZ2UiCiAgICAgIF0sCiAgICAgICJwcm9tcHQiOiAiU3RhcnQgd2l0aCBbMywgMSwgMl0uIFJ1biBjb21wYXJhdG9ycyAoMSwyKSwgdGhlbiAoMiwzKSwgdGhlbiAoMSwyKS4gV2hpY2ggc2VxdWVuY2UgbGlzdHMgdGhlIHRocmVlIGFmdGVyLXZlY3RvcnM/IiwKICAgICAgIm9wdGlvbnMiOiBbCiAgICAgICAgIlsxLDMsMl0g4oaSIFsxLDIsM10g4oaSIFsxLDIsM10iLAogICAgICAgICJbMSwzLDJdIOKGkiBbMSwzLDJdIOKGkiBbMSwyLDNdIiwKICAgICAgICAiWzMsMSwyXSDihpIgWzMsMSwyXSDihpIgWzEsMiwzXSIKICAgICAgXSwKICAgICAgImFuc3dlciI6IDAsCiAgICAgICJleHBsYW5hdGlvbiI6ICJUaGUgZmlyc3QgY29tcGFyYXRvciBleGNoYW5nZXMgMyBhbmQgMS4gVGhlIHNlY29uZCBleGNoYW5nZXMgMyBhbmQgMi4gVGhlIGxhc3QgY29tcGFyZXMgMSBhbmQgMiBhbmQgbGVhdmVzIHRoZW0gYWxvbmU7IHRoYXQgdW5jaGFuZ2VkIHN0ZXAgaXMgcmV0YWluZWQuIiwKICAgICAgInRyYW5zZmVyIjogIlRyYWNlIHRoZSBzYW1lIGZpeGVkIHBhaXJzIG9uIFsyLCAyLCAtMV0uIgogICAgfSwKICAgIHsKICAgICAgImlkIjogInNuLWFkYXB0aXZlIiwKICAgICAgImNvbmNlcHQiOiAiRml4ZWQgb3JkZXIiLAogICAgICAicHJlcmVxdWlzaXRlcyI6IFsKICAgICAgICAiQ29tcGFyZS1leGNoYW5nZSIKICAgICAgXSwKICAgICAgInByb21wdCI6ICJXaGljaCBwcm9jZWR1cmUgaXMgYSBmaXhlZCBjb21wYXJhdG9yIG5ldHdvcms/IiwKICAgICAgIm9wdGlvbnMiOiBbCiAgICAgICAgIkFmdGVyIHNlZWluZyB0aGUgdmFsdWVzLCBjaG9vc2Ugd2hpY2hldmVyIHBhaXIgY3VycmVudGx5IGxvb2tzIG1vc3Qgb3V0IG9mIG9yZGVyLiIsCiAgICAgICAgIkFsd2F5cyBjb21wYXJlICgxLDIpLCAoMiwzKSwgKDEsMiksIGluIHRoYXQgb3JkZXIsIHdoYXRldmVyIHZhbHVlcyBhcnJpdmUuIiwKICAgICAgICAiU29ydCB0aGUgaW5wdXQgYnkgY2FsbGluZyBhbiB1bnNwZWNpZmllZCBsaWJyYXJ5IGZ1bmN0aW9uLiIKICAgICAgXSwKICAgICAgImFuc3dlciI6IDEsCiAgICAgICJleHBsYW5hdGlvbiI6ICJUaGUgcGFpciBzZXF1ZW5jZSBvZiBhIGNvbXBhcmF0b3IgbmV0d29yayBpcyBmaXhlZCBiZWZvcmUgaXQgc2VlcyB0aGUgZGF0YS4gU3dhcCBkZWNpc2lvbnMgZGVwZW5kIG9uIHZhbHVlcywgYnV0IHRoZSBuZXh0IHdpcmUgcGFpciBkb2VzIG5vdC4iLAogICAgICAidHJhbnNmZXIiOiAiRGlzdGluZ3Vpc2ggYSB2YWx1ZS1kZXBlbmRlbnQgc3dhcCBmcm9tIGEgdmFsdWUtZGVwZW5kZW50IGNob2ljZSBvZiB0aGUgbmV4dCBwYWlyLiIKICAgIH0sCiAgICB7CiAgICAgICJpZCI6ICJzbi13aXRuZXNzIiwKICAgICAgImNvbmNlcHQiOiAiQ291bnRlcmV4YW1wbGVzIiwKICAgICAgInByZXJlcXVpc2l0ZXMiOiBbCiAgICAgICAgIkZpeGVkIG9yZGVyIgogICAgICBdLAogICAgICAicHJvbXB0IjogIk9uIFsyLDQsMSwzXSwgcnVuICgxLDIpLCAoMyw0KSwgKDEsMyksICgyLDQpLiBUaGUgb3V0cHV0IGlzIFsxLDMsMiw0XS4gV2hhdCBkb2VzIHRoaXMgZXN0YWJsaXNoPyIsCiAgICAgICJvcHRpb25zIjogWwogICAgICAgICJUaGUgbmV0d29yayBzb3J0cyBiZWNhdXNlIHRoZSBmaXJzdCBhbmQgbGFzdCB2YWx1ZXMgYXJlIGNvcnJlY3QuIiwKICAgICAgICAiVGhlIG5ldHdvcmsgZmFpbHMgdG8gc29ydCBhbGwgaW5wdXRzOiAzIHJlbWFpbnMgYmVmb3JlIDIuIiwKICAgICAgICAiVGhlIGlucHV0IGlzIG91dHNpZGUgdGhlIG1vZGVsIGJlY2F1c2UgaXQgY29udGFpbnMgZm91ciBkaXN0aW5jdCBudW1iZXJzLiIKICAgICAgXSwKICAgICAgImFuc3dlciI6IDEsCiAgICAgICJleHBsYW5hdGlvbiI6ICJBIHNvcnRlZCB2ZWN0b3IgbXVzdCBiZSBub25kZWNyZWFzaW5nIGF0IGV2ZXJ5IGFkamFjZW50IHBhaXIuIFRoZSBtaWRkbGUgaW52ZXJzaW9uIGlzIGEgY29uY3JldGUgY291bnRlcmV4YW1wbGUgdG8gdGhlIHVuaXZlcnNhbCBzb3J0aW5nIGNsYWltLiIsCiAgICAgICJ0cmFuc2ZlciI6ICJJZGVudGlmeSBvbmUgZXh0cmEgY29tcGFyYXRvciB0aGF0IGZpeGVzIHRoaXMgb3V0cHV0OyB0aGVuIGV4cGxhaW4gd2h5IGZpeGluZyBvbmUgb3V0cHV0IGFsb25lIGlzIG5vdCBhIGdlbmVyYWwgcHJvb2YuIgogICAgfSwKICAgIHsKICAgICAgImlkIjogInNuLXJlcGFpciIsCiAgICAgICJjb25jZXB0IjogIkNvdW50ZXJleGFtcGxlcyIsCiAgICAgICJwcmVyZXF1aXNpdGVzIjogWwogICAgICAgICJGaXhlZCBvcmRlciIKICAgICAgXSwKICAgICAgInByb21wdCI6ICJBcHBseSBvbmUgYWRkaXRpb25hbCBjb21wYXJhdG9yICgyLDMpIHRvIFsxLDMsMiw0XS4gV2hhdCBpcyB0aGUgcmVzdWx0LCBhbmQgd2hhdCBoYXMgdGhpcyBzaW5nbGUgY29tcHV0YXRpb24gZXN0YWJsaXNoZWQ/IiwKICAgICAgIm9wdGlvbnMiOiBbCiAgICAgICAgIlsxLDIsMyw0XTsgaXQgZXN0YWJsaXNoZXMgc3VjY2VzcyBmb3IgdGhpcyBpbnB1dCwgbm90IGJ5IGl0c2VsZiBmb3IgZXZlcnkgaW5wdXQuIiwKICAgICAgICAiWzEsMiwzLDRdOyBpdCBwcm92ZXMgdGhhdCBldmVyeSBwb3NzaWJsZSBmb3VyLXdpcmUgbmV0d29yayBzb3J0cy4iLAogICAgICAgICJbMSwzLDIsNF07IG5vbmFkamFjZW50IHZhbHVlcyBjYW5ub3QgbW92ZS4iCiAgICAgIF0sCiAgICAgICJhbnN3ZXIiOiAwLAogICAgICAiZXhwbGFuYXRpb24iOiAiVGhlIGV4dHJhIGNvbXBhcmF0b3IgZXhjaGFuZ2VzIHRoZSBtaWRkbGUgdmFsdWVzLiBUaGlzIGlzIGEgbG9jYWwgY29tcHV0YXRpb24gb24gb25lIGlucHV0OyBhIHVuaXZlcnNhbCBjbGFpbSBzdGlsbCBuZWVkcyBhIGNvbXBsZXRlIGFyZ3VtZW50IG9yIHRoZSBhcHBsaWNhYmxlIGV4aGF1c3RpdmUgYmluYXJ5IHRlc3QuIiwKICAgICAgInRyYW5zZmVyIjogIlRyeSB0aGUgcmVwYWlyZWQgZml4ZWQgc2VxdWVuY2Ugb24gYW5vdGhlciBpbnB1dCBiZWZvcmUgY2hlY2tpbmcgaXRzIGZ1bGwgYmluYXJ5IHRhYmxlLiIKICAgIH0sCiAgICB7CiAgICAgICJpZCI6ICJzbi1jb3VudCIsCiAgICAgICJjb25jZXB0IjogIkJpbmFyeSBjb21wbGV0ZW5lc3MiLAogICAgICAicHJlcmVxdWlzaXRlcyI6IFsKICAgICAgICAiQ291bnRlcmV4YW1wbGVzIgogICAgICBdLAogICAgICAicHJvbXB0IjogIkhvdyBtYW55IGRpc3RpbmN0IGJpbmFyeSBpbnB1dCB2ZWN0b3JzIG11c3QgYSBzaXgtd2lyZSBuZXR3b3JrIHNvcnQgZm9yIGEgY29tcGxldGUgemVyb+KAk29uZSBjaGVjaz8iLAogICAgICAib3B0aW9ucyI6IFsKICAgICAgICAiNiIsCiAgICAgICAgIjEyIiwKICAgICAgICAiNjQiCiAgICAgIF0sCiAgICAgICJhbnN3ZXIiOiAyLAogICAgICAiZXhwbGFuYXRpb24iOiAiRWFjaCBvZiBzaXggbGFiZWxlZCB3aXJlcyBpbmRlcGVuZGVudGx5IGNhcnJpZXMgMCBvciAxLCBnaXZpbmcgMl42ID0gNjQgY29tcGxldGUgaW5wdXRzLiBUZXN0aW5nIG9ubHkgc2l4IHNpbmdsZS1vbmUgaW5wdXRzIG9taXRzIG1hbnkgYXJyYW5nZW1lbnRzLiIsCiAgICAgICJ0cmFuc2ZlciI6ICJDb3VudCB0aGUgYmluYXJ5IHZlY3RvcnMgZm9yIHR3bywgdGhyZWUgYW5kIGZvdXIgd2lyZXMuIgogICAgfSwKICAgIHsKICAgICAgImlkIjogInNuLWJpbmFyeSIsCiAgICAgICJjb25jZXB0IjogIkJpbmFyeSBjb21wbGV0ZW5lc3MiLAogICAgICAicHJlcmVxdWlzaXRlcyI6IFsKICAgICAgICAiQ291bnRlcmV4YW1wbGVzIgogICAgICBdLAogICAgICAicHJvbXB0IjogIkEgZm91ci13aXJlIG5ldHdvcmsncyBjb21wbGV0ZSAxNi1yb3cgYmluYXJ5IHRhYmxlIGNvbnRhaW5zIG9uZSBvdXRwdXQgWzAsMSwwLDFdLiBXaGF0IGNvbmNsdXNpb24gaXMganVzdGlmaWVkPyIsCiAgICAgICJvcHRpb25zIjogWwogICAgICAgICJUaGUgbmV0d29yayBpcyBjZXJ0aWZpZWQgYmVjYXVzZSBpdCBwYXNzZWQgbW9zdCByb3dzLiIsCiAgICAgICAgIlRoZSBuZXR3b3JrIGlzIG5vdCBhIHNvcnRpbmcgbmV0d29yazsgdGhpcyByb3cgaXMgYW4gdW5zb3J0ZWQgYmluYXJ5IHdpdG5lc3MuIiwKICAgICAgICAiVGhlIHJvdyBzaG91bGQgYmUgZGlzY2FyZGVkIGJlY2F1c2UgaXRzIGlucHV0IGhhcyByZXBlYXRlZCB2YWx1ZXMuIgogICAgICBdLAogICAgICAiYW5zd2VyIjogMSwKICAgICAgImV4cGxhbmF0aW9uIjogIlRoZSBhZGphY2VudCAxLDAgaXMgb3V0IG9mIG9yZGVyLiBBIHNpbmdsZSBjb3VudGVyZXhhbXBsZSBkZWZlYXRzIGEgY2xhaW0gYWJvdXQgZXZlcnkgaW5wdXQsIGV2ZW4gd2hlbiBhbGwgb3RoZXIgcm93cyBwYXNzLiIsCiAgICAgICJ0cmFuc2ZlciI6ICJSZWFkIHRoZSBmYWlsaW5nIGlucHV0IGFzIHdlbGwgYXMgdGhlIG91dHB1dCwgYW5kIHRyYWNlIHdoZXJlIHRoZSBpbnZlcnNpb24gc3Vydml2ZXMuIgogICAgfSwKICAgIHsKICAgICAgImlkIjogInNuLXRocmVzaG9sZCIsCiAgICAgICJjb25jZXB0IjogIlRocmVzaG9sZCByZWFzb25pbmciLAogICAgICAicHJlcmVxdWlzaXRlcyI6IFsKICAgICAgICAiQmluYXJ5IGNvbXBsZXRlbmVzcyIKICAgICAgXSwKICAgICAgInByb21wdCI6ICJBbiBvdXRwdXQgaGFzIDcgYmVmb3JlIDQuIE1hcCBldmVyeSB2YWx1ZSB4IHRvIDAgd2hlbiB4IOKJpCA0IGFuZCB0byAxIHdoZW4geCA+IDQuIFdoYXQgaGFwcGVucyB0byB0aGlzIG91dC1vZi1vcmRlciBwYWlyPyIsCiAgICAgICJvcHRpb25zIjogWwogICAgICAgICJJdCBiZWNvbWVzIDAgYmVmb3JlIDEuIiwKICAgICAgICAiSXQgYmVjb21lcyAxIGJlZm9yZSAwLiIsCiAgICAgICAgIkJvdGggdmFsdWVzIGJlY29tZSAwLiIKICAgICAgXSwKICAgICAgImFuc3dlciI6IDEsCiAgICAgICJleHBsYW5hdGlvbiI6ICJUaGUgbGFyZ2VyIHZhbHVlIDcgbWFwcyB0byAxIGFuZCA0IG1hcHMgdG8gMCwgc28gdGhlIGludmVyc2lvbiByZW1haW5zIHZpc2libGUgaW4gYmluYXJ5IGZvcm0uIFRoZSBzYW1lIGZpeGVkIG1hcCBtdXN0IGJlIGFwcGxpZWQgdG8gdGhlIGVudGlyZSBpbnB1dC4iLAogICAgICAidHJhbnNmZXIiOiAiQ2hvb3NlIGEgdGhyZXNob2xkIGZvciBhIGRpZmZlcmVudCBzdHJpY3QgaW52ZXJzaW9uLiIKICAgIH0sCiAgICB7CiAgICAgICJpZCI6ICJzbi1jb21tdXRlIiwKICAgICAgImNvbmNlcHQiOiAiVGhyZXNob2xkIHJlYXNvbmluZyIsCiAgICAgICJwcmVyZXF1aXNpdGVzIjogWwogICAgICAgICJDb21wYXJlLWV4Y2hhbmdlIiwKICAgICAgICAiQmluYXJ5IGNvbXBsZXRlbmVzcyIKICAgICAgXSwKICAgICAgInByb21wdCI6ICJXaHkgY2FuIHRoZSBzYW1lIHRocmVzaG9sZCBtYXAgYmUgbW92ZWQgdGhyb3VnaCBlYWNoIG1pbi9tYXggY29tcGFyYXRvciBpbiB0aGUgemVyb+KAk29uZSBhcmd1bWVudD8iLAogICAgICAib3B0aW9ucyI6IFsKICAgICAgICAiVGhlIHRocmVzaG9sZCBtYXAgcHJlc2VydmVzIHdlYWsgb3JkZXIsIHNvIG1hcHBpbmcgbWluL21heCBhZ3JlZXMgd2l0aCB0YWtpbmcgbWluL21heCBhZnRlciBtYXBwaW5nLiIsCiAgICAgICAgIlRocmVzaG9sZCBtYXBzIG1ha2UgYWxsIGlucHV0IHZhbHVlcyBkaXN0aW5jdC4iLAogICAgICAgICJBIGNvbXBhcmF0b3IgbWF5IGNob29zZSBhIGRpZmZlcmVudCBwYWlyIGFmdGVyIHRoZSB2YWx1ZXMgYXJlIG1hcHBlZC4iCiAgICAgIF0sCiAgICAgICJhbnN3ZXIiOiAwLAogICAgICAiZXhwbGFuYXRpb24iOiAiQSBub25kZWNyZWFzaW5nIHRocmVzaG9sZCBtYXAgY2FuIG1lcmdlIGVxdWFsLXNpZGUgdmFsdWVzIGJ1dCBjYW5ub3QgcmV2ZXJzZSB0aGVpciBvcmRlci4gSXQgdGhlcmVmb3JlIGNvbW11dGVzIHdpdGggbWluIGFuZCBtYXguIEFwcGx5aW5nIHRoaXMgZmFjdCBhdCBldmVyeSBmaXhlZCBjb21wYXJhdG9yIGxpbmtzIHRoZSBtYXBwZWQgaW5wdXQgdG8gdGhlIG1hcHBlZCBvdXRwdXQuIiwKICAgICAgInRyYW5zZmVyIjogIkNoZWNrIHRoZSBjb21tdXRpbmcgaWRlbnRpdHkgb25jZSB3aGVuIHRoZSB0d28gdmFsdWVzIGFyZSBvbiB0aGUgc2FtZSBzaWRlIG9mIHRoZSB0aHJlc2hvbGQgYW5kIG9uY2Ugd2hlbiB0aGV5IGFyZSBvbiBvcHBvc2l0ZSBzaWRlcy4iCiAgICB9LAogICAgewogICAgICAiaWQiOiAic24tdW5pdmVyc2FsIiwKICAgICAgImNvbmNlcHQiOiAiVGhyZXNob2xkIHJlYXNvbmluZyIsCiAgICAgICJwcmVyZXF1aXNpdGVzIjogWwogICAgICAgICJCaW5hcnkgY29tcGxldGVuZXNzIgogICAgICBdLAogICAgICAicHJvbXB0IjogIkEgZml4ZWQgbWluL21heCBuZXR3b3JrIHBhc3NlcyBldmVyeSBiaW5hcnkgaW5wdXQgb2YgaXRzIHdpcmUgY291bnQuIFdoYXQgZm9sbG93cyBmcm9tIHRoZSB6ZXJv4oCTb25lIHByaW5jaXBsZT8iLAogICAgICAib3B0aW9ucyI6IFsKICAgICAgICAiSXQgc29ydHMgYWxsIHZlY3RvcnMgb2Ygb3JkZXJlZCB2YWx1ZXMgb2YgdGhhdCBsZW5ndGggdW5kZXIgdGhlIHNhbWUgY29tcGFyaXNvbiBvcmRlci4iLAogICAgICAgICJJdCBoYXMgdGhlIGZld2VzdCBwb3NzaWJsZSBjb21wYXJhdG9ycy4iLAogICAgICAgICJJdCBwcmVzZXJ2ZXMgdGhlIG9yaWdpbmFsIGlkZW50aXR5IG9yZGVyIG9mIGFsbCBlcXVhbC12YWx1ZWQgcmVjb3Jkcy4iCiAgICAgIF0sCiAgICAgICJhbnN3ZXIiOiAwLAogICAgICAiZXhwbGFuYXRpb24iOiAiSWYgYW55IG9yZGVyZWQgaW5wdXQgZmFpbGVkLCBhIHRocmVzaG9sZCBwbGFjZWQgYmV0d2VlbiBhbiBpbnZlcnRlZCBvdXRwdXQgcGFpciB3b3VsZCB5aWVsZCBhIGZhaWxpbmcgYmluYXJ5IGlucHV0LiBFeGhhdXN0aXZlIGJpbmFyeSBzdWNjZXNzIHJ1bGVzIHRoYXQgb3V0LiBJdCBlc3RhYmxpc2hlcyBzb3J0aW5nLCBub3Qgc2l6ZSBvcHRpbWFsaXR5IG9yIHN0YWJsZSBoYW5kbGluZyBvZiByZWNvcmQgaWRlbnRpdGllcy4iLAogICAgICAidHJhbnNmZXIiOiAiRXhwbGFpbiB3aHkgdGhpcyBpbXBsaWNhdGlvbiByZXF1aXJlcyBhIGZpeGVkIG1pbi9tYXggbmV0d29yayByYXRoZXIgdGhhbiBhbiBhcmJpdHJhcnkgcHJvZ3JhbSB0aGF0IHNwZWNpYWwtY2FzZXMgYmluYXJ5IGlucHV0cy4iCiAgICB9LAogICAgewogICAgICAiaWQiOiAic24tbGltaXRzIiwKICAgICAgImNvbmNlcHQiOiAiSW50ZXJwcmV0aW5nIHJlc3VsdHMiLAogICAgICAicHJlcmVxdWlzaXRlcyI6IFsKICAgICAgICAiQmluYXJ5IGNvbXBsZXRlbmVzcyIKICAgICAgXSwKICAgICAgInByb21wdCI6ICJUaGUgbGFiIHJlcG9ydHMgMTYgb2YgMTYgYmluYXJ5IGNhc2VzIHNvcnRlZCBmb3IgYSBmaXZlLWNvbXBhcmF0b3IsIGZvdXItd2lyZSBuZXR3b3JrLiBXaGljaCByZXBvcnQga2VlcHMgdGhlIGV2aWRlbmNlIHdpdGhpbiBpdHMgc2NvcGU/IiwKICAgICAgIm9wdGlvbnMiOiBbCiAgICAgICAgIlRoaXMgaXMgdGhlIGZhc3Rlc3QgaGFyZHdhcmUgc29ydGVyIG9uIGV2ZXJ5IG1hY2hpbmUuIiwKICAgICAgICAiVGhpcyBmaXhlZCBuZXR3b3JrIHNvcnRzIGZvdXIgb3JkZXJlZCB2YWx1ZXM7IHRoZSBsYWIgaGFzIG5vdCBtZWFzdXJlZCBoYXJkd2FyZSB0aW1lIG9yIHByb3ZlZCBtaW5pbXVtIHNpemUuIiwKICAgICAgICAiQW55IGxpc3Qgb2YgZml2ZSBjb21wYXJpc29ucyBtdXN0IHNvcnQgZm91ciB2YWx1ZXMuIgogICAgICBdLAogICAgICAiYW5zd2VyIjogMSwKICAgICAgImV4cGxhbmF0aW9uIjogIlRoZSBleGhhdXN0aXZlIGNlcnRpZmljYXRlIGNvbmNlcm5zIHRoaXMgZXhhY3Qgb3JkZXJlZCBjb21wYXJhdG9yIGxpc3QgYW5kIHdpcmUgY291bnQuIFRoZSBsYWIgZG9lcyBub3QgYmVuY2htYXJrIGhhcmR3YXJlLCBjb21wYXJlIGV2ZXJ5IHNtYWxsZXIgbmV0d29yaywgb3IgYXNzZXJ0IGEgc3RhYmxlIHNvcnQgb2YgbGFiZWxlZCByZWNvcmRzLiIsCiAgICAgICJ0cmFuc2ZlciI6ICJOYW1lIGEgc2VwYXJhdGUgZXhwZXJpbWVudCBvciBwcm9vZiB0aGF0IHdvdWxkIGJlIG5lZWRlZCBmb3IgYSBwZXJmb3JtYW5jZSBvciBvcHRpbWFsaXR5IGNsYWltLiIKICAgIH0KICBdCn0K</script>
+<script>
+const { MAX_WIRES, MAX_COMPARATORS, PRESETS, validateConfiguration, parseDraft, traceInput, analyzeNetwork, configurationJSON, observationJSON } = (() => {
+/** Fixed min/max comparator networks. All public inputs are copied and validated. */
+const MAX_WIRES = 6;
+const MAX_COMPARATORS = 30;
+
+function freeze(value) {
+  if (value && typeof value === "object") {
+    Object.values(value).forEach(freeze);
+    Object.freeze(value);
+  }
+  return value;
+}
+function fields(value, expected, label) {
+  if (!value || typeof value !== "object" || Array.isArray(value) ||
+      Object.keys(value).sort().join("|") !== [...expected].sort().join("|")) {
+    throw new Error(label + " must have exactly " + expected.join(", ") + ".");
+  }
+}
+function integer(value, low, high, label) {
+  if (typeof value !== "number" || !Number.isInteger(value) || value < low || value > high) {
+    throw new Error(label + " must be an integer from " + low + " to " + high + ".");
+  }
+  return value === 0 ? 0 : value;
+}
+function vector(values, wires) {
+  if (!Array.isArray(values) || values.length !== wires) throw new Error("Supply exactly one value per wire.");
+  return Array.from(values, (value, i) => integer(value, -999, 999, "Value on wire " + (i + 1)));
+}
+const PRESETS = freeze([
+  {name: "Three wires", wires: 3, values: [3, 1, 2], comparators: [[1, 2], [2, 3], [1, 2]]},
+  {name: "Four wires", wires: 4, values: [4, 1, 3, 2], comparators: [[1, 2], [3, 4], [1, 3], [2, 4], [2, 3]]},
+  {name: "Missing last comparator", wires: 4, values: [2, 4, 1, 3], comparators: [[1, 2], [3, 4], [1, 3], [2, 4]]}
+]);
+function validateConfiguration(value) {
+  fields(value, ["wires", "values", "comparators"], "Configuration");
+  const wires = integer(value.wires, 2, MAX_WIRES, "Wire count");
+  if (!Array.isArray(value.comparators) || value.comparators.length > MAX_COMPARATORS) {
+    throw new Error("Use at most " + MAX_COMPARATORS + " comparators.");
+  }
+  const comparators = Array.from(value.comparators, (pair, index) => {
+    if (!Array.isArray(pair) || pair.length !== 2) throw new Error("Comparator " + (index + 1) + " needs two wires.");
+    const a = integer(pair[0], 1, wires, "First wire");
+    const b = integer(pair[1], 1, wires, "Second wire");
+    if (a >= b) throw new Error("Each comparator must put the lower-numbered wire first.");
+    return [a, b];
+  });
+  return freeze({wires, values: vector(value.values, wires), comparators});
+}
+function decimal(token, label) {
+  if (!/^[+-]?\d+$/.test(token)) throw new Error(label + " needs ordinary signed decimal integers.");
+  return Number(token);
+}
+function parseDraft(wireText, valueText, comparatorText) {
+  if ([wireText, valueText, comparatorText].some(x => typeof x !== "string")) throw new Error("Draft fields must be text.");
+  if (wireText.length > 20 || valueText.length > 200 || comparatorText.length > 2000) throw new Error("Draft exceeds the editor limits.");
+  const wires = decimal(wireText.trim(), "Wire count");
+  const values = valueText.trim().split(/\s+/).map(x => decimal(x, "Values"));
+  const trimmed = comparatorText.trim();
+  const comparators = trimmed ? trimmed.split(/\r\n|\r|\n/).map((line, i) => {
+    const tokens = line.trim().split(/\s+/);
+    if (tokens.length !== 2) throw new Error("Comparator line " + (i + 1) + " needs exactly two wire numbers.");
+    return tokens.map(x => decimal(x, "Comparator line " + (i + 1)));
+  }) : [];
+  return validateConfiguration({wires, values, comparators});
+}
+function inversion(values) {
+  for (let i = 1; i < values.length; i++) if (values[i - 1] > values[i]) return [i, i + 1];
+  return null;
+}
+function run(configuration, values) {
+  let current = values.slice();
+  const input = current.slice(), steps = [];
+  configuration.comparators.forEach((pair, index) => {
+    const before = current.slice(), [a, b] = pair.map(x => x - 1);
+    const swapped = before[a] > before[b];
+    if (swapped) [current[a], current[b]] = [current[b], current[a]];
+    steps.push({index: index + 1, pair: pair.slice(), before, after: current.slice(), swapped});
+  });
+  const firstInversion = inversion(current);
+  return {input, steps, output: current.slice(), sorted: firstInversion === null, firstInversion};
+}
+function traceInput(configuration, values) {
+  const checked = validateConfiguration(configuration);
+  return freeze(run(checked, vector(values, checked.wires)));
+}
+function analyzeNetwork(configuration) {
+  const checked = validateConfiguration(configuration);
+  const cases = [];
+  for (let ordinal = 0; ordinal < 2 ** checked.wires; ordinal++) {
+    const input = Array.from({length: checked.wires}, (_, i) => (ordinal >> (checked.wires - i - 1)) & 1);
+    cases.push({ordinal, ...run(checked, input)});
+  }
+  const failures = cases.filter(x => !x.sorted).map(x => x.ordinal);
+  return freeze({
+    format: "recallweave-sorting-network-observation/1",
+    configuration: checked,
+    authored: run(checked, checked.values),
+    binary: {total: cases.length, passed: cases.length - failures.length, failed: failures.length,
+      sortsAll: failures.length === 0, failingOrdinals: failures, cases}
+  });
+}
+function configurationJSON(configuration) {
+  return JSON.stringify(validateConfiguration(configuration), null, 2) + "\n";
+}
+function observationJSON(configuration) {
+  return JSON.stringify(analyzeNetwork(configuration), null, 2) + "\n";
+}
+
+return { MAX_WIRES, MAX_COMPARATORS, PRESETS, validateConfiguration, parseDraft, traceInput, analyzeNetwork, configurationJSON, observationJSON };
+})();
+const $ = id => document.getElementById(id);
+let accepted = null, selected = null, step = 0;
+const text = (tag, value, className) => {
+  const element = document.createElement(tag);
+  element.textContent = value;
+  if (className) element.className = className;
+  return element;
+};
+const row = values => {
+  const tr = document.createElement("tr");
+  values.forEach(value => tr.append(text("td", String(value))));
+  return tr;
+};
+function status(message, error = false) {
+  $("status").textContent = message;
+  $("status").classList.toggle("error", error);
+}
+function retire() {
+  accepted = null; selected = null; step = 0;
+  $("results").hidden = true;
+  $("download-config").disabled = true;
+  $("download-observation").disabled = true;
+  status("Draft changed. Choose Run network to create a current result.");
+}
+for (const id of ["wires", "values", "comparators"]) $(id).addEventListener("input", retire);
+$("load-preset").addEventListener("click", () => {
+  const preset = PRESETS[Number($("preset").value)];
+  $("wires").value = String(preset.wires);
+  $("values").value = preset.values.join(" ");
+  $("comparators").value = preset.comparators.map(pair => pair.join(" ")).join("\n");
+  retire();
+});
+function download(name, content, type) {
+  const url = URL.createObjectURL(new Blob([content], {type}));
+  const a = document.createElement("a");
+  a.href = url; a.download = name;
+  document.body.append(a);
+  try { a.click(); } finally { a.remove(); setTimeout(() => URL.revokeObjectURL(url), 1000); }
+}
+$("download-config").addEventListener("click", () => {
+  if (accepted) download("sorting-network-configuration.json", configurationJSON(accepted.configuration), "application/json;charset=utf-8");
+});
+$("download-observation").addEventListener("click", () => {
+  if (accepted) download("sorting-network-observation.json", JSON.stringify(accepted, null, 2) + "\n", "application/json;charset=utf-8");
+});
+$("download-course").addEventListener("click", () => {
+  const bytes = Uint8Array.from(atob($("course-data").textContent.trim()), c => c.charCodeAt(0));
+  download("sorting-networks.json", bytes, "application/json;charset=utf-8");
+});
+function drawNetwork(trace) {
+  const {wires, comparators} = accepted.configuration;
+  const width = Math.max(480, 180 + comparators.length * 48), height = 54 + wires * 48;
+  const ns = "http://www.w3.org/2000/svg";
+  const svg = document.createElementNS(ns, "svg");
+  svg.setAttribute("viewBox", "0 0 " + width + " " + height);
+  svg.setAttribute("width", width); svg.setAttribute("height", height);
+  svg.setAttribute("role", "img"); svg.setAttribute("aria-label", "Fixed comparator network: smaller values move to lower-numbered wires. Selected step " + step + ".");
+  const add = (tag, attributes, value) => {
+    const e = document.createElementNS(ns, tag);
+    for (const [key, v] of Object.entries(attributes)) e.setAttribute(key, v);
+    if (value !== undefined) e.textContent = value;
+    svg.append(e);
+    return e;
+  };
+  for (let i = 0; i < wires; i++) {
+    const y = 40 + 48 * i;
+    add("line", {x1:70,y1:y,x2:width-70,y2:y,stroke:"#9cb0b9","stroke-width":2});
+    add("text", {x:10,y:y+5,fill:"#182d39","font-size":14}, "W" + (i + 1) + ": " + trace.input[i]);
+    add("text", {x:width-55,y:y+5,fill:"#182d39","font-size":14}, trace.output[i]);
+  }
+  comparators.forEach(([a,b], i) => {
+    const x = 100 + i * 48, y1 = 40 + 48 * (a - 1), y2 = 40 + 48 * (b - 1);
+    const color = step === i + 1 ? "#a55b00" : "#075d62";
+    add("line", {x1:x,y1,x2:x,y2,stroke:color,"stroke-width":step === i + 1 ? 5 : 3});
+    add("circle", {cx:x,cy:y1,r:5,fill:color});
+    add("circle", {cx:x,cy:y2,r:5,fill:color});
+    add("text", {x,y:height-12,fill:"#435c68","text-anchor":"middle","font-size":12}, i + 1);
+  });
+  $("diagram").replaceChildren(svg);
+}
+function showStep() {
+  const trace = selected === null ? accepted.authored : accepted.binary.cases[selected];
+  const current = step === 0 ? trace.input : trace.steps[step - 1].after;
+  $("trace-source").textContent = selected === null ? "Authored input: " + trace.input.join(" ") :
+    "Binary case " + selected + ": " + trace.input.join(" ") + (trace.sorted ? " — sorted output." : " — counterexample.");
+  $("step-summary").textContent = step === 0 ? "Step 0 · before any comparison" :
+    "Step " + step + " · compare wires " + trace.steps[step-1].pair.join(" and ") + " · " +
+    (trace.steps[step-1].swapped ? "swap" : "unchanged");
+  $("current-values").textContent = current.map((x,i) => "W" + (i+1) + ": " + x).join("   ");
+  $("previous").disabled = step === 0;
+  $("next").disabled = step === trace.steps.length;
+  drawNetwork(trace);
+  const head = document.createElement("tr");
+  ["Step", "Pair", ...Array.from({length:accepted.configuration.wires},(_,i) => "Wire " + (i+1)), "Action"].forEach(x => {
+    const th = text("th", x); th.scope = "col"; head.append(th);
+  });
+  $("trace-table").querySelector("thead").replaceChildren(head);
+  const rows = [row([0, "—", ...trace.input, "Initial"])];
+  trace.steps.forEach(s => rows.push(row([s.index, s.pair.join("–"), ...s.after, s.swapped ? "Swap" : "Unchanged"])));
+  rows[step].classList.add("active");
+  $("trace-table").querySelector("tbody").replaceChildren(...rows);
+}
+function render() {
+  const b = accepted.binary;
+  $("verdict").textContent = b.sortsAll ? "All " + b.total + " binary inputs sort." : b.failed + " of " + b.total + " binary inputs fail.";
+  $("verdict-detail").textContent = b.sortsAll ?
+    "By the zero–one principle, this fixed min/max network sorts all ordered inputs of length " + accepted.configuration.wires + "." :
+    "This exact network is not a sorting network. Each unsorted row below is a witness you can trace.";
+  $("binary-summary").textContent = b.passed + " sorted · " + b.failed + " unsorted · " + b.total + " complete cases, in lexicographic order.";
+  const rows = b.cases.map(c => {
+    const tr = row([c.ordinal, c.input.join(" "), c.output.join(" ")]);
+    const result = document.createElement("td");
+    result.append(text("span", c.sorted ? "Sorted" : "Unsorted", c.sorted ? "pill" : "pill fail"));
+    if (!c.sorted) result.append(text("span", " · wires " + c.firstInversion.join("–"), "hint"));
+    tr.append(result);
+    const action = document.createElement("td"), button = text("button", "Trace", "secondary smallbtn");
+    button.type = "button"; button.setAttribute("aria-label", "Trace binary case " + c.ordinal);
+    button.addEventListener("click", () => { selected = c.ordinal; step = 0; showStep(); $("trace-title").scrollIntoView({block:"start"}); });
+    action.append(button); tr.append(action);
+    return tr;
+  });
+  $("binary-table").querySelector("tbody").replaceChildren(...rows);
+  selected = null; step = 0;
+  $("results").hidden = false; showStep();
+}
+$("run").addEventListener("click", () => {
+  retire();
+  try {
+    const configuration = parseDraft($("wires").value, $("values").value, $("comparators").value);
+    accepted = analyzeNetwork(configuration);
+    render();
+    $("download-config").disabled = false; $("download-observation").disabled = false;
+    status("Current result: " + configuration.wires + " wires, " + configuration.comparators.length + " fixed comparators. Downloads preserve this accepted configuration.");
+  } catch (error) {
+    retire(); status(error.message, true);
+  }
+});
+$("previous").addEventListener("click", () => { if (accepted && step > 0) { step--; showStep(); } });
+$("next").addEventListener("click", () => { if (accepted && step < accepted.configuration.comparators.length) { step++; showStep(); } });
+$("authored").addEventListener("click", () => { if (accepted) { selected = null; step = 0; showStep(); } });
+
+</script>
+</body></html>
