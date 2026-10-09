@@ -1,0 +1,124 @@
+{
+  "schema": "recallweave.absorbing-walk-prompt-adoption-review.v1",
+  "scope": "Independent read-only review of first-right.prompt clarification and minimum derived-artifact adoption; no builders, product imports, native calls, archive regeneration or Git writes.",
+  "repository": "Jacob-Met/RecallWeave",
+  "issue": 206,
+  "owner": "estate-db371a37f4c8 / longwater_author_recovery",
+  "source": {
+    "commit": "8b4b61e23d4d80fce607e315caee31e98a4d9183",
+    "tree": "bfc313d06faceba257440691fe1c4370180ff31f",
+    "ref": "receiving/absorbing-walk-db371a37f4c8"
+  },
+  "finding": "Accept the single prompt clarification. JSON-only adoption would leave the actual standalone lab Download course consumer stale.",
+  "prompt": {
+    "id": "first-right",
+    "old": "For that same fair walk starting at 1, what is the probability of first reaching endpoint 3 at step 2?",
+    "proposed": "For a fair walk on states 0..3 starting at 1, what is the probability of first reaching endpoint 3 at step 2?",
+    "all_other_fields_exact": true,
+    "preserved_answer": {
+      "index": 3,
+      "value": "1/4",
+      "reason": "Only the two right steps 1→2→3 arrive first at endpoint 3 on step 2; fair independent steps give (1/2)(1/2)=1/4."
+    },
+    "original": {
+      "bytes": 9418,
+      "sha256": "7f71684445984c744c9dd81f8538be2ea2e9f09c97435f658a4353a20a6a2e66",
+      "git_blob": "bdf9771f3bdc1eae588a337c2c3c25460bedd4bf"
+    },
+    "hypothetical": {
+      "bytes": 9425,
+      "sha256": "5993a650b314e40d73eafb474e28e5a8e8bfdcfb9e23aa759eb14ae203ec1ecb",
+      "git_blob": "2e1aa8332e23fb552a34021a6da431452882af48"
+    }
+  },
+  "minimum_adoption": [
+    {
+      "path": "courses/absorbing-walk.json",
+      "action": "Apply exactly the one prompt replacement; no other byte or field change.",
+      "new_bytes": 9425,
+      "new_sha256": "5993a650b314e40d73eafb474e28e5a8e8bfdcfb9e23aa759eb14ae203ec1ecb",
+      "new_git_blob": "2e1aa8332e23fb552a34021a6da431452882af48"
+    },
+    {
+      "path": "courses/absorbing-walk-lab.html",
+      "action": "Regenerate with the unchanged tools/build-absorbing-walk.mjs. It embeds complete course UTF-8 as base64 and the actual download handler serves those embedded bytes.",
+      "old": {
+        "bytes": 45341,
+        "sha256": "42aa985039fb337e3c854fc53ed81a0791c03bf8e86097090bd582d39939c810",
+        "git_blob": "deefbefb1d105db88467bdf3c09d3eaed28c2eaa"
+      },
+      "expected_new_bytes_if_all_other_inputs_remain_exact": 45349,
+      "new_artifact_produced": false,
+      "new_hash_claimed": false
+    },
+    {
+      "path": "docs/receiving/absorbing-walk-db371a37f4c8/absorbing-walk-portable.zip",
+      "action": "Produce an explicitly identified successor delivery package. Its course and lab members must contain the corrected source and regenerated output, and internal MANIFEST.json must update exactly their size/hash records. Preserve the previous archive as historical custody.",
+      "old_bytes": 49847,
+      "old_sha256": "a928a859470c668f8e313d839f11d0f31e781aaa4367a03441d6bcb70eb70426",
+      "old_git_blob": "d63fc78761a1fef824c7b5af86a2fc663aeb18ad",
+      "new_archive_produced": false
+    }
+  ],
+  "unchanged": {
+    "builder": {
+      "bytes": 1367,
+      "sha256": "19aafdacf1237f2da3575ea62aaad643bcc143139c9f5118dec3d6fe85565074",
+      "git_blob": "34a1d980ef926eb65dd2fa44fe92dd9be8ad2e5d"
+    },
+    "guide": {
+      "bytes": 6602,
+      "sha256": "872aeaad0997f0c25d58eacd9dca5fcd509348f6a0bb8c7ae31edb08227bfc4d",
+      "git_blob": "7d5e977030363d062db088bc0e5990d671936e12"
+    },
+    "learner": {
+      "path": "demo.html",
+      "bytes": 98468,
+      "sha256": "fe7d44d125f9797c867251c05f02868a7cacf91c7d5129f46bbca3c69dc7ae1d",
+      "git_blob": "ef7bc3e27e7f161d917ced6a457fad8822802f3f"
+    },
+    "instructions": {
+      "path": "PLAY.md",
+      "bytes": 1750,
+      "sha256": "4eb5c2e88e9259b8d7f72bd4a006d738798e9b9fe79797cc4574301f97eceff1",
+      "git_blob": "194b6c44b8d7ef5bd42554b13fa3389810a63255"
+    },
+    "remaining_source": "Model, UI, template, deck parser and all unrelated fields and course items stay unchanged.",
+    "maintained_tests": "tests/absorbing-walk-course.test.mjs dynamically compares embedded bytes with current source; tools/check-absorbing-walk-browser.mjs compares actual downloads with current source. Neither contains the old prompt, old course hash or old 9418-byte size as a fixed expectation. No test-source change is required by this correction."
+  },
+  "manifest": {
+    "bytes": 928,
+    "sha256": "76205073cb3d3a07de1789952ffc879a4fff09149438a4b10c1400d06beb6e3e",
+    "git_blob": "20e81abb8f330050baebcc65450532a14d047fd8",
+    "format": "recallweave-absorbing-walk-package/1",
+    "payload_members": 5,
+    "total_members_including_manifest": 6,
+    "changed_successor_member_records": [
+      "courses/absorbing-walk-lab.html",
+      "courses/absorbing-walk.json"
+    ],
+    "unchanged_successor_members": [
+      "PLAY.md",
+      "courses/absorbing-walk.md",
+      "demo.html"
+    ],
+    "originalCommit": "698902f9c9c1d5c5023092b85b3632a7cb7a01ed",
+    "originalCommit_interpretation": "The original learner identity stays exact; any new owner source commit and successor archive identity belong in an additive correction/adoption record.",
+    "custody": "The earlier evidence/portable/MANIFEST.json and archived downloads/receipts describe the old delivery; do not edit or relabel them. Export any successor member manifest separately and bind it to the successor archive."
+  },
+  "static_derivation": {
+    "actual_old_course_base64_occurrences": 1,
+    "actual_guide_base64_occurrences": 1,
+    "old_course_base64_length": 12560,
+    "proposed_course_base64_length": 12568,
+    "lab_size_delta": 8,
+    "guide_context": "The guide already states N=3, start i=1, p=q=1/2, and step-2 first-right probability 1/4. Neither old nor proposed prompt occurs in the guide."
+  },
+  "remaining_owner_action": "Within the existing owner's admitted route, regenerate the lab and package and bind the resulting course/download/member manifest to the new source and receipt. This review makes no claim that the corrected source or artifacts have been built, run, downloaded, adopted or integrated.",
+  "limits": [
+    "The ZIP producer package-r1.py was not read or run. The exact maintained lab builder and exact package manifest establish the minimum dependency set, not archive reproducibility or fresh archive metadata.",
+    "A peer PLAY.md relay initially contained one extra comma. Removing precisely that comma reconstructed the independently declared 1750-byte SHA/blob. The inaccurate relay and failed hash checks are retained; the original archive was not changed.",
+    "No change is requested to historical qualification claims; PLAY.md explicitly labels its packaging qualification historical and expects additive final qualification."
+  ],
+  "outcome": "No blocking content issue in the one-prompt replacement; derived lab/package refresh is required for actual recipient adoption."
+}
