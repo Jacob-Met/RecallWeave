@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src 'none'; img-src 'none'; font-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <title>Course prerequisite review · RecallWeave</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="skip" href="#file-panel">Skip to file selection</a>
+  <header>
+    <p class="eyebrow">RecallWeave · Course review</p>
+    <h1>See where prerequisites come from</h1>
+    <p class="intro">Open a saved course to follow its declared concept links back to the original questions. See direct requirements, longer chains, and the concepts that depend on each one.</p>
+  </header>
+  <main>
+    <section id="file-panel" class="panel" aria-labelledby="file-heading">
+      <h2 id="file-heading">Review a local course</h2>
+      <p>Your file stays on this device. This page reads a checked course JSON file, up to 256 KiB, without changing it or saving anything automatically.</p>
+      <label for="course-file">Choose a course JSON file</label>
+      <input id="course-file" type="file" accept=".json,application/json">
+      <div class="actions">
+        <button id="clear-course" type="button" disabled>Clear review</button>
+        <button id="download-review" type="button" disabled>Download review JSON</button>
+      </div>
+      <p id="review-status" role="status" aria-live="polite" aria-atomic="true">Choose a course JSON file to begin.</p>
+      <p class="small muted">The downloaded review contains question prompts and course attribution. It is a report, not a lesson file, and does not include answer choices, correct answers, explanations or transfer questions.</p>
+    </section>
+    <div id="review" hidden aria-busy="false">
+      <section class="panel" aria-labelledby="course-title">
+        <p class="eyebrow">Current course</p>
+        <h2 id="course-title" class="literal" tabindex="-1"></h2>
+        <dl class="provenance">
+          <dt>Attribution</dt><dd id="course-attribution" class="literal"></dd>
+          <dt>License</dt><dd id="course-license" class="literal"></dd>
+          <dt>Source file</dt><dd id="source-filename" class="literal"></dd>
+          <dt>Captured bytes</dt><dd id="source-bytes"></dd>
+          <dt>SHA-256</dt><dd id="source-sha256" class="hash"></dd>
+        </dl>
+        <p class="small muted">The hash identifies the captured file bytes. It does not verify authorship or authenticity.</p>
+      </section>
+      <section class="panel" aria-labelledby="overview-heading">
+        <h2 id="overview-heading">All source concepts</h2>
+        <p>Choose a concept to inspect it. Source numbers preserve the file’s concept order, including names that look alike.</p>
+        <ol id="concept-overview" class="overview"></ol>
+      </section>
+      <section class="panel selected" aria-labelledby="selected-concept">
+        <p class="eyebrow">Selected concept</p>
+        <h2 id="selected-concept" class="literal" tabindex="-1"></h2>
+        <p id="selection-summary"></p>
+        <div class="notice">These are links declared by the course’s questions. They do not establish what a learner knows or which teaching sequence will work best.</div>
+        <div class="relationship-grid">
+          <section aria-labelledby="direct-prerequisites-heading">
+            <h3 id="direct-prerequisites-heading">Direct prerequisites</h3>
+            <p class="muted">Links declared by at least one original question for this concept. Open a witness list to see every question that declares that link.</p>
+            <div id="direct-prerequisites"></div>
+          </section>
+          <section aria-labelledby="direct-dependents-heading">
+            <h3 id="direct-dependents-heading">Direct dependents</h3>
+            <p class="muted">Other concepts whose original questions directly name the selected concept.</p>
+            <div id="direct-dependents"></div>
+          </section>
+        </div>
+        <section aria-labelledby="required-heading">
+          <h3 id="required-heading">All requirements, direct and longer</h3>
+          <div id="required-concepts"></div>
+          <h4>Requirement chains</h4>
+          <p class="muted">Each step reads “requires”. Open a chain for its exact original question witnesses. A longer chain is not an additional direct link.</p>
+          <div id="requirement-paths"></div>
+        </section>
+        <section aria-labelledby="downstream-heading">
+          <h3 id="downstream-heading">All dependents, direct and longer</h3>
+          <div id="downstream-concepts"></div>
+          <h4>Dependent chains</h4>
+          <p class="muted">These chains start at another concept and follow “requires” links back to the selected concept.</p>
+          <div id="dependent-paths"></div>
+        </section>
+        <section aria-labelledby="questions-heading">
+          <h3 id="questions-heading">Original questions for this concept</h3>
+          <p class="muted">Question numbers preserve the original item order. The prompts and declared prerequisite order below are copied exactly.</p>
+          <div id="selected-questions"></div>
+        </section>
+      </section>
+    </div>
+  </main>
+  <footer>This read-only review cannot edit a course or judge a learner’s mastery. Keep your original course file for learning or editing.</footer>
+  <script type="module" src="../src/course-prerequisites-ui.mjs"></script>
+</body>
+</html>

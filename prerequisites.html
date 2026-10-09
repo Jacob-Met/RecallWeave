@@ -1,0 +1,656 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src 'none'; img-src 'none'; font-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <title>Course prerequisite review · RecallWeave</title>
+  <style>
+:root{color-scheme:light;--ink:#172e37;--muted:#475e65;--line:#c4d7d6;--accent:#125c58;--wash:#e6f2ef}
+*{box-sizing:border-box}
+body{margin:0;background:#f6f7f2;color:var(--ink);font:16px/1.6 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+header,main,footer{max-width:1120px;margin:0 auto;padding:1.25rem}
+header{padding-top:3rem}
+h1{max-width:820px;font-size:clamp(2rem,5vw,3.7rem);line-height:1.12;letter-spacing:-.035em;margin:.6rem 0 1rem}
+h2{font-size:1.6rem;line-height:1.3;margin:.3rem 0 1rem}
+h3{font-size:1.18rem;margin:1.5rem 0 .6rem}
+h4{font-size:1rem;margin:.7rem 0}
+p{margin:.6rem 0 1rem}
+.eyebrow{text-transform:uppercase;letter-spacing:.12em;font-weight:700;font-size:.8rem;color:var(--accent)}
+.intro{font-size:1.14rem;max-width:780px}
+.panel{padding:1.7rem;border:1px solid var(--line);border-radius:1rem;background:#fff;margin-bottom:1.25rem;min-width:0}
+.selected{border-top:5px solid var(--accent)}
+label{display:block;font-weight:700;margin:.8rem 0 .5rem}
+input[type=file]{display:block;width:100%;max-width:100%;font:inherit;padding:.65rem;background:var(--wash);border:1px solid var(--line);border-radius:.4rem}
+button{font:inherit;line-height:1.4;min-height:44px;text-align:left;color:var(--accent);background:#fff;border:1px solid #769d99;border-radius:.45rem;padding:.55rem .8rem;cursor:pointer;max-width:100%;overflow-wrap:anywhere;white-space:pre-wrap}
+button:hover{background:var(--wash)}
+button[aria-pressed=true]{background:var(--accent);color:#fff;border-color:var(--accent)}
+button:disabled{opacity:.55;cursor:default}
+:focus-visible{outline:3px solid #c45c23;outline-offset:3px}
+.actions,.follow-controls{display:flex;flex-wrap:wrap;gap:.7rem;margin-top:1rem}
+#download-review{background:var(--accent);color:#fff}
+#review-status{padding:.8rem 1rem;background:var(--wash);border-left:4px solid var(--accent);overflow-wrap:anywhere;white-space:pre-wrap}
+#review[aria-busy=true]{opacity:.65}
+.muted{color:var(--muted)}
+.small{font-size:.9rem}
+.literal{white-space:pre-wrap;overflow-wrap:anywhere}
+.hash{font: .88rem/1.7 ui-monospace,SFMono-Regular,Consolas,monospace;overflow-wrap:anywhere}
+.provenance{display:grid;grid-template-columns:9rem minmax(0,1fr);gap:.6rem 1rem}
+dt{font-weight:700}
+dd{margin:0;min-width:0}
+.overview{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:.8rem;list-style:none;padding:0}
+.overview li{padding:.75rem;background:#f4f8f5;border-radius:.5rem;min-width:0}
+.overview button{width:100%}
+.overview p{font-size:.85rem;margin:.5rem 0 0}
+.relationship-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem}
+.relationship-grid>section{min-width:0}
+.notice{border-left:3px solid #b66e28;background:#fff4df;padding:.85rem 1rem;margin:1rem 0}
+.edge{border:1px solid var(--line);border-radius:.5rem;margin:1rem 0;padding:1rem;min-width:0}
+.follow-controls button{font-size:.88rem}
+details{border-top:1px solid var(--line);padding:.7rem 0;margin:.7rem 0}
+summary{cursor:pointer;min-height:32px;overflow-wrap:anywhere;white-space:pre-wrap;font-weight:600}
+.question{border-left:3px solid #93b6b1;padding:.3rem .9rem;margin:1rem 0;background:#f7faf8;min-width:0}
+.question-label{font-size:.86rem;font-weight:700;white-space:pre-wrap;overflow-wrap:anywhere}
+.prompt{margin-bottom:.5rem}
+.concept-list{list-style:none;display:flex;flex-wrap:wrap;gap:.5rem;padding:0}
+.path-step{margin:1rem 0;padding:.3rem .8rem;border-left:2px solid var(--line)}
+footer{color:var(--muted);font-size:.9rem;padding-bottom:3rem}
+.skip{position:absolute;left:1rem;top:-6rem;background:#fff;padding:.6rem;z-index:2}
+.skip:focus{top:1rem}
+[hidden]{display:none!important}
+@media(max-width:650px){header,main,footer{padding:1rem}header{padding-top:2rem}.panel{padding:1.05rem}.relationship-grid{grid-template-columns:1fr;gap:0}.provenance{grid-template-columns:1fr;gap:.15rem}dd{margin-bottom:.65rem}.edge{padding:.75rem}}
+@media print{body{background:white;font-size:11pt}header,main,footer{max-width:none}.actions,input,label,.skip{display:none}.panel{border:0;padding:0;margin:1rem 0}.overview{display:block}.overview li{break-inside:avoid}.relationship-grid{display:block}button{border:0;padding:.1rem;min-height:0}.question{break-inside:avoid}details:not([open])>*:not(summary){display:none}}
+</style>
+</head>
+<body>
+  <a class="skip" href="#file-panel">Skip to file selection</a>
+  <header>
+    <p class="eyebrow">RecallWeave · Course review</p>
+    <h1>See where prerequisites come from</h1>
+    <p class="intro">Open a saved course to follow its declared concept links back to the original questions. See direct requirements, longer chains, and the concepts that depend on each one.</p>
+  </header>
+  <main>
+    <section id="file-panel" class="panel" aria-labelledby="file-heading">
+      <h2 id="file-heading">Review a local course</h2>
+      <p>Your file stays on this device. This page reads a checked course JSON file, up to 256 KiB, without changing it or saving anything automatically.</p>
+      <label for="course-file">Choose a course JSON file</label>
+      <input id="course-file" type="file" accept=".json,application/json">
+      <div class="actions">
+        <button id="clear-course" type="button" disabled>Clear review</button>
+        <button id="download-review" type="button" disabled>Download review JSON</button>
+      </div>
+      <p id="review-status" role="status" aria-live="polite" aria-atomic="true">Choose a course JSON file to begin.</p>
+      <p class="small muted">The downloaded review contains question prompts and course attribution. It is a report, not a lesson file, and does not include answer choices, correct answers, explanations or transfer questions.</p>
+    </section>
+    <div id="review" hidden aria-busy="false">
+      <section class="panel" aria-labelledby="course-title">
+        <p class="eyebrow">Current course</p>
+        <h2 id="course-title" class="literal" tabindex="-1"></h2>
+        <dl class="provenance">
+          <dt>Attribution</dt><dd id="course-attribution" class="literal"></dd>
+          <dt>License</dt><dd id="course-license" class="literal"></dd>
+          <dt>Source file</dt><dd id="source-filename" class="literal"></dd>
+          <dt>Captured bytes</dt><dd id="source-bytes"></dd>
+          <dt>SHA-256</dt><dd id="source-sha256" class="hash"></dd>
+        </dl>
+        <p class="small muted">The hash identifies the captured file bytes. It does not verify authorship or authenticity.</p>
+      </section>
+      <section class="panel" aria-labelledby="overview-heading">
+        <h2 id="overview-heading">All source concepts</h2>
+        <p>Choose a concept to inspect it. Source numbers preserve the file’s concept order, including names that look alike.</p>
+        <ol id="concept-overview" class="overview"></ol>
+      </section>
+      <section class="panel selected" aria-labelledby="selected-concept">
+        <p class="eyebrow">Selected concept</p>
+        <h2 id="selected-concept" class="literal" tabindex="-1"></h2>
+        <p id="selection-summary"></p>
+        <div class="notice">These are links declared by the course’s questions. They do not establish what a learner knows or which teaching sequence will work best.</div>
+        <div class="relationship-grid">
+          <section aria-labelledby="direct-prerequisites-heading">
+            <h3 id="direct-prerequisites-heading">Direct prerequisites</h3>
+            <p class="muted">Links declared by at least one original question for this concept. Open a witness list to see every question that declares that link.</p>
+            <div id="direct-prerequisites"></div>
+          </section>
+          <section aria-labelledby="direct-dependents-heading">
+            <h3 id="direct-dependents-heading">Direct dependents</h3>
+            <p class="muted">Other concepts whose original questions directly name the selected concept.</p>
+            <div id="direct-dependents"></div>
+          </section>
+        </div>
+        <section aria-labelledby="required-heading">
+          <h3 id="required-heading">All requirements, direct and longer</h3>
+          <div id="required-concepts"></div>
+          <h4>Requirement chains</h4>
+          <p class="muted">Each step reads “requires”. Open a chain for its exact original question witnesses. A longer chain is not an additional direct link.</p>
+          <div id="requirement-paths"></div>
+        </section>
+        <section aria-labelledby="downstream-heading">
+          <h3 id="downstream-heading">All dependents, direct and longer</h3>
+          <div id="downstream-concepts"></div>
+          <h4>Dependent chains</h4>
+          <p class="muted">These chains start at another concept and follow “requires” links back to the selected concept.</p>
+          <div id="dependent-paths"></div>
+        </section>
+        <section aria-labelledby="questions-heading">
+          <h3 id="questions-heading">Original questions for this concept</h3>
+          <p class="muted">Question numbers preserve the original item order. The prompts and declared prerequisite order below are copied exactly.</p>
+          <div id="selected-questions"></div>
+        </section>
+      </section>
+    </div>
+  </main>
+  <footer>This read-only review cannot edit a course or judge a learner’s mastery. Keep your original course file for learning or editing.</footer>
+  <script type="module">
+// src/deck.mjs
+/** Local lesson content. Imported data cannot replace the model or run code. */
+const DECK_FORMAT = 'recallweave-deck/1';
+const MAX_DECK_BYTES = 262144;
+
+function deckRecord(value, path) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    throw new Error(`${path} must be an object.`);
+  }
+  return value;
+}
+
+function deckText(value, path, limit) {
+  if (typeof value !== 'string' || !value.trim() || value.length > limit) {
+    throw new Error(`${path} must be nonempty text of at most ${limit} characters.`);
+  }
+  return value;
+}
+
+function deckList(value, path, minimum, maximum) {
+  if (!Array.isArray(value) || value.length < minimum || value.length > maximum) {
+    throw new Error(`${path} must contain ${minimum}–${maximum} entries.`);
+  }
+  return value;
+}
+
+/** Validate and copy only the content fields used by the existing lesson runtime. */
+function validateDeck(value) {
+  const input = deckRecord(value, 'Deck');
+  if (input.format !== undefined && input.format !== DECK_FORMAT) {
+    throw new Error(`Unsupported deck format. Use ${DECK_FORMAT}.`);
+  }
+  const title = deckText(input.title, 'title', 160);
+  const attribution = deckText(input.attribution, 'attribution', 2000);
+  const license = deckText(input.license, 'license', 2000);
+  const concepts = deckList(input.concepts, 'concepts', 1, 32).map((concept, index) =>
+    deckText(concept, `concepts[${index}]`, 80));
+  if (new Set(concepts).size !== concepts.length) throw new Error('Concept names must be unique.');
+  const knownConcepts = new Set(concepts);
+  const ids = new Set();
+  const coveredConcepts = new Set();
+  const links = new Map(concepts.map(concept => [concept, new Set()]));
+  const items = deckList(input.items, 'items', 1, 100).map((value, index) => {
+    const path = `items[${index}]`;
+    const item = deckRecord(value, path);
+    const id = deckText(item.id, `${path}.id`, 80);
+    if (ids.has(id)) throw new Error(`${path}.id duplicates another question ID.`);
+    ids.add(id);
+    const concept = deckText(item.concept, `${path}.concept`, 80);
+    if (!knownConcepts.has(concept)) throw new Error(`${path}.concept is not in concepts.`);
+    coveredConcepts.add(concept);
+    const prerequisites = deckList(item.prerequisites, `${path}.prerequisites`, 0, 31).map((name, p) => {
+      deckText(name, `${path}.prerequisites[${p}]`, 80);
+      if (!knownConcepts.has(name)) throw new Error(`${path}.prerequisites contains an unknown concept.`);
+      if (name === concept) throw new Error(`${path} cannot require its own concept.`);
+      links.get(concept).add(name);
+      return name;
+    });
+    if (new Set(prerequisites).size !== prerequisites.length) throw new Error(`${path}.prerequisites contains a duplicate.`);
+    const options = deckList(item.options, `${path}.options`, 2, 6).map((option, o) =>
+      deckText(option, `${path}.options[${o}]`, 1000));
+    if (new Set(options).size !== options.length) throw new Error(`${path}.options must be distinct.`);
+    if (!Number.isInteger(item.answer) || item.answer < 0 || item.answer >= options.length) {
+      throw new Error(`${path}.answer must be a zero-based index of an option.`);
+    }
+    return Object.freeze({
+      id, concept, prerequisites: Object.freeze(prerequisites),
+      prompt: deckText(item.prompt, `${path}.prompt`, 2000),
+      options: Object.freeze(options), answer: item.answer,
+      explanation: deckText(item.explanation, `${path}.explanation`, 4000),
+      transfer: deckText(item.transfer, `${path}.transfer`, 2000)
+    });
+  });
+  if (coveredConcepts.size !== concepts.length) throw new Error('Every concept must have at least one question.');
+  const visiting = new Set();
+  const visited = new Set();
+  const visit = concept => {
+    if (visiting.has(concept)) throw new Error('Prerequisite links must not form a cycle.');
+    if (visited.has(concept)) return;
+    visiting.add(concept);
+    for (const prerequisite of links.get(concept)) visit(prerequisite);
+    visiting.delete(concept);
+    visited.add(concept);
+  };
+  concepts.forEach(visit);
+  return Object.freeze({
+    format: DECK_FORMAT, title, attribution, license,
+    concepts: Object.freeze(concepts), items: Object.freeze(items)
+  });
+}
+
+/** The same size limit applies to a File and to programmatically supplied UTF-8 JSON. */
+function parseDeck(text) {
+  if (typeof text !== 'string' || new TextEncoder().encode(text).length > MAX_DECK_BYTES) {
+    throw new Error('Choose a JSON deck no larger than 256 KiB.');
+  }
+  let value;
+  try { value = JSON.parse(text); }
+  catch { throw new Error('The file is not valid JSON. Check its commas, quotes and brackets.'); }
+  return validateDeck(value);
+}
+
+/** Export the existing bundled lesson as an editable example of the same contract. */
+function serializeDeck(deck) {
+  return JSON.stringify(validateDeck(deck), null, 2) + '\n';
+}
+
+// src/course-focus.mjs
+
+/** Select complete concepts, including dependencies declared by any of their questions. */
+function planAdmittedDeck(deck, targetConcepts) {
+  if (!Array.isArray(targetConcepts) || targetConcepts.length > deck.concepts.length) {
+    throw new Error('Choose a list of target concepts from this deck.');
+  }
+  const known = new Set(deck.concepts);
+  const requested = new Set();
+  for (const concept of targetConcepts) {
+    if (typeof concept !== 'string' || !known.has(concept)) {
+      throw new Error('Every target concept must belong to this deck.');
+    }
+    if (requested.has(concept)) throw new Error('Choose each target concept only once.');
+    requested.add(concept);
+  }
+
+  const dependencies = new Map(deck.concepts.map(concept => [concept, new Set()]));
+  const counts = new Map(deck.concepts.map(concept => [concept, 0]));
+  for (const item of deck.items) {
+    counts.set(item.concept, counts.get(item.concept) + 1);
+    for (const prerequisite of item.prerequisites) dependencies.get(item.concept).add(prerequisite);
+  }
+
+  const included = new Set(requested);
+  const pending = [...requested];
+  while (pending.length) {
+    for (const prerequisite of dependencies.get(pending.pop())) {
+      if (!included.has(prerequisite)) {
+        included.add(prerequisite);
+        pending.push(prerequisite);
+      }
+    }
+  }
+
+  const concepts = deck.concepts.filter(concept => included.has(concept));
+  const inclusions = concepts.map(concept => Object.freeze({
+    concept,
+    requested: requested.has(concept),
+    questionCount: counts.get(concept),
+    requiredBy: Object.freeze(concepts.filter(other => dependencies.get(other).has(concept)))
+  }));
+  return Object.freeze({
+    requested: Object.freeze(deck.concepts.filter(concept => requested.has(concept))),
+    required: Object.freeze(concepts.filter(concept => !requested.has(concept))),
+    concepts: Object.freeze(concepts),
+    items: Object.freeze(deck.items.filter(item => included.has(item.concept))),
+    inclusions: Object.freeze(inclusions)
+  });
+}
+
+/** Empty selections are useful while editing, but do not produce a checked lesson. */
+function planCourseFocus(sourceDeck, targetConcepts) {
+  return planAdmittedDeck(validateDeck(sourceDeck), targetConcepts);
+}
+
+/** Produce the exact downloadable checked file without changing the source deck. */
+function createFocusedLesson(sourceDeck, targetConcepts, title) {
+  const source = validateDeck(sourceDeck);
+  const plan = planAdmittedDeck(source, targetConcepts);
+  if (!plan.requested.length) throw new Error('Choose at least one target concept before downloading.');
+  const candidate = validateDeck({
+    format: source.format,
+    title,
+    attribution: source.attribution,
+    license: source.license,
+    concepts: plan.concepts,
+    items: plan.items
+  });
+  const utf8 = new TextEncoder();
+  let json = serializeDeck(candidate);
+  if (utf8.encode(json).length > MAX_DECK_BYTES) json = JSON.stringify(candidate);
+  const deck = parseDeck(json);
+  return Object.freeze({ ...plan, deck, json, bytes: utf8.encode(json).length });
+}
+
+// src/course-prerequisites.mjs
+
+const prerequisiteFrozenList = values => Object.freeze([...values]);
+
+/** First shortest path, using source concept order to break every tie. */
+function prerequisitePath(direct, from, to) {
+  const queue = [[from]];
+  const seen = new Set([from]);
+  for (let head = 0; head < queue.length; head += 1) {
+    const path = queue[head];
+    for (const next of direct[path.at(-1)]) {
+      if (seen.has(next)) continue;
+      const extended = [...path, next];
+      if (next === to) return prerequisiteFrozenList(extended);
+      seen.add(next);
+      queue.push(extended);
+    }
+  }
+  throw new Error('The declared prerequisite path could not be found.');
+}
+
+/** Review authored links only. A concept union is not a learner mastery judgment. */
+function inspectCoursePrerequisites(text, selectedConceptIndex = 0) {
+  const deck = parseDeck(text);
+  if (!Number.isInteger(selectedConceptIndex) || selectedConceptIndex < 0 ||
+      selectedConceptIndex >= deck.concepts.length) {
+    throw new Error('Choose a source concept index from this course.');
+  }
+  const indexByName = new Map(deck.concepts.map((name, index) => [name, index]));
+  const questions = deck.items.map((item, index) => Object.freeze({
+    index, id: item.id, conceptIndex: indexByName.get(item.concept), prompt: item.prompt,
+    prerequisiteIndices: prerequisiteFrozenList(item.prerequisites.map(name => indexByName.get(name)))
+  }));
+  const direct = deck.concepts.map((_, index) => {
+    const found = new Set(questions.filter(item => item.conceptIndex === index)
+      .flatMap(item => item.prerequisiteIndices));
+    return deck.concepts.flatMap((name, i) => found.has(i) ? [i] : []);
+  });
+  const required = deck.concepts.map(name =>
+    planCourseFocus(deck, [name]).required.map(other => indexByName.get(other)));
+  const levels = [];
+  const level = index => {
+    if (levels[index] === undefined) {
+      levels[index] = direct[index].length ? 1 + Math.max(...direct[index].map(level)) : 0;
+    }
+    return levels[index];
+  };
+  const concepts = deck.concepts.map((name, index) => Object.freeze({
+    index, name,
+    questionIndices: prerequisiteFrozenList(questions.filter(item => item.conceptIndex === index)
+      .map(item => item.index)),
+    directPrerequisites: prerequisiteFrozenList(direct[index]),
+    directDependents: prerequisiteFrozenList(direct.flatMap((values, i) => values.includes(index) ? [i] : [])),
+    required: prerequisiteFrozenList(required[index]),
+    downstream: prerequisiteFrozenList(required.flatMap((values, i) => values.includes(index) ? [i] : [])),
+    level: level(index)
+  }));
+  const links = concepts.flatMap(concept => concept.directPrerequisites.map(prerequisiteIndex =>
+    Object.freeze({
+      prerequisiteIndex, conceptIndex: concept.index,
+      questionIndices: prerequisiteFrozenList(questions.filter(item =>
+        item.conceptIndex === concept.index && item.prerequisiteIndices.includes(prerequisiteIndex))
+        .map(item => item.index))
+    })));
+  const selected = concepts[selectedConceptIndex];
+  return Object.freeze({
+    format: 'recallweave-course-prerequisites/1',
+    course: Object.freeze({ title: deck.title, attribution: deck.attribution, license: deck.license }),
+    concepts: prerequisiteFrozenList(concepts),
+    questions: prerequisiteFrozenList(questions),
+    links: prerequisiteFrozenList(links),
+    selection: Object.freeze({
+      index: selectedConceptIndex,
+      requirementPaths: prerequisiteFrozenList(selected.required.map(index => Object.freeze({
+        index, path: prerequisitePath(direct, selectedConceptIndex, index)
+      }))),
+      dependentPaths: prerequisiteFrozenList(selected.downstream.map(index => Object.freeze({
+        index, path: prerequisitePath(direct, index, selectedConceptIndex)
+      })))
+    })
+  });
+}
+
+// src/course-prerequisites-ui.mjs
+
+/** Explicit local-file review. A newer action retires every older read or hash. */
+function mountCoursePrerequisites(document, environment = globalThis) {
+  const get = id => document.getElementById(id);
+  const input = get('course-file');
+  const clear = get('clear-course');
+  const download = get('download-review');
+  const status = get('review-status');
+  const review = get('review');
+  let revision = 0;
+  let current = null;
+  let pending = false;
+
+  const literalText = (node, text) => {
+    node.replaceChildren();
+    for (const part of String(text).split(/(\r(?!\n))/)) {
+      node.append(document.createTextNode(part));
+      if (part === '\r') node.append(document.createElement('br'));
+    }
+  };
+  const element = (tag, text, className) => {
+    const node = document.createElement(tag);
+    if (text !== undefined) literalText(node, text);
+    if (className) node.className = className;
+    return node;
+  };
+  const conceptLabel = index => 'Source concept ' + (index + 1) + ': ' + current.report.concepts[index].name;
+  const updateControls = () => {
+    clear.disabled = !current && !pending;
+    download.disabled = !current || pending;
+    review.setAttribute('aria-busy', String(pending));
+    for (const button of review.querySelectorAll('button')) button.disabled = pending;
+  };
+  const say = message => { status.textContent = message; };
+  const select = index => {
+    if (!current || pending) return;
+    current = { ...current, report: inspectCoursePrerequisites(current.text, index) };
+    render();
+    get('selected-concept').focus();
+    say('Showing ' + conceptLabel(index) + '.');
+  };
+  const conceptButton = (index, className) => {
+    const button = element('button', conceptLabel(index), className);
+    button.type = 'button';
+    button.dataset.selectConcept = String(index);
+    button.addEventListener('click', () => select(index));
+    return button;
+  };
+  const question = index => {
+    const row = current.report.questions[index];
+    const box = element('div', undefined, 'question');
+    box.dataset.questionIndex = String(index);
+    box.append(element('p', 'Question ' + (index + 1) + ' · ID: ' + row.id, 'question-label'),
+      element('p', row.prompt, 'literal prompt'));
+    return box;
+  };
+  const relationList = (id, indices, empty) => {
+    const host = get(id);
+    host.replaceChildren();
+    if (!indices.length) { host.append(element('p', empty, 'muted')); return; }
+    const list = element('ul', undefined, 'concept-list');
+    for (const index of indices) {
+      const row = element('li');
+      row.append(conceptButton(index));
+      list.append(row);
+    }
+    host.append(list);
+  };
+  const edgeList = (id, links, empty) => {
+    const host = get(id);
+    host.replaceChildren();
+    if (!links.length) { host.append(element('p', empty, 'muted')); return; }
+    for (const link of links) {
+      const box = element('article', undefined, 'edge');
+      box.dataset.linkFrom = String(link.prerequisiteIndex);
+      box.dataset.linkTo = String(link.conceptIndex);
+      const heading = element('h4', conceptLabel(link.conceptIndex) + ' requires ' +
+        conceptLabel(link.prerequisiteIndex), 'literal');
+      const follow = element('div', undefined, 'follow-controls');
+      follow.append(conceptButton(link.prerequisiteIndex), conceptButton(link.conceptIndex));
+      const details = element('details');
+      details.append(element('summary', link.questionIndices.length +
+        (link.questionIndices.length === 1 ? ' original question declares this link' :
+          ' original questions declare this link')));
+      for (const index of link.questionIndices) details.append(question(index));
+      box.append(heading, follow, details);
+      host.append(box);
+    }
+  };
+  const pathList = (id, rows, empty) => {
+    const host = get(id);
+    host.replaceChildren();
+    if (!rows.length) { host.append(element('p', empty, 'muted')); return; }
+    for (const row of rows) {
+      const details = element('details', undefined, 'path');
+      details.dataset.pathTo = String(row.index);
+      details.dataset.path = row.path.join(',');
+      details.append(element('summary', row.path.map(conceptLabel).join(' requires → ')));
+      details.append(element('p', 'One shortest declared chain. Equal-length alternatives use source concept order.', 'muted'));
+      for (let step = 0; step < row.path.length - 1; step += 1) {
+        const from = row.path[step];
+        const to = row.path[step + 1];
+        const link = current.report.links.find(value =>
+          value.conceptIndex === from && value.prerequisiteIndex === to);
+        const box = element('div', undefined, 'path-step');
+        box.append(element('h4', conceptLabel(from) + ' requires ' + conceptLabel(to), 'literal'));
+        for (const index of link.questionIndices) box.append(question(index));
+        details.append(box);
+      }
+      host.append(details);
+    }
+  };
+  function render() {
+    review.hidden = !current;
+    if (!current) {
+      for (const id of ['course-title', 'course-attribution', 'course-license', 'source-filename',
+        'source-bytes', 'source-sha256', 'concept-overview', 'selected-concept', 'selection-summary',
+        'direct-prerequisites', 'required-concepts', 'direct-dependents', 'downstream-concepts',
+        'requirement-paths', 'dependent-paths', 'selected-questions']) get(id).replaceChildren();
+      updateControls();
+      return;
+    }
+    const { report, source } = current;
+    literalText(get('course-title'), report.course.title);
+    literalText(get('course-attribution'), report.course.attribution);
+    literalText(get('course-license'), report.course.license);
+    literalText(get('source-filename'), source.filename);
+    get('source-bytes').textContent = String(source.bytes);
+    get('source-sha256').textContent = source.sha256;
+    const overview = get('concept-overview');
+    overview.replaceChildren();
+    for (const concept of report.concepts) {
+      const row = element('li');
+      const button = conceptButton(concept.index);
+      button.setAttribute('aria-pressed', String(concept.index === report.selection.index));
+      row.append(button, element('p', concept.questionIndices.length +
+        (concept.questionIndices.length === 1 ? ' question' : ' questions') +
+        ' · ' + concept.directPrerequisites.length + ' direct requirements · structural depth ' + concept.level, 'muted'));
+      overview.append(row);
+    }
+    const selected = report.concepts[report.selection.index];
+    literalText(get('selected-concept'), conceptLabel(selected.index));
+    get('selection-summary').textContent = selected.questionIndices.length +
+      (selected.questionIndices.length === 1 ? ' original question' : ' original questions') +
+      ' · structural depth ' + selected.level +
+      '. Depth counts the longest declared prerequisite chain; it is not a teaching order or mastery score.';
+    edgeList('direct-prerequisites', report.links.filter(link => link.conceptIndex === selected.index),
+      'No original question for this concept declares a prerequisite.');
+    relationList('required-concepts', selected.required, 'No direct or longer requirements.');
+    edgeList('direct-dependents', report.links.filter(link => link.prerequisiteIndex === selected.index),
+      'No other concept directly names this concept as a prerequisite.');
+    relationList('downstream-concepts', selected.downstream, 'No other concept depends on this concept.');
+    pathList('requirement-paths', report.selection.requirementPaths, 'There are no requirement chains to show.');
+    pathList('dependent-paths', report.selection.dependentPaths, 'There are no dependent chains to show.');
+    const questions = get('selected-questions');
+    questions.replaceChildren();
+    for (const index of selected.questionIndices) {
+      const box = question(index);
+      const row = report.questions[index];
+      box.append(element('p', row.prerequisiteIndices.length ?
+        'Authored prerequisites, in original order: ' + row.prerequisiteIndices.map(conceptLabel).join(' · ') :
+        'This question declares no prerequisites.', 'literal muted'));
+      questions.append(box);
+    }
+    updateControls();
+  }
+  input.addEventListener('change', async () => {
+    const file = input.files && input.files[0];
+    input.value = '';
+    if (!file) return;
+    const request = ++revision;
+    pending = true;
+    updateControls();
+    say('Reading ' + file.name + '. ' + (current ? 'The previous file is still shown; its controls are paused.' : ''));
+    try {
+      if (!Number.isSafeInteger(file.size) || file.size < 0 || file.size > MAX_DECK_BYTES) {
+        throw new Error('Choose a JSON deck no larger than 256 KiB.');
+      }
+      const bytes = await file.arrayBuffer();
+      if (request !== revision) return;
+      if (bytes.byteLength > MAX_DECK_BYTES) throw new Error('Choose a JSON deck no larger than 256 KiB.');
+      const text = new TextDecoder('utf-8', { fatal: true, ignoreBOM: true }).decode(bytes);
+      const report = inspectCoursePrerequisites(text);
+      const digest = await environment.crypto.subtle.digest('SHA-256', bytes);
+      if (request !== revision) return;
+      const sha256 = Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, '0')).join('');
+      current = {
+        text, report,
+        source: Object.freeze({ filename: file.name, bytes: bytes.byteLength, sha256 })
+      };
+      pending = false;
+      render();
+      say('Review ready. Showing ' + file.name + '. The course file is unchanged.');
+      get('course-title').focus();
+    } catch (error) {
+      if (request !== revision) return;
+      pending = false;
+      updateControls();
+      say('Could not review this file. ' + (error instanceof Error ? error.message : String(error)) +
+        (current ? ' Still showing previous file: ' + current.source.filename + '.' : ' Choose another course JSON file.'));
+    }
+  });
+  clear.addEventListener('click', () => {
+    revision += 1;
+    current = null;
+    pending = false;
+    input.value = '';
+    render();
+    say('Review cleared. Choose a course JSON file to begin.');
+    input.focus();
+  });
+  download.addEventListener('click', () => {
+    if (!current || pending) return;
+    let url = null;
+    let anchor = null;
+    try {
+      const text = JSON.stringify({
+        format: 'recallweave-prerequisite-review/1', source: current.source, report: current.report
+      }, null, 2) + '\n';
+      const blob = new environment.Blob([text], { type: 'application/json;charset=utf-8' });
+      url = environment.URL.createObjectURL(blob);
+      anchor = element('a');
+      anchor.href = url;
+      anchor.download = 'course-prerequisite-review.json';
+      anchor.hidden = true;
+      document.body.append(anchor);
+      anchor.click();
+      say('Review download started. It contains question prompts and attribution; it is not a lesson file.');
+    } catch (error) {
+      say('Could not start the review download. ' +
+        (error instanceof Error ? error.message : String(error)) + ' Your current review is still available; try again.');
+    } finally {
+      anchor?.remove();
+      if (url) environment.setTimeout(() => environment.URL.revokeObjectURL(url), 1000);
+    }
+  });
+  render();
+}
+
+if (typeof document !== 'undefined' && document.getElementById('course-file')) {
+  mountCoursePrerequisites(document);
+}
+
+</script>
+</body>
+</html>
