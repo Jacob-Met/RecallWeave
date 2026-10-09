@@ -8,6 +8,8 @@ Prerequisite: truth values, conjunction, disjunction, negation, and implication.
 
 Every exercise names sets $X$ and $Y$. A relation $R\subseteq X\times Y$ specifies exactly which ordered pairs are true: $R(x,y)$ means $(x,y)\in R$. Rows always name elements of $X$; columns name elements of $Y$. A table entry **T** means true and **F** means false. There are no unknown entries. When a relation is given as a list of pairs, every unlisted pair is false.
 
+A witness is an element of the named set that makes an existential claim true.
+
 We use these two statements throughout:
 
 $$

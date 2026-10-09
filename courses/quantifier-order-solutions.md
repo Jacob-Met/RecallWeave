@@ -22,6 +22,8 @@ $$
 
 The exhibit $x$ is considered first. Its guide card may be chosen using that exhibit. The formula allows a different card for each exhibit but does not require different cards.
 
+Here, “first” describes logical dependence, not a time schedule or a ban on inspecting the complete relation.
+
 The second claim is
 
 $$
