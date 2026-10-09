@@ -164,6 +164,17 @@ accuracy, reuse rights or learning efficacy. The bundled synthetic learner
 simulation remains available only with the original lesson because its toy
 profile is specific to that content.
 
+## Repeated evidence: two flags, three models
+
+Study an original [twelve-question repeated-evidence course](courses/repeated-evidence.json)
+and its [worked guide](courses/repeated-evidence.md). Three fictional 16,000-file
+populations have identical priors and individual flag rates, but different report
+overlap. Compare independent reports, an exact copied report and dependent reports;
+calculate their different two-flag posteriors and recognize when joint information
+is missing or a conditioning event has probability zero. Download the JSON and use
+**Bring your own lesson** to preview and start it. The guide uses stable question IDs
+and answer content because choices shuffle.
+
 ## Review and practice
 
 After finishing a deck's challenges, open any question under **Review the connections** to revisit the original answer and explanation. **Practice missed connections** gives each initially missed question one retry in the same order it appeared during the session. A session with every answer correct still offers every review panel.
