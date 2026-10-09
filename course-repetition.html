@@ -1,0 +1,521 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>Repeated question review · RecallWeave</title>
+  <style>
+    :root { color-scheme:light; font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; color:#17343b; background:#f5f7f4; line-height:1.55; }
+    * { box-sizing:border-box; } body { margin:0; } button { font:inherit; } a { color:#116979; text-underline-offset:.2em; }
+    .site-header { max-width:1180px; margin:auto; padding:24px 28px; display:flex; align-items:center; justify-content:space-between; gap:24px; border-bottom:1px solid #d8e2df; }
+    .brand { display:flex; align-items:center; gap:10px; font-weight:750; color:#17343b; text-decoration:none; }
+    .brand-mark { background:#17343b; color:white; border-radius:10px; width:34px; height:34px; text-align:center; line-height:32px; font-size:25px; }
+    main { max-width:1180px; padding:46px 28px 24px; margin:auto; } .eyebrow { font-size:.78rem; letter-spacing:.13em; text-transform:uppercase; font-weight:750; color:#40717a; }
+    h1 { font-size:clamp(2.1rem,5vw,3.5rem); letter-spacing:-.045em; line-height:1.12; max-width:800px; margin:10px 0 20px; }
+    .intro { font-size:1.12rem; max-width:770px; color:#4b6367; margin-bottom:32px; }
+    .layout { display:grid; grid-template-columns:minmax(270px,.72fr) minmax(0,1.5fr); gap:24px; align-items:start; }
+    .card { min-width:0; border:1px solid #d7e2dd; border-radius:18px; background:#fff; padding:24px; box-shadow:0 7px 25px #17343b06; }
+    h2 { margin:6px 0 12px; font-size:1.35rem; line-height:1.3; } h3 { margin:8px 0 12px; font-size:1.2rem; } h4 { font-size:.94rem; margin:18px 0 8px; overflow-wrap:anywhere; }
+    p { margin:0 0 16px; } .step { font-size:.75rem; color:#57716f; letter-spacing:.07em; text-transform:uppercase; font-weight:750; }
+    .button { padding:12px 16px; border:1px solid #b5cbc7; border-radius:9px; background:#fff; color:#17343b; cursor:pointer; font-weight:650; min-height:46px; text-align:center; }
+    .button.primary { color:#fff; background:#126c76; border-color:#126c76; } .button:hover:enabled { filter:brightness(.96); }
+    .button:disabled { color:#71817f; background:#edf1ee; border-color:#dfe6e2; cursor:not-allowed; } .button:focus-visible,a:focus-visible,summary:focus-visible { outline:3px solid #db9d26; outline-offset:4px; }
+    .wide { display:block; width:100%; margin:10px 0; } .quiet { color:#5c7475; font-size:.88rem; }
+    .status { margin-top:20px; padding:14px; border-left:3px solid #93b9b1; background:#f4f8f6; font-size:.92rem; overflow-wrap:anywhere; }
+    .privacy { padding-top:18px; border-top:1px solid #e1e9e4; margin-top:20px; } .save-card { margin-top:20px; }
+    .empty { min-height:350px; display:flex; flex-direction:column; justify-content:center; align-items:flex-start; background:linear-gradient(140deg,#e8f1ed,#f8faf7); }
+    .empty-symbol { font:700 2rem ui-monospace,monospace; color:#7da29a; margin-bottom:24px; }
+    .literal { white-space:pre-wrap; overflow-wrap:anywhere; } .prompt-title { font-size:1.15rem; }
+    dl { margin:0; } dt { font-size:.74rem; text-transform:uppercase; letter-spacing:.06em; font-weight:750; color:#5c7475; margin-top:16px; } dd { margin:6px 0 0; overflow-wrap:anywhere; }
+    .hash { font:.76rem/1.7 ui-monospace,SFMono-Regular,Consolas,monospace; overflow-wrap:anywhere; }
+    .counts { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; margin:22px 0; }
+    .counts div { padding:12px; border:1px solid #e1e9e4; border-radius:10px; background:#f8faf7; } .counts dt { margin:0; text-transform:none; letter-spacing:0; } .counts dd { font-size:1.55rem; font-weight:750; }
+    .notice { background:#f2f6ed; border-left:3px solid #9caf77; padding:14px; font-size:.92rem; }
+    .prompt-group { margin-top:28px; border-top:2px solid #d4e1db; padding-top:22px; min-width:0; }
+    .choice-group { border:1px solid #d9e4df; border-radius:10px; padding:2px 15px 12px; margin:16px 0; background:#f7faf8; }
+    .question-record { margin-top:18px; border-top:1px solid #dce7e1; padding-top:1px; }
+    details { margin-top:20px; } summary { cursor:pointer; font-weight:650; min-height:44px; padding:10px 0; overflow-wrap:anywhere; }
+    pre { font:.78rem/1.6 ui-monospace,SFMono-Regular,Consolas,monospace; white-space:pre-wrap; overflow-wrap:anywhere; padding:14px; background:#f3f6f3; border-radius:8px; margin:8px 0 16px; }
+    .record { max-width:100%; } [hidden] { display:none!important; }
+    footer { color:#6b8180; font-size:.8rem; margin-top:36px; padding-top:20px; border-top:1px solid #d8e2df; }
+    @media(max-width:760px) { .site-header { padding:20px; gap:12px; } .site-header nav { font-size:.85rem; } main { padding:30px 20px 20px; } .layout { grid-template-columns:1fr; } .card { padding:21px; } .empty { min-height:230px; } h1 { font-size:2.35rem; } .choice-group { padding-left:10px; padding-right:10px; } }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="demo.html"><span class="brand-mark" aria-hidden="true">r</span> RecallWeave</a>
+    <nav aria-label="Related tools"><a href="author.html">Deck studio</a></nav>
+  </header>
+  <main>
+    <p class="eyebrow">For course authors · Literal question review</p>
+    <h1>Repeated questions deserve a closer look.</h1>
+    <p class="intro">Review an existing lesson for repeated prompts and differing authored answer keys. Keep the original records together, then decide what deserves attention.</p>
+    <div class="layout">
+      <aside aria-label="Choose, review and download">
+        <section class="card">
+          <p class="step">01 · Choose and review</p>
+          <h2>Start with your course JSON.</h2>
+          <p>Choose a saved RecallWeave lesson. Then explicitly review its contents. Your source file stays unchanged.</p>
+          <input id="repetition-file" type="file" accept=".json,application/json" hidden>
+          <button id="choose-repetition-file" class="button primary wide" type="button">Choose course JSON</button>
+          <button id="review-repetition" class="button primary wide" type="button" disabled>Review loaded course</button>
+          <button id="clear-repetition" class="button wide" type="button">Clear</button>
+          <p id="repetition-status" class="status" role="status" aria-live="polite">Choose a local course JSON to begin. Review cues do not edit your course.</p>
+          <div id="repetition-captured" hidden>
+            <dl>
+              <dt>Captured filename · quoted exactly</dt><dd id="repetition-filename" class="literal"></dd>
+              <dt>Captured bytes</dt><dd id="repetition-bytes"></dd>
+              <dt>Original file · SHA-256</dt><dd id="repetition-source-hash" class="hash"></dd>
+            </dl>
+          </div>
+          <p class="quiet privacy">Local file only · Maximum 256 KiB<br>No upload, account or automatic saving.</p>
+        </section>
+        <section class="card save-card">
+          <p class="step">02 · Keep your review</p>
+          <h2>Save the complete report.</h2>
+          <p>The JSON download contains the unchanged review result and separate file provenance. It includes matching question text and answer keys.</p>
+          <button id="download-repetition" class="button primary wide" type="button" disabled>Download review JSON</button>
+          <p class="quiet">Share deliberately. Keep the original course: this report is not a replacement lesson. Choosing or cancelling another file clears the current review.</p>
+        </section>
+      </aside>
+      <section aria-label="Question review">
+        <div id="repetition-empty" class="card empty">
+          <div class="empty-symbol" aria-hidden="true">A / A / B</div>
+          <p class="eyebrow">Same words · Original context</p>
+          <h2>Review cues, not automatic corrections.</h2>
+          <p>Exact prompt matches are grouped for inspection. Reordered choices can still select the same answer text; identical answer positions can select different text.</p>
+          <p class="quiet">Repetition may be intentional. A report does not establish factual accuracy, semantic uniqueness or teaching quality.</p>
+        </div>
+        <article id="repetition-result" class="card" hidden>
+          <p class="eyebrow">Literal review · Source unchanged</p>
+          <h2 id="repetition-title" class="literal"></h2>
+          <p id="repetition-outcome" class="notice"></p>
+          <dl class="counts">
+            <div><dt>Questions in course</dt><dd id="repetition-total"></dd></div>
+            <div><dt>Repeated prompt groups</dt><dd id="repetition-prompt-count"></dd></div>
+            <div><dt>Questions in those groups</dt><dd id="repetition-member-count"></dd></div>
+            <div><dt>Repeated choice sets</dt><dd id="repetition-choice-count"></dd></div>
+            <div><dt>Authored answer disagreements</dt><dd id="repetition-answer-count"></dd></div>
+          </dl>
+          <details><summary>Inspect exact course metadata</summary><pre id="repetition-metadata"></pre></details>
+          <p class="quiet">Question numbers refer to the original course. Quoted records expose exact spaces and escaped characters; wording, choices and context are never normalized.</p>
+          <div id="repetition-groups"></div>
+          <details><summary>Inspect the complete helper report</summary><pre id="repetition-report-json"></pre></details>
+        </article>
+      </section>
+    </div>
+    <footer>RecallWeave / Repeated question review · Literal comparison within one course. No automatic deduplication, course edits or learner-state changes.</footer>
+  </main>
+  <script>
+(() => {
+'use strict';
+const __recallweaveRepetitionModules = Object.create(null);
+__recallweaveRepetitionModules['./deck.mjs'] = (() => {
+/** Local lesson content. Imported data cannot replace the model or run code. */
+const DECK_FORMAT = 'recallweave-deck/1';
+const MAX_DECK_BYTES = 262144;
+
+function deckRecord(value, path) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    throw new Error(`${path} must be an object.`);
+  }
+  return value;
+}
+
+function deckText(value, path, limit) {
+  if (typeof value !== 'string' || !value.trim() || value.length > limit) {
+    throw new Error(`${path} must be nonempty text of at most ${limit} characters.`);
+  }
+  return value;
+}
+
+function deckList(value, path, minimum, maximum) {
+  if (!Array.isArray(value) || value.length < minimum || value.length > maximum) {
+    throw new Error(`${path} must contain ${minimum}–${maximum} entries.`);
+  }
+  return value;
+}
+
+/** Validate and copy only the content fields used by the existing lesson runtime. */
+function validateDeck(value) {
+  const input = deckRecord(value, 'Deck');
+  if (input.format !== undefined && input.format !== DECK_FORMAT) {
+    throw new Error(`Unsupported deck format. Use ${DECK_FORMAT}.`);
+  }
+  const title = deckText(input.title, 'title', 160);
+  const attribution = deckText(input.attribution, 'attribution', 2000);
+  const license = deckText(input.license, 'license', 2000);
+  const concepts = deckList(input.concepts, 'concepts', 1, 32).map((concept, index) =>
+    deckText(concept, `concepts[${index}]`, 80));
+  if (new Set(concepts).size !== concepts.length) throw new Error('Concept names must be unique.');
+  const knownConcepts = new Set(concepts);
+  const ids = new Set();
+  const coveredConcepts = new Set();
+  const links = new Map(concepts.map(concept => [concept, new Set()]));
+  const items = deckList(input.items, 'items', 1, 100).map((value, index) => {
+    const path = `items[${index}]`;
+    const item = deckRecord(value, path);
+    const id = deckText(item.id, `${path}.id`, 80);
+    if (ids.has(id)) throw new Error(`${path}.id duplicates another question ID.`);
+    ids.add(id);
+    const concept = deckText(item.concept, `${path}.concept`, 80);
+    if (!knownConcepts.has(concept)) throw new Error(`${path}.concept is not in concepts.`);
+    coveredConcepts.add(concept);
+    const prerequisites = deckList(item.prerequisites, `${path}.prerequisites`, 0, 31).map((name, p) => {
+      deckText(name, `${path}.prerequisites[${p}]`, 80);
+      if (!knownConcepts.has(name)) throw new Error(`${path}.prerequisites contains an unknown concept.`);
+      if (name === concept) throw new Error(`${path} cannot require its own concept.`);
+      links.get(concept).add(name);
+      return name;
+    });
+    if (new Set(prerequisites).size !== prerequisites.length) throw new Error(`${path}.prerequisites contains a duplicate.`);
+    const options = deckList(item.options, `${path}.options`, 2, 6).map((option, o) =>
+      deckText(option, `${path}.options[${o}]`, 1000));
+    if (new Set(options).size !== options.length) throw new Error(`${path}.options must be distinct.`);
+    if (!Number.isInteger(item.answer) || item.answer < 0 || item.answer >= options.length) {
+      throw new Error(`${path}.answer must be a zero-based index of an option.`);
+    }
+    return Object.freeze({
+      id, concept, prerequisites: Object.freeze(prerequisites),
+      prompt: deckText(item.prompt, `${path}.prompt`, 2000),
+      options: Object.freeze(options), answer: item.answer,
+      explanation: deckText(item.explanation, `${path}.explanation`, 4000),
+      transfer: deckText(item.transfer, `${path}.transfer`, 2000)
+    });
+  });
+  if (coveredConcepts.size !== concepts.length) throw new Error('Every concept must have at least one question.');
+  const visiting = new Set();
+  const visited = new Set();
+  const visit = concept => {
+    if (visiting.has(concept)) throw new Error('Prerequisite links must not form a cycle.');
+    if (visited.has(concept)) return;
+    visiting.add(concept);
+    for (const prerequisite of links.get(concept)) visit(prerequisite);
+    visiting.delete(concept);
+    visited.add(concept);
+  };
+  concepts.forEach(visit);
+  return Object.freeze({
+    format: DECK_FORMAT, title, attribution, license,
+    concepts: Object.freeze(concepts), items: Object.freeze(items)
+  });
+}
+
+/** The same size limit applies to a File and to programmatically supplied UTF-8 JSON. */
+function parseDeck(text) {
+  if (typeof text !== 'string' || new TextEncoder().encode(text).length > MAX_DECK_BYTES) {
+    throw new Error('Choose a JSON deck no larger than 256 KiB.');
+  }
+  let value;
+  try { value = JSON.parse(text); }
+  catch { throw new Error('The file is not valid JSON. Check its commas, quotes and brackets.'); }
+  return validateDeck(value);
+}
+
+/** Export the existing bundled lesson as an editable example of the same contract. */
+function serializeDeck(deck) {
+  return JSON.stringify(validateDeck(deck), null, 2) + '\n';
+}
+
+return { DECK_FORMAT, MAX_DECK_BYTES, validateDeck, parseDeck, serializeDeck };
+})();
+
+__recallweaveRepetitionModules['./course-repetition.mjs'] = (() => {
+const { parseDeck } = __recallweaveRepetitionModules['./deck.mjs'];
+
+function freezeReport(value) {
+  if (value && typeof value === 'object' && !Object.isFrozen(value)) {
+    for (const child of Object.values(value)) freezeReport(child);
+    Object.freeze(value);
+  }
+  return value;
+}
+
+/**
+ * Inspect literal repetitions without editing questions or judging their facts.
+ * Equal choice sets use exact strings; their displayed order remains the first
+ * member's order. Authored answers are compared by selected text, not index.
+ */
+function inspectCourseRepetition(text) {
+  const deck = parseDeck(text);
+  const byPrompt = new Map();
+  for (const [index, item] of deck.items.entries()) {
+    if (!byPrompt.has(item.prompt)) byPrompt.set(item.prompt, []);
+    byPrompt.get(item.prompt).push({ index, item });
+  }
+
+  const prompts = [];
+  for (const [prompt, members] of byPrompt) {
+    if (members.length < 2) continue;
+    const byChoices = new Map();
+    for (const member of members) {
+      // JSON encoding keeps arbitrary option strings distinct, including NUL.
+      // Sorting a copy defines set identity without changing displayed choices.
+      const key = JSON.stringify([...member.item.options].sort());
+      if (!byChoices.has(key)) byChoices.set(key, []);
+      byChoices.get(key).push(member);
+    }
+
+    const choiceGroups = [];
+    for (const peers of byChoices.values()) {
+      if (peers.length < 2) continue;
+      const byAnswer = new Map();
+      for (const { item } of peers) {
+        const answerText = item.options[item.answer];
+        if (!byAnswer.has(answerText)) byAnswer.set(answerText, []);
+        byAnswer.get(answerText).push(item.id);
+      }
+      const authoredAnswers = [...byAnswer].map(([text, questionIds]) => ({
+        text, questionIds
+      }));
+      choiceGroups.push({
+        options: peers[0].item.options,
+        questionIds: peers.map(({ item }) => item.id),
+        authoredAnswers,
+        answerDisagreement: authoredAnswers.length > 1
+      });
+    }
+    prompts.push({ prompt, members, choiceGroups });
+  }
+
+  return freezeReport({
+    format: 'recallweave-course-repetition/1',
+    course: {
+      title: deck.title, attribution: deck.attribution, license: deck.license
+    },
+    summary: {
+      questionCount: deck.items.length,
+      repeatedPromptGroups: prompts.length,
+      repeatedQuestionCount: prompts.reduce((sum, group) => sum + group.members.length, 0),
+      equivalentChoiceGroups: prompts.reduce((sum, group) => sum + group.choiceGroups.length, 0),
+      answerDisagreementGroups: prompts.reduce((sum, group) =>
+        sum + group.choiceGroups.filter(choice => choice.answerDisagreement).length, 0)
+    },
+    prompts
+  });
+}
+
+return { inspectCourseRepetition };
+})();
+
+__recallweaveRepetitionModules['./course-repetition-ui.mjs'] = (() => {
+const { MAX_DECK_BYTES } = __recallweaveRepetitionModules['./deck.mjs'];
+const { inspectCourseRepetition } = __recallweaveRepetitionModules['./course-repetition.mjs'];
+
+async function sha256(bytes) {
+  if (!globalThis.crypto?.subtle) {
+    throw new Error('This browser cannot prepare the required SHA-256 provenance. Use a current browser.');
+  }
+  const digest = await globalThis.crypto.subtle.digest('SHA-256', bytes);
+  return Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, '0')).join('');
+}
+
+/** A separate, in-memory consumer of the unchanged literal-repetition helper. */
+function mountCourseRepetition(document, platform = {}) {
+  const byId = id => document.getElementById(id);
+  const input = byId('repetition-file');
+  const choose = byId('choose-repetition-file');
+  const review = byId('review-repetition');
+  const download = byId('download-repetition');
+  const status = byId('repetition-status');
+  const hash = platform.hash ?? sha256;
+  const createURL = platform.createObjectURL ?? (blob => URL.createObjectURL(blob));
+  const revokeURL = platform.revokeObjectURL ?? (url => URL.revokeObjectURL(url));
+  const later = platform.setTimeout ?? setTimeout;
+  const BlobType = platform.Blob ?? Blob;
+  const listeners = [];
+  const urls = new Set();
+  let generation = 0;
+  let captured = null;
+  let prepared = null;
+
+  function on(element, event, action) {
+    element.addEventListener(event, action);
+    listeners.push(() => element.removeEventListener(event, action));
+  }
+  function revoke(url) {
+    if (urls.delete(url)) revokeURL(url);
+  }
+  function retire(message) {
+    generation++;
+    captured = null;
+    prepared = null;
+    review.disabled = true;
+    download.disabled = true;
+    byId('repetition-captured').hidden = true;
+    byId('repetition-result').hidden = true;
+    byId('repetition-empty').hidden = false;
+    for (const id of ['repetition-filename', 'repetition-bytes', 'repetition-source-hash',
+      'repetition-title', 'repetition-metadata', 'repetition-total', 'repetition-prompt-count',
+      'repetition-member-count', 'repetition-choice-count', 'repetition-answer-count',
+      'repetition-outcome', 'repetition-report-json']) byId(id).textContent = '';
+    byId('repetition-groups').replaceChildren();
+    for (const url of [...urls]) revoke(url);
+    status.textContent = message;
+    return generation;
+  }
+  function refuse(message) {
+    retire(message);
+    input.value = '';
+  }
+  function element(tag, text, className) {
+    const node = document.createElement(tag);
+    if (text !== undefined) node.textContent = text;
+    if (className) node.className = className;
+    return node;
+  }
+  function exactBlock(parent, label, value) {
+    parent.append(element('h4', label), element('pre', JSON.stringify(value, null, 2), 'record'));
+  }
+  function showReport(report) {
+    byId('repetition-title').textContent = report.course.title;
+    byId('repetition-metadata').textContent = JSON.stringify(report.course, null, 2);
+    const s = report.summary;
+    byId('repetition-total').textContent = String(s.questionCount);
+    byId('repetition-prompt-count').textContent = String(s.repeatedPromptGroups);
+    byId('repetition-member-count').textContent = String(s.repeatedQuestionCount);
+    byId('repetition-choice-count').textContent = String(s.equivalentChoiceGroups);
+    byId('repetition-answer-count').textContent = String(s.answerDisagreementGroups);
+    byId('repetition-outcome').textContent = s.repeatedPromptGroups === 0
+      ? 'No literal repeated prompts were found in this course. This does not establish semantic uniqueness, factual accuracy or teaching quality.'
+      : 'These are review cues, not automatic corrections. Repetition may be intentional, and different authored answers need human review.';
+    const groups = byId('repetition-groups');
+    groups.replaceChildren();
+    report.prompts.forEach((group, groupIndex) => {
+      const card = element('article', undefined, 'prompt-group');
+      card.append(element('p', 'Prompt group ' + (groupIndex + 1), 'step'),
+        element('h3', group.prompt, 'literal prompt-title'),
+        element('p', group.members.length + ' questions share this exact prompt. Original source positions are shown below.', 'quiet'));
+      if (group.choiceGroups.length === 0) {
+        card.append(element('p', 'No choice set repeats within this prompt group. Every original record is retained below.', 'notice'));
+      }
+      group.choiceGroups.forEach((choice, choiceIndex) => {
+        const section = element('section', undefined, 'choice-group');
+        section.append(element('h4', 'Choice set ' + (choiceIndex + 1) + (choice.answerDisagreement
+          ? ' · Authored answers differ' : ' · Same authored answer text')));
+        exactBlock(section, 'Choices in the first member’s order', choice.options);
+        exactBlock(section, 'Question IDs in source order', choice.questionIds);
+        exactBlock(section, 'Authored selected text and its question IDs', choice.authoredAnswers);
+        card.append(section);
+      });
+      const records = element('details');
+      records.open = true;
+      records.append(element('summary', 'Inspect all ' + group.members.length + ' original question records'));
+      for (const member of group.members) {
+        const section = element('section', undefined, 'question-record');
+        section.append(element('h4', 'Source question ' + (member.index + 1) + ' · ID ' + JSON.stringify(member.item.id)));
+        const item = member.item;
+        section.append(element('p', 'Authored choice ' + (item.answer + 1) + ' of ' + item.options.length
+          + ' · selected text ' + JSON.stringify(item.options[item.answer]), 'literal record-answer'));
+        section.append(element('pre', JSON.stringify({ sourceQuestion: member.index + 1, index: member.index, item }, null, 2), 'record'));
+        records.append(section);
+      }
+      card.append(records);
+      groups.append(card);
+    });
+    byId('repetition-report-json').textContent = JSON.stringify(report, null, 2);
+    byId('repetition-result').hidden = false;
+    byId('repetition-empty').hidden = true;
+  }
+
+  async function readSelection() {
+    const version = retire('Reading the selected file…');
+    const file = input.files?.[0];
+    if (!file) {
+      status.textContent = 'Selection cancelled. Choose a course JSON to begin.';
+      return;
+    }
+    try {
+      if (input.files.length !== 1) throw new Error('Choose one course JSON at a time.');
+      if (!Number.isSafeInteger(file.size) || file.size < 0 || file.size > MAX_DECK_BYTES) {
+        throw new Error('Choose a JSON deck no larger than 256 KiB.');
+      }
+      const buffer = await file.arrayBuffer();
+      if (version !== generation) return;
+      const bytes = new Uint8Array(buffer);
+      if (bytes.byteLength > MAX_DECK_BYTES) throw new Error('Choose a JSON deck no larger than 256 KiB.');
+      let text;
+      try { text = new TextDecoder('utf-8', { fatal: true, ignoreBOM: true }).decode(bytes); }
+      catch { throw new Error('The file must contain valid UTF-8. Invalid bytes were not replaced.'); }
+      const sourceHash = await hash(bytes);
+      if (version !== generation) return;
+      if (typeof sourceHash !== 'string' || !/^[0-9a-f]{64}$/.test(sourceHash)) {
+        throw new Error('The required SHA-256 provenance could not be prepared.');
+      }
+      captured = Object.freeze({ text, source: Object.freeze({
+        filename: file.name, bytes: bytes.byteLength, sha256: sourceHash
+      }) });
+      byId('repetition-filename').textContent = JSON.stringify(file.name);
+      byId('repetition-bytes').textContent = String(bytes.byteLength);
+      byId('repetition-source-hash').textContent = sourceHash;
+      byId('repetition-captured').hidden = false;
+      review.disabled = false;
+      status.textContent = 'File captured. Choose Review loaded course to validate it and inspect literal repetitions.';
+    } catch (error) {
+      if (version !== generation) return;
+      refuse(error instanceof Error ? error.message : 'The file could not be read. Choose the course again.');
+    }
+  }
+
+  function reviewCaptured() {
+    if (!captured) return;
+    try {
+      const report = inspectCourseRepetition(captured.text);
+      const wrapper = { format: 'recallweave-course-repetition-browser/1', source: captured.source, report };
+      const json = JSON.stringify(wrapper, null, 2) + '\n';
+      showReport(report);
+      prepared = Object.freeze({ json });
+      review.disabled = true;
+      download.disabled = false;
+      status.textContent = 'Review ready. Inspect the authored records and download the report if useful. The course has not been changed.';
+    } catch (error) {
+      refuse(error instanceof Error ? error.message : 'The course could not be reviewed. Choose another course JSON.');
+    }
+  }
+  function downloadPrepared() {
+    if (!prepared) return;
+    try {
+      const url = createURL(new BlobType([prepared.json], { type: 'application/json;charset=utf-8' }));
+      urls.add(url);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'course-repetition-review.json';
+      document.body.append(link);
+      try { link.click(); } finally { link.remove(); }
+      later(() => revoke(url), 1000);
+      status.textContent = 'Review download requested. It contains original question text and answer keys; share it deliberately.';
+    } catch {
+      refuse('The download could not be prepared. Choose the course again and review it before retrying.');
+    }
+  }
+  on(choose, 'click', () => {
+    retire('Choose a course JSON. The previous file, review and download have been cleared.');
+    input.value = '';
+    try { input.click(); }
+    catch { refuse('The file chooser could not be opened. Try choosing the course again.'); }
+  });
+  on(input, 'change', readSelection);
+  on(input, 'cancel', () => refuse('Selection cancelled. Choose a course JSON to begin.'));
+  on(byId('clear-repetition'), 'click', () => {
+    refuse('Selection cleared. Choose a course JSON to begin.');
+    choose.focus();
+  });
+  on(review, 'click', reviewCaptured);
+  on(download, 'click', downloadPrepared);
+  retire('Choose a local course JSON to begin. Review cues do not edit your course.');
+  return () => {
+    retire('Question review closed.');
+    listeners.forEach(remove => remove());
+  };
+}
+
+if (typeof document !== 'undefined') mountCourseRepetition(document);
+
+return { mountCourseRepetition };
+})();
+
+})();
+</script>
+</body>
+</html>

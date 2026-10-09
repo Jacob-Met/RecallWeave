@@ -456,3 +456,18 @@ the standalone page needs no server or connection and uses no automatic storage.
 See the [browser export guide](docs/CSV_EXPORT_BROWSER.md) for limits, the existing
 importer dependency and reimport instructions. Rebuild with
 `python3 tools/make_csv_export.py`, or add `--check` to verify source parity.
+
+## Review repeated questions without a terminal
+
+Open [Repeated question review](course-repetition.html), choose a local course
+JSON, then explicitly review exact prompt repetitions and authored answer-key
+disagreements. The page retains complete source-numbered matching records,
+including reordered choices and their selected answer text. Findings are review
+cues; repetition may be intentional, and no course is edited.
+
+Download the complete unchanged helper report with separate captured-file
+provenance, or clear it. Replacing, cancelling or refusing a file retires old
+results. The standalone page works offline with no account or automatic storage.
+See the [browser review guide](docs/COURSE_REPETITION_BROWSER.md) for limits and
+interpretation. Rebuild with `python3 tools/make_course_repetition.py`, or add
+`--check` to verify exact source parity.
