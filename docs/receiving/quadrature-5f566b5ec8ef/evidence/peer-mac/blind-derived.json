@@ -1,0 +1,129 @@
+{
+  "reviewer": "chatgpt:5f566b5ec8ef:mac_continuity",
+  "phase": "Blind independent derivation before reading candidate source, course keys, explanations or guide",
+  "input": "../course-questions-blind.json",
+  "conventions": "zero-based option_index; n counts elementary subintervals; signed error Q-I",
+  "derivation_note": "All selected answers and transfer calculations derived from elementary integration/quadrature, not candidate evaluation. A draft mental midpoint value for cubic transfer was corrected by direct substitution before this freeze; no candidate source or output was consulted.",
+  "answers": [
+    {
+      "id": "quad-signed",
+      "option_index": 1,
+      "answer": "-6",
+      "derivation": "The signed integral of a constant is c(b-a): -2(2-(-1))=-6. Crossing zero in x does not cancel a constant negative ordinate.",
+      "transfer": {
+        "prompt": "Integrate f(x)=-3 on [-2,4].",
+        "answer": "-18"
+      }
+    },
+    {
+      "id": "quad-midpoint",
+      "option_index": 2,
+      "answer": "1 × [f(1/2) + f(3/2)] = 5/2",
+      "derivation": "h=(2-0)/2=1. The two sample locations are 1/2 and 3/2, giving 1(1/4+9/4)=5/2. n counts subintervals, not nodes or one full-interval midpoint.",
+      "transfer": {
+        "prompt": "Composite midpoint for x² on [1,3], n=2.",
+        "answer": "25/2; nodes3/2,5/2 and width1"
+      }
+    },
+    {
+      "id": "quad-trapezoid",
+      "option_index": 0,
+      "answer": "1/2, 1, 1, 1, 1/2",
+      "derivation": "h=1. Every interior endpoint belongs to two adjacent trapezoids and receives h; the two outer endpoints receive h/2.",
+      "transfer": {
+        "prompt": "Aggregated trapezoid weights on [2,4], n=4.",
+        "answer": "1/4,1/2,1/2,1/2,1/4; sum2"
+      }
+    },
+    {
+      "id": "quad-simpson",
+      "option_index": 3,
+      "answer": "n even with h/3 × [1,4,2,4,…,2,4,1]",
+      "derivation": "Each two-subinterval panel uses its left endpoint, midpoint and right endpoint with h/3[1,4,1]; shared panel endpoints aggregate to2. There are n+1 nodes and n/2 panels.",
+      "transfer": {
+        "prompt": "Simpson on [1,3] with n=4: list nodes and actual weights.",
+        "answer": "nodes1,3/2,2,5/2,3; weights1/6,2/3,1/3,2/3,1/6"
+      }
+    },
+    {
+      "id": "quad-error-sign",
+      "option_index": 1,
+      "answer": "-1/6, estimate too low",
+      "derivation": "5/2-8/3=(15-16)/6=-1/6. Absolute error1/6 discards this orientation.",
+      "transfer": {
+        "prompt": "An estimate is -7/2 and exact integral -4. What is Q-I?",
+        "answer": "+1/2; the estimate is higher although both values are negative"
+      }
+    },
+    {
+      "id": "quad-cubic",
+      "option_index": 2,
+      "answer": "Composite Simpson is exact",
+      "derivation": "On one symmetric panel [c-h,c+h], the weights h/3[1,4,1] integrate the centered monomials1,u,u²,u³ exactly as2h,0,2h³/3,0. Translation and linearity give every degree≤3 polynomial; summing panels preserves equality. Midpoint/trapezoid only guarantee degree≤1, although higher-degree coincidences exist.",
+      "transfer": {
+        "prompt": "Integrate x³-2x+1 on [1,3] using Simpson n=2.",
+        "answer": "exact14; endpoint ordinates0,22 and midpoint5 give (0+4×5+22)/3=14. Antiderivative x⁴/4-x²+x gives(57/4)-(1/4)=14."
+      }
+    },
+    {
+      "id": "quad-agreement",
+      "option_index": 0,
+      "answer": "Agreement does not establish the integral",
+      "derivation": "Factor f=x²(2x-1)(x-1); nodes0,1/2,1 are roots. The exact integral2/5-3/4+1/3=-1/60 remains nonzero, so both sampled sums can agree at0 and both be wrong.",
+      "transfer": {
+        "prompt": "For the same function, composite midpoint n=2 uses1/4 and3/4. Find Q and Q-I.",
+        "answer": "values3/128 and-9/128; Q=-3/128; error=-13/1920"
+      }
+    },
+    {
+      "id": "quad-refinement",
+      "option_index": 3,
+      "answer": "16",
+      "derivation": "(4/15)/(1/60)=16. Independently, Simpson on x⁴ at n2 gives2/3, at n4 gives5/12, while integral2/5; the errors are4/15 and1/60. One observed ratio is not a universal improvement guarantee for arbitrary polynomials.",
+      "transfer": {
+        "prompt": "For x⁴ on [-1,1], Simpson n=8 error and estimate.",
+        "answer": "error1/960 and estimate77/192"
+      }
+    },
+    {
+      "id": "quad-lucky",
+      "option_index": 1,
+      "answer": "The new signed error is +1/16; refinement loses coincidental exactness",
+      "derivation": "Integral=5(2/5)-9(2/3)=-4. Coarse trapezoid weights give-4. At n4 the values are-4,-31/16,0,-31/16,-4 and h=1/2, giving-63/16. Subtracting-4 yields+1/16.",
+      "transfer": {
+        "prompt": "If the previous absolute error is0 and the next is1/16, what is their ratio?",
+        "answer": "finite0, distinct from undefined0/0 and from reaching exactness"
+      }
+    },
+    {
+      "id": "quad-symmetry",
+      "option_index": 2,
+      "answer": "Odd symmetry cancels both the integral and symmetric quadrature sums",
+      "derivation": "The interval is symmetric and x⁵ is odd. Every positive node has its negative counterpart with equal weight; the center, if sampled, contributes0. Exactness here does not raise the degree guarantee.",
+      "transfer": {
+        "prompt": "Does trapezoid n=2 remain exact for x⁵ on [0,2]?",
+        "answer": "No. Q=17, exact32/3, error19/3"
+      }
+    },
+    {
+      "id": "quad-zero-ratio",
+      "option_index": 0,
+      "answer": "Undefined0/0; both results exact",
+      "derivation": "The quotient0/0 has no defined value. Equal zero errors establish exact results but cannot identify a convergence order.",
+      "transfer": {
+        "prompt": "Previous error1/10, current0: how differs from both zero?",
+        "answer": "Reached exactness with zero denominator and positive numerator; no finite ratio. Previous0,current1/10 instead gives finite0."
+      }
+    },
+    {
+      "id": "quad-arithmetic",
+      "option_index": 3,
+      "answer": "No rounding error in reported rational arithmetic; quadrature error can remain",
+      "derivation": "Exact operations preserve sampled values and weighted sums. A quadrature formula is a finite-sample approximation to integration and need not be exact even when every arithmetic step is exact; pixel rendering and learning outcomes are separate claims.",
+      "transfer": {
+        "prompt": "One-panel Simpson x⁴ on [0,1].",
+        "answer": "Q=5/24, I=1/5, exact signed error1/120; no rounding is needed to produce a nonzero quadrature error"
+      }
+    }
+  ]
+}

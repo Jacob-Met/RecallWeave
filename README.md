@@ -433,3 +433,11 @@ Open [the minimum-spanning-forest explorer](courses/minimum-spanning-forest-expl
 
 Download the full trace with its original entered text and selected frame, or save the original [twelve-question course](courses/minimum-spanning-forest.json) and [worked guide](courses/minimum-spanning-forest.md). Open the JSON through the learner's existing **Bring your own lesson** preview and **Start this deck** flow. No network, account, automatic storage or learner-session modification is involved. Rebuild the standalone page with `node tools/build-minimum-spanning-forest.mjs`; add `--check` to verify exact source parity.
 
+
+## Inspect quadrature weights and refinement
+
+Open **[Between the samples](courses/quadrature-lab.html)** directly in a browser to compare composite midpoint, trapezoid and Simpson rules on the same bounded polynomial. Apply integer coefficients and bounds, inspect every exact node, weight and contribution, and compare five meshes against the antiderivative integral. The page separates signed error from absolute error, general polynomial exactness from accidental cancellation, and exact fractions from approximate plotted geometry.
+
+Download the original [twelve-question lesson](courses/quadrature.json), open it through **Bring your own lesson**, preview it and choose **Start this deck** for the existing learner, separate practice and study-note flow. The [worked guide](courses/quadrature.md) derives the examples, including matching estimates that miss the integral and a lucky coarse answer that stops being exact after refinement. The observation download retains the complete applied calculation and selected inspection method.
+
+The lab works offline without installation or automatic storage. Rebuild it with `node tools/build-quadrature.mjs`; `--check` verifies exact source and embedded-download parity. Run the focused controls with `node --test tests/quadrature.test.mjs tests/quadrature-course.test.mjs`. The [receiving packet](docs/receiving/quadrature-5f566b5ec8ef/README.md) records independent exact-arithmetic and content review, actual local downloads and the unchanged learner.

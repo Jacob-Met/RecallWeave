@@ -1,0 +1,403 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Between the samples · RecallWeave</title>
+<style>
+:root{color-scheme:light;--ink:#17383b;--muted:#46676a;--paper:#f6f3e9;--white:#fffef9;--line:#c7d5cf;--teal:#075f69;--gold:#a35d09;--blue:#245bc1}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.55 system-ui,sans-serif}
+a{color:var(--teal)}button,input,select{font:inherit}button{border:1px solid var(--teal);border-radius:6px;background:var(--white);color:var(--teal);padding:.6rem .85rem;cursor:pointer;font-weight:650}
+button.primary{background:var(--teal);color:white}button:disabled,select:disabled{opacity:.48;cursor:default}
+:focus-visible{outline:3px solid var(--blue);outline-offset:3px}[hidden]{display:none!important}
+main{max-width:1180px;margin:auto;padding:32px 24px 56px}.eyebrow{text-transform:uppercase;letter-spacing:.15em;font-size:.76rem;font-weight:750;color:var(--teal)}
+h1{font:700 clamp(2.5rem,6vw,4.6rem)/1.05 Georgia,serif;letter-spacing:-.045em;margin:.6rem 0 1rem;max-width:860px}h2{font:700 1.65rem/1.2 Georgia,serif;margin:0 0 .9rem}h3{font-size:1.05rem}
+.lede{font-size:1.18rem;max-width:780px;color:var(--muted)}.hero{padding-bottom:26px;border-bottom:2px solid var(--teal)}
+.steps{display:flex;gap:12px;flex-wrap:wrap;margin:24px 0 0;padding:0;list-style:none}.steps li{background:#e4ede5;border-radius:30px;padding:6px 15px;font-size:.88rem}
+.workspace{display:grid;grid-template-columns:325px minmax(0,1fr);gap:24px;margin-top:26px;align-items:start}
+.card{background:var(--white);border:1px solid var(--line);border-radius:12px;padding:23px;min-width:0}.controls{position:sticky;top:20px}
+.coefficients{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.field{display:grid;gap:5px;margin-bottom:14px}
+.field label,.coefficients label{font-size:.85rem;font-weight:700}input,select{width:100%;min-width:0;border:1px solid #94aaa3;border-radius:5px;padding:9px;background:white;color:var(--ink)}
+.bounds{display:grid;grid-template-columns:1fr 1fr;gap:12px}fieldset{border:0;padding:0;margin:0 0 18px}legend{font-weight:700;margin-bottom:10px}
+.help{font-size:.86rem;color:var(--muted)}.buttons{display:flex;gap:8px;flex-wrap:wrap}.divider{border-top:1px solid var(--line);margin-top:23px;padding-top:20px}
+#status{border-left:4px solid var(--gold);padding:12px 15px;margin:0 0 20px;background:#fff8e8}
+#status[data-kind=success]{border-color:var(--teal);background:#eaf5eb}#status[data-kind=error]{border-color:#a02924;background:#fff0ec}
+.output>section{margin-bottom:20px}.integral{background:#e6f0e7;border-radius:8px;padding:18px}.integral strong{font-size:1.7rem;display:block;overflow-wrap:anywhere}
+#polynomial{font-family:ui-monospace,monospace;font-size:.9rem;overflow-wrap:anywhere}.scroll-table{max-width:100%;overflow:auto;border:1px solid var(--line);border-radius:6px;margin:12px 0}
+table{border-collapse:collapse;width:100%;font-size:.88rem;text-align:left}th{background:#edf2ed;color:var(--ink);font-weight:750}
+th,td{padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}td{font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+#nodes td{white-space:nowrap;font-family:ui-monospace,monospace}#refinement td{white-space:nowrap}.selected-mesh{background:#fff2d7}
+#graph{display:block;width:100%;height:320px;background:#fcfcf7;border:1px solid var(--line);border-radius:7px;margin-top:16px}
+.grid{stroke:#dce5de;stroke-width:1}.zero-axis{stroke:#819b92;stroke-width:1.5}.tick{fill:#46676a;font:12px system-ui,sans-serif}
+.sample-area{fill:#e7b65e;fill-opacity:.16;stroke:none}.approximation{fill:none;stroke:#ad6410;stroke-width:2;stroke-dasharray:6 4}
+.function-curve{fill:none;stroke:var(--blue);stroke-width:2.5}.sample-node{fill:#ad6410;stroke:var(--white);stroke-width:1.3}
+.legend{display:flex;gap:18px;flex-wrap:wrap;font-size:.85rem;margin:8px 0}.legend strong{color:var(--blue)}.legend span{color:var(--gold)}
+details{margin:14px 0}summary{cursor:pointer;font-weight:700}.learn{border-top:2px solid var(--teal);padding-top:24px;margin-top:28px;max-width:860px}
+.footnote{font-size:.85rem;color:var(--muted)}
+@media(max-width:850px){.workspace{grid-template-columns:1fr}.controls{position:static}.coefficients{grid-template-columns:repeat(6,minmax(0,1fr))}}
+@media(max-width:520px){main{padding:22px 15px 40px}.card{padding:18px}.coefficients{grid-template-columns:repeat(3,minmax(0,1fr))}.bounds{gap:10px}.buttons button{flex:1 1 140px}.steps{gap:7px}.steps li{padding:5px 11px}th,td{padding:9px}.integral strong{font-size:1.35rem}}
+</style>
+</head>
+<body><main>
+<header class="hero"><p class="eyebrow">RecallWeave · An offline mathematics lab</p><h1>Between the samples.</h1>
+<p class="lede">A few weighted values can estimate an integral. Inspect what each rule samples, what it misses, and how its error changes when you refine the mesh.</p>
+<ol class="steps" aria-label="How to explore"><li>1 · Choose a polynomial</li><li>2 · Apply the settings</li><li>3 · Inspect the weights and errors</li></ol></header>
+<div class="workspace">
+<aside class="card controls" aria-label="Experiment settings">
+<h2>Set the experiment</h2><p class="help">Enter six integer coefficients in [-9, 9]. These describe c₀ + c₁x + c₂x² + c₃x³ + c₄x⁴ + c₅x⁵.</p>
+<form id="experiment" novalidate="">
+<fieldset><legend>Polynomial coefficients</legend><div class="coefficients">
+<div class="field"><label for="c0">c₀</label><input id="c0" aria-label="Constant coefficient c0" type="number" step="1" min="-9" max="9" value="0" style=""></div>
+<div class="field"><label for="c1">c₁ · x</label><input id="c1" aria-label="Coefficient c1" type="number" step="1" min="-9" max="9" value="0" style=""></div>
+<div class="field"><label for="c2">c₂ · x²</label><input id="c2" aria-label="Coefficient c2" type="number" step="1" min="-9" max="9" value="1" style=""></div>
+<div class="field"><label for="c3">c₃ · x³</label><input id="c3" aria-label="Coefficient c3" type="number" step="1" min="-9" max="9" value="0" style=""></div>
+<div class="field"><label for="c4">c₄ · x⁴</label><input id="c4" aria-label="Coefficient c4" type="number" step="1" min="-9" max="9" value="0" style=""></div>
+<div class="field"><label for="c5">c₅ · x⁵</label><input id="c5" aria-label="Coefficient c5" type="number" step="1" min="-9" max="9" value="0" style=""></div>
+</div></fieldset>
+<div class="bounds"><div class="field"><label for="lower">Lower bound a</label><input id="lower" aria-label="Lower bound" type="number" step="1" min="-5" max="5" value="0" style=""></div>
+<div class="field"><label for="upper">Upper bound b</label><input id="upper" aria-label="Upper bound" type="number" step="1" min="-5" max="5" value="2" style=""></div></div>
+<div class="field"><label for="subintervals">Elementary subintervals n</label><select id="subintervals"><option>2</option><option>4</option><option>8</option><option>16</option><option>32</option></select></div>
+<p class="help">Bounds are integers in [-5, 5], with a &lt; b. Simpson pairs adjacent subintervals, so n is even.</p>
+<button id="apply" class="primary" type="submit">Apply polynomial</button>
+</form>
+<div class="divider"><label for="preset"><strong>Try a worked example</strong></label><div class="field"><select id="preset"><option value="quadratic">A quadratic: bracket the integral</option><option value="cubic">A cubic: Simpson is exact</option><option value="quartic">A quartic: inspect refinement</option><option value="missed">Two rules agree and still miss</option><option value="coincidence">A lucky coarse answer does not persist</option><option value="odd">Odd symmetry: cancellation to zero</option><option value="negative">A negative signed integral</option><option value="zero">The zero polynomial</option></select></div><button id="apply-preset">Apply example</button></div>
+</aside>
+<div class="output"><p id="status" role="status" aria-live="polite" data-kind="success">Applied. Every displayed fraction belongs to this polynomial and mesh.</p>
+<div id="results">
+<section class="card"><h2 id="result-title" tabindex="-1">The applied comparison</h2><p id="applied">Applied on [-1, 1] with n = 2 elementary subintervals; h = 1.</p><p id="polynomial">(0) + (0)x + (0)x^2 + (0)x^3 + (1)x^4 + (0)x^5</p>
+<div class="integral">Exact signed integral <strong id="exact-integral">2/5  ≈ 0.4</strong><span class="help">From the polynomial's antiderivative; a negative contribution remains negative.</span></div>
+<div class="scroll-table"><table><caption>Three rules on the same applied mesh</caption><thead><tr><th scope="col">Rule</th><th scope="col">Estimate Q</th><th scope="col">Signed error Q − I</th><th scope="col">Absolute error</th><th scope="col">Exactness</th></tr></thead><tbody id="estimates"><tr><td>Midpoint</td><td>1/8</td><td>-11/40</td><td>11/40</td><td>Not exact for this experiment</td></tr><tr><td>Trapezoid</td><td>1</td><td>3/5</td><td>3/5</td><td>Not exact for this experiment</td></tr><tr><td>Simpson</td><td>2/3</td><td>4/15</td><td>4/15</td><td>Not exact for this experiment</td></tr></tbody></table></div>
+<p class="help">Exact fractions determine these results. Decimals after ≈ and plotted coordinates are approximate. A rule can be exact here without being exact for every polynomial of this degree.</p>
+</section>
+<section class="card"><h2 id="inspection-title">Simpson: inspect the weighted samples</h2><div class="field"><label for="method">Rule to inspect</label><select id="method"><option value="midpoint">Midpoint</option><option value="trapezoid">Trapezoid</option><option value="simpson">Simpson</option></select></div>
+<svg id="graph" role="img" viewBox="0 0 600 320"><title>Simpson quadrature view for the applied polynomial</title><desc>Blue is the polynomial. Amber is the sampled approximation. All coordinates are approximate; exact node weights and errors follow in tables.</desc><line x1="58" x2="580" y1="272" y2="272" class="grid"></line><text x="50" y="276" text-anchor="end" class="tick">-0.12</text><text x="58" y="298" text-anchor="middle" class="tick">-1</text><line x1="58" x2="580" y1="210.5" y2="210.5" class="grid"></line><text x="50" y="214.5" text-anchor="end" class="tick">0.19</text><text x="188.5" y="298" text-anchor="middle" class="tick">-0.5</text><line x1="58" x2="580" y1="149" y2="149" class="grid"></line><text x="50" y="153" text-anchor="end" class="tick">0.5</text><text x="319" y="298" text-anchor="middle" class="tick">0</text><line x1="58" x2="580" y1="87.5" y2="87.5" class="grid"></line><text x="50" y="91.5" text-anchor="end" class="tick">0.81</text><text x="449.5" y="298" text-anchor="middle" class="tick">0.5</text><line x1="58" x2="580" y1="26" y2="26" class="grid"></line><text x="50" y="30" text-anchor="end" class="tick">1.12</text><text x="580" y="298" text-anchor="middle" class="tick">1</text><line x1="58" x2="580" y1="248.19354838709677" y2="248.19354838709677" class="zero-axis"></line><polygon points="58,248.19354838709677 58,49.80645161290323 79.75000000000001,81.49327956989251 101.5,110.42473118279571 123.25,136.60080645161293 145,160.0215053763441 166.75,180.68682795698928 188.5,198.5967741935484 210.25,213.75134408602153 232,226.1505376344086 253.75,235.7943548387097 275.5,242.68279569892474 297.25,246.81586021505376 319,248.19354838709677 340.75,246.81586021505376 362.5,242.68279569892474 384.25,235.7943548387097 406,226.15053763440864 427.75,213.7513440860215 449.5,198.5967741935484 471.25,180.68682795698928 493,160.0215053763441 514.75,136.60080645161293 536.5,110.42473118279571 558.25,81.49327956989248 580,49.80645161290323 580,248.19354838709677" class="sample-area"></polygon><polyline points="58,49.80645161290323 79.75000000000001,81.49327956989251 101.5,110.42473118279571 123.25,136.60080645161293 145,160.0215053763441 166.75,180.68682795698928 188.5,198.5967741935484 210.25,213.75134408602153 232,226.1505376344086 253.75,235.7943548387097 275.5,242.68279569892474 297.25,246.81586021505376 319,248.19354838709677 340.75,246.81586021505376 362.5,242.68279569892474 384.25,235.7943548387097 406,226.15053763440864 427.75,213.7513440860215 449.5,198.5967741935484 471.25,180.68682795698928 493,160.0215053763441 514.75,136.60080645161293 536.5,110.42473118279571 558.25,81.49327956989248 580,49.80645161290323" class="approximation"></polyline><polyline points="58,49.80645161290323 61.26249999999999,59.54136360414566 64.525,68.91353137600814 67.7875,77.93207995999242 71.05000000000001,86.60601814516133 74.3125,94.94423847813763 77.57499999999999,102.95551726310484 80.8375,110.64851456180699 84.1,118.03177419354839 87.36250000000001,125.1137237351941 90.625,131.9026745211694 93.88749999999999,138.40682164346018 97.15,144.63424395161294 100.4125,150.59290405273438 103.67500000000001,156.29064831149196 106.9375,161.73520685011343 110.19999999999999,166.9341935483871 113.4625,171.89510604366183 116.725,176.62532573084678 119.98750000000001,181.13211776241184 123.25,185.42263104838713 126.51249999999999,189.5038982563634 129.775,193.38283581149193 133.0375,197.0662438964844 136.3,200.56080645161293 139.5625,203.87309117471017 142.825,207.00954952116936 146.0875,209.97651670394407 149.35,212.78021169354838 152.6125,215.42673721805699 155.875,217.92207976310485 159.1375,220.2721095718876 162.4,222.4825806451613 165.6625,224.55913074124243 168.925,226.50728137600808 172.1875,228.33243782289566 175.45,230.0398891129032 178.7125,231.6348080345892 181.975,233.1222511340726 185.2375,234.50715871503277 188.5,235.7943548387097 191.7625,236.98854732390373 195.025,238.0943277469758 198.2875,239.11617144184729 201.55,240.05843750000003 204.8125,240.92536877047633 208.075,241.72109185987904 211.3375,242.4496171323715 214.6,243.11483870967743 217.8625,243.72053447108115 221.125,244.27036605342744 224.3875,244.76787885112148 227.65,245.21650201612903 230.9125,245.61954845797632 234.175,245.98021484375 237.4375,246.30158159809727 240.7,246.5866129032258 243.9625,246.83815669890373 247.225,247.0589446824597 250.4875,247.25159230878276 253.75,247.4185987903226 257.0125,247.56234709708923 260.275,247.68510395665322 263.5375,247.78901985414566 266.8,247.87612903225806 270.0625,247.94834949124245 273.325,248.0074829889113 276.5875,248.05521504063762 279.85,248.09311491935483 283.1125,248.12263565555696 286.375,248.14511403729838 289.6375,248.16177061019405 292.9,248.17370967741937 296.1625,248.1819192997102 299.425,248.1872712953629 302.6875,248.19052124023438 305.95,248.19230846774195 309.2125,248.1931560688634 312.475,248.1934708921371 315.7375,248.1935435436618 319,248.19354838709677 322.2625,248.1935435436618 325.525,248.1934708921371 328.7875,248.1931560688634 332.05,248.19230846774195 335.3125,248.19052124023438 338.575,248.1872712953629 341.8375,248.1819192997102 345.1,248.17370967741937 348.3625,248.16177061019405 351.625,248.14511403729838 354.8875,248.12263565555696 358.15,248.09311491935483 361.4125,248.05521504063762 364.675,248.0074829889113 367.9375,247.94834949124245 371.2,247.87612903225806 374.4625,247.78901985414566 377.725,247.68510395665322 380.9875,247.56234709708923 384.25,247.4185987903226 387.5125,247.25159230878276 390.775,247.0589446824597 394.0375,246.83815669890373 397.3,246.5866129032258 400.5625,246.30158159809727 403.825,245.98021484375 407.0875,245.61954845797632 410.35,245.21650201612903 413.6125,244.76787885112148 416.875,244.27036605342744 420.1375,243.72053447108115 423.4,243.11483870967743 426.6625,242.4496171323715 429.925,241.72109185987904 433.1875,240.92536877047633 436.45,240.05843750000003 439.7125,239.11617144184729 442.975,238.0943277469758 446.2375,236.98854732390373 449.5,235.7943548387097 452.7625,234.50715871503277 456.025,233.1222511340726 459.2875,231.6348080345892 462.55,230.0398891129032 465.8125,228.33243782289566 469.075,226.50728137600808 472.3375,224.55913074124246 475.6,222.48258064516128 478.8625,220.2721095718876 482.125,217.92207976310485 485.3875,215.42673721805699 488.65,212.7802116935484 491.9125,209.97651670394404 495.175,207.00954952116936 498.4375,203.87309117471017 501.7,200.56080645161293 504.9625,197.06624389648442 508.225,193.38283581149193 511.4875,189.5038982563634 514.75,185.42263104838713 518.0125,181.13211776241184 521.275,176.6253257308468 524.5375,171.89510604366177 527.8,166.9341935483871 531.0625,161.73520685011343 534.325,156.29064831149196 537.5875,150.59290405273444 540.85,144.6342439516129 544.1125,138.40682164346018 547.375,131.9026745211694 550.6375,125.1137237351941 553.9,118.03177419354847 557.1625,110.64851456180693 560.425,102.95551726310484 563.6875,94.94423847813763 566.95,86.60601814516133 570.2125,77.9320799599925 573.475,68.91353137600805 576.7375000000001,59.54136360414566 580,49.80645161290323" class="function-curve"></polyline><circle cx="58" cy="49.80645161290323" r="3.5" class="sample-node"></circle><circle cx="319" cy="248.19354838709677" r="3.5" class="sample-node"></circle><circle cx="580" cy="49.80645161290323" r="3.5" class="sample-node"></circle><text x="580" y="317" text-anchor="end" class="tick">x</text><text x="58" y="16" class="tick">f(x)</text></svg><p class="legend"><strong>Solid blue · polynomial</strong><span>Dashed amber · approximation and sample nodes</span></p>
+<p class="help">The shaded signed contribution is illustrative. The drawn curve is sampled; use the fractions in the tables for exact comparisons.</p>
+<details open=""><summary>Every node, weight and contribution</summary><p id="node-count" class="help">3 distinct sample nodes. Weights include contributions from adjacent panels.</p><div class="scroll-table"><table><caption>Exact sampled values and aggregated weights</caption><thead><tr><th scope="col">Index</th><th scope="col">x</th><th scope="col">f(x)</th><th scope="col">Weight</th><th scope="col">Weight × f(x)</th></tr></thead><tbody id="nodes"><tr><td>0</td><td>-1</td><td>1</td><td>1/3</td><td>1/3</td></tr><tr><td>1</td><td>0</td><td>0</td><td>4/3</td><td>0</td></tr><tr><td>2</td><td>1</td><td>1</td><td>1/3</td><td>1/3</td></tr></tbody></table></div></details>
+</section>
+<section class="card"><h2>Refine the mesh</h2><p>All rows use the same applied polynomial and bounds. The highlighted row is the mesh inspected above.</p>
+<div class="scroll-table"><table><caption>Absolute errors and previous-mesh / current-mesh error ratios</caption><thead><tr><th scope="col">n</th><th scope="col">Midpoint error</th><th scope="col">Ratio</th><th scope="col">Trapezoid error</th><th scope="col">Ratio</th><th scope="col">Simpson error</th><th scope="col">Ratio</th></tr></thead><tbody id="refinement"><tr class="selected-mesh"><td>2</td><td>11/40</td><td>— first mesh</td><td>3/5</td><td>— first mesh</td><td>4/15</td><td>— first mesh</td></tr><tr><td>4</td><td>51/640</td><td>176/51</td><td>13/80</td><td>48/13</td><td>1/60</td><td>16</td></tr><tr><td>8</td><td>211/10240</td><td>816/211</td><td>53/1280</td><td>208/53</td><td>1/960</td><td>16</td></tr><tr><td>16</td><td>851/163840</td><td>3376/851</td><td>213/20480</td><td>848/213</td><td>1/15360</td><td>16</td></tr><tr><td>32</td><td>3411/2621440</td><td>13616/3411</td><td>853/327680</td><td>3408/853</td><td>1/245760</td><td>16</td></tr></tbody></table></div>
+<p class="help">A zero current error has no finite previous/current ratio. These are observed errors for this polynomial; neither a universal accuracy guarantee nor a measured learning outcome is inferred.</p>
+</section>
+</div>
+<div class="buttons"><button id="download-observation">Save complete observation</button></div>
+</div></div>
+<section class="learn"><p class="eyebrow">Connect the experiment to a lesson</p><h2>Keep asking what the samples establish.</h2>
+<p>Study twelve original questions about signed accumulation, exactness, error and misleading agreement. Download the course, open <a href="../demo.html">RecallWeave</a>, choose the JSON under <strong>Bring your own lesson</strong>, inspect its preview and select <strong>Start this deck</strong>. Course downloads do not change an existing learner session.</p>
+<div class="buttons"><button id="download-course">Download lesson JSON</button><button id="download-guide">Download worked guide</button></div>
+<p class="footnote">This self-contained page works from a local file with no account, installation or connection. Only explicit downloads save anything. Editing settings hides the previous calculation until you apply again. The complete observation records its mathematical inputs and fractions, not learner answers.</p>
+</section>
+</main>
+<script>const deckText = "{\n  \"format\": \"recallweave-deck/1\",\n  \"title\": \"Between the samples: numerical integration\",\n  \"attribution\": \"Original questions, explanations, examples and companion lab prepared for RecallWeave in October 2026. Mathematical background: NIST Digital Library of Mathematical Functions §3.5, https://dlmf.nist.gov/3.5 ; T. von Petersdorff, University of Maryland AMSC/CMSC 460/466 Numerical Integration notes, https://math.umd.edu/~petersd/460/numint460.pdf . References checked 2026-10-08. No source exercise, prose or figure is copied.\",\n  \"license\": \"Original teaching text and examples. This contribution makes no additional reuse-license grant. Linked references retain their own terms.\",\n  \"concepts\": [\n    \"Signed accumulation\",\n    \"Nodes and weights\",\n    \"Polynomial exactness\",\n    \"Error and refinement\",\n    \"What agreement establishes\",\n    \"Arithmetic versus approximation\"\n  ],\n  \"items\": [\n    {\n      \"id\": \"quad-signed\",\n      \"concept\": \"Signed accumulation\",\n      \"prerequisites\": [],\n      \"prompt\": \"The function is f(x) = -2 throughout [-1, 2]. What is its signed integral?\",\n      \"options\": [\n        \"6, because an area cannot be negative\",\n        \"-6\",\n        \"-2\",\n        \"0, because the interval crosses zero\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"The interval has width 3. Integrating the constant gives (-2) × 3 = -6. The signed integral records the negative contribution below the horizontal axis. The geometric area between the graph and the axis would instead be 6.\",\n      \"transfer\": \"Give a constant negative function and an interval for which the signed integral is -10. What is the corresponding geometric area?\"\n    },\n    {\n      \"id\": \"quad-midpoint\",\n      \"concept\": \"Nodes and weights\",\n      \"prerequisites\": [\n        \"Signed accumulation\"\n      ],\n      \"prompt\": \"Use the composite midpoint rule for f(x) = x² on [0, 2] with n = 2 equal elementary subintervals. Which calculation is correct?\",\n      \"options\": [\n        \"1 × [f(0) + f(2)] = 4\",\n        \"(1/2) × [f(1/2) + f(3/2)] = 5/4\",\n        \"1 × [f(1/2) + f(3/2)] = 5/2\",\n        \"1 × f(1) = 1\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"Each subinterval has width h = (2 - 0)/2 = 1. Their midpoints are 1/2 and 3/2. The sampled heights are 1/4 and 9/4, so the estimate is 1 × (1/4 + 9/4) = 5/2. A midpoint rule uses the middle of each subinterval, not just the midpoint of the entire interval.\",\n      \"transfer\": \"Use the midpoint rule on this same function with four subintervals. List the four sample positions before adding their weighted values.\"\n    },\n    {\n      \"id\": \"quad-trapezoid\",\n      \"concept\": \"Nodes and weights\",\n      \"prerequisites\": [\n        \"Signed accumulation\"\n      ],\n      \"prompt\": \"A composite trapezoid estimate on [0, 4] uses n = 4 equal subintervals. What are the aggregated weights on f(0), f(1), f(2), f(3), f(4)?\",\n      \"options\": [\n        \"1/2, 1, 1, 1, 1/2\",\n        \"1, 1, 1, 1, 1\",\n        \"1/3, 4/3, 2/3, 4/3, 1/3\",\n        \"0, 1, 1, 1, 0\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"Here h = 1. Each small trapezoid contributes h/2 times each of its endpoint values. An interior node belongs to two adjacent trapezoids and therefore receives total weight 1; each outer endpoint receives 1/2. These weights sum to 4, which makes every constant function integrate exactly over the width-4 interval.\",\n      \"transfer\": \"Repeat the weight calculation on [0, 2] with four subintervals. Explain why the endpoint weights change even though the number of nodes is the same.\"\n    },\n    {\n      \"id\": \"quad-simpson\",\n      \"concept\": \"Nodes and weights\",\n      \"prerequisites\": [\n        \"Signed accumulation\"\n      ],\n      \"prompt\": \"For composite Simpson quadrature, n counts elementary subintervals. Which statement describes the rule used in the lab?\",\n      \"options\": [\n        \"Any positive n works, and every sampled value has equal weight\",\n        \"n counts sample nodes, so n = 4 means three elementary subintervals\",\n        \"Only the two outer endpoint values are used\",\n        \"n must be even; adjacent subintervals form pairs with weights h/3 × [1, 4, 2, 4, …, 2, 4, 1]\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"Each Simpson panel spans two elementary subintervals and uses their outer endpoints and shared midpoint. With even n and h = (b-a)/n, combining the panels gives endpoint coefficients 1, odd-index coefficients 4, and internal even-index coefficients 2, all multiplied by h/3. For n = 2 the coefficient list is just [1, 4, 1].\",\n      \"transfer\": \"For [0, 4] with n = 4, write every Simpson node, its aggregated weight and the sum of the weights.\"\n    },\n    {\n      \"id\": \"quad-error-sign\",\n      \"concept\": \"Error and refinement\",\n      \"prerequisites\": [\n        \"Nodes and weights\"\n      ],\n      \"prompt\": \"For f(x) = x² on [0, 2], the exact integral is 8/3 and the two-subinterval midpoint estimate is 5/2. The lab defines signed error as estimate minus exact integral. What is that signed error?\",\n      \"options\": [\n        \"1/6, so the estimate is too high\",\n        \"-1/6, so the estimate is too low\",\n        \"1/3, so the estimate is too high\",\n        \"-5/6, so the estimate is too low\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"Write both values with denominator 6: 5/2 - 8/3 = 15/6 - 16/6 = -1/6. The negative sign says this estimate is below the exact signed integral. The absolute error is 1/6. Stating the error convention matters because exact-minus-estimate would have the opposite sign.\",\n      \"transfer\": \"The trapezoid estimate for the same two-subinterval experiment is 3. Calculate its signed and absolute errors using the lab's convention.\"\n    },\n    {\n      \"id\": \"quad-cubic\",\n      \"concept\": \"Polynomial exactness\",\n      \"prerequisites\": [\n        \"Nodes and weights\"\n      ],\n      \"prompt\": \"Which of these guarantees applies to every polynomial of degree at most three, on any admitted interval and mesh, when the arithmetic is exact?\",\n      \"options\": [\n        \"The midpoint rule is always exact\",\n        \"The trapezoid rule is always exact\",\n        \"Composite Simpson quadrature is exact\",\n        \"All three rules are exact only if the integral is positive\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"Composite Simpson quadrature integrates every polynomial of degree at most three exactly. The midpoint and trapezoid rules guarantee exactness for degree at most one. A particular higher-degree polynomial may still be exact because of cancellation, but that does not enlarge either rule's general guarantee. For example, Simpson integrates 1 + x³ on [0, 2] to 6 exactly.\",\n      \"transfer\": \"Find a quadratic that the midpoint rule does not integrate exactly on [0, 2]. Then explain why that one example does not contradict Simpson's cubic guarantee.\"\n    },\n    {\n      \"id\": \"quad-agreement\",\n      \"concept\": \"What agreement establishes\",\n      \"prerequisites\": [\n        \"Polynomial exactness\",\n        \"Error and refinement\"\n      ],\n      \"prompt\": \"Let f(x) = 2x⁴ - 3x³ + x² on [0, 1]. With n = 2, the trapezoid and Simpson rules both sample zero at every node and return 0, while the exact integral is -1/60. What does this show?\",\n      \"options\": [\n        \"Agreement between two sampled estimates does not by itself establish the integral\",\n        \"Exact rational arithmetic must have rounded a value to zero\",\n        \"The definite integral of a polynomial cannot be negative\",\n        \"The Simpson rule is never useful for polynomials\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"Both rules use the same three nodes, 0, 1/2 and 1, and this polynomial vanishes at all of them. Their agreement contains no information about the nonzero behavior between those nodes. Direct integration gives 2/5 - 3/4 + 1/3 = -1/60. The two estimates agree with each other but not with the integral.\",\n      \"transfer\": \"In the lab, refine this experiment to four subintervals. Identify a new node whose value is nonzero, and explain what new information the refined mesh has gained.\"\n    },\n    {\n      \"id\": \"quad-refinement\",\n      \"concept\": \"Error and refinement\",\n      \"prerequisites\": [\n        \"Nodes and weights\"\n      ],\n      \"prompt\": \"For f(x) = x⁴ on [-1, 1], the Simpson estimate has absolute error 4/15 at n = 2 and 1/60 at n = 4. By what factor did the absolute error decrease in this refinement?\",\n      \"options\": [\n        \"2\",\n        \"4\",\n        \"8\",\n        \"16\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"The ratio is (4/15)/(1/60) = (4/15) × 60 = 16. For this quartic, each doubling in the lab gives that exact factor. This is a comparison of retained errors for this function; it does not promise the same ratio for every integrand, rule, domain or finite computation.\",\n      \"transfer\": \"The exact integral here is 2/5. Reconstruct the n = 4 Simpson estimate from its nodes and weights, then verify that its absolute error is 1/60.\"\n    },\n    {\n      \"id\": \"quad-lucky\",\n      \"concept\": \"Error and refinement\",\n      \"prerequisites\": [\n        \"Nodes and weights\"\n      ],\n      \"prompt\": \"For f(x) = 5x⁴ - 9x² on [-1, 1], the exact integral is -4. The trapezoid estimates are -4 at n = 2 and -63/16 at n = 4. Which conclusion follows?\",\n      \"options\": [\n        \"The finer estimate must also be exact because the coarse one was exact\",\n        \"This refinement loses a coincidentally exact answer; its new signed error is 1/16\",\n        \"The new signed error is -1/16 because both estimates are negative\",\n        \"Refining a quadrature mesh can never be useful\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"At n = 2, separate polynomial error contributions happen to cancel. At n = 4, the estimate minus the integral is -63/16 - (-64/16) = 1/16. More subintervals do not guarantee a smaller error at every individual refinement. This counterexample is compatible with eventual convergence as the mesh becomes fine.\",\n      \"transfer\": \"Inspect n = 8 and n = 16 in the lab. Describe the observed errors without claiming that every refinement of every polynomial must behave the same way.\"\n    },\n    {\n      \"id\": \"quad-symmetry\",\n      \"concept\": \"Polynomial exactness\",\n      \"prerequisites\": [\n        \"Nodes and weights\"\n      ],\n      \"prompt\": \"All three rules return exactly 0 for f(x) = x⁵ on [-2, 2]. What is the sound explanation?\",\n      \"options\": [\n        \"Each of these rules is guaranteed exact for every polynomial of degree five\",\n        \"A polynomial's degree falls to one on an interval containing zero\",\n        \"Odd symmetry makes opposite signed contributions cancel in both the integral and these symmetric quadrature sums\",\n        \"Every integral whose bounds have opposite signs is zero\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"The fifth-power function is odd: f(-x) = -f(x). On this symmetric interval, the integral cancels, and the equally weighted symmetric node pairs cancel too. This is exact for this experiment, even though degree five lies beyond the general polynomial-exactness guarantees. Changing the function or interval can remove that cancellation.\",\n      \"transfer\": \"Change only the upper bound from 2 to 1. Predict which symmetry argument no longer applies, then inspect the resulting estimates and exact errors.\"\n    },\n    {\n      \"id\": \"quad-zero-ratio\",\n      \"concept\": \"Error and refinement\",\n      \"prerequisites\": [\n        \"Nodes and weights\"\n      ],\n      \"prompt\": \"Two successive refinements both have absolute error 0. How should the ratio 'previous error divided by current error' be reported?\",\n      \"options\": [\n        \"As undefined 0/0, accompanied by the fact that both results are exact\",\n        \"As 0, proving an infinitely fast convergence rate\",\n        \"As 1, because the errors are equal\",\n        \"As 16, because Simpson often has fourth-order behavior\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"Dividing 0 by 0 does not define a numerical ratio. The useful facts are that both errors are exactly zero and that this ratio is unavailable. The lab labels that case separately rather than inventing a convergence factor. A nonzero previous error followed by zero is also reported separately, as reaching an exact result.\",\n      \"transfer\": \"For a constant polynomial, explain why every rule and refinement is exact, yet no nonzero convergence rate can be inferred from the all-zero error column.\"\n    },\n    {\n      \"id\": \"quad-arithmetic\",\n      \"concept\": \"Arithmetic versus approximation\",\n      \"prerequisites\": [\n        \"Error and refinement\"\n      ],\n      \"prompt\": \"This lab computes polynomial values, quadrature weights and totals as exact rational numbers. What does that establish?\",\n      \"options\": [\n        \"Every quadrature estimate is the exact integral\",\n        \"Every drawn pixel is an exact rational representation\",\n        \"The laboratory has measured a learner's numerical-analysis mastery\",\n        \"The reported arithmetic has no rounding error, while a quadrature estimate may still differ from the exact integral\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"Exact rational arithmetic prevents rounding in the model's reported fractions. It does not remove the approximation made by replacing a continuous function with a weighted set of samples. The missed-between-nodes experiment has nonzero quadrature error even with exact arithmetic. Decimal displays and chart coordinates are explicitly approximate views.\",\n      \"transfer\": \"Describe two separate reasons an ordinary floating-point numerical-integration program can disagree with a true integral. Which one is isolated by this lab?\"\n    }\n  ]\n}\n";
+const guideText = "# Between the samples: numerical integration\n\nThis companion belongs to the original RecallWeave quadrature lesson. It explores\na deliberately small family of polynomials so that both the quadrature and the\nreference integral can be kept as exact fractions.\n\nOpen `quadrature-lab.html` directly. Enter the six coefficients from the constant\nterm through x^5, choose integer bounds a \u003c b, and select an even elementary\nsubinterval count. **Apply polynomial** accepts those settings together.\n**Apply example** fills and accepts one worked case. Changing an input retires\nthe displayed calculation until you apply again.\n\nThe rule selector changes only which approximation and node table you inspect.\n**Save complete observation** retains every rule and refinement, with that\ninspection choice recorded separately. It does not save learner answers.\nThe course and this guide can be downloaded independently. To study the course,\nopen RecallWeave's `demo.html`, choose the JSON under **Bring your own lesson**,\nreview the preview and select **Start this deck**. This starts that deck in the\nexisting learner; no extra lab-specific start or registration is required.\n\n## Read the calculation\n\nWrite the input as f(x) = c0 + c1 x + ... + c5 x^5. The permitted coefficients\nare integers in [-9,9], the bounds are integers in [-5,5], and n is one of\n2, 4, 8, 16 or 32. Every elementary subinterval has width h = (b-a)/n.\n\nThe midpoint sum weights each elementary midpoint value by h. The trapezoid\nsum weights each outer endpoint by h/2 and each interior endpoint by h.\nComposite Simpson groups two elementary subintervals at a time. Its aggregated\ncoefficients are 1,4,2,4,...,2,4,1, multiplied by h/3; for n=2 this is 1,4,1.\nThe lab's n always counts elementary subintervals, not Simpson panels.\n\nThe reference I comes from integrating each polynomial term. Signed error\nmeans Q-I, where Q is a quadrature estimate. A negative error puts the estimate\nbelow the exact signed integral; absolute error removes that sign. Integration\nretains cancellation between positive and negative contributions. It does not\nautomatically give the total geometric area.\n\nFractions in the model are exact BigInt rational calculations. Decimal values,\nSVG coordinates and the drawn polynomial/approximation curves are views with\nlimited precision. Sampling the drawing is never used to decide exactness.\n\n## Worked investigations\n\n### A quadratic brackets the reference\n\nApply f(x)=x² on [0,2], n=2. The midpoint nodes are 1/2 and 3/2, both with weight 1,\ngiving Q_M=1/4+9/4=5/2. The trapezoid sum is 0/2+1+4/2=3.\nSimpson gives (1/3)(0+4+4)=8/3, equal to I=8/3.\n\nThe midpoint error is -1/6 and the trapezoid error is 1/3. At n=4, the midpoint\nestimate is 21/8 and the trapezoid estimate is 11/4, with errors -1/24 and 1/12.\nBoth absolute errors have decreased by a factor of four. Simpson was already exact.\n\n### Cubic exactness and a quartic refinement\n\nFor f(x)=1+x³ on [0,2], the reference is 2+4=6.\nAt n=2, midpoint gives 11/2, trapezoid gives 7, and Simpson gives 6.\nMidpoint and trapezoid guarantee exactness for degree at most one. Simpson\nguarantees exactness through degree three. These are sufficient guarantees;\na higher-degree special case can still be exact.\n\nFor f(x)=x⁴ on [-1,1], I=2/5. Simpson at n=2 gives 2/3 and error 4/15.\nAt n=4 its values are 1,1/16,0,1/16,1 with coefficient pattern 1,4,2,4,1\nand factor 1/6. The result is 5/12, with error 1/60.\nThe error ratio is (4/15)/(1/60)=16. Inspect the later rows before making a\nclaim about the observed refinement sequence.\n\n### Two agreeing answers can miss the integral\n\nApply f(x)=2x⁴-3x³+x² on [0,1], n=2. At 0,1/2,1 every value is zero.\nThe trapezoid and Simpson estimates therefore both return zero.\nBut term-by-term integration gives 2/5-3/4+1/3=-1/60.\n\nNo rounding caused this disagreement. The sampled values simply omitted\ninformation between the nodes. At the added n=4 node x=1/4, the value is 3/128;\nat x=3/4 it is -9/128. Those new values expose behavior the coarse endpoints missed.\n\n### Refinement can lose a coincidentally exact answer\n\nApply f(x)=5x⁴-9x² on [-1,1]. Its reference is 2-6=-4.\nAt n=2 the trapezoid sum is also -4. At n=4, the outer values remain -4,\nthe new values at ±1/2 are -31/16, and the middle value is zero.\nThe new trapezoid sum is -63/16, whose signed error is +1/16.\n\nThe coarse error contributions happened to cancel. This example disproves a\nclaim that every individual refinement must decrease error. It does not\ndisprove convergence as the mesh tends to zero.\n\n### Symmetry and zero errors\n\nFor x^5 on [-2,2], the exact integral is zero. Each of the three rules also\ncancels equally weighted opposite nodes. Degree five is still outside their\ngeneral exactness guarantees. Change only one bound to remove this symmetry.\n\nThe all-zero polynomial has no finite polynomial degree in this model.\nIt has zero integral and zero quadrature error everywhere. If two neighboring\nerror values are both zero, their ratio would be 0/0: the lab reports\n**undefined · both exact**. If only the new error is zero it reports\n**undefined · now exact**. If the old error is zero and the new error is nonzero,\nthe ordinary ratio is zero; it is not evidence of fast convergence.\n\n## Lesson answer map and transfer checks\n\nQuestion numbering follows the original JSON order. Letters below refer to\nthat file's option order; RecallWeave may shuffle the displayed choices.\n\n| Item | Original option | Transfer check |\n|---|---|---|\n| 1 | B | f=-5 on [0,2] has signed integral -10 and geometric area 10. |\n| 2 | C | Midpoint nodes are 1/4,3/4,5/4,7/4; multiplying the squared-value sum by 1/2 gives 21/8. |\n| 3 | A | On [0,2] with n=4, weights are 1/4,1/2,1/2,1/2,1/4 and sum to 2. |\n| 4 | D | On [0,4] with n=4, weights are 1/3,4/3,2/3,4/3,1/3 and sum to 4. |\n| 5 | B | 3-8/3=1/3; its absolute value is also 1/3. |\n| 6 | C | x² on [0,2] gives midpoint 5/2 at n=2, different from 8/3; Simpson remains exact. |\n| 7 | A | Newly sampled 1/4 and 3/4 have nonzero values; shared old nodes alone did not establish the integral. |\n| 8 | D | Simpson's weighted sum at n=4 is 5/12; 5/12-2/5=1/60. |\n| 9 | B | For this case, later trapezoid errors are 5/256 at n=8 and 21/4096 at n=16; these are observations, not universal promises. |\n| 10 | C | Changing the upper bound to 1 removes paired cancellation; the exact integral on [-2,1] is -21/2. |\n| 11 | A | All errors may be exactly zero while every adjacent error ratio remains undefined. |\n| 12 | D | Sampling/quadrature error and finite-arithmetic rounding are separate; this lab isolates the first in its exact fractions. |\n\n## Source and local verification\n\nMathematical background was checked on 2026-10-08 against\n[NIST DLMF §3.5](https://dlmf.nist.gov/3.5) and\n[T. von Petersdorff's University of Maryland numerical-integration notes](https://math.umd.edu/~petersd/460/numint460.pdf).\nThe questions, worked settings, explanations, transfer tasks and graphics here\nare newly authored; no reference exercise, prose or figure is reproduced.\n\nFrom the repository root, run `node --test tests/quadrature.test.mjs tests/quadrature-course.test.mjs`.\nRebuild this page with `node tools/build-quadrature.mjs`, or verify its exact\nmodel/UI/template/course/guide parity with `--check`. The unchanged learner\nvalidator checks the deck's structure; mathematical and teaching review are\nseparate from structural validation. No learning-efficacy result is claimed.\n";
+const { QUADRATURE_PRESETS, analyzeQuadrature, serializeQuadrature } = (() => {
+// Exact arithmetic for the bounded polynomial teaching model; no floating-point
+// estimate or rendered coordinate participates in an error/exactness decision.
+const abs = n => n < 0n ? -n : n;
+function rational(n, d = 1n) {
+  if (d === 0n) throw new Error('A rational denominator cannot be zero.');
+  if (d < 0n) { n = -n; d = -d; }
+  let a = abs(n), b = d;
+  while (b) [a, b] = [b, a % b];
+  return { n: n / a, d: d / a };
+}
+const add = (a, b) => rational(a.n * b.d + b.n * a.d, a.d * b.d);
+const sub = (a, b) => rational(a.n * b.d - b.n * a.d, a.d * b.d);
+const mul = (a, b) => rational(a.n * b.n, a.d * b.d);
+const div = (a, b) => rational(a.n * b.d, a.d * b.n);
+const magnitude = a => rational(abs(a.n), a.d);
+const zero = rational(0n);
+function value(a) {
+  return { numerator: String(a.n), denominator: String(a.d),
+    fraction: a.d === 1n ? String(a.n) : a.n + '/' + a.d,
+    approximate: Number(a.n) / Number(a.d) };
+}
+function freeze(v) {
+  if (v && typeof v === 'object') { Object.values(v).forEach(freeze); Object.freeze(v); }
+  return v;
+}
+function integer(v, low, high, label) {
+  if (typeof v !== 'number' || !Number.isInteger(v) || v < low || v > high) {
+    throw new Error(label + ' must be an integer from ' + low + ' through ' + high + '.');
+  }
+  return v;
+}
+const SUBINTERVAL_COUNTS = Object.freeze([2, 4, 8, 16, 32]);
+const QUADRATURE_PRESETS = freeze([
+  { id: 'quadratic', title: 'A quadratic: bracket the integral',
+    coefficients: [0, 0, 1, 0, 0, 0], lower: 0, upper: 2, subintervals: 2 },
+  { id: 'cubic', title: 'A cubic: Simpson is exact',
+    coefficients: [1, 0, 0, 1, 0, 0], lower: 0, upper: 2, subintervals: 2 },
+  { id: 'quartic', title: 'A quartic: inspect refinement',
+    coefficients: [0, 0, 0, 0, 1, 0], lower: -1, upper: 1, subintervals: 2 },
+  { id: 'missed', title: 'Two rules agree and still miss',
+    coefficients: [0, 0, 1, -3, 2, 0], lower: 0, upper: 1, subintervals: 2 },
+  { id: 'coincidence', title: 'A lucky coarse answer does not persist',
+    coefficients: [0, 0, -9, 0, 5, 0], lower: -1, upper: 1, subintervals: 2 },
+  { id: 'odd', title: 'Odd symmetry: cancellation to zero',
+    coefficients: [0, 0, 0, 0, 0, 1], lower: -2, upper: 2, subintervals: 4 },
+  { id: 'negative', title: 'A negative signed integral',
+    coefficients: [-2, 0, 0, 0, 0, 0], lower: -1, upper: 2, subintervals: 2 },
+  { id: 'zero', title: 'The zero polynomial',
+    coefficients: [0, 0, 0, 0, 0, 0], lower: -1, upper: 1, subintervals: 2 },
+]);
+function parse(input) {
+  if (!input || typeof input !== 'object' || Array.isArray(input)) throw new Error('Supply polynomial settings.');
+  if (!Array.isArray(input.coefficients) || input.coefficients.length !== 6) {
+    throw new Error('Supply exactly six coefficients, from the constant through x^5.');
+  }
+  const coefficients = Array.from({length: 6}, (_, i) =>
+    integer(input.coefficients[i], -9, 9, 'Coefficient c' + i));
+  const lower = integer(input.lower, -5, 5, 'Lower bound');
+  const upper = integer(input.upper, -5, 5, 'Upper bound');
+  if (lower >= upper) throw new Error('The lower bound must be smaller than the upper bound.');
+  if (!SUBINTERVAL_COUNTS.includes(input.subintervals)) {
+    throw new Error('Choose 2, 4, 8, 16 or 32 elementary subintervals.');
+  }
+  return { coefficients, lower, upper, subintervals: input.subintervals };
+}
+function polynomial(coefficients, x) {
+  let out = zero;
+  for (let i = coefficients.length - 1; i >= 0; i--) out = add(mul(out, x), coefficients[i]);
+  return out;
+}
+function integral(coefficients, a, b) {
+  let aPower = a, bPower = b, out = zero;
+  for (let k = 0; k < coefficients.length; k++) {
+    out = add(out, div(mul(coefficients[k], sub(bPower, aPower)), rational(BigInt(k + 1))));
+    aPower = mul(aPower, a); bPower = mul(bPower, b);
+  }
+  return out;
+}
+function quadrature(coefficients, a, b, n, exact, degree, includeNodes) {
+  const h = div(sub(b, a), rational(BigInt(n))), result = {};
+  for (const method of ['midpoint', 'trapezoid', 'simpson']) {
+    const nodes = []; let estimate = zero;
+    const last = method === 'midpoint' ? n - 1 : n;
+    for (let i = 0; i <= last; i++) {
+      const index = method === 'midpoint' ? rational(BigInt(2 * i + 1), 2n) : rational(BigInt(i));
+      const x = add(a, mul(h, index)), y = polynomial(coefficients, x);
+      const factor = method === 'midpoint' ? rational(1n)
+        : method === 'trapezoid' ? rational(i === 0 || i === n ? 1n : 2n, 2n)
+        : rational(i === 0 || i === n ? 1n : i % 2 ? 4n : 2n, 3n);
+      const weight = mul(h, factor), contribution = mul(weight, y);
+      estimate = add(estimate, contribution);
+      if (includeNodes) nodes.push({ index: i, x: value(x), y: value(y), weight: value(weight), contribution: value(contribution) });
+    }
+    const error = sub(estimate, exact);
+    result[method] = { estimate: value(estimate), signedError: value(error),
+      absoluteError: value(magnitude(error)), exact: error.n === 0n,
+      guaranteedForDegree: degree === null || degree <= (method === 'simpson' ? 3 : 1),
+      degreeGuarantee: method === 'simpson' ? 3 : 1, distinctNodes: last + 1,
+      ...(includeNodes ? { nodes } : {}) };
+  }
+  return result;
+}
+const reports = new WeakSet();
+function analyzeQuadrature(input) {
+  const settings = parse(input), coefficients = settings.coefficients.map(c => rational(BigInt(c)));
+  const a = rational(BigInt(settings.lower)), b = rational(BigInt(settings.upper));
+  let degree = settings.coefficients.length - 1;
+  while (degree >= 0 && settings.coefficients[degree] === 0) degree--;
+  const polynomialDegree = degree < 0 ? null : degree;
+  const exact = integral(coefficients, a, b);
+  const rules = quadrature(coefficients, a, b, settings.subintervals, exact, polynomialDegree, true);
+  let previous = null;
+  const refinement = SUBINTERVAL_COUNTS.map(n => {
+    const results = quadrature(coefficients, a, b, n, exact, polynomialDegree, false);
+    for (const method of ['midpoint', 'trapezoid', 'simpson']) {
+      const current = results[method].absoluteError;
+      let ratio = { kind: 'first-level', value: null };
+      if (previous) {
+        const prior = previous[method].absoluteError;
+        if (current.numerator === '0') ratio = { kind: prior.numerator === '0' ? 'both-exact' : 'reached-exact', value: null };
+        else ratio = { kind: 'finite', value: value(div(
+          rational(BigInt(prior.numerator), BigInt(prior.denominator)),
+          rational(BigInt(current.numerator), BigInt(current.denominator)))) };
+      }
+      results[method].previousErrorRatio = ratio;
+    }
+    previous = results;
+    return { subintervals: n, rules: results };
+  });
+  const report = freeze({ format: 'recallweave-quadrature/1', input: settings,
+    polynomialDegree, exactIntegral: value(exact),
+    subintervalWidth: value(div(sub(b, a), rational(BigInt(settings.subintervals)))),
+    rules, refinement,
+    conventions: {
+      signedError: 'quadrature estimate minus exact integral',
+      subdivision: 'n equal elementary subintervals; Simpson groups adjacent pairs',
+      arithmetic: 'Exact rational values from bounded integer polynomial inputs; decimals and geometry are approximate',
+      refinement: 'Observed errors for this polynomial, not a universal error or convergence guarantee',
+      integral: 'Signed integral, not total geometric area',
+    } });
+  reports.add(report);
+  return report;
+}
+function serializeQuadrature(report, inspectedMethod = 'midpoint') {
+  if (!reports.has(report)) throw new Error('Download a calculation produced by this model.');
+  if (!['midpoint', 'trapezoid', 'simpson'].includes(inspectedMethod)) throw new Error('Choose a supported inspection method.');
+  return JSON.stringify({ ...report, inspectedMethod }, null, 2) + '\n';
+}
+
+return { QUADRATURE_PRESETS, analyzeQuadrature, serializeQuadrature };
+})();
+const byId = id => document.getElementById(id);
+const methods = ['midpoint', 'trapezoid', 'simpson'];
+const methodNames = { midpoint: 'Midpoint', trapezoid: 'Trapezoid', simpson: 'Simpson' };
+const form = byId('experiment'), status = byId('status'), results = byId('results');
+let accepted = null;
+function text(id, value) { byId(id).textContent = value; }
+function element(tag, value, className) {
+  const e = document.createElement(tag); if (value !== undefined) e.textContent = value;
+  if (className) e.className = className; return e;
+}
+function strictInteger(id) {
+  const value = byId(id).value.trim();
+  if (!/^-?(?:0|[1-9]\d*)$/.test(value)) throw new Error(byId(id).getAttribute('aria-label') + ' must be a whole number.');
+  return Number(value);
+}
+function retire(message = 'Draft changed. Apply the polynomial to calculate a new comparison.') {
+  accepted = null; results.hidden = true;
+  byId('download-observation').disabled = true; byId('method').disabled = true;
+  status.textContent = message; status.dataset.kind = 'notice';
+}
+function readInputs() {
+  return { coefficients: Array.from({length: 6}, (_, i) => strictInteger('c' + i)),
+    lower: strictInteger('lower'), upper: strictInteger('upper'), subintervals: Number(byId('subintervals').value) };
+}
+function showFraction(v) { return v.fraction + '  ≈ ' + Number(v.approximate.toPrecision(7)); }
+function addRow(table, values, heading = false) {
+  const row = element('tr');
+  values.forEach(v => row.append(element(heading ? 'th' : 'td', v)));
+  table.append(row); return row;
+}
+function ratioText(ratio) {
+  if (ratio.kind === 'first-level') return '— first mesh';
+  if (ratio.kind === 'both-exact') return 'undefined · both exact';
+  if (ratio.kind === 'reached-exact') return 'undefined · now exact';
+  return ratio.value.fraction;
+}
+function render(r) {
+  results.hidden = false;
+  text('exact-integral', showFraction(r.exactIntegral));
+  text('applied', 'Applied on [' + r.input.lower + ', ' + r.input.upper + '] with n = ' +
+    r.input.subintervals + ' elementary subintervals; h = ' + r.subintervalWidth.fraction + '.');
+  text('polynomial', r.input.coefficients.map((c, i) => '(' + c + ')' + (i ? 'x' + (i === 1 ? '' : '^' + i) : '')).join(' + '));
+  const table = byId('estimates'); table.replaceChildren();
+  for (const method of methods) {
+    const q = r.rules[method];
+    const explanation = q.guaranteedForDegree ? 'Within the degree-' + q.degreeGuarantee + ' guarantee'
+      : q.exact ? 'Exact here, outside the general degree guarantee' : 'Not exact for this experiment';
+    addRow(table, [methodNames[method], q.estimate.fraction, q.signedError.fraction, q.absoluteError.fraction, explanation]);
+  }
+  const refine = byId('refinement'); refine.replaceChildren();
+  for (const row of r.refinement) {
+    const tr = addRow(refine, [String(row.subintervals), ...methods.flatMap(method => {
+      const q = row.rules[method]; return [q.absoluteError.fraction, ratioText(q.previousErrorRatio)];
+    })]);
+    if (row.subintervals === r.input.subintervals) tr.className = 'selected-mesh';
+  }
+  renderInspection(r);
+}
+function renderInspection(r = accepted) {
+  if (!r) return;
+  const method = byId('method').value;
+  if (!methods.includes(method)) throw new Error('Choose a supported inspection method.');
+  const q = r.rules[method], table = byId('nodes'); table.replaceChildren();
+  for (const row of q.nodes) addRow(table,
+    [String(row.index), row.x.fraction, row.y.fraction, row.weight.fraction, row.contribution.fraction]);
+  text('node-count', q.distinctNodes + ' distinct sample nodes. Weights include contributions from adjacent panels.');
+  text('inspection-title', methodNames[method] + ': inspect the weighted samples');
+  draw(r, method);
+}
+function draw(r, method) {
+  const svg = byId('graph'), width = Math.max(300, Math.floor(svg.getBoundingClientRect().width));
+  const height = 320, pad = {left: 58, right: 20, top: 26, bottom: 48};
+  svg.setAttribute('viewBox', '0 0 ' + width + ' ' + height); svg.replaceChildren();
+  const ns = 'http://www.w3.org/2000/svg';
+  function shape(tag, attrs, content) {
+    const e = document.createElementNS(ns, tag);
+    for (const [key, value] of Object.entries(attrs)) e.setAttribute(key, String(value));
+    if (content !== undefined) e.textContent = content; svg.append(e); return e;
+  }
+  shape('title', {}, methodNames[method] + ' quadrature view for the applied polynomial');
+  shape('desc', {}, 'Blue is the polynomial. Amber is the sampled approximation. All coordinates are approximate; exact node weights and errors follow in tables.');
+  const {lower: a, upper: b, coefficients: c, subintervals: n} = r.input;
+  const f = x => c.reduceRight((total, coefficient) => total * x + coefficient, 0);
+  const curve = Array.from({length: 161}, (_, i) => { const x = a + (b - a) * i / 160; return [x, f(x)]; });
+  const segments = [], rows = r.rules[method].nodes, h = (b - a) / n;
+  if (method === 'midpoint') {
+    rows.forEach((row, i) => segments.push([[a + i * h, row.y.approximate], [a + (i + 1) * h, row.y.approximate]]));
+  } else if (method === 'trapezoid') {
+    for (let i = 0; i < n; i++) segments.push([[rows[i].x.approximate, rows[i].y.approximate], [rows[i + 1].x.approximate, rows[i + 1].y.approximate]]);
+  } else {
+    for (let i = 0; i < n; i += 2) {
+      const y0 = rows[i].y.approximate, y1 = rows[i + 1].y.approximate, y2 = rows[i + 2].y.approximate;
+      segments.push(Array.from({length: 25}, (_, j) => {
+        const t = j / 24;
+        return [a + (i + 2 * t) * h, 2 * (t - 0.5) * (t - 1) * y0 + 4 * t * (1 - t) * y1 + 2 * t * (t - 0.5) * y2];
+      }));
+    }
+  }
+  const ys = [0, ...curve.map(p => p[1]), ...segments.flat().map(p => p[1])];
+  let low = Math.min(...ys), high = Math.max(...ys);
+  const extra = high === low ? 1 : (high - low) * 0.12; low -= extra; high += extra;
+  const x = v => pad.left + (v - a) / (b - a) * (width - pad.left - pad.right);
+  const y = v => height - pad.bottom - (v - low) / (high - low) * (height - pad.top - pad.bottom);
+  const points = list => list.map(p => x(p[0]) + ',' + y(p[1])).join(' ');
+  for (let i = 0; i <= 4; i++) {
+    const yy = low + (high - low) * i / 4;
+    shape('line', {x1: pad.left, x2: width - pad.right, y1: y(yy), y2: y(yy), class: 'grid'});
+    shape('text', {x: pad.left - 8, y: y(yy) + 4, 'text-anchor': 'end', class: 'tick'}, Number(yy.toPrecision(3)));
+    const xx = a + (b - a) * i / 4;
+    shape('text', {x: x(xx), y: height - 22, 'text-anchor': 'middle', class: 'tick'}, Number(xx.toPrecision(3)));
+  }
+  shape('line', {x1: pad.left, x2: width - pad.right, y1: y(0), y2: y(0), class: 'zero-axis'});
+  for (const segment of segments) {
+    shape('polygon', {points: points([[segment[0][0], 0], ...segment, [segment.at(-1)[0], 0]]), class: 'sample-area'});
+    shape('polyline', {points: points(segment), class: 'approximation'});
+  }
+  shape('polyline', {points: points(curve), class: 'function-curve'});
+  rows.forEach(row => shape('circle', {cx: x(row.x.approximate), cy: y(row.y.approximate), r: 3.5, class: 'sample-node'}));
+  shape('text', {x: width - pad.right, y: height - 3, 'text-anchor': 'end', class: 'tick'}, 'x');
+  shape('text', {x: pad.left, y: 16, class: 'tick'}, 'f(x)');
+}
+function apply() {
+  retire('Calculating the entered polynomial…');
+  try {
+    const report = analyzeQuadrature(readInputs());
+    render(report); accepted = report;
+    byId('download-observation').disabled = false; byId('method').disabled = false;
+    status.textContent = 'Applied. Every displayed fraction belongs to this polynomial and mesh.';
+    status.dataset.kind = 'success'; byId('result-title').focus();
+  } catch (error) { retire(error.message); status.dataset.kind = 'error'; }
+}
+function download(name, type, body) {
+  const url = URL.createObjectURL(new Blob([body], {type}));
+  const a = element('a'); a.href = url; a.download = name; document.body.append(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+for (const preset of QUADRATURE_PRESETS) {
+  const option = element('option', preset.title); option.value = preset.id; byId('preset').append(option);
+}
+form.addEventListener('submit', event => { event.preventDefault(); apply(); });
+form.addEventListener('input', () => retire());
+form.addEventListener('change', event => { if (event.target.tagName === 'SELECT') retire(); });
+byId('apply-preset').addEventListener('click', () => {
+  const preset = QUADRATURE_PRESETS.find(p => p.id === byId('preset').value);
+  if (!preset) { retire('Choose an available example.'); return; }
+  preset.coefficients.forEach((c, i) => { byId('c' + i).value = String(c); });
+  byId('lower').value = String(preset.lower); byId('upper').value = String(preset.upper);
+  byId('subintervals').value = String(preset.subintervals); apply();
+});
+byId('method').addEventListener('change', () => {
+  try { renderInspection(); } catch (error) { retire(error.message); status.dataset.kind = 'error'; }
+});
+byId('download-observation').addEventListener('click', () => {
+  if (!accepted) return;
+  try { download('quadrature-observation.json', 'application/json', serializeQuadrature(accepted, byId('method').value)); }
+  catch (error) { retire(error.message); status.dataset.kind = 'error'; }
+});
+byId('download-course').addEventListener('click', () => download('quadrature.json', 'application/json', deckText));
+byId('download-guide').addEventListener('click', () => download('quadrature.md', 'text/markdown', guideText));
+window.addEventListener('resize', () => { if (accepted) draw(accepted, byId('method').value); });
+
+</script>
+</body></html>

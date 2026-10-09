@@ -1,0 +1,113 @@
+{
+  "reviewer": "chatgpt:5f566b5ec8ef:mac_continuity",
+  "decision": "ACCEPT the exact model and course mathematical/content boundary; no blocker found in this reviewed scope.",
+  "source_pins": {
+    "src/quadrature.mjs": "86f3f1db3ac306dab470541eae179f75997c3e9ca0697e00de970b93ab4b5af2",
+    "courses/quadrature.json": "b2865b323d28d12f3fbf2287e88e6ec316ba32dcd2bf39dfda7adfd9d4adf128",
+    "courses/quadrature.md": "6fa0330121881075e3f05c563670ecb5b7696c4e8ef013bcabc2197c7c5cde3a"
+  },
+  "blind_provenance": {
+    "questions_sha256": "75602c1ab1dc835438d2fcf751de304d9407bd7922046ab37edd420eb141263e",
+    "freeze_at": "2026-10-08T22:19:17.725361+00:00",
+    "answers_sha256": "6787789836122ec6209303833f7f1959ac36cfd2fcb094fbcf184eaca8449038",
+    "oracle_sha256": "2dfbf5886a9de1002a8952756a14bbab6824bbde6a9f5ac342a5698da4d58223",
+    "expected_sha256": "670cb789cbdcb300b09db1bcd634c9a10b26c6aef933ea035ebe366a91f2a5d7",
+    "clarification": "The masked input contained the twelve prompts/options but not the author's transfer questions. Twelve extra transfer calculations were independently authored and frozen alongside the answers before model source/output, keys or explanations were read. The author's later transfer questions and worked guide were then separately checked; their review is post-disclosure, not claimed as blind."
+  },
+  "numerical_receiving": {
+    "receipt": "model-receipt.json",
+    "sha256": "b83a99e095ae100d8409701cddcbb3b62eed2db87ab8477be5e784c34f1f2037",
+    "cases": 468,
+    "translated_monomial_cases": 330,
+    "mixed_polynomial_cases": 128,
+    "fixed_counterexample_cases": 10,
+    "rule_refinement_results": 8424,
+    "selected_nodes": 18390,
+    "rational_fields": 103484,
+    "invalid_inputs": 58,
+    "model_unchanged": true,
+    "findings": [
+      "Every admitted integer interval and every monomial degree 0..5 occurs in the frozen reference; each case checks all five meshes and all three rules. Selected nodes, polynomial values, aggregate weights, contributions, estimates, signed/absolute errors, actual exactness and degree guarantees agree with independent Python Fractions.",
+      "The polynomial reference integrates the monomial expansion independently of the product Horner evaluator. Opposite signs, translated bounds, zero polynomials, missed-between-nodes sampling and accidental exactness are represented.",
+      "Rational fields are reduced with a positive denominator; fraction text and approximate display projections agree with independently expected exact values. Approximate coordinates are not used as numerical exactness evidence.",
+      "Invalid types, sparse/incorrect-length coefficient arrays, coefficient/bound range, reversed/equal bounds and unsupported meshes refuse. Reports deeply freeze copied input and nested output; later caller mutation does not alter them. Only actual branded reports serialize, with complete report equality and a separately admitted inspection method."
+    ]
+  },
+  "extra_reached_exact": {
+    "receipt": "reached-exact-and-course-receipt.json",
+    "sha256": "54b7be52541064a808a947d301ed3fb3a833a72c1bab0d58ed81017e425a5be7",
+    "input": {
+      "coefficients": [
+        0,
+        0,
+        -8,
+        7,
+        -5,
+        -2
+      ],
+      "lower": -3,
+      "upper": 1
+    },
+    "exact_integral": "-216",
+    "trapezoid_errors_by_n": {
+      "2": "-8",
+      "4": "0",
+      "8": "1/8",
+      "16": "5/128",
+      "32": "21/2048"
+    },
+    "meaning": "A positive absolute error reaches exactness at n4, then becomes nonzero at n8; the ratio sequence distinguishes reached-exact from finite zero. Degree5 remains outside the trapezoid guarantee. This additional search was done after model disclosure, using only the already frozen independent Fraction oracle for expectations; candidate source was not changed."
+  },
+  "course_review": {
+    "keys_matched": 12,
+    "question_projection_identical_to_blind_input": true,
+    "choice_positions_zero_based": [
+      1,
+      2,
+      0,
+      3,
+      1,
+      2,
+      0,
+      3,
+      1,
+      2,
+      0,
+      3
+    ],
+    "findings": [
+      "Signed accumulation, elementary subinterval counts, endpoint/interior aggregation and Simpson paired-panel convention are correct and explicit.",
+      "All reported exact fractions, signed-error arithmetic, the degree1/1/3 guarantees and the quartic factor16 observation agree with independent algebra.",
+      "The missed-between-nodes polynomial has roots0,1/2,1 and integral-1/60; agreement at sampled zeros is correctly separated from validity of the integral.",
+      "The accidental exact trapezoid case and odd-symmetry example correctly avoid universal monotonicity or degree-guarantee claims.",
+      "Undefined both-zero and reaching-zero error ratios are distinct from finite zero after losing exactness. The worked guide uses the same Q-I convention.",
+      "Exact arithmetic is correctly distinguished from quadrature approximation, approximate drawing and measured learning efficacy.",
+      "Prerequisites form an acyclic conceptual sequence and distractors are distinct from the identified correct answers; no question requires a false premise within the stated domain."
+    ],
+    "author_transfer_checks": [
+      "1: f=-5 on[0,2] gives signed-10 and area10.",
+      "2: midpoint nodes1/4,3/4,5/4,7/4 with h1/2 give21/8.",
+      "3: on[0,2],n4 trapezoid weights1/4,1/2,1/2,1/2,1/4 sum2.",
+      "4: on[0,4],n4 Simpson weights1/3,4/3,2/3,4/3,1/3 sum4.",
+      "5: trapezoid3 minus exact8/3 gives signed and absolute1/3.",
+      "6: quadratic x² midpoint5/2 differs from8/3; Simpson cubic guarantee is unaffected.",
+      "7: added nodes1/4 and3/4 expose values3/128 and-9/128.",
+      "8: x⁴ Simpson n4 yields5/12 and error1/60.",
+      "9: for5x⁴-9x², trapezoid errors5/256 atn8 and21/4096 atn16 follow the independent formula h²(1-h²)/3.",
+      "10: x⁵ on[-2,1] loses odd symmetric integration; exact integral(1-64)/6=-21/2. No fixed mesh was required by the transfer.",
+      "11: constant-function errors vanish because each rule's weights sum to interval width, leaving undefined0/0 ratios.",
+      "12: finite-sample quadrature error and floating arithmetic error are separate; exact rational results isolate the former."
+    ]
+  },
+  "limits": [
+    "This is independent source/math/content receiving, not a learner UI, standalone browser, generated-artifact or accessibility acceptance.",
+    "No learning efficacy, retention gain, generalized arbitrary-integrand theorem or physical outcome was measured.",
+    "External references were not used to construct the frozen oracle and their historical access/attribution assertions were not independently audited.",
+    "No product source was edited, no dependency installed, no provider contacted and no GitHub Actions/source publication was invoked."
+  ],
+  "preserved_negative_evidence": [
+    "The first receipt write returned ENOENT because the new peer-mac directory did not yet exist; the directory was created and exact intended content was then written.",
+    "A draft mental cubic-transfer midpoint value was corrected by direct substitution before the blind freeze. No candidate output was consulted for that correction.",
+    "Independent receiver sensitivity intentionally corrupts a private result projection and requires refusal; it does not alter model source."
+  ]
+}
