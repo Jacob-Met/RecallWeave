@@ -1,0 +1,90 @@
+{
+  "schema": "recallweave-nfa-authored-key/1",
+  "blind_sheet_sha256": "1c39732eb75b10b53de90d24cabb633527c24151675ec9af928355d583105c89",
+  "items": [
+    {
+      "id": "nfa-01",
+      "answer": 2,
+      "option": "Accept: one fully consuming accepting path is enough.",
+      "explanation": "Nondeterministic acceptance is existential: at least one possible path must consume the whole word and finish in an accepting state. Other paths may fail, stop early or end elsewhere. There is no vote or probability in this model.",
+      "transfer_answer": "Only existence matters: a single complete accepting path establishes acceptance, regardless of how many other paths fail. A path with unread symbols has not processed the queried word and cannot establish its acceptance."
+    },
+    {
+      "id": "nfa-02",
+      "answer": 0,
+      "option": "{q2}",
+      "explanation": "Take the union of the symbol destinations of the active states. q0 contributes nothing and q1 contributes q2, so the next set is {q2}. A stopped branch does not erase a surviving branch.",
+      "transfer_answer": "If both states have no 1-destination, the next set is empty. Every later symbol still has no active origin; epsilon closure also has no seed, so the set cannot revive."
+    },
+    {
+      "id": "nfa-03",
+      "answer": 3,
+      "option": "No: after all three symbols the active set is {q0,q1}, with no accepting state.",
+      "explanation": "After 1 the active set is {q0,q1}; after 10 it is {q0,q2}; after 101 it is {q0,q1}. Only the final set decides this word, and it excludes accepting q2. An accepting prefix does not stop consumption.",
+      "transfer_answer": "For1010 the sets are {q0}, {q0,q1}, {q0,q2}, {q0,q1}, {q0,q2}. It accepts because final q2 is present. For101 it is only an earlier prefix that included q2."
+    },
+    {
+      "id": "nfa-04",
+      "answer": 1,
+      "option": "{q0,q1,q2}",
+      "explanation": "Zero epsilon moves keep q0. One move reaches q1, and from q1 another move reaches q2 as well as returning to q0. The set is {q0,q1,q2}. Repeating a cycle does not create new states.",
+      "transfer_answer": "A visited-state traversal expands each of the finitely many state identities once. Reaching an already visited state cannot reveal a new future edge set, even when infinitely many walks revisit it."
+    },
+    {
+      "id": "nfa-05",
+      "answer": 2,
+      "option": "∅: no starting state exists from which to follow an edge.",
+      "explanation": "Epsilon closure follows paths starting from members of its seed set. An empty seed set supplies no such starting state, so its closure remains empty even if the machine contains many edges or accepting states.",
+      "transfer_answer": "closure(empty) is empty. closure({q}) is {q} when q has no outgoing epsilon edge, because zero moves are permitted."
+    },
+    {
+      "id": "nfa-06",
+      "answer": 0,
+      "option": "{q1,q2}; accept",
+      "explanation": "The symbol move reaches q1. The following epsilon closure includes q1 itself and q2, giving {q1,q2}. Since q2 accepts and all input has been consumed, the word is accepted. Epsilon moves add reachable possibilities; they do not delete their starting states.",
+      "transfer_answer": "A symbol can land at a state from which epsilon moves reach additional possible endpoints without reading another symbol. For the empty word, the start closure is just {q0}, which does not contain q2, so it rejects."
+    },
+    {
+      "id": "nfa-07",
+      "answer": 3,
+      "option": "The subset {q0,q1,q2}.",
+      "explanation": "The DFA represents every possible NFA state after each consumed prefix, including the empty prefix. Its start subset must therefore include q0 and all states epsilon-reachable from q0: {q0,q1,q2}.",
+      "transfer_answer": "Yes. The start subset contains accepting q2, reached from q0 entirely through epsilon edges. That path reads no symbols and so accepts the empty word."
+    },
+    {
+      "id": "nfa-08",
+      "answer": 1,
+      "option": "Accepting, because at least one member is q2.",
+      "explanation": "A subset state accepts exactly when it intersects the NFA accepting set. {q0,q2,q3} contains q2, so it accepts. Other, nonaccepting members do not undo the successful possibility.",
+      "transfer_answer": "{q2} is accepting and {q0,q3} is rejecting. The test is a nonempty intersection with {q2}, not a count or majority of accepting members."
+    },
+    {
+      "id": "nfa-09",
+      "answer": 0,
+      "option": "Both destinations are ∅.",
+      "explanation": "No active state contributes any symbol destination from the empty set. Closing the resulting empty union again gives the empty set. Thus both transitions return to it, making it a valid rejecting sink whenever it is reachable.",
+      "transfer_answer": "No. For a one-state machine that loops on both symbols, only its nonempty singleton subset is reachable. The full power set includes the empty subset, but reachable-only construction need not include every possible subset."
+    },
+    {
+      "id": "nfa-10",
+      "answer": 2,
+      "option": "At most 32; some subsets may be unreachable.",
+      "explanation": "Each DFA state is one subset of the five original states. There are 2^5 = 32 possible subsets, including the empty set, so no more than 32 can be reachable. The graph may use far fewer; epsilon cycles do not change that finite bound.",
+      "transfer_answer": "Start q0, make each of its0 and1 moves return onlyq0, and giveq0 no epsilon destinations. The other four states may have any internal moves provided there is no reachable edge to them; they remain unreachable fromq0. Only{q0} is reached."
+    },
+    {
+      "id": "nfa-11",
+      "answer": 1,
+      "option": "For every prefix, its DFA state equals the ε-NFA's closed active set; this invariant extends by each symbol and gives the same final acceptance.",
+      "explanation": "The start subset equals the NFA's closed start set. If the sets agree for a prefix, unioning the next symbol destinations and taking epsilon closure preserves the agreement for one more symbol. Final acceptance is the same set-intersection condition, giving agreement for every finite word.",
+      "transfer_answer": "At the empty prefix both representations are closure({start}). For another symbol, both form the union of that symbol's edges from the current set, then close it under epsilon. The finite test panel samples prefixes, whereas induction establishes the invariant at every finite length."
+    },
+    {
+      "id": "nfa-12",
+      "answer": 3,
+      "option": "No: one accepting state looping on both symbols recognizes the same language.",
+      "explanation": "Both reachable states accept, and any continuation stays among accepting states. The language is every binary word, including the empty word. One accepting state with loops on both symbols recognizes that language, so the two reachable subset states are not minimal.",
+      "transfer_answer": "The language is {0,1}*, so it contains epsilon and every finite binary word. Removing unreachable subsets restricts attention to the start-reachable graph; minimization may also merge different reachable states whose accepted continuation languages agree."
+    }
+  ]
+}

@@ -1,0 +1,181 @@
+{
+  "schema": "recallweave-nfa-blind-question-sheet/1",
+  "contract_sha256": "0d4bf65fc8928f78faef71e0b61850e1903b67fe5a147ecb58c61da88e294846",
+  "definitions": "All machines use alphabet {0,1}. An omitted edge is absent; each item specifies its epsilon edges. State sets are mathematical sets. Questions concern acceptance after all input is consumed. This sheet intentionally excludes answer indices and explanations.",
+  "items": [
+    {
+      "id": "nfa-01",
+      "concept": "Branching paths",
+      "prerequisites": [],
+      "prompt": "An ε-NFA reads the entire word 01. One possible path consumes both symbols and ends in an accepting state; every other possible path rejects or stops early. What is the result?",
+      "options": [
+        "Reject: every path must accept.",
+        "Reject: accepting and rejecting paths cancel.",
+        "Accept: one fully consuming accepting path is enough.",
+        "Undefined: an NFA must choose exactly one path in advance."
+      ],
+      "transfer": "Explain why counting the accepting paths is unnecessary for this accept/reject decision, and why a path that leaves input unread is insufficient."
+    },
+    {
+      "id": "nfa-02",
+      "concept": "Branching paths",
+      "prerequisites": [],
+      "prompt": "The current active set is {q0,q1}. On input 1, q0 has no destination and q1 reaches q2. There are no ε-edges. What is the next active set?",
+      "options": [
+        "{q2}",
+        "∅, because one branch stopped",
+        "{q0,q1,q2}",
+        "{q0,q2}"
+      ],
+      "transfer": "Change q1 so it also has no 1-destination. What is the next active set, and can later input revive it without any active state?"
+    },
+    {
+      "id": "nfa-03",
+      "concept": "Branching paths",
+      "prerequisites": [],
+      "prompt": "Start at q0; only q2 accepts. There are no ε-edges. q0 on 0→{q0}, on 1→{q0,q1}; q1 on 0→{q2}, on 1→∅; q2 has no symbol destinations. Does the machine accept 101?",
+      "options": [
+        "Yes, because the prefix 10 reached q2.",
+        "Yes, because q0 remains active.",
+        "No, because any branch that stops makes the whole word reject.",
+        "No: after all three symbols the active set is {q0,q1}, with no accepting state."
+      ],
+      "transfer": "Trace the same machine on 1010. State the final active set and decision; explain how it differs from 101."
+    },
+    {
+      "id": "nfa-04",
+      "concept": "Epsilon closure",
+      "prerequisites": [
+        "Branching paths"
+      ],
+      "prompt": "The only ε-edges are q0→q1, q1→q0 and q1→q2. What is the ε-closure of {q0}?",
+      "options": [
+        "{q1}",
+        "{q0,q1,q2}",
+        "{q0,q1}, because a cycle prevents further search",
+        "An infinite set, because the cycle can be repeated"
+      ],
+      "transfer": "Why can a visited-state traversal stop even though there are infinitely many walks around the q0–q1 cycle?"
+    },
+    {
+      "id": "nfa-05",
+      "concept": "Epsilon closure",
+      "prerequisites": [
+        "Branching paths"
+      ],
+      "prompt": "A machine contains several ε-edges and an accepting state. What is the ε-closure of the empty active set ∅?",
+      "options": [
+        "All states with an ε-edge.",
+        "All accepting states.",
+        "∅: no starting state exists from which to follow an edge.",
+        "The closure of the machine's original start state."
+      ],
+      "transfer": "Contrast closure(∅) with closure({q}) when q has no outgoing ε-edge."
+    },
+    {
+      "id": "nfa-06",
+      "concept": "Epsilon closure",
+      "prerequisites": [
+        "Branching paths"
+      ],
+      "prompt": "Start at q0; only q2 accepts. The only symbol edge is q0 on 0→q1, and the only ε-edge is q1→q2. After reading the word 0, which closed active set and decision are correct?",
+      "options": [
+        "{q1,q2}; accept",
+        "{q1}; reject",
+        "{q2}; accept, with q1 removed because it has an ε-edge",
+        "{q0,q1,q2}; accept"
+      ],
+      "transfer": "Why must the simulator close the destinations after a symbol move? What is the result for the empty word in this machine?"
+    },
+    {
+      "id": "nfa-07",
+      "concept": "Subset states",
+      "prerequisites": [
+        "Epsilon closure"
+      ],
+      "prompt": "An ε-NFA starts at q0, with ε-edges q0→q1 and q1→q2. There are no other ε-edges. What is the start state of its subset-construction DFA?",
+      "options": [
+        "The single state q0.",
+        "The set of all accepting states.",
+        "∅ until the first symbol is read.",
+        "The subset {q0,q1,q2}."
+      ],
+      "transfer": "If only q2 is accepting, does this start subset accept the empty word? Explain without consuming a symbol."
+    },
+    {
+      "id": "nfa-08",
+      "concept": "Subset states",
+      "prerequisites": [
+        "Epsilon closure"
+      ],
+      "prompt": "The NFA accepting set is {q2}. Its reachable subset DFA contains a state whose members are {q0,q2,q3}. How is that DFA state classified?",
+      "options": [
+        "Rejecting, because not all members accept.",
+        "Accepting, because at least one member is q2.",
+        "Accepting only if q2 was entered without an ε-edge.",
+        "Neither accepting nor rejecting until one member is chosen."
+      ],
+      "transfer": "Give one accepting and one rejecting subset for the same NFA accepting set. Explain why the number of rejecting members is irrelevant."
+    },
+    {
+      "id": "nfa-09",
+      "concept": "Subset states",
+      "prerequisites": [
+        "Epsilon closure"
+      ],
+      "prompt": "The subset construction reaches the empty subset ∅. What are its destinations on 0 and 1, even if the original NFA contains ε-cycles?",
+      "options": [
+        "Both destinations are ∅.",
+        "Both destinations are the original start closure.",
+        "Each destination is an arbitrary accepting subset.",
+        "The transitions are undefined, so the constructed DFA cannot be complete."
+      ],
+      "transfer": "Is ∅ necessarily reachable in every subset construction? Distinguish the full power set from the subsets reached from the start."
+    },
+    {
+      "id": "nfa-10",
+      "concept": "Language preservation",
+      "prerequisites": [
+        "Subset states"
+      ],
+      "prompt": "An ε-NFA has five states. What can be concluded about the number of reachable states in its subset-construction DFA?",
+      "options": [
+        "Exactly five.",
+        "Exactly 32.",
+        "At most 32; some subsets may be unreachable.",
+        "Unbounded, because ε-cycles permit arbitrarily long walks."
+      ],
+      "transfer": "Construct a five-state NFA whose only reachable subset is {q0}: specify its start, symbol moves from q0 and relevant ε-moves. What happens to the other four states?"
+    },
+    {
+      "id": "nfa-11",
+      "concept": "Language preservation",
+      "prerequisites": [
+        "Subset states"
+      ],
+      "prompt": "Why does the full reachable subset construction recognize the same language as its ε-NFA?",
+      "options": [
+        "It agrees on every word shown in a finite test panel, which proves all future words.",
+        "For every prefix, its DFA state equals the ε-NFA's closed active set; this invariant extends by each symbol and gives the same final acceptance.",
+        "It merges all states that have the same accepting flag.",
+        "It selects a single successful NFA path before reading the input."
+      ],
+      "transfer": "State the invariant for the empty prefix and explain one inductive step. Why do agreement checks only through length eight provide tests rather than the whole proof?"
+    },
+    {
+      "id": "nfa-12",
+      "concept": "Language preservation",
+      "prerequisites": [
+        "Subset states"
+      ],
+      "prompt": "An NFA has no ε-edges. Both q0 and q1 accept; q0 is the start, both symbol moves from q0 go to q1, and both moves from q1 loop to q1. Reachable subset construction yields {q0} and {q1}. Is this necessarily a minimal DFA?",
+      "options": [
+        "Yes: reachable subset construction always minimizes.",
+        "Yes: different subset labels always mean different future languages.",
+        "No: minimization would require preserving the original two state names.",
+        "No: one accepting state looping on both symbols recognizes the same language."
+      ],
+      "transfer": "Which language does this machine recognize, including the empty word? Separate eliminating unreachable subsets from merging equivalent reachable states."
+    }
+  ]
+}

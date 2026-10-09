@@ -1,0 +1,61 @@
+import ctypes,datetime,hashlib,json,shutil,zipfile
+from pathlib import Path
+r=Path(r"C:\Users\jacob\recallweave-nfa-3dcb83a1");out=r/"qualified-offer-v1"
+def gh(kind,b):return hashlib.sha1(kind.encode()+b" "+str(len(b)).encode()+b"\0"+b).hexdigest()
+def pin(b):return {"bytes":len(b),"sha256":hashlib.sha256(b).hexdigest(),"git_blob":gh("blob",b)}
+def raw(x):return (json.dumps(x,ensure_ascii=True,indent=2)+"\n").encode()
+def tree_hash(entries):
+ children={}
+ for x in entries:
+  parent,_,name=x["path"].rpartition("/");children.setdefault(parent,{})[name]=x
+ def calc(p):
+  rows=[]
+  for name,x in children.get(p,{}).items():
+   istree=x["type"]=="tree";sha=calc(x["path"]) if istree else x["sha"];mode="40000" if istree else x["mode"]
+   rows.append(((name+("/" if istree else "")).encode(),mode.encode()+b" "+name.encode()+b"\0"+bytes.fromhex(sha)))
+  return gh("tree",b"".join(v for k,v in sorted(rows)))
+ return calc("")
+class M(ctypes.Structure):
+ _fields_=[("length",ctypes.c_ulong),("load",ctypes.c_ulong),("total",ctypes.c_ulonglong),("available",ctypes.c_ulonglong),("page_total",ctypes.c_ulonglong),("page_available",ctypes.c_ulonglong),("virtual_total",ctypes.c_ulonglong),("virtual_available",ctypes.c_ulonglong),("extended",ctypes.c_ulonglong)]
+m=M();m.length=ctypes.sizeof(m);assert ctypes.windll.kernel32.GlobalMemoryStatusEx(ctypes.byref(m));disk=shutil.disk_usage(r).free
+assert m.available>=2147483648 and disk>=38654705664 and not out.exists()
+base=json.loads((r/"base-tree-v1.json").read_bytes());assert not base["truncated"] and tree_hash(base["entries"])==base["tree"]
+guard=json.loads((r/"current-source-guard-v1.json").read_bytes());assert guard["base"]==base["base"] and guard["tree"]==base["tree"]
+prior=json.loads((r/"source-offer-preparation-v1.json").read_bytes());peer=json.loads((r/"root-exact-text-supplement-v3.json").read_bytes())
+prefix="docs/receiving/nondeterministic-automata-3dcb83a1/"
+payload=prior["files"]+[{**x,"path":prefix+"root/"+x["path"]} for x in peer["files"]]
+for name,src in [("RECEIVING.md","qualified-RECEIVING-v1.md"),("current-source-guard-v1.json","current-source-guard-v1.json"),("assembly/seal-root-supplement-v3.py.txt","seal-root-supplement-v3.py"),("assembly/assemble-qualified-offer-v1.py.txt","assemble-qualified-offer-v1.py")]:
+ b=(r/src).read_bytes();payload.append({"path":prefix+name,"mode":"100644",**pin(b),"content":b.decode("utf-8")})
+assert len(payload)==108 and len(set(x["path"] for x in payload))==108
+for row in payload:
+ b=row["content"].encode("utf-8");assert pin(b)=={k:row[k] for k in ("bytes","sha256","git_blob")};assert row["mode"]=="100644"
+ if row["path"].endswith(".test.mjs"):assert row["path"].startswith("tests/")
+assert len([x for x in payload if x["path"].endswith(".test.mjs")])==2
+manifest={"schema":"recallweave.nfa.qualified-source-manifest.v1","repository":"Jacob-Met/RecallWeave","base":base["base"],"base_tree":base["tree"],"product_count":9,"listed_payload_count":len(payload),"files":[{k:x[k] for k in ("path","mode","bytes","sha256","git_blob")} for x in payload],"self_hash":"Manifest excluded from its own entries.","root_archive":peer["archive"],"scope":"Nine frozen additive products; exact original/qualified receiving with explicit corrected notes custody; no shared-source changes."}
+mb=raw(manifest);payload.append({"path":prefix+"files-manifest.json","mode":"100644",**pin(mb),"content":mb.decode()})
+entries={x["path"]:dict(x) for x in base["entries"]}
+for row in payload:
+ assert row["path"] not in entries,row["path"]
+ p=row["path"]
+ while "/" in p:
+  p=p.rpartition("/")[0]
+  if p not in entries:entries[p]={"path":p,"mode":"040000","type":"tree","sha":None}
+ entries[row["path"]]={"path":row["path"],"mode":"100644","type":"blob","sha":row["git_blob"]}
+for x in base["entries"]:
+ if x["type"]!="tree":assert entries[x["path"]]==x
+out.mkdir()
+for row in payload:
+ p=out/row["path"];p.parent.mkdir(parents=True,exist_ok=True);p.write_bytes(row["content"].encode());assert pin(p.read_bytes())=={k:row[k] for k in ("bytes","sha256","git_blob")}
+projection={"schema":"recallweave.nfa.qualified-source-projection.v1","created_utc":datetime.datetime.now(datetime.timezone.utc).isoformat(),"state":"Qualified source offer only; no Git object/ref/PR/main mutation.","base":base["base"],"base_tree":base["tree"],"product_files":9,"payload_files":len(payload),"decoded_payload_bytes":sum(x["bytes"] for x in payload),"unrelated_base_leaves_preserved":sum(x["type"]!="tree" for x in base["entries"]),"result_leaves":sum(x["type"]!="tree" for x in entries.values()),"expected_tree":tree_hash(list(entries.values())),"all_payload_pins_verified":True,"all_base_leaves_unchanged":True,"admission":{"available_memory":m.available,"disk_available":disk}}
+(r/"qualified-offer-projection-v1.json").write_bytes(raw(projection))
+packet={"schema":"recallweave.nfa.qualified-offer-packet.v1",**projection,"files":payload};pb=raw(packet);(r/"qualified-offer-packet-v1.json").write_bytes(pb)
+archive=r/"RecallWeave-NFA-qualified-source-offer-v1.zip";assert not archive.exists()
+with zipfile.ZipFile(archive,"x",compression=zipfile.ZIP_DEFLATED,compresslevel=9) as z:
+ for row in sorted(payload,key=lambda x:x["path"]):
+  info=zipfile.ZipInfo(row["path"],(2026,10,9,0,0,0));info.compress_type=zipfile.ZIP_DEFLATED;info.external_attr=0o100644<<16;z.writestr(info,row["content"].encode())
+with zipfile.ZipFile(archive) as z:
+ assert len(z.namelist())==len(payload)
+ for row in payload:assert pin(z.read(row["path"]))=={k:row[k] for k in ("bytes","sha256","git_blob")}
+review={"schema":"recallweave.nfa.qualified-offer-review.v1","projection":projection,"README":(r/"qualified-RECEIVING-v1.md").read_bytes().decode(),"manifest":manifest,"final_manifest_pin":pin(mb),"source_packet":pin(pb),"archive":{"path":str(archive),**pin(archive.read_bytes())}}
+rb=raw(review);(r/"qualified-offer-review-v1.json").write_bytes(rb)
+print(json.dumps({"projection":projection,"packet":pin(pb),"archive":review["archive"],"review":pin(rb),"manifest":pin(mb)}))

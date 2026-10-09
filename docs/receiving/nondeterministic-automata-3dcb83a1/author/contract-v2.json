@@ -1,0 +1,94 @@
+{
+  "schema": "recallweave-epsilon-nfa-public-contract/1",
+  "owner": "estate-3dcb83a1/estate_continuity",
+  "repository": "Jacob-Met/RecallWeave",
+  "base": "698902f9c9c1d5c5023092b85b3632a7cb7a01ed",
+  "beneficiary": "A learner who understands deterministic state tracing can inspect how nondeterministic alternatives and epsilon moves become one exact active set, then build the complete reachable subset DFA for their own small machine.",
+  "receiving": "One self-contained offline HTML explorer, original twelve-question recallweave-deck/1 JSON and guide; existing deck validator, learner importer, review and practice remain unchanged.",
+  "ownership": {
+    "preserved": [
+      "PR96 finite-automata deterministic tracing/equivalence",
+      "estate-65ae877160f6 native finite-automata DFA lesson",
+      "shared catalog/importer/model/workflows and other courses"
+    ],
+    "new_paths": [
+      "src/nondeterministic-automata.mjs",
+      "src/nondeterministic-automata-ui.mjs",
+      "templates/nondeterministic-automata-explorer.html",
+      "courses/nondeterministic-automata-explorer.html",
+      "courses/nondeterministic-automata.json",
+      "courses/nondeterministic-automata.md",
+      "tools/build-nondeterministic-automata.mjs",
+      "tests/nondeterministic-automata.test.mjs",
+      "tests/nondeterministic-automata-course.test.mjs"
+    ],
+    "native_advisory": "2026-10-09T03:47:58Z uid1000 ThinkPad read788 files;36 PermissionError and1 oversized remain unknown, no lease claim. Matching native record describes DFA only. PR96 guide explicitly excludes nondeterministic/incomplete machines.",
+    "no_shared_mutation": true
+  },
+  "machine": {
+    "format": "recallweave-epsilon-nfa/1",
+    "states": "integer1..5, state identities0..n-1",
+    "start": "one integer state",
+    "accepting": "array of unique integer states, may be empty",
+    "transitions": "array of n objects with exact keys zero, one, epsilon; each maps to unique integer-state array, which may be empty. No implicit sink, probabilities, regex syntax or deletion of invalid entries.",
+    "unknown_keys": "refused",
+    "word": "string of0 and1 only, length0..24. Empty string means epsilon; literal epsilon glyph, spaces, other symbols refused."
+  },
+  "semantics": {
+    "closure": "All states reachable by zero or more epsilon edges, including seeds. Cycles terminate through visited-state tracking.",
+    "trace": "Initial active set is epsilon closure of start. Per symbol: union all matching symbol destinations, then epsilon close. Record raw moved set and resulting active set separately. Accept iff final active set intersects accepting, after all symbols.",
+    "construction": "Start with closed start subset. Breadth-first reachable subsets, symbol0 before1, canonical sorted member sets, unique subset identities. Two transitions per reachable subset; empty subset included only if reachable and then self-loops. At most2^n<=32 subsets. A subset accepts iff any member accepts.",
+    "proof": "Reachable-subset construction preserves the complete recognized language by the active-set induction invariant, not just agreement on tested words. It is not minimization. UI traces are bounded to24 symbols; the constructed transition graph is complete for all finite binary words."
+  },
+  "public_model_api": {
+    "admitMachine": "validate/copy a machine without mutating caller",
+    "epsilonClosure": "closed canonical set for admitted machine and seeds",
+    "trace": "complete input/prefix/active-set result",
+    "determinize": "complete reachable subset table with deterministic BFS ordering",
+    "analyze": "admitted machine, word, NFA trace, reachable subset DFA and corresponding DFA path"
+  },
+  "ui": {
+    "editable": "state count via explicit replace-blank button, one start state, accepting flags, per-state zero/one/epsilon destination text cells; presets load only on explicit action",
+    "execution": "explicit Analyze; no network, provider or hidden random generation",
+    "stale_state": "every actual machine/word edit clears prior results and disables result download; invalid input retains edit text, reports error and leaves no stale result",
+    "display": "show initial closure and each consumed symbol, raw moved set, resulting closure, accepting result and full reachable subset table; text labels accompany visual highlighting",
+    "downloads": "exact fixed course JSON, exact guide and standalone HTML, plus admitted-machine/trace/subset-analysis JSON. Analysis record is not a learner deck.",
+    "learner": "downloaded fixed course must parse through unchanged validator and enter actual importer preview/explicit start plus existing feedback/review flow",
+    "access": "keyboard controls, labelled inputs, focus visibility, readable small-screen table/scroll; no physical-device claim"
+  },
+  "lesson": {
+    "questions": 12,
+    "concepts": [
+      "Branching paths",
+      "Epsilon closure",
+      "Subset states",
+      "Language preservation"
+    ],
+    "content": "newly authored examples/options/explanations/transfer prompts; separate blind key review before published answer acceptance; no copied reference exercises"
+  },
+  "qualification_plan": {
+    "native": "fresh own Node/runtime/resource admission; literal closure/cycle/empty-set/empty-word/after-symbol epsilon controls; invalid admission; separate path-reachability oracle and finite bounded exhaustive comparisons; no claim that finite examples prove theorem",
+    "browser": "actual isolated current Chrome file opening, editable table/error/stale-state/download receiving and unchanged actual learner importer; no broad unrelated suite",
+    "independent": "freeze a separate mathematical/content and actual-consumer receiving contract before candidate outcomes when assigned"
+  },
+  "limits": [
+    "binary alphabet only",
+    "1..5 states",
+    "0..24 trace symbols",
+    "at most32 reachable DFA subsets",
+    "unconstrained input machines may accept no words",
+    "no regex parser, minimizer, probabilistic path, NFA equivalence comparator, persisted learner/model modification or measured learning benefit"
+  ],
+  "references": [
+    {
+      "url": "https://www.cs.columbia.edu/~aho/cs3261/Lectures/L3-Regular_Expressions.html",
+      "scope": "official epsilon-closure and subset-construction definitions; reference only, no exercises copied"
+    },
+    {
+      "url": "https://www.cs.columbia.edu/~aho/cs3261/Lectures/L2-Finite_Automata.html",
+      "scope": "official nondeterministic parallel state-set interpretation"
+    }
+  ],
+  "publication": "Private source only until fresh owner/workflow audit and serialized root slot. No GitHub Actions, source PR or main mutation.",
+  "freeze_order": "Frozen before implementation and candidate outcomes; attachment service timestamps are the temporal record. This v2 removes the v1 manually supplied approximate clock literal without changing any behavior or scope."
+}

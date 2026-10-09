@@ -1,0 +1,864 @@
+{
+  "schema": "recallweave-root-independent-epsilon-nfa-contract.v1",
+  "phase": "Frozen after public v2 contract/API shapes and before candidate source or outcomes",
+  "owner": "/root",
+  "author_contract_upload": "3f4aedcd-f4a5-812e-9d55-00b2469d5d09",
+  "author_contract_sha256": "0d4bf65fc8928f78faef71e0b61850e1903b67fe5a147ecb58c61da88e294846",
+  "base": "698902f9c9c1d5c5023092b85b3632a7cb7a01ed",
+  "math_oracle": "Root authored bitmask epsilon closure and BFS above entirely from public semantics. Literal expected tables are frozen here. A separate (input-index,state) configuration reachability oracle will enumerate legal consuming/epsilon paths without candidate functions.",
+  "cases": [
+    {
+      "id": "epsilon-cycle-branch",
+      "machine": {
+        "format": "recallweave-epsilon-nfa/1",
+        "states": 4,
+        "start": 0,
+        "accepting": [
+          3
+        ],
+        "transitions": [
+          {
+            "zero": [
+              0,
+              1
+            ],
+            "one": [],
+            "epsilon": [
+              1
+            ]
+          },
+          {
+            "zero": [],
+            "one": [
+              2
+            ],
+            "epsilon": [
+              0
+            ]
+          },
+          {
+            "zero": [
+              3
+            ],
+            "one": [
+              2
+            ],
+            "epsilon": [
+              3
+            ]
+          },
+          {
+            "zero": [],
+            "one": [
+              3
+            ],
+            "epsilon": []
+          }
+        ]
+      },
+      "literalExpectedDfa": {
+        "format": "recallweave-subset-dfa/1",
+        "alphabet": [
+          "0",
+          "1"
+        ],
+        "sourceStateCount": 4,
+        "start": "D0",
+        "states": [
+          {
+            "id": "D0",
+            "members": [
+              0,
+              1
+            ],
+            "accepting": false,
+            "zero": "D0",
+            "one": "D1",
+            "witness": ""
+          },
+          {
+            "id": "D1",
+            "members": [
+              2,
+              3
+            ],
+            "accepting": true,
+            "zero": "D2",
+            "one": "D1",
+            "witness": "1"
+          },
+          {
+            "id": "D2",
+            "members": [
+              3
+            ],
+            "accepting": true,
+            "zero": "D3",
+            "one": "D2",
+            "witness": "10"
+          },
+          {
+            "id": "D3",
+            "members": [],
+            "accepting": false,
+            "zero": "D3",
+            "one": "D3",
+            "witness": "100"
+          }
+        ]
+      }
+    },
+    {
+      "id": "epsilon-empty-word-accept",
+      "machine": {
+        "format": "recallweave-epsilon-nfa/1",
+        "states": 3,
+        "start": 2,
+        "accepting": [
+          0
+        ],
+        "transitions": [
+          {
+            "zero": [],
+            "one": [],
+            "epsilon": [
+              2
+            ]
+          },
+          {
+            "zero": [],
+            "one": [],
+            "epsilon": [
+              0
+            ]
+          },
+          {
+            "zero": [],
+            "one": [],
+            "epsilon": [
+              1
+            ]
+          }
+        ]
+      },
+      "literalExpectedDfa": {
+        "format": "recallweave-subset-dfa/1",
+        "alphabet": [
+          "0",
+          "1"
+        ],
+        "sourceStateCount": 3,
+        "start": "D0",
+        "states": [
+          {
+            "id": "D0",
+            "members": [
+              0,
+              1,
+              2
+            ],
+            "accepting": true,
+            "zero": "D1",
+            "one": "D1",
+            "witness": ""
+          },
+          {
+            "id": "D1",
+            "members": [],
+            "accepting": false,
+            "zero": "D1",
+            "one": "D1",
+            "witness": "0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "one-state-no-words",
+      "machine": {
+        "format": "recallweave-epsilon-nfa/1",
+        "states": 1,
+        "start": 0,
+        "accepting": [],
+        "transitions": [
+          {
+            "zero": [],
+            "one": [],
+            "epsilon": []
+          }
+        ]
+      },
+      "literalExpectedDfa": {
+        "format": "recallweave-subset-dfa/1",
+        "alphabet": [
+          "0",
+          "1"
+        ],
+        "sourceStateCount": 1,
+        "start": "D0",
+        "states": [
+          {
+            "id": "D0",
+            "members": [
+              0
+            ],
+            "accepting": false,
+            "zero": "D1",
+            "one": "D1",
+            "witness": ""
+          },
+          {
+            "id": "D1",
+            "members": [],
+            "accepting": false,
+            "zero": "D1",
+            "one": "D1",
+            "witness": "0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "one-state-all-words",
+      "machine": {
+        "format": "recallweave-epsilon-nfa/1",
+        "states": 1,
+        "start": 0,
+        "accepting": [
+          0
+        ],
+        "transitions": [
+          {
+            "zero": [
+              0
+            ],
+            "one": [
+              0
+            ],
+            "epsilon": []
+          }
+        ]
+      },
+      "literalExpectedDfa": {
+        "format": "recallweave-subset-dfa/1",
+        "alphabet": [
+          "0",
+          "1"
+        ],
+        "sourceStateCount": 1,
+        "start": "D0",
+        "states": [
+          {
+            "id": "D0",
+            "members": [
+              0
+            ],
+            "accepting": true,
+            "zero": "D0",
+            "one": "D0",
+            "witness": ""
+          }
+        ]
+      }
+    },
+    {
+      "id": "after-symbol-epsilon-union",
+      "machine": {
+        "format": "recallweave-epsilon-nfa/1",
+        "states": 5,
+        "start": 0,
+        "accepting": [
+          4
+        ],
+        "transitions": [
+          {
+            "zero": [
+              1,
+              2
+            ],
+            "one": [],
+            "epsilon": []
+          },
+          {
+            "zero": [],
+            "one": [],
+            "epsilon": [
+              3
+            ]
+          },
+          {
+            "zero": [],
+            "one": [
+              4
+            ],
+            "epsilon": []
+          },
+          {
+            "zero": [
+              4
+            ],
+            "one": [],
+            "epsilon": []
+          },
+          {
+            "zero": [
+              4
+            ],
+            "one": [
+              4
+            ],
+            "epsilon": []
+          }
+        ]
+      },
+      "literalExpectedDfa": {
+        "format": "recallweave-subset-dfa/1",
+        "alphabet": [
+          "0",
+          "1"
+        ],
+        "sourceStateCount": 5,
+        "start": "D0",
+        "states": [
+          {
+            "id": "D0",
+            "members": [
+              0
+            ],
+            "accepting": false,
+            "zero": "D1",
+            "one": "D2",
+            "witness": ""
+          },
+          {
+            "id": "D1",
+            "members": [
+              1,
+              2,
+              3
+            ],
+            "accepting": false,
+            "zero": "D3",
+            "one": "D3",
+            "witness": "0"
+          },
+          {
+            "id": "D2",
+            "members": [],
+            "accepting": false,
+            "zero": "D2",
+            "one": "D2",
+            "witness": "1"
+          },
+          {
+            "id": "D3",
+            "members": [
+              4
+            ],
+            "accepting": true,
+            "zero": "D3",
+            "one": "D3",
+            "witness": "00"
+          }
+        ]
+      }
+    },
+    {
+      "id": "full32-subsets",
+      "machine": {
+        "format": "recallweave-epsilon-nfa/1",
+        "states": 5,
+        "start": 0,
+        "accepting": [
+          4
+        ],
+        "transitions": [
+          {
+            "zero": [
+              1
+            ],
+            "one": [],
+            "epsilon": []
+          },
+          {
+            "zero": [
+              2
+            ],
+            "one": [
+              0,
+              1,
+              3
+            ],
+            "epsilon": []
+          },
+          {
+            "zero": [
+              3
+            ],
+            "one": [
+              2
+            ],
+            "epsilon": []
+          },
+          {
+            "zero": [
+              4
+            ],
+            "one": [
+              3
+            ],
+            "epsilon": []
+          },
+          {
+            "zero": [
+              0
+            ],
+            "one": [
+              4
+            ],
+            "epsilon": []
+          }
+        ]
+      },
+      "literalExpectedDfa": {
+        "format": "recallweave-subset-dfa/1",
+        "alphabet": [
+          "0",
+          "1"
+        ],
+        "sourceStateCount": 5,
+        "start": "D0",
+        "states": [
+          {
+            "id": "D0",
+            "members": [
+              0
+            ],
+            "accepting": false,
+            "zero": "D1",
+            "one": "D2",
+            "witness": ""
+          },
+          {
+            "id": "D1",
+            "members": [
+              1
+            ],
+            "accepting": false,
+            "zero": "D3",
+            "one": "D4",
+            "witness": "0"
+          },
+          {
+            "id": "D2",
+            "members": [],
+            "accepting": false,
+            "zero": "D2",
+            "one": "D2",
+            "witness": "1"
+          },
+          {
+            "id": "D3",
+            "members": [
+              2
+            ],
+            "accepting": false,
+            "zero": "D5",
+            "one": "D3",
+            "witness": "00"
+          },
+          {
+            "id": "D4",
+            "members": [
+              0,
+              1,
+              3
+            ],
+            "accepting": false,
+            "zero": "D6",
+            "one": "D4",
+            "witness": "01"
+          },
+          {
+            "id": "D5",
+            "members": [
+              3
+            ],
+            "accepting": false,
+            "zero": "D7",
+            "one": "D5",
+            "witness": "000"
+          },
+          {
+            "id": "D6",
+            "members": [
+              1,
+              2,
+              4
+            ],
+            "accepting": true,
+            "zero": "D8",
+            "one": "D9",
+            "witness": "010"
+          },
+          {
+            "id": "D7",
+            "members": [
+              4
+            ],
+            "accepting": true,
+            "zero": "D0",
+            "one": "D7",
+            "witness": "0000"
+          },
+          {
+            "id": "D8",
+            "members": [
+              0,
+              2,
+              3
+            ],
+            "accepting": false,
+            "zero": "D10",
+            "one": "D11",
+            "witness": "0100"
+          },
+          {
+            "id": "D9",
+            "members": [
+              0,
+              1,
+              2,
+              3,
+              4
+            ],
+            "accepting": true,
+            "zero": "D9",
+            "one": "D9",
+            "witness": "0101"
+          },
+          {
+            "id": "D10",
+            "members": [
+              1,
+              3,
+              4
+            ],
+            "accepting": true,
+            "zero": "D12",
+            "one": "D13",
+            "witness": "01000"
+          },
+          {
+            "id": "D11",
+            "members": [
+              2,
+              3
+            ],
+            "accepting": false,
+            "zero": "D14",
+            "one": "D11",
+            "witness": "01001"
+          },
+          {
+            "id": "D12",
+            "members": [
+              0,
+              2,
+              4
+            ],
+            "accepting": true,
+            "zero": "D4",
+            "one": "D15",
+            "witness": "010000"
+          },
+          {
+            "id": "D13",
+            "members": [
+              0,
+              1,
+              3,
+              4
+            ],
+            "accepting": true,
+            "zero": "D16",
+            "one": "D13",
+            "witness": "010001"
+          },
+          {
+            "id": "D14",
+            "members": [
+              3,
+              4
+            ],
+            "accepting": true,
+            "zero": "D17",
+            "one": "D14",
+            "witness": "010010"
+          },
+          {
+            "id": "D15",
+            "members": [
+              2,
+              4
+            ],
+            "accepting": true,
+            "zero": "D18",
+            "one": "D15",
+            "witness": "0100001"
+          },
+          {
+            "id": "D16",
+            "members": [
+              0,
+              1,
+              2,
+              4
+            ],
+            "accepting": true,
+            "zero": "D19",
+            "one": "D9",
+            "witness": "0100010"
+          },
+          {
+            "id": "D17",
+            "members": [
+              0,
+              4
+            ],
+            "accepting": true,
+            "zero": "D20",
+            "one": "D7",
+            "witness": "0100100"
+          },
+          {
+            "id": "D18",
+            "members": [
+              0,
+              3
+            ],
+            "accepting": false,
+            "zero": "D21",
+            "one": "D5",
+            "witness": "01000010"
+          },
+          {
+            "id": "D19",
+            "members": [
+              0,
+              1,
+              2,
+              3
+            ],
+            "accepting": false,
+            "zero": "D22",
+            "one": "D19",
+            "witness": "01000100"
+          },
+          {
+            "id": "D20",
+            "members": [
+              0,
+              1
+            ],
+            "accepting": false,
+            "zero": "D23",
+            "one": "D4",
+            "witness": "01001000"
+          },
+          {
+            "id": "D21",
+            "members": [
+              1,
+              4
+            ],
+            "accepting": true,
+            "zero": "D24",
+            "one": "D13",
+            "witness": "010000100"
+          },
+          {
+            "id": "D22",
+            "members": [
+              1,
+              2,
+              3,
+              4
+            ],
+            "accepting": true,
+            "zero": "D25",
+            "one": "D9",
+            "witness": "010001000"
+          },
+          {
+            "id": "D23",
+            "members": [
+              1,
+              2
+            ],
+            "accepting": false,
+            "zero": "D11",
+            "one": "D19",
+            "witness": "010010000"
+          },
+          {
+            "id": "D24",
+            "members": [
+              0,
+              2
+            ],
+            "accepting": false,
+            "zero": "D26",
+            "one": "D3",
+            "witness": "0100001000"
+          },
+          {
+            "id": "D25",
+            "members": [
+              0,
+              2,
+              3,
+              4
+            ],
+            "accepting": true,
+            "zero": "D13",
+            "one": "D27",
+            "witness": "0100010000"
+          },
+          {
+            "id": "D26",
+            "members": [
+              1,
+              3
+            ],
+            "accepting": false,
+            "zero": "D15",
+            "one": "D4",
+            "witness": "01000010000"
+          },
+          {
+            "id": "D27",
+            "members": [
+              2,
+              3,
+              4
+            ],
+            "accepting": true,
+            "zero": "D28",
+            "one": "D27",
+            "witness": "01000100001"
+          },
+          {
+            "id": "D28",
+            "members": [
+              0,
+              3,
+              4
+            ],
+            "accepting": true,
+            "zero": "D29",
+            "one": "D14",
+            "witness": "010001000010"
+          },
+          {
+            "id": "D29",
+            "members": [
+              0,
+              1,
+              4
+            ],
+            "accepting": true,
+            "zero": "D30",
+            "one": "D13",
+            "witness": "0100010000100"
+          },
+          {
+            "id": "D30",
+            "members": [
+              0,
+              1,
+              2
+            ],
+            "accepting": false,
+            "zero": "D31",
+            "one": "D19",
+            "witness": "01000100001000"
+          },
+          {
+            "id": "D31",
+            "members": [
+              1,
+              2,
+              3
+            ],
+            "accepting": false,
+            "zero": "D27",
+            "one": "D19",
+            "witness": "010001000010000"
+          }
+        ]
+      }
+    }
+  ],
+  "full32_derivation": {
+    "search": "Independent deterministic enumeration, before candidate exposure: input0 rotates5states; input1 replaces q0/q1 outgoing masks and leavesq2..q4 fixed. First pair producing32reachable subsets is q0->empty,q1->{0,1,3}. No candidate answers or random generation.",
+    "state_order_bitmasks": [
+      1,
+      2,
+      0,
+      4,
+      11,
+      8,
+      22,
+      16,
+      13,
+      31,
+      26,
+      12,
+      21,
+      27,
+      24,
+      20,
+      23,
+      17,
+      9,
+      15,
+      3,
+      18,
+      30,
+      6,
+      5,
+      29,
+      10,
+      28,
+      25,
+      19,
+      7,
+      14
+    ]
+  },
+  "checks": [
+    "All six exact reachable-subset tables, ordering, canonical members, witnesses, accepting flags and empty-sink inclusion/exclusion match the literal tables.",
+    "All1023 binary words of length0..9 per machine: compare trace active-prefix sets with independent configuration reachability, raw moved sets with independently closed previous set, final acceptance and complete DFA path. Test fixed24symbol boundary words too.",
+    "Empty input, epsilon cycles, accepting start closure, closure after symbol and vanished active sets are explicit; epsilon transitions consume no symbol.",
+    "Machine admission returns an independent deep canonical copy and every API leaves input unchanged, including deep-frozen valid input. Refuse all specified invalid state/count/start/edge/unknown-key/duplicate/type/word boundaries without deleting invalid text.",
+    "Actual generated standalone HTML in private current Chrome: analyze edited machine/word, inspect moved/closure/result/table; edits clear results and disable stale analysis download; invalid edits stay visible. Explicit replacement/preset behavior and keyboard focus are received.",
+    "Capture actual course/guide/HTML/analysis downloads and compare exact pinned content/valid admitted analysis. Only fixed course JSON enters unchanged real RecallWeave learner import preview, explicit start and feedback/review. Blind12question receiving is separately owned by production_scope.",
+    "Candidate/base/runtime, input fixtures and all package bytes pinned before and after; own children/listeners/profile isolated and retired with actual exits. No physical input, learning-benefit, global/browser-profile or source-main claim."
+  ],
+  "limits": {
+    "alphabet": [
+      "0",
+      "1"
+    ],
+    "states": [
+      1,
+      5
+    ],
+    "trace_max_length": 24,
+    "dfa_max_states": 32,
+    "finite_word_checks_are_not_language_proof": true,
+    "language_reasoning": "Active-set induction establishes subset semantics for arbitrary finite words when the full reachable transition table is correct; tested finite words alone do not prove a theorem.",
+    "no_candidate_model_repair_inside_receiving": true
+  }
+}

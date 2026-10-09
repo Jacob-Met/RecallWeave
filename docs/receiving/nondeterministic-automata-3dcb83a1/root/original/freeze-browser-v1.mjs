@@ -1,0 +1,12 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import crypto from 'node:crypto';
+import assert from 'node:assert/strict';
+const ROOT='C:\\Users\\jacob\\recallweave-nfa-independent-3dcb83a1';
+function pin(b){return {bytes:b.length,sha256:crypto.createHash('sha256').update(b).digest('hex'),git_blob:crypto.createHash('sha1').update(Buffer.concat([Buffer.from('blob '+b.length+'\0'),b])).digest('hex')};}
+assert.equal(fs.existsSync(path.join(ROOT,'browser-receiving-v1')),false);
+const files=['receive-browser-v1.mjs','launch-browser-v1.mjs','browser-source-manifest-v1.json','browser-source-intake-v1.json','contract.json'].map(p=>{const b=fs.readFileSync(path.join(ROOT,p));return {path:p,content:b.toString('utf8'),...pin(b)};});
+const data={schema:'recallweave-root-browser-preexecution-freeze.v1',created_utc:new Date().toISOString(),first_root_browser_run_exists:false,actual_browser_or_learner_execution:false,syntax_only:{program:'receive-browser-v1.mjs',tool_pid:10460,actual_exit:0,runtime_seconds:.21},oracles:'Root literal six-machine tables and independent configuration reachability were frozen before candidate. Browser implementation was authored after source/selector inspection, before first root browser run; no candidate model API is imported by the receiver.',contract_upload:'3f4aedcd-f4a5-81ca-aeb8-00b2b420454e',source_freeze_upload:'3f4aedcd-f4a5-810f-a0ff-00b2ac6154df',input_methods:'CDP mouse and keyboard for actions/text; DOM change/input events for exact custom-table values and selects; CDP native file input for retained physical downloads. No physical-person simulation claim.',checks:'Six complete rendered DFA/trace cases including all32 reachable sets; exact4 downloads; stale/invalid/edit/size/preset/24-symbol/keyboard/390px boundaries; physically downloaded lab; actual unchanged standalone learner analysis rejection,12-question import preview before explicit start,9correct3missed scripted lesson, exactfeedback/review,3missed-item practice and actual notes download; source/runtime/cleanup preservation.',limits:'Finite behavior receiving, not educational efficacy, a theorem from sampled words, default browser integration or all-platform validation.',files};
+const text=JSON.stringify(data,null,2)+'\n',target=path.join(ROOT,'browser-receiver-freeze-v1.json');
+fs.writeFileSync(target,text,{flag:'wx'});
+console.log(JSON.stringify({freeze:pin(Buffer.from(text)),files:files.map(({path,bytes,sha256,git_blob})=>({path,bytes,sha256,git_blob}))}));

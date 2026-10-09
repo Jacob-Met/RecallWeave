@@ -1,0 +1,53 @@
+{
+  "schema": "recallweave-nfa-public-bindings/1",
+  "contract_sha256": "0d4bf65fc8928f78faef71e0b61850e1903b67fe5a147ecb58c61da88e294846",
+  "module": "src/nondeterministic-automata.mjs",
+  "functions": [
+    "admitMachine(input)",
+    "epsilonClosure(input,seeds)",
+    "trace(input,word)",
+    "determinize(input)",
+    "analyze(input,word)"
+  ],
+  "machine_shape": {
+    "format": "recallweave-epsilon-nfa/1",
+    "states": "integer1..5",
+    "start": "integer0..states-1",
+    "accepting": "unique ascending integer array after admission",
+    "transitions": "array lengthstates of {zero:integer[],one:integer[],epsilon:integer[]}; exact keys"
+  },
+  "trace_shape": {
+    "word": "original word",
+    "steps": "[{index,prefix,symbol,moved,active,accepting}] including initial index0",
+    "initial": {
+      "index": 0,
+      "prefix": "",
+      "symbol": null,
+      "moved": "[start]",
+      "active": "epsilonClosure([start])",
+      "accepting": "whether active intersects accepting"
+    },
+    "later": "symbol is literal'0' or'1'; moved is raw symbol-destination union, active is its epsilon closure",
+    "accepted": "final step accepting"
+  },
+  "dfa_shape": {
+    "format": "recallweave-subset-dfa/1",
+    "alphabet": [
+      "0",
+      "1"
+    ],
+    "sourceStateCount": "original n",
+    "start": "D0",
+    "states": "BFS0-before1 list of {id,members,accepting,zero,one,witness}; idsD0,D1,...; zero/one reference ids; witness first shortest BFS word"
+  },
+  "analysis_shape": {
+    "format": "recallweave-nfa-analysis/1",
+    "machine": "admitted copied machine",
+    "word": "original word",
+    "nfa": "trace result",
+    "dfa": "determinize result",
+    "dfaPath": "ids including initial D0, then one per consumed symbol",
+    "accepted": "final NFA/DFA acceptance"
+  },
+  "semantics": "Every member/moved/active set is canonical ascending. Duplicate or invalid input state indices are refused. Caller inputs are not mutated. This is only an interface supplement; no candidate body or result."
+}

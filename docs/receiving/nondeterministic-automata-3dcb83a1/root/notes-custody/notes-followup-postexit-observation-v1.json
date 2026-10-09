@@ -1,0 +1,74 @@
+{
+  "schema": "recallweave.notes-followup-postexit-source-observation.v1",
+  "recorded_utc": "2026-10-09T06:07:34.166555+00:00",
+  "purpose": "Read-only source/retained-file interpretation after the one frozen literal-hash attempt failed; original expected pin and accepted:false result remain unchanged.",
+  "raw_result": {
+    "bytes": 10200,
+    "sha256": "ae884eb15a90e6cabf9c9a36848db7ee710248cf9d4ccd93c5724f454ae5df45",
+    "git_blob": "244e8c24b1048f398146b7e0547375d7d71ed823"
+  },
+  "actual_node_exit": 2,
+  "actual_rdc_exit": 1,
+  "actual_chrome_exit": {
+    "code": 0,
+    "signal": null
+  },
+  "postexit_notes": {
+    "bytes": 10967,
+    "sha256": "96362b05ad731e5c0766a3c412f85047d6f15cea6dbaf2f4aa48d645cbca5299",
+    "git_blob": "ff73bb9a43258b0b553ff8d38ffbbed9a59c67e3"
+  },
+  "saved_line": "Saved: 2026-10-09T06:04:37.614Z",
+  "source_excerpt": [
+    {
+      "line": 466,
+      "text": "function createStudyNotes({ deck, review, mastery, practice = null, reflections = null, exportedAt = new Date(), conceptLabel = id => id, applicationPrompt = APPLICATION_PROMPT }) {"
+    },
+    {
+      "line": 500,
+      "text": "    `Saved: ${savedAt.toISOString()}`,"
+    },
+    {
+      "line": 1495,
+      "text": "function downloadStudyNotes() {\n  const status = root.querySelector('#save-notes-status');\n  let url;\n  try {\n    const notes = createStudyNotes({deck, review, mastery, practice, reflections, conceptLabel, applicationPrompt: applicationPrompt()});\n    url = URL.createObjectURL(new Blob([notes.text], {type: notes.mediaType}));\n    const link = document.createElement('a');\n    link.href = url;\n    link.download = notes.filename;\n    document.body.append(link);\n    try { link.click(); } finally { link.remove(); }\n    status.textContent = 'Download requested. Check your browser\u2019s downloads for the study notes. Your session is still here.';\n  } catch {\n    status.textContent = 'The notes could not be prepared. Your answers are still available in this learning trace; try the download again.';\n  } finally {\n    if (url) setTimeout(() => URL.revokeObjectURL(url), 10000);\n  }\n}"
+    }
+  ],
+  "inputs_after": {
+    "learner": {
+      "bytes": 98468,
+      "sha256": "fe7d44d125f9797c867251c05f02868a7cacf91c7d5129f46bbca3c69dc7ae1d",
+      "git_blob": "ef7bc3e27e7f161d917ced6a457fad8822802f3f"
+    },
+    "course": {
+      "bytes": 12126,
+      "sha256": "71594563286bdacaa476f414e41fba08f5678e3a7f98f2f03cdfdacbc9d0c875",
+      "git_blob": "09a6f30396701994f0510f907653a168bd417316"
+    },
+    "contract": {
+      "bytes": 3195,
+      "sha256": "23872a3fadf8eeddfaaca55b7a583f9dbf013125cf8203eb601160a76062dfa8",
+      "git_blob": "3d787fd5cab1983825851f5b8c10eff3cef7525e"
+    },
+    "receiver": {
+      "bytes": 15305,
+      "sha256": "d9457ce3cb286ad9afe6b1b6697cf1c95579e9d3a0fc993a1d44f2e42e64a233",
+      "git_blob": "192221ccbd93d8eb1f19605a7dd1ffc77dac7b1c"
+    }
+  },
+  "all_four_recorded_inputs_unchanged": true,
+  "event_completed": [
+    {
+      "received_utc": "2026-10-09T06:04:37.800Z",
+      "method": "Browser.downloadProgress",
+      "params": {
+        "guid": "2c6ab15e-e468-4716-a7d1-eacfc5cd878a",
+        "totalBytes": 10967,
+        "receivedBytes": 10967,
+        "state": "completed",
+        "filePath": "C:\\Users\\jacob\\recallweave-nfa-3dcb83a1\\notes-followup-v1\\downloads\\recallweave-study-notes-2026-10-09.txt"
+      }
+    }
+  ],
+  "conclusion": "The unchanged notes writer includes the actual save timestamp. A new real click therefore does not meet the contract's identical previous timestamped-file hash. This source fact explains why strict cross-run byte equality is not an appropriate general oracle; it does not assert that all other file bytes equal the missing original. The new file has its own observed completed event and retained post-exit pin. No product change, reconstruction or rerun occurred.",
+  "assembly_incident": "An orchestration SyntaxError caused by unescaped backticks occurred before this Python command was submitted; no native effect resulted."
+}

@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Branching paths, exact subsets — RecallWeave</title>
+<style>
+:root{color-scheme:light;--ink:#16283d;--muted:#465a70;--line:#c7d3df;--paper:#f6f8fb;--blue:#174e8b;--accent:#dceafb}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.55 system-ui,sans-serif}main{max-width:1120px;margin:auto;padding:28px 20px 64px}header{padding:20px 0 26px}h1{font-size:clamp(2rem,5vw,3.2rem);line-height:1.12;margin:8px 0 18px;max-width:800px}h2{font-size:1.45rem;margin:0 0 12px}h3{font-size:1.1rem}.eyebrow{font-weight:700;letter-spacing:.08em;color:var(--blue);text-transform:uppercase;font-size:.78rem}.intro{max-width:800px;font-size:1.1rem}section{background:white;border:1px solid var(--line);border-radius:12px;padding:22px;margin:20px 0}.muted{color:var(--muted)}.controls{display:flex;flex-wrap:wrap;align-items:end;gap:12px;margin:14px 0}label{display:block;font-weight:600}input,select,button{font:inherit}input[type=text],select{border:1px solid #8093a7;border-radius:5px;padding:8px;background:white;color:var(--ink);max-width:100%}button{border:1px solid var(--blue);border-radius:5px;padding:9px 14px;background:white;color:var(--blue);cursor:pointer;font-weight:600}button.primary{background:var(--blue);color:white}button:disabled{opacity:.5;cursor:not-allowed}button:hover:enabled{box-shadow:0 0 0 2px var(--accent)}:focus-visible{outline:3px solid #e3a529;outline-offset:3px}.scroll{overflow-x:auto;border:1px solid var(--line);border-radius:5px}table{border-collapse:collapse;width:100%;font-size:.94rem}th,td{text-align:left;vertical-align:top;border-bottom:1px solid var(--line);padding:9px 10px}thead{background:#edf3f9}tbody tr:last-child>*{border-bottom:0}td input[type=text]{width:132px;min-width:100px}td input[type=checkbox]{width:20px;height:20px}#word{width:330px}#status{min-height:3em;padding:12px;background:#edf3f9;border-left:4px solid var(--blue)}#status.error{border-color:#a72a20;background:#fff2ef;color:#7b211c}.decision{font-size:1.6rem;font-weight:700;color:var(--blue)}.visited{background:#eef6ec}.note{border-left:3px solid #799b71;padding-left:14px}.downloads{display:flex;flex-wrap:wrap;gap:10px}.help{font-size:.92rem;color:var(--muted)}a{color:var(--blue)}code{background:#edf3f9;padding:1px 4px}summary{cursor:pointer;font-weight:650}footer{font-size:.88rem;color:var(--muted);margin-top:26px}ol{padding-left:23px}[hidden]{display:none!important}
+@media(max-width:560px){main{padding:14px 12px 36px}section{padding:16px 12px}.controls>div{width:100%}.controls button{max-width:100%}input[type=text],select{max-width:100%}h1{font-size:2rem}.downloads button{width:100%}}
+</style>
+</head>
+<body>
+<main>
+<header>
+<p class="eyebrow">RecallWeave · original computation lesson</p>
+<h1>Branching paths.<br>One exact set at a time.</h1>
+<p class="intro">Edit a small nondeterministic machine, follow its possible states, and construct the deterministic machine that keeps the same possibilities together.</p>
+<p class="muted">This lab runs offline. No account, upload, random path choice or probability is involved. Alphabet: <strong>0 and 1</strong>; 1–5 states; words up to 24 symbols.</p>
+</header>
+<section aria-labelledby="editor-title">
+<h2 id="editor-title">1. Build the machine</h2>
+<div class="controls">
+<div><label for="preset">Worked example</label><select id="preset"></select></div>
+<button id="load-preset" type="button">Load example</button>
+<div><label for="state-count">New blank table size</label><select id="state-count"><option>1</option><option>2</option><option selected>3</option><option>4</option><option>5</option></select></div>
+<button id="replace-blank" type="button">Replace with blank table</button>
+</div>
+<p class="help">Loading or replacing a table discards its current edits. Choosing a size alone does not change the current <strong id="current-count"></strong>-state table.</p>
+<div class="controls"><div><label for="start-state">Start state</label><select id="start-state"></select></div></div>
+<p id="table-help">Enter destination indices separated by commas, for example <code>0,2</code>. Leave a cell blank for no destinations (∅). <strong>ε edges consume no symbol.</strong> An accepting flag decides whether a path may finish successfully at that state.</p>
+<div class="scroll" role="region" aria-label="Editable machine transition table" tabindex="0">
+<table aria-describedby="table-help"><thead><tr><th scope="col">State</th><th scope="col">Accepts?</th><th scope="col">On 0</th><th scope="col">On 1</th><th scope="col">On ε</th></tr></thead><tbody id="machine-body"></tbody></table>
+</div>
+<div class="controls">
+<div><label for="word">Word to read</label><input id="word" type="text" autocomplete="off" spellcheck="false" aria-describedby="word-help"></div>
+<button id="analyze" type="button" class="primary">Analyze</button>
+<button id="download-result" type="button" disabled>Download this analysis</button>
+</div>
+<p id="word-help" class="help">Use only 0 and 1. Leave blank for the empty word, ε. Do not type the ε glyph or spaces.</p>
+<p id="status" role="status" aria-live="polite"></p>
+</section>
+<div id="result" hidden>
+<section aria-labelledby="trace-title">
+<h2 id="trace-title">2. Follow every possibility</h2>
+<p id="decision" class="decision"></p><p id="decision-detail"></p>
+<p>The active set starts with ε-closure of the start state. For each symbol, collect all symbol destinations, then follow every ε edge reachable from them. The last column is acceptance <em>at that prefix</em>; the whole word uses only the final row.</p>
+<div class="scroll" role="region" aria-label="Exact input trace" tabindex="0">
+<table><thead><tr><th scope="col">Read</th><th scope="col">Prefix</th><th scope="col">Operation</th><th scope="col">Raw destinations / seed</th><th scope="col">Closed active set</th><th scope="col">DFA state</th><th scope="col">At this prefix</th></tr></thead><tbody id="trace-body"></tbody></table>
+</div>
+</section>
+<section aria-labelledby="subset-title">
+<h2 id="subset-title">3. Keep each reachable set as one DFA state</h2>
+<p id="subset-count"></p>
+<p>Each row is a set of original states, not a single chosen path. It accepts if any member accepts. The table explores all reachable subsets in breadth-first order, trying 0 before 1; a first word records how each subset was reached.</p>
+<div class="scroll" role="region" aria-label="Complete reachable subset DFA" tabindex="0">
+<table><thead><tr><th scope="col">ID</th><th scope="col">Members</th><th scope="col">Accepts?</th><th scope="col">On 0</th><th scope="col">On 1</th><th scope="col">First word</th><th scope="col">Trace mark</th></tr></thead><tbody id="subset-body"></tbody></table>
+</div>
+<p class="note">This construction preserves the language because each DFA state is the NFA's exact closed active set after the same prefix. It does not minimize the number of states. The trace length limit does not truncate this reachable transition graph.</p>
+</section>
+</div>
+<section aria-labelledby="learn-title">
+<h2 id="learn-title">Study and keep the lesson</h2>
+<ol><li>Download the original twelve-question course.</li><li>Open the existing <a href="../demo.html">RecallWeave learner</a> and choose the JSON under <strong>Bring your own lesson</strong>.</li><li>Inspect the preview, then explicitly start the deck. The learner supplies feedback, review and practice.</li></ol>
+<p class="help">If this HTML was moved away from the repository, open your existing RecallWeave learner separately. The course is a fixed lesson; an analysis download records your edited machine and is not a learner deck.</p>
+<div class="downloads"><button id="download-course" type="button">Download course JSON</button><button id="download-guide" type="button">Download worked guide</button><button id="download-html" type="button">Download original offline lab</button></div>
+<details><summary>What this lab establishes</summary><p>It computes exact finite sets and transitions for the admitted machine. It does not select random paths, parse regular expressions, minimize DFAs or estimate the chance of acceptance. It does not measure learning outcomes. Edits remain only in this tab; reload returns to the initial example.</p></details>
+</section>
+<footer>Original lesson and examples by the HAMON autonomous cohort 3dcb83a1, with AI assistance, 2026-10-09. Lesson text: CC BY 4.0. Theory references and proof are in the guide. Existing deterministic automata lessons and the shared learner remain separate.</footer>
+</main>
+<script id="lesson-data" type="application/json">@@LESSON@@</script>
+<script id="guide-data" type="application/json">@@GUIDE@@</script>
+<script id="source-bundle" type="application/json">@@BUNDLE@@</script>
+<script type="module">@@PROGRAM@@</script>
+</body>
+</html>
