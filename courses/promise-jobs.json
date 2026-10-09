@@ -1,0 +1,215 @@
+{
+  "format": "recallweave-deck/1",
+  "title": "Promise jobs: before and after await",
+  "attribution": "Original questions, fixed JavaScript examples, explanations and transfer prompts by HAMON contributors for RecallWeave (2026). Primary background: ECMAScript Promise/Await algorithms, https://tc39.es/ecma262/multipage/control-abstraction-objects.html; Node24 microtask documentation, https://nodejs.org/docs/latest-v24.x/api/process.html#when-to-use-queuemicrotask-vs-processnexttick. The questions and examples are newly authored; no reference exercise is copied.",
+  "license": "Original lesson text and examples: Creative Commons Attribution 4.0 International (CC BY 4.0), https://creativecommons.org/licenses/by/4.0/. Attribution: HAMON contributors for RecallWeave, Promise jobs: before and after await, 2026. This permission covers the original lesson, not the linked specifications or documentation.",
+  "concepts": [
+    "Synchronous start",
+    "Queued reactions",
+    "Settlement and recovery",
+    "Values across suspension"
+  ],
+  "items": [
+    {
+      "id": "P01",
+      "concept": "Synchronous start",
+      "prerequisites": [],
+      "prompt": "What exact log array is returned when this function is awaited?\n\nasync function p01() {\n  const log = [];\n  log.push(\"start\");\n  const pending = new Promise(resolve => {\n    log.push(\"executor\");\n    resolve(\"value\");\n  });\n  const done = pending.then(value => log.push(value));\n  log.push(\"end\");\n  await done;\n  return log;\n}",
+      "options": [
+        "[\"start\",\"executor\",\"end\",\"value\"]",
+        "[\"start\",\"end\",\"executor\",\"value\"]",
+        "[\"start\",\"executor\",\"value\",\"end\"]",
+        "[\"executor\",\"value\",\"start\",\"end\"]"
+      ],
+      "answer": 0,
+      "explanation": "The Promise constructor calls its executor during construction, so start is followed by executor. Resolving the Promise does not call the registered then handler immediately. The end log completes synchronously; the queued fulfillment reaction later appends value.",
+      "transfer": "If resolve is called inside the executor, which part still waits for a later job?"
+    },
+    {
+      "id": "P02",
+      "concept": "Synchronous start",
+      "prerequisites": [],
+      "prompt": "What exact log array is returned when this function is awaited?\n\nasync function p02() {\n  const log = [];\n  const pending = Promise.resolve();\n  const a = pending.then(() => log.push(\"A\"));\n  const b = pending.then(() => log.push(\"B\"));\n  log.push(\"sync\");\n  await Promise.all([a, b]);\n  return log;\n}",
+      "options": [
+        "[\"A\",\"B\",\"sync\"]",
+        "[\"sync\",\"B\",\"A\"]",
+        "[\"sync\",\"A\",\"B\"]",
+        "[\"A\",\"sync\",\"B\"]"
+      ],
+      "answer": 2,
+      "explanation": "Both fulfillment reactions are registered against the already fulfilled Promise in A-then-B order. Their callbacks wait until the current synchronous code finishes, so sync precedes A and B. Promise.all is awaited only to keep the function open until both callbacks finish.",
+      "transfer": "If the two then registrations are swapped, which logged ordering changes?"
+    },
+    {
+      "id": "P03",
+      "concept": "Synchronous start",
+      "prerequisites": [],
+      "prompt": "What exact log array is returned when this function is awaited?\n\nasync function p03() {\n  const log = [];\n  async function work() {\n    log.push(\"before\");\n    await 0;\n    log.push(\"after\");\n  }\n  const done = work();\n  log.push(\"caller\");\n  await done;\n  return log;\n}",
+      "options": [
+        "[\"caller\",\"before\",\"after\"]",
+        "[\"before\",\"caller\",\"after\"]",
+        "[\"before\",\"after\",\"caller\"]",
+        "[\"after\",\"before\",\"caller\"]"
+      ],
+      "answer": 1,
+      "explanation": "Calling an async function begins its body immediately: work logs before. Awaiting even the ordinary value 0 suspends that function and schedules its continuation; the caller can log caller before work resumes and logs after. The outer await collects the completed work.",
+      "transfer": "Would awaiting an already fulfilled Promise make the caller wait synchronously? Explain."
+    },
+    {
+      "id": "P04",
+      "concept": "Queued reactions",
+      "prerequisites": [
+        "Synchronous start"
+      ],
+      "prompt": "What exact log array is returned when this function is awaited?\n\nasync function p04() {\n  const log = [];\n  const a = Promise.resolve().then(() => log.push(\"then\"));\n  const b = new Promise(resolve => queueMicrotask(() => {\n    log.push(\"micro\");\n    resolve();\n  }));\n  log.push(\"sync\");\n  await Promise.all([a, b]);\n  return log;\n}",
+      "options": [
+        "[\"micro\",\"then\",\"sync\"]",
+        "[\"then\",\"sync\",\"micro\"]",
+        "[\"sync\",\"micro\",\"then\"]",
+        "[\"sync\",\"then\",\"micro\"]"
+      ],
+      "answer": 3,
+      "explanation": "In the stated Node ES-module runtime, Promise reactions and queueMicrotask callbacks use the same microtask queue. The then callback is queued first, the micro callback second, and sync is logged before either callback runs. Neither scheduling API interrupts the current synchronous statements.",
+      "transfer": "Under the stated Node ESM runtime, what happens if the two scheduling statements are swapped?"
+    },
+    {
+      "id": "P05",
+      "concept": "Queued reactions",
+      "prerequisites": [
+        "Synchronous start"
+      ],
+      "prompt": "What exact log array is returned when this function is awaited?\n\nasync function p05() {\n  const log = [];\n  let nested;\n  const first = Promise.resolve().then(() => {\n    log.push(\"A\");\n    nested = Promise.resolve().then(() => log.push(\"C\"));\n  });\n  const second = Promise.resolve().then(() => log.push(\"B\"));\n  await Promise.all([first, second]);\n  await nested;\n  return log;\n}",
+      "options": [
+        "[\"A\",\"B\",\"C\"]",
+        "[\"A\",\"C\",\"B\"]",
+        "[\"B\",\"A\",\"C\"]",
+        "[\"C\",\"A\",\"B\"]"
+      ],
+      "answer": 0,
+      "explanation": "A runs first and schedules the new C reaction. B was already queued when A began, so C joins behind it. Awaiting the promises ensures every logged callback has finished; it does not move the new C callback ahead of the already queued B callback.",
+      "transfer": "Why does the nested C job not jump ahead of the already queued B job?"
+    },
+    {
+      "id": "P06",
+      "concept": "Queued reactions",
+      "prerequisites": [
+        "Synchronous start"
+      ],
+      "prompt": "What exact log array is returned when this function is awaited?\n\nasync function p06() {\n  const log = [];\n  let releaseA, releaseB;\n  const a = new Promise(resolve => { releaseA = resolve; });\n  const b = new Promise(resolve => { releaseB = resolve; });\n  const done = Promise.all([a, b]).then(values => {\n    log.push(values.join(\",\"));\n  });\n  releaseB(\"B\");\n  log.push(\"releasedB\");\n  releaseA(\"A\");\n  log.push(\"releasedA\");\n  await done;\n  return log;\n}",
+      "options": [
+        "[\"releasedB\",\"B,A\",\"releasedA\"]",
+        "[\"releasedB\",\"releasedA\",\"B,A\"]",
+        "[\"releasedB\",\"releasedA\",\"A,B\"]",
+        "[\"A,B\",\"releasedB\",\"releasedA\"]"
+      ],
+      "answer": 2,
+      "explanation": "Both release calls run synchronously, producing releasedB and releasedA before the aggregate reaction. Promise.all stores fulfillment values by input position, not settlement order. Its iterable is [a, b], so the joined result is A,B even though b was released first.",
+      "transfer": "If b settles first, why is the Promise.all result still in the order of its input iterable?"
+    },
+    {
+      "id": "P07",
+      "concept": "Settlement and recovery",
+      "prerequisites": [
+        "Queued reactions"
+      ],
+      "prompt": "What exact log array is returned when this function is awaited?\n\nasync function p07() {\n  const log = [];\n  let releaseA, releaseB;\n  const a = new Promise(resolve => { releaseA = resolve; });\n  const b = new Promise(resolve => { releaseB = resolve; });\n  const done = Promise.race([a, b]).then(value => log.push(value));\n  releaseB(\"B\");\n  releaseA(\"A\");\n  log.push(\"released\");\n  await done;\n  return log;\n}",
+      "options": [
+        "[\"released\",\"A\"]",
+        "[\"released\",\"B\"]",
+        "[\"B\",\"released\"]",
+        "[\"released\",\"B\",\"A\"]"
+      ],
+      "answer": 1,
+      "explanation": "The explicitly controlled releases settle b before a. The aggregate race takes the first settlement, B, and its then reaction runs after the synchronous released log. The A settlement cannot overwrite the already settled race. Race does not cancel its other inputs.",
+      "transfer": "If releaseA is called before releaseB instead, what can change? Does the losing Promise disappear?"
+    },
+    {
+      "id": "P08",
+      "concept": "Settlement and recovery",
+      "prerequisites": [
+        "Queued reactions"
+      ],
+      "prompt": "What exact log array is returned when this function is awaited?\n\nasync function p08() {\n  const log = [];\n  const value = await Promise.resolve(\"kept\").finally(() => {\n    log.push(\"finally\");\n    return \"replacement\";\n  });\n  log.push(value);\n  return log;\n}",
+      "options": [
+        "[\"kept\",\"finally\"]",
+        "[\"finally\",\"replacement\"]",
+        "[\"replacement\"]",
+        "[\"finally\",\"kept\"]"
+      ],
+      "answer": 3,
+      "explanation": "A normally returning finally callback observes settlement without replacing its original fulfillment value. It logs finally, then the chain still fulfills with kept. Returning replacement is different from throwing or returning a rejected Promise, which can turn the resulting chain into a rejection.",
+      "transfer": "How would throwing an Error from finally differ from returning an ordinary string?"
+    },
+    {
+      "id": "P09",
+      "concept": "Settlement and recovery",
+      "prerequisites": [
+        "Queued reactions"
+      ],
+      "prompt": "What exact log array is returned when this function is awaited?\n\nasync function p09() {\n  const log = [];\n  const value = await Promise.resolve()\n    .then(() => { log.push(\"then\"); throw new Error(\"bad\"); })\n    .catch(error => { log.push(error.message); return \"ok\"; })\n    .then(result => { log.push(result); return 7; });\n  log.push(String(value));\n  return log;\n}",
+      "options": [
+        "[\"then\",\"bad\",\"ok\",\"7\"]",
+        "[\"then\",\"bad\",\"7\"]",
+        "[\"then\",\"bad\",\"ok\",\"bad\"]",
+        "[\"then\",\"ok\",\"7\"]"
+      ],
+      "answer": 0,
+      "explanation": "The first fulfillment handler logs then and throws bad, rejecting its returned Promise. The catch handler logs bad and returns ok, so the chain recovers to fulfillment. The following handler receives ok, logs it and returns 7; await obtains that value, which is logged as the string 7.",
+      "transfer": "If the catch handler rethrows rather than returns ok, can the next fulfillment-only handler produce 7?"
+    },
+    {
+      "id": "P10",
+      "concept": "Values across suspension",
+      "prerequisites": [
+        "Synchronous start",
+        "Queued reactions"
+      ],
+      "prompt": "What exact log array is returned when this function is awaited?\n\nasync function p10() {\n  const log = [];\n  const request = { state: \"draft\" };\n  async function read() {\n    await Promise.resolve();\n    log.push(request.state);\n  }\n  const done = read();\n  request.state = \"changed\";\n  await done;\n  return log;\n}",
+      "options": [
+        "[\"draft\"]",
+        "[\"draft\",\"changed\"]",
+        "[\"changed\"]",
+        "[]"
+      ],
+      "answer": 2,
+      "explanation": "The read function obtains request.state only after it resumes from await. Before that reaction runs, the caller synchronously changes the object to changed. Async suspension neither freezes the caller's object nor captures its old property values.",
+      "transfer": "At which point does read obtain the state value? How could its timing be made explicit?"
+    },
+    {
+      "id": "P11",
+      "concept": "Values across suspension",
+      "prerequisites": [
+        "Synchronous start",
+        "Queued reactions"
+      ],
+      "prompt": "What exact log array is returned when this function is awaited?\n\nasync function p11() {\n  const log = [];\n  const request = { state: \"draft\" };\n  async function read() {\n    const state = request.state;\n    await Promise.resolve();\n    log.push(state);\n  }\n  const done = read();\n  request.state = \"changed\";\n  await done;\n  return log;\n}",
+      "options": [
+        "[\"changed\"]",
+        "[\"draft\"]",
+        "[\"draft\",\"changed\"]",
+        "[]"
+      ],
+      "answer": 1,
+      "explanation": "The local const state obtains the primitive string draft before suspension. Changing request.state later replaces a property value on the object; it does not replace that already captured local string. This is a deliberately narrow primitive-value capture, not a deep snapshot of arbitrary data.",
+      "transfer": "Why does capturing this string before await differ from rereading the object afterward?"
+    },
+    {
+      "id": "P12",
+      "concept": "Values across suspension",
+      "prerequisites": [
+        "Synchronous start",
+        "Queued reactions"
+      ],
+      "prompt": "What exact log array is returned when this function is awaited?\n\nasync function p12() {\n  const log = [];\n  const original = { name: \"before\", nested: { count: 1 } };\n  const copy = { ...original };\n  const done = Promise.resolve().then(() => {\n    log.push(copy.name + \":\" + copy.nested.count);\n  });\n  original.name = \"after\";\n  original.nested.count = 2;\n  await done;\n  return log;\n}",
+      "options": [
+        "[\"before:1\"]",
+        "[\"after:1\"]",
+        "[\"after:2\"]",
+        "[\"before:2\"]"
+      ],
+      "answer": 3,
+      "explanation": "Object spread copies the name property value before but copies only the reference to the nested object. Replacing original.name does not change copy.name; mutating the shared nested.count is visible through both objects. The later callback therefore combines before with 2.",
+      "transfer": "Which value was copied, which object is still shared, and why is shallow copying not a general validation snapshot?"
+    }
+  ]
+}
