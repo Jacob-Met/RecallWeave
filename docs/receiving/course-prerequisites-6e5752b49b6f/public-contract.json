@@ -1,0 +1,67 @@
+{
+  "format": "recallweave-course-prerequisite-public-contract/1",
+  "owner": "estate-6e5752b49b6f/github_integration",
+  "base": {
+    "repository": "Jacob-Met/RecallWeave",
+    "commit": "698902f9c9c1d5c5023092b85b3632a7cb7a01ed",
+    "tree": "d6d3707b691850af7928299242631534cff89aa8",
+    "leaves": 2915,
+    "validator": {
+      "path": "src/deck.mjs",
+      "git": "f0f8a4b234489c2388f427633f548d56c6ed4c03"
+    },
+    "focus": {
+      "path": "src/course-focus.mjs",
+      "git": "337b90d667170f19e5c75f5aaf4898e3410630b9"
+    }
+  },
+  "beneficiary": "A teacher reviewing one saved course can see which original questions declare each concept relationship, distinguish direct links from longer requirement chains, and see which other concepts refer back to a selected concept before editing or teaching. This page does not modify the course or infer pedagogical necessity.",
+  "gap": "The shipped focus consumer makes a prerequisite-complete subset. The separate dependency-graph teaching lab admits only 1–8 differently constrained job names. Neither provides full saved-course concept/question witness review.",
+  "api": {
+    "module": "src/course-prerequisites.mjs",
+    "function": "inspectCoursePrerequisites(text, selectedConceptIndex = 0)",
+    "admission": "text goes through the exact unchanged parseDeck, including its UTF-8 byte limit and rejection semantics. selectedConceptIndex must be an integer in [0, concepts.length). No string coercion, trim, case folding, Unicode normalization or alternate graph admission.",
+    "reuse": "The unchanged planCourseFocus may provide concept requirement closure; no existing module is edited.",
+    "output": {
+      "format": "recallweave-course-prerequisites/1",
+      "course": "{title,attribution,license}, exact admitted strings",
+      "concepts": "Source order: [{index,name,questionIndices,directPrerequisites,directDependents,required,downstream,level}]. All indices zero-based. questionIndices in source item order. Other index lists in source concept order; required/downstream are positive-length transitive closures, exclude self and include direct neighbors. level is 0 for no direct prerequisites, otherwise 1 + maximum prerequisite level; it is a structural depth, not time or recommended teaching order.",
+      "questions": "Source item order: [{index,id,conceptIndex,prompt,prerequisiteIndices}]. IDs/prompts exact. prerequisiteIndices preserve that question's authored order. No option, answer, explanation or transfer field is included in this review projection.",
+      "links": "[{prerequisiteIndex,conceptIndex,questionIndices}], ordered by conceptIndex then prerequisiteIndex. One link per exact distinct concept pair; questionIndices lists every original item declaring that exact direct link in item order, including a dependency first appearing only on a later question for that concept.",
+      "selection": "{index,requirementPaths,dependentPaths}. Each path row is {index,path}. Rows follow source concept order and cover all required/downstream concepts. requirement path begins at selected and follows dependent→prerequisite links to the row index; dependent path begins at the row index and ends at selected in the same direction. Choose a shortest path; break ties by ascending source concept indices at each expansion.",
+      "immutability": "Deeply frozen detached JSON-safe object with no source mutation. Repeated identical input/selection returns equivalent JSON."
+    }
+  },
+  "ui": {
+    "files": "Separate modular prerequisites/index.html + styles.css and generated prerequisites.html. No learner/author/focus/importer/catalog/template/workflow edits; any discovery README append is separately received.",
+    "admission": "Local File ≤262144 bytes before read and captured byte length ≤262144. Fatal UTF-8 decoding preserving BOM, then unchanged parseDeck. Retain literal filename/captured byte count/SHA-256; SHA binds bytes, not authorship/authenticity.",
+    "flow": "Explicit local file choice computes one readonly review. Pending reads disable selection/download and mark current display pending. A refused replacement retains the previous admitted course/report with explicit 'still showing previous file' status. Cancel leaves current state unchanged. Clear invalidates any pending reads and removes course/report. Request versions prevent late read/hash completion resurrecting superseded/cleared input.",
+    "display": "Course metadata/provenance, complete concept overview and question counts, selected concept with direct prerequisites, all transitive requirements, direct dependents and all downstream dependents. Every direct edge has its original question witnesses. Longer relations show the deterministic path and can be followed through exact witness links. Visible source-concept ordinals disambiguate whitespace-like literal names. Explicit labels distinguish structural depth and authored links from prerequisite mastery or teaching advice. Text-only insertion, readable literal wrapping, keyboard controls and 390px page width.",
+    "visual": "A compact selected-concept/direct-link diagram may use source ordinals paired with the complete adjacent literal labels; complete text lists carry the same information. It must not visually add transitive arrows as direct links.",
+    "download": "Explicit JSON review includes literal filename, captured UTF-8 bytes, SHA-256 and current complete report/selection. It is a report, not a checked course or restore format; clearly disclose that it contains question prompts and course attribution. Saving never changes the source or browser storage. A preparation/publication error retains the current admitted state for retry.",
+    "offline": "Standalone file and modular page equivalent, no upload/network/provider calls or automatic local/session storage. Blob downloads only on explicit user action."
+  },
+  "fence": [
+    "src/course-prerequisites.mjs",
+    "src/course-prerequisites-ui.mjs",
+    "prerequisites/index.html",
+    "prerequisites/styles.css",
+    "prerequisites.html",
+    "tools/build-course-prerequisites.mjs",
+    "tests/course-prerequisites.test.mjs",
+    "tests/course-prerequisites-bundle.test.mjs",
+    "tools/check-course-prerequisites.mjs",
+    "docs/course-prerequisites.md",
+    "unique docs/qualification/course-prerequisites-6e5752b49b6f/"
+  ],
+  "expectedExamples": [
+    "Five concepts [Intro,A,B,Merge,Else], with A requiring Intro, B requiring A, and separate Merge questions requiring B and [Intro,A]. Selecting Merge gives direct [Intro,A,B], required [Intro,A,B], levels [0,1,2,3,0], no self or Else. Selecting Intro gives downstream [A,B,Merge]; the direct Intro→Merge witness must identify only the question that actually names Intro.",
+    "A diamond with final concept requiring Left and Right, both requiring Root, yields one Root in closure and a shortest selected→Left→Root path when Left precedes Right in source concept order.",
+    "Two questions for one concept may have different prerequisite arrays. Graph unions them; witness lists and each original question record remain distinct and preserve input order.",
+    "Prototype-like names, names differing only in whitespace, emoji and HTML-like text stay exact and distinct; use indices and visible ordinals, never object-property identity or normalized labels.",
+    "One concept/no edges is a valid review, zero required/downstream, level0. Exact32-concept chain is admitted under original limits with deepest level31. Cyclic/self/unknown/uncovered concept and oversize/invalidUTF8/BOM source inputs refuse through existing admission.",
+    "Any new file selection/clear racing prior File.arrayBuffer or digest completion cannot restore a stale file/report/download. Current admitted file is unchanged on rejected replacement; displayed provenance identifies it."
+  ],
+  "receivingPlan": "Independent native model oracle freezes before candidate intake, challenges source order/union/witness membership/reverse orientation/transitive paths/identity/limits/immutability; authored native tests and exact standalone parity. Separate actual browser file/race/download/keyboard/phone/offline receiving with runtime/resource/exit/profile admission and before/after source pins. No existing broad suite replay or inferred native/browser pass.",
+  "authority": "Isolated source/native work and immutable Git custody only. No refs, PRs, main merge, Actions, runtime installs or shared-owner paths. Existing #10/#181 copy/loader, #170 handout, #177/#180 revision comparison, #190 repetition, focus/trace/learner/catalog owners retained."
+}

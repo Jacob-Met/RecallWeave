@@ -1,0 +1,13 @@
+# Recall196 independent native API receiving — accepted
+
+Candidate 331a09191115dc4943b8f42344cd11a817f42757 was offered only after the independent oracle and 25 complete manual expected reports were frozen and read back through immutable Git. Public contract551e3833b6439e475d8566e6727206dcd3e35493 and current baseline698902f9c9c1d5c5023092b85b3632a7cb7a01ed remain the authority.
+
+Actual receiving PID3799198 exited0 in0.82s, with583.201423ms inside the receiver. Nine groups/99API calls passed: all six fixture families and25 selected reports;15invalid indices;27exact inherited-validator refusal comparisons; exact262144-byte ASCII and multibyte boundaries; projection-only output; deep freezing and deterministic repetition. The graph cases exercise source-index shortest-path ties, reverse dependent direction, question-level prerequisite order, multiple original witnesses per edge, disconnected/singleton concepts, literal prototype/whitespace/canonical-distinct Unicode names,32concepts and100questions.
+
+All13 admitted receiver/source records and25 actual Node/runtime dependencies were rehashed unchanged. The complete actual25reports are retained,131365bytes SHA256e95a1f8350d1441d62a7ee28886f7048e1e37d85b6517d2d57b6960e98fdb616. Candidate imports only unchanged deckf0f8a4b234489c2388f427633f548d56c6ed4c03 and focus337b90d667170f19e5c75f5aaf4898e3410630b9. The executing runner admits the exact three-file closure, actual executable and25dependency pins before import and rejects caller overrides.
+
+The baseline original validator separately passed six groups before candidate exposure. The independent oracle self-test rejected10 corruptions before candidate intake. R0's pre-freeze checker accidentally disallowed shared frozen references; preserved R1 tracks only active ancestors and permits JSON-safe frozen sharing. All manual semantic expectations remained unchanged. Original source, correction, null lock and exact-source successor lock are retained.
+
+Native host was ordinary ThinkPadUID1000, Node22.22.1 at/usr/bin/node with128MiB old-space cap. Fresh required floors were256MiB available memory and64MiB filesystem. Actual candidate admission observed2673913856memory bytes and1273405440filesystem bytes. This staging is an existing volatile filesystem, not durable custody by itself. No installs, dependency build, browser, peer writes, workflow/ref/Actions change occurred.
+
+Accepted scope: the hash-pinned native API and unchanged dependency composition against the frozen contract. This packet makes no browser/file-lifecycle/standalone/whole-product claim. The independent browser receiver is separate.
