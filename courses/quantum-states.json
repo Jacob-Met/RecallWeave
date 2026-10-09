@@ -1,0 +1,215 @@
+{
+  "format": "recallweave-deck/1",
+  "title": "Two qubits: amplitudes, phase and shared outcomes",
+  "attribution": "Original questions, worked explanations and transfer prompts authored for RecallWeave under Jacob Metoyer's project direction by chatgpt-713adaab, 2026-10-09. Mathematical background: IBM Quantum Learning, Basics of Quantum Information, single systems and multiple systems; https://quantum.cloud.ibm.com/learning/en/courses/basics-of-quantum-information/single-systems/quantum-information and https://quantum.cloud.ibm.com/learning/en/courses/basics-of-quantum-information/multiple-systems/quantum-information . Ordering comparison: https://quantum.cloud.ibm.com/docs/en/guides/bit-ordering . No source prose, exercises or figures are reproduced.",
+  "license": "Original lesson content is dedicated under CC0 1.0 Universal: https://creativecommons.org/publicdomain/zero/1.0/ . Referenced materials retain their own terms. This is an ideal educational model, with no hardware, computational-advantage or measured-learning-efficacy claim.",
+  "concepts": [
+    "Amplitudes and basis labels",
+    "Phase and interference",
+    "Joint states and correlations",
+    "Reading the ideal model"
+  ],
+  "items": [
+    {
+      "id": "qs-01",
+      "concept": "Amplitudes and basis labels",
+      "prerequisites": [],
+      "prompt": "This lesson writes |q0q1>, with q0 on the LEFT. Its ordered basis is |00>, |01>, |10>, |11>. In the state |10>, which labels are certain in a computational-basis measurement?",
+      "options": [
+        "q0 = 1 and q1 = 0",
+        "q0 = 0 and q1 = 1",
+        "Both labels are 1",
+        "Each label is equally likely to be 0 or 1"
+      ],
+      "answer": 0,
+      "explanation": "The first character names q0 and the second names q1. Here the amplitude of |10> is 1 and all other amplitudes are 0. Some software, including Qiskit's displayed strings, uses a different bit order; read the convention before moving a circuit.",
+      "transfer": "Starting from |01>, predict which basis label results after an X gate flips q0."
+    },
+    {
+      "id": "qs-02",
+      "concept": "Amplitudes and basis labels",
+      "prerequisites": [],
+      "prompt": "A basis outcome has complex amplitude a = (1 + i)/2. The Born rule gives its probability as |a|² = Re(a)² + Im(a)². What is that probability?",
+      "options": [
+        "1",
+        "1/2",
+        "1/4",
+        "i/2"
+      ],
+      "answer": 1,
+      "explanation": "Both the real and imaginary parts are 1/2. Their squared sum is 1/4 + 1/4 = 1/2. A probability is a nonnegative real number; the complex amplitude contains information that a probability alone does not.",
+      "transfer": "Compare amplitudes (1 + i)/2 and (1 - i)/2. Do they have the same probability, the same complex value, or both?"
+    },
+    {
+      "id": "qs-03",
+      "concept": "Amplitudes and basis labels",
+      "prerequisites": [],
+      "prompt": "A normalized single-qubit state has amplitudes 1/√2 for |0> and -1/√2 for |1>. What are its computational-basis probabilities?",
+      "options": [
+        "P(0) = 1/√2 and P(1) = -1/√2",
+        "P(0) = 1 and P(1) = 0",
+        "P(0) = 1/2 and P(1) = 1/2",
+        "The negative amplitude makes the state invalid"
+      ],
+      "answer": 2,
+      "explanation": "Squaring magnitudes removes the minus sign: both probabilities are 1/2 and sum to 1. The sign is still part of the state. Later gates can combine amplitudes and make this relative sign affect a new measurement distribution.",
+      "transfer": "Explain why adding amplitudes directly is not the normalization test. Which squared quantities must sum to 1?"
+    },
+    {
+      "id": "qs-04",
+      "concept": "Phase and interference",
+      "prerequisites": [
+        "Amplitudes and basis labels"
+      ],
+      "prompt": "The Hadamard gate maps amplitude pair (a,b) to ((a+b)/√2,(a-b)/√2). Z keeps a and negates b. Starting from |0>, apply H, then Z, then H. Which final state results?",
+      "options": [
+        "|0>",
+        "An equal mixture of |0> and |1>",
+        "The zero vector",
+        "|1>"
+      ],
+      "answer": 3,
+      "explanation": "H first gives (1/√2,1/√2). Z changes this to (1/√2,-1/√2). The final H gives (0,1): one sum cancels while the other reinforces. Without Z, H followed by H would return |0>.",
+      "transfer": "Use the lab's phase comparison. Explain why the intermediate probability tables can agree while the final tables disagree."
+    },
+    {
+      "id": "qs-05",
+      "concept": "Phase and interference",
+      "prerequisites": [
+        "Amplitudes and basis labels"
+      ],
+      "prompt": "S acts on a single-qubit amplitude pair as (a,b) → (a,i·b), where i² = -1. Apply S to (1/√2,1/√2). What changes immediately?",
+      "options": [
+        "The relative phase changes; computational-basis probabilities stay 1/2 and 1/2",
+        "Both probabilities become 1",
+        "The |1> probability becomes imaginary",
+        "The qubit necessarily produces a measured 1"
+      ],
+      "answer": 0,
+      "explanation": "The new amplitudes are (1/√2,i/√2). Multiplication by i rotates the second amplitude without changing its magnitude. No measurement is performed by this gate. A later H can reveal effects of phase through amplitude addition.",
+      "transfer": "Apply S twice and simplify i². Which listed gate has the same action, and why is S four times the identity?"
+    },
+    {
+      "id": "qs-06",
+      "concept": "Phase and interference",
+      "prerequisites": [
+        "Amplitudes and basis labels"
+      ],
+      "prompt": "Two entire state vectors differ only by multiplying EVERY amplitude by -1. Apply the same linear gates to both, then measure in the computational basis. What can those probabilities tell you?",
+      "options": [
+        "They always distinguish the two vectors",
+        "They agree: the common factor is a global phase",
+        "Every probability changes sign",
+        "The vectors cease to be normalized"
+      ],
+      "answer": 1,
+      "explanation": "Linearity carries the common -1 through every gate. Squared magnitudes ignore that common sign, so the probabilities agree. This differs from changing only one nonzero amplitude's sign, which can alter later interference.",
+      "transfer": "Compare |00> with the result of X0, Z0, X0 on |00>. Explain why their displayed amplitudes differ but their probabilities agree."
+    },
+    {
+      "id": "qs-07",
+      "concept": "Joint states and correlations",
+      "prerequisites": [
+        "Amplitudes and basis labels"
+      ],
+      "prompt": "Use basis order |q0q1>, q0 leftmost. Starting from |00>, H on q0 gives (|00> + |10>)/√2. CNOT then flips q1 exactly when q0 = 1. What is the final state?",
+      "options": [
+        "(|00> + |01>)/√2",
+        "|11>",
+        "(|00> + |11>)/√2",
+        "(|01> + |10>)/√2"
+      ],
+      "answer": 2,
+      "explanation": "The |00> component has control q0 = 0 and stays put. The |10> component has q0 = 1, so its target q1 flips to produce |11>. CNOT moves amplitudes between labels; it does not read a hidden classical value or perform a measurement.",
+      "transfer": "Work through the same two gates starting from |01>. Name both final basis labels and their amplitudes."
+    },
+    {
+      "id": "qs-08",
+      "concept": "Joint states and correlations",
+      "prerequisites": [
+        "Amplitudes and basis labels"
+      ],
+      "prompt": "State A has joint probabilities [1/2,0,0,1/2] in order [00,01,10,11]. State B has [1/4,1/4,1/4,1/4]. What is true about their individual-qubit probabilities?",
+      "options": [
+        "Only A gives each qubit a 1/2 chance of 1",
+        "Only B gives each qubit a 1/2 chance of 1",
+        "Identical individual probabilities force identical joint probabilities",
+        "Both give each qubit a 1/2 chance of 1, but their joint correlations differ"
+      ],
+      "answer": 3,
+      "explanation": "For q0 = 1, add entries 10 and 11; for q1 = 1, add 01 and 11. Both sums are 1/2 in each state. Yet A never gives unequal labels, while B gives unequal labels with total probability 1/2. Marginals omit joint information.",
+      "transfer": "In the lab's Bell-versus-product preset, predict P(q0 = q1) before looking at the four-row probability tables."
+    },
+    {
+      "id": "qs-09",
+      "concept": "Joint states and correlations",
+      "prerequisites": [
+        "Amplitudes and basis labels"
+      ],
+      "prompt": "Start from |01> in the declared order |q0q1>. A CNOT has control q1 and target q0. It flips the target only when the control is 1. What output basis state results?",
+      "options": [
+        "|11>",
+        "|00>",
+        "|01>",
+        "|10>"
+      ],
+      "answer": 0,
+      "explanation": "The right-hand bit q1 is 1, so the left-hand bit q0 flips from 0 to 1. The result is |11>. Swapping the control and target is a different gate; control q0 would be 0 here and would leave |01> unchanged.",
+      "transfer": "Start instead from |11>, apply control q1 → target q0 twice, and explain both intermediate and final labels."
+    },
+    {
+      "id": "qs-10",
+      "concept": "Reading the ideal model",
+      "prerequisites": [
+        "Phase and interference",
+        "Joint states and correlations"
+      ],
+      "prompt": "For a pure two-qubit state a|00> + b|01> + c|10> + d|11>, a product state must satisfy ad = bc. The Bell state has a = d = 1/√2 and b = c = 0. What does this show?",
+      "options": [
+        "Its measurement probabilities are negative",
+        "It cannot be a product state, so this modeled pure state is entangled",
+        "Its individual qubits each have a definite hidden bit",
+        "Any experimentally observed matching pair of bits proves entanglement"
+      ],
+      "answer": 1,
+      "explanation": "Here ad = 1/2 while bc = 0, so no product of two single-qubit amplitude pairs can give this pure state. That is a statement about the full modeled state, not a certification from one measurement table. Classical mixtures can also have correlated outcomes.",
+      "transfer": "Show that the product state |++>, whose four amplitudes are all 1/2, satisfies ad = bc. Why are marginal tables insufficient for this argument?"
+    },
+    {
+      "id": "qs-11",
+      "concept": "Reading the ideal model",
+      "prerequisites": [
+        "Phase and interference",
+        "Joint states and correlations"
+      ],
+      "prompt": "The lab computes ideal amplitudes and their squared magnitudes. It has no hardware connection, noise model, random shots, or measurement collapse. A table displays P(00) = 0.5. Which interpretation is justified?",
+      "options": [
+        "Exactly half of every finite real experiment must produce 00",
+        "The app has observed a physical measurement",
+        "The ideal model predicts probability 0.5 for 00 in that basis",
+        "The circuit demonstrates a computational speed advantage"
+      ],
+      "answer": 2,
+      "explanation": "The value is a deterministic prediction of the stated model. Finite measurements can fluctuate, real devices can be noisy, and no physical trials occur in this page. This small gate set can be simulated classically; the lesson does not establish a speed advantage.",
+      "transfer": "Name one additional kind of evidence needed before making a claim about a real device, and one needed before making a learning-efficacy claim."
+    },
+    {
+      "id": "qs-12",
+      "concept": "Reading the ideal model",
+      "prerequisites": [
+        "Phase and interference",
+        "Joint states and correlations"
+      ],
+      "prompt": "A circuit starts from |00> and applies H0 twice. The lab retains step 0 before any gates and one row after every gate. How many state rows should appear?",
+      "options": [
+        "One, because only the final state matters",
+        "Two, because there are two gates",
+        "Two, because the first and final vectors are equal",
+        "Three, including both equal endpoint vectors at distinct steps"
+      ],
+      "answer": 3,
+      "explanation": "There are N + 1 rows for N gates: initial, after the first H, and after the second H. Returning to an earlier vector does not erase the operation history. The selected step in an exported observation must be interpreted with that retained circuit order.",
+      "transfer": "Clear all gates. Explain why the zero-gate circuit still has one state row and why selecting an earlier step does not remove later gates."
+    }
+  ]
+}
