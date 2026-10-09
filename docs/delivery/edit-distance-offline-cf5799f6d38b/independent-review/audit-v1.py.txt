@@ -1,0 +1,182 @@
+import hashlib, io, json, os, pathlib, posixpath, re, stat, urllib.parse, zipfile
+from datetime import datetime, timezone
+from html.parser import HTMLParser
+
+OUT = pathlib.Path('/tmp/recallweave-delivery-review-cf5799f6d38b-static-v1')
+OWNER = pathlib.Path('/tmp/recallweave-offline-delivery-cf5799f6d38b-kstjq9r7')
+SOURCE = pathlib.Path('/home/jacob/recallweave-current-698-cf5799f6d38b-uu2dh48b/current-v2')
+OLD_RECEIPT = pathlib.Path('/home/jacob/recall-current-browser-root-cf5799f6d38b-yaff8mtr/browser/receipt.json')
+PREFIX = 'docs/delivery/edit-distance-offline-cf5799f6d38b'
+NAMES = ['AI-DISCLOSURE.md','MANIFEST.sha256','SOURCE-PROVENANCE.json','START-HERE.html','courses/edit-distance-explorer.html','courses/edit-distance.json','courses/edit-distance.md','demo.html']
+TREE = 'c80febfe92c5b8613766ba9124a9d17ea05f52fe'
+BASE = '698902f9c9c1d5c5023092b85b3632a7cb7a01ed'
+def pin(b):
+    return dict(bytes=len(b),sha256=hashlib.sha256(b).hexdigest(),git_blob=hashlib.sha1(b'blob '+str(len(b)).encode()+b'\0'+b).hexdigest())
+def custody(p):
+    s=p.lstat()
+    assert stat.S_ISREG(s.st_mode) and not p.is_symlink(),str(p)
+    return dict(path=str(p),mode=stat.S_IMODE(s.st_mode),device=s.st_dev,inode=s.st_ino,mtime_ns=s.st_mtime_ns,**pin(p.read_bytes()))
+def write(p,b):
+    with p.open('xb') as f:f.write(b)
+def js(v):return (json.dumps(v,ensure_ascii=True,indent=2)+'\n').encode()
+OUT.mkdir()
+manifest_path=OWNER/'publication-manifest.json'
+raw=manifest_path.read_bytes()
+assert pin(raw)['sha256']=='94448b9ff4c2efe8f703b996ac1b6923162b07471450a6530e3eb1205f79c59c'
+manifest=json.loads(raw)
+assert manifest['count']==4 and len(manifest['files'])==4 and manifest['source_tree']==TREE
+owner_paths=[manifest_path]+[pathlib.Path(r['source_path']) for r in manifest['files']]
+before=[custody(p) for p in owner_paths]
+for row in manifest['files']:
+    b=pathlib.Path(row['source_path']).read_bytes()
+    assert all(pin(b)[k]==row[k] for k in ('bytes','sha256','git_blob')),row['path']
+archive=OWNER/'publication'/PREFIX/'RecallWeave-edit-distance-offline.zip'
+rawzip=archive.read_bytes()
+assert len(rawzip)==53535 and pin(rawzip)['sha256']=='a86d823d70be98d08fd804ce9d8bccdb071b586adf5c30c0784a96a5db2a03e9'
+payload={}
+members=[]
+with zipfile.ZipFile(io.BytesIO(rawzip)) as z:
+    assert z.namelist()==NAMES and len(set(z.namelist()))==8
+    assert z.testzip() is None
+    assert sum(i.file_size for i in z.infolist())<200000
+    for i in z.infolist():
+        parts=pathlib.PurePosixPath(i.filename).parts
+        assert not i.filename.startswith('/') and '\\' not in i.filename and ':' not in i.filename
+        assert parts and all(p not in ('','..','.') for p in parts)
+        assert (i.external_attr>>16)==0o100644 and i.create_system==3 and not i.is_dir()
+        assert i.flag_bits&1==0 and i.compress_type==zipfile.ZIP_DEFLATED and i.date_time==(1980,1,1,0,0,0)
+        b=z.read(i);payload[i.filename]=b
+        members.append(dict(path=i.filename,mode='100644',**pin(b)))
+mchecks={}
+for line in payload['MANIFEST.sha256'].decode('ascii').splitlines():
+    sha,name=line.split('  ',1)
+    assert name not in mchecks
+    mchecks[name]=sha
+assert set(mchecks)==set(NAMES)-{'MANIFEST.sha256'}
+assert all(pin(payload[n])['sha256']==h for n,h in mchecks.items())
+prov=json.loads(payload['SOURCE-PROVENANCE.json'])
+assert prov['qualified_product_tree']==TREE and prov['base_commit']==BASE
+assert prov['existing_source_evidence_custody_commit']=='cb0b0ac9e2badfea135aec3b8d021cb997b5831b'
+source_rows=prov['unchanged_source_files'];assert len(source_rows)==5
+source_before=[custody(SOURCE/r['path']) for r in source_rows]
+bindings={}
+source_expected={}
+for key,name in [('current_source','current-source-manifest.json'),('composition_source','composition-source-manifest.json')]:
+    path=SOURCE.parent/name;b=path.read_bytes();obj=json.loads(b)
+    assert pin(b)==prov['source_binding_manifests'][key]
+    bindings[key]=dict(path=str(path),**pin(b))
+    before.append(custody(path));owner_paths.append(path)
+    if key=='current_source':
+        assert obj['head']==BASE
+        source_expected.update({r['path']:r for r in obj['files']})
+    else:
+        assert obj['base_head']==BASE and obj['candidate_tree']==TREE
+        source_expected.update({r['path']:r for r in obj['scoped_files']})
+assert len(source_expected)==2924
+for r in source_rows:
+    b=(SOURCE/r['path']).read_bytes()
+    assert b==payload[r['path']]
+    for k,v in pin(b).items():
+        assert r[k]==v and source_expected[r['path']][k]==v
+    assert r['mode']==source_expected[r['path']]['git_mode']=='100644'
+oldraw=OLD_RECEIPT.read_bytes();old=json.loads(oldraw)
+assert pin(oldraw)['sha256']==prov['existing_application_receiving']['receipt_sha256']=='4d3767c575aa278e6fff4ee26110213b286f65b2bf294374fab7bc3be9474119'
+assert old['tree']==TREE and old['source']==str(SOURCE) and old['passed'] is True
+assert len(old['groups'])==2 and all(r['passed'] for r in old['groups'])
+assert [{'name':r['name'],'passed':r['passed']} for r in old['groups']]==prov['existing_application_receiving']['groups']
+for key in ('node','chrome','finished'):assert old[key]==prov['existing_application_receiving'][key]
+for alias,name in [('artifact','courses/edit-distance-explorer.html'),('learner','demo.html'),('course','courses/edit-distance.json'),('guide','courses/edit-distance.md')]:
+    assert old['assets'][alias]==pin(payload[name])['sha256']
+owner_paths.append(OLD_RECEIPT);before.append(custody(OLD_RECEIPT))
+class Doc(HTMLParser):
+    def __init__(self):
+        super().__init__();self.refs=[];self.ids=set();self.scripts=[];self.styles=[];self.active=None;self.attrs=None;self.data=[]
+    def handle_starttag(self,tag,attrs):
+        a=dict(attrs)
+        if 'id' in a:self.ids.add(a['id'])
+        for k in ('href','src','poster','action','data','srcset'):
+            if k in a:self.refs.append(dict(tag=tag,attribute=k,target=a[k]))
+        if tag in ('script','style'):self.active=tag;self.attrs=a;self.data=[]
+    def handle_data(self,s):
+        if self.active:self.data.append(s)
+    def handle_endtag(self,tag):
+        if tag==self.active:
+            (self.scripts if tag=='script' else self.styles).append((self.attrs,''.join(self.data)))
+            self.active=None
+docs={}
+for name,b in payload.items():
+    if name.endswith('.html'):
+        doc=Doc();doc.feed(b.decode());docs[name]=doc
+links=[]
+def checklink(name,ref,kind):
+    u=urllib.parse.urlsplit(ref)
+    if u.scheme or u.netloc:
+        assert u.scheme in ('http','https')
+        links.append(dict(source=name,target=ref,kind=kind,external=True,required_to_run=False));return
+    target=posixpath.normpath(posixpath.join(posixpath.dirname(name),urllib.parse.unquote(u.path))) if u.path else name
+    assert target in payload,(name,ref,target)
+    if u.fragment:assert target in docs and urllib.parse.unquote(u.fragment) in docs[target].ids,(name,ref)
+    links.append(dict(source=name,target=ref,resolved=target,fragment=u.fragment,kind=kind,external=False))
+for name,doc in docs.items():
+    for r in doc.refs:
+        assert r['attribute']!='srcset'
+        checklink(name,r['target'],'html '+r['tag']+' '+r['attribute'])
+    for attrs,style in doc.styles:
+        assert not re.search(r'url\s*\(|@import',style,re.I)
+    for attrs,script in doc.scripts:
+        assert 'src' not in attrs
+        assert not re.search(r'\bfetch\s*\(|\bXMLHttpRequest\b|\bWebSocket\b|\bEventSource\b|\bnew\s+Worker\b|serviceWorker|import\s*\(',script)
+        assert not re.search(r'(?m)^\s*(?:import|export)\s',script)
+for name in ('courses/edit-distance.md','AI-DISCLOSURE.md'):
+    for ref in re.findall(r'\[[^\]]*\]\(([^)]+)\)',payload[name].decode()):
+        checklink(name,ref,'markdown reference')
+assert sum(not r['external'] for r in links)==12 and sum(r['external'] for r in links)==2
+learner=payload['demo.html'].decode();explorer=payload['courses/edit-distance-explorer.html'].decode()
+course=json.loads(payload['courses/edit-distance.json'])
+assert course['format']=='recallweave-deck/1' and len(course['items'])==12
+default=[s for a,s in docs['demo.html'].scripts if a.get('id')=='deck-json']
+assert len(default)==1
+bundled=json.loads(default[0]);assert bundled['title']=='Energy in cells: from light to ATP'
+for label in ('Bring your own lesson','Choose a deck file','Start this deck'):assert label in learner
+for label in ('Compute minimum cost','Previous step','Next step','Download lesson','Download experiment','Download worked guide'):assert label in explorer
+assert 'const MAX_EDIT_SYMBOLS = 16;' in explorer
+assert 'const symbols = Array.from(value);' in explorer
+assert "cost < 1 || cost > 9" in explorer and 'Number.isInteger(cost)' in explorer
+assert "point >= 0xd800 && point <= 0xdfff" in explorer and r'/[\u0000-\u001f\u007f]/u' in explorer
+# Decode JSON string literals only, never execute JavaScript.
+offset=explorer.index('mountEditDistance(document,')+len('mountEditDistance(document,')
+decoder=json.JSONDecoder();lesson,end=decoder.raw_decode(explorer[offset:]);remaining=explorer[offset+end:]
+assert remaining.startswith(',')
+guide,end=decoder.raw_decode(remaining[1:])
+assert lesson.encode()==payload['courses/edit-distance.json'] and guide.encode()==payload['courses/edit-distance.md']
+snippets={}
+patterns={
+'demo.html':r'Bring your own lesson|Choose a deck file|Start this deck|bundledDeck|deck-json|createSession|startSession|file\.text|onStart|initialAnswers|firstAnswers',
+'courses/edit-distance-explorer.html':r'MAX_EDIT|function editSymbols|Array.from|0xd800|C0 or DEL|cost < 1|Number.isInteger|policy:|no transposition|No transposition|one optimum|tie rule|retire|download'
+}
+for name,pattern in patterns.items():
+    snippets[name]=[dict(line=i+1,text=line) for i,line in enumerate(payload[name].decode().splitlines()) if re.search(pattern,line) and len(line)<1500]
+url_inventory={}
+for name,b in payload.items():
+    if name.endswith(('.html','.md','.json')):
+        urls=sorted(set(re.findall(r'https?://[^\s"<>\\)]+',b.decode())))
+        if urls:url_inventory[name]=urls
+after=[custody(p) for p in owner_paths];source_after=[custody(SOURCE/r['path']) for r in source_rows]
+assert before==after and source_before==source_after
+receipt=dict(schema='recallweave.offline-delivery.independent-static.v1',finished=datetime.now(timezone.utc).isoformat(),passed=True,
+scope='Independent read-only archive, source-custody, instruction and static local-link QA. No source extraction, JavaScript, application tests, browser, packager or external URL execution.',
+external_manifest=dict(path=str(manifest_path),**pin(raw)),archive=dict(path=str(archive),**pin(rawzip)),
+members=members,internal_manifest_members=7,safe_regular_members=8,
+source_tree=TREE,base_commit=BASE,source_binding_manifest_rows=2924,source_bindings=bindings,
+original_source_before=source_before,original_source_after=source_after,delivery_and_binding_before=before,delivery_and_binding_after=after,
+prior_receiving=dict(path=str(OLD_RECEIPT),**pin(oldraw),tree=old['tree'],assets=old['assets'],groups=prov['existing_application_receiving']['groups'],node=old['node'],chrome=old['chrome'],finished=old['finished']),
+prior_receipt_attribution='Existing independent current-v2 browser receiving; not executed by this static review.',
+links=links,optional_url_strings=url_inventory,
+instruction_checks=dict(initial_lesson=bundled['title'],picker_labels=['Bring your own lesson','Choose a deck file','Start this deck'],lesson_questions=12,
+downloaded_lesson_exact=True,downloaded_guide_exact=True,scalar_limit=16,cost_minimum=1,cost_maximum=9,
+additional_source_refusals=['C0/DEL controls','unpaired UTF-16 surrogates'],default_biology_attribution=bundled['attribution']),
+source_excerpts=snippets,
+limitations=['Static link/resource inspection is not a new browser/network trace or security certification.','No new learning, mathematics, archive-restore, hosted deployment or installed adoption claim.','Existing prior receipt and manifests are read and hash-bound; no full tree is extracted/retested.'],
+preparation_events=[dict(command='rg -n on only two named source files',pid=3313641,result='rg unavailable; /bin/bash: line 1: rg: command not found',effect='read-only lookup failed; Python source inspection used instead')])
+write(OUT/'receipt.json',js(receipt))
+print(json.dumps(dict(passed=True,receipt=pin((OUT/'receipt.json').read_bytes()),output=str(OUT),members=8,original_source=5,local_links=12,external_markdown_links=2,all_inputs_unchanged=True)))

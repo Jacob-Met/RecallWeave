@@ -1,0 +1,150 @@
+import base64,hashlib,html,io,json,os,pathlib,posixpath,re,stat,sys,tempfile,urllib.parse,zipfile
+from html.parser import HTMLParser
+SOURCE=pathlib.Path('/home/jacob/recallweave-current-698-cf5799f6d38b-uu2dh48b/current-v2')
+PARENT=SOURCE.parent
+BASE='698902f9c9c1d5c5023092b85b3632a7cb7a01ed'
+TREE='c80febfe92c5b8613766ba9124a9d17ea05f52fe'
+CUSTODY='cb0b0ac9e2badfea135aec3b8d021cb997b5831b'
+RECEIPT=pathlib.Path('/home/jacob/recall-current-browser-root-cf5799f6d38b-yaff8mtr/browser/receipt.json')
+RECEIPT_SHA='4d3767c575aa278e6fff4ee26110213b286f65b2bf294374fab7bc3be9474119'
+SELECTED=['AI-DISCLOSURE.md','demo.html','courses/edit-distance-explorer.html','courses/edit-distance.json','courses/edit-distance.md']
+PREFIX='docs/delivery/edit-distance-offline-cf5799f6d38b'
+def pin(b):return {'bytes':len(b),'sha256':hashlib.sha256(b).hexdigest(),'git_blob':hashlib.sha1(b'blob '+str(len(b)).encode()+b'\0'+b).hexdigest()}
+def jb(v):return (json.dumps(v,ensure_ascii=True,indent=2)+'\n').encode('ascii')
+def write(p,b):
+ p.parent.mkdir(parents=True,exist_ok=True)
+ with p.open('xb') as f:f.write(b)
+base_raw=(PARENT/'current-source-manifest.json').read_bytes()
+composition_raw=(PARENT/'composition-source-manifest.json').read_bytes()
+base=json.loads(base_raw);composition=json.loads(composition_raw)
+assert base['head']==BASE and composition['base_head']==BASE and composition['candidate_tree']==TREE
+expected={r['path']:r for r in base['files']}
+expected.update({r['path']:r for r in composition['scoped_files']})
+assert len(expected)==2924
+prior=RECEIPT.read_bytes();assert pin(prior)['sha256']==RECEIPT_SHA
+prior_json=json.loads(prior);assert prior_json['tree']==TREE and prior_json['passed'] is True
+assert len(prior_json['groups'])==2 and all(x['passed'] for x in prior_json['groups'])
+def snapshot():
+ out=[]
+ for name in SELECTED:
+  p=SOURCE/name;s=p.lstat();assert stat.S_ISREG(s.st_mode) and not p.is_symlink()
+  b=p.read_bytes();wanted=expected[name]
+  for k,v in pin(b).items():assert wanted[k]==v,(name,k)
+  mode='100755' if s.st_mode&0o111 else '100644';assert wanted['git_mode']==mode
+  out.append({'path':name,'source_path':str(p),'mode':mode,'filesystem_mode':stat.S_IMODE(s.st_mode),'device':s.st_dev,'inode':s.st_ino,'mtime_ns':s.st_mtime_ns,**pin(b)})
+ return out
+before=snapshot()
+payload={name:(SOURCE/name).read_bytes() for name in SELECTED}
+START="""<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RecallWeave edit-distance lesson — start here</title>
+<style>body{font:17px/1.6 system-ui,sans-serif;max-width:760px;margin:auto;padding:24px;color:#173d34;background:#fafbf7}h1{line-height:1.15}a{color:#155846}li{margin:.7em 0}code{overflow-wrap:anywhere}aside{border-left:4px solid #668365;padding:8px 18px}small{font-size:.85em}</style></head>
+<body><h1>Explore edit distance.<br>Then learn the reasoning.</h1>
+<p>Extract the whole ZIP into one folder and keep its <code>courses</code> folder beside <code>demo.html</code>. Open this START-HERE file in your browser. No installation, account, server or internet connection is required for the included activities.</p>
+<ol>
+<li><strong><a href="courses/edit-distance-explorer.html">Open the edit-distance explorer</a>.</strong> Load an example or enter your own two short strings and operation costs, then choose <strong>Compute minimum cost</strong>. Inspect a prefix cell, the tied choices and one alignment. Use <strong>Previous step</strong> and <strong>Next step</strong> to replay it. Changing inputs retires the old result until you compute again.</li>
+<li><strong><a href="demo.html">Open the unchanged RecallWeave learner</a>.</strong> It initially shows its bundled biology lesson. Under <strong>Bring your own lesson</strong>, use <strong>Choose a deck file</strong> to select <code>courses/edit-distance.json</code> from this extracted folder. Preview it, then choose <strong>Start this deck</strong>. Starting replaces the current lesson in that tab. Nothing is uploaded.</li>
+<li><strong>Answer the twelve questions.</strong> Read the explanations and your original review; practice missed items separately. A correct practice retry does not rewrite the first answer. Use the learner's existing explicit downloads if you want to keep a record before closing or refreshing.</li>
+</ol>
+<p>The explorer's <strong>Download lesson</strong> saves this same authored course for the existing learner import flow. <strong>Download experiment</strong> saves the current valid table/alignment record; it is not a learner lesson or restore file. <strong>Download worked guide</strong> saves the included guide.</p>
+<p><a href="courses/edit-distance.md">Read the worked guide</a> · <a href="courses/edit-distance.json" download>Course JSON</a> · <a href="MANIFEST.sha256">File checksums</a> · <a href="SOURCE-PROVENANCE.json">Source and qualification</a></p>
+<aside><strong>The stated model matters.</strong> Inputs contain 0–16 literal Unicode scalars. Costs are positive integers 1–9. This model does not normalize text, ignore case or allow a one-step transposition. It displays one optimum, not a uniqueness proof. The lesson illustrates reasoning; no learning-outcome claim is made.</aside>
+<p><small>The original edit-distance questions, explanations and guide are CC BY 4.0, with attribution retained in the course and guide. Wagner–Fischer and MIT references in the guide are optional online reading; those works keep their own licenses. The learner's pre-existing bundled lesson retains its own displayed attribution and license. <a href="AI-DISCLOSURE.md">AI-assistance disclosure</a>.</small></p>
+<p><small>This is a byte-preserving offline delivery of qualified source. The current-source browser receipt already passed two groups; creating this ZIP adds static file/link/transport verification only. It does not claim new browser coverage, hosted deployment or published-main adoption.</small></p>
+</body></html>
+"""
+payload['START-HERE.html']=START.encode('utf-8')
+provenance={'package':'RecallWeave edit-distance offline lesson','base_commit':BASE,'qualified_product_tree':TREE,'existing_source_evidence_custody_commit':CUSTODY,'source_repository':'https://github.com/Jacob-Met/RecallWeave','unchanged_source_files':[{k:r[k] for k in ('path','mode','bytes','sha256','git_blob')} for r in before],'existing_application_receiving':{'receipt_sha256':RECEIPT_SHA,'groups':[{'name':x['name'],'passed':x['passed']} for x in prior_json['groups']],'node':prior_json['node'],'chrome':prior_json['chrome'],'finished':prior_json['finished'],'no_rerun_for_packaging':True},'new_delivery_scope':'Exact bytes, required local links, deterministic ZIP and transport only; no new browser, mathematical, archive-resume or learning-outcome qualification.','source_binding_manifests':{'current_source':pin(base_raw),'composition_source':pin(composition_raw)},'source_license':'Edit-distance original lesson content is CC BY 4.0; embedded learner material and external references retain their own stated licenses. No global relicensing.','reproduction':'ZIP entries sorted by relative path; original file bytes and modes; added documentation bytes fixed; 1980-01-01 00:00:00 timestamp; Unix regular-file mode; DEFLATE level9. MANIFEST.sha256 covers every other member.'}
+payload['SOURCE-PROVENANCE.json']=jb(provenance)
+payload['MANIFEST.sha256']=''.join(hashlib.sha256(payload[name]).hexdigest()+'  '+name+'\n' for name in sorted(payload)).encode('ascii')
+class Links(HTMLParser):
+ def __init__(self):super().__init__();self.refs=[];self.ids=set();self.blocks={'script':[],'style':[]};self.active=None
+ def handle_starttag(self,tag,attrs):
+  d=dict(attrs)
+  if 'id' in d:self.ids.add(d['id'])
+  for k in ('href','src','poster','action','data'):
+   if k in d:self.refs.append({'tag':tag,'attribute':k,'target':d[k]})
+  if tag in self.blocks:self.active=tag
+ def handle_endtag(self,tag):
+  if self.active==tag:self.active=None
+ def handle_data(self,text):
+  if self.active:self.blocks[self.active].append(text)
+parsers={}
+for name,b in payload.items():
+ if name.endswith('.html'):
+  p=Links();p.feed(b.decode('utf-8'));parsers[name]=p
+edges=[]
+def edge(name,target,kind):
+ u=urllib.parse.urlsplit(target)
+ if u.scheme or u.netloc:
+  assert kind=='markdown-reference' and u.scheme in ('https','http')
+  edges.append({'from':name,'target':target,'kind':'optional external reference','required_to_run':False});return
+ path=urllib.parse.unquote(u.path)
+ destination=posixpath.normpath(posixpath.join(posixpath.dirname(name),path)) if path else name
+ assert not destination.startswith('../') and destination in payload,(name,target,destination)
+ if u.fragment:
+  assert destination in parsers and urllib.parse.unquote(u.fragment) in parsers[destination].ids,(name,target)
+ edges.append({'from':name,'target':target,'resolved':destination,'fragment':u.fragment,'kind':kind,'exists':True})
+for name,p in parsers.items():
+ for r in p.refs:edge(name,r['target'],'HTML '+r['attribute'])
+ for block in p.blocks['style']:
+  assert not re.search(r'url\s*\(|@import',block,re.I),(name,'external CSS resource')
+ if name in SELECTED:
+  for block in p.blocks['script']:
+   assert not re.search(r'(?m)^\s*(?:import|export)\s',block),(name,'module dependency')
+   assert not re.search(r'\bfetch\s*\(|\bXMLHttpRequest\b|\bnew\s+Worker\b|serviceWorker|import\s*\(',block),(name,'unaccounted runtime network dependency')
+for name in ['courses/edit-distance.md','AI-DISCLOSURE.md']:
+ for target in re.findall(r'\[[^\]]*\]\(([^)]+)\)',payload[name].decode('utf-8')):edge(name,target,'markdown-reference')
+assert len([r for r in edges if r.get('kind')=='optional external reference'])==2
+assert 'Start this deck' in payload['demo.html'].decode()
+for name in ['Download lesson','Download worked guide','Compute minimum cost','Download experiment','Previous step','Next step']:assert name in payload['courses/edit-distance-explorer.html'].decode()
+def archive():
+ buf=io.BytesIO()
+ with zipfile.ZipFile(buf,'w') as z:
+  for name in sorted(payload):
+   i=zipfile.ZipInfo(name,date_time=(1980,1,1,0,0,0));i.create_system=3;i.external_attr=(stat.S_IFREG|0o644)<<16;i.compress_type=zipfile.ZIP_DEFLATED
+   z.writestr(i,payload[name],compress_type=zipfile.ZIP_DEFLATED,compresslevel=9)
+ return buf.getvalue()
+zip_bytes=archive();assert archive()==zip_bytes
+with zipfile.ZipFile(io.BytesIO(zip_bytes)) as z:
+ assert z.namelist()==sorted(payload) and z.testzip() is None
+ for name in payload:assert z.read(name)==payload[name] and ((z.getinfo(name).external_attr>>16)&0o777)==0o644
+ for line in z.read('MANIFEST.sha256').decode('ascii').splitlines():
+  sha,name=line.split('  ',1);assert hashlib.sha256(z.read(name)).hexdigest()==sha
+after=snapshot();assert before==after
+assert (PARENT/'current-source-manifest.json').read_bytes()==base_raw and (PARENT/'composition-source-manifest.json').read_bytes()==composition_raw and RECEIPT.read_bytes()==prior
+out=pathlib.Path(tempfile.mkdtemp(prefix='recallweave-offline-delivery-cf5799f6d38b-',dir='/tmp'));pub=out/'publication'/PREFIX;pub.mkdir(parents=True)
+zip_name='RecallWeave-edit-distance-offline.zip'
+write(pub/zip_name,zip_bytes)
+readme="""# RecallWeave edit-distance offline delivery
+
+Download RecallWeave-edit-distance-offline.zip, extract all eight members into one folder, and open START-HERE.html. The package includes the exact unchanged learner, standalone explorer, twelve-question course, worked guide and AI disclosure. The learner initially shows biology; use Bring your own lesson, choose courses/edit-distance.json, preview and Start this deck. The explorer is a separate local activity and does not alter the learner.
+
+No installation or local service is needed. The package's local links resolve within its preserved directory layout. Two academic-reference links are optional online reading. The course's CC BY4.0 attribution and every existing embedded-license statement are preserved; no global relicensing is implied.
+
+This delivery preserves product tree c80febfe92c5b8613766ba9124a9d17ea05f52fe over698902f9c9c1d5c5023092b85b3632a7cb7a01ed. Existing source/evidence custody is cb0b0ac9e2badfea135aec3b8d021cb997b5831b. The previous root current-source browser receipt4d3767c5 passed two groups. Those are historical application results, not new executions by the packager.
+
+New verification is limited to exact source bytes/modes and source-manifest binding, static local-link/fragment closure, deterministic ZIP bytes, CRC/member/checksum readback and unchanged source before/after. No course/browser/arithmetic/resume tests, installations, providers, services, workflows or refs were invoked or changed. The retained source/evidence packet is unchanged.
+
+Inside the ZIP, MANIFEST.sha256 covers every other member and SOURCE-PROVENANCE.json binds original source identities and prior qualification. delivery-receipt.json additionally hashes the ZIP itself. The fixed builder is archived as build-package.py.txt; it was executed only for this transport construction, not as application receiving. Root independent intake and external artifact storage remain separate.
+"""
+write(pub/'README.md',readme.encode())
+members=[{'path':name,'mode':'100644',**pin(b),'origin':'unchanged qualified source' if name in SELECTED else 'new delivery documentation'} for name,b in sorted(payload.items())]
+receipt={'schema':'recallweave.offline-delivery-static.v1','source':str(SOURCE),'source_tree':TREE,'base_commit':BASE,'custody_commit':CUSTODY,'zip':{'path':zip_name,**pin(zip_bytes)},'members':members,'source_before':before,'source_after':after,'source_before_after_exact':True,'binding_manifests_unchanged':True,'existing_browser_receipt_unchanged':RECEIPT_SHA,'local_link_checks':edges,'standalone_dependency_scan':'Parsed HTML href/src/etc and CSS/module/network-call forms found no required external runtime assets; this static result supplements existing browser receipt and is not a new execution.','deterministic_zip_bytes_equal':True,'zip_member_crc_hash_mode_checks_pass':True,'sha256_manifest_pass':True,'new_application_tests_or_browser_runs':False,'publication_or_installed_adoption_claim':False,'preparation_read_event':'Initial broad content printer also requested absent package.json after reading the two HTML files; source was read-only and no package output existed. No dependency requirement was inferred from that missing file.'}
+write(pub/'delivery-receipt.json',jb(receipt))
+write(pub/'build-package.py.txt',pathlib.Path(__file__).read_bytes())
+files=[{'path':p.relative_to(out/'publication').as_posix(),'source_path':str(p),'mode':'100644',**pin(p.read_bytes()),'encoding':'base64' if p.suffix=='.zip' else 'utf-8'} for p in sorted(pub.iterdir())]
+manifest={'schema':'recallweave.delivery-publication.v1','files':files,'count':len(files),'bytes':sum(f['bytes'] for f in files),'source_tree':TREE,'zip_sha256':pin(zip_bytes)['sha256'],'new_delivery_only':True}
+write(out/'publication-manifest.json',jb(manifest))
+transfer=jb({'schema':'recallweave.delivery-transfer.v1','manifest':manifest,'files':[dict(f,content=(base64.b64encode(pathlib.Path(f['source_path']).read_bytes()).decode() if f['encoding']=='base64' else pathlib.Path(f['source_path']).read_bytes().decode('utf-8'))) for f in files]})
+write(out/'transfer.json',transfer);parts=[];offset=0
+while offset<len(transfer):
+ n=len(parts)+1;size=min(40000,len(transfer)-offset)
+ while True:
+  b=transfer[offset:offset+size];wrapper=jb({'part':n,'offset':offset,**pin(b),'text':b.decode('ascii')})
+  if len(wrapper)<=60000:break
+  size=size*3//4
+ p=out/'fragments'/(str(n).zfill(3)+'.json');write(p,wrapper);parts.append({'part':n,'path':str(p),**pin(wrapper),'payload_bytes':len(b)});offset+=len(b)
+assert b''.join(json.loads(pathlib.Path(x['path']).read_bytes())['text'].encode('ascii') for x in parts)==transfer
+write(out/'index.json',jb({'schema':'recallweave.offline-delivery-transfer-index.v1','manifest':{'path':str(out/'publication-manifest.json'),**pin((out/'publication-manifest.json').read_bytes())},'transfer':pin(transfer),'fragments':parts,'decoder':'Concatenate wrapper text in part order as ASCII, parse JSON, then encode utf-8 content or decode base64 per file.'}))
+print(json.dumps({'root':str(out),'manifest':{'path':str(out/'publication-manifest.json'),**pin((out/'publication-manifest.json').read_bytes())},'index':{'path':str(out/'index.json'),**pin((out/'index.json').read_bytes())},'zip':{'path':str(pub/zip_name),**pin(zip_bytes)},'members':len(payload),'source_files_exact':len(before),'delivery_files':len(files),'fragments':len(parts),'static_link_edges':len(edges),'no_new_application_tests':True}))

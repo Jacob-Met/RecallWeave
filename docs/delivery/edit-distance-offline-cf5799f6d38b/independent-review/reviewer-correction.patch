@@ -1,0 +1,28 @@
+--- audit-v1.py
++++ audit-v2.py
+@@ -2,7 +2,7 @@
+ from datetime import datetime, timezone
+ from html.parser import HTMLParser
+ 
+-OUT = pathlib.Path('/tmp/recallweave-delivery-review-cf5799f6d38b-static-v1')
++OUT = pathlib.Path('/tmp/recallweave-delivery-review-cf5799f6d38b-static-v2')
+ OWNER = pathlib.Path('/tmp/recallweave-offline-delivery-cf5799f6d38b-kstjq9r7')
+ SOURCE = pathlib.Path('/home/jacob/recallweave-current-698-cf5799f6d38b-uu2dh48b/current-v2')
+ OLD_RECEIPT = pathlib.Path('/home/jacob/recall-current-browser-root-cf5799f6d38b-yaff8mtr/browser/receipt.json')
+@@ -144,7 +144,7 @@
+ assert "cost < 1 || cost > 9" in explorer and 'Number.isInteger(cost)' in explorer
+ assert "point >= 0xd800 && point <= 0xdfff" in explorer and r'/[\u0000-\u001f\u007f]/u' in explorer
+ # Decode JSON string literals only, never execute JavaScript.
+-offset=explorer.index('mountEditDistance(document,')+len('mountEditDistance(document,')
++offset=explorer.rindex('mountEditDistance(document,')+len('mountEditDistance(document,')
+ decoder=json.JSONDecoder();lesson,end=decoder.raw_decode(explorer[offset:]);remaining=explorer[offset+end:]
+ assert remaining.startswith(',')
+ guide,end=decoder.raw_decode(remaining[1:])
+@@ -177,6 +177,6 @@
+ additional_source_refusals=['C0/DEL controls','unpaired UTF-16 surrogates'],default_biology_attribution=bundled['attribution']),
+ source_excerpts=snippets,
+ limitations=['Static link/resource inspection is not a new browser/network trace or security certification.','No new learning, mathematics, archive-restore, hosted deployment or installed adoption claim.','Existing prior receipt and manifests are read and hash-bound; no full tree is extracted/retested.'],
+-preparation_events=[dict(command='rg -n on only two named source files',pid=3313641,result='rg unavailable; /bin/bash: line 1: rg: command not found',effect='read-only lookup failed; Python source inspection used instead')])
++preparation_events=[dict(event='v1 static reviewer JSON selector failure',pid=3338616,exit_code=1,stderr='/tmp/recallweave-delivery-review-cf5799f6d38b-static-v1.stderr',cause='index selected function declaration; rindex selects the actual final invocation; no product modification'),dict(command='rg -n on only two named source files',pid=3313641,result='rg unavailable; /bin/bash: line 1: rg: command not found',effect='read-only lookup failed; Python source inspection used instead')])
+ write(OUT/'receipt.json',js(receipt))
+ print(json.dumps(dict(passed=True,receipt=pin((OUT/'receipt.json').read_bytes()),output=str(OUT),members=8,original_source=5,local_links=12,external_markdown_links=2,all_inputs_unchanged=True)))
