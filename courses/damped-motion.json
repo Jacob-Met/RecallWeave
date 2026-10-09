@@ -1,0 +1,278 @@
+{
+  "format": "recallweave-deck/1",
+  "title": "Damped motion: from force balance to energy loss",
+  "attribution": "Original AI-assisted questions, examples, explanations and lab for RecallWeave. Mathematical background: MIT OpenCourseWare 18.03SC Differential Equations (Fall 2011), Damped Harmonic Oscillators, https://ocw.mit.edu/courses/18-03sc-differential-equations-fall-2011/resources/mit18_03scf11_s13_2text/; and MIT RES.8-009 Introduction to Oscillations and Waves (Summer 2017), Lecture 4, https://live.ocw.mit.edu/courses/res-8-009-introduction-to-oscillations-and-waves-summer-2017/mitres_8_009su17_lec4.pdf. No source passages, exercises or figures are copied.",
+  "license": "Original question wording, explanations, worked examples and lab diagrams: CC0-1.0. Referenced materials retain their own licenses. Other repository content is unchanged.",
+  "concepts": [
+    "force-law",
+    "regimes",
+    "initial-conditions",
+    "energy"
+  ],
+  "items": [
+    {
+      "id": "damp-balanced-forces",
+      "concept": "force-law",
+      "prerequisites": [],
+      "prompt": "An ideal horizontal oscillator has m = 1 kg, k = 4 N/m and b = 2 N·s/m. At one instant x = +0.25 m and v = −0.50 m/s. What is its acceleration?",
+      "options": [
+        "−2 m/s²",
+        "0 m/s²",
+        "+1 m/s²",
+        "+2 m/s²"
+      ],
+      "answer": 1,
+      "explanation": "The spring contributes −kx = −1 N. The damper contributes −bv = +1 N because the mass moves left. The net force and instantaneous acceleration are zero. The nonzero velocity means the mass is not at rest.",
+      "transfer": "Change only v to +0.50 m/s and calculate the new acceleration."
+    },
+    {
+      "id": "damp-resists-velocity",
+      "concept": "force-law",
+      "prerequisites": [],
+      "prompt": "For a viscous damper with b > 0, which statement about Fd = −bv is true?",
+      "options": [
+        "The force always points toward x = 0.",
+        "The force always points left.",
+        "The force opposes the instantaneous velocity and is zero at v = 0.",
+        "The force depends only on the displacement."
+      ],
+      "answer": 2,
+      "explanation": "A positive velocity gives a negative damping force; a negative velocity gives a positive one. This differs from the spring's displacement-dependent force. At zero velocity the viscous damping force vanishes, even away from equilibrium.",
+      "transfer": "At x > 0 and v < 0, compare the directions of the spring and damping forces."
+    },
+    {
+      "id": "damp-coefficient-units",
+      "concept": "force-law",
+      "prerequisites": [],
+      "prompt": "In m x″ + b x′ + k x = 0, x is in metres and time in seconds. Which units for b make every term a force?",
+      "options": [
+        "N/m",
+        "N·s/m",
+        "J/s",
+        "kg·m/s"
+      ],
+      "answer": 1,
+      "explanation": "Velocity has units m/s. Multiplying it by N·s/m gives N. The equivalent units kg/s follow from N = kg·m/s². Stiffness k instead has units N/m.",
+      "transfer": "Use dimensional analysis to check that b/(2√(mk)) is dimensionless."
+    },
+    {
+      "id": "damp-initial-acceleration",
+      "concept": "force-law",
+      "prerequisites": [],
+      "prompt": "For m = 2 kg, k = 8 N/m and b = 4 N·s/m, the initial conditions are x0 = +0.50 m and v0 = +1.00 m/s. What is a0?",
+      "options": [
+        "−8 m/s²",
+        "−2 m/s²",
+        "0 m/s²",
+        "−4 m/s²"
+      ],
+      "answer": 3,
+      "explanation": "The net force is −8×0.50 −4×1.00 = −8 N. Dividing by m = 2 kg gives −4 m/s². Both spring and damper point left at this instant.",
+      "transfer": "Keep x0 fixed and choose v0 so the initial acceleration is zero."
+    },
+    {
+      "id": "damp-classify",
+      "concept": "regimes",
+      "prerequisites": [
+        "force-law"
+      ],
+      "prompt": "Define ζ = b/(2√(mk)). For m = 1 kg, k = 9 N/m and b = 6 N·s/m, which regime applies?",
+      "options": [
+        "Undamped",
+        "Underdamped",
+        "Critical",
+        "Overdamped"
+      ],
+      "answer": 2,
+      "explanation": "Here 2√(mk) = 6 N·s/m, so ζ = 1 exactly. The characteristic equation has a repeated real root −3 s⁻¹. The lab labels the regime from the entered damping ratio; it does not round a nearby value to critical.",
+      "transfer": "Keep m and k fixed and classify b = 3 and b = 12 N·s/m."
+    },
+    {
+      "id": "damp-frequency",
+      "concept": "regimes",
+      "prerequisites": [
+        "force-law"
+      ],
+      "prompt": "An underdamped oscillator has m = 1 kg, k = 4 N/m and b = 2 N·s/m. What is its damped angular frequency?",
+      "options": [
+        "√3 rad/s",
+        "2 rad/s",
+        "1 rad/s",
+        "3 rad/s"
+      ],
+      "answer": 0,
+      "explanation": "The natural angular frequency is ω0 = √(k/m) = 2 rad/s, and the exponential decay rate is α = b/(2m) = 1 s⁻¹. Thus ωd = √(ω0² − α²) = √3 rad/s. This is an angular frequency, not cycles per second.",
+      "transfer": "Calculate the period 2π/ωd and compare it with the undamped period."
+    },
+    {
+      "id": "damp-overdamped-roots",
+      "concept": "regimes",
+      "prerequisites": [
+        "force-law"
+      ],
+      "prompt": "With m = 1 kg, k = 1 N/m and b = 2.5 N·s/m, the characteristic roots are −0.5 s⁻¹ and −2 s⁻¹. Which form describes every displacement solution?",
+      "options": [
+        "A constant-amplitude sinusoid.",
+        "A sum A e^(−0.5t) + B e^(−2t), with A and B set by x0 and v0.",
+        "Only A e^(−2t), regardless of initial velocity.",
+        "A line x0 + v0t."
+      ],
+      "answer": 1,
+      "explanation": "The two distinct negative real roots give two decaying exponential terms. Both coefficients are generally needed to satisfy the two initial conditions. A coefficient can vanish for a special initial state, but not for all states.",
+      "transfer": "Choose A = 1 and B = −1. Find x0 and v0 and explain why non-oscillatory does not mean motionless."
+    },
+    {
+      "id": "damp-more-not-always-faster",
+      "concept": "regimes",
+      "prerequisites": [
+        "force-law"
+      ],
+      "prompt": "Fix m = k = 1 in consistent SI units. Compare b = 2 with b = 10. Which statement is justified by their characteristic roots?",
+      "options": [
+        "b = 10 guarantees earlier arrival at x = 0 for every initial state.",
+        "Both choices have the same roots because m and k are fixed.",
+        "The slow root at b = 10 is about −0.101 s⁻¹; more damping can produce a much slower tail.",
+        "b = 10 produces sustained oscillation."
+      ],
+      "answer": 2,
+      "explanation": "At b = 2 the repeated root is −1 s⁻¹. At b = 10 the slow root is (−10 + √96)/2 ≈ −0.101 s⁻¹. When its coefficient is nonzero, this term decays slowly. Settling also requires a stated tolerance and initial conditions; there is no universal fastest-arrival claim here.",
+      "transfer": "Compare the critical and strongly overdamped presets for the same displacement and zero initial velocity."
+    },
+    {
+      "id": "damp-critical-release",
+      "concept": "initial-conditions",
+      "prerequisites": [
+        "regimes"
+      ],
+      "prompt": "Let m = k = 1, b = 2, x0 = 1 and v0 = 0 in SI units. Which exact displacement satisfies the equation and both initial conditions?",
+      "options": [
+        "e^(−t)",
+        "t e^(−t)",
+        "(1 − t)e^(−t)",
+        "(1 + t)e^(−t)"
+      ],
+      "answer": 3,
+      "explanation": "The critical form is (A + Bt)e^(−t). Its initial displacement is A and its initial velocity is B − A. Therefore A = B = 1. The extra t term is essential to obtain zero initial velocity.",
+      "transfer": "Differentiate your selected expression and evaluate v at t = 1 s."
+    },
+    {
+      "id": "damp-critical-kick",
+      "concept": "initial-conditions",
+      "prerequisites": [
+        "regimes"
+      ],
+      "prompt": "For m = k = 1 and b = 2, start at x0 = 0 with v0 = 1 m/s. At what positive time does x(t) reach its maximum?",
+      "options": [
+        "0.5 s",
+        "1 s",
+        "2 s",
+        "It has no positive maximum."
+      ],
+      "answer": 1,
+      "explanation": "The displacement is x(t) = t e^(−t), so v(t) = (1 − t)e^(−t). Velocity changes from positive to negative at t = 1 s, where x = 1/e m. Starting at equilibrium does not mean staying there when initial velocity is nonzero.",
+      "transfer": "Inspect t = 1 s in the lab and compare spring force, damping force and acceleration."
+    },
+    {
+      "id": "damp-critical-crossing",
+      "concept": "initial-conditions",
+      "prerequisites": [
+        "regimes"
+      ],
+      "prompt": "For m = k = 1 and b = 2, take x0 = 0.25 m and v0 = −1 m/s. The solution is x(t) = (0.25 − 0.75t)e^(−t). What follows?",
+      "options": [
+        "Critical damping forbids a crossing of x = 0.",
+        "The mass crosses x = 0 once at t = 1/3 s.",
+        "It crosses x = 0 every 1/3 s forever.",
+        "It is at rest for all t."
+      ],
+      "answer": 1,
+      "explanation": "The exponential factor is positive at every finite time, so the single zero comes from 0.25 − 0.75t = 0. Critical damping removes sinusoidal oscillation; an adverse initial velocity can still carry the mass across equilibrium once.",
+      "transfer": "Evaluate the velocity at the crossing. Explain why zero displacement does not imply zero energy."
+    },
+    {
+      "id": "damp-rest",
+      "concept": "initial-conditions",
+      "prerequisites": [
+        "regimes"
+      ],
+      "prompt": "For any admitted m > 0, k > 0 and b ≥ 0 in this unforced model, what happens when x0 = v0 = 0?",
+      "options": [
+        "Damping creates a first oscillation.",
+        "The mass moves if b exceeds the critical value.",
+        "The unique response is x(t) = v(t) = 0.",
+        "The motion cannot be determined without a damping phase."
+      ],
+      "answer": 2,
+      "explanation": "The zero function satisfies the linear equation and both initial conditions. The unforced system has no energy to release, and the damper cannot add energy. The analytical response therefore stays at equilibrium.",
+      "transfer": "Compare the same zero initial conditions in all four regime presets."
+    },
+    {
+      "id": "damp-mechanical-energy",
+      "concept": "energy",
+      "prerequisites": [
+        "force-law"
+      ],
+      "prompt": "At an instant, m = 2 kg, k = 8 N/m, x = 0.25 m and v = −0.50 m/s. What is E = ½mv² + ½kx²?",
+      "options": [
+        "0.25 J",
+        "0.50 J",
+        "0.75 J",
+        "−0.50 J"
+      ],
+      "answer": 1,
+      "explanation": "Kinetic energy is ½×2×0.50² = 0.25 J and spring energy is ½×8×0.25² = 0.25 J. Their sum is 0.50 J. Velocity's sign does not make kinetic energy negative.",
+      "transfer": "Find the maximum displacement compatible with this energy if all of it were spring energy."
+    },
+    {
+      "id": "damp-energy-rate",
+      "concept": "energy",
+      "prerequisites": [
+        "force-law"
+      ],
+      "prompt": "For b = 3 N·s/m and v = −0.50 m/s, what is the instantaneous mechanical-energy rate dE/dt?",
+      "options": [
+        "−0.75 W",
+        "+0.75 W",
+        "−1.50 W",
+        "0 W"
+      ],
+      "answer": 0,
+      "explanation": "Multiplying the equation of motion by v gives dE/dt = −bv². Here it is −3×0.25 = −0.75 W. Mechanical energy leaves the modeled mass-and-spring store regardless of the direction of motion.",
+      "transfer": "At the same speed in the opposite direction, compare the damping force and its power."
+    },
+    {
+      "id": "damp-turning-point",
+      "concept": "energy",
+      "prerequisites": [
+        "force-law"
+      ],
+      "prompt": "A damped oscillator is momentarily at a turning point with x ≠ 0 and v = 0. Which statement is correct?",
+      "options": [
+        "All energy is zero.",
+        "The viscous damping force and instantaneous energy-loss rate are zero, but the spring can accelerate the mass next.",
+        "Damping must add energy to restart motion.",
+        "The system has become permanently undamped."
+      ],
+      "answer": 1,
+      "explanation": "At that instant −bv = 0 and −bv² = 0. Spring energy ½kx² remains positive and the spring acceleration is nonzero. As velocity develops, energy can again decrease. An instant with zero power is not a permanently lossless trajectory.",
+      "transfer": "Use an underdamped preset and compare a turning point with a nearby time."
+    },
+    {
+      "id": "damp-energy-accounting",
+      "concept": "energy",
+      "prerequisites": [
+        "initial-conditions"
+      ],
+      "prompt": "An unforced ideal viscously damped oscillator starts with E(0) = 0.50 J and later has E(t) = 0.20 J. What does E(0) − E(t) = 0.30 J represent in this model?",
+      "options": [
+        "Mechanical energy created by the spring.",
+        "The current kinetic energy alone.",
+        "Energy transferred out of the modeled mechanical store through damping, up to numerical roundoff in a calculation.",
+        "Proof that a measured apparatus has exactly 0.30 J of heat in one component."
+      ],
+      "answer": 2,
+      "explanation": "The model's energy identity is E(t) + ∫0ᵗ b v(s)² ds = E(0), so the difference is the energy transferred out of the mass-and-spring mechanical store. A numerical evaluation has finite precision. The ideal model does not measure heat distribution in a real apparatus.",
+      "transfer": "Set ζ = 0, inspect several times, and explain the expected energy difference and any tiny floating-point residual."
+    }
+  ]
+}

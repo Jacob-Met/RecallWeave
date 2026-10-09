@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>Damped motion · RecallWeave</title>
+<style>
+:root{font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#142b35;background:#f3f6f7;line-height:1.55}
+*{box-sizing:border-box}body{margin:0}main{max-width:1120px;margin:auto;padding:28px 24px 60px}h1{font-size:clamp(2rem,4vw,3rem);line-height:1.15;margin:.2em 0}h2{font-size:1.25rem;margin:0 0 .7rem}h3{font-size:1rem}p{max-width:80ch}.eyebrow{font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#315e69;font-size:.8rem}.intro{font-size:1.1rem;color:#38545f}.grid{display:grid;grid-template-columns:minmax(260px,330px) minmax(0,1fr);gap:20px;align-items:start}.panel{background:white;border:1px solid #d4dfe2;border-radius:14px;padding:20px;margin-bottom:20px;min-width:0}label{display:block;font-weight:600;font-size:.94rem;margin:12px 0 4px}input{width:100%;border:1px solid #829ca5;border-radius:6px;padding:9px;font:inherit;min-width:0}input[type=range]{padding:0;accent-color:#087881}input:focus,button:focus,a:focus,summary:focus{outline:3px solid #d6a929;outline-offset:3px}button{border:1px solid #436b75;border-radius:7px;background:#fff;color:#173e4a;font:inherit;padding:9px 12px;cursor:pointer}button:hover:not(:disabled){background:#eef5f6}button.primary{background:#075d67;color:white;border-color:#075d67;width:100%;font-weight:700;margin-top:16px}button:disabled{opacity:.5;cursor:not-allowed}.presets,.downloads{display:flex;flex-wrap:wrap;gap:8px}.presets button{font-size:.9rem}.hint,.small{font-size:.88rem;color:#49616b}.status{padding:12px 14px;border-left:4px solid #137782;background:#e8f4f5;border-radius:3px;min-height:3.5em;margin:0 0 18px}.status.error{border-color:#a32727;background:#fff0ec;color:#8b2424}.badge{display:inline-block;background:#dbeef0;color:#144a54;padding:4px 10px;border-radius:20px;font-weight:700}.numbers{display:grid;grid-template-columns:1fr 1fr;gap:4px 14px;font-variant-numeric:tabular-nums}.numbers dt{color:#49616b}.numbers dd{margin:0;text-align:right;overflow-wrap:anywhere}.plot{width:100%;height:auto;display:block;background:#fbfdfd;border:1px solid #e1e9ec;border-radius:8px}.plot text{font:12px system-ui;fill:#3e5760}.plot path{fill:none;stroke-width:2}.plot .axis{stroke:#80969f;stroke-width:1}.plot .marker{stroke:#a75916;stroke-width:1;stroke-dasharray:4 3}.inspection{display:grid;grid-template-columns:1fr 130px;gap:16px;align-items:end}.stale #plots,.stale #state-values{opacity:.45}.footer{border-top:1px solid #d4dfe2;padding-top:20px}a{color:#075d67}code{overflow-wrap:anywhere}details summary{cursor:pointer;font-weight:700}
+@media(max-width:760px){main{padding:20px 14px 40px}.grid{grid-template-columns:1fr}.panel{padding:16px}.inspection{grid-template-columns:1fr}.numbers{font-size:.92rem}.downloads button{flex:1 1 180px}}
+@media print{body{background:white}main{max-width:none}.grid{grid-template-columns:1fr}.panel{break-inside:avoid}button,input,.presets{display:none}}
+</style>
+</head>
+<body>
+<main>
+<header>
+<div class="eyebrow">RecallWeave · original analytical lab</div>
+<h1>Damped motion</h1>
+<p class="intro">See how a spring and a viscous damper turn initial motion into four response regimes. Inspect the forces, follow the energy, then test your reasoning in the original course.</p>
+<p class="small">Ideal unforced horizontal mass: <strong>m x″ + b x′ + kx = 0</strong>, with <strong>b = 2ζ√(mk)</strong>. Closed-form calculations in JavaScript binary64; no measured apparatus or time-stepping solver.</p>
+</header>
+<p id="status" class="status" role="status" aria-live="polite">Preparing the initial experiment…</p>
+<div id="experiment-region" class="grid">
+<section class="panel" aria-labelledby="parameters-title">
+<h2 id="parameters-title">1. Choose the motion</h2>
+<div class="presets" aria-label="Apply a complete preset">
+<button type="button" data-preset="undamped">Undamped</button>
+<button type="button" data-preset="underdamped">Underdamped</button>
+<button type="button" data-preset="critical">Critical</button>
+<button type="button" data-preset="overdamped">Overdamped</button>
+<button type="button" data-preset="crossing">Critical crossing</button>
+<button type="button" data-preset="rest">At rest</button>
+</div>
+<form id="parameters" novalidate>
+<label for="mass">Mass m (kg)</label><input id="mass" name="mass" value="1" inputmode="decimal" aria-describedby="parameter-limits">
+<label for="stiffness">Stiffness k (N/m)</label><input id="stiffness" name="stiffness" value="4" inputmode="decimal">
+<label for="dampingRatio">Damping ratio ζ</label><input id="dampingRatio" name="dampingRatio" value="0.25" inputmode="decimal">
+<label for="x0">Initial displacement x₀ (m)</label><input id="x0" name="x0" value="0.5" inputmode="decimal">
+<label for="v0">Initial velocity v₀ (m/s)</label><input id="v0" name="v0" value="0" inputmode="decimal">
+<label for="duration">Time window (s)</label><input id="duration" name="duration" value="10" inputmode="decimal">
+<button class="primary" type="submit">Apply parameters</button>
+<p id="parameter-limits" class="hint">m: 0.1–10 · k: 0.1–100 · ζ: 0–3 · x₀: −1–1 · v₀: −2–2 · window: 0.1–20. Editing marks the previous experiment stale until you apply.</p>
+</form>
+</section>
+<div>
+<section class="panel" aria-labelledby="inspect-title">
+<h2 id="inspect-title">2. Inspect an applied experiment</h2>
+<p><span id="regime" class="badge">—</span> <span id="derived" class="small"></span></p>
+<div class="inspection">
+<div><label for="time-slider">Inspection time</label><input id="time-slider" type="range" min="0" max="10" step="any" value="0" disabled></div>
+<div><label for="time-number">Time (s)</label><input id="time-number" type="text" inputmode="decimal" value="0" disabled></div>
+</div>
+<div id="plots">
+<h3>Displacement x (m)</h3><svg id="displacement-plot" class="plot" viewBox="0 0 660 250" role="img" aria-label="Displacement versus time; numerical state follows below"></svg>
+<h3>Mechanical energy E (J)</h3><svg id="energy-plot" class="plot" viewBox="0 0 660 250" role="img" aria-label="Mechanical energy versus time; numerical state follows below"></svg>
+<p id="sampling" class="hint"></p>
+</div>
+<h3>State at the inspection time</h3>
+<dl id="state-values" class="numbers" aria-live="off"></dl>
+<p class="hint">Energy transferred = E(0) − E(t). Tiny negative residuals can occur from roundoff; the exact model never creates mechanical energy. At rest, plot scales use a visible reference span.</p>
+<button id="download-observation" type="button" disabled>Download applied observation JSON</button>
+</section>
+</div>
+</div>
+<section class="panel" aria-labelledby="learn-title">
+<h2 id="learn-title">3. Explain what you see</h2>
+<p>Use the same initial displacement with ζ = 0, 0.25, 1 and 2. Then try <strong>Critical crossing</strong>: non-oscillatory does not mean “never crosses equilibrium.” Initial velocity matters.</p>
+<div class="downloads">
+<button id="download-course" type="button">Download the 16-question course</button>
+<button id="download-guide" type="button">Download the worked guide</button>
+<a href="../demo.html">Open the existing RecallWeave learner</a>
+</div>
+<p class="hint">In the learner, select the downloaded JSON, inspect its preview and explicitly start. Feedback, review, practice and study notes use the existing learner. Keep the repository layout for the learner link; the lab itself works as a standalone file.</p>
+<details>
+<summary>Model and limits</summary>
+<p>The damper force −bv opposes velocity; the spring force −kx opposes displacement. Mechanical energy E = ½mv² + ½kx² obeys dE/dt = −bv². No drive, dry friction, collision or nonlinear effect is included.</p>
+<p>Regimes use the exact entered ζ: zero is undamped, values strictly between zero and one are underdamped, exactly one is critical, and values above one are overdamped. Critical and overdamped trajectories may cross equilibrium under adverse initial velocity. A settling claim needs a tolerance and initial conditions.</p>
+<p>Curves join analytical samples. Extra samples resolve exponential decay near the start. The full grid and exact applied parameters travel with the observation download. This is a bounded teaching model, not a measured apparatus.</p>
+</details>
+</section>
+<footer class="footer small">Original course, worked examples and lab diagrams: CC0-1.0. Mathematical background: MIT OpenCourseWare 18.03SC and RES.8-009 (links in the guide). No source passages or figures copied. No learner state is stored by this lab.</footer>
+</main>
+<script>
+'use strict';
+{{DAMPED_MOTION_CORE}}
+const DAMPED_MOTION_COURSE_TEXT = {{DAMPED_MOTION_DECK_JSON}};
+const DAMPED_MOTION_GUIDE_TEXT = {{DAMPED_MOTION_GUIDE_JSON}};
+{{DAMPED_MOTION_UI}}
+</script>
+</body>
+</html>

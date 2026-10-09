@@ -38,6 +38,10 @@ Inputs are whole numbers from 0 to 10. Every invocation counts, including base c
 
 The explorer needs no server or account and keeps no automatic browser storage. Its trace is an algorithm inspection record, separate from learner-answer archives. Rebuild it with `node tools/build_recursion_call_stack.mjs`; add `--check` to verify that the checked-in page matches its exact sources and validated deck.
 
+## Explore damped motion
+
+Open the original **[Damped motion lab](courses/damped-motion-lab.html)** to compare undamped, underdamped, critical and overdamped responses, inspect forces and energy, and download the applied observation. The standalone file includes an original [sixteen-question course](courses/damped-motion.json) and [worked guide](courses/damped-motion.md) for the existing learner's import, feedback, review, practice and study-notes flow. It uses an ideal unforced linear mass–spring–damper model; no measured-apparatus or fastest-settling claim is made.
+
 ## Explore coupled motion
 
 Open **[Coupled motion: two patterns inside one system](courses/normal-modes-lab.html)** directly in a browser. Set the masses, spring stiffnesses and initial motion, then inspect how two independent normal modes combine into the motion of two coupled masses. Compare in-phase, opposite, localized and uncoupled motion; the exact values and energy decomposition accompany the schematic and time traces.

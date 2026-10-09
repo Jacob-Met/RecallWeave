@@ -1,0 +1,19 @@
+import pathlib,sqlite3,json,copy,hashlib,datetime
+from hamon_server.conscience_log import ConscienceLog
+key="claim:recall-damped-motion-713adaab";root=pathlib.Path("/dev/shm/chatgpt-recall-damped-motion-713adaab")
+db=sqlite3.connect("file:/var/lib/hamon/conscience.sqlite3?mode=ro",uri=True);db.row_factory=sqlite3.Row
+row=db.execute("SELECT seq,actor,payload_ref,event_hash FROM conscience_events WHERE json_extract(payload_ref,'$.key')=? ORDER BY seq DESC LIMIT1",(key,)).fetchone();db.close()
+assert row and row["actor"]=="chatgpt:/root/migration_execution"
+payload=json.loads(row["payload_ref"])
+assert payload["value"]=="reserved_native_additive_course_and_lab"
+packet=json.loads(pathlib.Path("/srv/hamon-estate/chatgpt-recall-damped-motion-713adaab-custody/checkpoint.json").read_bytes())
+payload.update(value="native_course_and_lab_qualified_pending_independent_custody_review_and_actions_release",source_commit="913c673c62a57f8d732f5c992ac18ba1ca6364ac",source_tree="effd0c0184fb7c6395578f49093802a77c0ea57c",native_packet=packet,previous_claim_seq=row["seq"],supersedes=[row["event_hash"]],scope=["README.md (one additive damped-motion paragraph)","courses/damped-motion-core.mjs","courses/damped-motion-ui.mjs","courses/damped-motion-lab.template.html","courses/damped-motion-lab.html","courses/damped-motion.json","courses/damped-motion.md","tools/build-damped-motion.mjs","tests/damped-motion-core.test.mjs","tests/damped-motion-course.test.mjs","tests/damped-motion-reference.json","tests/damped-motion-reference-labels.json","docs/receiving/damped-motion-713adaab/**"],qualification={"core_tests":"19pass/0fail/0skip","course_builder_tests":"3pass/0fail/0skip","blind_lesson_answers":"16/16match","independent_reference":"13cases/53states/371scalar comparisons","core_source_review":"approved c6598692","browser":"native Chrome153,16steps,exit0,13sourcefiles unchanged; actual learner15/16 deliberate first pass+one separate correct retry+notes","capsule":"75members byte-reopened;1016136bytes","independent_raw_custody_review":"in progress","partial_native_lineage":True,"full_current_main_composition":False,"actions":False,"public_integrated":False,"installed":False},text="Original additive damped-motion course/lab qualified natively and preserved in immutable source+receiving custody. Existing learner/model/importer/catalog and Spring-energy#121 preserved. Browser raw profile/startup netlog remain private; no browser-wide zero-network or whole-domain numerical certificate. Required composition/hosted/publication gates remain pending under Actions hold; no goal/attempt lease or live adoption.")
+log=ConscienceLog(pathlib.Path("/var/lib/hamon/conscience.sqlite3"),initialize=False)
+try:event=log.append("conscience.decision",actor="chatgpt:/root/migration_execution",payload=copy.deepcopy(payload))
+finally:log.close()
+meta={k:v for k,v in event.items() if k not in ("payload","payload_ref")}
+out={"payload":payload,"event":meta}
+(root/"custody/held-claim.json").write_text(json.dumps(out,indent=2)+"\n")
+coord=pathlib.Path("/srv/hamon-estate/coord/chatgpt-713adaab-recall-damped-motion.json")
+coord.write_text(json.dumps({"actor":"chatgpt:/root/migration_execution","status":payload["value"],"claim_key":key,"scope":payload["scope"],"source_commit":payload["source_commit"],"workspace":str(root),"native_packet":packet,"event":meta},indent=2)+"\n")
+print(json.dumps(meta))

@@ -1,0 +1,342 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>Damped motion · RecallWeave</title>
+<style>
+:root{font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#142b35;background:#f3f6f7;line-height:1.55}
+*{box-sizing:border-box}body{margin:0}main{max-width:1120px;margin:auto;padding:28px 24px 60px}h1{font-size:clamp(2rem,4vw,3rem);line-height:1.15;margin:.2em 0}h2{font-size:1.25rem;margin:0 0 .7rem}h3{font-size:1rem}p{max-width:80ch}.eyebrow{font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#315e69;font-size:.8rem}.intro{font-size:1.1rem;color:#38545f}.grid{display:grid;grid-template-columns:minmax(260px,330px) minmax(0,1fr);gap:20px;align-items:start}.panel{background:white;border:1px solid #d4dfe2;border-radius:14px;padding:20px;margin-bottom:20px;min-width:0}label{display:block;font-weight:600;font-size:.94rem;margin:12px 0 4px}input{width:100%;border:1px solid #829ca5;border-radius:6px;padding:9px;font:inherit;min-width:0}input[type=range]{padding:0;accent-color:#087881}input:focus,button:focus,a:focus,summary:focus{outline:3px solid #d6a929;outline-offset:3px}button{border:1px solid #436b75;border-radius:7px;background:#fff;color:#173e4a;font:inherit;padding:9px 12px;cursor:pointer}button:hover:not(:disabled){background:#eef5f6}button.primary{background:#075d67;color:white;border-color:#075d67;width:100%;font-weight:700;margin-top:16px}button:disabled{opacity:.5;cursor:not-allowed}.presets,.downloads{display:flex;flex-wrap:wrap;gap:8px}.presets button{font-size:.9rem}.hint,.small{font-size:.88rem;color:#49616b}.status{padding:12px 14px;border-left:4px solid #137782;background:#e8f4f5;border-radius:3px;min-height:3.5em;margin:0 0 18px}.status.error{border-color:#a32727;background:#fff0ec;color:#8b2424}.badge{display:inline-block;background:#dbeef0;color:#144a54;padding:4px 10px;border-radius:20px;font-weight:700}.numbers{display:grid;grid-template-columns:1fr 1fr;gap:4px 14px;font-variant-numeric:tabular-nums}.numbers dt{color:#49616b}.numbers dd{margin:0;text-align:right;overflow-wrap:anywhere}.plot{width:100%;height:auto;display:block;background:#fbfdfd;border:1px solid #e1e9ec;border-radius:8px}.plot text{font:12px system-ui;fill:#3e5760}.plot path{fill:none;stroke-width:2}.plot .axis{stroke:#80969f;stroke-width:1}.plot .marker{stroke:#a75916;stroke-width:1;stroke-dasharray:4 3}.inspection{display:grid;grid-template-columns:1fr 130px;gap:16px;align-items:end}.stale #plots,.stale #state-values{opacity:.45}.footer{border-top:1px solid #d4dfe2;padding-top:20px}a{color:#075d67}code{overflow-wrap:anywhere}details summary{cursor:pointer;font-weight:700}
+@media(max-width:760px){main{padding:20px 14px 40px}.grid{grid-template-columns:1fr}.panel{padding:16px}.inspection{grid-template-columns:1fr}.numbers{font-size:.92rem}.downloads button{flex:1 1 180px}}
+@media print{body{background:white}main{max-width:none}.grid{grid-template-columns:1fr}.panel{break-inside:avoid}button,input,.presets{display:none}}
+</style>
+</head>
+<body>
+<main>
+<header>
+<div class="eyebrow">RecallWeave · original analytical lab</div>
+<h1>Damped motion</h1>
+<p class="intro">See how a spring and a viscous damper turn initial motion into four response regimes. Inspect the forces, follow the energy, then test your reasoning in the original course.</p>
+<p class="small">Ideal unforced horizontal mass: <strong>m x″ + b x′ + kx = 0</strong>, with <strong>b = 2ζ√(mk)</strong>. Closed-form calculations in JavaScript binary64; no measured apparatus or time-stepping solver.</p>
+</header>
+<p id="status" class="status" role="status" aria-live="polite">Preparing the initial experiment…</p>
+<div id="experiment-region" class="grid">
+<section class="panel" aria-labelledby="parameters-title">
+<h2 id="parameters-title">1. Choose the motion</h2>
+<div class="presets" aria-label="Apply a complete preset">
+<button type="button" data-preset="undamped">Undamped</button>
+<button type="button" data-preset="underdamped">Underdamped</button>
+<button type="button" data-preset="critical">Critical</button>
+<button type="button" data-preset="overdamped">Overdamped</button>
+<button type="button" data-preset="crossing">Critical crossing</button>
+<button type="button" data-preset="rest">At rest</button>
+</div>
+<form id="parameters" novalidate>
+<label for="mass">Mass m (kg)</label><input id="mass" name="mass" value="1" inputmode="decimal" aria-describedby="parameter-limits">
+<label for="stiffness">Stiffness k (N/m)</label><input id="stiffness" name="stiffness" value="4" inputmode="decimal">
+<label for="dampingRatio">Damping ratio ζ</label><input id="dampingRatio" name="dampingRatio" value="0.25" inputmode="decimal">
+<label for="x0">Initial displacement x₀ (m)</label><input id="x0" name="x0" value="0.5" inputmode="decimal">
+<label for="v0">Initial velocity v₀ (m/s)</label><input id="v0" name="v0" value="0" inputmode="decimal">
+<label for="duration">Time window (s)</label><input id="duration" name="duration" value="10" inputmode="decimal">
+<button class="primary" type="submit">Apply parameters</button>
+<p id="parameter-limits" class="hint">m: 0.1–10 · k: 0.1–100 · ζ: 0–3 · x₀: −1–1 · v₀: −2–2 · window: 0.1–20. Editing marks the previous experiment stale until you apply.</p>
+</form>
+</section>
+<div>
+<section class="panel" aria-labelledby="inspect-title">
+<h2 id="inspect-title">2. Inspect an applied experiment</h2>
+<p><span id="regime" class="badge">—</span> <span id="derived" class="small"></span></p>
+<div class="inspection">
+<div><label for="time-slider">Inspection time</label><input id="time-slider" type="range" min="0" max="10" step="any" value="0" disabled></div>
+<div><label for="time-number">Time (s)</label><input id="time-number" type="text" inputmode="decimal" value="0" disabled></div>
+</div>
+<div id="plots">
+<h3>Displacement x (m)</h3><svg id="displacement-plot" class="plot" viewBox="0 0 660 250" role="img" aria-label="Displacement versus time; numerical state follows below"></svg>
+<h3>Mechanical energy E (J)</h3><svg id="energy-plot" class="plot" viewBox="0 0 660 250" role="img" aria-label="Mechanical energy versus time; numerical state follows below"></svg>
+<p id="sampling" class="hint"></p>
+</div>
+<h3>State at the inspection time</h3>
+<dl id="state-values" class="numbers" aria-live="off"></dl>
+<p class="hint">Energy transferred = E(0) − E(t). Tiny negative residuals can occur from roundoff; the exact model never creates mechanical energy. At rest, plot scales use a visible reference span.</p>
+<button id="download-observation" type="button" disabled>Download applied observation JSON</button>
+</section>
+</div>
+</div>
+<section class="panel" aria-labelledby="learn-title">
+<h2 id="learn-title">3. Explain what you see</h2>
+<p>Use the same initial displacement with ζ = 0, 0.25, 1 and 2. Then try <strong>Critical crossing</strong>: non-oscillatory does not mean “never crosses equilibrium.” Initial velocity matters.</p>
+<div class="downloads">
+<button id="download-course" type="button">Download the 16-question course</button>
+<button id="download-guide" type="button">Download the worked guide</button>
+<a href="../demo.html">Open the existing RecallWeave learner</a>
+</div>
+<p class="hint">In the learner, select the downloaded JSON, inspect its preview and explicitly start. Feedback, review, practice and study notes use the existing learner. Keep the repository layout for the learner link; the lab itself works as a standalone file.</p>
+<details>
+<summary>Model and limits</summary>
+<p>The damper force −bv opposes velocity; the spring force −kx opposes displacement. Mechanical energy E = ½mv² + ½kx² obeys dE/dt = −bv². No drive, dry friction, collision or nonlinear effect is included.</p>
+<p>Regimes use the exact entered ζ: zero is undamped, values strictly between zero and one are underdamped, exactly one is critical, and values above one are overdamped. Critical and overdamped trajectories may cross equilibrium under adverse initial velocity. A settling claim needs a tolerance and initial conditions.</p>
+<p>Curves join analytical samples. Extra samples resolve exponential decay near the start. The full grid and exact applied parameters travel with the observation download. This is a bounded teaching model, not a measured apparatus.</p>
+</details>
+</section>
+<footer class="footer small">Original course, worked examples and lab diagrams: CC0-1.0. Mathematical background: MIT OpenCourseWare 18.03SC and RES.8-009 (links in the guide). No source passages or figures copied. No learner state is stored by this lab.</footer>
+</main>
+<script>
+'use strict';
+/**
+ * Original RecallWeave lab: m*x'' + b*x' + k*x = 0, b=2*zeta*sqrt(m*k).
+ * One ideal horizontal point mass; linear spring and viscous damper; no drive.
+ * Closed analytical response evaluated with JavaScript binary64 arithmetic.
+ */
+const PARAMETER_LIMITS = Object.freeze({
+  mass: Object.freeze([0.1, 10, 'Mass (kg)']),
+  stiffness: Object.freeze([0.1, 100, 'Stiffness (N/m)']),
+  dampingRatio: Object.freeze([0, 3, 'Damping ratio']),
+  x0: Object.freeze([-1, 1, 'Initial displacement (m)']),
+  v0: Object.freeze([-2, 2, 'Initial velocity (m/s)']),
+  duration: Object.freeze([0.1, 20, 'Time window (s)']),
+});
+const DECIMAL = /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?$/i;
+const TAU = 2 * Math.PI;
+function readNumber(value, label, lower, upper) {
+  let number = value;
+  if (typeof value === 'string') {
+    const text = value.trim();
+    if (!DECIMAL.test(text)) throw new RangeError(label + ' needs one complete decimal number.');
+    number = Number(text);
+    if (number === 0 && /[1-9]/.test(text.split(/e/i)[0]))
+      throw new RangeError(label + ' is too small to represent.');
+  }
+  if (typeof number !== 'number' || !Number.isFinite(number) || number < lower || number > upper)
+    throw new RangeError(label + ' must be between ' + lower + ' and ' + upper + '.');
+  return number === 0 ? 0 : number;
+}
+function makeExperiment(raw) {
+  if (raw === null || typeof raw !== 'object' || Array.isArray(raw))
+    throw new TypeError('Supply a complete parameter record.');
+  const values = {};
+  for (const [key, [lower, upper, label]] of Object.entries(PARAMETER_LIMITS))
+    values[key] = readNumber(raw[key], label, lower, upper);
+  const parameters = Object.freeze(values);
+  const {mass, stiffness, dampingRatio: zeta, x0, v0} = parameters;
+  const omega0 = Math.sqrt(stiffness / mass);
+  const alpha = zeta * omega0;
+  const damping = 2 * zeta * Math.sqrt(mass * stiffness);
+  const regime = zeta === 0 ? 'undamped' : zeta < 1 ? 'underdamped' :
+    zeta === 1 ? 'critical' : 'overdamped';
+  const omegaD = zeta < 1 ? omega0 * Math.sqrt((1 - zeta) * (1 + zeta)) : 0;
+  const root = zeta > 1 ? Math.sqrt((zeta - 1) * (zeta + 1)) : 0;
+  // Avoid subtraction of nearly equal positive numbers.
+  const slowRate = zeta > 1 ? omega0 / (zeta + root) : alpha;
+  const fastRate = zeta > 1 ? omega0 * (zeta + root) : alpha;
+  const initialEnergy = .5 * mass * v0 * v0 + .5 * stiffness * x0 * x0;
+  return Object.freeze({
+    parameters, regime, omega0, alpha, damping, omegaD, slowRate, fastRate,
+    initialEnergy, amplitudeBound: Math.sqrt(2 * initialEnergy / stiffness),
+  });
+}
+function sinc(value) {
+  if (Math.abs(value) < 1e-4) {
+    const square = value * value;
+    return 1 - square / 6 + square * square / 120;
+  }
+  return Math.sin(value) / value;
+}
+function stateAt(experiment, time) {
+  const {mass, stiffness, dampingRatio: zeta, x0, v0, duration} = experiment.parameters;
+  const t = readNumber(time, 'Inspection time (s)', 0, duration);
+  const {omega0, alpha, damping, omegaD, slowRate, fastRate} = experiment;
+  let x = x0, v = v0;
+  if (t !== 0 && (x0 !== 0 || v0 !== 0)) {
+    let c, s;
+    if (zeta < 1) {
+      const decay = Math.exp(-alpha * t);
+      c = decay * Math.cos(omegaD * t);
+      s = decay * t * sinc(omegaD * t);
+    } else if (zeta === 1) {
+      c = Math.exp(-alpha * t);
+      s = t * c;
+    } else {
+      const halfDifference = omega0 * Math.sqrt((zeta - 1) * (zeta + 1));
+      const slow = Math.exp(-slowRate * t), fast = Math.exp(-fastRate * t);
+      c = .5 * (slow + fast);
+      // Equivalent to exp(-alpha*t)*sinh(h*t)/h, without overflow
+      // or near-critical subtraction of two exponentials.
+      s = slow * (-Math.expm1(-2 * halfDifference * t)) / (2 * halfDifference);
+    }
+    x = x0 * c + (v0 + alpha * x0) * s;
+    v = v0 * c - (alpha * v0 + omega0 * omega0 * x0) * s;
+  }
+  const springForce = -stiffness * x, dampingForce = -damping * v;
+  const kineticEnergy = .5 * mass * v * v, springEnergy = .5 * stiffness * x * x;
+  const mechanicalEnergy = kineticEnergy + springEnergy;
+  const result = {
+    t, x, v, a: (springForce + dampingForce) / mass, springForce, dampingForce,
+    kineticEnergy, springEnergy, mechanicalEnergy, energyRate: -damping * v * v,
+    energyTransferred: experiment.initialEnergy - mechanicalEnergy,
+  };
+  return Object.freeze(Object.fromEntries(Object.entries(result).map(([key, value]) =>
+    [key, value === 0 ? 0 : value])));
+}
+function sampleTrajectory(experiment) {
+  const duration = experiment.parameters.duration;
+  const intervals = Math.max(240, Math.ceil(duration * experiment.omegaD / TAU * 48));
+  const times = new Set([0, duration]);
+  for (let i = 1; i < intervals; i++) times.add(duration * i / intervals);
+  // Add 16 intervals per decay time constant through twelve constants.
+  // A fast initial transient does not force a tiny step over the whole window.
+  for (const rate of new Set([experiment.slowRate, experiment.fastRate])) {
+    if (rate > 0) {
+      const end = Math.min(duration, 12 / rate);
+      for (let i = 1; i <= 192; i++) times.add(i === 192 ? end : end * i / 192);
+    }
+  }
+  return Object.freeze([...times].sort((a, b) => a - b).map(t => stateAt(experiment, t)));
+}
+function makeObservation(experiment, time) {
+  const state = stateAt(experiment, time);
+  const trajectory = sampleTrajectory(experiment);
+  return {
+    format: 'recallweave-damped-motion-observation/1',
+    model: "m*x''+b*x'+k*x=0; b=2*zeta*sqrt(m*k). Ideal horizontal point mass, linear spring and viscous damper; no drive.",
+    method: 'Closed analytical response evaluated with JavaScript binary64 arithmetic; not a measured apparatus or time-stepping solver.',
+    energyAccounting: 'Energy transferred is E(0)-E(t), including floating-point roundoff; no clipping or measured heat attribution.',
+    units: {mass: 'kg', stiffness: 'N/m', damping: 'N*s/m', displacement: 'm', velocity: 'm/s', acceleration: 'm/s^2', force: 'N', energy: 'J', energyRate: 'W', time: 's', angularFrequency: 'rad/s'},
+    parameters: {...experiment.parameters},
+    derived: {regime: experiment.regime, damping: experiment.damping, omega0: experiment.omega0, alpha: experiment.alpha, omegaD: experiment.omegaD, slowRate: experiment.slowRate, fastRate: experiment.fastRate},
+    initialEnergy: experiment.initialEnergy,
+    inspectionTime: state.t,
+    state,
+    sampling: {points: trajectory.length, start: 0, end: experiment.parameters.duration, minimumUniformIntervals: 240, minimumIntervalsPerSinusoidalCycle: 48, extraIntervalsPerExponentialTimeConstant: 16, extraTimeConstants: 12, grid: 'Sorted union of uniform window samples and per-rate initial-decay refinement; not a uniform step or integration grid.'},
+    trajectory,
+  };
+}
+
+const DAMPED_MOTION_COURSE_TEXT = "{\n  \"format\": \"recallweave-deck/1\",\n  \"title\": \"Damped motion: from force balance to energy loss\",\n  \"attribution\": \"Original AI-assisted questions, examples, explanations and lab for RecallWeave. Mathematical background: MIT OpenCourseWare 18.03SC Differential Equations (Fall 2011), Damped Harmonic Oscillators, https://ocw.mit.edu/courses/18-03sc-differential-equations-fall-2011/resources/mit18_03scf11_s13_2text/; and MIT RES.8-009 Introduction to Oscillations and Waves (Summer 2017), Lecture 4, https://live.ocw.mit.edu/courses/res-8-009-introduction-to-oscillations-and-waves-summer-2017/mitres_8_009su17_lec4.pdf. No source passages, exercises or figures are copied.\",\n  \"license\": \"Original question wording, explanations, worked examples and lab diagrams: CC0-1.0. Referenced materials retain their own licenses. Other repository content is unchanged.\",\n  \"concepts\": [\n    \"force-law\",\n    \"regimes\",\n    \"initial-conditions\",\n    \"energy\"\n  ],\n  \"items\": [\n    {\n      \"id\": \"damp-balanced-forces\",\n      \"concept\": \"force-law\",\n      \"prerequisites\": [],\n      \"prompt\": \"An ideal horizontal oscillator has m = 1 kg, k = 4 N/m and b = 2 N·s/m. At one instant x = +0.25 m and v = −0.50 m/s. What is its acceleration?\",\n      \"options\": [\n        \"−2 m/s²\",\n        \"0 m/s²\",\n        \"+1 m/s²\",\n        \"+2 m/s²\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"The spring contributes −kx = −1 N. The damper contributes −bv = +1 N because the mass moves left. The net force and instantaneous acceleration are zero. The nonzero velocity means the mass is not at rest.\",\n      \"transfer\": \"Change only v to +0.50 m/s and calculate the new acceleration.\"\n    },\n    {\n      \"id\": \"damp-resists-velocity\",\n      \"concept\": \"force-law\",\n      \"prerequisites\": [],\n      \"prompt\": \"For a viscous damper with b > 0, which statement about Fd = −bv is true?\",\n      \"options\": [\n        \"The force always points toward x = 0.\",\n        \"The force always points left.\",\n        \"The force opposes the instantaneous velocity and is zero at v = 0.\",\n        \"The force depends only on the displacement.\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"A positive velocity gives a negative damping force; a negative velocity gives a positive one. This differs from the spring's displacement-dependent force. At zero velocity the viscous damping force vanishes, even away from equilibrium.\",\n      \"transfer\": \"At x > 0 and v \u003c 0, compare the directions of the spring and damping forces.\"\n    },\n    {\n      \"id\": \"damp-coefficient-units\",\n      \"concept\": \"force-law\",\n      \"prerequisites\": [],\n      \"prompt\": \"In m x″ + b x′ + k x = 0, x is in metres and time in seconds. Which units for b make every term a force?\",\n      \"options\": [\n        \"N/m\",\n        \"N·s/m\",\n        \"J/s\",\n        \"kg·m/s\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"Velocity has units m/s. Multiplying it by N·s/m gives N. The equivalent units kg/s follow from N = kg·m/s². Stiffness k instead has units N/m.\",\n      \"transfer\": \"Use dimensional analysis to check that b/(2√(mk)) is dimensionless.\"\n    },\n    {\n      \"id\": \"damp-initial-acceleration\",\n      \"concept\": \"force-law\",\n      \"prerequisites\": [],\n      \"prompt\": \"For m = 2 kg, k = 8 N/m and b = 4 N·s/m, the initial conditions are x0 = +0.50 m and v0 = +1.00 m/s. What is a0?\",\n      \"options\": [\n        \"−8 m/s²\",\n        \"−2 m/s²\",\n        \"0 m/s²\",\n        \"−4 m/s²\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"The net force is −8×0.50 −4×1.00 = −8 N. Dividing by m = 2 kg gives −4 m/s². Both spring and damper point left at this instant.\",\n      \"transfer\": \"Keep x0 fixed and choose v0 so the initial acceleration is zero.\"\n    },\n    {\n      \"id\": \"damp-classify\",\n      \"concept\": \"regimes\",\n      \"prerequisites\": [\n        \"force-law\"\n      ],\n      \"prompt\": \"Define ζ = b/(2√(mk)). For m = 1 kg, k = 9 N/m and b = 6 N·s/m, which regime applies?\",\n      \"options\": [\n        \"Undamped\",\n        \"Underdamped\",\n        \"Critical\",\n        \"Overdamped\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"Here 2√(mk) = 6 N·s/m, so ζ = 1 exactly. The characteristic equation has a repeated real root −3 s⁻¹. The lab labels the regime from the entered damping ratio; it does not round a nearby value to critical.\",\n      \"transfer\": \"Keep m and k fixed and classify b = 3 and b = 12 N·s/m.\"\n    },\n    {\n      \"id\": \"damp-frequency\",\n      \"concept\": \"regimes\",\n      \"prerequisites\": [\n        \"force-law\"\n      ],\n      \"prompt\": \"An underdamped oscillator has m = 1 kg, k = 4 N/m and b = 2 N·s/m. What is its damped angular frequency?\",\n      \"options\": [\n        \"√3 rad/s\",\n        \"2 rad/s\",\n        \"1 rad/s\",\n        \"3 rad/s\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"The natural angular frequency is ω0 = √(k/m) = 2 rad/s, and the exponential decay rate is α = b/(2m) = 1 s⁻¹. Thus ωd = √(ω0² − α²) = √3 rad/s. This is an angular frequency, not cycles per second.\",\n      \"transfer\": \"Calculate the period 2π/ωd and compare it with the undamped period.\"\n    },\n    {\n      \"id\": \"damp-overdamped-roots\",\n      \"concept\": \"regimes\",\n      \"prerequisites\": [\n        \"force-law\"\n      ],\n      \"prompt\": \"With m = 1 kg, k = 1 N/m and b = 2.5 N·s/m, the characteristic roots are −0.5 s⁻¹ and −2 s⁻¹. Which form describes every displacement solution?\",\n      \"options\": [\n        \"A constant-amplitude sinusoid.\",\n        \"A sum A e^(−0.5t) + B e^(−2t), with A and B set by x0 and v0.\",\n        \"Only A e^(−2t), regardless of initial velocity.\",\n        \"A line x0 + v0t.\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"The two distinct negative real roots give two decaying exponential terms. Both coefficients are generally needed to satisfy the two initial conditions. A coefficient can vanish for a special initial state, but not for all states.\",\n      \"transfer\": \"Choose A = 1 and B = −1. Find x0 and v0 and explain why non-oscillatory does not mean motionless.\"\n    },\n    {\n      \"id\": \"damp-more-not-always-faster\",\n      \"concept\": \"regimes\",\n      \"prerequisites\": [\n        \"force-law\"\n      ],\n      \"prompt\": \"Fix m = k = 1 in consistent SI units. Compare b = 2 with b = 10. Which statement is justified by their characteristic roots?\",\n      \"options\": [\n        \"b = 10 guarantees earlier arrival at x = 0 for every initial state.\",\n        \"Both choices have the same roots because m and k are fixed.\",\n        \"The slow root at b = 10 is about −0.101 s⁻¹; more damping can produce a much slower tail.\",\n        \"b = 10 produces sustained oscillation.\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"At b = 2 the repeated root is −1 s⁻¹. At b = 10 the slow root is (−10 + √96)/2 ≈ −0.101 s⁻¹. When its coefficient is nonzero, this term decays slowly. Settling also requires a stated tolerance and initial conditions; there is no universal fastest-arrival claim here.\",\n      \"transfer\": \"Compare the critical and strongly overdamped presets for the same displacement and zero initial velocity.\"\n    },\n    {\n      \"id\": \"damp-critical-release\",\n      \"concept\": \"initial-conditions\",\n      \"prerequisites\": [\n        \"regimes\"\n      ],\n      \"prompt\": \"Let m = k = 1, b = 2, x0 = 1 and v0 = 0 in SI units. Which exact displacement satisfies the equation and both initial conditions?\",\n      \"options\": [\n        \"e^(−t)\",\n        \"t e^(−t)\",\n        \"(1 − t)e^(−t)\",\n        \"(1 + t)e^(−t)\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"The critical form is (A + Bt)e^(−t). Its initial displacement is A and its initial velocity is B − A. Therefore A = B = 1. The extra t term is essential to obtain zero initial velocity.\",\n      \"transfer\": \"Differentiate your selected expression and evaluate v at t = 1 s.\"\n    },\n    {\n      \"id\": \"damp-critical-kick\",\n      \"concept\": \"initial-conditions\",\n      \"prerequisites\": [\n        \"regimes\"\n      ],\n      \"prompt\": \"For m = k = 1 and b = 2, start at x0 = 0 with v0 = 1 m/s. At what positive time does x(t) reach its maximum?\",\n      \"options\": [\n        \"0.5 s\",\n        \"1 s\",\n        \"2 s\",\n        \"It has no positive maximum.\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"The displacement is x(t) = t e^(−t), so v(t) = (1 − t)e^(−t). Velocity changes from positive to negative at t = 1 s, where x = 1/e m. Starting at equilibrium does not mean staying there when initial velocity is nonzero.\",\n      \"transfer\": \"Inspect t = 1 s in the lab and compare spring force, damping force and acceleration.\"\n    },\n    {\n      \"id\": \"damp-critical-crossing\",\n      \"concept\": \"initial-conditions\",\n      \"prerequisites\": [\n        \"regimes\"\n      ],\n      \"prompt\": \"For m = k = 1 and b = 2, take x0 = 0.25 m and v0 = −1 m/s. The solution is x(t) = (0.25 − 0.75t)e^(−t). What follows?\",\n      \"options\": [\n        \"Critical damping forbids a crossing of x = 0.\",\n        \"The mass crosses x = 0 once at t = 1/3 s.\",\n        \"It crosses x = 0 every 1/3 s forever.\",\n        \"It is at rest for all t.\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"The exponential factor is positive at every finite time, so the single zero comes from 0.25 − 0.75t = 0. Critical damping removes sinusoidal oscillation; an adverse initial velocity can still carry the mass across equilibrium once.\",\n      \"transfer\": \"Evaluate the velocity at the crossing. Explain why zero displacement does not imply zero energy.\"\n    },\n    {\n      \"id\": \"damp-rest\",\n      \"concept\": \"initial-conditions\",\n      \"prerequisites\": [\n        \"regimes\"\n      ],\n      \"prompt\": \"For any admitted m > 0, k > 0 and b ≥ 0 in this unforced model, what happens when x0 = v0 = 0?\",\n      \"options\": [\n        \"Damping creates a first oscillation.\",\n        \"The mass moves if b exceeds the critical value.\",\n        \"The unique response is x(t) = v(t) = 0.\",\n        \"The motion cannot be determined without a damping phase.\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"The zero function satisfies the linear equation and both initial conditions. The unforced system has no energy to release, and the damper cannot add energy. The analytical response therefore stays at equilibrium.\",\n      \"transfer\": \"Compare the same zero initial conditions in all four regime presets.\"\n    },\n    {\n      \"id\": \"damp-mechanical-energy\",\n      \"concept\": \"energy\",\n      \"prerequisites\": [\n        \"force-law\"\n      ],\n      \"prompt\": \"At an instant, m = 2 kg, k = 8 N/m, x = 0.25 m and v = −0.50 m/s. What is E = ½mv² + ½kx²?\",\n      \"options\": [\n        \"0.25 J\",\n        \"0.50 J\",\n        \"0.75 J\",\n        \"−0.50 J\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"Kinetic energy is ½×2×0.50² = 0.25 J and spring energy is ½×8×0.25² = 0.25 J. Their sum is 0.50 J. Velocity's sign does not make kinetic energy negative.\",\n      \"transfer\": \"Find the maximum displacement compatible with this energy if all of it were spring energy.\"\n    },\n    {\n      \"id\": \"damp-energy-rate\",\n      \"concept\": \"energy\",\n      \"prerequisites\": [\n        \"force-law\"\n      ],\n      \"prompt\": \"For b = 3 N·s/m and v = −0.50 m/s, what is the instantaneous mechanical-energy rate dE/dt?\",\n      \"options\": [\n        \"−0.75 W\",\n        \"+0.75 W\",\n        \"−1.50 W\",\n        \"0 W\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"Multiplying the equation of motion by v gives dE/dt = −bv². Here it is −3×0.25 = −0.75 W. Mechanical energy leaves the modeled mass-and-spring store regardless of the direction of motion.\",\n      \"transfer\": \"At the same speed in the opposite direction, compare the damping force and its power.\"\n    },\n    {\n      \"id\": \"damp-turning-point\",\n      \"concept\": \"energy\",\n      \"prerequisites\": [\n        \"force-law\"\n      ],\n      \"prompt\": \"A damped oscillator is momentarily at a turning point with x ≠ 0 and v = 0. Which statement is correct?\",\n      \"options\": [\n        \"All energy is zero.\",\n        \"The viscous damping force and instantaneous energy-loss rate are zero, but the spring can accelerate the mass next.\",\n        \"Damping must add energy to restart motion.\",\n        \"The system has become permanently undamped.\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"At that instant −bv = 0 and −bv² = 0. Spring energy ½kx² remains positive and the spring acceleration is nonzero. As velocity develops, energy can again decrease. An instant with zero power is not a permanently lossless trajectory.\",\n      \"transfer\": \"Use an underdamped preset and compare a turning point with a nearby time.\"\n    },\n    {\n      \"id\": \"damp-energy-accounting\",\n      \"concept\": \"energy\",\n      \"prerequisites\": [\n        \"initial-conditions\"\n      ],\n      \"prompt\": \"An unforced ideal viscously damped oscillator starts with E(0) = 0.50 J and later has E(t) = 0.20 J. What does E(0) − E(t) = 0.30 J represent in this model?\",\n      \"options\": [\n        \"Mechanical energy created by the spring.\",\n        \"The current kinetic energy alone.\",\n        \"Energy transferred out of the modeled mechanical store through damping, up to numerical roundoff in a calculation.\",\n        \"Proof that a measured apparatus has exactly 0.30 J of heat in one component.\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"The model's energy identity is E(t) + ∫0ᵗ b v(s)² ds = E(0), so the difference is the energy transferred out of the mass-and-spring mechanical store. A numerical evaluation has finite precision. The ideal model does not measure heat distribution in a real apparatus.\",\n      \"transfer\": \"Set ζ = 0, inspect several times, and explain the expected energy difference and any tiny floating-point residual.\"\n    }\n  ]\n}\n";
+const DAMPED_MOTION_GUIDE_TEXT = "# Damped motion: force, response, and energy\n\nOpen `damped-motion-lab.html` directly in a modern browser. The standalone file contains this analytical lab, a guide, and an original sixteen-question course. It needs no server, account, external assets or package. Download the course, open the repository's current `demo.html`, select the JSON, inspect the preview and explicitly start. The existing learner provides feedback, review, practice and study notes; importing content does not change its model.\n\n## The system\n\nOne point mass moves horizontally with displacement measured from equilibrium. The spring force is Fs = −kx, the viscous damping force is Fd = −bv, and the unforced equation is m x″ + b x′ + kx = 0.\n\nPositive displacement and velocity point right. Mass m is in kg, stiffness k in N/m and damping coefficient b in N·s/m (equivalently kg/s). No drive, dry friction, collision, nonlinear spring or thermal model is included. This is a teaching model, not a measured apparatus or calibration tool.\n\nThe controls use the dimensionless damping ratio ζ and calculate b = 2ζ√(mk). Write ω0 = √(k/m) and α = ζω0.\n\n| Entered ratio | Regime | Response ingredients |\n| --- | --- | --- |\n| ζ = 0 | Undamped | Sinusoidal motion; constant mechanical energy |\n| 0 \u003c ζ \u003c 1 | Underdamped | Sinusoidal terms multiplied by exp(−αt) |\n| ζ = 1 exactly | Critical | A linear polynomial in t multiplied by exp(−ω0t) |\n| ζ > 1 | Overdamped | Two negative real exponential rates |\n\nThe regime uses the entered ratio without rounding a nearby value to one. Calculations use binary64 arithmetic, so small differences can be below display precision.\n\n## Two initial conditions\n\nFor 0 ≤ ζ \u003c 1, let ωd = ω0√(1−ζ²). Then\n\nx(t) = exp(−αt) [x0 cos(ωd t) + (v0 + αx0) sin(ωd t)/ωd].\n\nAt ζ = 1, the continuous limit is\n\nx(t) = exp(−ω0t) [x0 + (v0 + ω0x0)t].\n\nFor ζ > 1, the two rates are −ω0(ζ ± √(ζ²−1)). Both exponential coefficients are set by x0 and v0. The lab evaluates equivalent stable combinations of these functions, rather than time-stepping a differential equation.\n\nA zero initial displacement does not guarantee rest when velocity is nonzero. With both x0 and v0 zero, every admitted regime remains at rest.\n\n**Critical release.** Let m = k = ζ = 1, x0 = 1 and v0 = 0. Then b = 2, x = (1+t)exp(−t), and v = −t exp(−t). At t = 1 s, x = 2/e m and v = −1/e m/s.\n\n**Critical crossing.** Keep m = k = ζ = 1 but set x0 = 0.25 and v0 = −1. Now x = (0.25−0.75t)exp(−t), which crosses equilibrium once at t = 1/3 s. Critical damping removes sinusoidal oscillation; an adverse initial velocity can still carry the mass across equilibrium. Overdamped responses can also cross under suitable initial conditions.\n\nAvoid a universal “critical is fastest” claim. A settling statement needs fixed initial conditions, a tolerance and a definition of remaining inside it. Heavy damping can have a slow exponential tail. This lab makes no fastest-settling optimization claim.\n\n## Follow the energy\n\nMechanical energy in the mass-and-spring store is E = ½mv² + ½kx². Differentiation and the force equation give\n\ndE/dt = v(mv′ + kx) = −bv².\n\nThus energy never increases in the exact unforced model for b ≥ 0 and is constant for b = 0. At a turning point v = 0, instantaneous energy-loss rate is zero, but spring energy and acceleration can remain nonzero.\n\nFor m = 2, k = 8, x = 0.25 and v = −0.50, kinetic and spring energy are each 0.25 J; total energy is 0.50 J. If b = 3, the energy rate is −0.75 W.\n\nThe lab reports E(0)−E(t) as energy transferred out of the modeled mechanical store. Floating-point roundoff is retained, including a possible tiny negative residual for a theoretically lossless response. The ideal model does not locate or measure heat in a real device.\n\n## Use the lab deliberately\n\n1. Select a preset or enter all six parameters. Editing marks the old experiment stale and disables inspection and observation download.\n2. Choose **Apply parameters**. Only a complete valid record creates a new experiment. Invalid fields receive an actionable message.\n3. Move the inspection slider or enter a time within the applied window. The numeric state and vertical plot markers refer to that time.\n4. Compare displacement and energy. Each plot has its own labeled vertical scale and units. Lines join exact analytical samples; they are not integration steps. Sampling includes at least 48 intervals per sinusoidal cycle, a baseline time grid and extra points resolving exponential decay near the start.\n5. Download an observation JSON containing exact applied parameters, the inspected state, all samples and the grid policy. An unapplied draft cannot export as if applied.\n\nTeaching bounds: m in [0.1,10] kg; k in [0.1,100] N/m; ζ in [0,3]; x0 in [−1,1] m; v0 in [−2,2] m/s; duration in [0.1,20] s. These are not engineering design limits.\n\nCompare ζ = 0, 0.25, 1 and 2 for the same displacement and zero velocity. Then try negative initial velocity in the critical case. Explain the roles of the roots and initial conditions, and use the original course in the existing learner to check your reasoning.\n\n## Reproducibility and attribution\n\nSource consists of the new core, UI, template, JSON course and this guide. Run `node tools/build-damped-motion.mjs` to regenerate the standalone file, or append `--check` to check exact agreement. The unchanged course codec validates structure; that alone does not establish mathematical correctness.\n\nOriginal lesson wording, worked examples and lab diagrams: CC0-1.0. Background references retain their own licenses: [MIT 18.03SC, Damped Harmonic Oscillators](https://ocw.mit.edu/courses/18-03sc-differential-equations-fall-2011/resources/mit18_03scf11_s13_2text/) and [MIT RES.8-009, Lecture 4](https://live.ocw.mit.edu/courses/res-8-009-introduction-to-oscillations-and-waves-summer-2017/mitres_8_009su17_lec4.pdf). No source passages, exercises or figures are copied.\n";
+(() => {
+  const $ = id => document.getElementById(id);
+  const form = $('parameters'), fields = Object.keys(PARAMETER_LIMITS);
+  const slider = $('time-slider'), timeInput = $('time-number'), downloadButton = $('download-observation');
+  let applied = null, samples = null, inspectionTime = 0, validInspection = false;
+  const standard = {mass:1, stiffness:4, x0:.5, v0:0, duration:10};
+  const presets = {
+    undamped:{...standard,dampingRatio:0}, underdamped:{...standard,dampingRatio:.25},
+    critical:{...standard,dampingRatio:1}, overdamped:{...standard,dampingRatio:2},
+    crossing:{mass:1,stiffness:1,dampingRatio:1,x0:.25,v0:-1,duration:4},
+    rest:{...standard,dampingRatio:.25,x0:0,v0:0,duration:5},
+  };
+  const format = value => value === 0 ? '0' :
+    Math.abs(value) >= 1e5 || Math.abs(value) < 1e-5 ? value.toExponential(6) : Number(value.toPrecision(8)).toString();
+  function message(text, error = false) {
+    $('status').textContent = text; $('status').classList.toggle('error', error);
+  }
+  function markStale() {
+    applied = null; samples = null; validInspection = false;
+    $('experiment-region').classList.add('stale');
+    slider.disabled = true; timeInput.disabled = true; downloadButton.disabled = true;
+    message('Parameters edited. The faded display is the previous experiment. Apply the complete draft to inspect or download new results.');
+  }
+  function element(tag, attributes, text) {
+    const node = document.createElementNS('http://www.w3.org/2000/svg',tag);
+    for (const [key,value] of Object.entries(attributes)) node.setAttribute(key,String(value));
+    if (text !== undefined) node.textContent = text;
+    return node;
+  }
+  function plot(id, field, low, high, unit, colour) {
+    const svg = $(id), left=76, right=638, top=20, bottom=212;
+    const px = t => left+t/applied.parameters.duration*(right-left);
+    const py = y => bottom-(y-low)/(high-low)*(bottom-top);
+    svg.replaceChildren();
+    for(let i=0;i<=4;i++) {
+      const t=applied.parameters.duration*i/4;
+      svg.append(element('line',{x1:px(t),y1:top,x2:px(t),y2:bottom,stroke:'#e5edef'}));
+      svg.append(element('text',{x:px(t),y:231,'text-anchor':'middle'},format(t)));
+    }
+    for(let i=0;i<=2;i++) {
+      const y=low+(high-low)*i/2;
+      svg.append(element('line',{x1:left,y1:py(y),x2:right,y2:py(y),stroke:'#e5edef'}));
+      svg.append(element('text',{x:left-8,y:py(y)+4,'text-anchor':'end'},format(y)));
+    }
+    svg.append(element('line',{x1:left,y1:bottom,x2:right,y2:bottom,class:'axis'}));
+    svg.append(element('line',{x1:left,y1:top,x2:left,y2:bottom,class:'axis'}));
+    svg.append(element('text',{x:358,y:247,'text-anchor':'middle'},'Time (s)'));
+    svg.append(element('text',{x:10,y:13},unit));
+    const d=samples.map((s,i)=>(i?'L':'M')+px(s.t).toFixed(3)+','+py(s[field]).toFixed(3)).join(' ');
+    svg.append(element('path',{d,stroke:colour}));
+    svg.append(element('line',{id:id+'-marker',x1:px(inspectionTime),x2:px(inspectionTime),y1:top,y2:bottom,class:'marker'}));
+  }
+  function curves() {
+    const span=applied.amplitudeBound>0?applied.amplitudeBound*1.08:1;
+    plot('displacement-plot','x',-span,span,'x (m)','#087881');
+    plot('energy-plot','mechanicalEnergy',0,applied.initialEnergy>0?applied.initialEnergy*1.08:1,'E (J)','#854c95');
+    $('sampling').textContent=samples.length+' analytical samples; at least 48 intervals per sinusoidal cycle plus decay-time refinement. Lines connect samples, not integration steps.';
+  }
+  function show(state) {
+    const rows=[['Time (s)',state.t],['Displacement x (m)',state.x],['Velocity v (m/s)',state.v],
+      ['Acceleration a (m/s²)',state.a],['Spring force (N)',state.springForce],['Damping force (N)',state.dampingForce],
+      ['Kinetic energy (J)',state.kineticEnergy],['Spring energy (J)',state.springEnergy],
+      ['Mechanical energy (J)',state.mechanicalEnergy],['Energy rate (W)',state.energyRate],
+      ['Energy transferred (J)',state.energyTransferred]];
+    const dl=$('state-values'); dl.replaceChildren();
+    for(const [label,value] of rows) {
+      const dt=document.createElement('dt'),dd=document.createElement('dd');
+      dt.textContent=label; dd.textContent=format(value); dl.append(dt,dd);
+    }
+    const x=76+state.t/applied.parameters.duration*(638-76);
+    for(const id of ['displacement-plot-marker','energy-plot-marker']) {
+      $(id).setAttribute('x1',String(x)); $(id).setAttribute('x2',String(x));
+    }
+  }
+  function inspect(value) {
+    if(!applied) return;
+    try {
+      const state=stateAt(applied,value);
+      inspectionTime=state.t; slider.value=String(state.t); show(state);
+      validInspection=true; downloadButton.disabled=false;
+      message('Applied '+applied.regime+' experiment. Inspecting t = '+format(state.t)+' s. Results use the applied parameters.');
+    } catch(error) {
+      validInspection=false; downloadButton.disabled=true;
+      message(error.message+' The last valid state remains displayed; enter a valid inspection time.',true);
+    }
+  }
+  function apply(raw) {
+    try {
+      const next=makeExperiment(raw), trajectory=sampleTrajectory(next);
+      applied=next; samples=trajectory; inspectionTime=0; validInspection=true;
+      $('experiment-region').classList.remove('stale');
+      slider.max=String(next.parameters.duration); slider.value='0'; timeInput.value='0';
+      slider.disabled=false; timeInput.disabled=false;
+      $('regime').textContent=next.regime;
+      $('derived').textContent='b = '+format(next.damping)+' N·s/m · ω₀ = '+format(next.omega0)+' rad/s';
+      curves(); inspect(0);
+    } catch(error) {markStale(); message(error.message+' No new experiment was applied.',true);}
+  }
+  function download(name,text,type) {
+    const url=URL.createObjectURL(new Blob([text],{type})), link=document.createElement('a');
+    link.href=url; link.download=name; document.body.append(link); link.click(); link.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),1000);
+  }
+  form.addEventListener('input',markStale);
+  form.addEventListener('submit',event=>{
+    event.preventDefault(); apply(Object.fromEntries(fields.map(key=>[key,$(key).value])));
+  });
+  for(const button of document.querySelectorAll('[data-preset]')) button.addEventListener('click',()=>{
+    const raw=presets[button.dataset.preset];
+    for(const key of fields) $(key).value=String(raw[key]);
+    apply(raw);
+  });
+  slider.addEventListener('input',()=>{timeInput.value=slider.value; inspect(slider.value);});
+  timeInput.addEventListener('input',()=>inspect(timeInput.value));
+  downloadButton.addEventListener('click',()=>{
+    if(applied&&validInspection) download('damped-motion-observation.json',
+      JSON.stringify(makeObservation(applied,inspectionTime),null,2)+'\n','application/json;charset=utf-8');
+  });
+  $('download-course').addEventListener('click',()=>download('damped-motion.json',DAMPED_MOTION_COURSE_TEXT,'application/json;charset=utf-8'));
+  $('download-guide').addEventListener('click',()=>download('damped-motion.md',DAMPED_MOTION_GUIDE_TEXT,'text/markdown;charset=utf-8'));
+  apply(Object.fromEntries(fields.map(key=>[key,$(key).value])));
+})();
+
+</script>
+</body>
+</html>

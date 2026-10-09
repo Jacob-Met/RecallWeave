@@ -1,0 +1,17 @@
+# Damped-motion native receiving
+
+This packet qualifies an original sixteen-question course and self-contained analytical lab on the existing RecallWeave learner. Open courses/damped-motion-lab.html, inspect the model, download the original course and import it through the unchanged current demo.html. No learner/model/importer/catalog or other-course code is changed.
+
+Source is frozen at native commit913c673c62a57f8d732f5c992ac18ba1ca6364ac/tree effd0c0184fb7c6395578f49093802a77c0ea57c. Its native parent is an explicitly partial baseline containing canonical README, demo and deck codec, not full GitHub main. Canonical main698902f9c9c1d5c5023092b85b3632a7cb7a01ed/tree d6d3707b691850af7928299242631534cff89aa8. Twelve intended source paths are listed in source-checkpoint.json. A dedicated README paragraph is the only existing-file change. All thirteen browser-qualified files remain byte-identical; the README addition followed that receiving and changes no executable source.
+
+Actual native Node22.22.1 receiving passed19 core tests and3 course/builder tests, zero skips. The core compared13 independent Decimal matrix-exponential cases,53 states and371 scalars with explicit fixture tolerances. The independent oracle's initial exact-series-zero self-check and newline packaging correction remain retained; its additive zero-damping label clarification does not alter original numeric references. Fixture checks are not a worst-case accuracy certificate across all binary64 inputs.
+
+A blind reviewer saw only prompts/options before freezing all16 answer indices; they match the author's pre-frozen key. A separate source-only review approved the analytical core. Neither review alone claims browser or real-apparatus qualification.
+
+The one native Chrome153.0.8010.47 pass used a fresh private profile, short private temporary path and CDP pipes, no TCP debugging port, dependency install or sandbox bypass. It passed16 receiving steps: desktop/mobile width checks, draft invalidation, all regimes, critical crossing, invalid-time refusal, actual observation/course/guide downloads, then current-learner preview, explicit start, all16 questions, feedback, review, one separate practice retry and study-notes download. Its deliberate first pass was15/16 correct, followed by one correct retry. Notes preserve all16 prompts and the entered reflection. Three PNGs show retained viewports, not whole-page visual coverage.
+
+Page CDP observed only the two local files and no runtime exception. Raw browser-startup netlog and profile remain private. network-summary.json contains aggregate event types/error counts only: not a browser-wide zero-network guarantee.
+
+native-evidence.zip preserves every selected raw source, immutable oracle/review, driver, stream, download and screenshot at its native-relative path. capsule-manifest.json lists each member's length/SHA256. Every member was reopened and compared with its original bytes. Drivers are archived as .py.txt. First UI/builder transport timeouts and subsequent absent-file readback are retained; no unknown mutation or qualification was replayed.
+
+Full current-main composition, required hosted gates and Actions-triggering publication/integration remain pending under the estate hold. No service, installed consumer, firmware, cutover, other owner or learner state was changed. Spring-energy#121 and all existing course/importer ownership remain preserved.

@@ -1,0 +1,86 @@
+import {readFile, open, rename, unlink} from 'node:fs/promises';
+import {fileURLToPath} from 'node:url';
+import {resolve, dirname} from 'node:path';
+import {randomUUID} from 'node:crypto';
+import {parseDeck} from '../src/deck.mjs';
+
+export const REPOSITORY_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+export const OUTPUT_PATH = 'courses/damped-motion-lab.html';
+const INPUTS = [
+  'courses/damped-motion-lab.template.html',
+  'courses/damped-motion-core.mjs',
+  'courses/damped-motion-ui.mjs',
+  'courses/damped-motion.json',
+  'courses/damped-motion.md',
+];
+
+function inlineCode(source) {
+  const result = source.replace(/^export (?=(?:const|function|class)\b)/gm, '');
+  if (/^\s*(?:import|export)\b/m.test(result))
+    throw new Error('Standalone inputs must not retain module dependencies.');
+  return result.replace(/<\/script/gi, '<\\/script');
+}
+
+function inlineString(text) {
+  return JSON.stringify(text).replace(/</g, '\\u003c')
+    .replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029');
+}
+
+export async function renderLab(root = REPOSITORY_ROOT) {
+  const [template, core, ui, deck, guide] =
+    await Promise.all(INPUTS.map(path => readFile(resolve(root, path), 'utf8')));
+  const parsed = parseDeck(deck);
+  if (parsed.items.length !== 16 || parsed.concepts.length !== 4)
+    throw new Error('This original course requires its reviewed sixteen questions and four concepts.');
+  const replacements = {
+    '{{DAMPED_MOTION_CORE}}': inlineCode(core),
+    '{{DAMPED_MOTION_UI}}': inlineCode(ui),
+    '{{DAMPED_MOTION_DECK_JSON}}': inlineString(deck),
+    '{{DAMPED_MOTION_GUIDE_JSON}}': inlineString(guide),
+  };
+  let remaining = template;
+  for (const token of Object.keys(replacements)) {
+    if (template.split(token).length !== 2)
+      throw new Error('Template must contain exactly one ' + token);
+    remaining = remaining.replace(token, '');
+  }
+  if (/\{\{DAMPED_MOTION_/.test(remaining)) throw new Error('Unresolved standalone token.');
+  return template.replace(/\{\{DAMPED_MOTION_(?:CORE|UI|DECK_JSON|GUIDE_JSON)\}\}/g,
+    token => replacements[token]);
+}
+
+export async function buildLab({root = REPOSITORY_ROOT, check = false} = {}) {
+  const content = await renderLab(root);
+  const output = resolve(root, OUTPUT_PATH);
+  if (check) {
+    if (await readFile(output, 'utf8') !== content)
+      throw new Error('Standalone lab differs from its current source. Run node tools/build-damped-motion.mjs.');
+    return {path: output, bytes: Buffer.byteLength(content), checked: true};
+  }
+  const temporary = output + '.tmp-' + process.pid + '-' + randomUUID();
+  let acquired = false;
+  try {
+    const handle = await open(temporary, 'wx');
+    acquired = true;
+    try { await handle.writeFile(content, 'utf8'); }
+    finally { await handle.close(); }
+    await rename(temporary, output);
+    acquired = false;
+  } finally {
+    if (acquired) await unlink(temporary).catch(error => {
+      if (error.code !== 'ENOENT') throw error;
+    });
+  }
+  return {path: output, bytes: Buffer.byteLength(content), checked: false};
+}
+
+if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  const args = process.argv.slice(2);
+  if (args.length > 1 || (args.length === 1 && args[0] !== '--check')) {
+    console.error('Usage: node tools/build-damped-motion.mjs [--check]');
+    process.exitCode = 2;
+  } else {
+    try { console.log(JSON.stringify(await buildLab({check: args.includes('--check')}))); }
+    catch (error) { console.error(error.message); process.exitCode = 1; }
+  }
+}
