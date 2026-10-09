@@ -1,0 +1,169 @@
+{
+  "schema": "recallweave.blind-questions.v1",
+  "title": "Sampled slopes: numerical differentiation",
+  "items": [
+    {
+      "id": "central-divisor",
+      "concept": "Sampled slopes",
+      "prerequisites": [],
+      "prompt": "For h > 0, a central difference uses f(x−h) and f(x+h). What is its slope?",
+      "options": [
+        "[f(x+h)−f(x−h)] / h",
+        "[f(x+h)−f(x−h)] / (2h)",
+        "[f(x+h)+f(x−h)] / (2h)"
+      ],
+      "transfer": "For x=2 and h=1/4, name both sample locations and their separation."
+    },
+    {
+      "id": "forward-quadratic",
+      "concept": "Sampled slopes",
+      "prerequisites": [],
+      "prompt": "For f(x)=x² at x=1 with h=1/2, what are the forward estimate and its signed error Q−f′(1)?",
+      "options": [
+        "5/2 and 1/2",
+        "2 and 0",
+        "3/2 and −1/2"
+      ],
+      "transfer": "Keep x=1 but use h=1/4. Derive the forward estimate from the two samples."
+    },
+    {
+      "id": "backward-negative",
+      "concept": "Sampled slopes",
+      "prerequisites": [],
+      "prompt": "For f(x)=x² at x=−1 with h=1/2, what is the backward estimate?",
+      "options": [
+        "−3/2",
+        "5/2",
+        "−5/2"
+      ],
+      "transfer": "Explain why a negative signed error here is different from a negative absolute error."
+    },
+    {
+      "id": "degree-guarantee",
+      "concept": "Exactness and symmetry",
+      "prerequisites": [
+        "Sampled slopes"
+      ],
+      "prompt": "Which statement gives polynomial degree guarantees for every point and positive h in exact arithmetic?",
+      "options": [
+        "All three rules are guaranteed exact through degree 3.",
+        "Forward/backward are guaranteed through degree 1; central through degree 2.",
+        "Central is exact only for constant functions."
+      ],
+      "transfer": "Expand (x+h)²−(x−h)² and explain the central quadratic guarantee."
+    },
+    {
+      "id": "symmetry-exact",
+      "concept": "Exactness and symmetry",
+      "prerequisites": [
+        "Sampled slopes"
+      ],
+      "prompt": "For f(x)=x⁴ at x=0, what does the central difference give for any positive h?",
+      "options": [
+        "0, exactly matching f′(0), despite degree 4 exceeding the general degree guarantee.",
+        "h³, so it cannot be exact.",
+        "Exactness is impossible because degree 4 exceeds 2."
+      ],
+      "transfer": "Try x=1 instead: explain why the symmetry argument no longer makes the endpoint values equal."
+    },
+    {
+      "id": "parallel-not-same",
+      "concept": "Exactness and symmetry",
+      "prerequisites": [
+        "Sampled slopes"
+      ],
+      "prompt": "For f(x)=x², x=1, h=1/2, the central secant has slope 2. Which geometric statement is correct?",
+      "options": [
+        "It must be the tangent through (1,1).",
+        "It cannot be parallel to the tangent because it is a secant.",
+        "It is parallel to the tangent, but at horizontal coordinate 1 its height is 5/4 rather than 1."
+      ],
+      "transfer": "For the same quadratic, derive the vertical offset of the central secant at x in terms of h."
+    },
+    {
+      "id": "cubic-halving",
+      "concept": "Step size and error",
+      "prerequisites": [
+        "Sampled slopes"
+      ],
+      "prompt": "For f(x)=x³ at x=0, the central estimate is h² and the exact derivative is 0. What happens to the absolute error when h is halved?",
+      "options": [
+        "It is multiplied by 1/2.",
+        "It is multiplied by 1/4.",
+        "It becomes exactly zero."
+      ],
+      "transfer": "Compute the exact central errors for h=1/4 and h=1/8."
+    },
+    {
+      "id": "accidental-coarse",
+      "concept": "Step size and error",
+      "prerequisites": [
+        "Sampled slopes"
+      ],
+      "prompt": "For f(x)=x²−x³ at x=0, the forward estimate is h−h². What happens when h changes from 1 to 1/2?",
+      "options": [
+        "Absolute error improves from 1 to 0.",
+        "Both estimates are exact.",
+        "The estimate changes from 0 to 1/4, so absolute error increases from 0 to 1/4."
+      ],
+      "transfer": "Derive the central estimate for this polynomial at 0, then compare all three rules at h=1."
+    },
+    {
+      "id": "translated-cubic",
+      "concept": "Step size and error",
+      "prerequisites": [
+        "Sampled slopes"
+      ],
+      "prompt": "For f(x)=x³ at x=1 with h=1/2, what are the central estimate and signed error?",
+      "options": [
+        "13/4 and 1/4",
+        "3 and 0",
+        "7/2 and 1/2"
+      ],
+      "transfer": "Expand the central quotient for x³ at general x to show why its signed error is h²."
+    },
+    {
+      "id": "zero-not-constant",
+      "concept": "Interpreting evidence",
+      "prerequisites": [
+        "Sampled slopes"
+      ],
+      "prompt": "A central sampled slope is zero for f(x)=x² at x=0. What is justified?",
+      "options": [
+        "The polynomial is constant everywhere.",
+        "The two symmetric endpoint values are equal; this does not prove the function is constant.",
+        "The endpoint values must both be zero."
+      ],
+      "transfer": "Give a nonconstant polynomial whose values at −1 and 1 match, and state what a zero secant slope alone tells you."
+    },
+    {
+      "id": "higher-order-point",
+      "concept": "Interpreting evidence",
+      "prerequisites": [
+        "Sampled slopes",
+        "Step size and error"
+      ],
+      "prompt": "For f(x)=x⁵ at x=0, the central estimate is h⁴ while the derivative is 0. Halving h changes the absolute error by which factor?",
+      "options": [
+        "1/2",
+        "1/4",
+        "1/16"
+      ],
+      "transfer": "Compare this example with x³ at 0. What differs, and what remains the same about both positive-step errors?"
+    },
+    {
+      "id": "exact-arithmetic-limit",
+      "concept": "Interpreting evidence",
+      "prerequisites": [
+        "Sampled slopes"
+      ],
+      "prompt": "This lab evaluates bounded polynomials with exact rational arithmetic. Which claim is supported?",
+      "options": [
+        "The table isolates exact discretization errors for these inputs; it does not model floating-point roundoff or noisy measurements.",
+        "Its smallest h must be best for every numerical problem.",
+        "The approximate plot proves all table values are exact."
+      ],
+      "transfer": "Name one extra source of error you would need to study before choosing a step for measured or floating-point data."
+    }
+  ]
+}

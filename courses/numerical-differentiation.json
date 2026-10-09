@@ -1,0 +1,201 @@
+{
+  "format": "recallweave-deck/1",
+  "title": "Sampled slopes: numerical differentiation",
+  "attribution": "Original HAMON learning material, 2026. Mathematical reference: NIST Digital Library of Mathematical Functions, §3.4, https://dlmf.nist.gov/3.4. Examples, explanations and transfer prompts are original.",
+  "license": "CC BY 4.0 — original course text.",
+  "concepts": [
+    "Sampled slopes",
+    "Exactness and symmetry",
+    "Step size and error",
+    "Interpreting evidence"
+  ],
+  "items": [
+    {
+      "id": "central-divisor",
+      "concept": "Sampled slopes",
+      "prerequisites": [],
+      "prompt": "For h > 0, a central difference uses f(x−h) and f(x+h). What is its slope?",
+      "options": [
+        "[f(x+h)−f(x−h)] / h",
+        "[f(x+h)−f(x−h)] / (2h)",
+        "[f(x+h)+f(x−h)] / (2h)"
+      ],
+      "answer": 1,
+      "explanation": "The two sample locations are 2h apart. A slope divides the change in function value by that full horizontal separation.",
+      "transfer": "For x=2 and h=1/4, name both sample locations and their separation."
+    },
+    {
+      "id": "forward-quadratic",
+      "concept": "Sampled slopes",
+      "prerequisites": [],
+      "prompt": "For f(x)=x² at x=1 with h=1/2, what are the forward estimate and its signed error Q−f′(1)?",
+      "options": [
+        "5/2 and 1/2",
+        "2 and 0",
+        "3/2 and −1/2"
+      ],
+      "answer": 0,
+      "explanation": "f(3/2)=9/4 and f(1)=1. Their difference 5/4 divided by 1/2 is 5/2. The exact derivative is 2, so Q−f′=1/2.",
+      "transfer": "Keep x=1 but use h=1/4. Derive the forward estimate from the two samples."
+    },
+    {
+      "id": "backward-negative",
+      "concept": "Sampled slopes",
+      "prerequisites": [],
+      "prompt": "For f(x)=x² at x=−1 with h=1/2, what is the backward estimate?",
+      "options": [
+        "−3/2",
+        "5/2",
+        "−5/2"
+      ],
+      "answer": 2,
+      "explanation": "The backward difference is [f(−1)−f(−3/2)]/(1/2)=[1−9/4]/(1/2)=−5/2. The derivative is −2, giving signed error −1/2 and absolute error 1/2.",
+      "transfer": "Explain why a negative signed error here is different from a negative absolute error."
+    },
+    {
+      "id": "degree-guarantee",
+      "concept": "Exactness and symmetry",
+      "prerequisites": [
+        "Sampled slopes"
+      ],
+      "prompt": "Which statement gives polynomial degree guarantees for every point and positive h in exact arithmetic?",
+      "options": [
+        "All three rules are guaranteed exact through degree 3.",
+        "Forward/backward are guaranteed through degree 1; central through degree 2.",
+        "Central is exact only for constant functions."
+      ],
+      "answer": 1,
+      "explanation": "For a linear polynomial, the one-sided quotient equals the constant derivative. For a quadratic, symmetric endpoint subtraction cancels the h² term before division, so the central quotient also gives the exact derivative. Higher-degree polynomials can still be exact at particular points.",
+      "transfer": "Expand (x+h)²−(x−h)² and explain the central quadratic guarantee."
+    },
+    {
+      "id": "symmetry-exact",
+      "concept": "Exactness and symmetry",
+      "prerequisites": [
+        "Sampled slopes"
+      ],
+      "prompt": "For f(x)=x⁴ at x=0, what does the central difference give for any positive h?",
+      "options": [
+        "0, exactly matching f′(0), despite degree 4 exceeding the general degree guarantee.",
+        "h³, so it cannot be exact.",
+        "Exactness is impossible because degree 4 exceeds 2."
+      ],
+      "answer": 0,
+      "explanation": "The endpoint values (−h)⁴ and h⁴ are equal, so their difference is zero. f′(0)=4·0³=0. This point-specific symmetry does not extend the guarantee to every quartic at every point.",
+      "transfer": "Try x=1 instead: explain why the symmetry argument no longer makes the endpoint values equal."
+    },
+    {
+      "id": "parallel-not-same",
+      "concept": "Exactness and symmetry",
+      "prerequisites": [
+        "Sampled slopes"
+      ],
+      "prompt": "For f(x)=x², x=1, h=1/2, the central secant has slope 2. Which geometric statement is correct?",
+      "options": [
+        "It must be the tangent through (1,1).",
+        "It cannot be parallel to the tangent because it is a secant.",
+        "It is parallel to the tangent, but at horizontal coordinate 1 its height is 5/4 rather than 1."
+      ],
+      "answer": 2,
+      "explanation": "The secant passes through (1/2,1/4) and (3/2,9/4); its line is y=2x−3/4. The tangent at x=1 is y=2x−1. Equal slopes do not mean equal lines.",
+      "transfer": "For the same quadratic, derive the vertical offset of the central secant at x in terms of h."
+    },
+    {
+      "id": "cubic-halving",
+      "concept": "Step size and error",
+      "prerequisites": [
+        "Sampled slopes"
+      ],
+      "prompt": "For f(x)=x³ at x=0, the central estimate is h² and the exact derivative is 0. What happens to the absolute error when h is halved?",
+      "options": [
+        "It is multiplied by 1/2.",
+        "It is multiplied by 1/4.",
+        "It becomes exactly zero."
+      ],
+      "answer": 1,
+      "explanation": "Replacing h by h/2 changes h² to h²/4. The error remains positive for every positive step in this experiment.",
+      "transfer": "Compute the exact central errors for h=1/4 and h=1/8."
+    },
+    {
+      "id": "accidental-coarse",
+      "concept": "Step size and error",
+      "prerequisites": [
+        "Sampled slopes"
+      ],
+      "prompt": "For f(x)=x²−x³ at x=0, the forward estimate is h−h². What happens when h changes from 1 to 1/2?",
+      "options": [
+        "Absolute error improves from 1 to 0.",
+        "Both estimates are exact.",
+        "The estimate changes from 0 to 1/4, so absolute error increases from 0 to 1/4."
+      ],
+      "answer": 2,
+      "explanation": "The derivative at 0 is 0. At h=1, h−h²=0 by cancellation; at h=1/2 it is 1/4. A smaller finite step need not improve a particular estimate when a coarse step was accidentally exact. At h=1, the central estimate is −1, so central is not always the closer rule either.",
+      "transfer": "Derive the central estimate for this polynomial at 0, then compare all three rules at h=1."
+    },
+    {
+      "id": "translated-cubic",
+      "concept": "Step size and error",
+      "prerequisites": [
+        "Sampled slopes"
+      ],
+      "prompt": "For f(x)=x³ at x=1 with h=1/2, what are the central estimate and signed error?",
+      "options": [
+        "13/4 and 1/4",
+        "3 and 0",
+        "7/2 and 1/2"
+      ],
+      "answer": 0,
+      "explanation": "f(3/2)=27/8 and f(1/2)=1/8. Their difference is 26/8=13/4 and their horizontal separation is 1. The exact derivative is 3, so the signed error is 1/4.",
+      "transfer": "Expand the central quotient for x³ at general x to show why its signed error is h²."
+    },
+    {
+      "id": "zero-not-constant",
+      "concept": "Interpreting evidence",
+      "prerequisites": [
+        "Sampled slopes"
+      ],
+      "prompt": "A central sampled slope is zero for f(x)=x² at x=0. What is justified?",
+      "options": [
+        "The polynomial is constant everywhere.",
+        "The two symmetric endpoint values are equal; this does not prove the function is constant.",
+        "The endpoint values must both be zero."
+      ],
+      "answer": 1,
+      "explanation": "For any h>0, f(−h)=f(h)=h². Equal endpoint values produce a zero secant slope although the polynomial is nonconstant. Here the exact derivative is also zero at the center, but that is a local fact.",
+      "transfer": "Give a nonconstant polynomial whose values at −1 and 1 match, and state what a zero secant slope alone tells you."
+    },
+    {
+      "id": "higher-order-point",
+      "concept": "Interpreting evidence",
+      "prerequisites": [
+        "Sampled slopes",
+        "Step size and error"
+      ],
+      "prompt": "For f(x)=x⁵ at x=0, the central estimate is h⁴ while the derivative is 0. Halving h changes the absolute error by which factor?",
+      "options": [
+        "1/2",
+        "1/4",
+        "1/16"
+      ],
+      "answer": 2,
+      "explanation": "The special point cancels lower powers of h, leaving h⁴. Thus (h/2)⁴=h⁴/16. A general second-order error description does not mean every polynomial and point exhibits exactly a factor of four.",
+      "transfer": "Compare this example with x³ at 0. What differs, and what remains the same about both positive-step errors?"
+    },
+    {
+      "id": "exact-arithmetic-limit",
+      "concept": "Interpreting evidence",
+      "prerequisites": [
+        "Sampled slopes"
+      ],
+      "prompt": "This lab evaluates bounded polynomials with exact rational arithmetic. Which claim is supported?",
+      "options": [
+        "The table isolates exact discretization errors for these inputs; it does not model floating-point roundoff or noisy measurements.",
+        "Its smallest h must be best for every numerical problem.",
+        "The approximate plot proves all table values are exact."
+      ],
+      "answer": 0,
+      "explanation": "The table is computed with reduced integer fractions, so it contains no floating-point evaluation error. Approximate numbers and SVG coordinates are display aids only. Real sampled data and floating-point evaluation introduce additional effects outside this model.",
+      "transfer": "Name one extra source of error you would need to study before choosing a step for measured or floating-point data."
+    }
+  ]
+}

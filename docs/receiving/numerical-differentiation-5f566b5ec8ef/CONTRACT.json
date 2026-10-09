@@ -1,0 +1,68 @@
+{
+  "schema": "hamon.outcome-contract.v1",
+  "actor": "chatgpt:5f566b5ec8ef:mac_continuity",
+  "frozenAt": "2026-10-09T06:02:53.437Z",
+  "base": "698902f9c9c1d5c5023092b85b3632a7cb7a01ed",
+  "baseLeaves": 2915,
+  "outcome": "A learner estimates a polynomial's derivative from sampled values, compares forward/backward/central slopes with the exact analytic derivative, and studies six exact refinement levels through an original course and direct-open lab.",
+  "scope": [
+    "src/numerical-differentiation.mjs",
+    "src/numerical-differentiation-ui.mjs",
+    "courses/numerical-differentiation.json",
+    "courses/numerical-differentiation.md",
+    "courses/numerical-differentiation-lab.template.html",
+    "courses/numerical-differentiation-lab.html",
+    "tools/build-numerical-differentiation.mjs",
+    "tools/check-numerical-differentiation-browser.py",
+    "tests/numerical-differentiation.test.mjs",
+    "tests/numerical-differentiation-course.test.mjs",
+    "docs/receiving/numerical-differentiation-5f566b5ec8ef/**"
+  ],
+  "preserve": "All existing learner/importer/model/courses/Newton134/interpolation172/quadrature179/diffusion197/numerical-precision source, dependencies, README and workflows remain unchanged.",
+  "model": {
+    "api": "analyzeDifferentiation({coefficients,point,stepDenominator})",
+    "coefficients": "Exactly six dense integer Number coefficients c0..c5 in [-9,9]; reject booleans,strings,nonfinite,holes and extra object keys.",
+    "point": "Integer Number in [-5,5].",
+    "stepDenominator": "One of [1,2,4,8,16,32]; h=1/stepDenominator, strictly positive.",
+    "arithmetic": "BigInt reduced rationals with positive denominators; every mathematical output exposes numerator/denominator strings and exact fraction; Number approximations are display-only.",
+    "equations": {
+      "forward": "(f(x+h)-f(x))/h",
+      "backward": "(f(x)-f(x-h))/h",
+      "central": "(f(x+h)-f(x-h))/(2h)",
+      "reference": "sum(k*c[k]*x^(k-1), k=1..5)",
+      "signedError": "estimate - exactDerivative"
+    },
+    "report": "Immutable detached input, polynomial degree(null for zero), exact derivative, six levels h=1..1/32 each with three sample nodes/values, three complete differences/divisors/estimates/signedErrors/absoluteErrors/exact flags. Selected level identified by admitted denominator.",
+    "exactness": "Forward/backward degree guarantee <=1, central <=2; actual exactness reported separately. No universal claim that central is always closer, error decreases on each finite refinement, or a zero sample slope proves constant function.",
+    "export": "serializeDifferentiation accepts only actual admitted reports plus known inspectedMethod forward/backward/central; includes complete exact record and selected view. Copied or forged lookalikes refuse."
+  },
+  "ui": {
+    "inputs": "Six coefficient inputs, point input and six explicit positive step choices; Calculate applies valid draft. Initial default example is explicit in labels.",
+    "lifetime": "Any mathematical input edit or preset selection retires rendered report and worked-record download immediately; a preset only fills the draft, then Calculate applies. Invalid calculation preserves draft and shows a field-appropriate error without a stale report.",
+    "view": "Forward/backward/central view selector changes only inspection of current report. Exact tables remain authoritative. Function/tangent/secant SVG uses approximate display coordinates; central secant passes through actual two endpoint samples, not falsely through f(x).",
+    "visual": "Desktop and390px, labeled keyboard controls, no page overflow; bounded horizontal table scroll where needed; figure explicitly approximate and not a measured physical plot.",
+    "downloads": "Explicit complete worked JSON, exact original twelve-question deck JSON and worked guide Markdown; actual downloaded deck admitted by unchanged learner, then actual learning/review/practice/notes receiving.",
+    "effects": "No arbitrary expression evaluation, browser storage, account, provider, network request, install or hosting."
+  },
+  "content": {
+    "questions": 12,
+    "concepts": [
+      "Sampled slopes",
+      "Exactness and symmetry",
+      "Step size and error",
+      "Interpreting evidence"
+    ],
+    "original": true,
+    "review": "Question-only masked file including all transfer prompts before keys/model exposure to independent reviewer; independent exact oracle before candidate access.",
+    "references": [
+      "https://dlmf.nist.gov/3.4"
+    ],
+    "limits": "Exact polynomial experiment isolates discretization error; it does not model floating-point rounding or noisy measured samples, choose a production optimal step, or establish learning efficacy."
+  },
+  "receiving": "Native unchanged original deck/model controls and absent new paths before implementation. New model invariants and independent exact arithmetic; actual standalone browser/download plus unchanged learner consumer; preserve failures and only replay affected boundaries.",
+  "ownership": {
+    "github": "All-state differentiation and finite-differences searches0; derivative search only closed Newton134. Complete2915-source tree lacks new paths and AGENTS.",
+    "native": "909 direct coordination JSON files; zero matching current selected metadata,36 permission refusals retained. No DB or global lease assertion."
+  },
+  "policy": "No Actions, PR/main/dispatch, service, installation, native Conscience append. Native source projection labeled separately from complete canonical metadata. Any later safe source custody needs a fresh full workflow guard."
+}

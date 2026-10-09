@@ -1,0 +1,288 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sampled slopes · RecallWeave</title>
+<style>
+:root{color-scheme:light;--ink:#263d35;--muted:#566960;--line:#d2ddd4;--paper:#f6f7f0;--teal:#007b72;--orange:#b74c21}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.55 system-ui,-apple-system,sans-serif}a{color:#00655e}button,input,select{font:inherit}button,select{cursor:pointer}button{border:1px solid #b7c9bd;border-radius:8px;background:#fff;padding:.65rem .9rem;color:var(--ink);font-weight:650}button.primary{background:var(--teal);color:white;border-color:var(--teal)}button:disabled{opacity:.48;cursor:not-allowed}input,select{width:100%;border:1px solid #b4c5b9;border-radius:6px;background:#fff;color:var(--ink);padding:.55rem}label{display:block;font-size:.9rem;font-weight:650}input:focus-visible,select:focus-visible,button:focus-visible,a:focus-visible,.table-scroll:focus-visible{outline:3px solid #c58c2b;outline-offset:3px}
+header,main,footer{max-width:1260px;margin:auto;padding:2rem clamp(1rem,4vw,3rem)}header{padding-bottom:1rem}.eyebrow{text-transform:uppercase;letter-spacing:.16em;font-size:.72rem;font-weight:800;color:var(--teal);margin:0 0 .6rem}h1{font-size:clamp(2.2rem,5vw,3.6rem);line-height:1.05;letter-spacing:-.045em;margin:.5rem 0 1rem}h2{font-size:1.5rem;line-height:1.3;overflow-wrap:anywhere}h3{font-size:1.05rem;margin:0 0 .7rem}p{margin:.65rem 0}.lede{font-size:1.1rem;max-width:790px;color:var(--muted)}.workspace{display:grid;grid-template-columns:300px minmax(0,1fr);gap:2rem;align-items:start}.controls,.output,.learn{background:#fff;border:1px solid var(--line);border-radius:14px;padding:1.4rem;min-width:0}.controls{background:#edf2e9}.controls h2{margin-top:0}.controls label{margin:.9rem 0 .35rem}.coefficients{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.65rem}.coefficients label{margin:0}.coefficients input{margin-top:.3rem}.pair{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}.controls button.primary{width:100%;margin-top:1.1rem}.status{font-size:.85rem;color:var(--muted);min-height:3.5em}.error{color:#a12a20}.inspection{margin-top:1.4rem;border-top:1px solid var(--line);padding-top:.3rem}.inspection button{width:100%;margin-top:.8rem}.metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;border:1px solid var(--line);background:var(--line);border-radius:8px;overflow:hidden;margin:1.2rem 0}.metrics>div{background:#f7faf6;padding:.8rem;min-width:0}.metrics span{font-size:.75rem;display:block}.metrics strong{font-size:1.35rem;overflow-wrap:anywhere}.outcome{border-left:3px solid var(--orange);padding-left:.8rem}.exact{border-color:var(--teal);color:#00655e}.muted{color:var(--muted);font-size:.88rem}#results>section+section{border-top:1px solid var(--line);margin-top:1.5rem;padding-top:1.5rem}svg{display:block;width:100%;height:auto}.legend{display:flex;flex-wrap:wrap;gap:1rem;font-size:.82rem}.function-key{color:#293d37}.tangent-key{color:#007b72}.secant-key{color:#b74c21}.table-scroll{overflow:auto;max-width:100%;border:1px solid var(--line);border-radius:6px}table{border-collapse:collapse;width:100%;font-size:.88rem;font-variant-numeric:tabular-nums}th,td{text-align:left;padding:.65rem .75rem;border-bottom:1px solid #e2e9e0;white-space:nowrap}th{background:#f1f5ef;font-size:.78rem}tr:last-child td{border-bottom:0}.equation{font-family:ui-monospace,monospace;font-size:.87rem;overflow-wrap:anywhere}.learn{margin-top:2rem}.learn .buttons{display:flex;flex-wrap:wrap;gap:.7rem}ol{padding-left:1.4rem}footer{color:var(--muted);font-size:.8rem;padding-top:0}[hidden]{display:none!important}
+@media(max-width:760px){.workspace{grid-template-columns:minmax(0,1fr);gap:1rem}header,main,footer{padding:1rem}.controls,.output,.learn{padding:1rem}.metrics{grid-template-columns:minmax(0,1fr)}.metrics>div{display:flex;align-items:center;justify-content:space-between;gap:1rem}.metrics strong{font-size:1.2rem}.output{min-width:0}}
+@media print{.controls,.buttons,footer a{display:none}.workspace{display:block}.output{border:0}.table-scroll{overflow:visible}body{font-size:11pt}.learn{break-before:page}svg{max-height:65mm}section{break-inside:avoid}}
+</style></head>
+<body>
+<header><p class="eyebrow">RecallWeave · exact numerical experiments</p><h1>Sampled slopes</h1><p class="lede">Estimate a derivative from nearby values. Compare three rules with the exact answer, then see what a smaller step actually changes.</p></header>
+<main>
+<div class="workspace">
+<aside class="controls" aria-label="Calculation controls">
+<h2>Build an example</h2>
+<label for="preset">Fill a draft example</label><select id="preset"><option value="quadratic">Quadratic · equal slopes, different lines</option><option value="cubic">Cubic · quarter the error</option><option value="cancellation">Cancellation · a smaller step can be worse</option><option value="symmetry">Quartic · exact at a special point</option><option value="linear">Linear · all three exact</option></select>
+<p class="muted">The page starts with x² at x = 1, h = 1/2. Changing an example fills the draft; Calculate applies it.</p>
+<form id="calculation" novalidate>
+<p class="muted">f(x) = c0 + c1·x + … + c5·x⁵.<br>Whole coefficients from −9 to 9.</p>
+<div class="coefficients">
+<label for="c0">c0<input id="c0" type="number" min="-9" max="9" step="1" required></label>
+<label for="c1">c1<input id="c1" type="number" min="-9" max="9" step="1" required></label>
+<label for="c2">c2<input id="c2" type="number" min="-9" max="9" step="1" required></label>
+<label for="c3">c3<input id="c3" type="number" min="-9" max="9" step="1" required></label>
+<label for="c4">c4<input id="c4" type="number" min="-9" max="9" step="1" required></label>
+<label for="c5">c5<input id="c5" type="number" min="-9" max="9" step="1" required></label></div>
+<div class="pair"><label for="point">Point x (−5 to 5)<input id="point" type="number" min="-5" max="5" step="1" required></label><label for="step">Positive step h<select id="step"><option value="1">1</option><option value="2">1/2</option><option value="4">1/4</option><option value="8">1/8</option><option value="16">1/16</option><option value="32">1/32</option></select></label></div>
+<button type="submit" class="primary">Calculate</button></form>
+<p id="status" class="status" role="status" aria-live="polite"></p>
+<div class="inspection"><label for="method">Inspect a rule</label><select id="method"><option value="forward">Forward difference</option><option value="backward">Backward difference</option><option value="central" selected>Central difference</option></select><button id="save-record" disabled>Save worked record</button><p class="muted">JSON includes the admitted inputs, all six exact calculations and the inspected rule.</p></div>
+</aside>
+<div class="output"><div id="results" hidden></div><noscript>This lab requires local JavaScript. No network connection is used.</noscript></div>
+</div>
+<section class="learn"><p class="eyebrow">Make the connections</p><h2>A twelve-question course, with a worked guide</h2><p>Practice sampled slopes, exactness and symmetry, step size, and interpreting evidence.</p><div class="buttons"><button id="save-course">Download course JSON</button><button id="save-guide">Download worked guide</button><a href="../demo.html">Open the local learner</a></div><ol><li>Download the course JSON.</li><li>Open the local learner and choose the downloaded deck.</li><li>Complete the first session; review explanations, retry missed questions, and write your own connections.</li><li>Save study notes explicitly. Refreshing does not restore this session.</li></ol><p class="muted">The exact table isolates discretization error for bounded polynomials. It does not model noisy samples or floating-point roundoff, or choose a universally best step. The graph is an approximate illustration.</p></section>
+</main><footer>Original course and worked examples. Mathematical reference: <a href="https://dlmf.nist.gov/3.4">NIST DLMF §3.4</a>. This page runs locally; downloads happen only when selected.</footer>
+<script>
+'use strict';
+const courseText = "{\n  \"format\": \"recallweave-deck/1\",\n  \"title\": \"Sampled slopes: numerical differentiation\",\n  \"attribution\": \"Original HAMON learning material, 2026. Mathematical reference: NIST Digital Library of Mathematical Functions, §3.4, https://dlmf.nist.gov/3.4. Examples, explanations and transfer prompts are original.\",\n  \"license\": \"CC BY 4.0 — original course text.\",\n  \"concepts\": [\n    \"Sampled slopes\",\n    \"Exactness and symmetry\",\n    \"Step size and error\",\n    \"Interpreting evidence\"\n  ],\n  \"items\": [\n    {\n      \"id\": \"central-divisor\",\n      \"concept\": \"Sampled slopes\",\n      \"prerequisites\": [],\n      \"prompt\": \"For h > 0, a central difference uses f(x−h) and f(x+h). What is its slope?\",\n      \"options\": [\n        \"[f(x+h)−f(x−h)] / h\",\n        \"[f(x+h)−f(x−h)] / (2h)\",\n        \"[f(x+h)+f(x−h)] / (2h)\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"The two sample locations are 2h apart. A slope divides the change in function value by that full horizontal separation.\",\n      \"transfer\": \"For x=2 and h=1/4, name both sample locations and their separation.\"\n    },\n    {\n      \"id\": \"forward-quadratic\",\n      \"concept\": \"Sampled slopes\",\n      \"prerequisites\": [],\n      \"prompt\": \"For f(x)=x² at x=1 with h=1/2, what are the forward estimate and its signed error Q−f′(1)?\",\n      \"options\": [\n        \"5/2 and 1/2\",\n        \"2 and 0\",\n        \"3/2 and −1/2\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"f(3/2)=9/4 and f(1)=1. Their difference 5/4 divided by 1/2 is 5/2. The exact derivative is 2, so Q−f′=1/2.\",\n      \"transfer\": \"Keep x=1 but use h=1/4. Derive the forward estimate from the two samples.\"\n    },\n    {\n      \"id\": \"backward-negative\",\n      \"concept\": \"Sampled slopes\",\n      \"prerequisites\": [],\n      \"prompt\": \"For f(x)=x² at x=−1 with h=1/2, what is the backward estimate?\",\n      \"options\": [\n        \"−3/2\",\n        \"5/2\",\n        \"−5/2\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"The backward difference is [f(−1)−f(−3/2)]/(1/2)=[1−9/4]/(1/2)=−5/2. The derivative is −2, giving signed error −1/2 and absolute error 1/2.\",\n      \"transfer\": \"Explain why a negative signed error here is different from a negative absolute error.\"\n    },\n    {\n      \"id\": \"degree-guarantee\",\n      \"concept\": \"Exactness and symmetry\",\n      \"prerequisites\": [\n        \"Sampled slopes\"\n      ],\n      \"prompt\": \"Which statement gives polynomial degree guarantees for every point and positive h in exact arithmetic?\",\n      \"options\": [\n        \"All three rules are guaranteed exact through degree 3.\",\n        \"Forward/backward are guaranteed through degree 1; central through degree 2.\",\n        \"Central is exact only for constant functions.\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"For a linear polynomial, the one-sided quotient equals the constant derivative. For a quadratic, symmetric endpoint subtraction cancels the h² term before division, so the central quotient also gives the exact derivative. Higher-degree polynomials can still be exact at particular points.\",\n      \"transfer\": \"Expand (x+h)²−(x−h)² and explain the central quadratic guarantee.\"\n    },\n    {\n      \"id\": \"symmetry-exact\",\n      \"concept\": \"Exactness and symmetry\",\n      \"prerequisites\": [\n        \"Sampled slopes\"\n      ],\n      \"prompt\": \"For f(x)=x⁴ at x=0, what does the central difference give for any positive h?\",\n      \"options\": [\n        \"0, exactly matching f′(0), despite degree 4 exceeding the general degree guarantee.\",\n        \"h³, so it cannot be exact.\",\n        \"Exactness is impossible because degree 4 exceeds 2.\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"The endpoint values (−h)⁴ and h⁴ are equal, so their difference is zero. f′(0)=4·0³=0. This point-specific symmetry does not extend the guarantee to every quartic at every point.\",\n      \"transfer\": \"Try x=1 instead: explain why the symmetry argument no longer makes the endpoint values equal.\"\n    },\n    {\n      \"id\": \"parallel-not-same\",\n      \"concept\": \"Exactness and symmetry\",\n      \"prerequisites\": [\n        \"Sampled slopes\"\n      ],\n      \"prompt\": \"For f(x)=x², x=1, h=1/2, the central secant has slope 2. Which geometric statement is correct?\",\n      \"options\": [\n        \"It must be the tangent through (1,1).\",\n        \"It cannot be parallel to the tangent because it is a secant.\",\n        \"It is parallel to the tangent, but at horizontal coordinate 1 its height is 5/4 rather than 1.\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"The secant passes through (1/2,1/4) and (3/2,9/4); its line is y=2x−3/4. The tangent at x=1 is y=2x−1. Equal slopes do not mean equal lines.\",\n      \"transfer\": \"For the same quadratic, derive the vertical offset of the central secant at x in terms of h.\"\n    },\n    {\n      \"id\": \"cubic-halving\",\n      \"concept\": \"Step size and error\",\n      \"prerequisites\": [\n        \"Sampled slopes\"\n      ],\n      \"prompt\": \"For f(x)=x³ at x=0, the central estimate is h² and the exact derivative is 0. What happens to the absolute error when h is halved?\",\n      \"options\": [\n        \"It is multiplied by 1/2.\",\n        \"It is multiplied by 1/4.\",\n        \"It becomes exactly zero.\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"Replacing h by h/2 changes h² to h²/4. The error remains positive for every positive step in this experiment.\",\n      \"transfer\": \"Compute the exact central errors for h=1/4 and h=1/8.\"\n    },\n    {\n      \"id\": \"accidental-coarse\",\n      \"concept\": \"Step size and error\",\n      \"prerequisites\": [\n        \"Sampled slopes\"\n      ],\n      \"prompt\": \"For f(x)=x²−x³ at x=0, the forward estimate is h−h². What happens when h changes from 1 to 1/2?\",\n      \"options\": [\n        \"Absolute error improves from 1 to 0.\",\n        \"Both estimates are exact.\",\n        \"The estimate changes from 0 to 1/4, so absolute error increases from 0 to 1/4.\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"The derivative at 0 is 0. At h=1, h−h²=0 by cancellation; at h=1/2 it is 1/4. A smaller finite step need not improve a particular estimate when a coarse step was accidentally exact. At h=1, the central estimate is −1, so central is not always the closer rule either.\",\n      \"transfer\": \"Derive the central estimate for this polynomial at 0, then compare all three rules at h=1.\"\n    },\n    {\n      \"id\": \"translated-cubic\",\n      \"concept\": \"Step size and error\",\n      \"prerequisites\": [\n        \"Sampled slopes\"\n      ],\n      \"prompt\": \"For f(x)=x³ at x=1 with h=1/2, what are the central estimate and signed error?\",\n      \"options\": [\n        \"13/4 and 1/4\",\n        \"3 and 0\",\n        \"7/2 and 1/2\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"f(3/2)=27/8 and f(1/2)=1/8. Their difference is 26/8=13/4 and their horizontal separation is 1. The exact derivative is 3, so the signed error is 1/4.\",\n      \"transfer\": \"Expand the central quotient for x³ at general x to show why its signed error is h².\"\n    },\n    {\n      \"id\": \"zero-not-constant\",\n      \"concept\": \"Interpreting evidence\",\n      \"prerequisites\": [\n        \"Sampled slopes\"\n      ],\n      \"prompt\": \"A central sampled slope is zero for f(x)=x² at x=0. What is justified?\",\n      \"options\": [\n        \"The polynomial is constant everywhere.\",\n        \"The two symmetric endpoint values are equal; this does not prove the function is constant.\",\n        \"The endpoint values must both be zero.\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"For any h>0, f(−h)=f(h)=h². Equal endpoint values produce a zero secant slope although the polynomial is nonconstant. Here the exact derivative is also zero at the center, but that is a local fact.\",\n      \"transfer\": \"Give a nonconstant polynomial whose values at −1 and 1 match, and state what a zero secant slope alone tells you.\"\n    },\n    {\n      \"id\": \"higher-order-point\",\n      \"concept\": \"Interpreting evidence\",\n      \"prerequisites\": [\n        \"Sampled slopes\",\n        \"Step size and error\"\n      ],\n      \"prompt\": \"For f(x)=x⁵ at x=0, the central estimate is h⁴ while the derivative is 0. Halving h changes the absolute error by which factor?\",\n      \"options\": [\n        \"1/2\",\n        \"1/4\",\n        \"1/16\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"The special point cancels lower powers of h, leaving h⁴. Thus (h/2)⁴=h⁴/16. A general second-order error description does not mean every polynomial and point exhibits exactly a factor of four.\",\n      \"transfer\": \"Compare this example with x³ at 0. What differs, and what remains the same about both positive-step errors?\"\n    },\n    {\n      \"id\": \"exact-arithmetic-limit\",\n      \"concept\": \"Interpreting evidence\",\n      \"prerequisites\": [\n        \"Sampled slopes\"\n      ],\n      \"prompt\": \"This lab evaluates bounded polynomials with exact rational arithmetic. Which claim is supported?\",\n      \"options\": [\n        \"The table isolates exact discretization errors for these inputs; it does not model floating-point roundoff or noisy measurements.\",\n        \"Its smallest h must be best for every numerical problem.\",\n        \"The approximate plot proves all table values are exact.\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"The table is computed with reduced integer fractions, so it contains no floating-point evaluation error. Approximate numbers and SVG coordinates are display aids only. Real sampled data and floating-point evaluation introduce additional effects outside this model.\",\n      \"transfer\": \"Name one extra source of error you would need to study before choosing a step for measured or floating-point data.\"\n    }\n  ]\n}\n";
+const guideText = "# Sampled slopes: numerical differentiation\n\nOpen `numerical-differentiation-lab.html` directly in a modern browser. No server, account, installation, storage or network request is needed. Keep the supplied `../demo.html` alongside it if using the local learner link.\n\n## Use the lab\n\nThe initial admitted example is **f(x)=x², x=1, h=1/2**, with the central rule inspected. Enter six whole coefficients c0..c5 from −9 to9, a whole evaluation point from −5 to5, and one positive step 1,1/2,1/4,1/8,1/16,1/32. A preset fills a draft only. Select **Calculate** to apply it. Any mathematical edit retires the preceding report and worked-record download immediately; an invalid draft stays visible with an error. The rule selector only inspects the current admitted report.\n\nThe exact table contains all six positive steps for the same polynomial and point. Inspecting a different rule does not change those calculations. **Save worked record** explicitly downloads complete JSON: admitted input, exact derivative, six sets of samples, differences, divisors, estimates, signed and absolute errors, exactness, degree guarantees, and the inspected rule. Refresh does not restore the draft.\n\n**Download course JSON** and **Download worked guide** preserve the original embedded bytes. Open the existing local learner, choose the downloaded course, complete its twelve first questions, review explanations, retry missed questions and write your own connections. Save study notes explicitly. Neither the first-session mastery model nor a quiz score establishes learning efficacy.\n\nAt narrow widths, exact tables have their own labeled keyboard-focusable horizontal scroll regions. The page is designed for a390px phone. The SVG is an approximate illustration; table fractions are authoritative. Printing is a convenience only: long fractions may require a wider print page. The JSON and Markdown downloads preserve the full exact content.\n\n## The mathematical experiment\n\nLet f(x)=Σ c_k x^k. The analytic reference is f′(x)=Σ k c_k x^(k−1).\nFor positive h:\n\n- Forward F=[f(x+h)−f(x)]/h.\n- Backward B=[f(x)−f(x−h)]/h.\n- Central C=[f(x+h)−f(x−h)]/(2h).\n- Signed error is Q−f′(x); absolute error is |Q−f′(x)|.\n\nThe model uses reduced BigInt rational arithmetic, not floating-point polynomial evaluation. All exact number records expose numerator and positive denominator strings, a fraction string, and an approximate display number. No claim about roundoff or noisy measured samples follows from these tables. The graph uses Number coordinates and201 display samples; it is not an exact curve or an error oracle.\n\nOne-sided rules are exact for every polynomial of degree at most1. Central is exact for every polynomial of degree at most2. These are **general degree guarantees**, distinct from actual equality at a particular polynomial, point and step. The zero polynomial has no degree but is exact for every rule. The interface says so explicitly.\n\nFor a quadratic ax²+bx+c, F=f′+ah and B=f′−ah, while C=f′. The central secant goes through (x−h,f(x−h)) and (x+h,f(x+h)); at coordinate x it has height f(x)+ah². It need not pass through (x,f(x)), even when parallel to the tangent. The graph constructs that actual endpoint line.\n\nFor a cubic x³, central signed error is h². For x⁵ at x=0 it is h⁴. Thus halving produces factors1/4 and1/16 in these examples. General order descriptions do not require every input to have the same finite-step error ratio.\n\nA useful counterexample is f(x)=x²−x³ at x=0:\nF=h−h², B=−h−h², C=−h², exact derivative0. At h=1 the forward estimate happens to be exact while central is−1. At h=1/2 the forward estimate becomes1/4. This disproves both “central is always closer” and “every smaller step improves this finite estimate.”\n\n## Worked course and transfer responses\n\nThese responses support explanation and discussion; transfer text is not automatically scored.\n\n### 1. For h > 0, a central difference uses f(x−h) and f(x+h). What is its slope?\n\nCorrect choice: **[f(x+h)−f(x−h)] / (2h)**\n\nThe two sample locations are 2h apart. A slope divides the change in function value by that full horizontal separation.\n\nTransfer: For x=2 and h=1/4, name both sample locations and their separation.\n\nOne worked response: x−h=7/4, x+h=9/4, separation=1/2.\n\n### 2. For f(x)=x² at x=1 with h=1/2, what are the forward estimate and its signed error Q−f′(1)?\n\nCorrect choice: **5/2 and 1/2**\n\nf(3/2)=9/4 and f(1)=1. Their difference 5/4 divided by 1/2 is 5/2. The exact derivative is 2, so Q−f′=1/2.\n\nTransfer: Keep x=1 but use h=1/4. Derive the forward estimate from the two samples.\n\nOne worked response: f(5/4)=25/16, f(1)=1. Their difference9/16 divided by1/4 gives9/4.\n\n### 3. For f(x)=x² at x=−1 with h=1/2, what is the backward estimate?\n\nCorrect choice: **−5/2**\n\nThe backward difference is [f(−1)−f(−3/2)]/(1/2)=[1−9/4]/(1/2)=−5/2. The derivative is −2, giving signed error −1/2 and absolute error 1/2.\n\nTransfer: Explain why a negative signed error here is different from a negative absolute error.\n\nOne worked response: Signed error Q−f′=−1/2 records direction. Its absolute value is1/2; an absolute error cannot be negative.\n\n### 4. Which statement gives polynomial degree guarantees for every point and positive h in exact arithmetic?\n\nCorrect choice: **Forward/backward are guaranteed through degree 1; central through degree 2.**\n\nFor a linear polynomial, the one-sided quotient equals the constant derivative. For a quadratic, symmetric endpoint subtraction cancels the h² term before division, so the central quotient also gives the exact derivative. Higher-degree polynomials can still be exact at particular points.\n\nTransfer: Expand (x+h)²−(x−h)² and explain the central quadratic guarantee.\n\nOne worked response: (x+h)²−(x−h)²=4xh. Divide by2h to get2x.\n\n### 5. For f(x)=x⁴ at x=0, what does the central difference give for any positive h?\n\nCorrect choice: **0, exactly matching f′(0), despite degree 4 exceeding the general degree guarantee.**\n\nThe endpoint values (−h)⁴ and h⁴ are equal, so their difference is zero. f′(0)=4·0³=0. This point-specific symmetry does not extend the guarantee to every quartic at every point.\n\nTransfer: Try x=1 instead: explain why the symmetry argument no longer makes the endpoint values equal.\n\nOne worked response: At x=1 the endpoints1−h and1+h are not opposites. For the quartic the central estimate is4+4h², rather than the exact4.\n\n### 6. For f(x)=x², x=1, h=1/2, the central secant has slope 2. Which geometric statement is correct?\n\nCorrect choice: **It is parallel to the tangent, but at horizontal coordinate 1 its height is 5/4 rather than 1.**\n\nThe secant passes through (1/2,1/4) and (3/2,9/4); its line is y=2x−3/4. The tangent at x=1 is y=2x−1. Equal slopes do not mean equal lines.\n\nTransfer: For the same quadratic, derive the vertical offset of the central secant at x in terms of h.\n\nOne worked response: The midpoint of the two endpoint function values is x²+h². Its offset from f(x)=x² is h².\n\n### 7. For f(x)=x³ at x=0, the central estimate is h² and the exact derivative is 0. What happens to the absolute error when h is halved?\n\nCorrect choice: **It is multiplied by 1/4.**\n\nReplacing h by h/2 changes h² to h²/4. The error remains positive for every positive step in this experiment.\n\nTransfer: Compute the exact central errors for h=1/4 and h=1/8.\n\nOne worked response: For h=1/4, error1/16; for h=1/8, error1/64.\n\n### 8. For f(x)=x²−x³ at x=0, the forward estimate is h−h². What happens when h changes from 1 to 1/2?\n\nCorrect choice: **The estimate changes from 0 to 1/4, so absolute error increases from 0 to 1/4.**\n\nThe derivative at 0 is 0. At h=1, h−h²=0 by cancellation; at h=1/2 it is 1/4. A smaller finite step need not improve a particular estimate when a coarse step was accidentally exact. At h=1, the central estimate is −1, so central is not always the closer rule either.\n\nTransfer: Derive the central estimate for this polynomial at 0, then compare all three rules at h=1.\n\nOne worked response: At x=0, F=h−h², B=−h−h², C=−h². At h=1 they are0,−2,−1, versus derivative0.\n\n### 9. For f(x)=x³ at x=1 with h=1/2, what are the central estimate and signed error?\n\nCorrect choice: **13/4 and 1/4**\n\nf(3/2)=27/8 and f(1/2)=1/8. Their difference is 26/8=13/4 and their horizontal separation is 1. The exact derivative is 3, so the signed error is 1/4.\n\nTransfer: Expand the central quotient for x³ at general x to show why its signed error is h².\n\nOne worked response: (x+h)³−(x−h)³=6x²h+2h³. Divide by2h:3x²+h²; subtract3x² to geth².\n\n### 10. A central sampled slope is zero for f(x)=x² at x=0. What is justified?\n\nCorrect choice: **The two symmetric endpoint values are equal; this does not prove the function is constant.**\n\nFor any h>0, f(−h)=f(h)=h². Equal endpoint values produce a zero secant slope although the polynomial is nonconstant. Here the exact derivative is also zero at the center, but that is a local fact.\n\nTransfer: Give a nonconstant polynomial whose values at −1 and 1 match, and state what a zero secant slope alone tells you.\n\nOne worked response: x² works: f(−1)=f(1)=1. Zero secant slope says those endpoint values match, not that the intervening or global function is constant.\n\n### 11. For f(x)=x⁵ at x=0, the central estimate is h⁴ while the derivative is 0. Halving h changes the absolute error by which factor?\n\nCorrect choice: **1/16**\n\nThe special point cancels lower powers of h, leaving h⁴. Thus (h/2)⁴=h⁴/16. A general second-order error description does not mean every polynomial and point exhibits exactly a factor of four.\n\nTransfer: Compare this example with x³ at 0. What differs, and what remains the same about both positive-step errors?\n\nOne worked response: x³ givesh² and quarter-error halving; x⁵ givesh⁴ and sixteenth-error halving. Both are positive for every h>0 and approach0 as h tends to0.\n\n### 12. This lab evaluates bounded polynomials with exact rational arithmetic. Which claim is supported?\n\nCorrect choice: **The table isolates exact discretization errors for these inputs; it does not model floating-point roundoff or noisy measurements.**\n\nThe table is computed with reduced integer fractions, so it contains no floating-point evaluation error. Approximate numbers and SVG coordinates are display aids only. Real sampled data and floating-point evaluation introduce additional effects outside this model.\n\nTransfer: Name one extra source of error you would need to study before choosing a step for measured or floating-point data.\n\nOne worked response: Examples: roundoff in subtracting nearby floating-point values, measurement noise, quantization, or uncertainty in sample locations. These are absent from this exact polynomial experiment.\n\n## Native source and reproducibility\n\nThe new model is `src/numerical-differentiation.mjs`. Its input must have exactly coefficients, point and stepDenominator. Booleans, strings, holes, nonfinite values, extra input keys and out-of-domain values refuse. Output is detached and recursively frozen. `serializeDifferentiation(report, inspectedMethod)` requires an actual model-produced report and a known rule; a parsed lookalike is not an admitted report.\n\n`node tools/build-numerical-differentiation.mjs` regenerates this direct-open HTML using only Node built-ins and the unchanged project deck validator. Add `--check` to compare exact bytes without writing. New focused controls are `node --test tests/numerical-differentiation.test.mjs tests/numerical-differentiation-course.test.mjs`. The browser receiver accepts an explicitly installed Chrome path; it does not install a browser or open a personal profile.\n\nThe course and worked examples are original. Reference: NIST Digital Library of Mathematical Functions, [§3.4 Differentiation](https://dlmf.nist.gov/3.4), particularly the two- and three-point differentiated interpolation formulas. The concrete polynomial identities above follow directly by expansion; no external explanation text was copied.\n\nOriginal course and guide text: CC BY4.0. This lab is bounded teaching material, not a production step-size selector or a model of measurement error.\n";
+const {analyzeDifferentiation,serializeDifferentiation,DIFFERENCE_METHODS}=(()=>{
+/** Exact, bounded polynomial differentiation. Approximation belongs only to display. */
+const STEP_DENOMINATORS = Object.freeze([1, 2, 4, 8, 16, 32]);
+const DIFFERENCE_METHODS = Object.freeze(['forward', 'backward', 'central']);
+const admittedReports = new WeakSet();
+
+function gcd(a, b) {
+  a = a < 0n ? -a : a;
+  b = b < 0n ? -b : b;
+  while (b) [a, b] = [b, a % b];
+  return a;
+}
+function rational(n, d = 1n) {
+  if (d === 0n) throw new RangeError('A rational denominator cannot be zero.');
+  if (d < 0n) { n = -n; d = -d; }
+  const g = gcd(n, d);
+  return {n: n / g, d: d / g};
+}
+const add = (a, b) => rational(a.n * b.d + b.n * a.d, a.d * b.d);
+const subtract = (a, b) => rational(a.n * b.d - b.n * a.d, a.d * b.d);
+const multiply = (a, b) => rational(a.n * b.n, a.d * b.d);
+const divide = (a, b) => rational(a.n * b.d, a.d * b.n);
+function evaluate(coefficients, x) {
+  let y = rational(0n);
+  for (let i = coefficients.length - 1; i >= 0; i--) y = add(multiply(y, x), rational(BigInt(coefficients[i])));
+  return y;
+}
+function record(a) {
+  return Object.freeze({
+    numerator: String(a.n), denominator: String(a.d),
+    fraction: a.d === 1n ? String(a.n) : `${a.n}/${a.d}`,
+    approximate: Number(a.n) / Number(a.d)
+  });
+}
+function freeze(value) {
+  if (value && typeof value === 'object') {
+    for (const child of Object.values(value)) freeze(child);
+    Object.freeze(value);
+  }
+  return value;
+}
+function integer(value, minimum, maximum, field) {
+  if (typeof value !== 'number' || !Number.isInteger(value) || value < minimum || value > maximum) {
+    throw new TypeError(`${field} must be an integer from ${minimum} to ${maximum}.`);
+  }
+  return value === 0 ? 0 : value;
+}
+function admit(input) {
+  if (input === null || typeof input !== 'object' || Array.isArray(input)) throw new TypeError('Use an input object.');
+  const keys = Reflect.ownKeys(input);
+  if (keys.length !== 3 || !['coefficients', 'point', 'stepDenominator'].every(key => keys.includes(key))) {
+    throw new TypeError('Input needs only coefficients, point and stepDenominator.');
+  }
+  const coefficients = input.coefficients;
+  if (!Array.isArray(coefficients) || coefficients.length !== 6 || Reflect.ownKeys(coefficients).length !== 7 ||
+      !Array.from({length: 6}, (_, i) => Object.hasOwn(coefficients, i)).every(Boolean)) {
+    throw new TypeError('Coefficients must contain exactly six dense integer entries, c0 through c5.');
+  }
+  const copied = Array.from(coefficients, (c, i) => integer(c, -9, 9, `Coefficient c${i}`));
+  const point = integer(input.point, -5, 5, 'Evaluation point');
+  if (!STEP_DENOMINATORS.includes(input.stepDenominator)) throw new TypeError('Choose a step denominator: 1, 2, 4, 8, 16 or 32.');
+  return {coefficients: copied, point, stepDenominator: input.stepDenominator};
+}
+
+/** Analyze all six steps; the admitted step only selects the initial inspection. */
+function analyzeDifferentiation(input) {
+  const admitted = admit(input);
+  const {coefficients, point, stepDenominator} = admitted;
+  const degree = coefficients.findLastIndex(c => c !== 0);
+  const x = rational(BigInt(point));
+  const derivativeCoefficients = coefficients.slice(1).map((c, i) => c * (i + 1));
+  const derivative = evaluate(derivativeCoefficients, x);
+  const levels = STEP_DENOMINATORS.map(denominator => {
+    const h = rational(1n, BigInt(denominator));
+    const nodes = [subtract(x, h), x, add(x, h)];
+    const values = nodes.map(node => evaluate(coefficients, node));
+    const methods = {};
+    for (const method of DIFFERENCE_METHODS) {
+      const [left, right] = method === 'forward' ? [1, 2] : method === 'backward' ? [0, 1] : [0, 2];
+      const difference = subtract(values[right], values[left]);
+      const divisor = subtract(nodes[right], nodes[left]);
+      const estimate = divide(difference, divisor);
+      const error = subtract(estimate, derivative);
+      methods[method] = {
+        degreeGuarantee: method === 'central' ? 2 : 1,
+        guaranteedByDegree: degree <= (method === 'central' ? 2 : 1),
+        sampleIndices: [left, right],
+        difference: record(difference), divisor: record(divisor),
+        estimate: record(estimate), signedError: record(error),
+        absoluteError: record(rational(error.n < 0n ? -error.n : error.n, error.d)),
+        exact: error.n === 0n
+      };
+    }
+    return {stepDenominator: denominator, step: record(h),
+      samples: nodes.map((node, i) => ({offset: i - 1, node: record(node), value: record(values[i])})), methods};
+  });
+  const report = freeze({
+    format: 'recallweave-differentiation-report/1', input: admitted,
+    polynomialDegree: degree < 0 ? null : degree, exactDerivative: record(derivative),
+    selectedLevel: STEP_DENOMINATORS.indexOf(stepDenominator), levels
+  });
+  admittedReports.add(report);
+  return report;
+}
+
+/** A view name cannot substitute for or mutate an admitted calculation. */
+function serializeDifferentiation(report, inspectedMethod) {
+  if (!admittedReports.has(report)) throw new TypeError('Export needs an actual admitted differentiation report.');
+  if (!DIFFERENCE_METHODS.includes(inspectedMethod)) throw new TypeError('Choose forward, backward or central for the inspected method.');
+  return JSON.stringify({format: 'recallweave-differentiation-worked-record/1', inspectedMethod, report}, null, 2) + '\n';
+}
+
+return {analyzeDifferentiation,serializeDifferentiation,DIFFERENCE_METHODS};
+})();
+
+
+const byId = id => document.getElementById(id);
+const form = byId('calculation');
+const output = byId('results');
+const status = byId('status');
+const save = byId('save-record');
+let current = null;
+const presets = {
+  quadratic: {coefficients:[0,0,1,0,0,0],point:1,stepDenominator:2},
+  cubic: {coefficients:[0,0,0,1,0,0],point:0,stepDenominator:4},
+  cancellation: {coefficients:[0,0,1,-1,0,0],point:0,stepDenominator:1},
+  symmetry: {coefficients:[0,0,0,0,1,0],point:0,stepDenominator:2},
+  linear: {coefficients:[3,-2,0,0,0,0],point:-1,stepDenominator:8}
+};
+function element(tag, text, className) {
+  const node = document.createElement(tag);
+  if (text !== undefined) node.textContent = text;
+  if (className) node.className = className;
+  return node;
+}
+function retire() {
+  current = null; output.replaceChildren(); output.hidden = true; save.disabled = true;
+  status.textContent = 'Draft changed. Calculate to inspect these inputs.';
+  status.className = 'status';
+}
+function fillDraft(value) {
+  value.coefficients.forEach((c,i) => { byId('c'+i).value = String(c); });
+  byId('point').value = String(value.point);
+  byId('step').value = String(value.stepDenominator);
+}
+function readInteger(id, name) {
+  const text = byId(id).value.trim();
+  if (!/^-?\d+$/.test(text)) throw new TypeError(name+' must be a whole integer.');
+  return Number(text);
+}
+function polynomial(coefficients) {
+  const terms = [];
+  for (let i=5;i>=0;i--) {
+    const c=coefficients[i]; if (!c) continue;
+    const body=(i && Math.abs(c)===1 ? '' : String(Math.abs(c)))+(i ? (i===1?'x':'x^'+i) : '');
+    terms.push((terms.length ? (c<0?' − ':' + ') : (c<0?'−':''))+body);
+  }
+  return terms.join('') || '0';
+}
+function table(headers, rows, name) {
+  const scroll = element('div', undefined, 'table-scroll');
+  scroll.tabIndex=0;scroll.setAttribute('role','region');scroll.setAttribute('aria-label',name);
+  const t=element('table');const head=element('thead');const tr=element('tr');
+  for (const header of headers) {const cell=element('th',header);cell.scope='col';tr.append(cell);}
+  head.append(tr);t.append(head);
+  const body=element('tbody');
+  for (const row of rows) {const r=element('tr');for (const value of row) r.append(element('td',String(value)));body.append(r);}
+  t.append(body);scroll.append(t);return scroll;
+}
+function plot(report, level, method) {
+  const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
+  svg.setAttribute('viewBox','0 0 760 300');svg.setAttribute('role','img');
+  svg.setAttribute('aria-label','Approximate function, tangent and selected secant; exact values are in the tables.');
+  const x=report.input.point, left=x-1.25,right=x+1.25;
+  const evaluate = t => report.input.coefficients.reduceRight((y,c)=>y*t+c,0);
+  const y0=evaluate(x), slope=report.exactDerivative.approximate;
+  const rule=level.methods[method], anchor=level.samples[rule.sampleIndices[0]];
+  const secant=t=>anchor.value.approximate+rule.estimate.approximate*(t-anchor.node.approximate);
+  const tangent=t=>y0+slope*(t-x);
+  const points=Array.from({length:201},(_,i)=>{const t=left+(right-left)*i/200;return[t,evaluate(t)];});
+  const ys=[...points.map(p=>p[1]),tangent(left),tangent(right),secant(left),secant(right)];
+  let low=Math.min(...ys),high=Math.max(...ys);const pad=Math.max((high-low)*0.1,0.25);low-=pad;high+=pad;
+  const X=t=>54+(t-left)/(right-left)*678, Y=y=>258-(y-low)/(high-low)*224;
+  function add(tag, attributes, text) {
+    const node=document.createElementNS(svg.namespaceURI,tag);
+    for(const [key,value]of Object.entries(attributes))node.setAttribute(key,String(value));
+    if(text!==undefined)node.textContent=text;svg.append(node);return node;
+  }
+  add('path',{d:`M54 30 V258 H732`,stroke:'#b7c3bd',fill:'none'});
+  add('line',{x1:X(x),x2:X(x),y1:30,y2:258,stroke:'#dae1dc','stroke-dasharray':'3 5'});
+  add('polyline',{points:points.map(([a,b])=>`${X(a)},${Y(b)}`).join(' '),fill:'none',stroke:'#293d37','stroke-width':2.5});
+  add('line',{x1:X(left),x2:X(right),y1:Y(tangent(left)),y2:Y(tangent(right)),stroke:'#007b72','stroke-width':2.5,'stroke-dasharray':'8 5'});
+  add('line',{x1:X(left),x2:X(right),y1:Y(secant(left)),y2:Y(secant(right)),stroke:'#c75b28','stroke-width':2.5});
+  level.samples.forEach((sample,i)=>add('circle',{cx:X(sample.node.approximate),cy:Y(sample.value.approximate),r:5,fill:rule.sampleIndices.includes(i)?'#c75b28':'#293d37',stroke:'#fff','stroke-width':2}));
+  for(const t of [left,x,right])add('text',{x:X(t),y:284,'text-anchor':'middle',fill:'#4d5d56','font-size':13},String(t));
+  for(const y of [low,high])add('text',{x:48,y:Y(y)+4,'text-anchor':'end',fill:'#4d5d56','font-size':12},Number(y.toPrecision(3)).toString());
+  return svg;
+}
+function render() {
+  if (!current) return;
+  const report=current, level=report.levels[report.selectedLevel], method=byId('method').value, rule=level.methods[method];
+  output.replaceChildren();output.hidden=false;
+  const header=element('section');header.append(element('p','ADMITTED CALCULATION','eyebrow'),element('h2','f(x) = '+polynomial(report.input.coefficients)));
+  header.append(element('p',`At x = ${report.input.point}; h = ${level.step.fraction}. ${method[0].toUpperCase()+method.slice(1)} difference.`));
+  const cards=element('div',undefined,'metrics');
+  for(const [label,value]of [['Exact derivative',report.exactDerivative.fraction],['Sampled estimate',rule.estimate.fraction],['Signed error Q − f′',rule.signedError.fraction]]) {
+    const card=element('div');card.append(element('span',label),element('strong',value));cards.append(card);
+  }
+  header.append(cards);
+  header.append(element('p',rule.exact?'Exact for this polynomial, point and step.':'Absolute error: '+rule.absoluteError.fraction,rule.exact?'outcome exact':'outcome'));
+  header.append(element('p',`Polynomial degree: ${report.polynomialDegree===null?'zero polynomial (no degree)':report.polynomialDegree}. This rule is guaranteed exact through degree ${rule.degreeGuarantee}. ${rule.guaranteedByDegree?'This input falls within that guarantee.':'This input is outside the degree guarantee; inspect the actual error separately.'}`,'muted'));
+  output.append(header);
+  const figure=element('section');figure.append(element('h3','See the sampled slope'),plot(report,level,method));
+  const legend=element('p',undefined,'legend');legend.append(element('span','● Function','function-key'),element('span','┄ Tangent','tangent-key'),element('span','━ Selected secant','secant-key'));figure.append(legend);
+  figure.append(element('p','Approximate display coordinates. A central secant joins the two endpoint samples; equal tangent and secant slopes do not require the same line. Exact fractions below are authoritative.','muted'));output.append(figure);
+  const samples=element('section');samples.append(element('h3','Three exact samples'),table(['Location','x value','f(x value)'],level.samples.map((s,i)=>[['x − h','x','x + h'][i],s.node.fraction,s.value.fraction]),'Exact sample values'));
+  samples.append(element('p',`Difference ${rule.difference.fraction} ÷ horizontal separation ${rule.divisor.fraction} = ${rule.estimate.fraction}.`,'equation'));output.append(samples);
+  const comparison=element('section');comparison.append(element('h3','Compare all three rules'),table(['Rule','Estimate','Signed error','Absolute error'],DIFFERENCE_METHODS.map(name=>[name,level.methods[name].estimate.fraction,level.methods[name].signedError.fraction,level.methods[name].absoluteError.fraction]),'Rule comparison'));output.append(comparison);
+  const refinement=element('section');refinement.append(element('h3','Six exact step sizes'),element('p','All rows use this same admitted polynomial and point. A smaller step can leave accidental exactness; central is not always closest.','muted'));
+  refinement.append(table(['h','Forward |error|','Backward |error|','Central |error|'],report.levels.map(l=>[l.step.fraction,...DIFFERENCE_METHODS.map(m=>l.methods[m].absoluteError.fraction)]),'Step-size comparison'));output.append(refinement);
+}
+function calculate() {
+  try {
+    current=analyzeDifferentiation({coefficients:Array.from({length:6},(_,i)=>readInteger('c'+i,'Coefficient c'+i)),point:readInteger('point','Evaluation point'),stepDenominator:Number(byId('step').value)});
+    render();save.disabled=false;status.className='status';
+    status.textContent='Calculated. The tables and worked-record download are bound to these inputs.';
+  } catch(error) {
+    current=null;output.replaceChildren();output.hidden=true;save.disabled=true;
+    status.className='status error';status.textContent=error.message;
+  }
+}
+function download(text, name, mime) {
+  const url=URL.createObjectURL(new Blob([text],{type:mime}));
+  const a=element('a');a.href=url;a.download=name;document.body.append(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+form.addEventListener('input',retire);
+form.addEventListener('change',event=>{if(event.target.tagName==='SELECT')retire();});
+form.addEventListener('submit',event=>{event.preventDefault();calculate();});
+byId('preset').addEventListener('change',()=>{fillDraft(presets[byId('preset').value]);retire();});
+byId('method').addEventListener('change',render);
+save.addEventListener('click',()=>{if(current)download(serializeDifferentiation(current,byId('method').value),'numerical-differentiation-worked.json','application/json;charset=utf-8');});
+byId('save-course').addEventListener('click',()=>download(courseText,'numerical-differentiation.json','application/json;charset=utf-8'));
+byId('save-guide').addEventListener('click',()=>download(guideText,'numerical-differentiation.md','text/markdown;charset=utf-8'));
+fillDraft(presets.quadratic);calculate();
+
+</script></body></html>
