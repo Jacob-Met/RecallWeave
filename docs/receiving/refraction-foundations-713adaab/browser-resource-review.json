@@ -1,0 +1,27 @@
+{
+  "schema": "recallweave.browser-resource-composition-review/1",
+  "driver_sha256": "4336dfa9f494af68f44611ba23850f70025a09b93e8a72b535829cfdf4d26d82",
+  "executed": false,
+  "frozen_admission": {
+    "home_available_min": 134217728,
+    "tmp_available_min": 134217728,
+    "memory_available_min": 1073741824,
+    "memory_api": "os.freemem (free physical memory, not MemAvailable)",
+    "one_minute_load_max": "max(8, CPU_count*1.5)",
+    "browser_deadline_ms": 120000
+  },
+  "composition": {
+    "browser": "Existing Chromium153 binary; CDP pipes; no TCP listener; ordinary user sandbox; no --no-sandbox",
+    "temporary": "New /tmp/rf-* private directory for profile/TMPDIR; --disable-dev-shm-usage routes Chromium shared-memory files to this private temporary allocation rather than the refused UID shared-memory namespace.",
+    "source": "Exact unchanged canonical demo.html and authored course; local-file import; no server or package install.",
+    "output": "Two selected viewport PNGs, two real text downloads, small JSON/source maps; stderr retention stops after approximately256KiB plus the last incoming chunk.",
+    "cleanup": "Browser.close then SIGTERM/SIGKILL restricted to the spawned detached browser process group; profile remains private; no peer/shared cleanup."
+  },
+  "limits": [
+    "These are admission reserves, not enforced upper bounds on Chromium profile, temporary file or process memory usage.",
+    "A120-second browser lifetime does not impose a hard disk quota.",
+    "No browser has launched; no claim of browser isolation, rendered correctness or complete network silence is available.",
+    "Future execution needs fresh positive native capacity and a receiving owner to accept the complete resource composition; do not lower the frozen thresholds."
+  ],
+  "current_disposition": "Held before launch; static resource review only, no capacity poll or product replay."
+}

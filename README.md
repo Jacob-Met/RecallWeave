@@ -433,3 +433,7 @@ Open [the minimum-spanning-forest explorer](courses/minimum-spanning-forest-expl
 
 Download the full trace with its original entered text and selected frame, or save the original [twelve-question course](courses/minimum-spanning-forest.json) and [worked guide](courses/minimum-spanning-forest.md). Open the JSON through the learner's existing **Bring your own lesson** preview and **Start this deck** flow. No network, account, automatic storage or learner-session modification is involved. Rebuild the standalone page with `node tools/build-minimum-spanning-forest.mjs`; add `--check` to verify exact source parity.
 
+
+## Refraction and the critical boundary
+
+[Refraction foundations](courses/refraction-foundations.json) is an original 16-question course for the existing local deck picker. Its [worked guide](courses/refraction-foundations.md) connects normal-angle geometry, ordered refractive indices, Snell's law, equal-index and normal-incidence controls, reversibility, and the strict total-internal-reflection threshold. Import the JSON into `demo.html`, preview it, then choose **Start this deck**. Review, separate practice, reflections and study-note downloads use the unchanged learner. The ideal ray model predicts directions; it does not calculate optical power or claim measured learning gains. No catalog registration or new runtime is required.
