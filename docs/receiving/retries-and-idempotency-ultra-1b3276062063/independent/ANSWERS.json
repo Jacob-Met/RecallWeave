@@ -1,0 +1,256 @@
+{
+  "schema": "recallweave-retry-independent-answers-v1",
+  "reviewer": "ultra-1b3276062063/source_coordination",
+  "sealed_utc": "2026-10-09 07:20:35 UTC",
+  "question_freeze": {
+    "repository": "Jacob-Met/RecallWeave",
+    "blob": "1a04d77ebd7cfe8dbd5e66117b4f83ec7e46ed14",
+    "bytes": 12074,
+    "sha256": "9221b6f6ac18dd56ec054f7574ba4f64853f91c528453459dd833c4c6e42f38d",
+    "recorded_utc": "2026-10-09 07:13:45 UTC",
+    "baseline": {
+      "commit": "698902f9c9c1d5c5023092b85b3632a7cb7a01ed",
+      "tree": "d6d3707b691850af7928299242631534cff89aa8",
+      "parser": "f0f8a4b234489c2388f427633f548d56c6ed4c03"
+    }
+  },
+  "exposure": {
+    "question_prompts_options_read": 12,
+    "authored_answer_indices_read": false,
+    "authored_explanations_read": false,
+    "authored_guide_read": false,
+    "candidate_deck_read": false,
+    "consultation_with_author_about_answers": false
+  },
+  "disposition": "ACCEPT all12 self-contained questions as having exactly one correct option; no semantic blocker or required wording correction",
+  "answer_indices_zero_based": [
+    1,
+    2,
+    0,
+    3,
+    1,
+    0,
+    2,
+    3,
+    1,
+    2,
+    0,
+    3
+  ],
+  "answers": [
+    {
+      "id": "retry-increment-twice",
+      "correct_index_zero_based": 1,
+      "correct_option_number_one_based": 2,
+      "selected_option": "13; it is not idempotent because the second application changes the counter again.",
+      "trace": [
+        "initial counter=7",
+        "first delivered ADD3:7+3=10",
+        "second delivered ADD3:10+3=13"
+      ],
+      "reason": "The repeat changes the requested counter state again. Identical command text and successful replies do not make addition idempotent.",
+      "unique_correct_option": true,
+      "ambiguity": "none under the stated teaching protocol"
+    },
+    {
+      "id": "retry-assignment-twice",
+      "correct_index_zero_based": 2,
+      "correct_option_number_one_based": 3,
+      "selected_option": "The register ends at 12; repeating SET 12 has the same requested register effect as applying it once.",
+      "trace": [
+        "initial register=4",
+        "first SET12:register=12",
+        "second SET12:register=12",
+        "audit deliveries=2; requested register result remains12"
+      ],
+      "reason": "The question explicitly asks about the register effect. Per-delivery auditing does not alter whether that selected effect equals one application.",
+      "unique_correct_option": true,
+      "ambiguity": "none under the stated teaching protocol"
+    },
+    {
+      "id": "retry-missing-reply",
+      "correct_index_zero_based": 0,
+      "correct_option_number_one_based": 1,
+      "selected_option": "The effect is unknown to the client; it does not prove either that the increment failed or that it committed.",
+      "trace": [
+        "history A consistent with timeout:request never arrives; increment absent",
+        "history B also consistent:increment commits; reply is lost",
+        "client observes same missing response in both histories"
+      ],
+      "reason": "The observation cannot distinguish nonexecution from commitment. It provides neither a success proof nor a proof that retry is harmless.",
+      "unique_correct_option": true,
+      "ambiguity": "none under the stated teaching protocol"
+    },
+    {
+      "id": "retry-historical-result",
+      "correct_index_zero_based": 3,
+      "correct_option_number_one_based": 4,
+      "selected_option": "Reply 2; current counter 7.",
+      "trace": [
+        "A ADD2 atomically stores result2;counter=2",
+        "B ADD5 atomically stores result7;counter=7",
+        "repeat A ADD2 finds retained identical operation;reply=result2;no addition"
+      ],
+      "reason": "Historical recorded result and current counter are different variables. Replaying A returns2 while current state stays7.",
+      "unique_correct_option": true,
+      "ambiguity": "none under the stated teaching protocol"
+    },
+    {
+      "id": "retry-changed-intent",
+      "correct_index_zero_based": 1,
+      "correct_option_number_one_based": 2,
+      "selected_option": "Refuse the parameter mismatch and leave the counter at 4.",
+      "trace": [
+        "blue is bound to amount4,result4;counter=4",
+        "new request has same ID blue but amount9",
+        "declared mismatch branch refuses before mutation"
+      ],
+      "reason": "The explicit contract prevents both another addition and rebinding the retained operation to changed intent. Counter remains4.",
+      "unique_correct_option": true,
+      "ambiguity": "none under the stated teaching protocol"
+    },
+    {
+      "id": "retry-equal-parameters-new-ids",
+      "correct_index_zero_based": 0,
+      "correct_option_number_one_based": 1,
+      "selected_option": "7; these are two distinct operations, each adding 3.",
+      "trace": [
+        "initial=1",
+        "new ID first ADD3:counter=4",
+        "new ID second ADD3:counter=7"
+      ],
+      "reason": "The operation identity includes the distinct ID; matching parameters alone do not collapse two intentionally separate accepted operations.",
+      "unique_correct_option": true,
+      "ambiguity": "none under the stated teaching protocol"
+    },
+    {
+      "id": "retry-caller-namespace",
+      "correct_index_zero_based": 2,
+      "correct_option_number_one_based": 3,
+      "selected_option": "Both distinct pairs apply, so the counter is 4.",
+      "trace": [
+        "initial=0",
+        "new pair(Ada,job-1) ADD2:counter=2",
+        "different new pair(Bo,job-1) ADD2:counter=4"
+      ],
+      "reason": "The two keys differ in caller. A global operation-ID namespace would contradict the prompt's exact pair rule.",
+      "unique_correct_option": true,
+      "ambiguity": "none under the stated teaching protocol"
+    },
+    {
+      "id": "retry-record-effect-gap",
+      "correct_index_zero_based": 3,
+      "correct_option_number_one_based": 4,
+      "selected_option": "The effect and its completion record were not committed together; the retry can make the counter 10.",
+      "trace": [
+        "first K effect durable:counter=5",
+        "crash leaves no K completion record",
+        "retry takes explicitly stated absent-record branch and applies ADD5:counter=10"
+      ],
+      "reason": "The trace exposes the gap between the durable effect and durable completion knowledge. Waiting by the client cannot repair that record or establish rollback.",
+      "unique_correct_option": true,
+      "ambiguity": "none under the stated teaching protocol"
+    },
+    {
+      "id": "retry-concurrent-check",
+      "correct_index_zero_based": 1,
+      "correct_option_number_one_based": 2,
+      "selected_option": "The final value is 2; a separate check followed by a write did not enforce one application for K.",
+      "trace": [
+        "W1 observes missing K",
+        "W2 also observes missing K",
+        "W1 atomic increment:counter=1;writes K",
+        "W2 does not recheck or claim exclusively;atomic increment:counter=2;writes K"
+      ],
+      "reason": "Atomicity of each increment avoids lost increments but does not make the separate record check and effect mutually exclusive for K.",
+      "unique_correct_option": true,
+      "ambiguity": "none under the stated teaching protocol"
+    },
+    {
+      "id": "retry-retention-expiry",
+      "correct_index_zero_based": 2,
+      "correct_option_number_one_based": 3,
+      "selected_option": "The counter becomes 4; duplicate suppression did not cover a retry after the stated retention window.",
+      "trace": [
+        "initial K ADD2:counter=2",
+        "K record deleted after60seconds;counter unchanged",
+        "old identical K arrives at120seconds",
+        "declared absent-record handler accepts a new ADD2:counter=4"
+      ],
+      "reason": "This teaching handler's deduplication protection expires with its record. The conclusion depends on the expressly stated expiry policy, not a universal API lifetime.",
+      "unique_correct_option": true,
+      "ambiguity": "none under the stated teaching protocol"
+    },
+    {
+      "id": "retry-intervening-update",
+      "correct_index_zero_based": 0,
+      "correct_option_number_one_based": 1,
+      "selected_option": "The final value is 5; idempotence of SET 5 alone does not protect the intervening writer's value.",
+      "trace": [
+        "SET5:register=5",
+        "intervening SET9:register=9",
+        "unconditional late SET5:register=5"
+      ],
+      "reason": "Repeated application of one assignment without interference has the same effect, but that algebraic property does not preserve a different writer's intervening value.",
+      "unique_correct_option": true,
+      "ambiguity": "none under the stated teaching protocol"
+    },
+    {
+      "id": "retry-at-most-once-not-eventual",
+      "correct_index_zero_based": 3,
+      "correct_option_number_one_based": 4,
+      "selected_option": "It produces no increment; an at-most-once effect rule by itself does not guarantee eventual delivery or completion.",
+      "trace": [
+        "particular request lost before service",
+        "no delivery and no retry",
+        "no service application for that request;increments=0"
+      ],
+      "reason": "An at-most-one bound permits zero. Suppressing duplicate effects does not itself guarantee delivery, completion or a successful response.",
+      "unique_correct_option": true,
+      "ambiguity": "none under the stated teaching protocol"
+    }
+  ],
+  "ambiguity_assessment": {
+    "blocking": [],
+    "multiple_correct": [],
+    "unstated_assumptions_needed": [],
+    "notes": [
+      "The SET/audit question explicitly scopes idempotence to the requested register effect; this avoids conflating incidental delivery logs with that effect.",
+      "The historical-result question states exact stored-result replay, rather than assuming all real APIs return a byte-identical or current-state reply.",
+      "Atomicity, identity namespace, mismatch refusal and retention are expressly declared teaching contracts; the answers do not claim every HTTP service implements them.",
+      "The concurrency trace expressly makes increments atomic and sequentially applied after both initial reads, excluding a lost-update interpretation.",
+      "The late SET trace deliberately separates repeat idempotence from protection against intervening writes.",
+      "The final at-most-once question includes non-delivery explicitly, so zero effects is compatible with the safety property."
+    ]
+  },
+  "primary_sources_checked": [
+    {
+      "url": "https://www.rfc-editor.org/rfc/rfc9110.html#name-idempotent-methods",
+      "section": "9.2.2",
+      "retrieved_via": "public primary-source web retrieval",
+      "relevant_scope": "Idempotence concerns the requested effect; per-request logging may differ, and a retry response may differ. This supports the effect-versus-log distinction but does not imply this deck's invented ADD protocol is HTTP.",
+      "source_ref": "turn71view0"
+    },
+    {
+      "url": "https://aws.amazon.com/builders-library/making-retries-safe-with-idempotent-APIs/",
+      "sections": [
+        "Retries and semantic equivalence",
+        "Late arriving requests",
+        "Same client request ID, different intent"
+      ],
+      "retrieved_via": "public primary-source web retrieval",
+      "relevant_scope": "Caller-scoped request identity, explicit parameter validation, atomic effect/token treatment and service-specific retention corroborate the contract distinctions. The exact answers were computed from the prompts, not imported as universal AWS behavior.",
+      "source_refs": [
+        "turn71view1",
+        "turn71view2",
+        "turn71view3"
+      ]
+    }
+  ],
+  "qualification_limits": [
+    "Independent human-readable reasoning/content receiving only; no application parser or deck load invoked.",
+    "No native process, browser, installed learner, storage mutation, remote-service exercise or learning-effectiveness measurement.",
+    "No authored key/guide comparison yet. This frozen answer object precedes any such exposure.",
+    "No claims about retry budgets/backoff, authentication, cancellation or a universal exactly-once protocol, which are outside the questions."
+  ]
+}

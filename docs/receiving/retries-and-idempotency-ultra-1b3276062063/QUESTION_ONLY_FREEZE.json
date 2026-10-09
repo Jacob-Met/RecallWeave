@@ -1,0 +1,205 @@
+{
+  "schema": "recallweave-retry-question-only-freeze-v1",
+  "repository": "Jacob-Met/RecallWeave",
+  "issue": 228,
+  "author": "ultra-1b3276062063/mac",
+  "recorded_utc": "2026-10-09 07:13:45 UTC",
+  "baseline": {
+    "commit": "698902f9c9c1d5c5023092b85b3632a7cb7a01ed",
+    "tree": "d6d3707b691850af7928299242631534cff89aa8",
+    "parser": "f0f8a4b234489c2388f427633f548d56c6ed4c03"
+  },
+  "title": "Retries: one request, uncertain replies",
+  "paths": [
+    "courses/retries-and-idempotency.json",
+    "courses/retries-and-idempotency.md"
+  ],
+  "concepts": [
+    "Repeated state changes",
+    "Operation identity",
+    "Durable result records",
+    "Limits of retry guarantees"
+  ],
+  "items": [
+    {
+      "id": "retry-increment-twice",
+      "concept": "Repeated state changes",
+      "prerequisites": [],
+      "prompt": "A counter starts at 7. Every delivered ADD 3 command increments it by 3, with no duplicate detection. The same command is delivered and applied twice; nothing else runs. What is the final counter, and is this command idempotent for that state change?",
+      "options": [
+        "10; it is idempotent because the command text is unchanged.",
+        "13; it is not idempotent because the second application changes the counter again.",
+        "13; it is idempotent because both replies can say success.",
+        "7; repeated command text automatically cancels both applications."
+      ]
+    },
+    {
+      "id": "retry-assignment-twice",
+      "concept": "Repeated state changes",
+      "prerequisites": [],
+      "prompt": "A register starts at 4. SET 12 replaces its value with 12. The same command is applied twice with no intervening operation. The service separately appends one audit entry for each delivery. Which statement correctly describes the requested register effect?",
+      "options": [
+        "The register becomes 24 because two deliveries add two copies of 12.",
+        "The register effect is not idempotent because the audit has two entries.",
+        "The register ends at 12; repeating SET 12 has the same requested register effect as applying it once.",
+        "The register ends at 4 because an idempotent command cannot change state."
+      ]
+    },
+    {
+      "id": "retry-missing-reply",
+      "concept": "Repeated state changes",
+      "prerequisites": [],
+      "prompt": "A client sends a non-idempotent increment once and times out without receiving a response. The protocol supplies no operation lookup or duplicate suppression. The increment might not have arrived, or it might have committed before its reply was lost. What does the timeout alone establish?",
+      "options": [
+        "The effect is unknown to the client; it does not prove either that the increment failed or that it committed.",
+        "The server definitely made no change, so a retry cannot duplicate the increment.",
+        "The increment definitely committed, so the client may report success.",
+        "The server is guaranteed to undo any operation whose response is not received."
+      ]
+    },
+    {
+      "id": "retry-historical-result",
+      "concept": "Operation identity",
+      "prerequisites": [
+        "Repeated state changes"
+      ],
+      "prompt": "A teaching service keeps durable records keyed by exact operation ID. A first ID applies ADD n atomically with storing its result. A repeated ID with identical n returns that stored result without another addition. Starting at 0, ID A adds 2 and stores result 2; ID B then adds 5 and stores result 7. While both records remain, A with n=2 is received again. Which pair is correct?",
+      "options": [
+        "Reply 7; current counter 7.",
+        "Reply 9; current counter 9.",
+        "Reply 2; current counter 2.",
+        "Reply 2; current counter 7."
+      ]
+    },
+    {
+      "id": "retry-changed-intent",
+      "concept": "Operation identity",
+      "prerequisites": [
+        "Repeated state changes"
+      ],
+      "prompt": "A service binds each retained operation ID to its exact ADD amount and result. Same ID/same amount replays the stored result; same ID/different amount is refused without mutation. ID blue was accepted with amount 4, leaving the counter at 4. While that record remains, a caller sends blue with amount 9. What must this service do?",
+      "options": [
+        "Add 9 and silently update blue to the new request.",
+        "Refuse the parameter mismatch and leave the counter at 4.",
+        "Return the old result but replace the stored amount with 9.",
+        "Apply an additional 5 so the counter matches the new requested amount."
+      ]
+    },
+    {
+      "id": "retry-equal-parameters-new-ids",
+      "concept": "Operation identity",
+      "prerequisites": [
+        "Repeated state changes"
+      ],
+      "prompt": "A counter starts at 1. A service suppresses repeats only when the exact caller and operation ID match a retained record; equal ADD amounts alone are not duplicates. One caller intentionally sends ID first with ADD 3 and then a different ID second with ADD 3. Both first deliveries are accepted. What is the counter?",
+      "options": [
+        "7; these are two distinct operations, each adding 3.",
+        "4; identical amounts always mean the second request is a retry.",
+        "1; requesting the same amount twice is a conflict.",
+        "6; operation IDs replace the original counter value."
+      ]
+    },
+    {
+      "id": "retry-caller-namespace",
+      "concept": "Durable result records",
+      "prerequisites": [
+        "Operation identity"
+      ],
+      "prompt": "Two callers share a counter initially equal to 0. Deduplication records are keyed by the exact pair (caller, operation ID); each first pair atomically applies its ADD amount. Caller Ada sends (Ada, job-1), ADD 2. Caller Bo then sends (Bo, job-1), ADD 2. There are no other requests. What follows from this declared identity rule?",
+      "options": [
+        "Bo is refused because operation IDs are globally unique across all callers.",
+        "Only Ada's request applies, so the counter is 2.",
+        "Both distinct pairs apply, so the counter is 4.",
+        "The counter becomes 1 because the repeated job-1 text replaces its value."
+      ]
+    },
+    {
+      "id": "retry-record-effect-gap",
+      "concept": "Durable result records",
+      "prerequisites": [
+        "Operation identity"
+      ],
+      "prompt": "A broken service durably changes a counter from 0 to 5 for operation K, then crashes before saving K's completion record. After restart the counter is still 5 but no K record exists. Its retry handler treats an absent record as a new ADD 5 and applies it. Which diagnosis fits this trace?",
+      "options": [
+        "A stored completion record is guaranteed whenever an effect is durable.",
+        "The missing reply proves that the first addition was rolled back.",
+        "Adding more client-side waiting would itself restore the lost record.",
+        "The effect and its completion record were not committed together; the retry can make the counter 10."
+      ]
+    },
+    {
+      "id": "retry-concurrent-check",
+      "concept": "Durable result records",
+      "prerequisites": [
+        "Operation identity"
+      ],
+      "prompt": "A shared counter starts at 0. Workers W1 and W2 receive the same new operation ID K with ADD 1. Both first read 'no K record'. Without rechecking or an exclusive/atomic claim, W1 adds 1 and writes K; W2 then adds 1 and writes K. The counter increments themselves are atomic, so neither increment is lost. What does the final value show?",
+      "options": [
+        "The final value is 1 because atomic increments automatically deduplicate IDs.",
+        "The final value is 2; a separate check followed by a write did not enforce one application for K.",
+        "The final value is 0 because concurrent operations cancel.",
+        "The final value is 2, which proves all later retries are safe even if records expire."
+      ]
+    },
+    {
+      "id": "retry-retention-expiry",
+      "concept": "Limits of retry guarantees",
+      "prerequisites": [
+        "Durable result records"
+      ],
+      "prompt": "A service applies ADD 2 for ID K once, changing a counter from 0 to 2. It retains K's deduplication record for exactly 60 seconds, then deletes that record without changing the counter. At 120 seconds an old identical K request arrives; this teaching service explicitly treats IDs with no current record as new. What happens, and what limit does this illustrate?",
+      "options": [
+        "The counter stays 2 because idempotency records necessarily last forever.",
+        "The counter returns to 0 when the record expires.",
+        "The counter becomes 4; duplicate suppression did not cover a retry after the stated retention window.",
+        "The late request must be refused even though the stated handler treats it as new."
+      ]
+    },
+    {
+      "id": "retry-intervening-update",
+      "concept": "Limits of retry guarantees",
+      "prerequisites": [
+        "Repeated state changes"
+      ],
+      "prompt": "SET v unconditionally replaces a register. SET 5 is idempotent when repeated with no intervening operation. Now apply this actual sequence: SET 5, then another writer's SET 9, then a delayed repeat of SET 5. There are no version checks or operation records. Which conclusion is correct?",
+      "options": [
+        "The final value is 5; idempotence of SET 5 alone does not protect the intervening writer's value.",
+        "The final value is 9 because an idempotent command can never overwrite another update.",
+        "The final value is 14 because assignments accumulate.",
+        "The repeat is automatically rejected because its value is older."
+      ]
+    },
+    {
+      "id": "retry-at-most-once-not-eventual",
+      "concept": "Limits of retry guarantees",
+      "prerequisites": [
+        "Durable result records"
+      ],
+      "prompt": "A protocol guarantees at most one committed counter increment for each operation ID that it receives, while retaining the relevant records. A particular client's request is lost before reaching the service and is never delivered or retried. What can be concluded about that request?",
+      "options": [
+        "It must eventually increment the counter because duplicates are suppressed.",
+        "It committed exactly once even though the service never received it.",
+        "It must produce a success response after its record expires.",
+        "It produces no increment; an at-most-once effect rule by itself does not guarantee eventual delivery or completion."
+      ]
+    }
+  ],
+  "review_contract": [
+    "No authored answer indices, explanations or worked guide are included in this freeze.",
+    "Independently answer each self-contained prompt; identify ambiguity, multiple correct choices or unstated assumptions before reading the authored key.",
+    "The examples are declared teaching protocols. Do not import a universal HTTP/API storage, concurrency, retention or liveness guarantee.",
+    "Distinguish requested effects from logs/replies, historical recorded results from current state, exact operation identity from equal parameters, and duplicate suppression from delivery/completion.",
+    "Actual parser admission will use the entire unchanged native project module. No browser, installed learner, remote service, private ledger or learning-effectiveness result is implied."
+  ],
+  "conceptual_sources": [
+    {
+      "url": "https://www.rfc-editor.org/rfc/rfc9110.html#name-idempotent-methods",
+      "role": "Requested-effect definition and allowance for differing response/incidental effects."
+    },
+    {
+      "url": "https://aws.amazon.com/builders-library/making-retries-safe-with-idempotent-APIs/",
+      "role": "Explicit request identifiers, parameter mismatch and retained atomic result/effect contracts; not a copied implementation."
+    }
+  ],
+  "source_state": "Claim precedes candidate files; question/options are frozen before independent key exposure. Candidate answers/guide are withheld from reviewer."
+}
