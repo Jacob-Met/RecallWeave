@@ -1,0 +1,93 @@
+import pathlib,json,hashlib,stat,os,subprocess,signal,tempfile,datetime,shutil,traceback
+P=pathlib.Path("/home/jacob/root-continuation-cf5799f6d38b-v1")
+S=pathlib.Path("/home/jacob/recallweave-current-698-cf5799f6d38b-uu2dh48b/current-v2")
+A=pathlib.Path("/home/jacob/recallweave-edit-author-cf5799f6d38b-6rx6cd_n")
+I=pathlib.Path("/home/jacob/recall-root-intake-cf5799f6d38b-ng27u79l")
+M=pathlib.Path("/tmp/recallweave-current-peer-binding-cf5799f6d38b-iwbi7scc-manifest.json")
+R=pathlib.Path(tempfile.mkdtemp(prefix="recall-current-browser-root-cf5799f6d38b-",dir="/home/jacob"))
+def sha(b):return hashlib.sha256(b).hexdigest()
+def blob(b):return hashlib.sha1(b"blob "+str(len(b)).encode()+b"\0"+b).hexdigest()
+def now():return datetime.datetime.now(datetime.timezone.utc).isoformat()
+def pin(p):
+ p=pathlib.Path(p);s=p.lstat();assert stat.S_ISREG(s.st_mode) and not p.is_symlink(),str(p)
+ b=p.read_bytes();t=p.lstat();assert (s.st_dev,s.st_ino,s.st_mtime_ns,s.st_ctime_ns,s.st_size)==(t.st_dev,t.st_ino,t.st_mtime_ns,t.st_ctime_ns,t.st_size)
+ return b,{"bytes":len(b),"sha256":sha(b),"git_blob":blob(b),"mode":"100755" if s.st_mode&0o111 else "100644"}
+def write(p,b):
+ p.parent.mkdir(parents=True,exist_ok=True)
+ with p.open("xb") as f:f.write(b)
+def dump(p,obj):write(p,(json.dumps(obj,indent=2)+"\n").encode())
+def capacity():
+ return {p:{"free_bytes":shutil.disk_usage(p).free,"free_inodes":os.statvfs(p).f_favail} for p in ["/tmp","/home/jacob","/dev/shm"]}
+def tree(rows):
+ root={}
+ for r in rows:
+  parts=r["path"].split("/");d=root
+  for part in parts[:-1]:d=d.setdefault(part,{})
+  assert parts[-1] not in d;d[parts[-1]]=(r["mode"],r["sha"])
+ def walk(d):
+  v=[]
+  for name,x in d.items():
+   directory=isinstance(x,dict);mode,h=("40000",walk(x)) if directory else x
+   v.append(((name+("/" if directory else "")).encode(),mode.encode()+b" "+name.encode()+b"\0"+bytes.fromhex(h)))
+  b=b"".join(x for k,x in sorted(v));return hashlib.sha1(b"tree "+str(len(b)).encode()+b"\0"+b).hexdigest()
+ return walk(root)
+record={"schema":"recallweave.root.current-browser.v1","root":str(R),"started":now(),"source":str(S),"captured_parent":"698902f9c9c1d5c5023092b85b3632a7cb7a01ed","source_tree":"c80febfe92c5b8613766ba9124a9d17ea05f52fe","current_remote_ref_rechecked":False,"remote_limit":"GitHub core API rate limit; receive the exact already captured parent, without a latest-main claim","actions_started":False,"capacity_before":capacity(),"inherited_temp_env":{k:os.environ.get(k) for k in ["TMPDIR","TMP","TEMP"]}}
+rows=None
+try:
+ b,info=pin(P/"recall-primary698.json");assert info["sha256"]=="76709207014f8b410db580fade6f3417c624b5da700adeb645625dded5275638";primary=json.loads(b)
+ b,info=pin(A/"candidate-receiver-v4-source-manifest.json");assert info["sha256"]=="20450124313b5a4f58f762d05e23181545386a01475dbf7d1a0d815f46afdd6b";scoped=json.loads(b)["scoped_files"]
+ mapping={r["path"]:dict(r) for r in primary["current"]["leaves"]}
+ for r in scoped:mapping[r["path"]]={"path":r["path"],"mode":r["git_mode"],"sha":r["git_blob"]}
+ current_readme,info=pin(I/"current-README.md");assert info["sha256"]=="09e48f8a8ad9011e047c866de662678e7acd65042e30fa904735ed3a2ab39d92"
+ mapping["README.md"]["sha"]=blob(current_readme);rows=list(mapping.values());assert len(rows)==2924 and tree(rows)==record["source_tree"]
+ def source_pins():
+  result=[]
+  for r in rows:
+   data,x=pin(S/r["path"]);assert x["git_blob"]==r["sha"] and x["mode"]==r["mode"],r["path"]
+   result.append({"path":r["path"],**x})
+  return result
+ before=source_pins();dump(R/"source-before.json",before)
+ mb,mi=pin(M);assert mi["sha256"]=="e8d83aaacbc69a9173e232c182e02b36949c11e2778d3c7f6d77ce4b9c534c5b";manifest=json.loads(mb)
+ assert len(manifest["files"])==11
+ for r in manifest["files"]:
+  data,x=pin(r["source_path"]);assert all(x[k]==r[k] for k in ["bytes","sha256","git_blob","mode"])
+  write(R/"companion"/pathlib.Path(r["source_path"]).name,data)
+ write(R/"companion-manifest.json",mb)
+ original=(I/"publication-old-parent/docs/receiving/edit-distance-cf5799f6d38b/independent-review/browser-independent-v2.mjs").read_bytes()
+ assert sha(original)=="b43f1f140aee28d755f46ed2c668edaf3d91dca61949613ef2efd661c150918a"
+ adapter=(R/"companion/browser-independent-current698.mjs").read_bytes()
+ assert sha(adapter)=="3ab3133dc3ca02e13f5b9507d0c7697ad586831791e277c7a93ca285797319e5"
+ assert adapter==original.replace(b"tree:'eb5ab352400a643bd85768b46b81921820a5f233'",b"tree:'c80febfe92c5b8613766ba9124a9d17ea05f52fe'",1)
+ needle=b"userDataDir:profile,args:";assert adapter.count(needle)==1
+ receiver=adapter.replace(needle,b"userDataDir:profile,dumpio:true,args:",1)
+ def groups(b):return b[b.index(b"  await group("):b.index(b"  report.final=await snapshot();")]
+ assert groups(receiver)==groups(original)
+ write(R/"browser-current698-root.mjs",receiver);write(R/"core-oracle-v1.mjs",(R/"companion/core-oracle-v1.mjs").read_bytes())
+ proof={"original_peer_receiver_sha256":sha(original),"current_metadata_adapter_sha256":sha(adapter),"root_receiver_sha256":sha(receiver),"exact_changes":["report.tree names captured current product c80","dumpio:true forwards Chromium output into durable stdout/stderr"],"both_group_bodies_exact":True,"group_body_bytes":len(groups(receiver)),"group_body_sha256":sha(groups(receiver)),"launch_timeout_ms":30000,"outer_bound_seconds":240,"source_manifest_files":len(before),"source_before_sha256":sha((R/"source-before.json").read_bytes())}
+ dump(R/"receiver-proof.json",proof);record["receiver_proof"]=proof
+ temp=R/"tmp";temp.mkdir();env=dict(os.environ)
+ for k in ["TMPDIR","TMP","TEMP"]:env[k]=str(temp)
+ record["effective_temp_env"]={k:env[k] for k in ["TMPDIR","TMP","TEMP"]};record["node"]=subprocess.check_output(["node","--version"],text=True).strip()
+ syntax=subprocess.run(["node","--check",str(R/"browser-current698-root.mjs")],capture_output=True,env=env,timeout=20)
+ write(R/"syntax.stdout",syntax.stdout);write(R/"syntax.stderr",syntax.stderr);assert syntax.returncode==0
+ cmd=["node",str(R/"browser-current698-root.mjs"),str(S),str(R/"browser"),str(R/"visible")]
+ record["command"]=cmd
+ with (R/"browser.stdout").open("xb") as out,(R/"browser.stderr").open("xb") as err:
+  child=subprocess.Popen(cmd,stdout=out,stderr=err,cwd=R,env=env,start_new_session=True);record["pid"]=child.pid;dump(R/"process-start.json",record)
+  try:record["exit_code"]=child.wait(timeout=240)
+  except subprocess.TimeoutExpired:
+   record["timeout"]=True;os.killpg(child.pid,signal.SIGTERM)
+   try:record["exit_code"]=child.wait(timeout=10)
+   except subprocess.TimeoutExpired:os.killpg(child.pid,signal.SIGKILL);record["exit_code"]=child.wait()
+ after=source_pins();dump(R/"source-after.json",after);record["all_source_exact"]=before==after
+ if (R/"browser/receipt.json").exists():
+  rb=(R/"browser/receipt.json").read_bytes();rr=json.loads(rb)
+  record["browser_receipt"]={"path":str(R/"browser/receipt.json"),"bytes":len(rb),"sha256":sha(rb),"passed":rr.get("passed"),"groups":[{"name":x["name"],"passed":x["passed"],"error":x.get("error")} for x in rr.get("groups",[])],"downloads":len(rr.get("downloads",[])),"chrome":rr.get("chrome"),"outer_error":rr.get("outerError")}
+except Exception as exc:record.update(error=str(exc),traceback=traceback.format_exc())
+record["finished"]=now();record["capacity_after"]=capacity()
+record["logs"]={n:{"bytes":(R/n).stat().st_size,"sha256":sha((R/n).read_bytes())} for n in ["browser.stdout","browser.stderr"] if (R/n).exists()}
+lines=subprocess.check_output(["ps","-eo","pid,ppid,args"],text=True).splitlines()
+record["remaining_owned_processes"]=[l for l in lines if str(R) in l and ("node " in l or "chromium " in l) and "python3 -c" not in l]
+record["passed"]=record.get("exit_code")==0 and record.get("all_source_exact") is True and record.get("browser_receipt",{}).get("passed") is True and not record["remaining_owned_processes"]
+dump(R/"process-final.json",record);print(json.dumps(record))
+raise SystemExit(0 if record["passed"] else 1)

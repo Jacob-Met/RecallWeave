@@ -1,0 +1,354 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; base-uri 'none'; form-action 'none'">
+<title>Edit distance — RecallWeave</title>
+<style>
+:root{color-scheme:light;--ink:#182e40;--muted:#51616d;--paper:#f3f6f5;--line:#c5d4d5;--accent:#00695f;--pale:#e4f2ee;--warm:#fff7e4}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:17px/1.55 system-ui,sans-serif}
+a{color:var(--accent)}button,input,select{font:inherit}button,input,select{border:1px solid #799395;border-radius:7px}
+button{padding:.65rem .9rem;background:white;color:var(--ink);cursor:pointer}button:hover{background:var(--pale)}button:disabled{opacity:.5;cursor:default}
+button.primary{background:var(--accent);color:#fff;border-color:var(--accent);font-weight:700}
+:focus-visible{outline:3px solid #bb6700;outline-offset:3px}input,select{width:100%;padding:.6rem;background:#fff;color:var(--ink);min-width:0}
+[hidden]{display:none!important}.skip{position:absolute;top:-100px;left:1rem;background:white;padding:1rem;z-index:3}.skip:focus{top:1rem}
+.wrap{max-width:1220px;margin:auto;padding:2.5rem 1.5rem}header{display:grid;grid-template-columns:1.4fr 1fr;gap:3rem;border-bottom:1px solid var(--line);padding-bottom:2rem;margin-bottom:2rem}
+.eyebrow{text-transform:uppercase;letter-spacing:.15em;font-size:.75rem;font-weight:750;color:var(--accent)}h1{font-size:clamp(2.3rem,6vw,4.4rem);line-height:1.05;letter-spacing:-.05em;margin:.65rem 0 1rem;max-width:12ch}
+h2{font-size:1.4rem;margin-top:0}h3{font-size:1.05rem}p{margin:.5rem 0 1rem}.intro{max-width:55ch}.lesson-box{align-self:center;background:var(--ink);color:white;padding:1.5rem;border-radius:12px}
+.lesson-box h2{font-size:1.1rem}.lesson-box p{font-size:.95rem;color:#e0e9eb}.lesson-box button{font-size:.9rem;margin:.25rem .3rem .25rem 0}
+.panel{background:white;border:1px solid var(--line);border-radius:12px;padding:1.5rem;margin-bottom:1.5rem;min-width:0}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}.costs{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin:1.2rem 0}
+label{font-weight:650;display:block;font-size:.95rem}label input,label select{margin-top:.35rem}.hint{font-size:.88rem;color:var(--muted);margin:.5rem 0 1rem}
+.preset{display:flex;gap:.7rem;align-items:end;flex-wrap:wrap;border-bottom:1px solid var(--line);padding-bottom:1.2rem;margin-bottom:1.2rem}.preset label{flex:1;min-width:180px}
+.actions{display:flex;gap:.8rem;align-items:center;flex-wrap:wrap}.status{min-height:1.6em;margin-top:1rem;font-weight:600}
+.summary{display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap;background:var(--pale);border-color:#9abdb3}
+.minimum{font-size:3.5rem;line-height:1;font-weight:800;letter-spacing:-.05em}.summary-label{text-transform:uppercase;letter-spacing:.12em;font-size:.72rem;font-weight:800}.literal{font-family:ui-monospace,monospace;overflow-wrap:anywhere;white-space:pre-wrap}
+.summary-copy{flex:1;min-width:180px}.table-scroll{overflow:auto;max-width:100%;border:1px solid var(--line);border-radius:8px;margin:1rem 0}
+table{border-collapse:collapse;width:max-content;min-width:100%;font-variant-numeric:tabular-nums}th,td{border:1px solid #d8e1e2;text-align:center;padding:.35rem;white-space:nowrap}
+th{font-weight:650;background:#eef3f4;font-size:.78rem}td button{padding:.4rem;min-width:2.4rem;border:1px solid transparent}
+td button[aria-pressed=true]{background:var(--accent);color:white;border-color:var(--accent)}.cell-arrows{display:block;font-size:.7rem;line-height:1;color:var(--accent)}
+.selectors{display:grid;grid-template-columns:1fr 1fr;gap:1rem}.details{background:var(--warm);border-radius:9px;padding:1rem;margin-top:1rem;overflow-wrap:anywhere}
+.details p:last-child{margin-bottom:0}.winning{font-weight:750}.two-columns{display:grid;grid-template-columns:1.2fr 1fr;gap:1.5rem}
+ol{padding-left:1.5rem}#edit-alignment{font-size:.9rem;overflow-wrap:anywhere}#edit-alignment li{padding:.35rem 0}
+.replay{background:#edf2f5;border-radius:9px;padding:1rem;align-self:start}.replay-output{font-size:1.5rem;min-height:2em;margin:.8rem 0}
+.replay input{padding:0;margin:1rem 0}.replay .actions button{flex:1}footer{color:var(--muted);font-size:.85rem;border-top:1px solid var(--line);padding-top:1rem}
+@media(max-width:720px){.wrap{padding:1.3rem .8rem}header{grid-template-columns:1fr;gap:1.2rem;padding-bottom:1.4rem}h1{max-width:15ch}.panel{padding:1rem}.form-grid,.two-columns{grid-template-columns:1fr}.costs{gap:.6rem}.costs label{font-size:.8rem}.selectors{grid-template-columns:1fr}.summary{gap:1rem}.preset button{width:100%}.lesson-box{padding:1.2rem}}
+@media(prefers-reduced-motion:no-preference){button{transition:background-color .12s}}
+@media print{body{background:white}.wrap{padding:0}.lesson-box button,.actions,form,.preset,#edit-step{display:none}.panel{break-inside:avoid}header{display:block}.lesson-box{background:white;color:black}.lesson-box p{color:black}.table-scroll{overflow:visible}table{font-size:.7rem}}
+</style>
+</head>
+<body>
+<a class="skip" href="#lab">Skip to the experiment</a>
+<div class="wrap">
+<header>
+<div><div class="eyebrow">RecallWeave · An offline algorithm lab</div><h1>Edit distance</h1><p class="intro">Change a string. Inspect every prefix decision. Replay one cheapest transformation.</p><p class="hint">Exact insertion, deletion and substitution costs. No transposition, text normalization or meaning comparison.</p></div>
+<aside class="lesson-box" aria-label="Original lesson downloads"><h2>Take the reasoning into a lesson</h2><p>Twelve original questions connect operations, prefix states, ties and representation. Download the course and open it through RecallWeave's existing local lesson preview.</p><button type="button" id="edit-download-lesson">Download lesson</button><button type="button" id="edit-download-guide">Download worked guide</button></aside>
+</header>
+<main id="lab">
+<section class="panel" aria-labelledby="inputs-heading">
+<h2 id="inputs-heading">Choose a transformation</h2>
+<div class="preset"><label for="edit-preset">Worked example<select id="edit-preset"></select></label><button type="button" id="edit-load-preset">Load example</button></div>
+<form id="edit-form" novalidate>
+<div class="form-grid"><label for="edit-source">Source string<input id="edit-source" type="text" autocomplete="off" spellcheck="false" aria-describedby="symbol-policy"></label><label for="edit-target">Target string<input id="edit-target" type="text" autocomplete="off" spellcheck="false" aria-describedby="symbol-policy"></label></div>
+<p class="hint" id="symbol-policy">0–16 Unicode scalar values per string. Empty strings, spaces and letter case are retained. Scalars are not necessarily displayed characters: é and e + combining acute differ here. C0/DEL controls and unpaired surrogates are refused.</p>
+<div class="costs"><label for="edit-insert">Insertion cost<input id="edit-insert" type="text" inputmode="numeric" value="1" aria-describedby="cost-policy"></label><label for="edit-delete">Deletion cost<input id="edit-delete" type="text" inputmode="numeric" value="1" aria-describedby="cost-policy"></label><label for="edit-substitute">Substitution cost<input id="edit-substitute" type="text" inputmode="numeric" value="1" aria-describedby="cost-policy"></label></div>
+<p class="hint" id="cost-policy">Each cost is a whole number from 1 to 9. Identical-symbol matches cost 0. Unequal costs minimize total cost, which can differ from the fewest edits.</p>
+<div class="actions"><button class="primary" type="submit" id="edit-compute">Compute minimum cost</button><button type="button" id="edit-download-experiment" disabled>Download experiment</button></div>
+</form>
+<p class="status" id="edit-status" role="status" aria-live="polite"></p>
+</section>
+<div id="edit-result" hidden>
+<section class="panel summary" aria-label="Applied experiment"><div><div class="summary-label">Minimum cost</div><div id="edit-minimum" class="minimum"></div></div><div class="summary-copy"><p id="edit-input-summary" class="literal"></p><p class="hint">This result belongs to these exact applied inputs. Editing a draft retires it until you compute again.</p></div></section>
+<section class="panel" aria-labelledby="table-heading">
+<h2 id="table-heading">Every prefix, one exact minimum</h2><p>D[i, j] transforms the first i source scalars into the first j target scalars. The 0 row and column are empty prefixes.</p>
+<div class="selectors"><label for="edit-row">Source prefix<select id="edit-row"></select></label><label for="edit-column">Target prefix<select id="edit-column"></select></label></div>
+<p class="hint">Select prefixes above or inspect a table button. Arrow keys move between cells. ↖ means match/substitution, ↑ deletion, ← insertion; all minimum predecessors are shown.</p>
+<div class="table-scroll" tabindex="0" role="region" aria-label="Scrollable prefix cost table"><table id="edit-matrix" aria-label="Minimum transformation costs for every prefix pair"></table></div>
+<div id="edit-details" class="details" aria-live="polite"></div>
+</section>
+<section class="panel" aria-labelledby="alignment-heading"><h2 id="alignment-heading">One optimal alignment</h2><p>The backward tie rule prefers diagonal, then deletion, then insertion. Other alignments can have the same minimum. Matches appear as zero-cost steps, not edits.</p>
+<div class="two-columns"><ol id="edit-alignment"></ol><div class="replay"><h3>Replay the chosen alignment</h3><p class="hint">Built target prefix + unused source suffix. Each step consumes source, emits target, or both.</p><p id="edit-replay-text" class="literal replay-output"></p><p id="edit-replay-cost"></p><label for="edit-step">Alignment step<input id="edit-step" type="range" min="0" max="0" value="0"></label><div class="actions"><button type="button" id="edit-previous">Previous step</button><button type="button" id="edit-next">Next step</button></div></div></div>
+</section>
+</div>
+</main>
+<footer><p>Original RecallWeave lesson and explorer, with AI assistance. Runs locally without network requests or automatic storage. Experiment files are records, not learner archives. No learning-efficacy or semantic-similarity claim is made.</p></footer>
+</div>
+<script>(()=>{
+/** Original bounded edit-distance teaching model. Inputs are Unicode scalars, not graphemes.
+ * Positive uniform operation costs; no transposition, normalization or case folding.
+ * This is an exact alignment model for the supplied symbols, not a semantic-similarity model.
+ */
+const MAX_EDIT_SYMBOLS = 16;
+const editRuns = new WeakSet();
+function freezeEdit(value) {
+  if (value && typeof value === 'object' && !Object.isFrozen(value)) {
+    Object.values(value).forEach(freezeEdit);
+    Object.freeze(value);
+  }
+  return value;
+}
+function editSymbols(value, name) {
+  if (typeof value !== 'string') throw new TypeError(name + ' must be text.');
+  const symbols = Array.from(value);
+  if (symbols.length > MAX_EDIT_SYMBOLS) throw new RangeError(name + ' needs at most 16 Unicode scalar values.');
+  if (symbols.some(symbol => { const point = symbol.codePointAt(0); return point >= 0xd800 && point <= 0xdfff; })) {
+    throw new TypeError(name + ' contains an unpaired UTF-16 surrogate.');
+  }
+  if (/[\u0000-\u001f\u007f]/u.test(value)) throw new TypeError(name + ' cannot contain C0 or DEL control characters.');
+  return symbols;
+}
+function validateEditExperiment(value) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) throw new TypeError('Use an experiment object.');
+  editSymbols(value.source, 'Source');
+  editSymbols(value.target, 'Target');
+  if (!value.costs || typeof value.costs !== 'object' || Array.isArray(value.costs)) throw new TypeError('Supply all three costs.');
+  const costs = {};
+  for (const kind of ['insert', 'delete', 'substitute']) {
+    const cost = value.costs[kind];
+    if (!Number.isInteger(cost) || cost < 1 || cost > 9) throw new RangeError(kind + ' cost must be an integer from 1 to 9.');
+    costs[kind] = cost;
+  }
+  return freezeEdit({source: value.source, target: value.target, costs});
+}
+function requireEditRun(run) {
+  if (!run || !editRuns.has(run)) throw new TypeError('Compute an experiment before inspecting or exporting it.');
+}
+
+/** Build every prefix state; candidate order is the declared deterministic tie rule. */
+function calculateEditDistance(value) {
+  const input = validateEditExperiment(value);
+  const source = Array.from(input.source), target = Array.from(input.target);
+  const cells = [];
+  for (let i = 0; i <= source.length; i++) {
+    const row = [];
+    cells.push(row);
+    for (let j = 0; j <= target.length; j++) {
+      const candidates = [];
+      const add = (kind, fromI, fromJ, operationCost) => {
+        const previous = cells[fromI][fromJ].cost;
+        candidates.push({kind, from: [fromI, fromJ], previous, operationCost, cost: previous + operationCost});
+      };
+      if (i && j) add(source[i - 1] === target[j - 1] ? 'match' : 'substitute', i - 1, j - 1,
+        source[i - 1] === target[j - 1] ? 0 : input.costs.substitute);
+      if (i) add('delete', i - 1, j, input.costs.delete);
+      if (j) add('insert', i, j - 1, input.costs.insert);
+      const cost = candidates.length ? Math.min(...candidates.map(candidate => candidate.cost)) : 0;
+      candidates.forEach(candidate => { candidate.optimal = candidate.cost === cost; });
+      row.push({i, j, cost, candidates, chosen: candidates.find(candidate => candidate.optimal)?.kind ?? null});
+    }
+  }
+  let i = source.length, j = target.length;
+  const alignment = [];
+  while (i || j) {
+    const cell = cells[i][j], chosen = cell.candidates.find(candidate => candidate.optimal);
+    const consumes = chosen.kind !== 'insert', emits = chosen.kind !== 'delete';
+    alignment.push({
+      kind: chosen.kind, from: chosen.from, to: [i, j],
+      sourceIndex: consumes ? i - 1 : null, targetIndex: emits ? j - 1 : null,
+      source: consumes ? source[i - 1] : null, target: emits ? target[j - 1] : null,
+      cost: chosen.operationCost
+    });
+    [i, j] = chosen.from;
+  }
+  alignment.reverse();
+  let used = 0, output = '', cost = 0;
+  const replay = [{step: 0, sourceUsed: 0, targetPrefix: '', remainingSource: input.source, text: input.source, cost: 0}];
+  for (const operation of alignment) {
+    if (operation.source !== null) used++;
+    if (operation.target !== null) output += operation.target;
+    cost += operation.cost;
+    const remainingSource = source.slice(used).join('');
+    replay.push({step: replay.length, sourceUsed: used, targetPrefix: output, remainingSource, text: output + remainingSource, cost});
+  }
+  const run = freezeEdit({
+    input, sourceSymbols: source, targetSymbols: target, cells,
+    distance: cells[source.length][target.length].cost, alignment, replay,
+    tieRule: 'Backtrack with diagonal (match or substitution), then deletion, then insertion; this selects one optimal alignment.'
+  });
+  editRuns.add(run);
+  return run;
+}
+function editCell(run, i, j) {
+  requireEditRun(run);
+  if (!Number.isInteger(i) || !Number.isInteger(j) || i < 0 || j < 0 ||
+      i > run.sourceSymbols.length || j > run.targetSymbols.length) throw new RangeError('Choose a valid prefix row and column.');
+  return run.cells[i][j];
+}
+function serializeEditExperiment(run) {
+  requireEditRun(run);
+  return JSON.stringify({
+    format: 'recallweave-edit-distance-experiment/1',
+    policy: 'Exact Unicode scalar identity; no normalization, case folding, trimming or transposition. Positive uniform integer operation costs.',
+    ...run,
+    note: 'An explicit record of this teaching experiment. It neither saves nor restores a RecallWeave learner session.'
+  }, null, 2) + '\n';
+}
+const EDIT_PRESETS = freezeEdit([
+  {name: 'A leading insertion', source: 'tack', target: 'stack', costs: {insert: 1, delete: 1, substitute: 1}},
+  {name: 'Two best alignments', source: 'aa', target: 'a', costs: {insert: 1, delete: 1, substitute: 1}},
+  {name: 'Cheaper to delete and insert', source: 'a', target: 'b', costs: {insert: 1, delete: 1, substitute: 4}},
+  {name: 'Empty is a real prefix', source: '', target: 'cat', costs: {insert: 2, delete: 3, substitute: 1}},
+  {name: 'A swap is not one edit', source: 'ab', target: 'ba', costs: {insert: 1, delete: 1, substitute: 1}},
+  {name: 'Scalars are not graphemes', source: 'é', target: 'e\u0301', costs: {insert: 1, delete: 1, substitute: 1}}
+]);
+
+
+/** One local, explicit experiment. Draft changes retire all derived result surfaces. */
+function mountEditDistance(document, lessonText, guideText) {
+  const byId = id => document.getElementById(id);
+  const form = byId('edit-form'), status = byId('edit-status'), result = byId('edit-result');
+  const source = byId('edit-source'), target = byId('edit-target');
+  const fields = ['insert','delete','substitute'].map(kind => [kind, byId('edit-' + kind)]);
+  const rowSelect = byId('edit-row'), columnSelect = byId('edit-column');
+  const table = byId('edit-matrix'), details = byId('edit-details'), alignment = byId('edit-alignment');
+  const experimentDownload = byId('edit-download-experiment');
+  let current = null, cellButtons = [];
+  const symbol = value => value === null ? 'gap' : JSON.stringify(value);
+  const prefix = (values, count) => JSON.stringify(values.slice(0, count).join(''));
+  const element = (name, text, className) => {
+    const node = document.createElement(name);
+    if (text !== undefined) node.textContent = text;
+    if (className) node.className = className;
+    return node;
+  };
+  function download(name, text, type) {
+    const url = URL.createObjectURL(new Blob([text], {type}));
+    const link = element('a');
+    link.href = url; link.download = name;
+    document.body.append(link);
+    link.click(); link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+  byId('edit-download-lesson').addEventListener('click', () => download('edit-distance.json', lessonText, 'application/json;charset=utf-8'));
+  byId('edit-download-guide').addEventListener('click', () => download('edit-distance.md', guideText, 'text/markdown;charset=utf-8'));
+  experimentDownload.addEventListener('click', () => {
+    if (current) download('edit-distance-experiment.json', serializeEditExperiment(current), 'application/json;charset=utf-8');
+  });
+  function retire(message = 'Inputs changed. Compute again to inspect or download this experiment.') {
+    current = null; result.hidden = true; experimentDownload.disabled = true;
+    table.replaceChildren(); details.replaceChildren(); alignment.replaceChildren();
+    rowSelect.replaceChildren(); columnSelect.replaceChildren(); cellButtons = [];
+    byId('edit-minimum').textContent = ''; byId('edit-input-summary').textContent = '';
+    byId('edit-replay-text').textContent = ''; byId('edit-replay-cost').textContent = '';
+    status.textContent = message;
+  }
+  [source,target,...fields.map(([,field]) => field)].forEach(field => {
+    field.addEventListener('input', () => retire());
+    field.addEventListener('change', () => retire());
+  });
+  function showCell() {
+    if (!current) return;
+    const i = Number(rowSelect.value), j = Number(columnSelect.value), cell = editCell(current, i, j);
+    details.replaceChildren();
+    details.append(element('h3', 'D[' + i + ', ' + j + '] = ' + cell.cost));
+    details.append(element('p', 'Transform ' + prefix(current.sourceSymbols, i) + ' into ' + prefix(current.targetSymbols, j) + '.'));
+    if (!cell.candidates.length) details.append(element('p', 'Empty into empty costs 0; there is no previous operation.'));
+    else {
+      const list = element('ul');
+      for (const candidate of cell.candidates) {
+        list.append(element('li', candidate.kind + ': D[' + candidate.from.join(', ') + '] ' +
+          candidate.previous + ' + ' + candidate.operationCost + ' = ' + candidate.cost +
+          (candidate.optimal ? ' — minimum' : ''), candidate.optimal ? 'winning' : ''));
+      }
+      details.append(list);
+      const tied = cell.candidates.filter(candidate => candidate.optimal);
+      details.append(element('p', tied.length > 1
+        ? tied.length + ' predecessor choices tie here. The displayed alignment follows the stated tie rule.'
+        : 'One predecessor choice minimizes this cell. Other cells may still have ties.'));
+    }
+    cellButtons.forEach(button => {
+      const active = button.dataset.row === String(i) && button.dataset.column === String(j);
+      button.setAttribute('aria-pressed', String(active)); button.tabIndex = active ? 0 : -1;
+    });
+  }
+  function selectCell(i,j,focus=false) {
+    rowSelect.value=String(i); columnSelect.value=String(j); showCell();
+    if(focus) cellButtons.find(button => button.dataset.row===String(i)&&button.dataset.column===String(j))?.focus();
+  }
+  rowSelect.addEventListener('change', showCell); columnSelect.addEventListener('change', showCell);
+  function renderMatrix() {
+    const head=element('thead'), header=element('tr');
+    header.append(element('th','Source ↓ / Target →'));
+    for(let j=0;j<=current.targetSymbols.length;j++){
+      const th=element('th',j===0?'0 · ε':j+' · '+symbol(current.targetSymbols[j-1])); th.scope='col'; header.append(th);
+    }
+    head.append(header); table.append(head);
+    const body=element('tbody');
+    for(const row of current.cells){
+      const tr=element('tr'), i=row[0].i, th=element('th',i===0?'0 · ε':i+' · '+symbol(current.sourceSymbols[i-1]));
+      th.scope='row';tr.append(th);
+      for(const cell of row){
+        const td=element('td'), button=element('button',String(cell.cost));
+        button.type='button';button.dataset.row=String(cell.i);button.dataset.column=String(cell.j);
+        button.setAttribute('aria-label','Inspect source prefix '+cell.i+', target prefix '+cell.j+', cost '+cell.cost);
+        button.addEventListener('click',()=>selectCell(cell.i,cell.j));
+        button.addEventListener('keydown',event=>{
+          const delta={ArrowUp:[-1,0],ArrowDown:[1,0],ArrowLeft:[0,-1],ArrowRight:[0,1]}[event.key];
+          if(!delta||!current)return;event.preventDefault();
+          selectCell(Math.max(0,Math.min(current.sourceSymbols.length,cell.i+delta[0])),
+            Math.max(0,Math.min(current.targetSymbols.length,cell.j+delta[1])),true);
+        });
+        td.append(button);cellButtons.push(button);
+        const arrows=cell.candidates.filter(candidate=>candidate.optimal).map(candidate=>candidate.kind==='insert'?'←':candidate.kind==='delete'?'↑':'↖').join(' ');
+        if(arrows){ const note=element('span',arrows,'cell-arrows');note.setAttribute('aria-hidden','true');td.append(note); }
+        tr.append(td);
+      }
+      body.append(tr);
+    }
+    table.append(body);
+  }
+  const step = byId('edit-step');
+  function showReplay() {
+    if(!current)return;
+    const record=current.replay[Number(step.value)];
+    byId('edit-replay-text').textContent=JSON.stringify(record.text);
+    byId('edit-replay-cost').textContent='Step '+record.step+' of '+current.alignment.length+' · accumulated cost '+record.cost;
+    byId('edit-previous').disabled=record.step===0;
+    byId('edit-next').disabled=record.step===current.alignment.length;
+  }
+  step.addEventListener('input',showReplay);
+  byId('edit-previous').addEventListener('click',()=>{if(current){step.value=String(Math.max(0,Number(step.value)-1));showReplay();}});
+  byId('edit-next').addEventListener('click',()=>{if(current){step.value=String(Math.min(current.alignment.length,Number(step.value)+1));showReplay();}});
+  function compute() {
+    retire('Computing…');
+    try {
+      const costs={};
+      for(const [kind,field] of fields){
+        if(!/^[1-9]$/.test(field.value))throw new Error(kind+' cost must be one whole digit from 1 to 9.');
+        costs[kind]=Number(field.value);
+      }
+      current=calculateEditDistance({source:source.value,target:target.value,costs});
+      byId('edit-minimum').textContent=String(current.distance);
+      byId('edit-input-summary').textContent=JSON.stringify(current.input.source)+' → '+JSON.stringify(current.input.target)+
+        ' · insertion '+costs.insert+', deletion '+costs.delete+', substitution '+costs.substitute;
+      for(let i=0;i<=current.sourceSymbols.length;i++){const option=element('option',i+' · '+prefix(current.sourceSymbols,i));option.value=String(i);rowSelect.append(option);}
+      for(let j=0;j<=current.targetSymbols.length;j++){const option=element('option',j+' · '+prefix(current.targetSymbols,j));option.value=String(j);columnSelect.append(option);}
+      renderMatrix();selectCell(current.sourceSymbols.length,current.targetSymbols.length);
+      if(!current.alignment.length)alignment.append(element('li','Both inputs are empty. No operations are needed.'));
+      for(const [index,operation] of current.alignment.entries()){
+        alignment.append(element('li',(index+1)+'. '+operation.kind+' · '+symbol(operation.source)+' → '+symbol(operation.target)+
+          ' · cost '+operation.cost+' · prefix ['+operation.from.join(', ')+'] → ['+operation.to.join(', ')+']'));
+      }
+      step.max=String(current.alignment.length);step.value='0';showReplay();
+      result.hidden=false;experimentDownload.disabled=false;
+      status.textContent='Computed '+current.cells.length+' × '+current.cells[0].length+' prefix states. Minimum cost '+current.distance+'.';
+    } catch(error) {
+      retire('Cannot compute: '+error.message);
+    }
+  }
+  form.addEventListener('submit',event=>{event.preventDefault();compute();});
+  const presetSelect=byId('edit-preset');
+  EDIT_PRESETS.forEach((preset,index)=>{const option=element('option',preset.name);option.value=String(index);presetSelect.append(option);});
+  function loadPreset() {
+    const preset=EDIT_PRESETS[Number(presetSelect.value)];
+    source.value=preset.source;target.value=preset.target;
+    fields.forEach(([kind,field])=>{field.value=String(preset.costs[kind]);});
+    retire('Example loaded. Compute to inspect it.');
+  }
+  byId('edit-load-preset').addEventListener('click',loadPreset);
+  loadPreset();compute();
+}
+
+mountEditDistance(document,"{\n  \"format\": \"recallweave-deck/1\",\n  \"title\": \"Edit distance: prefixes, costs and one optimal alignment\",\n  \"attribution\": \"Original course, examples and explanations authored for RecallWeave with AI assistance. Conceptual references: Wagner & Fischer, The String-to-String Correction Problem (JACM1974, doi:10.1145/321796.321811), and MIT OpenCourseWare6.006 Spring2020 Recitation16. No source questions, passages or code are copied.\",\n  \"license\": \"Original lesson content: CC BY 4.0. Reference works retain their own licenses.\",\n  \"concepts\": [\n    \"Operations and costs\",\n    \"Prefix subproblems\",\n    \"Optimal reconstruction\",\n    \"Representation and limits\"\n  ],\n  \"items\": [\n    {\n      \"id\": \"edit-01\",\n      \"concept\": \"Operations and costs\",\n      \"prerequisites\": [],\n      \"prompt\": \"With insertion, deletion and substitution each costing 1, what is the minimum cost to turn cat into cut?\",\n      \"options\": [\n        \"0, because the lengths match\",\n        \"1, by substituting the middle symbol\",\n        \"2, because both words contain three symbols\",\n        \"3, one edit per position\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"Only a changes to u. One substitution costs 1. Cost 0 would require identical scalar sequences, so 1 is minimal.\",\n      \"transfer\": \"Find two equal-length strings that need more than one unit-cost edit.\"\n    },\n    {\n      \"id\": \"edit-02\",\n      \"concept\": \"Operations and costs\",\n      \"prerequisites\": [],\n      \"prompt\": \"Insertion costs 2 and deletion costs 3. What are the minimum costs of empty → abc and abc → empty, respectively?\",\n      \"options\": [\n        \"3 and 3\",\n        \"9 and 6\",\n        \"6 and 9\",\n        \"6 and 6\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"The empty source needs three insertions: 3×2=6. The empty target needs three deletions: 3×3=9. The same directional cost policy need not be symmetric.\",\n      \"transfer\": \"Explain which cost you would use for a fourth target symbol when the source is empty.\"\n    },\n    {\n      \"id\": \"edit-03\",\n      \"concept\": \"Operations and costs\",\n      \"prerequisites\": [],\n      \"prompt\": \"For a → b, insertion and deletion cost 1 each, while substitution costs 4. Which result minimizes cost?\",\n      \"options\": [\n        \"Cost 1, because only one position differs\",\n        \"Cost 4, because a substitution uses the fewest operations\",\n        \"Cost 0, because both strings are one symbol long\",\n        \"Cost 2, using one deletion and one insertion\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"A substitution costs 4. Deleting a and inserting b costs 1+1=2; either operation order can produce a valid transformation. Minimizing cost is not necessarily minimizing operation count.\",\n      \"transfer\": \"Choose a substitution cost that ties deletion plus insertion under these same other costs.\"\n    },\n    {\n      \"id\": \"edit-04\",\n      \"concept\": \"Prefix subproblems\",\n      \"prerequisites\": [\n        \"Operations and costs\"\n      ],\n      \"prompt\": \"D[i,j] uses prefix lengths i and j. What does it mean in this lab?\",\n      \"options\": [\n        \"The minimum cost to transform the first i source symbols into the first j target symbols\",\n        \"The number of equal symbols at positions i and j\",\n        \"The minimum cost of transforming the whole source while ignoring the target\",\n        \"The number of possible edit scripts for both suffixes\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"The cell describes exactly two prefixes, including the empty prefix at length 0. This makes the last operation depend on smaller already-computed prefixes.\",\n      \"transfer\": \"Describe D[2,0] in words before writing its formula.\"\n    },\n    {\n      \"id\": \"edit-05\",\n      \"concept\": \"Prefix subproblems\",\n      \"prerequisites\": [\n        \"Operations and costs\"\n      ],\n      \"prompt\": \"For ab → ac with all edit costs 1, consider D[2,2]. D[1,1]=0, D[1,2]=1 and D[2,1]=1. What are the diagonal, deletion and insertion candidate costs?\",\n      \"options\": [\n        \"0, 1, 1\",\n        \"1, 2, 2\",\n        \"2, 1, 2\",\n        \"1, 1, 1\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"The last symbols b and c differ, so the diagonal candidate is 0+1=1. Deletion costs D[1,2]+1=2. Insertion costs D[2,1]+1=2. The cell takes their minimum, 1.\",\n      \"transfer\": \"If b and c were the same symbol, which one candidate's added operation cost would change?\"\n    },\n    {\n      \"id\": \"edit-06\",\n      \"concept\": \"Prefix subproblems\",\n      \"prerequisites\": [\n        \"Operations and costs\"\n      ],\n      \"prompt\": \"With unit edit costs, why can tack → stack be achieved at cost 1 even though comparing equal screen positions shows several mismatches?\",\n      \"options\": [\n        \"The algorithm silently sorts the letters\",\n        \"Matching positions always have zero cost, even for different symbols\",\n        \"One insertion of s shifts the entire unchanged tack suffix into alignment\",\n        \"A transposition moves every character in one step\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"Insert s before the existing tack. The remaining source symbols match the remaining target symbols in order. Fixed-position comparison misses that an insertion changes the alignment.\",\n      \"transfer\": \"Construct another pair for which one leading insertion is better than replacing each mismatched position.\"\n    },\n    {\n      \"id\": \"edit-07\",\n      \"concept\": \"Optimal reconstruction\",\n      \"prerequisites\": [\n        \"Prefix subproblems\"\n      ],\n      \"prompt\": \"With unit costs, aa → a has minimum cost 1. A deterministic backtracker displays one alignment. What can you conclude?\",\n      \"options\": [\n        \"Both source a occurrences must be deleted\",\n        \"The optimum must be unique because the code is deterministic\",\n        \"The other deletion choice has a higher cost\",\n        \"Deleting either source occurrence gives an optimal alignment; a tie rule only chooses one\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"Either source a can be retained while the other is deleted. Each alignment costs 1. Reproducible display order is not a proof that only one alignment minimizes cost.\",\n      \"transfer\": \"Identify a table cell where multiple predecessors attain the same minimum.\"\n    },\n    {\n      \"id\": \"edit-08\",\n      \"concept\": \"Optimal reconstruction\",\n      \"prerequisites\": [\n        \"Prefix subproblems\"\n      ],\n      \"prompt\": \"Only insert, delete and substitute are allowed, each at cost 1. What is the minimum cost for ab → ba?\",\n      \"options\": [\n        \"2; swapping the two symbols is not a permitted single operation\",\n        \"1; every adjacent swap is one substitution\",\n        \"0; both strings contain the same multiset of symbols\",\n        \"3; every transformation must use all three operation types\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"Two substitutions work at cost 2. Delete then insert also gives a cost-2 alignment. A single insertion or deletion changes length, and a single substitution changes only one position; none turns ab into ba.\",\n      \"transfer\": \"Explain how adding transposition as a new operation could change the problem and its recurrence.\"\n    },\n    {\n      \"id\": \"edit-09\",\n      \"concept\": \"Optimal reconstruction\",\n      \"prerequisites\": [\n        \"Prefix subproblems\"\n      ],\n      \"prompt\": \"Which check establishes that a reconstructed alignment actually realizes the reported minimum for the accepted inputs?\",\n      \"options\": [\n        \"It has as many rows as the source has symbols\",\n        \"It contains at least one substitution\",\n        \"It consumes the full source, emits the exact target and sums to the final cell's cost\",\n        \"Its first step is the visually closest matching letter\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"A valid alignment consumes source symbols in order and emits target symbols in order. Its summed operation costs must equal D[m,n]. These checks verify the constructed witness; the recurrence establishes that no cheaper alignment exists.\",\n      \"transfer\": \"Replay an alignment with an insertion and a deletion, tracking the remaining source and emitted target prefix.\"\n    },\n    {\n      \"id\": \"edit-10\",\n      \"concept\": \"Representation and limits\",\n      \"prerequisites\": [\n        \"Operations and costs\"\n      ],\n      \"prompt\": \"The source has 3 scalar values and the target has 4. How many prefix cells are in the full table, including empty prefixes?\",\n      \"options\": [\n        \"12\",\n        \"7\",\n        \"16\",\n        \"20\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"There are 3+1 source prefix lengths and 4+1 target prefix lengths, so the table has 4×5=20 cells. Interior work considers three predecessor candidates per cell.\",\n      \"transfer\": \"Write the cell-count expression for general lengths m and n, including the case m=0.\"\n    },\n    {\n      \"id\": \"edit-11\",\n      \"concept\": \"Representation and limits\",\n      \"prerequisites\": [\n        \"Operations and costs\"\n      ],\n      \"prompt\": \"The lab treats Unicode scalars literally and does not normalize text. The source is one scalar é (U+00E9); the target is e (U+0065) followed by combining acute (U+0301). With unit costs, what is the minimum?\",\n      \"options\": [\n        \"2: one substitution and one insertion suffice; the literal sequences differ\",\n        \"0: the rendered accents look equivalent, so they are automatically merged\",\n        \"1: the browser always treats a displayed character as one scalar\",\n        \"3: all symbols must be deleted before any insertion\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"The source contains one scalar and the target contains two, neither identical to the source scalar. Substituting é with e and inserting the combining acute costs 2. One edit cannot both change the existing scalar and add a second scalar. A grapheme-aware or normalized comparison would be a different policy.\",\n      \"transfer\": \"Explain why 😀 → empty costs 1 in this scalar model despite JavaScript reporting two UTF-16 code units.\"\n    },\n    {\n      \"id\": \"edit-12\",\n      \"concept\": \"Representation and limits\",\n      \"prerequisites\": [\n        \"Operations and costs\"\n      ],\n      \"prompt\": \"A lab experiment reports minimum cost 0 under this positive-cost scalar policy. Which statement follows?\",\n      \"options\": [\n        \"The model has established that both texts express their author's intended meaning\",\n        \"The two literal scalar sequences are identical\",\n        \"The strings have equal lengths but can contain different symbols\",\n        \"An insertion and a deletion can cancel each other at total cost 0\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"Every insertion, deletion and unequal-symbol substitution has a positive cost. A zero-cost alignment can therefore contain only identical-symbol matches. This establishes literal scalar identity under the stated policy, not semantic equivalence.\",\n      \"transfer\": \"Give two different strings with similar meanings and explain why this model can still assign a positive edit cost.\"\n    }\n  ]\n}\n","# Edit distance: inspect the prefixes, replay one alignment\n\nOpen [the standalone explorer](edit-distance-explorer.html), download its [twelve-question course](edit-distance.json), or import that JSON through RecallWeave's existing **Bring your own lesson → preview → Start this deck** flow. The lab is separate from the learner. It computes an explicit experiment in your browser; it never reads or changes a learner session.\n\n## The question being answered\n\nGiven two short strings and three positive costs, what is the cheapest way to transform the first string into the second using insertion, deletion and substitution? A matching symbol costs 0. A transposition is not one operation. The inputs and costs remain visible with the result.\n\nThis lab uses literal Unicode scalar values. Spaces and letter case matter. It does not trim, normalize, sort, or compare meaning. One emoji such as 😀 is one scalar even though JavaScript's UTF-16 length is 2. A displayed accented character can consist of one scalar or several: é and e followed by U+0301 are different sequences here. This policy is useful for making the algorithm precise; it is not a universal definition of a human character or a language-similarity score.\n\nInputs allow 0–16 scalars each. Unpaired UTF-16 surrogates and C0/DEL controls are refused explicitly. Each operation cost is an integer 1–9, uniformly applied to that operation. Changing either string or any cost immediately retires the old result and experiment download. Choose **Compute minimum cost** again after editing. Invalid input never leaves an old successful table available.\n\n## Read a prefix table\n\nLet D[i,j] mean the minimum cost to transform the first i source scalars into the first j target scalars. Index 0 names an empty prefix. The table has (m+1)(n+1) cells, where m and n are the two input lengths.\n\n- Empty into empty costs 0.\n- D[i,0] is i times the deletion cost.\n- D[0,j] is j times the insertion cost.\n\nFor an interior cell, consider three possible final operations:\n\n| Final operation | Earlier prefix cell | Extra cost |\n|---|---|---|\n| Match or substitute | D[i−1,j−1] | 0 if the last scalars match; otherwise substitution |\n| Delete a source scalar | D[i−1,j] | deletion |\n| Insert a target scalar | D[i,j−1] | insertion |\n\nThe cell takes the smallest complete candidate. It does not choose the cheapest operation in isolation. A cheap operation can follow an expensive earlier prefix.\n\nEvery path to the new prefix ends in one of these three kinds of step. Removing that last step leaves one of the smaller prefix problems. Conversely, extending an optimal earlier prefix with a permitted step gives a valid candidate. Starting from the empty-prefix boundaries and taking the least candidate therefore computes a minimum for every prefix. With positive uniform costs, editing a symbol through repeated intermediate substitutions cannot improve on its direct substitution, while deleting and inserting remains an explicit alternative.\n\nUse the row and column selectors to inspect any cell's exact calculations. Each minimum candidate is labeled; table arrows mark all tied predecessors. The table buttons support arrow-key movement. A wide table scrolls inside its own region on a narrow screen.\n\n## Reconstruct one optimum\n\nStart at D[m,n] and walk backward through any minimizing predecessor until D[0,0]. This lab makes the display reproducible by preferring diagonal, then deletion, then insertion at each backward tie. Reverse those steps to obtain a forward alignment.\n\nThat is **one optimal alignment**, not a uniqueness claim. In aa → a at unit costs, either source occurrence can be deleted. Both alignments cost 1. A table cell with one best predecessor does not prove that every earlier cell was untied.\n\nThe alignment list shows source and target scalars, prefix coordinates and individual costs. The replay controls consume the source from left to right, build the target prefix and retain the unused source suffix. Matches appear as zero-cost alignment steps; they are not edits. A valid final replay consumes the complete source, emits the exact target, and has total cost equal to the final cell.\n\n## Worked checks\n\n### A shifted alignment\n\ntack → stack needs one insertion of s before tack, at unit cost 1. Comparing characters only at the same screen positions would miss the shift. The exact minimum is 1 because the target length differs, so a zero-cost sequence of matches cannot suffice.\n\n### Boundaries are genuine problems\n\nEmpty → cat with insertion 2 costs 6. cat → empty with deletion 3 costs 9. Unequal insertion and deletion costs can make the directional minimum asymmetric. It is safer to say “minimum transformation cost” than to assume all properties of a symmetric metric.\n\n### More edits can cost less\n\nFor a → b with insertion 1, deletion 1 and substitution 4, one substitution costs 4. Deletion plus insertion costs 2. The optimum minimizes the chosen cost policy, not the number of edit operations.\n\n### A swap is not available\n\nab → ba has unit-cost minimum 2. Two substitutions work; deletion plus insertion also works. None of the three permitted single operations can produce ba: insertion/deletion changes length, and substitution changes only one position. A model with transpositions would answer a different question.\n\n### One complete cell\n\nFor ab → ac at unit costs, the relevant earlier cells are D[1,1]=0, D[1,2]=1 and D[2,1]=1. The last-step candidates are 1,2,2, so D[2,2]=1. The substitution's operation cost is 1; the cell's total includes its prefix cost 0.\n\n### Literal Unicode policy\n\né → e + combining acute has unit-cost minimum 2 under scalar identity. Substitute the original scalar and insert the second target scalar. There is no one-step operation that both changes the original scalar and adds another. The visually composed character is not silently normalized.\n\n## Downloads and the learner\n\n**Download experiment** retains the accepted literal inputs, cost policy, complete cells and candidate calculations, one alignment, and every replay state. It is a record, not an accepted restore format or a learner archive. Editing the draft disables this download until a new valid computation succeeds.\n\n**Download lesson** always saves the same authored twelve-question course, regardless of experimental inputs. **Download worked guide** saves this document. All downloads are explicit and local. No network request, provider, automatic storage or background computation is needed.\n\nImport the lesson into the existing learner, answer all twelve items, inspect the original review, and practice missed items separately. A correct retry does not rewrite the original answer or its first-attempt estimate. The lesson and lab illustrate reasoning; they are not evidence that this course improves learning outcomes.\n\n## Original course answer derivations\n\n| Item | Correct answer | Reason |\n|---|---|---|\n| edit-01 | option 2: cost 1 | One middle substitution; different literal inputs cannot have cost 0. |\n| edit-02 | option 3:6 and 9 | Three insertions at 2; three deletions at 3. |\n| edit-03 | option 4: cost 2 | 1+1 is less than substitution 4. |\n| edit-04 | option 1: two prefixes | i and j are consumed prefix lengths. |\n| edit-05 | option 2:1,2,2 | Prefix cost plus the stated last-operation cost. |\n| edit-06 | option 3: leading insertion | tack remains in order after inserting s. |\n| edit-07 | option 4: either deletion | Repeated identical source symbols create alternative optimal alignments. |\n| edit-08 | option 1:2 | No single permitted operation is a swap. |\n| edit-09 | option 3: full witness checks | Source consumption, exact target and final-cell cost all agree. |\n| edit-10 | option 4:20 | Four source prefix lengths times five target prefix lengths. |\n| edit-11 | option 1:2 | One scalar must change and one must be inserted. |\n| edit-12 | option 2: literal identity | Positive edit costs leave only identical-symbol matches in a cost 0 alignment. |\n\nThese are original questions, distractors, explanations and worked examples. The source deck uses zero-based answer indices; this table numbers visible options from 1.\n\n## Build and receive\n\nNo packages are needed for the model, tests or standalone builder. Use the repository's Node 20+ requirement:\n\n```sh\nnode tools/build-edit-distance.mjs\nnode tools/build-edit-distance.mjs --check\nnode --test tests/edit-distance.test.mjs\n```\n\nThe optional actual-browser receiver uses an already installed Puppeteer and Chromium. Its command and native source identities are recorded with the receiving packet; it must use its own profile and download directory. Source validation is separate from browser, hosted or public delivery acceptance.\n\nThe standalone file bundles the authored model, UI, course and guide. It can be moved and opened directly. Rebuilding it is deterministic; --check refuses a stale committed artifact. The existing catalog/importer/learner and other lesson modules are unchanged.\n\n## Conceptual references and authorship\n\nWagner and Fischer's original [1974 paper](https://doi.org/10.1145/321796.321811), *The String-to-String Correction Problem*, gives the weighted prefix formulation; [MIT 6.006 Spring 2020 Recitation 16](https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/resources/mit6_006s20_r16/) discusses unit-cost prefix subproblems and reconstruction. These references informed conceptual checking. No passages, question banks, diagrams or implementations were copied. Original lesson content is CC BY 4.0; referenced works retain their own licenses. AI assistance was used for this implementation and original educational wording.\n");
+})();</script>
+</body></html>

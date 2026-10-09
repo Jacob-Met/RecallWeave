@@ -1,0 +1,35 @@
+diff --git a/tools/check-edit-distance-browser.mjs b/tools/check-edit-distance-browser.mjs
+index b6bf50c..254672b 100644
+--- a/tools/check-edit-distance-browser.mjs
++++ b/tools/check-edit-distance-browser.mjs
+@@ -56,6 +56,15 @@ async function fill(page,selector,value){
+  await page.keyboard.press('Backspace');if(value)await page.keyboard.type(value);
+ }
+ async function text(page,selector){return page.$eval(selector,el=>el.textContent);}
++async function firstReviewText(page){
++ // Native learner appends separately labeled retries inside the same review list.
++ // Compare the original first-attempt view while asserting retry blocks separately.
++ return page.$eval('.review-list',el=>{
++  const snapshot=el.cloneNode(true);
++  snapshot.querySelectorAll('.review-practice-answer').forEach(node=>node.remove());
++  return snapshot.textContent;
++ });
++}
+ async function download(page,selector){
+  const old=new Set(completed.keys());await click(page,selector);
+  for(let i=0;i<400;i++){
+@@ -139,11 +148,12 @@ try{
+    await click(learner,'[data-choice="'+(n%4===0?(item.answer+1)%item.options.length:item.answer)+'"]');await click(learner,'#next-button');
+   }
+   assert.equal(seen.size,12);const summary=await text(learner,'#first-try-summary');assert.match(summary,/9 of 12/);
+-  const mastery=await text(learner,'.mastery-box'),review=await text(learner,'.review-list');
++  const mastery=await text(learner,'.mastery-box'),review=await firstReviewText(learner);
+   await click(learner,'#practice-button');
+   for(let n=0;n<3;n++){const prompt=await text(learner,'.practice-card h2'),item=deck.items.find(item=>item.prompt===prompt);assert.ok(item);await click(learner,'[data-practice-choice="'+item.answer+'"]');await click(learner,'#practice-next');}
+   assert.match(await text(learner,'#practice-status'),/3 of 3 correctly on retry/);
+-  assert.equal(await text(learner,'#first-try-summary'),summary);assert.equal(await text(learner,'.mastery-box'),mastery);assert.equal(await text(learner,'.review-list'),review);
++  assert.equal(await text(learner,'#first-try-summary'),summary);assert.equal(await text(learner,'.mastery-box'),mastery);assert.equal(await firstReviewText(learner),review);
++  assert.deepEqual(await learner.$$eval('.review-practice-answer strong',nodes=>nodes.map(node=>node.textContent)),Array(3).fill('Practice answer · correct on retry'));
+   const notes=await download(learner,'#save-notes-button');assert.match(notes.raw.toString(),/Edit distance/);
+   await learner.close();
+  });

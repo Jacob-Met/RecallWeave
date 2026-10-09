@@ -1,0 +1,24 @@
+# Current learner source binding for the held edit-distance feature
+
+No product blocker was found in the inspected current learner delta. This is source/artifact review and receiver preparation, not a new browser or arithmetic run.
+
+Current parent is 698902f9c9c1d5c5023092b85b3632a7cb7a01ed, tree d6d3707b691850af7928299242631534cff89aa8. The composed staged tree is c80febfe92c5b8613766ba9124a9d17ea05f52fe at /home/jacob/recallweave-current-698-cf5799f6d38b-uu2dh48b/current-v2. Independent read-only reconstruction matches all2924 indexed paths, preserving2914 unrelated current-parent entries. Seventeen relevant runtime/template/artifact files match the primary before/after blobs; their bytes and the Git index remained unchanged.
+
+The exact runtime delta consists of:
+- knowledge.mjs accepts an optional recorded item ID only when it has exactly the maximum score. Calls without a preference retain the previous default ordering and result.
+- lesson-archive.mjs supplies recorded answer/current-question IDs during validation. Its exact deck/model/mastery/choice/order checks remain active; this does not permit arbitrary lower-priority questions.
+- app.mjs renders the admitted recorded question on resume, rather than recomputing a default equal-score choice. Its existing revision guard, file preview, explicit confirmation and feedback-resume path are unchanged.
+
+The current demo.html is byte-for-byte the original demo with only those three runtime chunks transformed according to the unchanged builder. That assertion was established by in-memory substitution, without running a builder or changing any file. The deck picker, review, practice, reflections, study-notes exporter, archive UI, answer-order code, index and CSS are exact to the original inspected runtime. The generator's import/export and embedded-deck transformations were read directly.
+
+The original independent browser2 remains applicable: actual explorer/course/guide downloads; field retirement and literal/Unicode cases; native file chooser preview/cancel; twelve-question current learner review; first-try/mastery preservation through practice; and actual study-notes download. It locates each current prompt by its exact item identity and therefore does not assume a fixed question traversal. Its review snapshot already targets stable review-answers rather than appended retry evidence.
+
+Those two groups do not exercise unfinished-lesson archive resume. The author's four current native compatibility groups remain separately attributed and were not read or rerun here. An actual resume-UI claim would require an additional browser control covering a recorded equal-priority question and explicit confirmation, not merely a replay of these two groups.
+
+browser-independent-current698.mjs changes only one report.tree literal from eb5 to c80. Every other byte of browser-independent-v2.mjs is unchanged, including all selectors, actions, data, assertions and timeouts. The original receiver and original eb5 receipts remain frozen. Prepared receiver SHA256: 3ab3133dc3ca02e13f5b9507d0c7697ad586831791e277c7a93ca285797319e5. Syntax check passes; no browser has run in this lane.
+
+Use existing Node22.22.1, Puppeteer at /home/jacob/.local/lib/node_modules/@wonderwhy-er/desktop-commander/node_modules/puppeteer/lib/puppeteer/puppeteer.js and /snap/bin/chromium. Provide three arguments: exact current source directory, a new output directory, and a new home-visible browser directory. Both output and visible directories must not already exist; the script creates them. Place TMPDIR/TMP/TEMP in a separate new task-owned home-visible runtime directory. Keep the unchanged core-oracle-v1.mjs beside the receiver. Use fresh profile/offline direct-file receiving, no installed session or overrides. Root owns execution and source/build before/after custody.
+
+The first read-only binding attempt incorrectly required all nine feature paths to equal eb5. It stopped at the separately corrected maintained author browser receiver: old100c4ae8 versus final9ffb4442. Eight feature paths remain exact eb5; the ninth is exact corrected author tree9ba42770, independently pinned by its frozen manifest. This was a comparison-baseline error, not a product/source regression. The original failed driver and captured tool traceback are retained; the traceback file is a literal transcript of the tool output, not an original process stderr file. No outer exit code was captured or inferred for that attempt. The successful successor separates these source identities. Author tests and receiver bodies were only hashed as opaque source bytes, not examined or executed.
+
+All Actions/publication remain held. These files may accompany the exact current composition; they do not alter the original35 packet or existing12 independent files.

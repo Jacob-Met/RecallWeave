@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; base-uri 'none'; form-action 'none'">
+<title>Edit distance — RecallWeave</title>
+<style>
+:root{color-scheme:light;--ink:#182e40;--muted:#51616d;--paper:#f3f6f5;--line:#c5d4d5;--accent:#00695f;--pale:#e4f2ee;--warm:#fff7e4}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:17px/1.55 system-ui,sans-serif}
+a{color:var(--accent)}button,input,select{font:inherit}button,input,select{border:1px solid #799395;border-radius:7px}
+button{padding:.65rem .9rem;background:white;color:var(--ink);cursor:pointer}button:hover{background:var(--pale)}button:disabled{opacity:.5;cursor:default}
+button.primary{background:var(--accent);color:#fff;border-color:var(--accent);font-weight:700}
+:focus-visible{outline:3px solid #bb6700;outline-offset:3px}input,select{width:100%;padding:.6rem;background:#fff;color:var(--ink);min-width:0}
+[hidden]{display:none!important}.skip{position:absolute;top:-100px;left:1rem;background:white;padding:1rem;z-index:3}.skip:focus{top:1rem}
+.wrap{max-width:1220px;margin:auto;padding:2.5rem 1.5rem}header{display:grid;grid-template-columns:1.4fr 1fr;gap:3rem;border-bottom:1px solid var(--line);padding-bottom:2rem;margin-bottom:2rem}
+.eyebrow{text-transform:uppercase;letter-spacing:.15em;font-size:.75rem;font-weight:750;color:var(--accent)}h1{font-size:clamp(2.3rem,6vw,4.4rem);line-height:1.05;letter-spacing:-.05em;margin:.65rem 0 1rem;max-width:12ch}
+h2{font-size:1.4rem;margin-top:0}h3{font-size:1.05rem}p{margin:.5rem 0 1rem}.intro{max-width:55ch}.lesson-box{align-self:center;background:var(--ink);color:white;padding:1.5rem;border-radius:12px}
+.lesson-box h2{font-size:1.1rem}.lesson-box p{font-size:.95rem;color:#e0e9eb}.lesson-box button{font-size:.9rem;margin:.25rem .3rem .25rem 0}
+.panel{background:white;border:1px solid var(--line);border-radius:12px;padding:1.5rem;margin-bottom:1.5rem;min-width:0}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}.costs{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin:1.2rem 0}
+label{font-weight:650;display:block;font-size:.95rem}label input,label select{margin-top:.35rem}.hint{font-size:.88rem;color:var(--muted);margin:.5rem 0 1rem}
+.preset{display:flex;gap:.7rem;align-items:end;flex-wrap:wrap;border-bottom:1px solid var(--line);padding-bottom:1.2rem;margin-bottom:1.2rem}.preset label{flex:1;min-width:180px}
+.actions{display:flex;gap:.8rem;align-items:center;flex-wrap:wrap}.status{min-height:1.6em;margin-top:1rem;font-weight:600}
+.summary{display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap;background:var(--pale);border-color:#9abdb3}
+.minimum{font-size:3.5rem;line-height:1;font-weight:800;letter-spacing:-.05em}.summary-label{text-transform:uppercase;letter-spacing:.12em;font-size:.72rem;font-weight:800}.literal{font-family:ui-monospace,monospace;overflow-wrap:anywhere;white-space:pre-wrap}
+.summary-copy{flex:1;min-width:180px}.table-scroll{overflow:auto;max-width:100%;border:1px solid var(--line);border-radius:8px;margin:1rem 0}
+table{border-collapse:collapse;width:max-content;min-width:100%;font-variant-numeric:tabular-nums}th,td{border:1px solid #d8e1e2;text-align:center;padding:.35rem;white-space:nowrap}
+th{font-weight:650;background:#eef3f4;font-size:.78rem}td button{padding:.4rem;min-width:2.4rem;border:1px solid transparent}
+td button[aria-pressed=true]{background:var(--accent);color:white;border-color:var(--accent)}.cell-arrows{display:block;font-size:.7rem;line-height:1;color:var(--accent)}
+.selectors{display:grid;grid-template-columns:1fr 1fr;gap:1rem}.details{background:var(--warm);border-radius:9px;padding:1rem;margin-top:1rem;overflow-wrap:anywhere}
+.details p:last-child{margin-bottom:0}.winning{font-weight:750}.two-columns{display:grid;grid-template-columns:1.2fr 1fr;gap:1.5rem}
+ol{padding-left:1.5rem}#edit-alignment{font-size:.9rem;overflow-wrap:anywhere}#edit-alignment li{padding:.35rem 0}
+.replay{background:#edf2f5;border-radius:9px;padding:1rem;align-self:start}.replay-output{font-size:1.5rem;min-height:2em;margin:.8rem 0}
+.replay input{padding:0;margin:1rem 0}.replay .actions button{flex:1}footer{color:var(--muted);font-size:.85rem;border-top:1px solid var(--line);padding-top:1rem}
+@media(max-width:720px){.wrap{padding:1.3rem .8rem}header{grid-template-columns:1fr;gap:1.2rem;padding-bottom:1.4rem}h1{max-width:15ch}.panel{padding:1rem}.form-grid,.two-columns{grid-template-columns:1fr}.costs{gap:.6rem}.costs label{font-size:.8rem}.selectors{grid-template-columns:1fr}.summary{gap:1rem}.preset button{width:100%}.lesson-box{padding:1.2rem}}
+@media(prefers-reduced-motion:no-preference){button{transition:background-color .12s}}
+@media print{body{background:white}.wrap{padding:0}.lesson-box button,.actions,form,.preset,#edit-step{display:none}.panel{break-inside:avoid}header{display:block}.lesson-box{background:white;color:black}.lesson-box p{color:black}.table-scroll{overflow:visible}table{font-size:.7rem}}
+</style>
+</head>
+<body>
+<a class="skip" href="#lab">Skip to the experiment</a>
+<div class="wrap">
+<header>
+<div><div class="eyebrow">RecallWeave · An offline algorithm lab</div><h1>Edit distance</h1><p class="intro">Change a string. Inspect every prefix decision. Replay one cheapest transformation.</p><p class="hint">Exact insertion, deletion and substitution costs. No transposition, text normalization or meaning comparison.</p></div>
+<aside class="lesson-box" aria-label="Original lesson downloads"><h2>Take the reasoning into a lesson</h2><p>Twelve original questions connect operations, prefix states, ties and representation. Download the course and open it through RecallWeave's existing local lesson preview.</p><button type="button" id="edit-download-lesson">Download lesson</button><button type="button" id="edit-download-guide">Download worked guide</button></aside>
+</header>
+<main id="lab">
+<section class="panel" aria-labelledby="inputs-heading">
+<h2 id="inputs-heading">Choose a transformation</h2>
+<div class="preset"><label for="edit-preset">Worked example<select id="edit-preset"></select></label><button type="button" id="edit-load-preset">Load example</button></div>
+<form id="edit-form" novalidate>
+<div class="form-grid"><label for="edit-source">Source string<input id="edit-source" type="text" autocomplete="off" spellcheck="false" aria-describedby="symbol-policy"></label><label for="edit-target">Target string<input id="edit-target" type="text" autocomplete="off" spellcheck="false" aria-describedby="symbol-policy"></label></div>
+<p class="hint" id="symbol-policy">0–16 Unicode scalar values per string. Empty strings, spaces and letter case are retained. Scalars are not necessarily displayed characters: é and e + combining acute differ here. C0/DEL controls and unpaired surrogates are refused.</p>
+<div class="costs"><label for="edit-insert">Insertion cost<input id="edit-insert" type="text" inputmode="numeric" value="1" aria-describedby="cost-policy"></label><label for="edit-delete">Deletion cost<input id="edit-delete" type="text" inputmode="numeric" value="1" aria-describedby="cost-policy"></label><label for="edit-substitute">Substitution cost<input id="edit-substitute" type="text" inputmode="numeric" value="1" aria-describedby="cost-policy"></label></div>
+<p class="hint" id="cost-policy">Each cost is a whole number from 1 to 9. Identical-symbol matches cost 0. Unequal costs minimize total cost, which can differ from the fewest edits.</p>
+<div class="actions"><button class="primary" type="submit" id="edit-compute">Compute minimum cost</button><button type="button" id="edit-download-experiment" disabled>Download experiment</button></div>
+</form>
+<p class="status" id="edit-status" role="status" aria-live="polite"></p>
+</section>
+<div id="edit-result" hidden>
+<section class="panel summary" aria-label="Applied experiment"><div><div class="summary-label">Minimum cost</div><div id="edit-minimum" class="minimum"></div></div><div class="summary-copy"><p id="edit-input-summary" class="literal"></p><p class="hint">This result belongs to these exact applied inputs. Editing a draft retires it until you compute again.</p></div></section>
+<section class="panel" aria-labelledby="table-heading">
+<h2 id="table-heading">Every prefix, one exact minimum</h2><p>D[i, j] transforms the first i source scalars into the first j target scalars. The 0 row and column are empty prefixes.</p>
+<div class="selectors"><label for="edit-row">Source prefix<select id="edit-row"></select></label><label for="edit-column">Target prefix<select id="edit-column"></select></label></div>
+<p class="hint">Select prefixes above or inspect a table button. Arrow keys move between cells. ↖ means match/substitution, ↑ deletion, ← insertion; all minimum predecessors are shown.</p>
+<div class="table-scroll" tabindex="0" role="region" aria-label="Scrollable prefix cost table"><table id="edit-matrix" aria-label="Minimum transformation costs for every prefix pair"></table></div>
+<div id="edit-details" class="details" aria-live="polite"></div>
+</section>
+<section class="panel" aria-labelledby="alignment-heading"><h2 id="alignment-heading">One optimal alignment</h2><p>The backward tie rule prefers diagonal, then deletion, then insertion. Other alignments can have the same minimum. Matches appear as zero-cost steps, not edits.</p>
+<div class="two-columns"><ol id="edit-alignment"></ol><div class="replay"><h3>Replay the chosen alignment</h3><p class="hint">Built target prefix + unused source suffix. Each step consumes source, emits target, or both.</p><p id="edit-replay-text" class="literal replay-output"></p><p id="edit-replay-cost"></p><label for="edit-step">Alignment step<input id="edit-step" type="range" min="0" max="0" value="0"></label><div class="actions"><button type="button" id="edit-previous">Previous step</button><button type="button" id="edit-next">Next step</button></div></div></div>
+</section>
+</div>
+</main>
+<footer><p>Original RecallWeave lesson and explorer, with AI assistance. Runs locally without network requests or automatic storage. Experiment files are records, not learner archives. No learning-efficacy or semantic-similarity claim is made.</p></footer>
+</div>
+<script>__EDIT_DISTANCE_SCRIPT__</script>
+</body></html>

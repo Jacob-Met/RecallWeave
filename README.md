@@ -433,3 +433,7 @@ Open [the minimum-spanning-forest explorer](courses/minimum-spanning-forest-expl
 
 Download the full trace with its original entered text and selected frame, or save the original [twelve-question course](courses/minimum-spanning-forest.json) and [worked guide](courses/minimum-spanning-forest.md). Open the JSON through the learner's existing **Bring your own lesson** preview and **Start this deck** flow. No network, account, automatic storage or learner-session modification is involved. Rebuild the standalone page with `node tools/build-minimum-spanning-forest.mjs`; add `--check` to verify exact source parity.
 
+
+## Edit distance: inspect every prefix decision
+
+Open the [standalone edit-distance explorer](courses/edit-distance-explorer.html) to edit two short literal strings and insertion, deletion and substitution costs. Inspect the full prefix table, every tied predecessor and one deterministic optimal alignment, then replay it to the exact target. The [worked guide](courses/edit-distance.md) explains empty prefixes, shifted alignments, unequal costs and Unicode scalar boundaries. Downloads retain either the complete accepted experiment or the fixed [twelve-question course](courses/edit-distance.json), which opens through the existing learner's local-file preview and **Start this deck** flow. The lab works offline and does not change learner state or the catalog. Build/check commands and its explicit limits are in the guide.

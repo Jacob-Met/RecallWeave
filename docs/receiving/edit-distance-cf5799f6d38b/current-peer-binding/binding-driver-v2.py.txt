@@ -1,0 +1,84 @@
+from pathlib import Path
+import datetime,difflib,hashlib,json,os,re,subprocess,tempfile
+root=Path('/home/jacob/recallweave-current-698-cf5799f6d38b-uu2dh48b')
+current=root/'current-v2'
+base=Path('/tmp/recallweave-edit-distance-cf5799f6d38b-0yf3khjn/baseline')
+oldfeature=Path('/tmp/recallweave-edit-distance-cf5799f6d38b-0yf3khjn/candidate-reference-v3')
+primary=Path('/home/jacob/root-continuation-cf5799f6d38b-v1/recall-primary698.json')
+original=Path('/home/jacob/recallweave-edit-peer-publication-cf5799f6d38b-q7oihcsv/publication/docs/receiving/edit-distance-cf5799f6d38b/independent-review')
+out=Path(tempfile.mkdtemp(prefix='recallweave-current-peer-binding-cf5799f6d38b-',dir='/tmp'))
+def pin(data):
+ return {'bytes':len(data),'sha256':hashlib.sha256(data).hexdigest(),'git_blob':hashlib.sha1(b'blob '+str(len(data)).encode()+b'\0'+data).hexdigest()}
+assert pin(primary.read_bytes())['sha256']=='76709207014f8b410db580fade6f3417c624b5da700adeb645625dded5275638'
+d=json.loads(primary.read_bytes());bm={x['path']:x for x in d['base']['leaves']};cm={x['path']:x for x in d['current']['leaves']}
+scoped=json.loads((root/'composition-source-manifest.json').read_bytes())['scoped_files']
+expected={k:{'mode':v['mode'],'sha':v['sha']} for k,v in cm.items()}
+for f in scoped:expected[f['path']]={'mode':f['git_mode'],'sha':f['git_blob']}
+raw=subprocess.run(['git','-C',str(current),'ls-files','-s','-z'],capture_output=True,check=True).stdout
+actual={}
+for entry in raw.split(b'\0'):
+ if not entry:continue
+ meta,name=entry.split(b'\t',1);mode,sha,stage=meta.decode().split();assert stage=='0';actual[name.decode()]={'mode':mode,'sha':sha}
+assert actual==expected and len(actual)==2924
+def tree(entries):
+ node={}
+ for path,e in entries.items():
+  parts=path.split('/');n=node
+  for part in parts[:-1]:n=n.setdefault(part,{})
+  n[parts[-1]]=(e['mode'],e['sha'])
+ def fold(n):
+  raw=b''
+  for name,value in sorted(n.items(),key=lambda x:x[0]+('/' if isinstance(x[1],dict) else '')):
+   if isinstance(value,dict):mode,h='40000',fold(value)
+   else:mode,h=value
+   raw+=mode.encode()+b' '+name.encode()+b'\0'+bytes.fromhex(h)
+  return hashlib.sha1(b'tree '+str(len(raw)).encode()+b'\0'+raw).hexdigest()
+ return fold(node)
+assert tree(actual)=='c80febfe92c5b8613766ba9124a9d17ea05f52fe'
+review_paths=['src/app.mjs','src/knowledge.mjs','src/lesson-archive.mjs','src/lesson-archive-ui.mjs','src/deck.mjs','src/deck-picker.mjs','src/review.mjs','src/reflections.mjs','src/session-export.mjs','src/trace-archive.mjs','src/trace-archive-ui.mjs','src/answer-order.mjs','tools/make_demo.py','index.html','styles.css','data/deck.json','demo.html']
+before=[]
+for name in review_paths:
+ old=(base/name).read_bytes();new=(current/name).read_bytes()
+ assert pin(old)['git_blob']==bm[name]['sha'];assert pin(new)['git_blob']==cm[name]['sha']
+ before.append({'path':name,'before':pin(old),'after':pin(new),'changed':old!=new})
+changed=[x['path'] for x in before if x['changed']]
+assert changed==['src/app.mjs','src/knowledge.mjs','src/lesson-archive.mjs','demo.html'],changed
+diff=''.join(''.join(difflib.unified_diff((base/name).read_text().splitlines(True),(current/name).read_text().splitlines(True),fromfile='567425/'+name,tofile='698902/'+name)) for name in changed[:-1])
+(out/'independent-runtime-diff.patch').write_text(diff)
+def transformed(name,text):
+ if name=='src/app.mjs':
+  text=re.sub(r'^import .*;\n','',text,flags=re.M)
+  old="const dataResponse = await fetch('./data/deck.json');\nif (!dataResponse.ok) throw new Error('The local demo deck could not be loaded.');\nconst bundledSource = await dataResponse.json();\nconst bundledDeck = validateDeck(bundledSource);"
+  new="const bundledSource = JSON.parse(document.querySelector('#deck-json').textContent);\nconst bundledDeck = validateDeck(bundledSource);"
+  assert text.count(old)==1;return text.replace(old,new)
+ text=re.sub(r'^import .+;\n','',text,flags=re.M)
+ return re.sub(r'^export (const|function) ',r'\1 ',text,flags=re.M)
+reconstructed=(base/'demo.html').read_text()
+chunks=[]
+for name in changed[:-1]:
+ old=transformed(name,(base/name).read_text());new=transformed(name,(current/name).read_text())
+ assert reconstructed.count(old)==1,name
+ reconstructed=reconstructed.replace(old,new)
+ chunks.append({'path':name,'old_transformed':pin(old.encode()),'new_transformed':pin(new.encode())})
+assert reconstructed.encode()==(current/'demo.html').read_bytes()
+feature=[]
+for f in scoped:
+ if f['path']=='README.md':continue
+ old=(oldfeature/f['path']).read_bytes();new=(current/f['path']).read_bytes()
+ assert pin(new)['git_blob']==f['git_blob']
+ if f['path']!='tools/check-edit-distance-browser.mjs':assert old==new
+ else:assert pin(new)['sha256']=='9ffb4442e64972bdf1422e27f70087069cf8108b1f0fee923993ad6fad5fcd73'
+ feature.append({'path':f['path'],'same_as_eb5':old==new,'eb5':pin(old),**pin(new)})
+receiver=(original/'browser-independent-v2.mjs').read_bytes();oracle=(original/'core-oracle-v1.mjs').read_bytes()
+assert pin(receiver)['sha256']=='b43f1f140aee28d755f46ed2c668edaf3d91dca61949613ef2efd661c150918a'
+assert receiver.count(b"tree:'eb5ab352400a643bd85768b46b81921820a5f233'")==1
+adapted=receiver.replace(b"tree:'eb5ab352400a643bd85768b46b81921820a5f233'",b"tree:'c80febfe92c5b8613766ba9124a9d17ea05f52fe'")
+(out/'browser-independent-current698.mjs').write_bytes(adapted)
+(out/'core-oracle-v1.mjs').write_bytes(oracle)
+proc=subprocess.run(['node','--check',str(out/'browser-independent-current698.mjs')],capture_output=True)
+(out/'syntax.stdout.log').write_bytes(proc.stdout);(out/'syntax.stderr.log').write_bytes(proc.stderr);assert proc.returncode==0
+for row in before:assert pin((current/row['path']).read_bytes())==row['after']
+assert subprocess.run(['git','-C',str(current),'ls-files','-s','-z'],capture_output=True,check=True).stdout==raw
+result={'at':datetime.datetime.now(datetime.timezone.utc).isoformat(),'primary':{'path':str(primary),**pin(primary.read_bytes())},'source':str(current),'base':d['current']['commit'],'tree':tree(actual),'indexed_paths':len(actual),'unowned_primary_entries_exact':len(cm)-1,'reviewed_runtime_and_artifact':before,'demo_equals_original_with_only_three_transformed_runtime_deltas':True,'transformed_chunks':chunks,'eight_original_eb5_feature_bytes_plus_known_corrected_author_receiver':feature,'receiver_original':{'path':str(original/'browser-independent-v2.mjs'),**pin(receiver)},'receiver_prepared':{'path':str(out/'browser-independent-current698.mjs'),**pin(adapted)},'metadata_only_change':"One report.tree literal; every other receiver byte including all predicates, selectors, data and timeouts is exact.",'oracle':{'path':str(out/'core-oracle-v1.mjs'),**pin(oracle)},'syntax_exit':proc.returncode,'runtime':{'node':subprocess.run(['node','--version'],capture_output=True,text=True).stdout.strip(),'python':subprocess.run(['python3','--version'],capture_output=True,text=True).stdout.strip(),'puppeteer':'/home/jacob/.local/lib/node_modules/@wonderwhy-er/desktop-commander/node_modules/puppeteer/lib/puppeteer/puppeteer.js','chromium':'/snap/bin/chromium'},'source_and_index_unchanged':True,'browser_run':False,'arithmetic_rerun':False,'author_tests_or_receiver_bodies_examined_or_executed':False,'author_file_hashes_only':True,'coverage_limit':'Original two groups cover fresh course import/review/practice, not unfinished-lesson archive resume.'}
+(out/'source-runtime-binding.json').write_text(json.dumps(result,indent=2)+'\n')
+print(json.dumps({'out':str(out),'binding':pin((out/'source-runtime-binding.json').read_bytes()),'tree':tree(actual),'receiver':pin(adapted),'runtime_paths_verified':len(before),'original_feature_paths_exact_to_eb5':sum(x['same_as_eb5'] for x in feature),'demo_parity':True},indent=2))

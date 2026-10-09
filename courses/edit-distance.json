@@ -1,0 +1,212 @@
+{
+  "format": "recallweave-deck/1",
+  "title": "Edit distance: prefixes, costs and one optimal alignment",
+  "attribution": "Original course, examples and explanations authored for RecallWeave with AI assistance. Conceptual references: Wagner & Fischer, The String-to-String Correction Problem (JACM1974, doi:10.1145/321796.321811), and MIT OpenCourseWare6.006 Spring2020 Recitation16. No source questions, passages or code are copied.",
+  "license": "Original lesson content: CC BY 4.0. Reference works retain their own licenses.",
+  "concepts": [
+    "Operations and costs",
+    "Prefix subproblems",
+    "Optimal reconstruction",
+    "Representation and limits"
+  ],
+  "items": [
+    {
+      "id": "edit-01",
+      "concept": "Operations and costs",
+      "prerequisites": [],
+      "prompt": "With insertion, deletion and substitution each costing 1, what is the minimum cost to turn cat into cut?",
+      "options": [
+        "0, because the lengths match",
+        "1, by substituting the middle symbol",
+        "2, because both words contain three symbols",
+        "3, one edit per position"
+      ],
+      "answer": 1,
+      "explanation": "Only a changes to u. One substitution costs 1. Cost 0 would require identical scalar sequences, so 1 is minimal.",
+      "transfer": "Find two equal-length strings that need more than one unit-cost edit."
+    },
+    {
+      "id": "edit-02",
+      "concept": "Operations and costs",
+      "prerequisites": [],
+      "prompt": "Insertion costs 2 and deletion costs 3. What are the minimum costs of empty → abc and abc → empty, respectively?",
+      "options": [
+        "3 and 3",
+        "9 and 6",
+        "6 and 9",
+        "6 and 6"
+      ],
+      "answer": 2,
+      "explanation": "The empty source needs three insertions: 3×2=6. The empty target needs three deletions: 3×3=9. The same directional cost policy need not be symmetric.",
+      "transfer": "Explain which cost you would use for a fourth target symbol when the source is empty."
+    },
+    {
+      "id": "edit-03",
+      "concept": "Operations and costs",
+      "prerequisites": [],
+      "prompt": "For a → b, insertion and deletion cost 1 each, while substitution costs 4. Which result minimizes cost?",
+      "options": [
+        "Cost 1, because only one position differs",
+        "Cost 4, because a substitution uses the fewest operations",
+        "Cost 0, because both strings are one symbol long",
+        "Cost 2, using one deletion and one insertion"
+      ],
+      "answer": 3,
+      "explanation": "A substitution costs 4. Deleting a and inserting b costs 1+1=2; either operation order can produce a valid transformation. Minimizing cost is not necessarily minimizing operation count.",
+      "transfer": "Choose a substitution cost that ties deletion plus insertion under these same other costs."
+    },
+    {
+      "id": "edit-04",
+      "concept": "Prefix subproblems",
+      "prerequisites": [
+        "Operations and costs"
+      ],
+      "prompt": "D[i,j] uses prefix lengths i and j. What does it mean in this lab?",
+      "options": [
+        "The minimum cost to transform the first i source symbols into the first j target symbols",
+        "The number of equal symbols at positions i and j",
+        "The minimum cost of transforming the whole source while ignoring the target",
+        "The number of possible edit scripts for both suffixes"
+      ],
+      "answer": 0,
+      "explanation": "The cell describes exactly two prefixes, including the empty prefix at length 0. This makes the last operation depend on smaller already-computed prefixes.",
+      "transfer": "Describe D[2,0] in words before writing its formula."
+    },
+    {
+      "id": "edit-05",
+      "concept": "Prefix subproblems",
+      "prerequisites": [
+        "Operations and costs"
+      ],
+      "prompt": "For ab → ac with all edit costs 1, consider D[2,2]. D[1,1]=0, D[1,2]=1 and D[2,1]=1. What are the diagonal, deletion and insertion candidate costs?",
+      "options": [
+        "0, 1, 1",
+        "1, 2, 2",
+        "2, 1, 2",
+        "1, 1, 1"
+      ],
+      "answer": 1,
+      "explanation": "The last symbols b and c differ, so the diagonal candidate is 0+1=1. Deletion costs D[1,2]+1=2. Insertion costs D[2,1]+1=2. The cell takes their minimum, 1.",
+      "transfer": "If b and c were the same symbol, which one candidate's added operation cost would change?"
+    },
+    {
+      "id": "edit-06",
+      "concept": "Prefix subproblems",
+      "prerequisites": [
+        "Operations and costs"
+      ],
+      "prompt": "With unit edit costs, why can tack → stack be achieved at cost 1 even though comparing equal screen positions shows several mismatches?",
+      "options": [
+        "The algorithm silently sorts the letters",
+        "Matching positions always have zero cost, even for different symbols",
+        "One insertion of s shifts the entire unchanged tack suffix into alignment",
+        "A transposition moves every character in one step"
+      ],
+      "answer": 2,
+      "explanation": "Insert s before the existing tack. The remaining source symbols match the remaining target symbols in order. Fixed-position comparison misses that an insertion changes the alignment.",
+      "transfer": "Construct another pair for which one leading insertion is better than replacing each mismatched position."
+    },
+    {
+      "id": "edit-07",
+      "concept": "Optimal reconstruction",
+      "prerequisites": [
+        "Prefix subproblems"
+      ],
+      "prompt": "With unit costs, aa → a has minimum cost 1. A deterministic backtracker displays one alignment. What can you conclude?",
+      "options": [
+        "Both source a occurrences must be deleted",
+        "The optimum must be unique because the code is deterministic",
+        "The other deletion choice has a higher cost",
+        "Deleting either source occurrence gives an optimal alignment; a tie rule only chooses one"
+      ],
+      "answer": 3,
+      "explanation": "Either source a can be retained while the other is deleted. Each alignment costs 1. Reproducible display order is not a proof that only one alignment minimizes cost.",
+      "transfer": "Identify a table cell where multiple predecessors attain the same minimum."
+    },
+    {
+      "id": "edit-08",
+      "concept": "Optimal reconstruction",
+      "prerequisites": [
+        "Prefix subproblems"
+      ],
+      "prompt": "Only insert, delete and substitute are allowed, each at cost 1. What is the minimum cost for ab → ba?",
+      "options": [
+        "2; swapping the two symbols is not a permitted single operation",
+        "1; every adjacent swap is one substitution",
+        "0; both strings contain the same multiset of symbols",
+        "3; every transformation must use all three operation types"
+      ],
+      "answer": 0,
+      "explanation": "Two substitutions work at cost 2. Delete then insert also gives a cost-2 alignment. A single insertion or deletion changes length, and a single substitution changes only one position; none turns ab into ba.",
+      "transfer": "Explain how adding transposition as a new operation could change the problem and its recurrence."
+    },
+    {
+      "id": "edit-09",
+      "concept": "Optimal reconstruction",
+      "prerequisites": [
+        "Prefix subproblems"
+      ],
+      "prompt": "Which check establishes that a reconstructed alignment actually realizes the reported minimum for the accepted inputs?",
+      "options": [
+        "It has as many rows as the source has symbols",
+        "It contains at least one substitution",
+        "It consumes the full source, emits the exact target and sums to the final cell's cost",
+        "Its first step is the visually closest matching letter"
+      ],
+      "answer": 2,
+      "explanation": "A valid alignment consumes source symbols in order and emits target symbols in order. Its summed operation costs must equal D[m,n]. These checks verify the constructed witness; the recurrence establishes that no cheaper alignment exists.",
+      "transfer": "Replay an alignment with an insertion and a deletion, tracking the remaining source and emitted target prefix."
+    },
+    {
+      "id": "edit-10",
+      "concept": "Representation and limits",
+      "prerequisites": [
+        "Operations and costs"
+      ],
+      "prompt": "The source has 3 scalar values and the target has 4. How many prefix cells are in the full table, including empty prefixes?",
+      "options": [
+        "12",
+        "7",
+        "16",
+        "20"
+      ],
+      "answer": 3,
+      "explanation": "There are 3+1 source prefix lengths and 4+1 target prefix lengths, so the table has 4×5=20 cells. Interior work considers three predecessor candidates per cell.",
+      "transfer": "Write the cell-count expression for general lengths m and n, including the case m=0."
+    },
+    {
+      "id": "edit-11",
+      "concept": "Representation and limits",
+      "prerequisites": [
+        "Operations and costs"
+      ],
+      "prompt": "The lab treats Unicode scalars literally and does not normalize text. The source is one scalar é (U+00E9); the target is e (U+0065) followed by combining acute (U+0301). With unit costs, what is the minimum?",
+      "options": [
+        "2: one substitution and one insertion suffice; the literal sequences differ",
+        "0: the rendered accents look equivalent, so they are automatically merged",
+        "1: the browser always treats a displayed character as one scalar",
+        "3: all symbols must be deleted before any insertion"
+      ],
+      "answer": 0,
+      "explanation": "The source contains one scalar and the target contains two, neither identical to the source scalar. Substituting é with e and inserting the combining acute costs 2. One edit cannot both change the existing scalar and add a second scalar. A grapheme-aware or normalized comparison would be a different policy.",
+      "transfer": "Explain why 😀 → empty costs 1 in this scalar model despite JavaScript reporting two UTF-16 code units."
+    },
+    {
+      "id": "edit-12",
+      "concept": "Representation and limits",
+      "prerequisites": [
+        "Operations and costs"
+      ],
+      "prompt": "A lab experiment reports minimum cost 0 under this positive-cost scalar policy. Which statement follows?",
+      "options": [
+        "The model has established that both texts express their author's intended meaning",
+        "The two literal scalar sequences are identical",
+        "The strings have equal lengths but can contain different symbols",
+        "An insertion and a deletion can cancel each other at total cost 0"
+      ],
+      "answer": 1,
+      "explanation": "Every insertion, deletion and unequal-symbol substitution has a positive cost. A zero-cost alignment can therefore contain only identical-symbol matches. This establishes literal scalar identity under the stated policy, not semantic equivalence.",
+      "transfer": "Give two different strings with similar meanings and explain why this model can still assign a positive edit cost."
+    }
+  ]
+}

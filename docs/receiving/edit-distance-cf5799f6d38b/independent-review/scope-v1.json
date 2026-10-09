@@ -1,0 +1,56 @@
+{
+  "schema": "recallweave.edit-distance-independent-scope.v1",
+  "frozen_at": "2026-10-08T19:47:23.115Z",
+  "baseline": {
+    "commit": "567425f209cdf8e8cf9767faac9bfd3003af3e65",
+    "tree": "a877e5d5eb1953aa2389ea75ef7cad96da321c1a",
+    "source": "/tmp/recallweave-edit-distance-cf5799f6d38b-0yf3khjn/baseline",
+    "materialized_files": 344,
+    "full_tree_leaves": 2322
+  },
+  "independence": "Written after reading the existing deck/knowledge/review/app/index/README contracts and issue140 requirements. Candidate implementation, new course, author tests and author receiving matrix have not been read. Candidate API/DOM mapping may be added later; predicates below stay fixed unless an explicit oracle correction is recorded.",
+  "native_groups": [
+    {
+      "group": "minimum_table",
+      "oracle": "Independent enumeration of every legal alignment path, not the implementation recurrence. Exhaust all source/target pairs over {a,b} of length<=3 and every prefix cell. Additional declared pairs: empty, one-empty, repeated letters, swaps, supplementary scalars, literal hyphens/empty-set glyphs and composed/decomposed text. Check matrix dimensions/base costs and final minimum. Unit costs are mandatory; additional documented accepted cost configurations are checked only if the product exposes them, without requiring that feature."
+    },
+    {
+      "group": "alignment_certificate_and_ties",
+      "oracle": "Consume each original scalar exactly once in order, recover target exactly, prohibit gap/gap columns and recompute match/substitution/insertion/deletion costs independently. Selected path must attain exhaustive optimum. Cases ab→ba, aaa→aa and a→b with replacement cost equal to delete+insert (if configurable) exercise genuine ties; accept any optimum unless a tie rule is promised, then check that documented rule and determinism. Literal '-' and '∅' must remain data."
+    },
+    {
+      "group": "unicode_and_bounds",
+      "oracle": "Unicode scalar units exclude isolated UTF-16 surrogates. Supplementary emoji count once; ZWJ/combining components are separate scalar units; no normalization (é versus e+combining-acute has unit distance2). Whitespace/case/literal markup remain significant. Check exact advertised inclusive bound and one beyond; invalid primitive/cost inputs refuse where relevant. No hidden trim, NaN or fractional table cells."
+    },
+    {
+      "group": "course_and_teaching",
+      "oracle": "Admit original course through unchanged parseDeck; manually audit every prompt/correct option/explanation/transfer against independently computed examples and stated assumptions. Check single-best-answer wording, no false unique-alignment claim, consistent prefix indices and all operation costs/Unicode/gap notation plainly stated. Exercise native selectNextItem/updateMastery/createReview/practice APIs with canonical option identity; do not attribute author assertions to this review."
+    }
+  ],
+  "browser_groups": [
+    {
+      "group": "offline_artifact_and_retirement",
+      "oracle": "Open exact generated HTML directly, with network offline and a new profile. Verify actual visible prefix values/alignment and a genuine trace/download against independent result. Change each calculation input after a valid result; old trace/navigation/export must retire until a new build. Refuse an invalid build without retaining a usable old export; valid recovery reflects new inputs. Exercise keyboard and a narrow viewport; no forged requests/responses or product script replacement."
+    },
+    {
+      "group": "real_course_import_and_learner_state",
+      "oracle": "Download course through the real explorer button, hash bytes against course source, and choose that actual file in unchanged baseline demo learner. Keep an existing answered learner session during preview/cancel, then explicitly start imported deck. Complete its adaptive questions with canonical choice identities, one deliberately missed item then one practice correction; first-answer review remains unchanged, and actual study-notes download preserves imported attribution/reflection. Explorer interactions never alter the separate learner. No automatic storage/provider/account request."
+    }
+  ],
+  "references": [
+    {
+      "url": "https://www.unicode.org/glossary/",
+      "claim": "Unicode scalar excludes surrogate code points; scalar units are not grapheme clusters."
+    }
+  ],
+  "receiving_boundary": {
+    "node": "Installed22.22.1 meets statedNode20+ floor; no package.json assumed (baseline read returnedENOENT).",
+    "browser": "Installed SnapChromium153/Puppeteer only; profile/download/artifact mirror under own /home path only after capacity check.",
+    "setup": "Own /tmp directory, exact selected baseline source contracts pinned before/after; no installs or GitHub writes.",
+    "known_read_attempts": [
+      "First package.json read path-validation timeout; retry returnedENOENT. No source or test failure inferred."
+    ]
+  },
+  "candidate_findings": [],
+  "candidate_has_been_read": false
+}
