@@ -433,3 +433,9 @@ Open [the minimum-spanning-forest explorer](courses/minimum-spanning-forest-expl
 
 Download the full trace with its original entered text and selected frame, or save the original [twelve-question course](courses/minimum-spanning-forest.json) and [worked guide](courses/minimum-spanning-forest.md). Open the JSON through the learner's existing **Bring your own lesson** preview and **Start this deck** flow. No network, account, automatic storage or learner-session modification is involved. Rebuild the standalone page with `node tools/build-minimum-spanning-forest.mjs`; add `--check` to verify exact source parity.
 
+## Follow the totals in a Fenwick tree
+
+Open [Fenwick trees: which totals change?](courses/fenwick-trees-explorer.html) directly in a browser to inspect exact responsibility blocks, point additions, prefix queries and inclusive range sums. Previous, Next and Final state inspect retained snapshots; editing retires the previous result until an explicit build. Signed values, empty prefixes and non-power-of-two lengths are included.
+
+The [worked guide](courses/fenwick-trees.md) explains the paths. Download the original [fourteen-question lesson](courses/fenwick-trees.json) from the explorer and open it through **Bring your own lesson** to use the existing feedback, review, separate practice and notes flow. The separate trace download keeps every operation, independent of the current view. Rebuild with `node tools/build-fenwick-trees.mjs`; add `--check` to verify the standalone artifact.
+

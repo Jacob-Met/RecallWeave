@@ -1,0 +1,408 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src 'none'; base-uri 'none'; form-action 'none'">
+<title>Fenwick trees: which totals change? · RecallWeave</title>
+<style>
+:root{color-scheme:light;--ink:#172d32;--muted:#456065;--paper:#f6f8f4;--line:#c9d7cc;--accent:#165c4d;--soft:#e2efe6}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.55 system-ui,sans-serif}
+main{max-width:1000px;margin:auto;padding:30px 24px 64px}header{border-bottom:2px solid var(--line);padding-bottom:22px;margin-bottom:24px}
+.eyebrow{font-size:.8rem;letter-spacing:.13em;text-transform:uppercase;font-weight:750;color:var(--accent)}
+h1{font-size:clamp(1.8rem,5vw,3rem);line-height:1.12;max-width:760px;margin:.4em 0}h2{font-size:1.3rem;margin:0 0 .7em}h3{font-size:1rem;margin:0 0 .4em}p{margin:.6em 0}
+a{color:var(--accent);text-underline-offset:.2em}code{background:var(--soft);padding:.08em .25em;border-radius:3px;overflow-wrap:anywhere}
+.intro{max-width:760px;color:var(--muted)}section{margin:24px 0}.panel{padding:22px;background:#fff;border:1px solid var(--line);border-radius:12px}
+label{display:block;font-weight:700;margin:16px 0 6px}.hint{font-size:.9rem;color:var(--muted)}
+input,textarea{display:block;width:100%;max-width:100%;border:1px solid #82988e;border-radius:6px;padding:12px;color:var(--ink);background:#fff;font:1rem/1.5 ui-monospace,monospace}
+textarea{min-height:175px;resize:vertical}button{font:inherit;line-height:1.25;min-height:44px;padding:10px 15px;border:1px solid #789488;border-radius:6px;background:#fff;color:var(--accent);font-weight:650;cursor:pointer}
+button.primary{background:var(--accent);color:#fff;border-color:var(--accent)}button:disabled{opacity:.5;cursor:default}
+button:focus-visible,input:focus-visible,textarea:focus-visible,a:focus-visible{outline:3px solid #bc6200;outline-offset:3px}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}.presets button{font-size:.9rem}#status{padding:12px 14px;background:var(--soft);border-left:4px solid var(--accent);min-height:50px;overflow-wrap:anywhere}
+[hidden]{display:none!important}.step-count{font-weight:700;color:var(--accent)}table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;font-size:.97rem}caption{text-align:left;font-weight:700;margin:10px 0}
+th,td{text-align:right;border-bottom:1px solid var(--line);padding:9px 8px}th:first-child,td:first-child{text-align:left}th{background:var(--soft)}
+#visits{padding-left:0;list-style:none}#visits>li{margin:14px 0}.visit,.query{border:1px solid var(--line);border-radius:8px;padding:14px;background:#fafcf9}.query>ol{padding-left:22px}.query>ol>.visit{margin:10px 0}
+.visit p{margin:.3em 0;color:var(--muted)}.equation,#query-result{font-weight:750;font-size:1.1rem}.limits{border-left:3px solid var(--line);padding-left:16px;color:var(--muted)}
+footer{font-size:.9rem;color:var(--muted);margin-top:32px;border-top:1px solid var(--line);padding-top:18px}
+@media(max-width:480px){main{padding:20px 14px 42px}.panel{padding:15px}th,td{padding:8px 5px;font-size:.9rem}.actions button{flex:1 1 auto}.query>ol{padding-left:17px}.visit,.query{padding:11px}}
+</style>
+</head>
+<body><main>
+<header><div class="eyebrow">RecallWeave · exact integer explorer</div>
+<h1>Fenwick trees: which totals change?</h1>
+<p class="intro">Inspect the blocks behind a prefix sum. Add to one value, follow the entries that change, and combine two prefixes into an inclusive range sum.</p>
+<p><a href="fenwick-trees.md">Read the worked guide</a> · All positions start at 1.</p></header>
+<section class="panel" aria-labelledby="draft-heading"><h2 id="draft-heading">1. Choose values and operations</h2>
+<p>Each tree entry <code>i</code> covers <code>[i − lowbit(i) + 1, i]</code>. Here <code>lowbit(i)</code> is the largest power of two dividing positive <code>i</code>.</p>
+<label for="initial-values">Initial values</label>
+<input id="initial-values" value="3, -1, 4, 0, 2, -2, 5, 1" spellcheck="false" autocomplete="off" aria-describedby="values-hint">
+<p class="hint" id="values-hint">1–16 comma-separated integers, each from −99 through 99. A leading + or − and decimal leading zeros are accepted; fractions, exponents and empty entries are refused.</p>
+<label for="operations">Operations, one per line</label>
+<textarea id="operations" spellcheck="false" autocomplete="off" aria-describedby="operations-hint">prefix 7
+add 3 -2
+prefix 7
+range 3 6
+prefix 0</textarea>
+<p class="hint" id="operations-hint"><code>add INDEX DELTA</code> adds −99…99; <code>prefix END</code> sums 1…END, with END 0 allowed; <code>range START END</code> sums the inclusive interval. Use at most 64 operations. An empty script shows only the initial tree.</p>
+<div class="actions presets"><button id="preset-signed">Signed example</button><button id="preset-short">Five positions</button><button id="preset-zero">Empty prefix &amp; zero addition</button></div>
+<div class="actions"><button class="primary" id="build-trace">Build trace</button><button id="download-course">Download lesson JSON</button><button id="download-trace" disabled>Download complete trace</button></div>
+<p id="status" role="status" aria-live="polite"></p></section>
+<section id="results" class="panel" hidden aria-labelledby="step-heading">
+<div class="actions" aria-label="Inspect saved states"><button id="previous-step" disabled>Previous operation</button><button id="next-step" disabled>Next operation</button><button id="last-step" disabled>Final state</button></div>
+<p class="step-count">State <span id="step-position">0 of 0</span></p><h2 id="step-heading"></h2><p id="step-explanation"></p>
+<table id="state-table"><caption>Values and stored block totals</caption><thead><tr><th scope="col">Index</th><th scope="col">Value</th><th scope="col">Tree total</th><th scope="col">Interval</th></tr></thead><tbody id="state-body"></tbody></table>
+<p id="query-result" hidden></p><h2 style="margin-top:24px">Traversal</h2><ol id="visits"></ol>
+</section>
+<section class="limits" aria-label="How to read the explorer"><h2>Exact values, explicit boundaries</h2>
+<p>Query steps read the stored totals without changing the tree. Updates add a delta; they do not replace a value. Navigation inspects the completed trace and never applies an update again.</p>
+<p>Editing either draft immediately retires the previous result and trace export. Build checks the whole script before publishing any state. The trace download contains every operation, even when you are viewing an earlier state.</p>
+<p>Negative values work for sums; prefix totals need not increase. This explorer does not perform cumulative-frequency rank search. Within the stated bounds, all integer arithmetic is exact.</p></section>
+<footer><p>This file runs locally without an account, network request or saved browser state. Download the original lesson JSON and open it in RecallWeave's existing course importer to study, review or practise the concepts.</p><p>Original lesson and implementation. Mathematical references and an example are in the worked guide. No performance or learning-outcome measurement is claimed.</p></footer>
+</main><script type="module">
+// Original bounded teaching model. Array offset i - 1 represents one-based position i.
+const TRACES = new WeakSet();
+const INTEGER_TOKEN = /^[+-]?[0-9]+$/;
+
+function fail(message) {
+  throw new Error(message);
+}
+
+function integer(value, low, high, label) {
+  if (typeof value !== "number" || !Number.isInteger(value) || value < low || value > high) {
+    fail(label + " must be an integer from " + low + " through " + high + ".");
+  }
+  return value;
+}
+
+function dataObject(value, keys, label) {
+  if (!value || typeof value !== "object" || Object.getPrototypeOf(value) !== Object.prototype) {
+    fail(label + " must be a plain data object.");
+  }
+  const own = Reflect.ownKeys(value);
+  if (own.length !== keys.length || own.some((key) => !keys.includes(key))) {
+    fail(label + " has an unknown or missing field.");
+  }
+  const descriptors = Object.getOwnPropertyDescriptors(value);
+  for (const key of keys) {
+    if (!Object.hasOwn(descriptors[key], "value") || !descriptors[key].enumerable) {
+      fail(label + " must contain ordinary data fields.");
+    }
+  }
+}
+
+function denseArray(value, low, high, label) {
+  if (!Array.isArray(value) || Object.getPrototypeOf(value) !== Array.prototype ||
+      value.length < low || value.length > high ||
+      Reflect.ownKeys(value).length !== value.length + 1) {
+    fail(label + " must be a dense array with " + low + " through " + high + " entries.");
+  }
+  for (let i = 0; i < value.length; i += 1) {
+    const descriptor = Object.getOwnPropertyDescriptor(value, String(i));
+    if (!descriptor || !Object.hasOwn(descriptor, "value") || !descriptor.enumerable) {
+      fail(label + " must contain ordinary data entries.");
+    }
+  }
+}
+
+function freeze(value) {
+  if (value && typeof value === "object") {
+    for (const entry of Object.values(value)) freeze(entry);
+    Object.freeze(value);
+  }
+  return value;
+}
+
+function admit(spec) {
+  dataObject(spec, ["initial", "operations"], "Input");
+  denseArray(spec.initial, 1, 16, "Initial values");
+  const initial = spec.initial.map((value, index) =>
+    integer(value, -99, 99, "Value at position " + (index + 1)));
+  denseArray(spec.operations, 0, 64, "Operations");
+  const operations = spec.operations.map((operation, offset) => {
+    const label = "Operation " + (offset + 1);
+    if (!operation || typeof operation !== "object") fail(label + " must be a data object.");
+    const kindDescriptor = Object.getOwnPropertyDescriptor(operation, "kind");
+    if (!kindDescriptor || !Object.hasOwn(kindDescriptor, "value")) fail(label + " needs a command.");
+    const kind = kindDescriptor.value;
+    if (kind === "add") {
+      dataObject(operation, ["kind", "index", "delta"], label);
+      return {kind, index: integer(operation.index, 1, initial.length, label + " index"),
+        delta: integer(operation.delta, -99, 99, label + " delta")};
+    }
+    if (kind === "prefix") {
+      dataObject(operation, ["kind", "end"], label);
+      return {kind, end: integer(operation.end, 0, initial.length, label + " end")};
+    }
+    if (kind === "range") {
+      dataObject(operation, ["kind", "start", "end"], label);
+      const start = integer(operation.start, 1, initial.length, label + " start");
+      return {kind, start, end: integer(operation.end, start, initial.length, label + " end")};
+    }
+    fail(label + " must be add, prefix, or range.");
+  });
+  return freeze({initial, operations});
+}
+
+function token(text, label) {
+  if (!INTEGER_TOKEN.test(text)) fail(label + " must use a signed decimal integer.");
+  const value = Number(text);
+  if (!Number.isSafeInteger(value)) fail(label + " is outside the supported integer range.");
+  return value;
+}
+
+function parseFenwickDraft(initialText, operationsText) {
+  if (typeof initialText !== "string" || initialText.length > 512) {
+    fail("Initial values must be text of at most 512 characters.");
+  }
+  if (typeof operationsText !== "string" || operationsText.length > 4096) {
+    fail("Operations must be text of at most 4096 characters.");
+  }
+  const initial = initialText.split(",").map((part, index) =>
+    token(part.trim(), "Value at position " + (index + 1)));
+  const lines = operationsText.split(/\r\n|\n|\r/).map((line) => line.trim()).filter(Boolean);
+  if (lines.length > 64) fail("Use at most 64 operations.");
+  const operations = lines.map((line, index) => {
+    const parts = line.split(/\s+/);
+    const label = "Operation " + (index + 1);
+    if (parts[0] === "add" && parts.length === 3) {
+      return {kind: "add", index: token(parts[1], label + " index"), delta: token(parts[2], label + " delta")};
+    }
+    if (parts[0] === "prefix" && parts.length === 2) {
+      return {kind: "prefix", end: token(parts[1], label + " end")};
+    }
+    if (parts[0] === "range" && parts.length === 3) {
+      return {kind: "range", start: token(parts[1], label + " start"), end: token(parts[2], label + " end")};
+    }
+    fail(label + " must be add INDEX DELTA, prefix END, or range START END.");
+  });
+  return admit({initial, operations});
+}
+
+function lowbit(index) {
+  return index & -index;
+}
+
+function block(index) {
+  const width = lowbit(index);
+  return {index, lowbit: width, start: index - width + 1, end: index};
+}
+
+function snapshot(values, tree) {
+  return {values: values.slice(), tree: tree.slice()};
+}
+
+function query(tree, end, sign) {
+  let index = end;
+  let accumulator = 0;
+  const visits = [];
+  while (index > 0) {
+    const interval = block(index);
+    const stored = tree[index - 1];
+    const next = index - interval.lowbit;
+    const accumulatorBefore = accumulator;
+    accumulator += stored;
+    visits.push({...interval, stored, accumulatorBefore, accumulatorAfter: accumulator, next});
+    index = next;
+  }
+  return {end, sign, visits, sum: accumulator};
+}
+
+function buildFenwickTrace(spec) {
+  const input = admit(spec); // Validate every operation before constructing any trace.
+  const values = input.initial.slice();
+  const blocks = values.map((_, index) => block(index + 1));
+  const tree = blocks.map(({start, end}) => {
+    let total = 0;
+    for (let index = start; index <= end; index += 1) total += values[index - 1];
+    return total;
+  });
+  const initial = snapshot(values, tree);
+  const steps = [];
+  for (const [offset, operation] of input.operations.entries()) {
+    const before = snapshot(values, tree);
+    const visits = [];
+    const queries = [];
+    let result = null;
+    if (operation.kind === "add") {
+      values[operation.index - 1] += operation.delta;
+      let index = operation.index;
+      while (index <= tree.length) {
+        const interval = blocks[index - 1];
+        const entryBefore = tree[index - 1];
+        tree[index - 1] += operation.delta;
+        const next = index + interval.lowbit;
+        visits.push({...interval, before: entryBefore, after: tree[index - 1], next});
+        index = next;
+      }
+    } else {
+      queries.push(query(tree, operation.end, 1));
+      if (operation.kind === "range") queries.push(query(tree, operation.start - 1, -1));
+      result = queries.reduce((sum, part) => sum + part.sign * part.sum, 0);
+    }
+    steps.push({sequence: offset + 1, operation, before, after: snapshot(values, tree),
+      visits, queries, result});
+  }
+  const trace = freeze({format: "recallweave-fenwick-trace/1", input, blocks, initial, steps,
+    final: snapshot(values, tree)});
+  TRACES.add(trace);
+  return trace;
+}
+
+function serializeFenwickTrace(trace) {
+  if (!TRACES.has(trace)) fail("Export requires a trace built by this model.");
+  return JSON.stringify(trace, null, 2) + "\n";
+}
+
+const COURSE_TEXT = "{\n  \"format\": \"recallweave-deck/1\",\n  \"title\": \"Fenwick trees: which totals change?\",\n  \"attribution\": \"Original RecallWeave questions and explanations. Algorithmic references: Peter M. Fenwick, A new data structure for cumulative frequency tables (1994), https://doi.org/10.1002/spe.4380240306; Rossano Venturini, Dynamic Prefix Sums with Fenwick Tree (2023), https://pages.di.unipi.it/rossano/blog/2023/fenwick/. Reference passages and exercises are not reproduced.\",\n  \"license\": \"CC BY 4.0 for this original course text; referenced publications retain their own terms.\",\n  \"concepts\": [\n    \"One-based prefixes\",\n    \"Responsibility blocks\",\n    \"Prefix query paths\",\n    \"Point additions\",\n    \"Inclusive ranges\"\n  ],\n  \"items\": [\n    {\n      \"id\": \"f1\",\n      \"concept\": \"One-based prefixes\",\n      \"prerequisites\": [],\n      \"prompt\": \"Positions start at 1. For values [3, -1, 4, 0, 2], what is prefix(3), the sum of positions 1 through 3?\",\n      \"options\": [\n        \"4, the value stored at position 3\",\n        \"6, the total of the first three values\",\n        \"3, because the negative value cancels 4\",\n        \"8, the sum of the entire array\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"prefix(3) includes exactly positions 1, 2, and 3: 3 + (-1) + 4 = 6. Reading only position 3 gives 4; summing the whole array gives 8. The endpoint tells you where the prefix stops, not how many stored tree entries must be read.\",\n      \"transfer\": \"Change position 2 to -4. Compute prefix(3) directly before thinking about the tree.\"\n    },\n    {\n      \"id\": \"f2\",\n      \"concept\": \"Responsibility blocks\",\n      \"prerequisites\": [\n        \"One-based prefixes\"\n      ],\n      \"prompt\": \"A Fenwick entry i stores the interval [i - lowbit(i) + 1, i], where lowbit(i) is the largest power of two dividing i. Which positions does tree[6] cover?\",\n      \"options\": [\n        \"Positions 1 through 6\",\n        \"Only position 6\",\n        \"Positions 3 through 6\",\n        \"Positions 5 through 6\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"6 is divisible by 2 but not 4, so lowbit(6) = 2. The start is 6 - 2 + 1 = 5. Thus tree[6] stores positions 5 and 6, not the entire prefix. A query combines several responsibility blocks when one entry does not cover the whole prefix.\",\n      \"transfer\": \"Find the responsibility intervals of entries 10 and 12. State each lowbit and start index.\"\n    },\n    {\n      \"id\": \"f3\",\n      \"concept\": \"Responsibility blocks\",\n      \"prerequisites\": [\n        \"One-based prefixes\"\n      ],\n      \"prompt\": \"With positions 1 through 8 holding [2, -3, 4, 1, 0, 5, -2, 3], tree[8] covers [1, 8]. What does that entry store?\",\n      \"options\": [\n        \"10\",\n        \"3\",\n        \"8\",\n        \"13\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"Because lowbit(8) = 8, this entry covers all eight positions. Adding 2 - 3 + 4 + 1 + 0 + 5 - 2 + 3 gives 10. The value at position 8 is only 3; the tree entry is the total of its responsibility block.\",\n      \"transfer\": \"Change only position 6 by adding -2. Predict the new total of tree[8].\"\n    },\n    {\n      \"id\": \"f4\",\n      \"concept\": \"Prefix query paths\",\n      \"prerequisites\": [\n        \"Responsibility blocks\"\n      ],\n      \"prompt\": \"A prefix query starts at its end index, reads tree[i], then sets i to i - lowbit(i) until i is 0. In what order does prefix(7) read entries? Here lowbit(i) is the largest power of two dividing positive i.\",\n      \"options\": [\n        \"7, 6, 5, 4, 3, 2, 1\",\n        \"7, 8\",\n        \"7, 6, 4\",\n        \"4, 6, 7\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"The query reads 7, then 7 - 1 = 6, then 6 - 2 = 4, then 4 - 4 = 0 and stops. It visits 7, 6, 4 in that order. The covered intervals [7,7], [5,6], and [1,4] partition the prefix; the stopping index 0 is not read.\",\n      \"transfer\": \"Write the visited indices and responsibility intervals for prefix(11). Check that the intervals do not overlap.\"\n    },\n    {\n      \"id\": \"f5\",\n      \"concept\": \"Prefix query paths\",\n      \"prerequisites\": [\n        \"Responsibility blocks\"\n      ],\n      \"prompt\": \"A prefix(6) query reads tree[6] = 5 for positions [5, 6] and tree[4] = 8 for positions [1, 4]. What is the result?\",\n      \"options\": [\n        \"13, because the two blocks cover [1, 6] without overlap\",\n        \"8, because tree[4] covers more positions\",\n        \"3, because the smaller block must be subtracted\",\n        \"40, because each block total must be multiplied\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"Add the stored totals: 5 + 8 = 13. Their intervals [5,6] and [1,4] do not overlap and together cover [1,6]. A block's stored value is already a sum, so it is not multiplied by its length.\",\n      \"transfer\": \"Suppose the two stored totals were -5 and 8. Compute the result and explain why the query still works.\"\n    },\n    {\n      \"id\": \"f6\",\n      \"concept\": \"Prefix query paths\",\n      \"prerequisites\": [\n        \"Responsibility blocks\"\n      ],\n      \"prompt\": \"Prefix(0) means the empty prefix before position 1. How should a one-based Fenwick query handle it?\",\n      \"options\": [\n        \"Read tree[1] and negate it\",\n        \"Return 0 without reading any tree entry\",\n        \"Read an extra stored tree[0] entry\",\n        \"Reject it because all prefixes must be nonempty\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"The sum over no positions is 0. Starting at endpoint 0 skips the query loop, so no entry is read. There is no stored tree[0]. This boundary makes range(start,end) = prefix(end) - prefix(start-1) work when start is 1.\",\n      \"transfer\": \"Evaluate range(1,1) using two prefix queries, including the empty one.\"\n    },\n    {\n      \"id\": \"f7\",\n      \"concept\": \"Point additions\",\n      \"prerequisites\": [\n        \"Responsibility blocks\"\n      ],\n      \"prompt\": \"For an array of length 8, a point addition starts at index 3, changes tree[i], then advances i by lowbit(i) while i is at most 8. Which entries change? Here lowbit(i) is the largest power of two dividing positive i.\",\n      \"options\": [\n        \"3, 2\",\n        \"1, 2, 3\",\n        \"3, 6\",\n        \"3, 4, 8\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"The update starts at 3, advances to 3 + 1 = 4, then to 4 + 4 = 8, then to 8 + 8 = 16 and stops. Entries 3, 4, and 8 contain position 3 in their responsibility blocks. Moving downward is the query path, not this update path.\",\n      \"transfer\": \"For length 10, trace the update path starting at position 6. Show the first index that stops the loop.\"\n    },\n    {\n      \"id\": \"f8\",\n      \"concept\": \"Point additions\",\n      \"prerequisites\": [\n        \"Responsibility blocks\"\n      ],\n      \"prompt\": \"The values are [2, 5, -1, 4]. The command add 2 -3 adds -3 to the value at one-based position 2. What are the resulting values?\",\n      \"options\": [\n        \"[2, -3, -1, 4]\",\n        \"[2, 2, -1, 4]\",\n        \"[-1, 2, -4, 1]\",\n        \"[2, 8, -1, 4]\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"Position 2 contains 5. Adding -3 changes it to 2; the other represented values stay 2, -1, and 4. The command is point addition, so it neither assigns -3 nor subtracts from every array position.\",\n      \"transfer\": \"Apply add 2 3 to the resulting array. Explain why the original represented values return.\"\n    },\n    {\n      \"id\": \"f9\",\n      \"concept\": \"Point additions\",\n      \"prerequisites\": [\n        \"Responsibility blocks\"\n      ],\n      \"prompt\": \"For an array of length 6, add 5 2 visits tree[5] and tree[6]. From 6, the next index is 6 + lowbit(6) = 8. What happens next?\",\n      \"options\": [\n        \"The update creates a new tree[8] entry\",\n        \"The update wraps around to tree[2]\",\n        \"The update stops because 8 exceeds the array length\",\n        \"The update continues at tree[1] instead\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"The array has six entries, so index 8 is outside the tree and the loop stops. A Fenwick tree works for lengths that are not powers of two; it does not add extra stored entries or wrap the index.\",\n      \"transfer\": \"For length 7, trace add 6 -1. Keep the stopping index separate from the visited entries.\"\n    },\n    {\n      \"id\": \"f10\",\n      \"concept\": \"Inclusive ranges\",\n      \"prerequisites\": [\n        \"Prefix query paths\"\n      ],\n      \"prompt\": \"For inclusive one-based positions, which expression gives the sum of positions 3 through 6?\",\n      \"options\": [\n        \"prefix(6) - prefix(2)\",\n        \"prefix(6) - prefix(3)\",\n        \"prefix(6) + prefix(2)\",\n        \"prefix(5) - prefix(2)\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"prefix(6) includes positions 1 through 6. Subtracting prefix(2) removes exactly positions 1 and 2, leaving 3 through 6. Subtracting prefix(3) would also remove the requested value at position 3.\",\n      \"transfer\": \"Write the corresponding expression for inclusive range(4,9), and explain both endpoints.\"\n    },\n    {\n      \"id\": \"f11\",\n      \"concept\": \"Inclusive ranges\",\n      \"prerequisites\": [\n        \"Prefix query paths\"\n      ],\n      \"prompt\": \"For values [5, -7, 4], the prefixes are 5, -2, and 2. Which conclusion follows?\",\n      \"options\": [\n        \"A Fenwick tree cannot represent any array with a negative value\",\n        \"The second prefix must be 0 because cumulative sums cannot be negative\",\n        \"The prefixes prove that the point-update traversal is reversed\",\n        \"Negative values are compatible with exact prefix sums, but the totals need not increase\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"Adding signed values still produces exact sums. Here adding -7 makes the total decrease from 5 to -2. A Fenwick sum query remains valid, but a separate cumulative-frequency search that assumes nondecreasing prefix totals would need a stronger input condition.\",\n      \"transfer\": \"Construct three signed values whose prefix totals decrease and then increase. Compute all three prefixes.\"\n    },\n    {\n      \"id\": \"f12\",\n      \"concept\": \"Inclusive ranges\",\n      \"prerequisites\": [\n        \"Prefix query paths\"\n      ],\n      \"prompt\": \"An inclusive range query uses prefix(end) - prefix(start - 1). For range [1, 4], what does its second traversal do?\",\n      \"options\": [\n        \"Visit tree[1] and subtract its value\",\n        \"Visit every entry from 1 through 4\",\n        \"Read no entries and contribute 0\",\n        \"Visit tree[4] and subtract its value\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"For start = 1, start - 1 = 0. The second prefix is therefore the empty sum: 0 with no visited entries. Reading tree[1] would subtract a value that belongs in the requested range.\",\n      \"transfer\": \"For a five-position array, name both traversals used by range(1,5).\"\n    },\n    {\n      \"id\": \"f13\",\n      \"concept\": \"Point additions\",\n      \"prerequisites\": [\n        \"Responsibility blocks\"\n      ],\n      \"prompt\": \"A trace records the standard update loop even when the delta is 0. For length 8, add 2 0 visits entries 2, 4, and 8. Which description is accurate?\",\n      \"options\": [\n        \"The trace must report no visits because no totals change\",\n        \"It records those visits, with each entry's before and after totals equal\",\n        \"It replaces each visited total with 0\",\n        \"It changes only the value at position 8\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"The standard update path depends on the index and length, not on whether the delta is nonzero. Adding 0 leaves every total unchanged, but the trace still records entries 2, 4, and 8 with equal before and after values.\",\n      \"transfer\": \"Compare add 3 0 and add 3 4 for length 8. Which parts of their traces match, and which totals differ?\"\n    },\n    {\n      \"id\": \"f14\",\n      \"concept\": \"Responsibility blocks\",\n      \"prerequisites\": [\n        \"One-based prefixes\"\n      ],\n      \"prompt\": \"For values [4, 1, -2, 3, 6], tree[4] covers [1, 4] and tree[5] covers [5, 5]. Which pair of stored totals is correct?\",\n      \"options\": [\n        \"tree[4] = 6; tree[5] = 6\",\n        \"tree[4] = 3; tree[5] = 6\",\n        \"tree[4] = 6; tree[5] = 12\",\n        \"tree[4] = 12; tree[5] = 6\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"tree[4] stores 4 + 1 - 2 + 3 = 6, while tree[5] stores the single value 6. Equal stored totals do not imply equal responsibility intervals: one covers four positions, and the other covers one.\",\n      \"transfer\": \"Find a different five-position array with tree[4] = tree[5]. State the two intervals despite equal totals.\"\n    }\n  ]\n}\n";
+
+const byId = (id) => document.getElementById(id);
+const initialInput = byId("initial-values");
+const operationsInput = byId("operations");
+const status = byId("status");
+const results = byId("results");
+let trace = null;
+let selected = 0;
+
+function element(tag, text, className) {
+  const node = document.createElement(tag);
+  if (text !== undefined) node.textContent = text;
+  if (className) node.className = className;
+  return node;
+}
+
+function labelOperation(operation) {
+  if (operation.kind === "add") return "add " + operation.index + " " + operation.delta;
+  if (operation.kind === "prefix") return "prefix " + operation.end;
+  return "range " + operation.start + " " + operation.end;
+}
+
+function retire(message) {
+  trace = null;
+  selected = 0;
+  results.hidden = true;
+  byId("download-trace").disabled = true;
+  for (const id of ["previous-step", "next-step", "last-step"]) byId(id).disabled = true;
+  status.textContent = message;
+}
+
+function render() {
+  const step = selected ? trace.steps[selected - 1] : null;
+  const state = step ? step.after : trace.initial;
+  byId("step-position").textContent = selected + " of " + trace.steps.length;
+  byId("step-heading").textContent = step ? "After " + labelOperation(step.operation) : "Initial responsibility blocks";
+  byId("step-explanation").textContent = !step
+    ? "Each tree entry is the sum of its listed inclusive interval. The initial construction is not an update operation."
+    : step.operation.kind === "add"
+      ? "The point value and every containing responsibility block receive the same addition. These totals show the completed update."
+      : "The query reads stored block totals. It changes neither the values nor the tree.";
+  const rows = state.values.map((value, offset) => {
+    const row = element("tr");
+    row.dataset.index = String(offset + 1);
+    const block = trace.blocks[offset];
+    for (const text of [offset + 1, value, state.tree[offset], "[" + block.start + ", " + block.end + "]"]) {
+      row.append(element("td", String(text)));
+    }
+    return row;
+  });
+  byId("state-body").replaceChildren(...rows);
+  const visits = byId("visits");
+  visits.replaceChildren();
+  byId("query-result").hidden = !step || step.result === null;
+  byId("query-result").textContent = step && step.result !== null ? "Exact query result: " + step.result : "";
+  if (!step) {
+    visits.append(element("p", "Choose Next operation to inspect the actual update or query path."));
+  } else if (step.operation.kind === "add") {
+    for (const visit of step.visits) {
+      const card = element("li", undefined, "visit");
+      card.dataset.index = String(visit.index);
+      card.append(element("h3", "Update tree[" + visit.index + "] · interval [" + visit.start + ", " + visit.end + "]"));
+      card.append(element("p", visit.before + " + (" + step.operation.delta + ") = " + visit.after));
+      card.append(element("p", "lowbit(" + visit.index + ") = " + visit.lowbit + "; next index " + visit.next +
+        (visit.next > state.values.length ? " exceeds " + state.values.length + ": stop." : ".")));
+      visits.append(card);
+    }
+  } else {
+    for (const part of step.queries) {
+      const card = element("li", undefined, "query");
+      card.dataset.end = String(part.end);
+      card.dataset.sign = String(part.sign);
+      card.append(element("h3", (part.sign === 1 ? "Add" : "Subtract") + " prefix(" + part.end + ") = " + part.sum));
+      if (part.visits.length === 0) card.append(element("p", "Empty prefix: no tree entries read; total 0."));
+      const list = element("ol");
+      for (const visit of part.visits) {
+        const item = element("li", undefined, "visit");
+        item.dataset.index = String(visit.index);
+        item.append(element("strong", "Read tree[" + visit.index + "] = " + visit.stored +
+          " · interval [" + visit.start + ", " + visit.end + "]"));
+        item.append(element("p", "Running sum: " + visit.accumulatorBefore + " + (" + visit.stored + ") = " + visit.accumulatorAfter));
+        item.append(element("p", "lowbit(" + visit.index + ") = " + visit.lowbit + "; next index " + visit.next +
+          (visit.next === 0 ? ": stop." : ".")));
+        list.append(item);
+      }
+      card.append(list);
+      visits.append(card);
+    }
+    if (step.queries.length === 2) visits.append(element("li",
+      step.queries[0].sum + " − (" + step.queries[1].sum + ") = " + step.result, "equation"));
+  }
+  byId("previous-step").disabled = selected === 0;
+  byId("next-step").disabled = selected === trace.steps.length;
+  byId("last-step").disabled = selected === trace.steps.length;
+  byId("download-trace").disabled = false;
+  results.hidden = false;
+}
+
+function download(text, filename) {
+  const url = URL.createObjectURL(new Blob([text], {type: "application/json;charset=utf-8"}));
+  const link = element("a");
+  link.href = url;
+  link.download = filename;
+  document.body.append(link);
+  link.click();
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 30000);
+}
+
+for (const input of [initialInput, operationsInput]) {
+  input.addEventListener("input", () => retire("Draft changed. Build a new trace to inspect or export it."));
+}
+byId("build-trace").addEventListener("click", () => {
+  retire("Checking the entire draft…");
+  try {
+    trace = buildFenwickTrace(parseFenwickDraft(initialInput.value, operationsInput.value));
+    render();
+    status.textContent = "Built " + trace.steps.length + " operations for " + trace.input.initial.length +
+      " positions. Showing the initial tree; navigation only inspects the saved trace.";
+  } catch (error) {
+    retire(error.message);
+  }
+});
+byId("previous-step").addEventListener("click", () => {
+  if (trace && selected > 0) { selected -= 1; render(); status.textContent = "Showing state " + selected + " of " + trace.steps.length + "."; }
+});
+byId("next-step").addEventListener("click", () => {
+  if (trace && selected < trace.steps.length) { selected += 1; render(); status.textContent = "Showing state " + selected + " of " + trace.steps.length + "."; }
+});
+byId("last-step").addEventListener("click", () => {
+  if (trace) { selected = trace.steps.length; render(); status.textContent = "Showing the final state after " + selected + " operations."; }
+});
+byId("download-trace").addEventListener("click", () => {
+  if (trace) download(serializeFenwickTrace(trace), "fenwick-trees-trace.json");
+});
+byId("download-course").addEventListener("click", () => download(COURSE_TEXT, "fenwick-trees.json"));
+
+const presets = {
+  "preset-signed": ["3, -1, 4, 0, 2, -2, 5, 1", "prefix 7\nadd 3 -2\nprefix 7\nrange 3 6\nprefix 0"],
+  "preset-short": ["4, 1, -2, 3, 6", "prefix 5\nadd 5 2\nrange 1 5"],
+  "preset-zero": ["0", "prefix 0\nadd 1 0\nrange 1 1"]
+};
+for (const [id, drafts] of Object.entries(presets)) {
+  byId(id).addEventListener("click", () => {
+    initialInput.value = drafts[0];
+    operationsInput.value = drafts[1];
+    retire("Example loaded. Build a trace to inspect it.");
+  });
+}
+retire("Ready. Build the example or edit the draft first.");
+
+</script></body></html>

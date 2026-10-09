@@ -1,0 +1,251 @@
+{
+  "format": "recallweave-deck/1",
+  "title": "Fenwick trees: which totals change?",
+  "attribution": "Original RecallWeave questions and explanations. Algorithmic references: Peter M. Fenwick, A new data structure for cumulative frequency tables (1994), https://doi.org/10.1002/spe.4380240306; Rossano Venturini, Dynamic Prefix Sums with Fenwick Tree (2023), https://pages.di.unipi.it/rossano/blog/2023/fenwick/. Reference passages and exercises are not reproduced.",
+  "license": "CC BY 4.0 for this original course text; referenced publications retain their own terms.",
+  "concepts": [
+    "One-based prefixes",
+    "Responsibility blocks",
+    "Prefix query paths",
+    "Point additions",
+    "Inclusive ranges"
+  ],
+  "items": [
+    {
+      "id": "f1",
+      "concept": "One-based prefixes",
+      "prerequisites": [],
+      "prompt": "Positions start at 1. For values [3, -1, 4, 0, 2], what is prefix(3), the sum of positions 1 through 3?",
+      "options": [
+        "4, the value stored at position 3",
+        "6, the total of the first three values",
+        "3, because the negative value cancels 4",
+        "8, the sum of the entire array"
+      ],
+      "answer": 1,
+      "explanation": "prefix(3) includes exactly positions 1, 2, and 3: 3 + (-1) + 4 = 6. Reading only position 3 gives 4; summing the whole array gives 8. The endpoint tells you where the prefix stops, not how many stored tree entries must be read.",
+      "transfer": "Change position 2 to -4. Compute prefix(3) directly before thinking about the tree."
+    },
+    {
+      "id": "f2",
+      "concept": "Responsibility blocks",
+      "prerequisites": [
+        "One-based prefixes"
+      ],
+      "prompt": "A Fenwick entry i stores the interval [i - lowbit(i) + 1, i], where lowbit(i) is the largest power of two dividing i. Which positions does tree[6] cover?",
+      "options": [
+        "Positions 1 through 6",
+        "Only position 6",
+        "Positions 3 through 6",
+        "Positions 5 through 6"
+      ],
+      "answer": 3,
+      "explanation": "6 is divisible by 2 but not 4, so lowbit(6) = 2. The start is 6 - 2 + 1 = 5. Thus tree[6] stores positions 5 and 6, not the entire prefix. A query combines several responsibility blocks when one entry does not cover the whole prefix.",
+      "transfer": "Find the responsibility intervals of entries 10 and 12. State each lowbit and start index."
+    },
+    {
+      "id": "f3",
+      "concept": "Responsibility blocks",
+      "prerequisites": [
+        "One-based prefixes"
+      ],
+      "prompt": "With positions 1 through 8 holding [2, -3, 4, 1, 0, 5, -2, 3], tree[8] covers [1, 8]. What does that entry store?",
+      "options": [
+        "10",
+        "3",
+        "8",
+        "13"
+      ],
+      "answer": 0,
+      "explanation": "Because lowbit(8) = 8, this entry covers all eight positions. Adding 2 - 3 + 4 + 1 + 0 + 5 - 2 + 3 gives 10. The value at position 8 is only 3; the tree entry is the total of its responsibility block.",
+      "transfer": "Change only position 6 by adding -2. Predict the new total of tree[8]."
+    },
+    {
+      "id": "f4",
+      "concept": "Prefix query paths",
+      "prerequisites": [
+        "Responsibility blocks"
+      ],
+      "prompt": "A prefix query starts at its end index, reads tree[i], then sets i to i - lowbit(i) until i is 0. In what order does prefix(7) read entries? Here lowbit(i) is the largest power of two dividing positive i.",
+      "options": [
+        "7, 6, 5, 4, 3, 2, 1",
+        "7, 8",
+        "7, 6, 4",
+        "4, 6, 7"
+      ],
+      "answer": 2,
+      "explanation": "The query reads 7, then 7 - 1 = 6, then 6 - 2 = 4, then 4 - 4 = 0 and stops. It visits 7, 6, 4 in that order. The covered intervals [7,7], [5,6], and [1,4] partition the prefix; the stopping index 0 is not read.",
+      "transfer": "Write the visited indices and responsibility intervals for prefix(11). Check that the intervals do not overlap."
+    },
+    {
+      "id": "f5",
+      "concept": "Prefix query paths",
+      "prerequisites": [
+        "Responsibility blocks"
+      ],
+      "prompt": "A prefix(6) query reads tree[6] = 5 for positions [5, 6] and tree[4] = 8 for positions [1, 4]. What is the result?",
+      "options": [
+        "13, because the two blocks cover [1, 6] without overlap",
+        "8, because tree[4] covers more positions",
+        "3, because the smaller block must be subtracted",
+        "40, because each block total must be multiplied"
+      ],
+      "answer": 0,
+      "explanation": "Add the stored totals: 5 + 8 = 13. Their intervals [5,6] and [1,4] do not overlap and together cover [1,6]. A block's stored value is already a sum, so it is not multiplied by its length.",
+      "transfer": "Suppose the two stored totals were -5 and 8. Compute the result and explain why the query still works."
+    },
+    {
+      "id": "f6",
+      "concept": "Prefix query paths",
+      "prerequisites": [
+        "Responsibility blocks"
+      ],
+      "prompt": "Prefix(0) means the empty prefix before position 1. How should a one-based Fenwick query handle it?",
+      "options": [
+        "Read tree[1] and negate it",
+        "Return 0 without reading any tree entry",
+        "Read an extra stored tree[0] entry",
+        "Reject it because all prefixes must be nonempty"
+      ],
+      "answer": 1,
+      "explanation": "The sum over no positions is 0. Starting at endpoint 0 skips the query loop, so no entry is read. There is no stored tree[0]. This boundary makes range(start,end) = prefix(end) - prefix(start-1) work when start is 1.",
+      "transfer": "Evaluate range(1,1) using two prefix queries, including the empty one."
+    },
+    {
+      "id": "f7",
+      "concept": "Point additions",
+      "prerequisites": [
+        "Responsibility blocks"
+      ],
+      "prompt": "For an array of length 8, a point addition starts at index 3, changes tree[i], then advances i by lowbit(i) while i is at most 8. Which entries change? Here lowbit(i) is the largest power of two dividing positive i.",
+      "options": [
+        "3, 2",
+        "1, 2, 3",
+        "3, 6",
+        "3, 4, 8"
+      ],
+      "answer": 3,
+      "explanation": "The update starts at 3, advances to 3 + 1 = 4, then to 4 + 4 = 8, then to 8 + 8 = 16 and stops. Entries 3, 4, and 8 contain position 3 in their responsibility blocks. Moving downward is the query path, not this update path.",
+      "transfer": "For length 10, trace the update path starting at position 6. Show the first index that stops the loop."
+    },
+    {
+      "id": "f8",
+      "concept": "Point additions",
+      "prerequisites": [
+        "Responsibility blocks"
+      ],
+      "prompt": "The values are [2, 5, -1, 4]. The command add 2 -3 adds -3 to the value at one-based position 2. What are the resulting values?",
+      "options": [
+        "[2, -3, -1, 4]",
+        "[2, 2, -1, 4]",
+        "[-1, 2, -4, 1]",
+        "[2, 8, -1, 4]"
+      ],
+      "answer": 1,
+      "explanation": "Position 2 contains 5. Adding -3 changes it to 2; the other represented values stay 2, -1, and 4. The command is point addition, so it neither assigns -3 nor subtracts from every array position.",
+      "transfer": "Apply add 2 3 to the resulting array. Explain why the original represented values return."
+    },
+    {
+      "id": "f9",
+      "concept": "Point additions",
+      "prerequisites": [
+        "Responsibility blocks"
+      ],
+      "prompt": "For an array of length 6, add 5 2 visits tree[5] and tree[6]. From 6, the next index is 6 + lowbit(6) = 8. What happens next?",
+      "options": [
+        "The update creates a new tree[8] entry",
+        "The update wraps around to tree[2]",
+        "The update stops because 8 exceeds the array length",
+        "The update continues at tree[1] instead"
+      ],
+      "answer": 2,
+      "explanation": "The array has six entries, so index 8 is outside the tree and the loop stops. A Fenwick tree works for lengths that are not powers of two; it does not add extra stored entries or wrap the index.",
+      "transfer": "For length 7, trace add 6 -1. Keep the stopping index separate from the visited entries."
+    },
+    {
+      "id": "f10",
+      "concept": "Inclusive ranges",
+      "prerequisites": [
+        "Prefix query paths"
+      ],
+      "prompt": "For inclusive one-based positions, which expression gives the sum of positions 3 through 6?",
+      "options": [
+        "prefix(6) - prefix(2)",
+        "prefix(6) - prefix(3)",
+        "prefix(6) + prefix(2)",
+        "prefix(5) - prefix(2)"
+      ],
+      "answer": 0,
+      "explanation": "prefix(6) includes positions 1 through 6. Subtracting prefix(2) removes exactly positions 1 and 2, leaving 3 through 6. Subtracting prefix(3) would also remove the requested value at position 3.",
+      "transfer": "Write the corresponding expression for inclusive range(4,9), and explain both endpoints."
+    },
+    {
+      "id": "f11",
+      "concept": "Inclusive ranges",
+      "prerequisites": [
+        "Prefix query paths"
+      ],
+      "prompt": "For values [5, -7, 4], the prefixes are 5, -2, and 2. Which conclusion follows?",
+      "options": [
+        "A Fenwick tree cannot represent any array with a negative value",
+        "The second prefix must be 0 because cumulative sums cannot be negative",
+        "The prefixes prove that the point-update traversal is reversed",
+        "Negative values are compatible with exact prefix sums, but the totals need not increase"
+      ],
+      "answer": 3,
+      "explanation": "Adding signed values still produces exact sums. Here adding -7 makes the total decrease from 5 to -2. A Fenwick sum query remains valid, but a separate cumulative-frequency search that assumes nondecreasing prefix totals would need a stronger input condition.",
+      "transfer": "Construct three signed values whose prefix totals decrease and then increase. Compute all three prefixes."
+    },
+    {
+      "id": "f12",
+      "concept": "Inclusive ranges",
+      "prerequisites": [
+        "Prefix query paths"
+      ],
+      "prompt": "An inclusive range query uses prefix(end) - prefix(start - 1). For range [1, 4], what does its second traversal do?",
+      "options": [
+        "Visit tree[1] and subtract its value",
+        "Visit every entry from 1 through 4",
+        "Read no entries and contribute 0",
+        "Visit tree[4] and subtract its value"
+      ],
+      "answer": 2,
+      "explanation": "For start = 1, start - 1 = 0. The second prefix is therefore the empty sum: 0 with no visited entries. Reading tree[1] would subtract a value that belongs in the requested range.",
+      "transfer": "For a five-position array, name both traversals used by range(1,5)."
+    },
+    {
+      "id": "f13",
+      "concept": "Point additions",
+      "prerequisites": [
+        "Responsibility blocks"
+      ],
+      "prompt": "A trace records the standard update loop even when the delta is 0. For length 8, add 2 0 visits entries 2, 4, and 8. Which description is accurate?",
+      "options": [
+        "The trace must report no visits because no totals change",
+        "It records those visits, with each entry's before and after totals equal",
+        "It replaces each visited total with 0",
+        "It changes only the value at position 8"
+      ],
+      "answer": 1,
+      "explanation": "The standard update path depends on the index and length, not on whether the delta is nonzero. Adding 0 leaves every total unchanged, but the trace still records entries 2, 4, and 8 with equal before and after values.",
+      "transfer": "Compare add 3 0 and add 3 4 for length 8. Which parts of their traces match, and which totals differ?"
+    },
+    {
+      "id": "f14",
+      "concept": "Responsibility blocks",
+      "prerequisites": [
+        "One-based prefixes"
+      ],
+      "prompt": "For values [4, 1, -2, 3, 6], tree[4] covers [1, 4] and tree[5] covers [5, 5]. Which pair of stored totals is correct?",
+      "options": [
+        "tree[4] = 6; tree[5] = 6",
+        "tree[4] = 3; tree[5] = 6",
+        "tree[4] = 6; tree[5] = 12",
+        "tree[4] = 12; tree[5] = 6"
+      ],
+      "answer": 0,
+      "explanation": "tree[4] stores 4 + 1 - 2 + 3 = 6, while tree[5] stores the single value 6. Equal stored totals do not imply equal responsibility intervals: one covers four positions, and the other covers one.",
+      "transfer": "Find a different five-position array with tree[4] = tree[5]. State the two intervals despite equal totals."
+    }
+  ]
+}

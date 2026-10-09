@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src 'none'; base-uri 'none'; form-action 'none'">
+<title>Fenwick trees: which totals change? · RecallWeave</title>
+<style>
+:root{color-scheme:light;--ink:#172d32;--muted:#456065;--paper:#f6f8f4;--line:#c9d7cc;--accent:#165c4d;--soft:#e2efe6}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.55 system-ui,sans-serif}
+main{max-width:1000px;margin:auto;padding:30px 24px 64px}header{border-bottom:2px solid var(--line);padding-bottom:22px;margin-bottom:24px}
+.eyebrow{font-size:.8rem;letter-spacing:.13em;text-transform:uppercase;font-weight:750;color:var(--accent)}
+h1{font-size:clamp(1.8rem,5vw,3rem);line-height:1.12;max-width:760px;margin:.4em 0}h2{font-size:1.3rem;margin:0 0 .7em}h3{font-size:1rem;margin:0 0 .4em}p{margin:.6em 0}
+a{color:var(--accent);text-underline-offset:.2em}code{background:var(--soft);padding:.08em .25em;border-radius:3px;overflow-wrap:anywhere}
+.intro{max-width:760px;color:var(--muted)}section{margin:24px 0}.panel{padding:22px;background:#fff;border:1px solid var(--line);border-radius:12px}
+label{display:block;font-weight:700;margin:16px 0 6px}.hint{font-size:.9rem;color:var(--muted)}
+input,textarea{display:block;width:100%;max-width:100%;border:1px solid #82988e;border-radius:6px;padding:12px;color:var(--ink);background:#fff;font:1rem/1.5 ui-monospace,monospace}
+textarea{min-height:175px;resize:vertical}button{font:inherit;line-height:1.25;min-height:44px;padding:10px 15px;border:1px solid #789488;border-radius:6px;background:#fff;color:var(--accent);font-weight:650;cursor:pointer}
+button.primary{background:var(--accent);color:#fff;border-color:var(--accent)}button:disabled{opacity:.5;cursor:default}
+button:focus-visible,input:focus-visible,textarea:focus-visible,a:focus-visible{outline:3px solid #bc6200;outline-offset:3px}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}.presets button{font-size:.9rem}#status{padding:12px 14px;background:var(--soft);border-left:4px solid var(--accent);min-height:50px;overflow-wrap:anywhere}
+[hidden]{display:none!important}.step-count{font-weight:700;color:var(--accent)}table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;font-size:.97rem}caption{text-align:left;font-weight:700;margin:10px 0}
+th,td{text-align:right;border-bottom:1px solid var(--line);padding:9px 8px}th:first-child,td:first-child{text-align:left}th{background:var(--soft)}
+#visits{padding-left:0;list-style:none}#visits>li{margin:14px 0}.visit,.query{border:1px solid var(--line);border-radius:8px;padding:14px;background:#fafcf9}.query>ol{padding-left:22px}.query>ol>.visit{margin:10px 0}
+.visit p{margin:.3em 0;color:var(--muted)}.equation,#query-result{font-weight:750;font-size:1.1rem}.limits{border-left:3px solid var(--line);padding-left:16px;color:var(--muted)}
+footer{font-size:.9rem;color:var(--muted);margin-top:32px;border-top:1px solid var(--line);padding-top:18px}
+@media(max-width:480px){main{padding:20px 14px 42px}.panel{padding:15px}th,td{padding:8px 5px;font-size:.9rem}.actions button{flex:1 1 auto}.query>ol{padding-left:17px}.visit,.query{padding:11px}}
+</style>
+</head>
+<body><main>
+<header><div class="eyebrow">RecallWeave · exact integer explorer</div>
+<h1>Fenwick trees: which totals change?</h1>
+<p class="intro">Inspect the blocks behind a prefix sum. Add to one value, follow the entries that change, and combine two prefixes into an inclusive range sum.</p>
+<p><a href="fenwick-trees.md">Read the worked guide</a> · All positions start at 1.</p></header>
+<section class="panel" aria-labelledby="draft-heading"><h2 id="draft-heading">1. Choose values and operations</h2>
+<p>Each tree entry <code>i</code> covers <code>[i − lowbit(i) + 1, i]</code>. Here <code>lowbit(i)</code> is the largest power of two dividing positive <code>i</code>.</p>
+<label for="initial-values">Initial values</label>
+<input id="initial-values" value="3, -1, 4, 0, 2, -2, 5, 1" spellcheck="false" autocomplete="off" aria-describedby="values-hint">
+<p class="hint" id="values-hint">1–16 comma-separated integers, each from −99 through 99. A leading + or − and decimal leading zeros are accepted; fractions, exponents and empty entries are refused.</p>
+<label for="operations">Operations, one per line</label>
+<textarea id="operations" spellcheck="false" autocomplete="off" aria-describedby="operations-hint">prefix 7
+add 3 -2
+prefix 7
+range 3 6
+prefix 0</textarea>
+<p class="hint" id="operations-hint"><code>add INDEX DELTA</code> adds −99…99; <code>prefix END</code> sums 1…END, with END 0 allowed; <code>range START END</code> sums the inclusive interval. Use at most 64 operations. An empty script shows only the initial tree.</p>
+<div class="actions presets"><button id="preset-signed">Signed example</button><button id="preset-short">Five positions</button><button id="preset-zero">Empty prefix &amp; zero addition</button></div>
+<div class="actions"><button class="primary" id="build-trace">Build trace</button><button id="download-course">Download lesson JSON</button><button id="download-trace" disabled>Download complete trace</button></div>
+<p id="status" role="status" aria-live="polite"></p></section>
+<section id="results" class="panel" hidden aria-labelledby="step-heading">
+<div class="actions" aria-label="Inspect saved states"><button id="previous-step" disabled>Previous operation</button><button id="next-step" disabled>Next operation</button><button id="last-step" disabled>Final state</button></div>
+<p class="step-count">State <span id="step-position">0 of 0</span></p><h2 id="step-heading"></h2><p id="step-explanation"></p>
+<table id="state-table"><caption>Values and stored block totals</caption><thead><tr><th scope="col">Index</th><th scope="col">Value</th><th scope="col">Tree total</th><th scope="col">Interval</th></tr></thead><tbody id="state-body"></tbody></table>
+<p id="query-result" hidden></p><h2 style="margin-top:24px">Traversal</h2><ol id="visits"></ol>
+</section>
+<section class="limits" aria-label="How to read the explorer"><h2>Exact values, explicit boundaries</h2>
+<p>Query steps read the stored totals without changing the tree. Updates add a delta; they do not replace a value. Navigation inspects the completed trace and never applies an update again.</p>
+<p>Editing either draft immediately retires the previous result and trace export. Build checks the whole script before publishing any state. The trace download contains every operation, even when you are viewing an earlier state.</p>
+<p>Negative values work for sums; prefix totals need not increase. This explorer does not perform cumulative-frequency rank search. Within the stated bounds, all integer arithmetic is exact.</p></section>
+<footer><p>This file runs locally without an account, network request or saved browser state. Download the original lesson JSON and open it in RecallWeave's existing course importer to study, review or practise the concepts.</p><p>Original lesson and implementation. Mathematical references and an example are in the worked guide. No performance or learning-outcome measurement is claimed.</p></footer>
+</main><script type="module">
+/*__FENWICK_MODEL__*/
+const COURSE_TEXT = /*__FENWICK_COURSE__*/;
+/*__FENWICK_UI__*/
+</script></body></html>
