@@ -1,0 +1,303 @@
+{
+  "schema": "recallweave-sql-null-membership-questions/v1",
+  "owner": "estate-c945953fdeb7/product_execution_next",
+  "reservation": "https://github.com/Jacob-Met/RecallWeave/issues/257",
+  "prepared_at": "2026-10-09 10:55:25 UTC",
+  "private_question_drafting_started": "2026-10-09 10:53:21 UTC",
+  "chronology": "Question wording, options, exact fixture and twelve worksheet queries are frozen here without answer indices, explanations or worked guide. No worksheet/query/course/parser/native/browser execution has occurred for this contribution. The author will seal a separate private answer/guide before reading the independent authority.",
+  "source_parent": "ec07bf3989132130759e5c00c6cb02eef19709d3",
+  "source_tree": "a839b6877bf2824f134443829d1ce62e1bd79e50",
+  "dialect": {
+    "name": "SQLite",
+    "intended_native": "Python 3.12.14 built-in SQLite 3.53.1",
+    "runtime_path": "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3.12",
+    "runtime_sha256": "fa67443527ed9647f760d807e2a38f26340757123e643c4639cf273ed15d5ea7",
+    "status": "Prior read-only capability observation only; fresh supported-runtime and resource admission required before query execution."
+  },
+  "sources": [
+    {
+      "url": "https://www.sqlite.org/lang_expr.html",
+      "parts": [
+        "IN and NOT IN matrix",
+        "EXISTS",
+        "operators and boolean expressions"
+      ]
+    },
+    {
+      "url": "https://www.sqlite.org/nulls.html",
+      "purpose": "Primary historical context only; original lesson fixtures and questions are not copied."
+    }
+  ],
+  "notation": [
+    "All tables and row contents are complete fictional givens. INTEGER columns contain only the stated integers or SQL NULL; there is no coercion, collation, floating-point or transaction question.",
+    "0 means false, 1 means true, NULL is an SQL NULL value, and [] means no returned rows. Options list complete outputs in SQL ORDER BY order.",
+    "The twelve statements read the fixture without modifying it. The plain worksheet starts from a fresh empty in-memory database; CREATE and INSERT setup is explicit.",
+    "Question 11 asks for a logical policy for every finite right-hand relation. Its one worksheet statement enumerates four named example relations and all three request rows, with option_a through option_d reporting the exact candidate predicate truth values. Those examples illustrate counterexamples; finite execution does not replace the independent general argument.",
+    "The established adaptive selector can reorder questions. Each prompt therefore restates its needed givens; concept prerequisite links remain soft links, not a required question order."
+  ],
+  "title": "SQL NULL: membership and absence",
+  "concepts": [
+    "three-valued logic",
+    "membership",
+    "row existence",
+    "absence policies"
+  ],
+  "setup_sql": "CREATE TABLE requests (id INTEGER PRIMARY KEY, code INTEGER);\nCREATE TABLE blocked (code INTEGER);\nINSERT INTO requests (id, code) VALUES (1, 7), (2, 9), (3, NULL);\nINSERT INTO blocked (code) VALUES (7), (NULL), (7);\n",
+  "questions": [
+    {
+      "id": "null-member-01",
+      "concept": "three-valued logic",
+      "prerequisites": [],
+      "prompt": "SQLite represents false as 0, true as 1, and an unknown SQL result as NULL. What single row does this query return, in the displayed column order?\n\nSELECT NOT NULL AS negated_unknown,\n       0 AND NULL AS false_and_unknown,\n       1 OR NULL AS true_or_unknown;",
+      "options": [
+        "(NULL, NULL, NULL)",
+        "(0, 0, 1)",
+        "(NULL, 0, 1)",
+        "(1, 0, 1)"
+      ]
+    },
+    {
+      "id": "null-member-02",
+      "concept": "three-valued logic",
+      "prerequisites": [],
+      "prompt": "SQLite. The complete fictional table requests(id, code) has rows (1, 7), (2, 9), (3, NULL). Table blocked(code) has exactly three rows: 7, NULL, 7. No other rows exist.\n\nWhich ordered list of ids does this query return?\n\nSELECT id FROM requests\nWHERE (code = 7) OR NOT (code = 7)\nORDER BY id;",
+      "options": [
+        "[1, 2, 3]",
+        "[1, 2]",
+        "[1]",
+        "[] (no rows)"
+      ]
+    },
+    {
+      "id": "null-member-03",
+      "concept": "membership",
+      "prerequisites": [
+        "three-valued logic"
+      ],
+      "prompt": "SQLite. The complete fictional table requests(id, code) has rows (1, 7), (2, 9), (3, NULL). Table blocked(code) has exactly three rows: 7, NULL, 7. No other rows exist.\n\nWhat are all returned rows (id, in_set, not_in_set), in order? NULL denotes SQL NULL, not a string.\n\nSELECT id,\n       code IN (SELECT code FROM blocked) AS in_set,\n       code NOT IN (SELECT code FROM blocked) AS not_in_set\nFROM requests\nORDER BY id;",
+      "options": [
+        "[(1, 1, 0), (2, NULL, NULL), (3, NULL, NULL)]",
+        "[(1, 1, 0), (2, 0, 1), (3, 0, 1)]",
+        "[(1, NULL, NULL), (2, NULL, NULL), (3, NULL, NULL)]",
+        "[(1, 1, 0), (2, 0, 1), (3, 1, 0)]"
+      ]
+    },
+    {
+      "id": "null-member-04",
+      "concept": "membership",
+      "prerequisites": [
+        "three-valued logic"
+      ],
+      "prompt": "SQLite. The complete fictional table requests(id, code) has rows (1, 7), (2, 9), (3, NULL). Table blocked(code) has exactly three rows: 7, NULL, 7. No other rows exist.\n\nWhich ordered list of ids does this query return?\n\nSELECT id FROM requests\nWHERE code NOT IN (SELECT code FROM blocked)\nORDER BY id;",
+      "options": [
+        "[2]",
+        "[2, 3]",
+        "[3]",
+        "[] (no rows)"
+      ]
+    },
+    {
+      "id": "null-member-05",
+      "concept": "membership",
+      "prerequisites": [
+        "three-valued logic"
+      ],
+      "prompt": "SQLite. The complete fictional table requests(id, code) has rows (1, 7), (2, 9), (3, NULL). Table blocked(code) has exactly three rows: 7, NULL, 7. No other rows exist.\n\nThe subquery's WHERE 0 returns no rows. What are all returned rows (id, in_empty, not_in_empty), in order?\n\nSELECT id,\n       code IN (SELECT code FROM blocked WHERE 0) AS in_empty,\n       code NOT IN (SELECT code FROM blocked WHERE 0) AS not_in_empty\nFROM requests\nORDER BY id;",
+      "options": [
+        "[(1, 0, 1), (2, 0, 1), (3, NULL, NULL)]",
+        "[(1, 0, 1), (2, 0, 1), (3, 0, 1)]",
+        "[(1, NULL, NULL), (2, NULL, NULL), (3, NULL, NULL)]",
+        "[(1, 1, 0), (2, 1, 0), (3, 1, 0)]"
+      ]
+    },
+    {
+      "id": "null-member-06",
+      "concept": "membership",
+      "prerequisites": [
+        "three-valued logic"
+      ],
+      "prompt": "SQLite. The complete fictional table requests(id, code) has rows (1, 7), (2, 9), (3, NULL). Table blocked(code) has exactly three rows: 7, NULL, 7. No other rows exist.\n\nWhich ordered list of ids does this query return after removing NULL from the right-hand relation?\n\nSELECT id FROM requests\nWHERE code NOT IN (SELECT code FROM blocked WHERE code IS NOT NULL)\nORDER BY id;",
+      "options": [
+        "[2]",
+        "[2, 3]",
+        "[] (no rows)",
+        "[1]"
+      ]
+    },
+    {
+      "id": "null-member-07",
+      "concept": "row existence",
+      "prerequisites": [
+        "three-valued logic"
+      ],
+      "prompt": "SQLite. The complete fictional table requests(id, code) has rows (1, 7), (2, 9), (3, NULL). Table blocked(code) has exactly three rows: 7, NULL, 7. No other rows exist.\n\nWhat single row (has_row, has_no_rows) does this query return? Both subqueries project the literal NULL.\n\nSELECT EXISTS(SELECT NULL FROM blocked WHERE code = 7) AS has_row,\n       EXISTS(SELECT NULL FROM blocked WHERE 0) AS has_no_rows;",
+      "options": [
+        "(NULL, NULL)",
+        "(2, 0)",
+        "(1, 0)",
+        "(0, 0)"
+      ]
+    },
+    {
+      "id": "null-member-08",
+      "concept": "row existence",
+      "prerequisites": [
+        "three-valued logic"
+      ],
+      "prompt": "SQLite. The complete fictional table requests(id, code) has rows (1, 7), (2, 9), (3, NULL). Table blocked(code) has exactly three rows: 7, NULL, 7. No other rows exist.\n\nWhich ordered list of request ids does the correlated absence query return?\n\nSELECT r.id FROM requests AS r\nWHERE NOT EXISTS (\n  SELECT 1 FROM blocked AS b WHERE b.code = r.code\n)\nORDER BY r.id;",
+      "options": [
+        "[] (no rows)",
+        "[2]",
+        "[3]",
+        "[2, 3]"
+      ]
+    },
+    {
+      "id": "null-member-09",
+      "concept": "row existence",
+      "prerequisites": [
+        "three-valued logic"
+      ],
+      "prompt": "SQLite. The complete fictional table requests(id, code) has rows (1, 7), (2, 9), (3, NULL). Table blocked(code) has exactly three rows: 7, NULL, 7. No other rows exist.\n\nThe subquery below uses COUNT(*) without GROUP BY. Which ordered list of request ids does the whole query return?\n\nSELECT r.id FROM requests AS r\nWHERE NOT EXISTS (\n  SELECT COUNT(*) FROM blocked AS b WHERE b.code = r.code\n)\nORDER BY r.id;",
+      "options": [
+        "[] (no rows)",
+        "[2, 3]",
+        "[2]",
+        "[1, 2, 3]"
+      ]
+    },
+    {
+      "id": "null-member-10",
+      "concept": "absence policies",
+      "prerequisites": [
+        "membership",
+        "row existence"
+      ],
+      "prompt": "SQLite. The complete fictional table requests(id, code) has rows (1, 7), (2, 9), (3, NULL). Table blocked(code) has exactly three rows: 7, NULL, 7. No other rows exist.\n\nThe required policy is to consider only known request codes and keep a request if no blocked code equals it. Which ordered list of ids does this explicit policy return?\n\nSELECT r.id FROM requests AS r\nWHERE r.code IS NOT NULL\n  AND NOT EXISTS (SELECT 1 FROM blocked AS b WHERE b.code = r.code)\nORDER BY r.id;",
+      "options": [
+        "[2, 3]",
+        "[2]",
+        "[] (no rows)",
+        "[1]"
+      ]
+    },
+    {
+      "id": "null-member-11",
+      "concept": "absence policies",
+      "prerequisites": [
+        "membership",
+        "row existence"
+      ],
+      "prompt": "SQLite. requests AS r has rows (id, code) = (1, 7), (2, 9), (3, NULL). blocked(code) may be ANY finite collection of integers and NULLs, including no rows or duplicate rows. Select exactly those requests whose code is non-NULL and for which no blocked row has an equal code under =. Which predicate, placed after WHERE, implements this policy for EVERY allowed blocked relation?",
+      "options": [
+        "r.code NOT IN (SELECT b.code FROM blocked AS b WHERE b.code IS NOT NULL)",
+        "NOT EXISTS (SELECT 1 FROM blocked AS b WHERE b.code = r.code AND b.code IS NOT NULL)",
+        "r.code IS NOT NULL AND NOT EXISTS (SELECT 1 FROM blocked AS b WHERE b.code = r.code)",
+        "r.code IS NOT NULL AND r.code NOT IN (SELECT b.code FROM blocked AS b)"
+      ]
+    },
+    {
+      "id": "null-member-12",
+      "concept": "absence policies",
+      "prerequisites": [
+        "membership",
+        "row existence"
+      ],
+      "prompt": "SQLite. The complete fictional table requests(id, code) has rows (1, 7), (2, 9), (3, NULL). Table blocked(code) has exactly three rows: 7, NULL, 7. No other rows exist.\n\nThis query compares ordinary = matching with SQLite IS matching, which treats two NULLs as matching. What are all returned rows (id, ordinary_absence, null_matching_absence), in order?\n\nSELECT r.id,\n       NOT EXISTS (SELECT 1 FROM blocked AS b WHERE b.code = r.code)\n         AS ordinary_absence,\n       NOT EXISTS (SELECT 1 FROM blocked AS b WHERE b.code IS r.code)\n         AS null_matching_absence\nFROM requests AS r\nORDER BY r.id;",
+      "options": [
+        "[(1, 0, 0), (2, 1, 1), (3, 0, 0)]",
+        "[(1, 0, 0), (2, 1, 1), (3, NULL, NULL)]",
+        "[(1, 0, 0), (2, 1, 1), (3, 1, 1)]",
+        "[(1, 0, 0), (2, 1, 1), (3, 1, 0)]"
+      ]
+    }
+  ],
+  "worksheet_queries": [
+    {
+      "question_id": "null-member-01",
+      "number": 1,
+      "sql": "SELECT NOT NULL AS negated_unknown,\n       0 AND NULL AS false_and_unknown,\n       1 OR NULL AS true_or_unknown;",
+      "purpose": "Exact query shown in the question."
+    },
+    {
+      "question_id": "null-member-02",
+      "number": 2,
+      "sql": "SELECT id FROM requests\nWHERE (code = 7) OR NOT (code = 7)\nORDER BY id;",
+      "purpose": "Exact query shown in the question."
+    },
+    {
+      "question_id": "null-member-03",
+      "number": 3,
+      "sql": "SELECT id,\n       code IN (SELECT code FROM blocked) AS in_set,\n       code NOT IN (SELECT code FROM blocked) AS not_in_set\nFROM requests\nORDER BY id;",
+      "purpose": "Exact query shown in the question."
+    },
+    {
+      "question_id": "null-member-04",
+      "number": 4,
+      "sql": "SELECT id FROM requests\nWHERE code NOT IN (SELECT code FROM blocked)\nORDER BY id;",
+      "purpose": "Exact query shown in the question."
+    },
+    {
+      "question_id": "null-member-05",
+      "number": 5,
+      "sql": "SELECT id,\n       code IN (SELECT code FROM blocked WHERE 0) AS in_empty,\n       code NOT IN (SELECT code FROM blocked WHERE 0) AS not_in_empty\nFROM requests\nORDER BY id;",
+      "purpose": "Exact query shown in the question."
+    },
+    {
+      "question_id": "null-member-06",
+      "number": 6,
+      "sql": "SELECT id FROM requests\nWHERE code NOT IN (SELECT code FROM blocked WHERE code IS NOT NULL)\nORDER BY id;",
+      "purpose": "Exact query shown in the question."
+    },
+    {
+      "question_id": "null-member-07",
+      "number": 7,
+      "sql": "SELECT EXISTS(SELECT NULL FROM blocked WHERE code = 7) AS has_row,\n       EXISTS(SELECT NULL FROM blocked WHERE 0) AS has_no_rows;",
+      "purpose": "Exact query shown in the question."
+    },
+    {
+      "question_id": "null-member-08",
+      "number": 8,
+      "sql": "SELECT r.id FROM requests AS r\nWHERE NOT EXISTS (\n  SELECT 1 FROM blocked AS b WHERE b.code = r.code\n)\nORDER BY r.id;",
+      "purpose": "Exact query shown in the question."
+    },
+    {
+      "question_id": "null-member-09",
+      "number": 9,
+      "sql": "SELECT r.id FROM requests AS r\nWHERE NOT EXISTS (\n  SELECT COUNT(*) FROM blocked AS b WHERE b.code = r.code\n)\nORDER BY r.id;",
+      "purpose": "Exact query shown in the question."
+    },
+    {
+      "question_id": "null-member-10",
+      "number": 10,
+      "sql": "SELECT r.id FROM requests AS r\nWHERE r.code IS NOT NULL\n  AND NOT EXISTS (SELECT 1 FROM blocked AS b WHERE b.code = r.code)\nORDER BY r.id;",
+      "purpose": "Exact query shown in the question."
+    },
+    {
+      "question_id": "null-member-11",
+      "number": 11,
+      "sql": "WITH scenarios(name, ord) AS (\n  VALUES ('empty', 1), ('only-null', 2), ('known-seven', 3), ('mixed', 4)\n), trial_blocks(scenario, code) AS (\n  VALUES ('only-null', NULL), ('known-seven', 7),\n         ('mixed', 7), ('mixed', NULL), ('mixed', 7)\n)\nSELECT s.name AS scenario, r.id,\n       r.code NOT IN (\n         SELECT b.code FROM trial_blocks AS b\n         WHERE b.scenario = s.name AND b.code IS NOT NULL\n       ) AS option_a,\n       NOT EXISTS (\n         SELECT 1 FROM trial_blocks AS b\n         WHERE b.scenario = s.name AND b.code = r.code AND b.code IS NOT NULL\n       ) AS option_b,\n       r.code IS NOT NULL AND NOT EXISTS (\n         SELECT 1 FROM trial_blocks AS b\n         WHERE b.scenario = s.name AND b.code = r.code\n       ) AS option_c,\n       r.code IS NOT NULL AND r.code NOT IN (\n         SELECT b.code FROM trial_blocks AS b WHERE b.scenario = s.name\n       ) AS option_d\nFROM scenarios AS s CROSS JOIN requests AS r\nORDER BY s.ord, r.id;",
+      "purpose": "Four finite counterexample/positive-policy illustrations; derive all 12 ordered rows and a separate general argument for the question."
+    },
+    {
+      "question_id": "null-member-12",
+      "number": 12,
+      "sql": "SELECT r.id,\n       NOT EXISTS (SELECT 1 FROM blocked AS b WHERE b.code = r.code)\n         AS ordinary_absence,\n       NOT EXISTS (SELECT 1 FROM blocked AS b WHERE b.code IS r.code)\n         AS null_matching_absence\nFROM requests AS r\nORDER BY r.id;",
+      "purpose": "Exact query shown in the question."
+    }
+  ],
+  "receiving_request": [
+    "Independently derive one correct original option index for every question, demonstrate uniqueness against each distractor, and give all complete ordered result columns/rows for the twelve exact worksheet SELECT statements.",
+    "For question 11, justify the universal policy under SQL truth/EXISTS semantics and give a concrete allowed relation that defeats each other option. Do not infer universality merely from four examples.",
+    "Freeze and exact-read-back the independent authority before receiving candidate answer indices, explanations, guide or native results. Report only the sealed authority handle until the author key/guide is also sealed; keep it unread by the author meanwhile.",
+    "After source exposure, verify exact questions/options/setup/query preservation, unchanged original parser admission and actual native SQLite outputs under fresh bounded admission. Any correction remains explicit rather than rewriting this frozen questions-only record.",
+    "The new physical deck is subsequently selected through the existing independently received installed learner. One ordinary session and physical study notes qualify this new content use; no old importer/course/reader matrix or installation change. A separate compact browser contract precedes that session."
+  ],
+  "new_maintained_paths": [
+    "courses/sql-null-membership.json",
+    "courses/sql-null-membership.md",
+    "courses/sql-null-membership.sql"
+  ],
+  "evidence_prefix": "docs/receiving/sql-null-membership-c945953fdeb7/",
+  "limits": "No refs/PR/main/Pages/Actions, new dependencies, real database, hosted service, catalog/default content change, new explorer/CLI/framework, or changed installed learner. Physical runtime allocation remains pending."
+}

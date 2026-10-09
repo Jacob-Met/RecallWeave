@@ -1,0 +1,549 @@
+{
+  "pass": true,
+  "answers": [
+    {
+      "order": 1,
+      "id": "null-member-01",
+      "prompt": "SQLite represents false as 0, true as 1, and an unknown SQL result as NULL. What single row does this query return, in the displayed column order?\n\nSELECT NOT NULL AS negated_unknown,\n       0 AND NULL AS false_and_unknown,\n       1 OR NULL AS true_or_unknown;",
+      "choice": 2,
+      "choice_text": "(NULL, 0, 1)",
+      "correct": true,
+      "displayed_option_order": [
+        {
+          "choice": 2,
+          "text": "(NULL, 0, 1)",
+          "display": "A"
+        },
+        {
+          "choice": 3,
+          "text": "(1, 0, 1)",
+          "display": "B"
+        },
+        {
+          "choice": 0,
+          "text": "(NULL, NULL, NULL)",
+          "display": "C"
+        },
+        {
+          "choice": 1,
+          "text": "(0, 0, 1)",
+          "display": "D"
+        }
+      ],
+      "feedback": "That connection holds.Your answer: (NULL, 0, 1)Correct answer: (NULL, 0, 1)NOT NULL remains unknown. False already settles an AND expression as false, while true already settles an OR expression as true. The returned row is (NULL, 0, 1); these are three SQL values, not strings or a count of rows.Try this transfer: Evaluate NULL AND 1 and NULL OR 0. Explain why neither of those has the deciding known operand used in this question.Follow the next thread →"
+    },
+    {
+      "order": 2,
+      "id": "null-member-03",
+      "prompt": "SQLite. The complete fictional table requests(id, code) has rows (1, 7), (2, 9), (3, NULL). Table blocked(code) has exactly three rows: 7, NULL, 7. No other rows exist.\n\nWhat are all returned rows (id, in_set, not_in_set), in order? NULL denotes SQL NULL, not a string.\n\nSELECT id,\n       code IN (SELECT code FROM blocked) AS in_set,\n       code NOT IN (SELECT code FROM blocked) AS not_in_set\nFROM requests\nORDER BY id;",
+      "choice": 0,
+      "choice_text": "[(1, 1, 0), (2, NULL, NULL), (3, NULL, NULL)]",
+      "correct": true,
+      "displayed_option_order": [
+        {
+          "choice": 3,
+          "text": "[(1, 1, 0), (2, 0, 1), (3, 1, 0)]",
+          "display": "A"
+        },
+        {
+          "choice": 1,
+          "text": "[(1, 1, 0), (2, 0, 1), (3, 0, 1)]",
+          "display": "B"
+        },
+        {
+          "choice": 2,
+          "text": "[(1, NULL, NULL), (2, NULL, NULL), (3, NULL, NULL)]",
+          "display": "C"
+        },
+        {
+          "choice": 0,
+          "text": "[(1, 1, 0), (2, NULL, NULL), (3, NULL, NULL)]",
+          "display": "D"
+        }
+      ],
+      "feedback": "That connection holds.Your answer: [(1, 1, 0), (2, NULL, NULL), (3, NULL, NULL)]Correct answer: [(1, 1, 0), (2, NULL, NULL), (3, NULL, NULL)]Request 1 has a definite match on 7, so IN is true and NOT IN is false even though another blocked row is NULL. Request 2 has no definite match but comparison with the blocked NULL is unknown. Request 3 also has unknown comparisons with this nonempty relation. Thus the last two rows have NULL for both operators. The duplicate 7 does not add output rows.Try this transfer: Remove the blocked NULL and predict which cells change. Then keep only the blocked NULL and predict the complete result again.Follow the next thread →"
+    },
+    {
+      "order": 3,
+      "id": "null-member-07",
+      "prompt": "SQLite. The complete fictional table requests(id, code) has rows (1, 7), (2, 9), (3, NULL). Table blocked(code) has exactly three rows: 7, NULL, 7. No other rows exist.\n\nWhat single row (has_row, has_no_rows) does this query return? Both subqueries project the literal NULL.\n\nSELECT EXISTS(SELECT NULL FROM blocked WHERE code = 7) AS has_row,\n       EXISTS(SELECT NULL FROM blocked WHERE 0) AS has_no_rows;",
+      "choice": 2,
+      "choice_text": "(1, 0)",
+      "correct": true,
+      "displayed_option_order": [
+        {
+          "choice": 3,
+          "text": "(0, 0)",
+          "display": "A"
+        },
+        {
+          "choice": 0,
+          "text": "(NULL, NULL)",
+          "display": "B"
+        },
+        {
+          "choice": 2,
+          "text": "(1, 0)",
+          "display": "C"
+        },
+        {
+          "choice": 1,
+          "text": "(2, 0)",
+          "display": "D"
+        }
+      ],
+      "feedback": "That connection holds.Your answer: (1, 0)Correct answer: (1, 0)EXISTS checks whether the subquery returns any row, not whether its projected value is non-NULL and not how many rows it returns. The first subquery returns two rows whose projected values are NULL, so EXISTS is 1. The second returns no row, so EXISTS is 0.Try this transfer: Replace SELECT NULL with SELECT 99 in both subqueries. Explain why the EXISTS values do not change.Follow the next thread →"
+    },
+    {
+      "order": 4,
+      "id": "null-member-02",
+      "prompt": "SQLite. The complete fictional table requests(id, code) has rows (1, 7), (2, 9), (3, NULL). Table blocked(code) has exactly three rows: 7, NULL, 7. No other rows exist.\n\nWhich ordered list of ids does this query return?\n\nSELECT id FROM requests\nWHERE (code = 7) OR NOT (code = 7)\nORDER BY id;",
+      "choice": 1,
+      "choice_text": "[1, 2]",
+      "correct": true,
+      "displayed_option_order": [
+        {
+          "choice": 2,
+          "text": "[1]",
+          "display": "A"
+        },
+        {
+          "choice": 0,
+          "text": "[1, 2, 3]",
+          "display": "B"
+        },
+        {
+          "choice": 3,
+          "text": "[] (no rows)",
+          "display": "C"
+        },
+        {
+          "choice": 1,
+          "text": "[1, 2]",
+          "display": "D"
+        }
+      ],
+      "feedback": "That connection holds.Your answer: [1, 2]Correct answer: [1, 2]For code 7, the predicate is true OR false; for code 9 it is false OR true. For the missing code, both code = 7 and its negation are unknown, so their OR is unknown. WHERE keeps only true rows, leaving ids 1 and 2. The classical P OR NOT P identity does not force an unknown SQL predicate to true.Try this transfer: Design a WHERE condition that keeps all three requests while still distinguishing a known comparison result from an unknown one.Follow the next thread →"
+    },
+    {
+      "order": 5,
+      "id": "null-member-04",
+      "prompt": "SQLite. The complete fictional table requests(id, code) has rows (1, 7), (2, 9), (3, NULL). Table blocked(code) has exactly three rows: 7, NULL, 7. No other rows exist.\n\nWhich ordered list of ids does this query return?\n\nSELECT id FROM requests\nWHERE code NOT IN (SELECT code FROM blocked)\nORDER BY id;",
+      "choice": 3,
+      "choice_text": "[] (no rows)",
+      "correct": true,
+      "displayed_option_order": [
+        {
+          "choice": 3,
+          "text": "[] (no rows)",
+          "display": "A"
+        },
+        {
+          "choice": 0,
+          "text": "[2]",
+          "display": "B"
+        },
+        {
+          "choice": 1,
+          "text": "[2, 3]",
+          "display": "C"
+        },
+        {
+          "choice": 2,
+          "text": "[3]",
+          "display": "D"
+        }
+      ],
+      "feedback": "That connection holds.Your answer: [] (no rows)Correct answer: [] (no rows)Request 1 produces false for NOT IN. Requests 2 and 3 produce unknown rather than true because the nonempty right-hand relation contains NULL. WHERE admits none of those values, so no rows are returned. Replacing this expression with NOT EXISTS would change the selected outer NULL policy as well as the treatment of the right-hand NULL.Try this transfer: State whether a missing request code should be kept, rejected or reported separately before choosing an absence query.Follow the next thread →"
+    },
+    {
+      "order": 6,
+      "id": "null-member-08",
+      "prompt": "SQLite. The complete fictional table requests(id, code) has rows (1, 7), (2, 9), (3, NULL). Table blocked(code) has exactly three rows: 7, NULL, 7. No other rows exist.\n\nWhich ordered list of request ids does the correlated absence query return?\n\nSELECT r.id FROM requests AS r\nWHERE NOT EXISTS (\n  SELECT 1 FROM blocked AS b WHERE b.code = r.code\n)\nORDER BY r.id;",
+      "choice": 3,
+      "choice_text": "[2, 3]",
+      "correct": true,
+      "displayed_option_order": [
+        {
+          "choice": 2,
+          "text": "[3]",
+          "display": "A"
+        },
+        {
+          "choice": 3,
+          "text": "[2, 3]",
+          "display": "B"
+        },
+        {
+          "choice": 1,
+          "text": "[2]",
+          "display": "C"
+        },
+        {
+          "choice": 0,
+          "text": "[] (no rows)",
+          "display": "D"
+        }
+      ],
+      "feedback": "That connection holds.Your answer: [2, 3]Correct answer: [2, 3]The correlated equality finds rows for request 1. It finds none for code 9 and none for the outer NULL: b.code = NULL is never true, including when b.code itself is NULL. NOT EXISTS is therefore true for ids 2 and 3. If the policy excludes missing request codes, add an explicit outer IS NOT NULL condition.Try this transfer: Write the additional condition needed to exclude unknown request codes while preserving known absent codes.Follow the next thread →"
+    },
+    {
+      "order": 7,
+      "id": "null-member-10",
+      "prompt": "SQLite. The complete fictional table requests(id, code) has rows (1, 7), (2, 9), (3, NULL). Table blocked(code) has exactly three rows: 7, NULL, 7. No other rows exist.\n\nThe required policy is to consider only known request codes and keep a request if no blocked code equals it. Which ordered list of ids does this explicit policy return?\n\nSELECT r.id FROM requests AS r\nWHERE r.code IS NOT NULL\n  AND NOT EXISTS (SELECT 1 FROM blocked AS b WHERE b.code = r.code)\nORDER BY r.id;",
+      "choice": 1,
+      "choice_text": "[2]",
+      "correct": true,
+      "displayed_option_order": [
+        {
+          "choice": 3,
+          "text": "[1]",
+          "display": "A"
+        },
+        {
+          "choice": 0,
+          "text": "[2, 3]",
+          "display": "B"
+        },
+        {
+          "choice": 2,
+          "text": "[] (no rows)",
+          "display": "C"
+        },
+        {
+          "choice": 1,
+          "text": "[2]",
+          "display": "D"
+        }
+      ],
+      "feedback": "That connection holds.Your answer: [2]Correct answer: [2]The outer IS NOT NULL test explicitly excludes request 3. For the two known codes, NOT EXISTS keeps exactly a code with no equal blocked row: 7 is found and 9 is absent. The result is id 2. A blocked NULL cannot create a true equality match for a known code.Try this transfer: Predict this explicit policy when blocked has no rows and when blocked contains only NULL.Follow the next thread →"
+    },
+    {
+      "order": 8,
+      "id": "null-member-11",
+      "prompt": "SQLite. requests AS r has rows (id, code) = (1, 7), (2, 9), (3, NULL). blocked(code) may be ANY finite collection of integers and NULLs, including no rows or duplicate rows. Select exactly those requests whose code is non-NULL and for which no blocked row has an equal code under =. Which predicate, placed after WHERE, implements this policy for EVERY allowed blocked relation?",
+      "choice": 0,
+      "choice_text": "r.code NOT IN (SELECT b.code FROM blocked AS b WHERE b.code IS NOT NULL)",
+      "correct": false,
+      "displayed_option_order": [
+        {
+          "choice": 0,
+          "text": "r.code NOT IN (SELECT b.code FROM blocked AS b WHERE b.code IS NOT NULL)",
+          "display": "A"
+        },
+        {
+          "choice": 1,
+          "text": "NOT EXISTS (SELECT 1 FROM blocked AS b WHERE b.code = r.code AND b.code IS NOT NULL)",
+          "display": "B"
+        },
+        {
+          "choice": 2,
+          "text": "r.code IS NOT NULL AND NOT EXISTS (SELECT 1 FROM blocked AS b WHERE b.code = r.code)",
+          "display": "C"
+        },
+        {
+          "choice": 3,
+          "text": "r.code IS NOT NULL AND r.code NOT IN (SELECT b.code FROM blocked AS b)",
+          "display": "D"
+        }
+      ],
+      "feedback": "Here’s the correction.Your answer: r.code NOT IN (SELECT b.code FROM blocked AS b WHERE b.code IS NOT NULL)Correct answer: r.code IS NOT NULL AND NOT EXISTS (SELECT 1 FROM blocked AS b WHERE b.code = r.code)Only the predicate with both the outer IS NOT NULL guard and equality-based NOT EXISTS implements the stated policy for every allowed right side. The guard rejects a missing request code. For a known code, the subquery returns a row exactly when an equal blocked integer exists, so NOT EXISTS is the required absence test. Duplicates do not change row existence and blocked NULLs do not make equality true. A right-filtered NOT IN admits the missing outer code when its filtered right side is empty; unguarded NOT EXISTS admits that missing code; guarded unfiltered NOT IN can reject a known absent code when a blocked NULL makes its predicate unknown.Try this transfer: Give a smallest counterexample to each rejected predicate, then explain why one correctly chosen example cannot prove the accepted predicate for every finite right side.Follow the next thread →"
+    },
+    {
+      "order": 9,
+      "id": "null-member-12",
+      "prompt": "SQLite. The complete fictional table requests(id, code) has rows (1, 7), (2, 9), (3, NULL). Table blocked(code) has exactly three rows: 7, NULL, 7. No other rows exist.\n\nThis query compares ordinary = matching with SQLite IS matching, which treats two NULLs as matching. What are all returned rows (id, ordinary_absence, null_matching_absence), in order?\n\nSELECT r.id,\n       NOT EXISTS (SELECT 1 FROM blocked AS b WHERE b.code = r.code)\n         AS ordinary_absence,\n       NOT EXISTS (SELECT 1 FROM blocked AS b WHERE b.code IS r.code)\n         AS null_matching_absence\nFROM requests AS r\nORDER BY r.id;",
+      "choice": 3,
+      "choice_text": "[(1, 0, 0), (2, 1, 1), (3, 1, 0)]",
+      "correct": true,
+      "displayed_option_order": [
+        {
+          "choice": 2,
+          "text": "[(1, 0, 0), (2, 1, 1), (3, 1, 1)]",
+          "display": "A"
+        },
+        {
+          "choice": 1,
+          "text": "[(1, 0, 0), (2, 1, 1), (3, NULL, NULL)]",
+          "display": "B"
+        },
+        {
+          "choice": 0,
+          "text": "[(1, 0, 0), (2, 1, 1), (3, 0, 0)]",
+          "display": "C"
+        },
+        {
+          "choice": 3,
+          "text": "[(1, 0, 0), (2, 1, 1), (3, 1, 0)]",
+          "display": "D"
+        }
+      ],
+      "feedback": "That connection holds.Your answer: [(1, 0, 0), (2, 1, 1), (3, 1, 0)]Correct answer: [(1, 0, 0), (2, 1, 1), (3, 1, 0)]Both matching rules find the blocked 7 for request 1 and find no 9 for request 2. Ordinary equality never finds a match for the outer NULL, while SQLite IS matches it to the blocked NULL. The third row is therefore (3, 1, 0). IS expresses a different NULL-matching policy; it is not an automatic substitute for an explicit requirement to exclude all missing outer codes.Try this transfer: Remove every blocked NULL and compare the two absence predicates again for a missing request code. Explain why an outer IS NOT NULL policy is different from NULL-matching equality.Follow the next thread →"
+    },
+    {
+      "order": 10,
+      "id": "null-member-05",
+      "prompt": "SQLite. The complete fictional table requests(id, code) has rows (1, 7), (2, 9), (3, NULL). Table blocked(code) has exactly three rows: 7, NULL, 7. No other rows exist.\n\nThe subquery's WHERE 0 returns no rows. What are all returned rows (id, in_empty, not_in_empty), in order?\n\nSELECT id,\n       code IN (SELECT code FROM blocked WHERE 0) AS in_empty,\n       code NOT IN (SELECT code FROM blocked WHERE 0) AS not_in_empty\nFROM requests\nORDER BY id;",
+      "choice": 1,
+      "choice_text": "[(1, 0, 1), (2, 0, 1), (3, 0, 1)]",
+      "correct": true,
+      "displayed_option_order": [
+        {
+          "choice": 0,
+          "text": "[(1, 0, 1), (2, 0, 1), (3, NULL, NULL)]",
+          "display": "A"
+        },
+        {
+          "choice": 1,
+          "text": "[(1, 0, 1), (2, 0, 1), (3, 0, 1)]",
+          "display": "B"
+        },
+        {
+          "choice": 3,
+          "text": "[(1, 1, 0), (2, 1, 0), (3, 1, 0)]",
+          "display": "C"
+        },
+        {
+          "choice": 2,
+          "text": "[(1, NULL, NULL), (2, NULL, NULL), (3, NULL, NULL)]",
+          "display": "D"
+        }
+      ],
+      "feedback": "That connection holds.Your answer: [(1, 0, 1), (2, 0, 1), (3, 0, 1)]Correct answer: [(1, 0, 1), (2, 0, 1), (3, 0, 1)]The subquery returns no rows, including no NULL-valued row. IN is false and NOT IN is true for an empty right-hand relation, even when the outer value is NULL. Every request therefore produces (0, 1). An empty relation is different from a relation containing one NULL.Try this transfer: Compare an empty subquery with SELECT NULL. Explain why both may look blank in a display while producing different membership results.Follow the next thread →"
+    },
+    {
+      "order": 11,
+      "id": "null-member-09",
+      "prompt": "SQLite. The complete fictional table requests(id, code) has rows (1, 7), (2, 9), (3, NULL). Table blocked(code) has exactly three rows: 7, NULL, 7. No other rows exist.\n\nThe subquery below uses COUNT(*) without GROUP BY. Which ordered list of request ids does the whole query return?\n\nSELECT r.id FROM requests AS r\nWHERE NOT EXISTS (\n  SELECT COUNT(*) FROM blocked AS b WHERE b.code = r.code\n)\nORDER BY r.id;",
+      "choice": 0,
+      "choice_text": "[] (no rows)",
+      "correct": true,
+      "displayed_option_order": [
+        {
+          "choice": 2,
+          "text": "[2]",
+          "display": "A"
+        },
+        {
+          "choice": 3,
+          "text": "[1, 2, 3]",
+          "display": "B"
+        },
+        {
+          "choice": 0,
+          "text": "[] (no rows)",
+          "display": "C"
+        },
+        {
+          "choice": 1,
+          "text": "[2, 3]",
+          "display": "D"
+        }
+      ],
+      "feedback": "That connection holds.Your answer: [] (no rows)Correct answer: [] (no rows)COUNT(*) without GROUP BY returns one aggregate result row even when its filtered input has zero rows. For the three requests the inner counts would be 2, 0 and 0, but every inner query still returns a row. EXISTS is true each time and NOT EXISTS is false, so the outer query returns no rows. Counting zero matches is not the same as returning zero rows.Try this transfer: Replace the aggregate subquery with SELECT 1 using the same WHERE. Explain why the zero-match case now differs.Follow the next thread →"
+    },
+    {
+      "order": 12,
+      "id": "null-member-06",
+      "prompt": "SQLite. The complete fictional table requests(id, code) has rows (1, 7), (2, 9), (3, NULL). Table blocked(code) has exactly three rows: 7, NULL, 7. No other rows exist.\n\nWhich ordered list of ids does this query return after removing NULL from the right-hand relation?\n\nSELECT id FROM requests\nWHERE code NOT IN (SELECT code FROM blocked WHERE code IS NOT NULL)\nORDER BY id;",
+      "choice": 0,
+      "choice_text": "[2]",
+      "correct": true,
+      "displayed_option_order": [
+        {
+          "choice": 2,
+          "text": "[] (no rows)",
+          "display": "A"
+        },
+        {
+          "choice": 3,
+          "text": "[1]",
+          "display": "B"
+        },
+        {
+          "choice": 1,
+          "text": "[2, 3]",
+          "display": "C"
+        },
+        {
+          "choice": 0,
+          "text": "[2]",
+          "display": "D"
+        }
+      ],
+      "feedback": "That connection holds.Your answer: [2]Correct answer: [2]Filtering the right-hand relation leaves two 7 values and no NULL. Request 1 is a definite match; request 2 is a definite nonmatch; the outer NULL still produces unknown against this nonempty right side. Only id 2 survives WHERE. This result does not prove that filtering the right side always excludes outer NULLs: if that filtered relation is empty, NOT IN is true for the outer NULL too.Try this transfer: Use a right-hand relation containing only NULL. Predict what the filtered NOT IN does to the missing request code.See your learning trace →"
+    }
+  ],
+  "review": [
+    {
+      "id": "null-member-01",
+      "prompt": "SQLite represents false as 0, true as 1, and an unknown SQL result as NULL. What single row does this query return, in the displayed column order?\n\nSELECT NOT NULL AS negated_unknown,\n       0 AND NULL AS false_and_unknown,\n       1 OR NULL AS true_or_unknown;",
+      "status": "Correct · first try",
+      "first": "(NULL, 0, 1)",
+      "correct": "(NULL, 0, 1)",
+      "bodyParagraphs": [
+        "NOT NULL remains unknown. False already settles an AND expression as false, while true already settles an OR expression as true. The returned row is (NULL, 0, 1); these are three SQL values, not strings or a count of rows.",
+        "Apply the idea: Evaluate NULL AND 1 and NULL OR 0. Explain why neither of those has the deciding known operand used in this question."
+      ],
+      "reflection": ""
+    },
+    {
+      "id": "null-member-03",
+      "prompt": "SQLite. The complete fictional table requests(id, code) has rows (1, 7), (2, 9), (3, NULL). Table blocked(code) has exactly three rows: 7, NULL, 7. No other rows exist.\n\nWhat are all returned rows (id, in_set, not_in_set), in order? NULL denotes SQL NULL, not a string.\n\nSELECT id,\n       code IN (SELECT code FROM blocked) AS in_set,\n       code NOT IN (SELECT code FROM blocked) AS not_in_set\nFROM requests\nORDER BY id;",
+      "status": "Correct · first try",
+      "first": "[(1, 1, 0), (2, NULL, NULL), (3, NULL, NULL)]",
+      "correct": "[(1, 1, 0), (2, NULL, NULL), (3, NULL, NULL)]",
+      "bodyParagraphs": [
+        "Request 1 has a definite match on 7, so IN is true and NOT IN is false even though another blocked row is NULL. Request 2 has no definite match but comparison with the blocked NULL is unknown. Request 3 also has unknown comparisons with this nonempty relation. Thus the last two rows have NULL for both operators. The duplicate 7 does not add output rows.",
+        "Apply the idea: Remove the blocked NULL and predict which cells change. Then keep only the blocked NULL and predict the complete result again."
+      ],
+      "reflection": ""
+    },
+    {
+      "id": "null-member-07",
+      "prompt": "SQLite. The complete fictional table requests(id, code) has rows (1, 7), (2, 9), (3, NULL). Table blocked(code) has exactly three rows: 7, NULL, 7. No other rows exist.\n\nWhat single row (has_row, has_no_rows) does this query return? Both subqueries project the literal NULL.\n\nSELECT EXISTS(SELECT NULL FROM blocked WHERE code = 7) AS has_row,\n       EXISTS(SELECT NULL FROM blocked WHERE 0) AS has_no_rows;",
+      "status": "Correct · first try",
+      "first": "(1, 0)",
+      "correct": "(1, 0)",
+      "bodyParagraphs": [
+        "EXISTS checks whether the subquery returns any row, not whether its projected value is non-NULL and not how many rows it returns. The first subquery returns two rows whose projected values are NULL, so EXISTS is 1. The second returns no row, so EXISTS is 0.",
+        "Apply the idea: Replace SELECT NULL with SELECT 99 in both subqueries. Explain why the EXISTS values do not change."
+      ],
+      "reflection": ""
+    },
+    {
+      "id": "null-member-02",
+      "prompt": "SQLite. The complete fictional table requests(id, code) has rows (1, 7), (2, 9), (3, NULL). Table blocked(code) has exactly three rows: 7, NULL, 7. No other rows exist.\n\nWhich ordered list of ids does this query return?\n\nSELECT id FROM requests\nWHERE (code = 7) OR NOT (code = 7)\nORDER BY id;",
+      "status": "Correct · first try",
+      "first": "[1, 2]",
+      "correct": "[1, 2]",
+      "bodyParagraphs": [
+        "For code 7, the predicate is true OR false; for code 9 it is false OR true. For the missing code, both code = 7 and its negation are unknown, so their OR is unknown. WHERE keeps only true rows, leaving ids 1 and 2. The classical P OR NOT P identity does not force an unknown SQL predicate to true.",
+        "Apply the idea: Design a WHERE condition that keeps all three requests while still distinguishing a known comparison result from an unknown one."
+      ],
+      "reflection": ""
+    },
+    {
+      "id": "null-member-04",
+      "prompt": "SQLite. The complete fictional table requests(id, code) has rows (1, 7), (2, 9), (3, NULL). Table blocked(code) has exactly three rows: 7, NULL, 7. No other rows exist.\n\nWhich ordered list of ids does this query return?\n\nSELECT id FROM requests\nWHERE code NOT IN (SELECT code FROM blocked)\nORDER BY id;",
+      "status": "Correct · first try",
+      "first": "[] (no rows)",
+      "correct": "[] (no rows)",
+      "bodyParagraphs": [
+        "Request 1 produces false for NOT IN. Requests 2 and 3 produce unknown rather than true because the nonempty right-hand relation contains NULL. WHERE admits none of those values, so no rows are returned. Replacing this expression with NOT EXISTS would change the selected outer NULL policy as well as the treatment of the right-hand NULL.",
+        "Apply the idea: State whether a missing request code should be kept, rejected or reported separately before choosing an absence query."
+      ],
+      "reflection": ""
+    },
+    {
+      "id": "null-member-08",
+      "prompt": "SQLite. The complete fictional table requests(id, code) has rows (1, 7), (2, 9), (3, NULL). Table blocked(code) has exactly three rows: 7, NULL, 7. No other rows exist.\n\nWhich ordered list of request ids does the correlated absence query return?\n\nSELECT r.id FROM requests AS r\nWHERE NOT EXISTS (\n  SELECT 1 FROM blocked AS b WHERE b.code = r.code\n)\nORDER BY r.id;",
+      "status": "Correct · first try",
+      "first": "[2, 3]",
+      "correct": "[2, 3]",
+      "bodyParagraphs": [
+        "The correlated equality finds rows for request 1. It finds none for code 9 and none for the outer NULL: b.code = NULL is never true, including when b.code itself is NULL. NOT EXISTS is therefore true for ids 2 and 3. If the policy excludes missing request codes, add an explicit outer IS NOT NULL condition.",
+        "Apply the idea: Write the additional condition needed to exclude unknown request codes while preserving known absent codes."
+      ],
+      "reflection": ""
+    },
+    {
+      "id": "null-member-10",
+      "prompt": "SQLite. The complete fictional table requests(id, code) has rows (1, 7), (2, 9), (3, NULL). Table blocked(code) has exactly three rows: 7, NULL, 7. No other rows exist.\n\nThe required policy is to consider only known request codes and keep a request if no blocked code equals it. Which ordered list of ids does this explicit policy return?\n\nSELECT r.id FROM requests AS r\nWHERE r.code IS NOT NULL\n  AND NOT EXISTS (SELECT 1 FROM blocked AS b WHERE b.code = r.code)\nORDER BY r.id;",
+      "status": "Correct · first try",
+      "first": "[2]",
+      "correct": "[2]",
+      "bodyParagraphs": [
+        "The outer IS NOT NULL test explicitly excludes request 3. For the two known codes, NOT EXISTS keeps exactly a code with no equal blocked row: 7 is found and 9 is absent. The result is id 2. A blocked NULL cannot create a true equality match for a known code.",
+        "Apply the idea: Predict this explicit policy when blocked has no rows and when blocked contains only NULL."
+      ],
+      "reflection": ""
+    },
+    {
+      "id": "null-member-11",
+      "prompt": "SQLite. requests AS r has rows (id, code) = (1, 7), (2, 9), (3, NULL). blocked(code) may be ANY finite collection of integers and NULLs, including no rows or duplicate rows. Select exactly those requests whose code is non-NULL and for which no blocked row has an equal code under =. Which predicate, placed after WHERE, implements this policy for EVERY allowed blocked relation?",
+      "status": "Needs review · first try",
+      "first": "r.code NOT IN (SELECT b.code FROM blocked AS b WHERE b.code IS NOT NULL)",
+      "correct": "r.code IS NOT NULL AND NOT EXISTS (SELECT 1 FROM blocked AS b WHERE b.code = r.code)",
+      "bodyParagraphs": [
+        "Only the predicate with both the outer IS NOT NULL guard and equality-based NOT EXISTS implements the stated policy for every allowed right side. The guard rejects a missing request code. For a known code, the subquery returns a row exactly when an equal blocked integer exists, so NOT EXISTS is the required absence test. Duplicates do not change row existence and blocked NULLs do not make equality true. A right-filtered NOT IN admits the missing outer code when its filtered right side is empty; unguarded NOT EXISTS admits that missing code; guarded unfiltered NOT IN can reject a known absent code when a blocked NULL makes its predicate unknown.",
+        "Apply the idea: Give a smallest counterexample to each rejected predicate, then explain why one correctly chosen example cannot prove the accepted predicate for every finite right side."
+      ],
+      "reflection": ""
+    },
+    {
+      "id": "null-member-12",
+      "prompt": "SQLite. The complete fictional table requests(id, code) has rows (1, 7), (2, 9), (3, NULL). Table blocked(code) has exactly three rows: 7, NULL, 7. No other rows exist.\n\nThis query compares ordinary = matching with SQLite IS matching, which treats two NULLs as matching. What are all returned rows (id, ordinary_absence, null_matching_absence), in order?\n\nSELECT r.id,\n       NOT EXISTS (SELECT 1 FROM blocked AS b WHERE b.code = r.code)\n         AS ordinary_absence,\n       NOT EXISTS (SELECT 1 FROM blocked AS b WHERE b.code IS r.code)\n         AS null_matching_absence\nFROM requests AS r\nORDER BY r.id;",
+      "status": "Correct · first try",
+      "first": "[(1, 0, 0), (2, 1, 1), (3, 1, 0)]",
+      "correct": "[(1, 0, 0), (2, 1, 1), (3, 1, 0)]",
+      "bodyParagraphs": [
+        "Both matching rules find the blocked 7 for request 1 and find no 9 for request 2. Ordinary equality never finds a match for the outer NULL, while SQLite IS matches it to the blocked NULL. The third row is therefore (3, 1, 0). IS expresses a different NULL-matching policy; it is not an automatic substitute for an explicit requirement to exclude all missing outer codes.",
+        "Apply the idea: Remove every blocked NULL and compare the two absence predicates again for a missing request code. Explain why an outer IS NOT NULL policy is different from NULL-matching equality."
+      ],
+      "reflection": ""
+    },
+    {
+      "id": "null-member-05",
+      "prompt": "SQLite. The complete fictional table requests(id, code) has rows (1, 7), (2, 9), (3, NULL). Table blocked(code) has exactly three rows: 7, NULL, 7. No other rows exist.\n\nThe subquery's WHERE 0 returns no rows. What are all returned rows (id, in_empty, not_in_empty), in order?\n\nSELECT id,\n       code IN (SELECT code FROM blocked WHERE 0) AS in_empty,\n       code NOT IN (SELECT code FROM blocked WHERE 0) AS not_in_empty\nFROM requests\nORDER BY id;",
+      "status": "Correct · first try",
+      "first": "[(1, 0, 1), (2, 0, 1), (3, 0, 1)]",
+      "correct": "[(1, 0, 1), (2, 0, 1), (3, 0, 1)]",
+      "bodyParagraphs": [
+        "The subquery returns no rows, including no NULL-valued row. IN is false and NOT IN is true for an empty right-hand relation, even when the outer value is NULL. Every request therefore produces (0, 1). An empty relation is different from a relation containing one NULL.",
+        "Apply the idea: Compare an empty subquery with SELECT NULL. Explain why both may look blank in a display while producing different membership results."
+      ],
+      "reflection": ""
+    },
+    {
+      "id": "null-member-09",
+      "prompt": "SQLite. The complete fictional table requests(id, code) has rows (1, 7), (2, 9), (3, NULL). Table blocked(code) has exactly three rows: 7, NULL, 7. No other rows exist.\n\nThe subquery below uses COUNT(*) without GROUP BY. Which ordered list of request ids does the whole query return?\n\nSELECT r.id FROM requests AS r\nWHERE NOT EXISTS (\n  SELECT COUNT(*) FROM blocked AS b WHERE b.code = r.code\n)\nORDER BY r.id;",
+      "status": "Correct · first try",
+      "first": "[] (no rows)",
+      "correct": "[] (no rows)",
+      "bodyParagraphs": [
+        "COUNT(*) without GROUP BY returns one aggregate result row even when its filtered input has zero rows. For the three requests the inner counts would be 2, 0 and 0, but every inner query still returns a row. EXISTS is true each time and NOT EXISTS is false, so the outer query returns no rows. Counting zero matches is not the same as returning zero rows.",
+        "Apply the idea: Replace the aggregate subquery with SELECT 1 using the same WHERE. Explain why the zero-match case now differs."
+      ],
+      "reflection": ""
+    },
+    {
+      "id": "null-member-06",
+      "prompt": "SQLite. The complete fictional table requests(id, code) has rows (1, 7), (2, 9), (3, NULL). Table blocked(code) has exactly three rows: 7, NULL, 7. No other rows exist.\n\nWhich ordered list of ids does this query return after removing NULL from the right-hand relation?\n\nSELECT id FROM requests\nWHERE code NOT IN (SELECT code FROM blocked WHERE code IS NOT NULL)\nORDER BY id;",
+      "status": "Correct · first try",
+      "first": "[2]",
+      "correct": "[2]",
+      "bodyParagraphs": [
+        "Filtering the right-hand relation leaves two 7 values and no NULL. Request 1 is a definite match; request 2 is a definite nonmatch; the outer NULL still produces unknown against this nonempty right side. Only id 2 survives WHERE. This result does not prove that filtering the right side always excludes outer NULLs: if that filtered relation is empty, NOT IN is true for the outer NULL too.",
+        "Apply the idea: Use a right-hand relation containing only NULL. Predict what the filtered NOT IN does to the missing request code."
+      ],
+      "reflection": ""
+    }
+  ],
+  "summary": "You made 11 of 12 connections on the first try. That count is a snapshot—not a measure of your ability. Review the concept estimates and choose one connection to explain in your own words.",
+  "writing": {
+    "item": "I treated a filtered NOT IN as a universal absence policy. On an empty blocked table, even a NULL request code passes NOT IN.\nI will state the missing-code policy first and keep the outer code IS NOT NULL guard when unknown requests must be excluded.",
+    "application": "For an eligibility report, I would keep requests with a known code and no equal blocked code. A correlated NOT EXISTS makes row absence explicit; the outer IS NOT NULL check states the policy for missing request codes.",
+    "prompt": "Choose one connection from this deck and explain how it relates to another idea in your own words.",
+    "source": "Attribution supplied in the deck: RecallWeave contributors, estate-c945953fdeb7. Original fictional requests/blocked tables, questions, explanations and SQL worksheet; AI assistance was used in authoring. SQLite reference dialect. Primary sources: https://www.sqlite.org/lang_expr.html ; https://www.sqlite.org/lang_select.html .License supplied in the deck: Original lesson material: you may use, adapt and redistribute it with attribution to RecallWeave contributors. Linked SQLite documentation retains its own terms and is not reproduced here.",
+    "mastery": [
+      {
+        "concept": "three-valued logic",
+        "value": "91%"
+      },
+      {
+        "concept": "membership",
+        "value": "100%"
+      },
+      {
+        "concept": "row existence",
+        "value": "98%"
+      },
+      {
+        "concept": "absence policies",
+        "value": "74%"
+      }
+    ]
+  },
+  "answer_scenario": "null-member-11 original option0 wrong; eleven original correct answers; display order observed, not fixed"
+}

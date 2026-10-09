@@ -1,0 +1,931 @@
+{
+  "schema": "recallweave-sql-null-membership-root-independent-authority/v1",
+  "reviewer": "estate-c945953fdeb7/root",
+  "frozen_at": "2026-10-09 11:01:32 UTC",
+  "status": "Frozen by independent reasoning and primary semantics before candidate answer indices, explanations, guide, native SQL results or browser use were received by root. No SQL was executed to derive these expectations.",
+  "original_question_offer": {
+    "repository": "Jacob-Met/RecallWeave",
+    "git_blob": "a65260e4f968b8267fc281aac4ab065a61cd1ec8",
+    "bytes": 17783,
+    "sha256": "22353fa19968cb800ff4ad7ee0e4d447ea38cc884311195fa68ffcee56e91a57",
+    "reservation": "https://github.com/Jacob-Met/RecallWeave/issues/257",
+    "questions": 12,
+    "queries": 12
+  },
+  "native_dialect": {
+    "name": "SQLite",
+    "intended_native": "Python 3.12.14 built-in SQLite 3.53.1",
+    "runtime_path": "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3.12",
+    "runtime_sha256": "fa67443527ed9647f760d807e2a38f26340757123e643c4639cf273ed15d5ea7",
+    "status": "Prior read-only capability observation only; fresh supported-runtime and resource admission required before query execution."
+  },
+  "primary_semantics": [
+    {
+      "url": "https://www.sqlite.org/lang_expr.html",
+      "sections": [
+        "Operators, NULL/AND/OR/IS",
+        "IN and NOT IN",
+        "EXISTS"
+      ],
+      "summary": "WHERE keeps true predicates. Unknown generally propagates, with decisive false-AND and true-OR exceptions. Empty-right IN/NOT IN gives false/true even for NULL. Otherwise a known match wins; an unmatched right NULL or NULL left operand gives unknown. EXISTS is Boolean row presence, independent of projected values. SQLite IS can match two NULLs."
+    },
+    {
+      "url": "https://www.sqlite.org/lang_select.html",
+      "sections": [
+        "Result rows and aggregate queries",
+        "ORDER BY"
+      ],
+      "summary": "An aggregate query without GROUP BY returns one result row even for zero input rows. The explicit ORDER BY clauses establish the row ordering used here."
+    },
+    {
+      "url": "https://www.sqlite.org/lang_aggfunc.html",
+      "sections": [
+        "count(X), count(*)"
+      ],
+      "summary": "COUNT(*) counts input rows; its value zero does not remove the aggregate result row."
+    }
+  ],
+  "setup_sql": "CREATE TABLE requests (id INTEGER PRIMARY KEY, code INTEGER);\nCREATE TABLE blocked (code INTEGER);\nINSERT INTO requests (id, code) VALUES (1, 7), (2, 9), (3, NULL);\nINSERT INTO blocked (code) VALUES (7), (NULL), (7);\n",
+  "questions": [
+    {
+      "id": "null-member-01",
+      "number": 1,
+      "original_option_index_zero_based": 2,
+      "original_option_label": "C",
+      "original_option_text": "(NULL, 0, 1)",
+      "unique_correct_option": true,
+      "independent_derivation": "NOT unknown remains unknown. False AND unknown is false, while true OR unknown is true. The single result row is therefore (NULL,0,1).",
+      "all_option_assessments": [
+        {
+          "index_zero_based": 0,
+          "label": "A",
+          "option_text": "(NULL, NULL, NULL)",
+          "correct": false,
+          "reason": "Incorrect: the second and third columns are fixed 0 and 1, not NULL."
+        },
+        {
+          "index_zero_based": 1,
+          "label": "B",
+          "option_text": "(0, 0, 1)",
+          "correct": false,
+          "reason": "Incorrect: the first column is NULL, not 0."
+        },
+        {
+          "index_zero_based": 2,
+          "label": "C",
+          "option_text": "(NULL, 0, 1)",
+          "correct": true,
+          "reason": "Correct: matches all three columns."
+        },
+        {
+          "index_zero_based": 3,
+          "label": "D",
+          "option_text": "(1, 0, 1)",
+          "correct": false,
+          "reason": "Incorrect: NOT NULL is not 1."
+        }
+      ]
+    },
+    {
+      "id": "null-member-02",
+      "number": 2,
+      "original_option_index_zero_based": 1,
+      "original_option_label": "B",
+      "original_option_text": "[1, 2]",
+      "unique_correct_option": true,
+      "independent_derivation": "For codes 7 and 9 the equality is respectively true and false, so the disjunction is true in both cases. For code NULL the equality, its negation and their disjunction are unknown. WHERE retains ids 1 and 2.",
+      "all_option_assessments": [
+        {
+          "index_zero_based": 0,
+          "label": "A",
+          "option_text": "[1, 2, 3]",
+          "correct": false,
+          "reason": "Incorrect: includes id 3 whose predicate is unknown."
+        },
+        {
+          "index_zero_based": 1,
+          "label": "B",
+          "option_text": "[1, 2]",
+          "correct": true,
+          "reason": "Correct: includes both known codes and excludes the unknown code."
+        },
+        {
+          "index_zero_based": 2,
+          "label": "C",
+          "option_text": "[1]",
+          "correct": false,
+          "reason": "Incorrect: omits id 2, whose disjunction is true."
+        },
+        {
+          "index_zero_based": 3,
+          "label": "D",
+          "option_text": "[] (no rows)",
+          "correct": false,
+          "reason": "Incorrect: omits ids 1 and 2."
+        }
+      ]
+    },
+    {
+      "id": "null-member-03",
+      "number": 3,
+      "original_option_index_zero_based": 0,
+      "original_option_label": "A",
+      "original_option_text": "[(1, 1, 0), (2, NULL, NULL), (3, NULL, NULL)]",
+      "unique_correct_option": true,
+      "independent_derivation": "A known match for 7 makes IN true and NOT IN false even though the right relation also contains NULL and a duplicate. The nonmatching 9 and the NULL left operand have unknown membership in this nonempty relation.",
+      "all_option_assessments": [
+        {
+          "index_zero_based": 0,
+          "label": "A",
+          "option_text": "[(1, 1, 0), (2, NULL, NULL), (3, NULL, NULL)]",
+          "correct": true,
+          "reason": "Correct: matches every returned row and value."
+        },
+        {
+          "index_zero_based": 1,
+          "label": "B",
+          "option_text": "[(1, 1, 0), (2, 0, 1), (3, 0, 1)]",
+          "correct": false,
+          "reason": "Incorrect: code 9 cannot establish nonmembership while a right NULL remains; outer NULL is also unknown."
+        },
+        {
+          "index_zero_based": 2,
+          "label": "C",
+          "option_text": "[(1, NULL, NULL), (2, NULL, NULL), (3, NULL, NULL)]",
+          "correct": false,
+          "reason": "Incorrect: a true known match for id 1 is not made unknown by another NULL row."
+        },
+        {
+          "index_zero_based": 3,
+          "label": "D",
+          "option_text": "[(1, 1, 0), (2, 0, 1), (3, 1, 0)]",
+          "correct": false,
+          "reason": "Incorrect: gives false certainty for id 2 and treats NULL membership as a true match."
+        }
+      ]
+    },
+    {
+      "id": "null-member-04",
+      "number": 4,
+      "original_option_index_zero_based": 3,
+      "original_option_label": "D",
+      "original_option_text": "[] (no rows)",
+      "unique_correct_option": true,
+      "independent_derivation": "Id 1 has a known match, so NOT IN is false. Ids 2 and 3 evaluate to NULL. None has a true WHERE predicate, so the complete result is empty.",
+      "all_option_assessments": [
+        {
+          "index_zero_based": 0,
+          "label": "A",
+          "option_text": "[2]",
+          "correct": false,
+          "reason": "Incorrect: includes id 2 despite its unknown NOT IN result."
+        },
+        {
+          "index_zero_based": 1,
+          "label": "B",
+          "option_text": "[2, 3]",
+          "correct": false,
+          "reason": "Incorrect: includes two requests with unknown NOT IN results."
+        },
+        {
+          "index_zero_based": 2,
+          "label": "C",
+          "option_text": "[3]",
+          "correct": false,
+          "reason": "Incorrect: includes id 3 despite its unknown NOT IN result."
+        },
+        {
+          "index_zero_based": 3,
+          "label": "D",
+          "option_text": "[] (no rows)",
+          "correct": true,
+          "reason": "Correct: no WHERE result is true."
+        }
+      ]
+    },
+    {
+      "id": "null-member-05",
+      "number": 5,
+      "original_option_index_zero_based": 1,
+      "original_option_label": "B",
+      "original_option_text": "[(1, 0, 1), (2, 0, 1), (3, 0, 1)]",
+      "unique_correct_option": true,
+      "independent_derivation": "The subquery returns zero rows. Empty-right membership is false and empty-right nonmembership is true for every left operand, including NULL. All three requests remain in this unfiltered SELECT.",
+      "all_option_assessments": [
+        {
+          "index_zero_based": 0,
+          "label": "A",
+          "option_text": "[(1, 0, 1), (2, 0, 1), (3, NULL, NULL)]",
+          "correct": false,
+          "reason": "Incorrect: the empty-right rule also gives (0,1) for id 3."
+        },
+        {
+          "index_zero_based": 1,
+          "label": "B",
+          "option_text": "[(1, 0, 1), (2, 0, 1), (3, 0, 1)]",
+          "correct": true,
+          "reason": "Correct: all three rows reflect the empty-right rule."
+        },
+        {
+          "index_zero_based": 2,
+          "label": "C",
+          "option_text": "[(1, NULL, NULL), (2, NULL, NULL), (3, NULL, NULL)]",
+          "correct": false,
+          "reason": "Incorrect: an empty right relation resolves membership rather than returning unknown."
+        },
+        {
+          "index_zero_based": 3,
+          "label": "D",
+          "option_text": "[(1, 1, 0), (2, 1, 0), (3, 1, 0)]",
+          "correct": false,
+          "reason": "Incorrect: reverses the false-IN/true-NOT-IN results."
+        }
+      ]
+    },
+    {
+      "id": "null-member-06",
+      "number": 6,
+      "original_option_index_zero_based": 0,
+      "original_option_label": "A",
+      "original_option_text": "[2]",
+      "unique_correct_option": true,
+      "independent_derivation": "After filtering, the right relation is [7,7]. Code 7 is excluded by its match, code 9 is retained, and NULL compared against this nonempty relation is unknown and excluded by WHERE.",
+      "all_option_assessments": [
+        {
+          "index_zero_based": 0,
+          "label": "A",
+          "option_text": "[2]",
+          "correct": true,
+          "reason": "Correct: only known unmatched id 2 qualifies."
+        },
+        {
+          "index_zero_based": 1,
+          "label": "B",
+          "option_text": "[2, 3]",
+          "correct": false,
+          "reason": "Incorrect: a nonempty right relation does not let the outer NULL qualify."
+        },
+        {
+          "index_zero_based": 2,
+          "label": "C",
+          "option_text": "[] (no rows)",
+          "correct": false,
+          "reason": "Incorrect: omits known unmatched id 2."
+        },
+        {
+          "index_zero_based": 3,
+          "label": "D",
+          "option_text": "[1]",
+          "correct": false,
+          "reason": "Incorrect: includes matched id 1 and omits id 2."
+        }
+      ]
+    },
+    {
+      "id": "null-member-07",
+      "number": 7,
+      "original_option_index_zero_based": 2,
+      "original_option_label": "C",
+      "original_option_text": "(1, 0)",
+      "unique_correct_option": true,
+      "independent_derivation": "The matching subquery has two rows, despite projecting NULL, so EXISTS is 1. The WHERE 0 subquery has no rows and EXISTS is 0. EXISTS answers row presence rather than count or projected value.",
+      "all_option_assessments": [
+        {
+          "index_zero_based": 0,
+          "label": "A",
+          "option_text": "(NULL, NULL)",
+          "correct": false,
+          "reason": "Incorrect: EXISTS does not yield NULL from projected NULL values."
+        },
+        {
+          "index_zero_based": 1,
+          "label": "B",
+          "option_text": "(2, 0)",
+          "correct": false,
+          "reason": "Incorrect: EXISTS returns a truth value, not the number of matching rows."
+        },
+        {
+          "index_zero_based": 2,
+          "label": "C",
+          "option_text": "(1, 0)",
+          "correct": true,
+          "reason": "Correct: one or more rows versus zero rows gives (1,0)."
+        },
+        {
+          "index_zero_based": 3,
+          "label": "D",
+          "option_text": "(0, 0)",
+          "correct": false,
+          "reason": "Incorrect: the first subquery has matching rows."
+        }
+      ]
+    },
+    {
+      "id": "null-member-08",
+      "number": 8,
+      "original_option_index_zero_based": 3,
+      "original_option_label": "D",
+      "original_option_text": "[2, 3]",
+      "unique_correct_option": true,
+      "independent_derivation": "Equality finds blocked matches for 7. It finds no true comparison for 9 or for a NULL outer code. Consequently NOT EXISTS retains ids 2 and 3; it does not itself impose a known-code policy.",
+      "all_option_assessments": [
+        {
+          "index_zero_based": 0,
+          "label": "A",
+          "option_text": "[] (no rows)",
+          "correct": false,
+          "reason": "Incorrect: omits both requests without a true equality match."
+        },
+        {
+          "index_zero_based": 1,
+          "label": "B",
+          "option_text": "[2]",
+          "correct": false,
+          "reason": "Incorrect: omits outer-NULL id 3 even though no equality match exists."
+        },
+        {
+          "index_zero_based": 2,
+          "label": "C",
+          "option_text": "[3]",
+          "correct": false,
+          "reason": "Incorrect: omits known unmatched id 2."
+        },
+        {
+          "index_zero_based": 3,
+          "label": "D",
+          "option_text": "[2, 3]",
+          "correct": true,
+          "reason": "Correct: ids 2 and 3 have no true equality match."
+        }
+      ]
+    },
+    {
+      "id": "null-member-09",
+      "number": 9,
+      "original_option_index_zero_based": 0,
+      "original_option_label": "A",
+      "original_option_text": "[] (no rows)",
+      "unique_correct_option": true,
+      "independent_derivation": "COUNT(*) with no GROUP BY produces one result row for each correlated invocation, including a row containing count 0. EXISTS sees that row in every case. NOT EXISTS is always false, so the outer result is empty.",
+      "all_option_assessments": [
+        {
+          "index_zero_based": 0,
+          "label": "A",
+          "option_text": "[] (no rows)",
+          "correct": true,
+          "reason": "Correct: every aggregate subquery returns one row, so no id qualifies."
+        },
+        {
+          "index_zero_based": 1,
+          "label": "B",
+          "option_text": "[2, 3]",
+          "correct": false,
+          "reason": "Incorrect: zero-count result rows still make EXISTS true for ids 2 and 3."
+        },
+        {
+          "index_zero_based": 2,
+          "label": "C",
+          "option_text": "[2]",
+          "correct": false,
+          "reason": "Incorrect: id 2 still has the aggregate result row."
+        },
+        {
+          "index_zero_based": 3,
+          "label": "D",
+          "option_text": "[1, 2, 3]",
+          "correct": false,
+          "reason": "Incorrect: all three aggregate invocations return rows and make NOT EXISTS false."
+        }
+      ]
+    },
+    {
+      "id": "null-member-10",
+      "number": 10,
+      "original_option_index_zero_based": 1,
+      "original_option_label": "B",
+      "original_option_text": "[2]",
+      "unique_correct_option": true,
+      "independent_derivation": "The explicit outer IS NOT NULL guard rejects id 3. Equality-based absence rejects blocked code 7 and accepts unmatched known code 9, leaving only id 2.",
+      "all_option_assessments": [
+        {
+          "index_zero_based": 0,
+          "label": "A",
+          "option_text": "[2, 3]",
+          "correct": false,
+          "reason": "Incorrect: the known-code guard excludes id 3."
+        },
+        {
+          "index_zero_based": 1,
+          "label": "B",
+          "option_text": "[2]",
+          "correct": true,
+          "reason": "Correct: only id 2 satisfies both policy clauses."
+        },
+        {
+          "index_zero_based": 2,
+          "label": "C",
+          "option_text": "[] (no rows)",
+          "correct": false,
+          "reason": "Incorrect: id 2 satisfies both clauses."
+        },
+        {
+          "index_zero_based": 3,
+          "label": "D",
+          "option_text": "[1]",
+          "correct": false,
+          "reason": "Incorrect: id 1 has a blocked match and id 2 has none."
+        }
+      ]
+    },
+    {
+      "id": "null-member-11",
+      "number": 11,
+      "original_option_index_zero_based": 2,
+      "original_option_label": "C",
+      "original_option_text": "r.code IS NOT NULL AND NOT EXISTS (SELECT 1 FROM blocked AS b WHERE b.code = r.code)",
+      "unique_correct_option": true,
+      "independent_derivation": "Option C states both parts of the policy directly. The universal proof and individual counterexamples below cover every finite allowed right relation. The twelve worksheet rows illustrate these distinctions but do not prove universality by themselves.",
+      "all_option_assessments": [
+        {
+          "index_zero_based": 0,
+          "label": "A",
+          "option_text": "r.code NOT IN (SELECT b.code FROM blocked AS b WHERE b.code IS NOT NULL)",
+          "correct": false,
+          "reason": "Incorrect universally: with blocked empty, outer NULL satisfies NOT IN empty and is wrongly retained."
+        },
+        {
+          "index_zero_based": 1,
+          "label": "B",
+          "option_text": "NOT EXISTS (SELECT 1 FROM blocked AS b WHERE b.code = r.code AND b.code IS NOT NULL)",
+          "correct": false,
+          "reason": "Incorrect universally: with outer NULL, equality cannot produce a true matching row, so NOT EXISTS is true and wrongly retains it; an empty right relation suffices."
+        },
+        {
+          "index_zero_based": 2,
+          "label": "C",
+          "option_text": "r.code IS NOT NULL AND NOT EXISTS (SELECT 1 FROM blocked AS b WHERE b.code = r.code)",
+          "correct": true,
+          "reason": "Correct universally: the outer guard and equality-based NOT EXISTS implement the two required clauses."
+        },
+        {
+          "index_zero_based": 3,
+          "label": "D",
+          "option_text": "r.code IS NOT NULL AND r.code NOT IN (SELECT b.code FROM blocked AS b)",
+          "correct": false,
+          "reason": "Incorrect universally: for known code 9 and blocked [NULL], NOT IN is unknown and the required request is wrongly excluded."
+        }
+      ]
+    },
+    {
+      "id": "null-member-12",
+      "number": 12,
+      "original_option_index_zero_based": 3,
+      "original_option_label": "D",
+      "original_option_text": "[(1, 0, 0), (2, 1, 1), (3, 1, 0)]",
+      "unique_correct_option": true,
+      "independent_derivation": "Ordinary equality gives no true match for the outer NULL, so its absence is 1. SQLite IS matches the NULL blocked row to the NULL outer code, so null-matching absence is 0. Known 7 has matches under either comparator; known 9 has neither.",
+      "all_option_assessments": [
+        {
+          "index_zero_based": 0,
+          "label": "A",
+          "option_text": "[(1, 0, 0), (2, 1, 1), (3, 0, 0)]",
+          "correct": false,
+          "reason": "Incorrect: ordinary absence for the outer NULL is 1, not 0."
+        },
+        {
+          "index_zero_based": 1,
+          "label": "B",
+          "option_text": "[(1, 0, 0), (2, 1, 1), (3, NULL, NULL)]",
+          "correct": false,
+          "reason": "Incorrect: both EXISTS-based predicates are Boolean, including for the outer NULL."
+        },
+        {
+          "index_zero_based": 2,
+          "label": "C",
+          "option_text": "[(1, 0, 0), (2, 1, 1), (3, 1, 1)]",
+          "correct": false,
+          "reason": "Incorrect: IS finds the right NULL for id 3, so null-matching absence is 0."
+        },
+        {
+          "index_zero_based": 3,
+          "label": "D",
+          "option_text": "[(1, 0, 0), (2, 1, 1), (3, 1, 0)]",
+          "correct": true,
+          "reason": "Correct: matches all three rows under their respective comparators."
+        }
+      ]
+    }
+  ],
+  "worksheet_expected": [
+    {
+      "question_id": "null-member-01",
+      "number": 1,
+      "sql": "SELECT NOT NULL AS negated_unknown,\n       0 AND NULL AS false_and_unknown,\n       1 OR NULL AS true_or_unknown;",
+      "columns": [
+        "negated_unknown",
+        "false_and_unknown",
+        "true_or_unknown"
+      ],
+      "rows": [
+        [
+          null,
+          0,
+          1
+        ]
+      ],
+      "row_order": "Exact SQL ORDER BY where present; singleton rows otherwise. Empty array means no result rows. JSON null denotes SQL NULL, never a string.",
+      "row_count": 1
+    },
+    {
+      "question_id": "null-member-02",
+      "number": 2,
+      "sql": "SELECT id FROM requests\nWHERE (code = 7) OR NOT (code = 7)\nORDER BY id;",
+      "columns": [
+        "id"
+      ],
+      "rows": [
+        [
+          1
+        ],
+        [
+          2
+        ]
+      ],
+      "row_order": "Exact SQL ORDER BY where present; singleton rows otherwise. Empty array means no result rows. JSON null denotes SQL NULL, never a string.",
+      "row_count": 2
+    },
+    {
+      "question_id": "null-member-03",
+      "number": 3,
+      "sql": "SELECT id,\n       code IN (SELECT code FROM blocked) AS in_set,\n       code NOT IN (SELECT code FROM blocked) AS not_in_set\nFROM requests\nORDER BY id;",
+      "columns": [
+        "id",
+        "in_set",
+        "not_in_set"
+      ],
+      "rows": [
+        [
+          1,
+          1,
+          0
+        ],
+        [
+          2,
+          null,
+          null
+        ],
+        [
+          3,
+          null,
+          null
+        ]
+      ],
+      "row_order": "Exact SQL ORDER BY where present; singleton rows otherwise. Empty array means no result rows. JSON null denotes SQL NULL, never a string.",
+      "row_count": 3
+    },
+    {
+      "question_id": "null-member-04",
+      "number": 4,
+      "sql": "SELECT id FROM requests\nWHERE code NOT IN (SELECT code FROM blocked)\nORDER BY id;",
+      "columns": [
+        "id"
+      ],
+      "rows": [],
+      "row_order": "Exact SQL ORDER BY where present; singleton rows otherwise. Empty array means no result rows. JSON null denotes SQL NULL, never a string.",
+      "row_count": 0
+    },
+    {
+      "question_id": "null-member-05",
+      "number": 5,
+      "sql": "SELECT id,\n       code IN (SELECT code FROM blocked WHERE 0) AS in_empty,\n       code NOT IN (SELECT code FROM blocked WHERE 0) AS not_in_empty\nFROM requests\nORDER BY id;",
+      "columns": [
+        "id",
+        "in_empty",
+        "not_in_empty"
+      ],
+      "rows": [
+        [
+          1,
+          0,
+          1
+        ],
+        [
+          2,
+          0,
+          1
+        ],
+        [
+          3,
+          0,
+          1
+        ]
+      ],
+      "row_order": "Exact SQL ORDER BY where present; singleton rows otherwise. Empty array means no result rows. JSON null denotes SQL NULL, never a string.",
+      "row_count": 3
+    },
+    {
+      "question_id": "null-member-06",
+      "number": 6,
+      "sql": "SELECT id FROM requests\nWHERE code NOT IN (SELECT code FROM blocked WHERE code IS NOT NULL)\nORDER BY id;",
+      "columns": [
+        "id"
+      ],
+      "rows": [
+        [
+          2
+        ]
+      ],
+      "row_order": "Exact SQL ORDER BY where present; singleton rows otherwise. Empty array means no result rows. JSON null denotes SQL NULL, never a string.",
+      "row_count": 1
+    },
+    {
+      "question_id": "null-member-07",
+      "number": 7,
+      "sql": "SELECT EXISTS(SELECT NULL FROM blocked WHERE code = 7) AS has_row,\n       EXISTS(SELECT NULL FROM blocked WHERE 0) AS has_no_rows;",
+      "columns": [
+        "has_row",
+        "has_no_rows"
+      ],
+      "rows": [
+        [
+          1,
+          0
+        ]
+      ],
+      "row_order": "Exact SQL ORDER BY where present; singleton rows otherwise. Empty array means no result rows. JSON null denotes SQL NULL, never a string.",
+      "row_count": 1
+    },
+    {
+      "question_id": "null-member-08",
+      "number": 8,
+      "sql": "SELECT r.id FROM requests AS r\nWHERE NOT EXISTS (\n  SELECT 1 FROM blocked AS b WHERE b.code = r.code\n)\nORDER BY r.id;",
+      "columns": [
+        "id"
+      ],
+      "rows": [
+        [
+          2
+        ],
+        [
+          3
+        ]
+      ],
+      "row_order": "Exact SQL ORDER BY where present; singleton rows otherwise. Empty array means no result rows. JSON null denotes SQL NULL, never a string.",
+      "row_count": 2
+    },
+    {
+      "question_id": "null-member-09",
+      "number": 9,
+      "sql": "SELECT r.id FROM requests AS r\nWHERE NOT EXISTS (\n  SELECT COUNT(*) FROM blocked AS b WHERE b.code = r.code\n)\nORDER BY r.id;",
+      "columns": [
+        "id"
+      ],
+      "rows": [],
+      "row_order": "Exact SQL ORDER BY where present; singleton rows otherwise. Empty array means no result rows. JSON null denotes SQL NULL, never a string.",
+      "row_count": 0
+    },
+    {
+      "question_id": "null-member-10",
+      "number": 10,
+      "sql": "SELECT r.id FROM requests AS r\nWHERE r.code IS NOT NULL\n  AND NOT EXISTS (SELECT 1 FROM blocked AS b WHERE b.code = r.code)\nORDER BY r.id;",
+      "columns": [
+        "id"
+      ],
+      "rows": [
+        [
+          2
+        ]
+      ],
+      "row_order": "Exact SQL ORDER BY where present; singleton rows otherwise. Empty array means no result rows. JSON null denotes SQL NULL, never a string.",
+      "row_count": 1
+    },
+    {
+      "question_id": "null-member-11",
+      "number": 11,
+      "sql": "WITH scenarios(name, ord) AS (\n  VALUES ('empty', 1), ('only-null', 2), ('known-seven', 3), ('mixed', 4)\n), trial_blocks(scenario, code) AS (\n  VALUES ('only-null', NULL), ('known-seven', 7),\n         ('mixed', 7), ('mixed', NULL), ('mixed', 7)\n)\nSELECT s.name AS scenario, r.id,\n       r.code NOT IN (\n         SELECT b.code FROM trial_blocks AS b\n         WHERE b.scenario = s.name AND b.code IS NOT NULL\n       ) AS option_a,\n       NOT EXISTS (\n         SELECT 1 FROM trial_blocks AS b\n         WHERE b.scenario = s.name AND b.code = r.code AND b.code IS NOT NULL\n       ) AS option_b,\n       r.code IS NOT NULL AND NOT EXISTS (\n         SELECT 1 FROM trial_blocks AS b\n         WHERE b.scenario = s.name AND b.code = r.code\n       ) AS option_c,\n       r.code IS NOT NULL AND r.code NOT IN (\n         SELECT b.code FROM trial_blocks AS b WHERE b.scenario = s.name\n       ) AS option_d\nFROM scenarios AS s CROSS JOIN requests AS r\nORDER BY s.ord, r.id;",
+      "columns": [
+        "scenario",
+        "id",
+        "option_a",
+        "option_b",
+        "option_c",
+        "option_d"
+      ],
+      "rows": [
+        [
+          "empty",
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        [
+          "empty",
+          2,
+          1,
+          1,
+          1,
+          1
+        ],
+        [
+          "empty",
+          3,
+          1,
+          1,
+          0,
+          0
+        ],
+        [
+          "only-null",
+          1,
+          1,
+          1,
+          1,
+          null
+        ],
+        [
+          "only-null",
+          2,
+          1,
+          1,
+          1,
+          null
+        ],
+        [
+          "only-null",
+          3,
+          1,
+          1,
+          0,
+          0
+        ],
+        [
+          "known-seven",
+          1,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          "known-seven",
+          2,
+          1,
+          1,
+          1,
+          1
+        ],
+        [
+          "known-seven",
+          3,
+          null,
+          1,
+          0,
+          0
+        ],
+        [
+          "mixed",
+          1,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          "mixed",
+          2,
+          1,
+          1,
+          1,
+          null
+        ],
+        [
+          "mixed",
+          3,
+          null,
+          1,
+          0,
+          0
+        ]
+      ],
+      "row_order": "Exact SQL ORDER BY where present; singleton rows otherwise. Empty array means no result rows. JSON null denotes SQL NULL, never a string.",
+      "row_count": 12
+    },
+    {
+      "question_id": "null-member-12",
+      "number": 12,
+      "sql": "SELECT r.id,\n       NOT EXISTS (SELECT 1 FROM blocked AS b WHERE b.code = r.code)\n         AS ordinary_absence,\n       NOT EXISTS (SELECT 1 FROM blocked AS b WHERE b.code IS r.code)\n         AS null_matching_absence\nFROM requests AS r\nORDER BY r.id;",
+      "columns": [
+        "id",
+        "ordinary_absence",
+        "null_matching_absence"
+      ],
+      "rows": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          2,
+          1,
+          1
+        ],
+        [
+          3,
+          1,
+          0
+        ]
+      ],
+      "row_order": "Exact SQL ORDER BY where present; singleton rows otherwise. Empty array means no result rows. JSON null denotes SQL NULL, never a string.",
+      "row_count": 3
+    }
+  ],
+  "expected_total_result_rows": 29,
+  "expected_total_result_cells": 110,
+  "q11_universal_proof": {
+    "domain": "Any finite multiset of INTEGER values or SQL NULL; left codes are exactly 7,9,NULL as given. Duplicate rows and the empty relation are allowed.",
+    "selected_original_option_index_zero_based": 2,
+    "argument": [
+      "Partition outer requests into code NULL and code a non-NULL integer x.",
+      "If the outer code is NULL, the left IS NOT NULL conjunct is false. NOT EXISTS is always a Boolean value, so the conjunction is false and the policy excludes the request.",
+      "If the outer code is a non-NULL integer x, the guard is true. The correlated WHERE b.code = x passes exactly right rows with the same non-NULL integer. NULL comparisons are unknown and do not pass WHERE.",
+      "EXISTS is true exactly when at least one such matching row exists. Negating it is therefore true exactly when no equal blocked row exists, which is the required absence clause.",
+      "Adding duplicates changes neither whether a matching row exists nor the outer known-code guard. For an empty right relation no row matches and every known request is retained while the NULL request remains excluded. These cases exhaust the stated domain."
+    ],
+    "counterexamples": [
+      {
+        "incorrect_option_index_zero_based": 0,
+        "blocked_codes": [],
+        "request": {
+          "id": 3,
+          "code": null
+        },
+        "actual_predicate": 1,
+        "policy_should_select": false,
+        "reason": "Filtering an already empty relation leaves it empty; NULL NOT IN empty is true."
+      },
+      {
+        "incorrect_option_index_zero_based": 1,
+        "blocked_codes": [],
+        "request": {
+          "id": 3,
+          "code": null
+        },
+        "actual_predicate": 1,
+        "policy_should_select": false,
+        "reason": "There is no row for the equality predicate to match; NOT EXISTS is true, and no outer known-code guard exists."
+      },
+      {
+        "incorrect_option_index_zero_based": 3,
+        "blocked_codes": [
+          null
+        ],
+        "request": {
+          "id": 2,
+          "code": 9
+        },
+        "actual_predicate": null,
+        "policy_should_select": true,
+        "reason": "No blocked integer equals 9, yet the NULL right row makes nonmembership unknown; WHERE excludes it."
+      }
+    ],
+    "finite_worksheet_limit": "The four named scenarios demonstrate results and counterexamples. The partition-and-existence argument, not those examples alone, establishes the universal policy."
+  },
+  "exposure_chronology": {
+    "root_received_questions_only": true,
+    "root_received_author_answer_indices": false,
+    "root_received_author_guide": false,
+    "root_received_author_native_results": false,
+    "root_received_announcement_author_sealed_at": "2026-10-09T10:59:36Z",
+    "author_seal_contents_unseen": true,
+    "root_sql_native_invocations_at_freeze": 0,
+    "root_parser_or_browser_invocations_at_freeze": 0,
+    "author_receives_only_authority_handle_until_seal_confirmed": true
+  },
+  "prospective_receiving": {
+    "source": "After both authorities are sealed, compare every question/option/setup/query literal with the frozen question offer; check each author index/explanation and complete worksheet row against this authority. Any discrepancy remains an explicit finding; do not replace this frozen record.",
+    "native_sql": "One bounded independent native SQLite invocation on a new in-memory database after supported runtime/resource admission; exact setup plus twelve unchanged SELECTs, complete ordered columns/rows and strict value types. Preserve full stdout/stderr, runtime pins, actual child/outer exits and any failure. No real database or extension loading.",
+    "native_bounds": {
+      "python_sha256": "fa67443527ed9647f760d807e2a38f26340757123e643c4639cf273ed15d5ea7",
+      "python_version": "3.12.14",
+      "sqlite_version": "3.53.1",
+      "disk_floor_bytes": 134217728,
+      "memory_floor_bytes": 2147483648,
+      "source_input_budget_bytes": 131072,
+      "stdout_stderr_budget_each_bytes": 65536,
+      "native_child_seconds": 20,
+      "owned_stop_seconds": 2,
+      "new_physical_files": 0,
+      "new_database_files": 0,
+      "max_queries": 12
+    },
+    "browser": "A separate compact contract must precede one ordinary new-course session through the unchanged received learner and its physical study-notes export. Do not repeat old importer/course matrices or alter the 19 installed files.",
+    "limits": [
+      "Correct synthetic fixture outputs and a scripted lesson journey do not establish learning effectiveness.",
+      "SQLite dialect is explicit; no cross-engine SQL portability qualification.",
+      "No Actions, PR, shared main/Pages or owner ref mutation."
+    ]
+  }
+}

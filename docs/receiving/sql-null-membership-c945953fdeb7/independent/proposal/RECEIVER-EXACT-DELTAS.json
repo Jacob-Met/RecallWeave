@@ -1,0 +1,262 @@
+{
+  "schema": "recallweave-sql-independent-receiver-exact-delta-v1",
+  "base": {
+    "repository": "Jacob-Met/RecallWeave",
+    "git_blob": "bab37b9983310d096313ca83f076734ac587ca27"
+  },
+  "candidate": {
+    "repository": "Jacob-Met/RecallWeave",
+    "git_blob": "51210ceec77980185ae19e3d83214877a0d9fcc4",
+    "bytes": 36834,
+    "sha256": "d6424e330a688f50fe532c176c74207c3106fc899022c63137296b1b206aff88"
+  },
+  "order": "Apply these literal replacements in the stored order. Each count is exact before that replacement; no regular expression or hidden transformation is used.",
+  "replacements": [
+    {
+      "old": "// Independent installed RecallWeave use. The original exporter is not executed as an oracle.",
+      "new": "// Independent SQL lesson adoption through the retained RecallWeave installation.\n// The original exporter, model and SQL are never called as an expected-output oracle.",
+      "count": 1
+    },
+    {
+      "old": "const SOURCE='/Users/me/Developer/recallweave-edit-distance-local-c945953fdeb7/source';\nconst ORIGINALS='/Users/me/Developer/recallweave-edit-distance-local-c945953fdeb7/ORIGINALS.json';",
+      "new": "const DELIVERY='/Users/me/Developer/recallweave-sql-null-membership-c945953fdeb7';\nconst NOTES=JSON.parse(fs.readFileSync(path.join(ROOT,'EXPECTED-NOTES-FRAGMENTS.json'),'utf8'));",
+      "count": 1
+    },
+    {
+      "old": "const REFLECTION='Equal lengths do not make cat and cut identical. With unit costs, changing a to u is one substitution.\\nI will check the operation costs before counting edits.';\nconst APPLICATION='For a spelling-checker explanation, I would show the accepted source and target, the operation costs, and one cheapest alignment. A zero score means the literal scalar sequences match; it does not prove the texts have the same meaning.';\nconst CONTRACT='499f3a7e240b3eb14a0b2911b4300ba7b77e95c9';\n",
+      "new": "const REFLECTION=NOTES.item_reflection;\nconst APPLICATION=NOTES.application_reflection;\nconst CONTRACT='c02b23263fe2c1ec7496698dcd35d89d7f9890aa';\n",
+      "count": 1
+    },
+    {
+      "old": "scope:['actual installed --no-open command from /tmp','one original learner session and physical text download','private headless Chrome, no Finder/default profile claim','no explorer/old matrix/restore/source editing']",
+      "new": "scope:['actual retained --no-open command from /tmp','one separately delivered SQL learner session and physical text download','private headless Chrome, no Finder/default profile claim','no SQL, exporter/model oracle, old matrix, restore or source edit']",
+      "count": 1
+    },
+    {
+      "old": "const guards=[];",
+      "new": "const guards=[];const profileCensusMisses=[];",
+      "count": 1
+    },
+    {
+      "old": "function jsonfile(name,value){const p=path.join(OUTPUT,name);fs.mkdirSync(path.dirname(p),{recursive:true});fs.writeFileSync(p,JSON.stringify(value,null,2)+'\\n',{flag:'wx',mode:0o600});}\nfunction writefile(name,b){const p=path.join(OUTPUT,name);fs.mkdirSync(path.dirname(p),{recursive:true});fs.writeFileSync(p,b,{flag:'wx',mode:0o600});return pin(b);}\n",
+      "new": "function writefile(name,b){\n require(Buffer.isBuffer(b)&&b.length<=1024**2,'per-evidence-file limit');\n const p=path.join(OUTPUT,name);require(p.startsWith(OUTPUT+path.sep),'owned evidence path');\n require(ownedSize(ROOT,true)+Math.ceil(b.length/4096)*4096<=STATIC_CAP,'static evidence capacity before write');\n fs.mkdirSync(path.dirname(p),{recursive:true});\n const fd=fs.openSync(p,'wx',0o600);try{fs.writeFileSync(fd,b);fs.fsyncSync(fd);}finally{fs.closeSync(fd);}return pin(b);\n}\nfunction jsonfile(name,value){return writefile(name,Buffer.from(JSON.stringify(value,null,2)+'\\n'));}\n",
+      "count": 1
+    },
+    {
+      "old": "mtime_ns:s.mtimeNs.toString()};}",
+      "new": "mtime_ns:s.mtimeNs.toString(),inode:s.ino.toString()};}",
+      "count": 1
+    },
+    {
+      "old": "function ownedSize(root,excludeBrowser=false){let total=0;if(!fs.existsSync(root))return total;function walk(p){let list;try{list=fs.readdirSync(p);}catch(e){if(e.code==='ENOENT')return;throw e;}for(const name of list){const q=path.join(p,name);if(excludeBrowser&&q===path.join(ROOT,'browser'))continue;let s;try{s=fs.lstatSync(q);}catch(e){if(e.code==='ENOENT')continue;throw e;}if(s.isSymbolicLink())continue;if(s.isDirectory())walk(q);else if(s.isFile())total+=s.size;}}walk(root);return total;}\n",
+      "new": "function ownedAllocation(root,excludeBrowser=false){\n let logical=0,allocated=0;if(!fs.existsSync(root))return {logical,allocated};\n const volatile=root===path.join(ROOT,'browser');\n function missing(q,e){if(e.code!=='ENOENT'||!volatile)throw e;\n  require(profileCensusMisses.length<128,'bounded volatile profile census observations');profileCensusMisses.push({path:path.relative(ROOT,q),at:new Date().toISOString()});}\n function walk(p){let list;try{list=fs.readdirSync(p);}catch(e){missing(p,e);return;}\n  for(const name of list){const q=path.join(p,name);if(excludeBrowser&&q===path.join(root,'browser'))continue;\n   let st;try{st=fs.lstatSync(q);}catch(e){missing(q,e);continue;}\n   if(st.isSymbolicLink())continue;if(st.isDirectory())walk(q);else if(st.isFile()){logical+=st.size;allocated+=(st.blocks||0)*512;}}}\n walk(root);return {logical,allocated};\n}\nfunction ownedSize(root,excludeBrowser=false){const a=ownedAllocation(root,excludeBrowser);return Math.max(a.logical,a.allocated);}\n",
+      "count": 1
+    },
+    {
+      "old": "receiver_bytes:ownedSize(ROOT,true),browser_bytes:ownedSize(path.join(ROOT,'browser'))",
+      "new": "receiver_bytes:ownedSize(ROOT,true),browser_bytes:ownedSize(path.join(ROOT,'browser')),charged_metric:'max(logical, allocated)',receiver_allocation:ownedAllocation(ROOT,true),browser_allocation:ownedAllocation(path.join(ROOT,'browser'))",
+      "count": 1
+    },
+    {
+      "old": "function inventory(){return {installed:census(INSTALL),source:census(SOURCE),original_capsule:fileIdentity(ORIGINALS),\n runtime:{node:fileIdentity(fs.realpathSync(process.execPath)),python:fileIdentity(fs.realpathSync(PYTHON)),chrome_entry:fileIdentity(fs.realpathSync(CHROME))}};}",
+      "new": "function inventory(){return {installed:census(INSTALL),delivered:census(DELIVERY),\n receiver_inputs:Object.fromEntries(['receiver.mjs','AUTHORITY.json','CONTRACT.json','EXPECTED-NOTES-FRAGMENTS.json'].map(n=>[n,fileIdentity(path.join(ROOT,n))])),\n runtime:{node:fileIdentity(fs.realpathSync(process.execPath)),python:fileIdentity(fs.realpathSync(PYTHON)),\n python_framework:fileIdentity('/Library/Frameworks/Python.framework/Versions/3.13/Python'),chrome_entry:fileIdentity(fs.realpathSync(CHROME))}};}",
+      "count": 1
+    },
+    {
+      "old": "function expectedNotes(deck,review,mastery,savedAt,applicationPrompt){\n const lines=['RecallWeave — study notes',deck.title,'Saved: '+savedAt,'','FIRST SESSION','11 of 12 connections correct on the first try.',\n  'This count describes this session; it is not a measure of your ability.','','ESTIMATED MASTERY — MODEL STATE, NOT A GRADE',\n  'These estimates come from the demo’s learning model. They are not a validated assessment.','Practice does not change the first-session estimates.'];\n for(const concept of deck.concepts)lines.push(concept+': '+mastery[concept]);\n lines.push('','PRACTICE','Not started. 1 missed connection is available for practice.',\n  'Practice follows the explanations and is recorded separately from the first answers.','','REVIEW THE CONNECTIONS');\n for(let i=0;i<review.length;i++){const r=review[i],item=deck.items.find(v=>v.id===r.id),choice=item.id==='edit-01'?0:item.answer;\n  lines.push('',String(i+1)+'. '+item.prompt,'Concept: '+item.concept,'Your first answer: '+item.options[choice],\n   'First try: '+(choice===item.answer?'correct':'needs review'),'Correct answer: '+item.options[item.answer],\n   'Explanation: '+item.explanation,'Apply the idea: '+item.transfer,'Your explanation — reflection, not scored:');\n  if(item.id==='edit-01')for(const line of REFLECTION.split('\\n'))lines.push('  > '+line);else lines.push('  Not written.');\n  if(item.id==='edit-01')lines.push('Practice answer: not recorded.');\n }\n lines.push('','YOUR APPLICATION REFLECTION — NOT SCORED','Prompt: '+applicationPrompt,'  > '+APPLICATION,'','DECK ATTRIBUTION',\n  deck.attribution,deck.license,'','Saved from this browser session. The download does not upload the session or restore it after a refresh.');\n return lines.join('\\n')+'\\n';\n}\n",
+      "new": "function expectedNotes(deck,review,mastery,savedAt,applicationPrompt){\n require(applicationPrompt===NOTES.application_prompt,'frozen imported application prompt');\n require(review.length===12&&new Set(review.map(r=>r.id)).size===12,'complete independently bound review order');\n require(JSON.stringify(deck.concepts)===JSON.stringify(NOTES.mastery_concepts),'independent concept order');\n let text=NOTES.header_before_saved+savedAt+NOTES.header_after_saved;\n for(const concept of NOTES.mastery_concepts){\n  require(typeof mastery[concept]==='string'&&/^(100|[0-9]{1,2})%$/.test(mastery[concept]),'observed original mastery string');\n  text+=concept+': '+mastery[concept]+'\\n';\n }\n text+=NOTES.after_mastery;\n review.forEach((r,index)=>{require(Object.hasOwn(NOTES.record_blocks,r.id),'fixed independent review block');text+='\\n'+(index+1)+'. '+NOTES.record_blocks[r.id];});\n return text+NOTES.tail;\n}\n",
+      "count": 1
+    },
+    {
+      "old": "path.join(ROOT,'CONTRACT.md')",
+      "new": "path.join(ROOT,'CONTRACT.json')",
+      "count": 1
+    },
+    {
+      "old": " const sourceOriginal=fs.readFileSync(ORIGINALS);require(samePin(pin(sourceOriginal),CFG.original_capsule),'original-only capsule identity');\n const capsule=JSON.parse(sourceOriginal);require(capsule.originals_only===true&&capsule.new_launcher_or_installer_source_included===false,'original capsule scope');\n const deck=JSON.parse(capsule.files['courses/edit-distance.json'].content);\n require(deck.items.length===12&&new Set(deck.items.map(i=>i.id)).size===12,'original12 identities');\n resourceSnapshot('before-installed-command');before=inventory();jsonfile('identity-before.json',before);\n require(samePin(before.installed['INSTALLATION.json'],CFG.installed_marker),'offered installed marker');\n const marker=JSON.parse(fs.readFileSync(path.join(INSTALL,'INSTALLATION.json')));\n require(marker.root===INSTALL&&marker.schema==='recall-edit-distance-local-installation/v1','installed marker scope');\n require(JSON.stringify(Object.keys(before.installed).sort())===JSON.stringify([...Object.keys(marker.files),'INSTALLATION.json'].sort()),'complete installed file census');\n for(const [name,p] of Object.entries(marker.files))require(samePin(before.installed[name],p)&&before.installed[name].mode===p.mode,'installed declared pin/mode '+name);\n for(const [name,p] of Object.entries(capsule.files))require(samePin(before.installed['app/'+name],p),'all8 originals exact '+name);\n for(const [name,p] of Object.entries(CFG.source_files))require(samePin(before.source[name],p),'candidate source exact '+name);\n require(samePin(before.runtime.python,marker.python),'selected Python binary identity');\n",
+      "new": " require(samePin(pin(fs.readFileSync(path.join(ROOT,'EXPECTED-NOTES-FRAGMENTS.json'))),CFG.notes_fragments),'frozen independent full notes fragments');\n const deck=JSON.parse(fs.readFileSync(path.join(DELIVERY,'courses','sql-null-membership.json'),'utf8'));\n require(deck.items.length===12&&new Set(deck.items.map(i=>i.id)).size===12,'exact SQL twelve identities');\n require(JSON.stringify(deck.items.map(i=>i.id))===JSON.stringify(NOTES.scenario.map(i=>i.id)),'independent scenario identities/order');\n require(NOTES.scenario.every(row=>CFG.chosen_options[row.id]===row.chosen&&deck.items.find(i=>i.id===row.id).answer===row.correct),'frozen chosen/correct original identities');\n resourceSnapshot('before-installed-command');before=inventory();jsonfile('identity-before.json',before);\n for(const [kind,expected] of [['installed',CFG.installed_files],['delivered',CFG.delivery_files]]){\n  require(JSON.stringify(Object.keys(before[kind]).sort())===JSON.stringify(Object.keys(expected).sort()),'complete '+kind+' file census');\n  for(const [name,p] of Object.entries(expected))require(['bytes','sha256','git_blob','mode','mtime_ns','inode'].every(k=>p[k]===undefined||before[kind][name][k]===p[k]),'exact offered '+kind+' identity '+name);\n }\n require(samePin(before.installed['INSTALLATION.json'],CFG.installed_marker),'retained installed marker');\n const marker=JSON.parse(fs.readFileSync(path.join(INSTALL,'INSTALLATION.json'),'utf8'));\n require(marker.root===INSTALL&&marker.schema==='recall-edit-distance-local-installation/v1','installed marker scope');\n const delivery=JSON.parse(fs.readFileSync(path.join(DELIVERY,'DELIVERY.json'),'utf8'));\n require(delivery.schema==='recallweave-sql-lesson-delivery/v1'&&delivery.root===DELIVERY&&delivery.parser_result.accepted===true&&delivery.parser_result.parseDeck_calls===1,'accepted physical course delivery');\n for(const [name,p] of Object.entries(CFG.runtime))require(['bytes','sha256','git_blob','mode','mtime_ns'].every(k=>p[k]===undefined||before.runtime[name][k]===p[k]),'pinned runtime identity '+name);\n require(process.version==='v26.3.0','existing Node version');\n",
+      "count": 1
+    },
+    {
+      "old": "samePin(launch.original_archive,capsule.original_archive)",
+      "new": "samePin(launch.original_archive,CFG.original_archive)",
+      "count": 1
+    },
+    {
+      "old": "let chromeStdout='',chromeStderr='';\n chrome.stdout.on('data',b=>{chromeStdout+=b.toString();if(chromeStdout.length>2*1024**2)boundaryError=new Error('Chrome stdout cap');});\n chrome.stderr.on('data',b=>{chromeStderr+=b.toString();if(chromeStderr.length>2*1024**2)boundaryError=new Error('Chrome stderr cap');});",
+      "new": "let chromeStdout=[],chromeStderr=[],chromeStdoutBytes=0,chromeStderrBytes=0;\n chrome.stdout.on('data',b=>{chromeStdout.push(b);chromeStdoutBytes+=b.length;if(chromeStdoutBytes>1024**2)boundaryError=new Error('Chrome stdout cap');});\n chrome.stderr.on('data',b=>{chromeStderr.push(b);chromeStderrBytes+=b.length;if(chromeStderrBytes>1024**2)boundaryError=new Error('Chrome stderr cap');});",
+      "count": 1
+    },
+    {
+      "old": "Buffer.from(chromeStdout)",
+      "new": "Buffer.concat(chromeStdout)",
+      "count": 1
+    },
+    {
+      "old": "Buffer.from(chromeStderr)",
+      "new": "Buffer.concat(chromeStderr)",
+      "count": 1
+    },
+    {
+      "old": "const physicalCourse=path.join(INSTALL,'app','courses','edit-distance.json');",
+      "new": "const physicalCourse=path.join(DELIVERY,'courses','sql-null-membership.json');",
+      "count": 1
+    },
+    {
+      "old": "pin:before.installed['app/courses/edit-distance.json']",
+      "new": "pin:before.delivered['courses/sql-null-membership.json']",
+      "count": 1
+    },
+    {
+      "old": "const choice=item.id==='edit-01'?0:item.answer;",
+      "new": "const choice=CFG.chosen_options[item.id];require(Number.isInteger(choice)&&choice>=0&&choice<item.options.length,'frozen chosen original option');",
+      "count": 1
+    },
+    {
+      "old": "edit-01",
+      "new": "null-member-11",
+      "count": 4
+    },
+    {
+      "old": "'R1'",
+      "new": "'L1'",
+      "count": 1
+    },
+    {
+      "old": ".R1",
+      "new": ".L1",
+      "count": 2
+    },
+    {
+      "old": "R1-",
+      "new": "L1-",
+      "count": 1
+    },
+    {
+      "old": "'R2'",
+      "new": "'L2'",
+      "count": 1
+    },
+    {
+      "old": ".R2",
+      "new": ".L2",
+      "count": 2
+    },
+    {
+      "old": "R2-",
+      "new": "L2-",
+      "count": 1
+    },
+    {
+      "old": "'R3'",
+      "new": "'L3'",
+      "count": 1
+    },
+    {
+      "old": ".R3",
+      "new": ".L3",
+      "count": 2
+    },
+    {
+      "old": "R3-",
+      "new": "L3-",
+      "count": 1
+    },
+    {
+      "old": "'R4'",
+      "new": "'L4'",
+      "count": 1
+    },
+    {
+      "old": ".R4",
+      "new": ".L4",
+      "count": 2
+    },
+    {
+      "old": "R4-",
+      "new": "L4-",
+      "count": 1
+    },
+    {
+      "old": "window.__estateReceivingEvents=[];for(const type of ['click','input','change'])document.addEventListener(type,e=>{const t=e.target;window.__estateReceivingEvents.push({type,isTrusted:e.isTrusted,id:t.id||null,choice:t.closest?.('[data-choice]')?.dataset.choice??null,value:t.matches?.('textarea')?t.value:null,fileCount:t.type==='file'?t.files.length:null});},true);",
+      "new": "window.__estateReceivingEvents=[];window.__estateReceivingEventsOverflow=false;for(const type of ['click','input','change'])document.addEventListener(type,e=>{const t=e.target;if(window.__estateReceivingEvents.length>=256){window.__estateReceivingEventsOverflow=true;return;}window.__estateReceivingEvents.push({type,isTrusted:e.isTrusted,id:t.id||null,choice:t.closest?.('[data-choice]')?.dataset.choice??null,reflectionItem:t.dataset?.reflectionItem??null,value:t.matches?.('textarea')?t.value:null,fileCount:t.type==='file'?t.files.length:null});},{capture:true,passive:true});",
+      "count": 1
+    },
+    {
+      "old": "require(review.length===12&&new Set(review.map(r=>r.id)).size===12,'complete review identities');",
+      "new": "require(review.length===12&&new Set(review.map(r=>r.id)).size===12&&JSON.stringify(review.map(r=>r.id))===JSON.stringify(answered.map(a=>a.id)),'complete review identities and actual answer order');",
+      "count": 1
+    },
+    {
+      "old": "&&r.reflection===''&&r.status.startsWith(actual.correct?'Correct':'Needs review'),'original review by identity '+r.id);",
+      "new": "&&r.bodyParagraphs.includes('Apply the idea: '+item.transfer)&&r.reflection===''&&r.status.startsWith(actual.correct?'Correct':'Needs review'),'original review by identity '+r.id);",
+      "count": 1
+    },
+    {
+      "old": "trackProcesses();const exportBefore=await evaluate(\"Date.now()\");",
+      "new": "trackProcesses();const nativeExportBefore=Date.now(),exportBefore=await evaluate(\"Date.now()\");",
+      "count": 1
+    },
+    {
+      "old": "const exportAfter=await evaluate(\"Date.now()\"),savedMs=Date.parse(saved[1]);",
+      "new": "const exportAfter=await evaluate(\"Date.now()\"),nativeExportAfter=Date.now(),savedMs=Date.parse(saved[1]);",
+      "count": 1
+    },
+    {
+      "old": "require(Number.isFinite(savedMs)&&savedMs>=exportBefore&&savedMs<=exportAfter&&begin.suggestedFilename===",
+      "new": "require(/^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$/.test(saved[1])&&Number.isFinite(savedMs)&&savedMs>=exportBefore&&savedMs<=exportAfter&&savedMs>=nativeExportBefore&&savedMs<=nativeExportAfter&&begin.suggestedFilename===",
+      "count": 1
+    },
+    {
+      "old": "browser_clock_before:exportBefore,browser_clock_after:exportAfter,product_status:status,",
+      "new": "browser_clock_before:exportBefore,browser_clock_after:exportAfter,native_clock_before:nativeExportBefore,native_clock_after:nativeExportAfter,product_status:status,",
+      "count": 1
+    },
+    {
+      "old": "receipt.observations.input_events=await evaluate(\"window.__estateReceivingEvents\");",
+      "new": "receipt.observations.input_events=await evaluate(\"window.__estateReceivingEvents\");\n  require(await evaluate(\"window.__estateReceivingEventsOverflow===false\"),'bounded passive input event receipt');",
+      "count": 1
+    },
+    {
+      "old": "require(receipt.observations.input_events.some(e=>e.type==='change'&&e.id==='deck-file'&&e.fileCount===1),'physical file input event observed');",
+      "new": "require(receipt.observations.input_events.some(e=>e.type==='change'&&e.id==='deck-file'&&e.fileCount===1),'physical file input event observed');\n  require(receipt.observations.input_events.some(e=>e.type==='input'&&e.reflectionItem==='null-member-11'&&e.isTrusted&&e.value===REFLECTION),'trusted literal item writing event');\n  require(receipt.observations.input_events.some(e=>e.type==='input'&&e.id==='application-reflection'&&e.isTrusted&&e.value===APPLICATION),'trusted literal application writing event');\n  require(receipt.observations.downloads.filter(e=>e.method==='Browser.downloadWillBegin').length===1,'one actual notes download only');",
+      "count": 1
+    },
+    {
+      "old": "file_input:'DOM.setFileInputFiles selects physical installed course; no constructed File/Blob'",
+      "new": "file_input:'DOM.setFileInputFiles selects the separately delivered physical SQL course; no constructed File/Blob'",
+      "count": 1
+    },
+    {
+      "old": "source_files:Object.keys(after.source).length",
+      "new": "delivered_files:Object.keys(after.delivered).length",
+      "count": 1
+    },
+    {
+      "old": "'complete installed/source/original/runtime bytes modes mtimes unchanged'",
+      "new": "'complete installed/delivered/receiver/runtime bytes modes mtimes unchanged'",
+      "count": 1
+    },
+    {
+      "old": "receipt.guards=guards;receipt.total_seconds=",
+      "new": "receipt.guards=guards;receipt.profile_census_disappearances=profileCensusMisses;receipt.total_seconds=",
+      "count": 1
+    },
+    {
+      "old": "receipt.owned_final={source_evidence_bytes:ownedSize(ROOT,true),browser_bytes:ownedSize(path.join(ROOT,'browser'))};",
+      "new": "receipt.owned_final={source_evidence_bytes:ownedSize(ROOT,true),browser_bytes:ownedSize(path.join(ROOT,'browser')),charged_metric:'max(logical, allocated)',receiver_allocation:ownedAllocation(ROOT,true),browser_allocation:ownedAllocation(path.join(ROOT,'browser'))};",
+      "count": 1
+    },
+    {
+      "old": "scope:'one installed original learner session, actual physical notes, no original matrix rerun'",
+      "new": "scope:'one separately delivered SQL session through retained installed learner, physical independent notes comparison, no SQL/model/exporter oracle or old matrix rerun'",
+      "count": 1
+    }
+  ],
+  "reconstruction": {
+    "exact": true,
+    "replacements": 48,
+    "base_fetched_exact": true,
+    "candidate_native_executions": 0
+  }
+}

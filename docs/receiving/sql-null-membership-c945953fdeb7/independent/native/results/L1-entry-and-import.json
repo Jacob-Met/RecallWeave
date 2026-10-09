@@ -1,0 +1,50 @@
+{
+  "pass": true,
+  "entry_command": {
+    "executable": "/Users/me/Applications/RecallWeaveEditDistance-c945953fdeb7/Open RecallWeave.command",
+    "args": [
+      "--no-open"
+    ],
+    "cwd": "/tmp",
+    "pid": 17786,
+    "status": 0,
+    "signal": null,
+    "elapsed_ms": 238,
+    "stdout_pin": {
+      "bytes": 604,
+      "sha256": "7a97b8a5e55ab85b71cf9f5ec3c1ec74dcd27da5525b7e6444560b5c88c18426",
+      "git_blob": "3bbe1deef11abf250fd276188b70798877eac1c2"
+    },
+    "stderr_pin": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "git_blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    }
+  },
+  "initial": {
+    "title": "RecallWeave — learn the links",
+    "description": "Build a mental model of how cells move energy—from sunlight to usable work. Each next prompt is chosen from your learning state, not a fixed quiz order.",
+    "bundledTitle": "Energy in cells: from light to ATP"
+  },
+  "preview": {
+    "title": "SQL NULL: membership and absence",
+    "count": "sql-null-membership.json · 12 questions · 4 concepts",
+    "attribution": "Attribution supplied in the deck: RecallWeave contributors, estate-c945953fdeb7. Original fictional requests/blocked tables, questions, explanations and SQL worksheet; AI assistance was used in authoring. SQLite reference dialect. Primary sources: https://www.sqlite.org/lang_expr.html ; https://www.sqlite.org/lang_select.html .",
+    "license": "License supplied in the deck: Original lesson material: you may use, adapt and redistribute it with attribution to RecallWeave contributors. Linked SQLite documentation retains its own terms and is not reproduced here.",
+    "prompts": [
+      "SQLite represents false as 0, true as 1, and an unknown SQL result as NULL. What single row does this query return, in the displayed column order?\n\nSELECT NOT NULL AS negated_unknown,\n       0 AND NULL AS false_and_unknown,\n       1 OR NULL AS true_or_unknown;",
+      "SQLite. The complete fictional table requests(id, code) has rows (1, 7), (2, 9), (3, NULL). Table blocked(code) has exactly three rows: 7, NULL, 7. No other rows exist.\n\nWhich ordered list of ids does this query return?\n\nSELECT id FROM requests\nWHERE (code = 7) OR NOT (code = 7)\nORDER BY id;",
+      "SQLite. The complete fictional table requests(id, code) has rows (1, 7), (2, 9), (3, NULL). Table blocked(code) has exactly three rows: 7, NULL, 7. No other rows exist.\n\nWhat are all returned rows (id, in_set, not_in_set), in order? NULL denotes SQL NULL, not a string.\n\nSELECT id,\n       code IN (SELECT code FROM blocked) AS in_set,\n       code NOT IN (SELECT code FROM blocked) AS not_in_set\nFROM requests\nORDER BY id;",
+      "SQLite. The complete fictional table requests(id, code) has rows (1, 7), (2, 9), (3, NULL). Table blocked(code) has exactly three rows: 7, NULL, 7. No other rows exist.\n\nWhich ordered list of ids does this query return?\n\nSELECT id FROM requests\nWHERE code NOT IN (SELECT code FROM blocked)\nORDER BY id;",
+      "SQLite. The complete fictional table requests(id, code) has rows (1, 7), (2, 9), (3, NULL). Table blocked(code) has exactly three rows: 7, NULL, 7. No other rows exist.\n\nThe subquery's WHERE 0 returns no rows. What are all returned rows (id, in_empty, not_in_empty), in order?\n\nSELECT id,\n       code IN (SELECT code FROM blocked WHERE 0) AS in_empty,\n       code NOT IN (SELECT code FROM blocked WHERE 0) AS not_in_empty\nFROM requests\nORDER BY id;",
+      "SQLite. The complete fictional table requests(id, code) has rows (1, 7), (2, 9), (3, NULL). Table blocked(code) has exactly three rows: 7, NULL, 7. No other rows exist.\n\nWhich ordered list of ids does this query return after removing NULL from the right-hand relation?\n\nSELECT id FROM requests\nWHERE code NOT IN (SELECT code FROM blocked WHERE code IS NOT NULL)\nORDER BY id;",
+      "SQLite. The complete fictional table requests(id, code) has rows (1, 7), (2, 9), (3, NULL). Table blocked(code) has exactly three rows: 7, NULL, 7. No other rows exist.\n\nWhat single row (has_row, has_no_rows) does this query return? Both subqueries project the literal NULL.\n\nSELECT EXISTS(SELECT NULL FROM blocked WHERE code = 7) AS has_row,\n       EXISTS(SELECT NULL FROM blocked WHERE 0) AS has_no_rows;",
+      "SQLite. The complete fictional table requests(id, code) has rows (1, 7), (2, 9), (3, NULL). Table blocked(code) has exactly three rows: 7, NULL, 7. No other rows exist.\n\nWhich ordered list of request ids does the correlated absence query return?\n\nSELECT r.id FROM requests AS r\nWHERE NOT EXISTS (\n  SELECT 1 FROM blocked AS b WHERE b.code = r.code\n)\nORDER BY r.id;",
+      "SQLite. The complete fictional table requests(id, code) has rows (1, 7), (2, 9), (3, NULL). Table blocked(code) has exactly three rows: 7, NULL, 7. No other rows exist.\n\nThe subquery below uses COUNT(*) without GROUP BY. Which ordered list of request ids does the whole query return?\n\nSELECT r.id FROM requests AS r\nWHERE NOT EXISTS (\n  SELECT COUNT(*) FROM blocked AS b WHERE b.code = r.code\n)\nORDER BY r.id;",
+      "SQLite. The complete fictional table requests(id, code) has rows (1, 7), (2, 9), (3, NULL). Table blocked(code) has exactly three rows: 7, NULL, 7. No other rows exist.\n\nThe required policy is to consider only known request codes and keep a request if no blocked code equals it. Which ordered list of ids does this explicit policy return?\n\nSELECT r.id FROM requests AS r\nWHERE r.code IS NOT NULL\n  AND NOT EXISTS (SELECT 1 FROM blocked AS b WHERE b.code = r.code)\nORDER BY r.id;",
+      "SQLite. requests AS r has rows (id, code) = (1, 7), (2, 9), (3, NULL). blocked(code) may be ANY finite collection of integers and NULLs, including no rows or duplicate rows. Select exactly those requests whose code is non-NULL and for which no blocked row has an equal code under =. Which predicate, placed after WHERE, implements this policy for EVERY allowed blocked relation?",
+      "SQLite. The complete fictional table requests(id, code) has rows (1, 7), (2, 9), (3, NULL). Table blocked(code) has exactly three rows: 7, NULL, 7. No other rows exist.\n\nThis query compares ordinary = matching with SQLite IS matching, which treats two NULLs as matching. What are all returned rows (id, ordinary_absence, null_matching_absence), in order?\n\nSELECT r.id,\n       NOT EXISTS (SELECT 1 FROM blocked AS b WHERE b.code = r.code)\n         AS ordinary_absence,\n       NOT EXISTS (SELECT 1 FROM blocked AS b WHERE b.code IS r.code)\n         AS null_matching_absence\nFROM requests AS r\nORDER BY r.id;"
+    ]
+  },
+  "physical_course": "/Users/me/Developer/recallweave-sql-null-membership-c945953fdeb7/courses/sql-null-membership.json"
+}

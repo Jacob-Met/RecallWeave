@@ -1,0 +1,43 @@
+{
+  "schema": "sql-original-PNG-custody-wrapper-refusal-v1",
+  "phase": "read-only screenshot transport after fully closed accepted native session",
+  "requests": [
+    {
+      "deviceId": "0b4ac27b-8500-47d0-8f11-5a35402e9abc",
+      "path": "/Users/me/Developer/recallweave-sql-null-membership-receiving-c945953fdeb7/results/01-installed-entry.png"
+    },
+    {
+      "deviceId": "0b4ac27b-8500-47d0-8f11-5a35402e9abc",
+      "path": "/Users/me/Developer/recallweave-sql-null-membership-receiving-c945953fdeb7/results/02-original-review-and-reflection.png"
+    },
+    {
+      "deviceId": "0b4ac27b-8500-47d0-8f11-5a35402e9abc",
+      "path": "/Users/me/Developer/recallweave-sql-null-membership-receiving-c945953fdeb7/results/03-application-and-completed-download.png"
+    }
+  ],
+  "exact_exception": "Error: Original PNG image block missing results/01-installed-entry.png\n    at exec_main.mjs:6:98",
+  "effect": "The orchestration wrapper assumed a top-level content image block and threw before storing its three Promise.allSettled responses. Those original nested response objects were not retained. No screenshot was displayed or byte-qualified by that wrapper. This is a custody-wrapper schema observation, not an application/browser run or product failure.",
+  "browser_calls": 0,
+  "native_process_calls": 0,
+  "next": "Read the original immutable image through the documented result structure and retain each response before inspecting it; no browser or screenshot recapture.",
+  "followup": "A separately retained sequential read returned the documented top-level image block, and all three sequential original-image reads were retained before validation. Every decoded PNG matched the pre-existing native byte/SHA pin. The cause of the first parallel missing-block observation cannot be established because its original nested responses were not retained; no underlying product or native file defect is inferred.",
+  "original_screenshot_recaptures": 0,
+  "subsequent_original_byte_matches": [
+    {
+      "path": "results/01-installed-entry.png",
+      "bytes": 201572,
+      "sha256": "5e283b202bbd97bb71e8f0737c0f1ef6ac2cb95c64a582fa59118b8ef68aee09"
+    },
+    {
+      "path": "results/02-original-review-and-reflection.png",
+      "bytes": 222258,
+      "sha256": "2e253d40799edf844132f04aa40ff1d4fb7d6b58a439aef527cdc904c0fe7eac"
+    },
+    {
+      "path": "results/03-application-and-completed-download.png",
+      "bytes": 95766,
+      "sha256": "51cde8f0a033584f057aba27d56bf1ef153a7361e701c272e791d95cd7de2ea9"
+    }
+  ],
+  "actual_wrapper_source": "const root=load(\"sql_receiver_authority\").receiver_root,imgs=load(\"sql_custody_native_receipt\").files.filter(f=>f.binary_original);\nconst calls=await Promise.allSettled(imgs.map(f=>tools.mcp__codex_apps__remote_desktop_commander_read_file({deviceId:\"0b4ac27b-8500-47d0-8f11-5a35402e9abc\",path:root+\"/\"+f.path})));\nconst t=new Function(load(\"nmr_transport_helper\"))(),h=new Function(load(\"nmr_binary_hash_helper\"))(),out=[];\nfor(let i=0;i<calls.length;i++){\n if(calls[i].status!==\"fulfilled\")throw calls[i].reason;\n const response=calls[i].value,block=response.content?.find(x=>x.type===\"image\");if(!block)throw Error(\"Original PNG image block missing \"+imgs[i].path);\n const bytes=t.from64(block.data);if(bytes.length!==imgs[i].bytes||h.sha256(bytes)!==imgs[i].sha256)throw Error(\"Original PNG transport differs \"+imgs[i].path);\n out.push({file:imgs[i],request:{deviceId:\"0b4ac27b-8500-47d0-8f11-5a35402e9abc\",path:root+\"/\"+imgs[i].path},response,image:block,base64:block.data});\n text({path:imgs[i].path,bytes:imgs[i].bytes,sha256:imgs[i].sha256,git_blob:imgs[i].git_blob,exact_native_bytes:true});\n image(block,\"original\");\n}\nstore(\"sql_actual_original_png_reads\",out);\n"
+}

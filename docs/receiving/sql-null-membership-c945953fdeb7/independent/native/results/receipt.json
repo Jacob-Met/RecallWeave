@@ -1,0 +1,1575 @@
+{
+  "schema": 1,
+  "receiver": "estate-c945953fdeb7/control_execution",
+  "contract": "c02b23263fe2c1ec7496698dcd35d89d7f9890aa",
+  "groups": {
+    "L1": {
+      "pass": true,
+      "entry_command": {
+        "executable": "/Users/me/Applications/RecallWeaveEditDistance-c945953fdeb7/Open RecallWeave.command",
+        "args": [
+          "--no-open"
+        ],
+        "cwd": "/tmp",
+        "pid": 17786,
+        "status": 0,
+        "signal": null,
+        "elapsed_ms": 238,
+        "stdout_pin": {
+          "bytes": 604,
+          "sha256": "7a97b8a5e55ab85b71cf9f5ec3c1ec74dcd27da5525b7e6444560b5c88c18426",
+          "git_blob": "3bbe1deef11abf250fd276188b70798877eac1c2"
+        },
+        "stderr_pin": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "git_blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+        }
+      },
+      "initial": {
+        "title": "RecallWeave — learn the links",
+        "description": "Build a mental model of how cells move energy—from sunlight to usable work. Each next prompt is chosen from your learning state, not a fixed quiz order.",
+        "bundledTitle": "Energy in cells: from light to ATP"
+      },
+      "preview": {
+        "title": "SQL NULL: membership and absence",
+        "count": "sql-null-membership.json · 12 questions · 4 concepts",
+        "attribution": "Attribution supplied in the deck: RecallWeave contributors, estate-c945953fdeb7. Original fictional requests/blocked tables, questions, explanations and SQL worksheet; AI assistance was used in authoring. SQLite reference dialect. Primary sources: https://www.sqlite.org/lang_expr.html ; https://www.sqlite.org/lang_select.html .",
+        "license": "License supplied in the deck: Original lesson material: you may use, adapt and redistribute it with attribution to RecallWeave contributors. Linked SQLite documentation retains its own terms and is not reproduced here.",
+        "prompts": [
+          "SQLite represents false as 0, true as 1, and an unknown SQL result as NULL. What single row does this query return, in the displayed column order?\n\nSELECT NOT NULL AS negated_unknown,\n       0 AND NULL AS false_and_unknown,\n       1 OR NULL AS true_or_unknown;",
+          "SQLite. The complete fictional table requests(id, code) has rows (1, 7), (2, 9), (3, NULL). Table blocked(code) has exactly three rows: 7, NULL, 7. No other rows exist.\n\nWhich ordered list of ids does this query return?\n\nSELECT id FROM requests\nWHERE (code = 7) OR NOT (code = 7)\nORDER BY id;",
+          "SQLite. The complete fictional table requests(id, code) has rows (1, 7), (2, 9), (3, NULL). Table blocked(code) has exactly three rows: 7, NULL, 7. No other rows exist.\n\nWhat are all returned rows (id, in_set, not_in_set), in order? NULL denotes SQL NULL, not a string.\n\nSELECT id,\n       code IN (SELECT code FROM blocked) AS in_set,\n       code NOT IN (SELECT code FROM blocked) AS not_in_set\nFROM requests\nORDER BY id;",
+          "SQLite. The complete fictional table requests(id, code) has rows (1, 7), (2, 9), (3, NULL). Table blocked(code) has exactly three rows: 7, NULL, 7. No other rows exist.\n\nWhich ordered list of ids does this query return?\n\nSELECT id FROM requests\nWHERE code NOT IN (SELECT code FROM blocked)\nORDER BY id;",
+          "SQLite. The complete fictional table requests(id, code) has rows (1, 7), (2, 9), (3, NULL). Table blocked(code) has exactly three rows: 7, NULL, 7. No other rows exist.\n\nThe subquery's WHERE 0 returns no rows. What are all returned rows (id, in_empty, not_in_empty), in order?\n\nSELECT id,\n       code IN (SELECT code FROM blocked WHERE 0) AS in_empty,\n       code NOT IN (SELECT code FROM blocked WHERE 0) AS not_in_empty\nFROM requests\nORDER BY id;",
+          "SQLite. The complete fictional table requests(id, code) has rows (1, 7), (2, 9), (3, NULL). Table blocked(code) has exactly three rows: 7, NULL, 7. No other rows exist.\n\nWhich ordered list of ids does this query return after removing NULL from the right-hand relation?\n\nSELECT id FROM requests\nWHERE code NOT IN (SELECT code FROM blocked WHERE code IS NOT NULL)\nORDER BY id;",
+          "SQLite. The complete fictional table requests(id, code) has rows (1, 7), (2, 9), (3, NULL). Table blocked(code) has exactly three rows: 7, NULL, 7. No other rows exist.\n\nWhat single row (has_row, has_no_rows) does this query return? Both subqueries project the literal NULL.\n\nSELECT EXISTS(SELECT NULL FROM blocked WHERE code = 7) AS has_row,\n       EXISTS(SELECT NULL FROM blocked WHERE 0) AS has_no_rows;",
+          "SQLite. The complete fictional table requests(id, code) has rows (1, 7), (2, 9), (3, NULL). Table blocked(code) has exactly three rows: 7, NULL, 7. No other rows exist.\n\nWhich ordered list of request ids does the correlated absence query return?\n\nSELECT r.id FROM requests AS r\nWHERE NOT EXISTS (\n  SELECT 1 FROM blocked AS b WHERE b.code = r.code\n)\nORDER BY r.id;",
+          "SQLite. The complete fictional table requests(id, code) has rows (1, 7), (2, 9), (3, NULL). Table blocked(code) has exactly three rows: 7, NULL, 7. No other rows exist.\n\nThe subquery below uses COUNT(*) without GROUP BY. Which ordered list of request ids does the whole query return?\n\nSELECT r.id FROM requests AS r\nWHERE NOT EXISTS (\n  SELECT COUNT(*) FROM blocked AS b WHERE b.code = r.code\n)\nORDER BY r.id;",
+          "SQLite. The complete fictional table requests(id, code) has rows (1, 7), (2, 9), (3, NULL). Table blocked(code) has exactly three rows: 7, NULL, 7. No other rows exist.\n\nThe required policy is to consider only known request codes and keep a request if no blocked code equals it. Which ordered list of ids does this explicit policy return?\n\nSELECT r.id FROM requests AS r\nWHERE r.code IS NOT NULL\n  AND NOT EXISTS (SELECT 1 FROM blocked AS b WHERE b.code = r.code)\nORDER BY r.id;",
+          "SQLite. requests AS r has rows (id, code) = (1, 7), (2, 9), (3, NULL). blocked(code) may be ANY finite collection of integers and NULLs, including no rows or duplicate rows. Select exactly those requests whose code is non-NULL and for which no blocked row has an equal code under =. Which predicate, placed after WHERE, implements this policy for EVERY allowed blocked relation?",
+          "SQLite. The complete fictional table requests(id, code) has rows (1, 7), (2, 9), (3, NULL). Table blocked(code) has exactly three rows: 7, NULL, 7. No other rows exist.\n\nThis query compares ordinary = matching with SQLite IS matching, which treats two NULLs as matching. What are all returned rows (id, ordinary_absence, null_matching_absence), in order?\n\nSELECT r.id,\n       NOT EXISTS (SELECT 1 FROM blocked AS b WHERE b.code = r.code)\n         AS ordinary_absence,\n       NOT EXISTS (SELECT 1 FROM blocked AS b WHERE b.code IS r.code)\n         AS null_matching_absence\nFROM requests AS r\nORDER BY r.id;"
+        ]
+      },
+      "physical_course": "/Users/me/Developer/recallweave-sql-null-membership-c945953fdeb7/courses/sql-null-membership.json"
+    },
+    "L2": {
+      "pass": true,
+      "answers": [
+        {
+          "order": 1,
+          "id": "null-member-01",
+          "prompt": "SQLite represents false as 0, true as 1, and an unknown SQL result as NULL. What single row does this query return, in the displayed column order?\n\nSELECT NOT NULL AS negated_unknown,\n       0 AND NULL AS false_and_unknown,\n       1 OR NULL AS true_or_unknown;",
+          "choice": 2,
+          "choice_text": "(NULL, 0, 1)",
+          "correct": true,
+          "displayed_option_order": [
+            {
+              "choice": 2,
+              "text": "(NULL, 0, 1)",
+              "display": "A"
+            },
+            {
+              "choice": 3,
+              "text": "(1, 0, 1)",
+              "display": "B"
+            },
+            {
+              "choice": 0,
+              "text": "(NULL, NULL, NULL)",
+              "display": "C"
+            },
+            {
+              "choice": 1,
+              "text": "(0, 0, 1)",
+              "display": "D"
+            }
+          ],
+          "feedback": "That connection holds.Your answer: (NULL, 0, 1)Correct answer: (NULL, 0, 1)NOT NULL remains unknown. False already settles an AND expression as false, while true already settles an OR expression as true. The returned row is (NULL, 0, 1); these are three SQL values, not strings or a count of rows.Try this transfer: Evaluate NULL AND 1 and NULL OR 0. Explain why neither of those has the deciding known operand used in this question.Follow the next thread →"
+        },
+        {
+          "order": 2,
+          "id": "null-member-03",
+          "prompt": "SQLite. The complete fictional table requests(id, code) has rows (1, 7), (2, 9), (3, NULL). Table blocked(code) has exactly three rows: 7, NULL, 7. No other rows exist.\n\nWhat are all returned rows (id, in_set, not_in_set), in order? NULL denotes SQL NULL, not a string.\n\nSELECT id,\n       code IN (SELECT code FROM blocked) AS in_set,\n       code NOT IN (SELECT code FROM blocked) AS not_in_set\nFROM requests\nORDER BY id;",
+          "choice": 0,
+          "choice_text": "[(1, 1, 0), (2, NULL, NULL), (3, NULL, NULL)]",
+          "correct": true,
+          "displayed_option_order": [
+            {
+              "choice": 3,
+              "text": "[(1, 1, 0), (2, 0, 1), (3, 1, 0)]",
+              "display": "A"
+            },
+            {
+              "choice": 1,
+              "text": "[(1, 1, 0), (2, 0, 1), (3, 0, 1)]",
+              "display": "B"
+            },
+            {
+              "choice": 2,
+              "text": "[(1, NULL, NULL), (2, NULL, NULL), (3, NULL, NULL)]",
+              "display": "C"
+            },
+            {
+              "choice": 0,
+              "text": "[(1, 1, 0), (2, NULL, NULL), (3, NULL, NULL)]",
+              "display": "D"
+            }
+          ],
+          "feedback": "That connection holds.Your answer: [(1, 1, 0), (2, NULL, NULL), (3, NULL, NULL)]Correct answer: [(1, 1, 0), (2, NULL, NULL), (3, NULL, NULL)]Request 1 has a definite match on 7, so IN is true and NOT IN is false even though another blocked row is NULL. Request 2 has no definite match but comparison with the blocked NULL is unknown. Request 3 also has unknown comparisons with this nonempty relation. Thus the last two rows have NULL for both operators. The duplicate 7 does not add output rows.Try this transfer: Remove the blocked NULL and predict which cells change. Then keep only the blocked NULL and predict the complete result again.Follow the next thread →"
+        },
+        {
+          "order": 3,
+          "id": "null-member-07",
+          "prompt": "SQLite. The complete fictional table requests(id, code) has rows (1, 7), (2, 9), (3, NULL). Table blocked(code) has exactly three rows: 7, NULL, 7. No other rows exist.\n\nWhat single row (has_row, has_no_rows) does this query return? Both subqueries project the literal NULL.\n\nSELECT EXISTS(SELECT NULL FROM blocked WHERE code = 7) AS has_row,\n       EXISTS(SELECT NULL FROM blocked WHERE 0) AS has_no_rows;",
+          "choice": 2,
+          "choice_text": "(1, 0)",
+          "correct": true,
+          "displayed_option_order": [
+            {
+              "choice": 3,
+              "text": "(0, 0)",
+              "display": "A"
+            },
+            {
+              "choice": 0,
+              "text": "(NULL, NULL)",
+              "display": "B"
+            },
+            {
+              "choice": 2,
+              "text": "(1, 0)",
+              "display": "C"
+            },
+            {
+              "choice": 1,
+              "text": "(2, 0)",
+              "display": "D"
+            }
+          ],
+          "feedback": "That connection holds.Your answer: (1, 0)Correct answer: (1, 0)EXISTS checks whether the subquery returns any row, not whether its projected value is non-NULL and not how many rows it returns. The first subquery returns two rows whose projected values are NULL, so EXISTS is 1. The second returns no row, so EXISTS is 0.Try this transfer: Replace SELECT NULL with SELECT 99 in both subqueries. Explain why the EXISTS values do not change.Follow the next thread →"
+        },
+        {
+          "order": 4,
+          "id": "null-member-02",
+          "prompt": "SQLite. The complete fictional table requests(id, code) has rows (1, 7), (2, 9), (3, NULL). Table blocked(code) has exactly three rows: 7, NULL, 7. No other rows exist.\n\nWhich ordered list of ids does this query return?\n\nSELECT id FROM requests\nWHERE (code = 7) OR NOT (code = 7)\nORDER BY id;",
+          "choice": 1,
+          "choice_text": "[1, 2]",
+          "correct": true,
+          "displayed_option_order": [
+            {
+              "choice": 2,
+              "text": "[1]",
+              "display": "A"
+            },
+            {
+              "choice": 0,
+              "text": "[1, 2, 3]",
+              "display": "B"
+            },
+            {
+              "choice": 3,
+              "text": "[] (no rows)",
+              "display": "C"
+            },
+            {
+              "choice": 1,
+              "text": "[1, 2]",
+              "display": "D"
+            }
+          ],
+          "feedback": "That connection holds.Your answer: [1, 2]Correct answer: [1, 2]For code 7, the predicate is true OR false; for code 9 it is false OR true. For the missing code, both code = 7 and its negation are unknown, so their OR is unknown. WHERE keeps only true rows, leaving ids 1 and 2. The classical P OR NOT P identity does not force an unknown SQL predicate to true.Try this transfer: Design a WHERE condition that keeps all three requests while still distinguishing a known comparison result from an unknown one.Follow the next thread →"
+        },
+        {
+          "order": 5,
+          "id": "null-member-04",
+          "prompt": "SQLite. The complete fictional table requests(id, code) has rows (1, 7), (2, 9), (3, NULL). Table blocked(code) has exactly three rows: 7, NULL, 7. No other rows exist.\n\nWhich ordered list of ids does this query return?\n\nSELECT id FROM requests\nWHERE code NOT IN (SELECT code FROM blocked)\nORDER BY id;",
+          "choice": 3,
+          "choice_text": "[] (no rows)",
+          "correct": true,
+          "displayed_option_order": [
+            {
+              "choice": 3,
+              "text": "[] (no rows)",
+              "display": "A"
+            },
+            {
+              "choice": 0,
+              "text": "[2]",
+              "display": "B"
+            },
+            {
+              "choice": 1,
+              "text": "[2, 3]",
+              "display": "C"
+            },
+            {
+              "choice": 2,
+              "text": "[3]",
+              "display": "D"
+            }
+          ],
+          "feedback": "That connection holds.Your answer: [] (no rows)Correct answer: [] (no rows)Request 1 produces false for NOT IN. Requests 2 and 3 produce unknown rather than true because the nonempty right-hand relation contains NULL. WHERE admits none of those values, so no rows are returned. Replacing this expression with NOT EXISTS would change the selected outer NULL policy as well as the treatment of the right-hand NULL.Try this transfer: State whether a missing request code should be kept, rejected or reported separately before choosing an absence query.Follow the next thread →"
+        },
+        {
+          "order": 6,
+          "id": "null-member-08",
+          "prompt": "SQLite. The complete fictional table requests(id, code) has rows (1, 7), (2, 9), (3, NULL). Table blocked(code) has exactly three rows: 7, NULL, 7. No other rows exist.\n\nWhich ordered list of request ids does the correlated absence query return?\n\nSELECT r.id FROM requests AS r\nWHERE NOT EXISTS (\n  SELECT 1 FROM blocked AS b WHERE b.code = r.code\n)\nORDER BY r.id;",
+          "choice": 3,
+          "choice_text": "[2, 3]",
+          "correct": true,
+          "displayed_option_order": [
+            {
+              "choice": 2,
+              "text": "[3]",
+              "display": "A"
+            },
+            {
+              "choice": 3,
+              "text": "[2, 3]",
+              "display": "B"
+            },
+            {
+              "choice": 1,
+              "text": "[2]",
+              "display": "C"
+            },
+            {
+              "choice": 0,
+              "text": "[] (no rows)",
+              "display": "D"
+            }
+          ],
+          "feedback": "That connection holds.Your answer: [2, 3]Correct answer: [2, 3]The correlated equality finds rows for request 1. It finds none for code 9 and none for the outer NULL: b.code = NULL is never true, including when b.code itself is NULL. NOT EXISTS is therefore true for ids 2 and 3. If the policy excludes missing request codes, add an explicit outer IS NOT NULL condition.Try this transfer: Write the additional condition needed to exclude unknown request codes while preserving known absent codes.Follow the next thread →"
+        },
+        {
+          "order": 7,
+          "id": "null-member-10",
+          "prompt": "SQLite. The complete fictional table requests(id, code) has rows (1, 7), (2, 9), (3, NULL). Table blocked(code) has exactly three rows: 7, NULL, 7. No other rows exist.\n\nThe required policy is to consider only known request codes and keep a request if no blocked code equals it. Which ordered list of ids does this explicit policy return?\n\nSELECT r.id FROM requests AS r\nWHERE r.code IS NOT NULL\n  AND NOT EXISTS (SELECT 1 FROM blocked AS b WHERE b.code = r.code)\nORDER BY r.id;",
+          "choice": 1,
+          "choice_text": "[2]",
+          "correct": true,
+          "displayed_option_order": [
+            {
+              "choice": 3,
+              "text": "[1]",
+              "display": "A"
+            },
+            {
+              "choice": 0,
+              "text": "[2, 3]",
+              "display": "B"
+            },
+            {
+              "choice": 2,
+              "text": "[] (no rows)",
+              "display": "C"
+            },
+            {
+              "choice": 1,
+              "text": "[2]",
+              "display": "D"
+            }
+          ],
+          "feedback": "That connection holds.Your answer: [2]Correct answer: [2]The outer IS NOT NULL test explicitly excludes request 3. For the two known codes, NOT EXISTS keeps exactly a code with no equal blocked row: 7 is found and 9 is absent. The result is id 2. A blocked NULL cannot create a true equality match for a known code.Try this transfer: Predict this explicit policy when blocked has no rows and when blocked contains only NULL.Follow the next thread →"
+        },
+        {
+          "order": 8,
+          "id": "null-member-11",
+          "prompt": "SQLite. requests AS r has rows (id, code) = (1, 7), (2, 9), (3, NULL). blocked(code) may be ANY finite collection of integers and NULLs, including no rows or duplicate rows. Select exactly those requests whose code is non-NULL and for which no blocked row has an equal code under =. Which predicate, placed after WHERE, implements this policy for EVERY allowed blocked relation?",
+          "choice": 0,
+          "choice_text": "r.code NOT IN (SELECT b.code FROM blocked AS b WHERE b.code IS NOT NULL)",
+          "correct": false,
+          "displayed_option_order": [
+            {
+              "choice": 0,
+              "text": "r.code NOT IN (SELECT b.code FROM blocked AS b WHERE b.code IS NOT NULL)",
+              "display": "A"
+            },
+            {
+              "choice": 1,
+              "text": "NOT EXISTS (SELECT 1 FROM blocked AS b WHERE b.code = r.code AND b.code IS NOT NULL)",
+              "display": "B"
+            },
+            {
+              "choice": 2,
+              "text": "r.code IS NOT NULL AND NOT EXISTS (SELECT 1 FROM blocked AS b WHERE b.code = r.code)",
+              "display": "C"
+            },
+            {
+              "choice": 3,
+              "text": "r.code IS NOT NULL AND r.code NOT IN (SELECT b.code FROM blocked AS b)",
+              "display": "D"
+            }
+          ],
+          "feedback": "Here’s the correction.Your answer: r.code NOT IN (SELECT b.code FROM blocked AS b WHERE b.code IS NOT NULL)Correct answer: r.code IS NOT NULL AND NOT EXISTS (SELECT 1 FROM blocked AS b WHERE b.code = r.code)Only the predicate with both the outer IS NOT NULL guard and equality-based NOT EXISTS implements the stated policy for every allowed right side. The guard rejects a missing request code. For a known code, the subquery returns a row exactly when an equal blocked integer exists, so NOT EXISTS is the required absence test. Duplicates do not change row existence and blocked NULLs do not make equality true. A right-filtered NOT IN admits the missing outer code when its filtered right side is empty; unguarded NOT EXISTS admits that missing code; guarded unfiltered NOT IN can reject a known absent code when a blocked NULL makes its predicate unknown.Try this transfer: Give a smallest counterexample to each rejected predicate, then explain why one correctly chosen example cannot prove the accepted predicate for every finite right side.Follow the next thread →"
+        },
+        {
+          "order": 9,
+          "id": "null-member-12",
+          "prompt": "SQLite. The complete fictional table requests(id, code) has rows (1, 7), (2, 9), (3, NULL). Table blocked(code) has exactly three rows: 7, NULL, 7. No other rows exist.\n\nThis query compares ordinary = matching with SQLite IS matching, which treats two NULLs as matching. What are all returned rows (id, ordinary_absence, null_matching_absence), in order?\n\nSELECT r.id,\n       NOT EXISTS (SELECT 1 FROM blocked AS b WHERE b.code = r.code)\n         AS ordinary_absence,\n       NOT EXISTS (SELECT 1 FROM blocked AS b WHERE b.code IS r.code)\n         AS null_matching_absence\nFROM requests AS r\nORDER BY r.id;",
+          "choice": 3,
+          "choice_text": "[(1, 0, 0), (2, 1, 1), (3, 1, 0)]",
+          "correct": true,
+          "displayed_option_order": [
+            {
+              "choice": 2,
+              "text": "[(1, 0, 0), (2, 1, 1), (3, 1, 1)]",
+              "display": "A"
+            },
+            {
+              "choice": 1,
+              "text": "[(1, 0, 0), (2, 1, 1), (3, NULL, NULL)]",
+              "display": "B"
+            },
+            {
+              "choice": 0,
+              "text": "[(1, 0, 0), (2, 1, 1), (3, 0, 0)]",
+              "display": "C"
+            },
+            {
+              "choice": 3,
+              "text": "[(1, 0, 0), (2, 1, 1), (3, 1, 0)]",
+              "display": "D"
+            }
+          ],
+          "feedback": "That connection holds.Your answer: [(1, 0, 0), (2, 1, 1), (3, 1, 0)]Correct answer: [(1, 0, 0), (2, 1, 1), (3, 1, 0)]Both matching rules find the blocked 7 for request 1 and find no 9 for request 2. Ordinary equality never finds a match for the outer NULL, while SQLite IS matches it to the blocked NULL. The third row is therefore (3, 1, 0). IS expresses a different NULL-matching policy; it is not an automatic substitute for an explicit requirement to exclude all missing outer codes.Try this transfer: Remove every blocked NULL and compare the two absence predicates again for a missing request code. Explain why an outer IS NOT NULL policy is different from NULL-matching equality.Follow the next thread →"
+        },
+        {
+          "order": 10,
+          "id": "null-member-05",
+          "prompt": "SQLite. The complete fictional table requests(id, code) has rows (1, 7), (2, 9), (3, NULL). Table blocked(code) has exactly three rows: 7, NULL, 7. No other rows exist.\n\nThe subquery's WHERE 0 returns no rows. What are all returned rows (id, in_empty, not_in_empty), in order?\n\nSELECT id,\n       code IN (SELECT code FROM blocked WHERE 0) AS in_empty,\n       code NOT IN (SELECT code FROM blocked WHERE 0) AS not_in_empty\nFROM requests\nORDER BY id;",
+          "choice": 1,
+          "choice_text": "[(1, 0, 1), (2, 0, 1), (3, 0, 1)]",
+          "correct": true,
+          "displayed_option_order": [
+            {
+              "choice": 0,
+              "text": "[(1, 0, 1), (2, 0, 1), (3, NULL, NULL)]",
+              "display": "A"
+            },
+            {
+              "choice": 1,
+              "text": "[(1, 0, 1), (2, 0, 1), (3, 0, 1)]",
+              "display": "B"
+            },
+            {
+              "choice": 3,
+              "text": "[(1, 1, 0), (2, 1, 0), (3, 1, 0)]",
+              "display": "C"
+            },
+            {
+              "choice": 2,
+              "text": "[(1, NULL, NULL), (2, NULL, NULL), (3, NULL, NULL)]",
+              "display": "D"
+            }
+          ],
+          "feedback": "That connection holds.Your answer: [(1, 0, 1), (2, 0, 1), (3, 0, 1)]Correct answer: [(1, 0, 1), (2, 0, 1), (3, 0, 1)]The subquery returns no rows, including no NULL-valued row. IN is false and NOT IN is true for an empty right-hand relation, even when the outer value is NULL. Every request therefore produces (0, 1). An empty relation is different from a relation containing one NULL.Try this transfer: Compare an empty subquery with SELECT NULL. Explain why both may look blank in a display while producing different membership results.Follow the next thread →"
+        },
+        {
+          "order": 11,
+          "id": "null-member-09",
+          "prompt": "SQLite. The complete fictional table requests(id, code) has rows (1, 7), (2, 9), (3, NULL). Table blocked(code) has exactly three rows: 7, NULL, 7. No other rows exist.\n\nThe subquery below uses COUNT(*) without GROUP BY. Which ordered list of request ids does the whole query return?\n\nSELECT r.id FROM requests AS r\nWHERE NOT EXISTS (\n  SELECT COUNT(*) FROM blocked AS b WHERE b.code = r.code\n)\nORDER BY r.id;",
+          "choice": 0,
+          "choice_text": "[] (no rows)",
+          "correct": true,
+          "displayed_option_order": [
+            {
+              "choice": 2,
+              "text": "[2]",
+              "display": "A"
+            },
+            {
+              "choice": 3,
+              "text": "[1, 2, 3]",
+              "display": "B"
+            },
+            {
+              "choice": 0,
+              "text": "[] (no rows)",
+              "display": "C"
+            },
+            {
+              "choice": 1,
+              "text": "[2, 3]",
+              "display": "D"
+            }
+          ],
+          "feedback": "That connection holds.Your answer: [] (no rows)Correct answer: [] (no rows)COUNT(*) without GROUP BY returns one aggregate result row even when its filtered input has zero rows. For the three requests the inner counts would be 2, 0 and 0, but every inner query still returns a row. EXISTS is true each time and NOT EXISTS is false, so the outer query returns no rows. Counting zero matches is not the same as returning zero rows.Try this transfer: Replace the aggregate subquery with SELECT 1 using the same WHERE. Explain why the zero-match case now differs.Follow the next thread →"
+        },
+        {
+          "order": 12,
+          "id": "null-member-06",
+          "prompt": "SQLite. The complete fictional table requests(id, code) has rows (1, 7), (2, 9), (3, NULL). Table blocked(code) has exactly three rows: 7, NULL, 7. No other rows exist.\n\nWhich ordered list of ids does this query return after removing NULL from the right-hand relation?\n\nSELECT id FROM requests\nWHERE code NOT IN (SELECT code FROM blocked WHERE code IS NOT NULL)\nORDER BY id;",
+          "choice": 0,
+          "choice_text": "[2]",
+          "correct": true,
+          "displayed_option_order": [
+            {
+              "choice": 2,
+              "text": "[] (no rows)",
+              "display": "A"
+            },
+            {
+              "choice": 3,
+              "text": "[1]",
+              "display": "B"
+            },
+            {
+              "choice": 1,
+              "text": "[2, 3]",
+              "display": "C"
+            },
+            {
+              "choice": 0,
+              "text": "[2]",
+              "display": "D"
+            }
+          ],
+          "feedback": "That connection holds.Your answer: [2]Correct answer: [2]Filtering the right-hand relation leaves two 7 values and no NULL. Request 1 is a definite match; request 2 is a definite nonmatch; the outer NULL still produces unknown against this nonempty right side. Only id 2 survives WHERE. This result does not prove that filtering the right side always excludes outer NULLs: if that filtered relation is empty, NOT IN is true for the outer NULL too.Try this transfer: Use a right-hand relation containing only NULL. Predict what the filtered NOT IN does to the missing request code.See your learning trace →"
+        }
+      ],
+      "review": [
+        {
+          "id": "null-member-01",
+          "prompt": "SQLite represents false as 0, true as 1, and an unknown SQL result as NULL. What single row does this query return, in the displayed column order?\n\nSELECT NOT NULL AS negated_unknown,\n       0 AND NULL AS false_and_unknown,\n       1 OR NULL AS true_or_unknown;",
+          "status": "Correct · first try",
+          "first": "(NULL, 0, 1)",
+          "correct": "(NULL, 0, 1)",
+          "bodyParagraphs": [
+            "NOT NULL remains unknown. False already settles an AND expression as false, while true already settles an OR expression as true. The returned row is (NULL, 0, 1); these are three SQL values, not strings or a count of rows.",
+            "Apply the idea: Evaluate NULL AND 1 and NULL OR 0. Explain why neither of those has the deciding known operand used in this question."
+          ],
+          "reflection": ""
+        },
+        {
+          "id": "null-member-03",
+          "prompt": "SQLite. The complete fictional table requests(id, code) has rows (1, 7), (2, 9), (3, NULL). Table blocked(code) has exactly three rows: 7, NULL, 7. No other rows exist.\n\nWhat are all returned rows (id, in_set, not_in_set), in order? NULL denotes SQL NULL, not a string.\n\nSELECT id,\n       code IN (SELECT code FROM blocked) AS in_set,\n       code NOT IN (SELECT code FROM blocked) AS not_in_set\nFROM requests\nORDER BY id;",
+          "status": "Correct · first try",
+          "first": "[(1, 1, 0), (2, NULL, NULL), (3, NULL, NULL)]",
+          "correct": "[(1, 1, 0), (2, NULL, NULL), (3, NULL, NULL)]",
+          "bodyParagraphs": [
+            "Request 1 has a definite match on 7, so IN is true and NOT IN is false even though another blocked row is NULL. Request 2 has no definite match but comparison with the blocked NULL is unknown. Request 3 also has unknown comparisons with this nonempty relation. Thus the last two rows have NULL for both operators. The duplicate 7 does not add output rows.",
+            "Apply the idea: Remove the blocked NULL and predict which cells change. Then keep only the blocked NULL and predict the complete result again."
+          ],
+          "reflection": ""
+        },
+        {
+          "id": "null-member-07",
+          "prompt": "SQLite. The complete fictional table requests(id, code) has rows (1, 7), (2, 9), (3, NULL). Table blocked(code) has exactly three rows: 7, NULL, 7. No other rows exist.\n\nWhat single row (has_row, has_no_rows) does this query return? Both subqueries project the literal NULL.\n\nSELECT EXISTS(SELECT NULL FROM blocked WHERE code = 7) AS has_row,\n       EXISTS(SELECT NULL FROM blocked WHERE 0) AS has_no_rows;",
+          "status": "Correct · first try",
+          "first": "(1, 0)",
+          "correct": "(1, 0)",
+          "bodyParagraphs": [
+            "EXISTS checks whether the subquery returns any row, not whether its projected value is non-NULL and not how many rows it returns. The first subquery returns two rows whose projected values are NULL, so EXISTS is 1. The second returns no row, so EXISTS is 0.",
+            "Apply the idea: Replace SELECT NULL with SELECT 99 in both subqueries. Explain why the EXISTS values do not change."
+          ],
+          "reflection": ""
+        },
+        {
+          "id": "null-member-02",
+          "prompt": "SQLite. The complete fictional table requests(id, code) has rows (1, 7), (2, 9), (3, NULL). Table blocked(code) has exactly three rows: 7, NULL, 7. No other rows exist.\n\nWhich ordered list of ids does this query return?\n\nSELECT id FROM requests\nWHERE (code = 7) OR NOT (code = 7)\nORDER BY id;",
+          "status": "Correct · first try",
+          "first": "[1, 2]",
+          "correct": "[1, 2]",
+          "bodyParagraphs": [
+            "For code 7, the predicate is true OR false; for code 9 it is false OR true. For the missing code, both code = 7 and its negation are unknown, so their OR is unknown. WHERE keeps only true rows, leaving ids 1 and 2. The classical P OR NOT P identity does not force an unknown SQL predicate to true.",
+            "Apply the idea: Design a WHERE condition that keeps all three requests while still distinguishing a known comparison result from an unknown one."
+          ],
+          "reflection": ""
+        },
+        {
+          "id": "null-member-04",
+          "prompt": "SQLite. The complete fictional table requests(id, code) has rows (1, 7), (2, 9), (3, NULL). Table blocked(code) has exactly three rows: 7, NULL, 7. No other rows exist.\n\nWhich ordered list of ids does this query return?\n\nSELECT id FROM requests\nWHERE code NOT IN (SELECT code FROM blocked)\nORDER BY id;",
+          "status": "Correct · first try",
+          "first": "[] (no rows)",
+          "correct": "[] (no rows)",
+          "bodyParagraphs": [
+            "Request 1 produces false for NOT IN. Requests 2 and 3 produce unknown rather than true because the nonempty right-hand relation contains NULL. WHERE admits none of those values, so no rows are returned. Replacing this expression with NOT EXISTS would change the selected outer NULL policy as well as the treatment of the right-hand NULL.",
+            "Apply the idea: State whether a missing request code should be kept, rejected or reported separately before choosing an absence query."
+          ],
+          "reflection": ""
+        },
+        {
+          "id": "null-member-08",
+          "prompt": "SQLite. The complete fictional table requests(id, code) has rows (1, 7), (2, 9), (3, NULL). Table blocked(code) has exactly three rows: 7, NULL, 7. No other rows exist.\n\nWhich ordered list of request ids does the correlated absence query return?\n\nSELECT r.id FROM requests AS r\nWHERE NOT EXISTS (\n  SELECT 1 FROM blocked AS b WHERE b.code = r.code\n)\nORDER BY r.id;",
+          "status": "Correct · first try",
+          "first": "[2, 3]",
+          "correct": "[2, 3]",
+          "bodyParagraphs": [
+            "The correlated equality finds rows for request 1. It finds none for code 9 and none for the outer NULL: b.code = NULL is never true, including when b.code itself is NULL. NOT EXISTS is therefore true for ids 2 and 3. If the policy excludes missing request codes, add an explicit outer IS NOT NULL condition.",
+            "Apply the idea: Write the additional condition needed to exclude unknown request codes while preserving known absent codes."
+          ],
+          "reflection": ""
+        },
+        {
+          "id": "null-member-10",
+          "prompt": "SQLite. The complete fictional table requests(id, code) has rows (1, 7), (2, 9), (3, NULL). Table blocked(code) has exactly three rows: 7, NULL, 7. No other rows exist.\n\nThe required policy is to consider only known request codes and keep a request if no blocked code equals it. Which ordered list of ids does this explicit policy return?\n\nSELECT r.id FROM requests AS r\nWHERE r.code IS NOT NULL\n  AND NOT EXISTS (SELECT 1 FROM blocked AS b WHERE b.code = r.code)\nORDER BY r.id;",
+          "status": "Correct · first try",
+          "first": "[2]",
+          "correct": "[2]",
+          "bodyParagraphs": [
+            "The outer IS NOT NULL test explicitly excludes request 3. For the two known codes, NOT EXISTS keeps exactly a code with no equal blocked row: 7 is found and 9 is absent. The result is id 2. A blocked NULL cannot create a true equality match for a known code.",
+            "Apply the idea: Predict this explicit policy when blocked has no rows and when blocked contains only NULL."
+          ],
+          "reflection": ""
+        },
+        {
+          "id": "null-member-11",
+          "prompt": "SQLite. requests AS r has rows (id, code) = (1, 7), (2, 9), (3, NULL). blocked(code) may be ANY finite collection of integers and NULLs, including no rows or duplicate rows. Select exactly those requests whose code is non-NULL and for which no blocked row has an equal code under =. Which predicate, placed after WHERE, implements this policy for EVERY allowed blocked relation?",
+          "status": "Needs review · first try",
+          "first": "r.code NOT IN (SELECT b.code FROM blocked AS b WHERE b.code IS NOT NULL)",
+          "correct": "r.code IS NOT NULL AND NOT EXISTS (SELECT 1 FROM blocked AS b WHERE b.code = r.code)",
+          "bodyParagraphs": [
+            "Only the predicate with both the outer IS NOT NULL guard and equality-based NOT EXISTS implements the stated policy for every allowed right side. The guard rejects a missing request code. For a known code, the subquery returns a row exactly when an equal blocked integer exists, so NOT EXISTS is the required absence test. Duplicates do not change row existence and blocked NULLs do not make equality true. A right-filtered NOT IN admits the missing outer code when its filtered right side is empty; unguarded NOT EXISTS admits that missing code; guarded unfiltered NOT IN can reject a known absent code when a blocked NULL makes its predicate unknown.",
+            "Apply the idea: Give a smallest counterexample to each rejected predicate, then explain why one correctly chosen example cannot prove the accepted predicate for every finite right side."
+          ],
+          "reflection": ""
+        },
+        {
+          "id": "null-member-12",
+          "prompt": "SQLite. The complete fictional table requests(id, code) has rows (1, 7), (2, 9), (3, NULL). Table blocked(code) has exactly three rows: 7, NULL, 7. No other rows exist.\n\nThis query compares ordinary = matching with SQLite IS matching, which treats two NULLs as matching. What are all returned rows (id, ordinary_absence, null_matching_absence), in order?\n\nSELECT r.id,\n       NOT EXISTS (SELECT 1 FROM blocked AS b WHERE b.code = r.code)\n         AS ordinary_absence,\n       NOT EXISTS (SELECT 1 FROM blocked AS b WHERE b.code IS r.code)\n         AS null_matching_absence\nFROM requests AS r\nORDER BY r.id;",
+          "status": "Correct · first try",
+          "first": "[(1, 0, 0), (2, 1, 1), (3, 1, 0)]",
+          "correct": "[(1, 0, 0), (2, 1, 1), (3, 1, 0)]",
+          "bodyParagraphs": [
+            "Both matching rules find the blocked 7 for request 1 and find no 9 for request 2. Ordinary equality never finds a match for the outer NULL, while SQLite IS matches it to the blocked NULL. The third row is therefore (3, 1, 0). IS expresses a different NULL-matching policy; it is not an automatic substitute for an explicit requirement to exclude all missing outer codes.",
+            "Apply the idea: Remove every blocked NULL and compare the two absence predicates again for a missing request code. Explain why an outer IS NOT NULL policy is different from NULL-matching equality."
+          ],
+          "reflection": ""
+        },
+        {
+          "id": "null-member-05",
+          "prompt": "SQLite. The complete fictional table requests(id, code) has rows (1, 7), (2, 9), (3, NULL). Table blocked(code) has exactly three rows: 7, NULL, 7. No other rows exist.\n\nThe subquery's WHERE 0 returns no rows. What are all returned rows (id, in_empty, not_in_empty), in order?\n\nSELECT id,\n       code IN (SELECT code FROM blocked WHERE 0) AS in_empty,\n       code NOT IN (SELECT code FROM blocked WHERE 0) AS not_in_empty\nFROM requests\nORDER BY id;",
+          "status": "Correct · first try",
+          "first": "[(1, 0, 1), (2, 0, 1), (3, 0, 1)]",
+          "correct": "[(1, 0, 1), (2, 0, 1), (3, 0, 1)]",
+          "bodyParagraphs": [
+            "The subquery returns no rows, including no NULL-valued row. IN is false and NOT IN is true for an empty right-hand relation, even when the outer value is NULL. Every request therefore produces (0, 1). An empty relation is different from a relation containing one NULL.",
+            "Apply the idea: Compare an empty subquery with SELECT NULL. Explain why both may look blank in a display while producing different membership results."
+          ],
+          "reflection": ""
+        },
+        {
+          "id": "null-member-09",
+          "prompt": "SQLite. The complete fictional table requests(id, code) has rows (1, 7), (2, 9), (3, NULL). Table blocked(code) has exactly three rows: 7, NULL, 7. No other rows exist.\n\nThe subquery below uses COUNT(*) without GROUP BY. Which ordered list of request ids does the whole query return?\n\nSELECT r.id FROM requests AS r\nWHERE NOT EXISTS (\n  SELECT COUNT(*) FROM blocked AS b WHERE b.code = r.code\n)\nORDER BY r.id;",
+          "status": "Correct · first try",
+          "first": "[] (no rows)",
+          "correct": "[] (no rows)",
+          "bodyParagraphs": [
+            "COUNT(*) without GROUP BY returns one aggregate result row even when its filtered input has zero rows. For the three requests the inner counts would be 2, 0 and 0, but every inner query still returns a row. EXISTS is true each time and NOT EXISTS is false, so the outer query returns no rows. Counting zero matches is not the same as returning zero rows.",
+            "Apply the idea: Replace the aggregate subquery with SELECT 1 using the same WHERE. Explain why the zero-match case now differs."
+          ],
+          "reflection": ""
+        },
+        {
+          "id": "null-member-06",
+          "prompt": "SQLite. The complete fictional table requests(id, code) has rows (1, 7), (2, 9), (3, NULL). Table blocked(code) has exactly three rows: 7, NULL, 7. No other rows exist.\n\nWhich ordered list of ids does this query return after removing NULL from the right-hand relation?\n\nSELECT id FROM requests\nWHERE code NOT IN (SELECT code FROM blocked WHERE code IS NOT NULL)\nORDER BY id;",
+          "status": "Correct · first try",
+          "first": "[2]",
+          "correct": "[2]",
+          "bodyParagraphs": [
+            "Filtering the right-hand relation leaves two 7 values and no NULL. Request 1 is a definite match; request 2 is a definite nonmatch; the outer NULL still produces unknown against this nonempty right side. Only id 2 survives WHERE. This result does not prove that filtering the right side always excludes outer NULLs: if that filtered relation is empty, NOT IN is true for the outer NULL too.",
+            "Apply the idea: Use a right-hand relation containing only NULL. Predict what the filtered NOT IN does to the missing request code."
+          ],
+          "reflection": ""
+        }
+      ],
+      "summary": "You made 11 of 12 connections on the first try. That count is a snapshot—not a measure of your ability. Review the concept estimates and choose one connection to explain in your own words.",
+      "writing": {
+        "item": "I treated a filtered NOT IN as a universal absence policy. On an empty blocked table, even a NULL request code passes NOT IN.\nI will state the missing-code policy first and keep the outer code IS NOT NULL guard when unknown requests must be excluded.",
+        "application": "For an eligibility report, I would keep requests with a known code and no equal blocked code. A correlated NOT EXISTS makes row absence explicit; the outer IS NOT NULL check states the policy for missing request codes.",
+        "prompt": "Choose one connection from this deck and explain how it relates to another idea in your own words.",
+        "source": "Attribution supplied in the deck: RecallWeave contributors, estate-c945953fdeb7. Original fictional requests/blocked tables, questions, explanations and SQL worksheet; AI assistance was used in authoring. SQLite reference dialect. Primary sources: https://www.sqlite.org/lang_expr.html ; https://www.sqlite.org/lang_select.html .License supplied in the deck: Original lesson material: you may use, adapt and redistribute it with attribution to RecallWeave contributors. Linked SQLite documentation retains its own terms and is not reproduced here.",
+        "mastery": [
+          {
+            "concept": "three-valued logic",
+            "value": "91%"
+          },
+          {
+            "concept": "membership",
+            "value": "100%"
+          },
+          {
+            "concept": "row existence",
+            "value": "98%"
+          },
+          {
+            "concept": "absence policies",
+            "value": "74%"
+          }
+        ]
+      },
+      "answer_scenario": "null-member-11 original option0 wrong; eleven original correct answers; display order observed, not fixed"
+    },
+    "L3": {
+      "pass": true,
+      "download_event": {
+        "method": "Browser.downloadWillBegin",
+        "frameId": "8CF5B4752E1FFB995841A63CC72D76D3",
+        "guid": "d093c9a7-1931-4d2b-b955-5aefc5b2696f",
+        "url": "blob:null/8f3aad26-85f6-4c0e-842e-96530b46e996",
+        "suggestedFilename": "recallweave-study-notes-2026-10-09.txt"
+      },
+      "completion_event": {
+        "method": "Browser.downloadProgress",
+        "guid": "d093c9a7-1931-4d2b-b955-5aefc5b2696f",
+        "totalBytes": 14850,
+        "receivedBytes": 14850,
+        "state": "completed",
+        "filePath": "/Users/me/Developer/recallweave-sql-null-membership-receiving-c945953fdeb7/browser/downloads/recallweave-study-notes-2026-10-09.txt"
+      },
+      "physical_path": "/Users/me/Developer/recallweave-sql-null-membership-receiving-c945953fdeb7/browser/downloads/recallweave-study-notes-2026-10-09.txt",
+      "physical": {
+        "bytes": 14850,
+        "sha256": "ad2688bcfc840c71727517413f91688919d09e2582a03173632751aa94d29578",
+        "git_blob": "9d3921f210057a6f37d7d1fd144a02d77cf52196",
+        "mode": "0644",
+        "mtime_ns": "1791548665640155893",
+        "inode": "137640858"
+      },
+      "independent_expected": {
+        "bytes": 14850,
+        "sha256": "ad2688bcfc840c71727517413f91688919d09e2582a03173632751aa94d29578",
+        "git_blob": "9d3921f210057a6f37d7d1fd144a02d77cf52196"
+      },
+      "exact_complete_bytes": true,
+      "saved_timestamp": "2026-10-09T12:24:25.609Z",
+      "browser_clock_before": 1791548665540,
+      "browser_clock_after": 1791548665788,
+      "native_clock_before": 1791548665530,
+      "native_clock_after": 1791548665789,
+      "product_status": "Download requested. Check your browser’s downloads for the study notes. Your session is still here.",
+      "artifact_scope": "Readable physical text, no restore/resume acceptance",
+      "literal_reflection": "I treated a filtered NOT IN as a universal absence policy. On an empty blocked table, even a NULL request code passes NOT IN.\nI will state the missing-code policy first and keep the outer code IS NOT NULL guard when unknown requests must be excluded.",
+      "literal_application": "For an eligibility report, I would keep requests with a known code and no equal blocked code. A correlated NOT EXISTS makes row absence explicit; the outer IS NOT NULL check states the policy for missing request codes."
+    },
+    "L4": {
+      "pass": true,
+      "installed_files": 19,
+      "delivered_files": 4,
+      "complete_byte_mode_mtime_preservation": true,
+      "first_answers_preserved": true,
+      "browser_actual_exit": {
+        "pid": 17789,
+        "code": 0,
+        "signal": null,
+        "at": "2026-10-09T12:24:29.341Z"
+      },
+      "remaining_owned_processes": [],
+      "entry_child_absent": true,
+      "application_listener_started": false,
+      "console_exceptions": 0,
+      "console_messages": 0,
+      "log_entries": 0,
+      "resource_failures": 0,
+      "non_file_blob_requests": [],
+      "disclosure": "Private headless --no-open installed route; classify all actual errors separately, with no default-browser or persistence claim."
+    }
+  },
+  "accepted": true,
+  "failure": null,
+  "actual_commands": [
+    {
+      "executable": "/Users/me/Applications/RecallWeaveEditDistance-c945953fdeb7/Open RecallWeave.command",
+      "args": [
+        "--no-open"
+      ],
+      "cwd": "/tmp",
+      "pid": 17786,
+      "status": 0,
+      "signal": null,
+      "elapsed_ms": 238,
+      "stdout_pin": {
+        "bytes": 604,
+        "sha256": "7a97b8a5e55ab85b71cf9f5ec3c1ec74dcd27da5525b7e6444560b5c88c18426",
+        "git_blob": "3bbe1deef11abf250fd276188b70798877eac1c2"
+      },
+      "stderr_pin": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "git_blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+      }
+    }
+  ],
+  "actions": [
+    {
+      "action": "trusted_mouse_click",
+      "selector": "a[href=\"demo.html\"]",
+      "text": "Open the unchanged RecallWeave learner",
+      "at": "2026-10-09T12:24:21.288Z"
+    },
+    {
+      "action": "native_physical_file_input",
+      "selector": "#deck-file",
+      "path": "/Users/me/Developer/recallweave-sql-null-membership-c945953fdeb7/courses/sql-null-membership.json",
+      "pin": {
+        "bytes": 15690,
+        "sha256": "e5cba4607be7f2be5ce90df3203e2393b5e2a5dbc20d245d9bd5289b8b064b5c",
+        "git_blob": "f32b3b429b209de60b5494b6f23dc8f863af0f1f",
+        "mode": "0444",
+        "mtime_ns": "1791545965829912074",
+        "inode": "137577899"
+      }
+    },
+    {
+      "action": "trusted_mouse_click",
+      "selector": "#start-deck",
+      "text": "Start this deck",
+      "at": "2026-10-09T12:24:21.588Z"
+    },
+    {
+      "action": "trusted_mouse_click",
+      "selector": ".choices [data-choice=\"2\"]",
+      "text": "A(NULL, 0, 1)",
+      "at": "2026-10-09T12:24:22.260Z"
+    },
+    {
+      "action": "trusted_mouse_click",
+      "selector": "#next-button",
+      "text": "Follow the next thread →",
+      "at": "2026-10-09T12:24:22.288Z"
+    },
+    {
+      "action": "trusted_mouse_click",
+      "selector": ".choices [data-choice=\"0\"]",
+      "text": "D[(1, 1, 0), (2, NULL, NULL), (3, NULL, NULL)]",
+      "at": "2026-10-09T12:24:22.338Z"
+    },
+    {
+      "action": "trusted_mouse_click",
+      "selector": "#next-button",
+      "text": "Follow the next thread →",
+      "at": "2026-10-09T12:24:22.389Z"
+    },
+    {
+      "action": "trusted_mouse_click",
+      "selector": ".choices [data-choice=\"2\"]",
+      "text": "C(1, 0)",
+      "at": "2026-10-09T12:24:22.423Z"
+    },
+    {
+      "action": "trusted_mouse_click",
+      "selector": "#next-button",
+      "text": "Follow the next thread →",
+      "at": "2026-10-09T12:24:22.456Z"
+    },
+    {
+      "action": "trusted_mouse_click",
+      "selector": ".choices [data-choice=\"1\"]",
+      "text": "D[1, 2]",
+      "at": "2026-10-09T12:24:22.495Z"
+    },
+    {
+      "action": "trusted_mouse_click",
+      "selector": "#next-button",
+      "text": "Follow the next thread →",
+      "at": "2026-10-09T12:24:22.534Z"
+    },
+    {
+      "action": "trusted_mouse_click",
+      "selector": ".choices [data-choice=\"3\"]",
+      "text": "A[] (no rows)",
+      "at": "2026-10-09T12:24:22.602Z"
+    },
+    {
+      "action": "trusted_mouse_click",
+      "selector": "#next-button",
+      "text": "Follow the next thread →",
+      "at": "2026-10-09T12:24:22.702Z"
+    },
+    {
+      "action": "trusted_mouse_click",
+      "selector": ".choices [data-choice=\"3\"]",
+      "text": "B[2, 3]",
+      "at": "2026-10-09T12:24:22.751Z"
+    },
+    {
+      "action": "trusted_mouse_click",
+      "selector": "#next-button",
+      "text": "Follow the next thread →",
+      "at": "2026-10-09T12:24:22.798Z"
+    },
+    {
+      "action": "trusted_mouse_click",
+      "selector": ".choices [data-choice=\"1\"]",
+      "text": "D[2]",
+      "at": "2026-10-09T12:24:22.826Z"
+    },
+    {
+      "action": "trusted_mouse_click",
+      "selector": "#next-button",
+      "text": "Follow the next thread →",
+      "at": "2026-10-09T12:24:22.852Z"
+    },
+    {
+      "action": "trusted_mouse_click",
+      "selector": ".choices [data-choice=\"0\"]",
+      "text": "Ar.code NOT IN (SELECT b.code FROM blocked AS b WHERE b.code IS NOT NULL)",
+      "at": "2026-10-09T12:24:22.893Z"
+    },
+    {
+      "action": "trusted_mouse_click",
+      "selector": "#next-button",
+      "text": "Follow the next thread →",
+      "at": "2026-10-09T12:24:22.921Z"
+    },
+    {
+      "action": "trusted_mouse_click",
+      "selector": ".choices [data-choice=\"3\"]",
+      "text": "D[(1, 0, 0), (2, 1, 1), (3, 1, 0)]",
+      "at": "2026-10-09T12:24:22.960Z"
+    },
+    {
+      "action": "trusted_mouse_click",
+      "selector": "#next-button",
+      "text": "Follow the next thread →",
+      "at": "2026-10-09T12:24:22.990Z"
+    },
+    {
+      "action": "trusted_mouse_click",
+      "selector": ".choices [data-choice=\"1\"]",
+      "text": "B[(1, 0, 1), (2, 0, 1), (3, 0, 1)]",
+      "at": "2026-10-09T12:24:23.031Z"
+    },
+    {
+      "action": "trusted_mouse_click",
+      "selector": "#next-button",
+      "text": "Follow the next thread →",
+      "at": "2026-10-09T12:24:23.068Z"
+    },
+    {
+      "action": "trusted_mouse_click",
+      "selector": ".choices [data-choice=\"0\"]",
+      "text": "C[] (no rows)",
+      "at": "2026-10-09T12:24:23.096Z"
+    },
+    {
+      "action": "trusted_mouse_click",
+      "selector": "#next-button",
+      "text": "Follow the next thread →",
+      "at": "2026-10-09T12:24:23.126Z"
+    },
+    {
+      "action": "trusted_mouse_click",
+      "selector": ".choices [data-choice=\"0\"]",
+      "text": "D[2]",
+      "at": "2026-10-09T12:24:23.163Z"
+    },
+    {
+      "action": "trusted_mouse_click",
+      "selector": "#next-button",
+      "text": "See your learning trace →",
+      "at": "2026-10-09T12:24:23.265Z"
+    },
+    {
+      "action": "trusted_mouse_click",
+      "selector": "details.review-item:has([data-reflection-item=\"null-member-11\"]) summary",
+      "text": "08 · absence policiesNeeds review · first trySQLite. requests AS r has rows (id, code) = (1, 7), (2, 9), (3, NULL). blocked(code) may be ANY finite collection of integers and NULLs, including no rows or duplicate rows. Select exactly those requests whose code is non-NULL and for which no blocked row has an equal code under =. Which predicate, placed after WHERE, implements this policy for EVERY allowed blocked relation?",
+      "at": "2026-10-09T12:24:23.388Z"
+    },
+    {
+      "action": "trusted_mouse_click",
+      "selector": "[data-reflection-item=\"null-member-11\"]",
+      "text": "",
+      "at": "2026-10-09T12:24:23.490Z"
+    },
+    {
+      "action": "browser_Input.insertText",
+      "selector": "[data-reflection-item=\"null-member-11\"]",
+      "text": "I treated a filtered NOT IN as a universal absence policy. On an empty blocked table, even a NULL request code passes NOT IN.\nI will state the missing-code policy first and keep the outer code IS NOT NULL guard when unknown requests must be excluded.",
+      "at": "2026-10-09T12:24:23.516Z"
+    },
+    {
+      "action": "trusted_mouse_click",
+      "selector": "#application-reflection",
+      "text": "",
+      "at": "2026-10-09T12:24:24.086Z"
+    },
+    {
+      "action": "browser_Input.insertText",
+      "selector": "#application-reflection",
+      "text": "For an eligibility report, I would keep requests with a known code and no equal blocked code. A correlated NOT EXISTS makes row absence explicit; the outer IS NOT NULL check states the policy for missing request codes.",
+      "at": "2026-10-09T12:24:24.177Z"
+    },
+    {
+      "action": "trusted_mouse_click",
+      "selector": "#save-notes-button",
+      "text": "Download study notes (.txt)",
+      "at": "2026-10-09T12:24:25.617Z"
+    }
+  ],
+  "browser": {
+    "command": {
+      "executable": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+      "args": [
+        "--headless=new",
+        "--remote-debugging-pipe",
+        "--user-data-dir=/Users/me/Developer/recallweave-sql-null-membership-receiving-c945953fdeb7/browser/profile",
+        "--no-first-run",
+        "--no-default-browser-check",
+        "--disable-background-networking",
+        "--disable-component-update",
+        "--disable-sync",
+        "--disable-extensions",
+        "--disable-default-apps",
+        "--metrics-recording-only",
+        "--password-store=basic",
+        "--use-mock-keychain",
+        "--disable-breakpad",
+        "--disable-crash-reporter",
+        "--disk-cache-size=1048576",
+        "--media-cache-size=1048576",
+        "about:blank"
+      ],
+      "pid": 17789,
+      "control": "private inherited CDP pipe; no application or debugging listener"
+    },
+    "version": {
+      "protocolVersion": "1.3",
+      "product": "Chrome/154.0.8037.99",
+      "revision": "@45889d77830582727fe00dbfd614bcb7aac35caa",
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+      "jsVersion": "15.4.80.20"
+    },
+    "tracked_processes": [
+      {
+        "pid": 17789,
+        "ppid": 17783,
+        "command": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome --headless=new --remote-debugging-pipe --user-data-dir=/Users/me/Developer/recallweave-sql-null-membership-receiving-c945953fdeb7/browser/profile --no-first-run --no-default-browser-check --disable-background-networking --disable-component-update --disable-sync --disable-extensions --disable-default-apps --metrics-recording-only --password-store=basic --use-mock-keychain --disable-breakpad --disable-crash-reporter --disk-cache-size=1048576 --media-cache-size=1048576 about:blank"
+      },
+      {
+        "pid": 17796,
+        "ppid": 17789,
+        "command": "/Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/Versions/154.0.8037.99/Helpers/Google Chrome Helper.app/Contents/MacOS/Google Chrome Helper --type=gpu-process --gpu-recent-crash-count=0 --disable-breakpad --headless=new --metrics-client-id=09e87971-7f46-458b-81a5-24139623e0a3 --noerrdialogs --user-data-dir=/Users/me/Developer/recallweave-sql-null-membership-receiving-c945953fdeb7/browser/profile --gpu-preferences=WAAAAAAAAAAgAQAEAAAAAAAAAAAAAGAAQAAAAAAAAAADAAAAAAAAADgAAAAAAAAAAAAAAAAAAAACAAAAAAAAAAAAAAAAAAAAKAAAAAAAAAAoAAAAAAAAAAgAAAAAAAAADAAAAAEAAAAAAAAAAAAAAAgAAAAAAAAACAAAAAAAAAA= --shared-files --field-trial-handle=1718379636,r,7109495881606411624,15356096782152755598,262144 --disable-features=PaintHolding --variations-seed-version --pseudonymization-salt-handle=1935764596,r,3735847466119527684,5001702969767813988,4 --trace-process-track-uuid=3190708988185955192 --seatbelt-client=25"
+      },
+      {
+        "pid": 17797,
+        "ppid": 17789,
+        "command": "/Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/Versions/154.0.8037.99/Helpers/Google Chrome Helper.app/Contents/MacOS/Google Chrome Helper --type=utility --utility-sub-type=network.mojom.NetworkService --lang=en-US --service-sandbox-type=network --metrics-client-id=09e87971-7f46-458b-81a5-24139623e0a3 --noerrdialogs --user-data-dir=/Users/me/Developer/recallweave-sql-null-membership-receiving-c945953fdeb7/browser/profile --shared-files --field-trial-handle=1718379636,r,7109495881606411624,15356096782152755598,262144 --disable-features=PaintHolding --variations-seed-version --pseudonymization-salt-handle=1935764596,r,3735847466119527684,5001702969767813988,4 --trace-process-track-uuid=3190708989122997041 --seatbelt-client=25"
+      },
+      {
+        "pid": 17798,
+        "ppid": 17789,
+        "command": "/Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/Versions/154.0.8037.99/Helpers/Google Chrome Helper.app/Contents/MacOS/Google Chrome Helper --type=utility --utility-sub-type=storage.mojom.StorageService --lang=en-US --service-sandbox-type=service --metrics-client-id=09e87971-7f46-458b-81a5-24139623e0a3 --noerrdialogs --user-data-dir=/Users/me/Developer/recallweave-sql-null-membership-receiving-c945953fdeb7/browser/profile --shared-files --field-trial-handle=1718379636,r,7109495881606411624,15356096782152755598,262144 --disable-features=PaintHolding --variations-seed-version --pseudonymization-salt-handle=1935764596,r,3735847466119527684,5001702969767813988,4 --trace-process-track-uuid=3190708990060038890 --seatbelt-client=38"
+      },
+      {
+        "pid": 17800,
+        "ppid": 17789,
+        "command": "/Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/Versions/154.0.8037.99/Helpers/Google Chrome Helper (Renderer).app/Contents/MacOS/Google Chrome Helper (Renderer) --type=renderer --top-chrome-webui --metrics-client-id=09e87971-7f46-458b-81a5-24139623e0a3 --noerrdialogs --user-data-dir=/Users/me/Developer/recallweave-sql-null-membership-receiving-c945953fdeb7/browser/profile --disable-breakpad --remote-debugging-pipe --lang=en-US --num-raster-threads=4 --enable-zero-copy --enable-gpu-memory-buffer-compositor-resources --enable-main-frame-before-activation --renderer-client-id=6 --launch-time-ticks=1085156835328 --shared-files --field-trial-handle=1718379636,r,7109495881606411624,15356096782152755598,262144 --disable-features=PaintHolding --variations-seed-version --pseudonymization-salt-handle=1935764596,r,3735847466119527684,5001702969767813988,4 --trace-process-track-uuid=3190708991934122588 --seatbelt-client=79"
+      },
+      {
+        "pid": 17802,
+        "ppid": 17789,
+        "command": "/Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/Versions/154.0.8037.99/Helpers/Google Chrome Helper (Renderer).app/Contents/MacOS/Google Chrome Helper (Renderer) --type=renderer --metrics-client-id=09e87971-7f46-458b-81a5-24139623e0a3 --noerrdialogs --user-data-dir=/Users/me/Developer/recallweave-sql-null-membership-receiving-c945953fdeb7/browser/profile --disable-breakpad --remote-debugging-pipe --lang=en-US --num-raster-threads=4 --enable-zero-copy --enable-gpu-memory-buffer-compositor-resources --enable-main-frame-before-activation --renderer-client-id=7 --launch-time-ticks=1085157189758 --shared-files --field-trial-handle=1718379636,r,7109495881606411624,15356096782152755598,262144 --disable-features=PaintHolding --variations-seed-version --pseudonymization-salt-handle=1935764596,r,3735847466119527684,5001702969767813988,4 --trace-process-track-uuid=3190708992871164437 --seatbelt-client=22"
+      },
+      {
+        "pid": 17803,
+        "ppid": 17789,
+        "command": "/Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/Versions/154.0.8037.99/Helpers/Google Chrome Helper (Renderer).app/Contents/MacOS/Google Chrome Helper (Renderer) --type=renderer --metrics-client-id=09e87971-7f46-458b-81a5-24139623e0a3 --noerrdialogs --user-data-dir=/Users/me/Developer/recallweave-sql-null-membership-receiving-c945953fdeb7/browser/profile --disable-breakpad --remote-debugging-pipe --lang=en-US --num-raster-threads=4 --enable-zero-copy --enable-gpu-memory-buffer-compositor-resources --enable-main-frame-before-activation --renderer-client-id=9 --launch-time-ticks=1085157444628 --shared-files --field-trial-handle=1718379636,r,7109495881606411624,15356096782152755598,262144 --disable-features=PaintHolding --variations-seed-version --pseudonymization-salt-handle=1935764596,r,3735847466119527684,5001702969767813988,4 --trace-process-track-uuid=3190708994745248135 --seatbelt-client=84"
+      },
+      {
+        "pid": 17804,
+        "ppid": 17789,
+        "command": "/Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/Versions/154.0.8037.99/Helpers/Google Chrome Helper (Renderer).app/Contents/MacOS/Google Chrome Helper (Renderer) --type=renderer --metrics-client-id=09e87971-7f46-458b-81a5-24139623e0a3 --noerrdialogs --user-data-dir=/Users/me/Developer/recallweave-sql-null-membership-receiving-c945953fdeb7/browser/profile --extension-process --disable-breakpad --remote-debugging-pipe --lang=en-US --num-raster-threads=4 --enable-zero-copy --enable-gpu-memory-buffer-compositor-resources --enable-main-frame-before-activation --renderer-client-id=10 --launch-time-ticks=1085157452737 --shared-files --field-trial-handle=1718379636,r,7109495881606411624,15356096782152755598,262144 --disable-features=PaintHolding --variations-seed-version --pseudonymization-salt-handle=1935764596,r,3735847466119527684,5001702969767813988,4 --trace-process-track-uuid=3190708995682289984 --seatbelt-client=85"
+      },
+      {
+        "pid": 17806,
+        "ppid": 17789,
+        "command": "/Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/Versions/154.0.8037.99/Helpers/Google Chrome Helper (Renderer).app/Contents/MacOS/Google Chrome Helper (Renderer) --type=renderer --metrics-client-id=09e87971-7f46-458b-81a5-24139623e0a3 --noerrdialogs --user-data-dir=/Users/me/Developer/recallweave-sql-null-membership-receiving-c945953fdeb7/browser/profile --disable-breakpad --remote-debugging-pipe --lang=en-US --num-raster-threads=4 --enable-zero-copy --enable-gpu-memory-buffer-compositor-resources --enable-main-frame-before-activation --renderer-client-id=11 --launch-time-ticks=1085157992475 --shared-files --field-trial-handle=1718379636,r,7109495881606411624,15356096782152755598,262144 --disable-features=PaintHolding --variations-seed-version --pseudonymization-salt-handle=1935764596,r,3735847466119527684,5001702969767813988,4 --trace-process-track-uuid=3190708996619331833 --seatbelt-client=91"
+      },
+      {
+        "pid": 17807,
+        "ppid": 17789,
+        "command": "/Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/Versions/154.0.8037.99/Helpers/Google Chrome Helper (Renderer).app/Contents/MacOS/Google Chrome Helper (Renderer) --type=renderer --metrics-client-id=09e87971-7f46-458b-81a5-24139623e0a3 --noerrdialogs --user-data-dir=/Users/me/Developer/recallweave-sql-null-membership-receiving-c945953fdeb7/browser/profile --extension-process --disable-breakpad --remote-debugging-pipe --lang=en-US --num-raster-threads=4 --enable-zero-copy --enable-gpu-memory-buffer-compositor-resources --enable-main-frame-before-activation --renderer-client-id=12 --launch-time-ticks=1085158727038 --shared-files --field-trial-handle=1718379636,r,7109495881606411624,15356096782152755598,262144 --disable-features=PaintHolding --variations-seed-version --pseudonymization-salt-handle=1935764596,r,3735847466119527684,5001702969767813988,4 --trace-process-track-uuid=3190708997556373682 --seatbelt-client=100"
+      }
+    ],
+    "close_requested": true,
+    "actual_exit": {
+      "pid": 17789,
+      "code": 0,
+      "signal": null,
+      "at": "2026-10-09T12:24:29.341Z"
+    },
+    "remaining_owned_processes": [],
+    "active_seconds": 12.912513792
+  },
+  "observations": {
+    "exceptions": [],
+    "console": [],
+    "log": [],
+    "requests": [
+      {
+        "requestId": "59AE8DF97A5A23E1D65C043D42423F17",
+        "url": "file:///Users/me/Applications/RecallWeaveEditDistance-c945953fdeb7/app/START-HERE.html",
+        "method": "GET",
+        "type": "Document"
+      },
+      {
+        "requestId": "26AC67A30A659CBCF057764F528D6A89",
+        "url": "file:///Users/me/Applications/RecallWeaveEditDistance-c945953fdeb7/app/demo.html",
+        "method": "GET",
+        "type": "Document"
+      }
+    ],
+    "responses": [
+      {
+        "requestId": "59AE8DF97A5A23E1D65C043D42423F17",
+        "url": "file:///Users/me/Applications/RecallWeaveEditDistance-c945953fdeb7/app/START-HERE.html",
+        "status": 200,
+        "type": "Document"
+      },
+      {
+        "requestId": "26AC67A30A659CBCF057764F528D6A89",
+        "url": "file:///Users/me/Applications/RecallWeaveEditDistance-c945953fdeb7/app/demo.html",
+        "status": 200,
+        "type": "Document"
+      }
+    ],
+    "loading_failed": [],
+    "downloads": [
+      {
+        "method": "Browser.downloadWillBegin",
+        "frameId": "8CF5B4752E1FFB995841A63CC72D76D3",
+        "guid": "d093c9a7-1931-4d2b-b955-5aefc5b2696f",
+        "url": "blob:null/8f3aad26-85f6-4c0e-842e-96530b46e996",
+        "suggestedFilename": "recallweave-study-notes-2026-10-09.txt"
+      },
+      {
+        "method": "Browser.downloadProgress",
+        "guid": "d093c9a7-1931-4d2b-b955-5aefc5b2696f",
+        "totalBytes": 14850,
+        "receivedBytes": 0,
+        "state": "inProgress"
+      },
+      {
+        "method": "Browser.downloadProgress",
+        "guid": "d093c9a7-1931-4d2b-b955-5aefc5b2696f",
+        "totalBytes": 14850,
+        "receivedBytes": 14850,
+        "state": "inProgress"
+      },
+      {
+        "method": "Browser.downloadProgress",
+        "guid": "d093c9a7-1931-4d2b-b955-5aefc5b2696f",
+        "totalBytes": 14850,
+        "receivedBytes": 14850,
+        "state": "inProgress"
+      },
+      {
+        "method": "Browser.downloadProgress",
+        "guid": "d093c9a7-1931-4d2b-b955-5aefc5b2696f",
+        "totalBytes": 14850,
+        "receivedBytes": 14850,
+        "state": "inProgress"
+      },
+      {
+        "method": "Browser.downloadProgress",
+        "guid": "d093c9a7-1931-4d2b-b955-5aefc5b2696f",
+        "totalBytes": 14850,
+        "receivedBytes": 14850,
+        "state": "inProgress"
+      },
+      {
+        "method": "Browser.downloadProgress",
+        "guid": "d093c9a7-1931-4d2b-b955-5aefc5b2696f",
+        "totalBytes": 14850,
+        "receivedBytes": 14850,
+        "state": "completed",
+        "filePath": "/Users/me/Developer/recallweave-sql-null-membership-receiving-c945953fdeb7/browser/downloads/recallweave-study-notes-2026-10-09.txt"
+      }
+    ],
+    "input_events": [
+      {
+        "type": "input",
+        "isTrusted": true,
+        "id": "deck-file",
+        "choice": null,
+        "reflectionItem": null,
+        "value": null,
+        "fileCount": 1
+      },
+      {
+        "type": "change",
+        "isTrusted": true,
+        "id": "deck-file",
+        "choice": null,
+        "reflectionItem": null,
+        "value": null,
+        "fileCount": 1
+      },
+      {
+        "type": "click",
+        "isTrusted": true,
+        "id": "start-deck",
+        "choice": null,
+        "reflectionItem": null,
+        "value": null,
+        "fileCount": null
+      },
+      {
+        "type": "click",
+        "isTrusted": true,
+        "id": null,
+        "choice": "2",
+        "reflectionItem": null,
+        "value": null,
+        "fileCount": null
+      },
+      {
+        "type": "click",
+        "isTrusted": true,
+        "id": "next-button",
+        "choice": null,
+        "reflectionItem": null,
+        "value": null,
+        "fileCount": null
+      },
+      {
+        "type": "click",
+        "isTrusted": true,
+        "id": null,
+        "choice": "0",
+        "reflectionItem": null,
+        "value": null,
+        "fileCount": null
+      },
+      {
+        "type": "click",
+        "isTrusted": true,
+        "id": "next-button",
+        "choice": null,
+        "reflectionItem": null,
+        "value": null,
+        "fileCount": null
+      },
+      {
+        "type": "click",
+        "isTrusted": true,
+        "id": null,
+        "choice": "2",
+        "reflectionItem": null,
+        "value": null,
+        "fileCount": null
+      },
+      {
+        "type": "click",
+        "isTrusted": true,
+        "id": "next-button",
+        "choice": null,
+        "reflectionItem": null,
+        "value": null,
+        "fileCount": null
+      },
+      {
+        "type": "click",
+        "isTrusted": true,
+        "id": null,
+        "choice": "1",
+        "reflectionItem": null,
+        "value": null,
+        "fileCount": null
+      },
+      {
+        "type": "click",
+        "isTrusted": true,
+        "id": "next-button",
+        "choice": null,
+        "reflectionItem": null,
+        "value": null,
+        "fileCount": null
+      },
+      {
+        "type": "click",
+        "isTrusted": true,
+        "id": null,
+        "choice": "3",
+        "reflectionItem": null,
+        "value": null,
+        "fileCount": null
+      },
+      {
+        "type": "click",
+        "isTrusted": true,
+        "id": "next-button",
+        "choice": null,
+        "reflectionItem": null,
+        "value": null,
+        "fileCount": null
+      },
+      {
+        "type": "click",
+        "isTrusted": true,
+        "id": null,
+        "choice": "3",
+        "reflectionItem": null,
+        "value": null,
+        "fileCount": null
+      },
+      {
+        "type": "click",
+        "isTrusted": true,
+        "id": "next-button",
+        "choice": null,
+        "reflectionItem": null,
+        "value": null,
+        "fileCount": null
+      },
+      {
+        "type": "click",
+        "isTrusted": true,
+        "id": null,
+        "choice": "1",
+        "reflectionItem": null,
+        "value": null,
+        "fileCount": null
+      },
+      {
+        "type": "click",
+        "isTrusted": true,
+        "id": "next-button",
+        "choice": null,
+        "reflectionItem": null,
+        "value": null,
+        "fileCount": null
+      },
+      {
+        "type": "click",
+        "isTrusted": true,
+        "id": null,
+        "choice": "0",
+        "reflectionItem": null,
+        "value": null,
+        "fileCount": null
+      },
+      {
+        "type": "click",
+        "isTrusted": true,
+        "id": "next-button",
+        "choice": null,
+        "reflectionItem": null,
+        "value": null,
+        "fileCount": null
+      },
+      {
+        "type": "click",
+        "isTrusted": true,
+        "id": null,
+        "choice": "3",
+        "reflectionItem": null,
+        "value": null,
+        "fileCount": null
+      },
+      {
+        "type": "click",
+        "isTrusted": true,
+        "id": "next-button",
+        "choice": null,
+        "reflectionItem": null,
+        "value": null,
+        "fileCount": null
+      },
+      {
+        "type": "click",
+        "isTrusted": true,
+        "id": null,
+        "choice": "1",
+        "reflectionItem": null,
+        "value": null,
+        "fileCount": null
+      },
+      {
+        "type": "click",
+        "isTrusted": true,
+        "id": "next-button",
+        "choice": null,
+        "reflectionItem": null,
+        "value": null,
+        "fileCount": null
+      },
+      {
+        "type": "click",
+        "isTrusted": true,
+        "id": null,
+        "choice": "0",
+        "reflectionItem": null,
+        "value": null,
+        "fileCount": null
+      },
+      {
+        "type": "click",
+        "isTrusted": true,
+        "id": "next-button",
+        "choice": null,
+        "reflectionItem": null,
+        "value": null,
+        "fileCount": null
+      },
+      {
+        "type": "click",
+        "isTrusted": true,
+        "id": null,
+        "choice": "0",
+        "reflectionItem": null,
+        "value": null,
+        "fileCount": null
+      },
+      {
+        "type": "click",
+        "isTrusted": true,
+        "id": "next-button",
+        "choice": null,
+        "reflectionItem": null,
+        "value": null,
+        "fileCount": null
+      },
+      {
+        "type": "click",
+        "isTrusted": true,
+        "id": null,
+        "choice": null,
+        "reflectionItem": null,
+        "value": null,
+        "fileCount": null
+      },
+      {
+        "type": "click",
+        "isTrusted": true,
+        "id": "reflection-7",
+        "choice": null,
+        "reflectionItem": "null-member-11",
+        "value": "",
+        "fileCount": null
+      },
+      {
+        "type": "input",
+        "isTrusted": true,
+        "id": "reflection-7",
+        "choice": null,
+        "reflectionItem": "null-member-11",
+        "value": "I treated a filtered NOT IN as a universal absence policy. On an empty blocked table, even a NULL request code passes NOT IN.\nI will state the missing-code policy first and keep the outer code IS NOT NULL guard when unknown requests must be excluded.",
+        "fileCount": null
+      },
+      {
+        "type": "input",
+        "isTrusted": true,
+        "id": "reflection-7",
+        "choice": null,
+        "reflectionItem": "null-member-11",
+        "value": "I treated a filtered NOT IN as a universal absence policy. On an empty blocked table, even a NULL request code passes NOT IN.\nI will state the missing-code policy first and keep the outer code IS NOT NULL guard when unknown requests must be excluded.",
+        "fileCount": null
+      },
+      {
+        "type": "input",
+        "isTrusted": true,
+        "id": "reflection-7",
+        "choice": null,
+        "reflectionItem": "null-member-11",
+        "value": "I treated a filtered NOT IN as a universal absence policy. On an empty blocked table, even a NULL request code passes NOT IN.\nI will state the missing-code policy first and keep the outer code IS NOT NULL guard when unknown requests must be excluded.",
+        "fileCount": null
+      },
+      {
+        "type": "change",
+        "isTrusted": true,
+        "id": "reflection-7",
+        "choice": null,
+        "reflectionItem": "null-member-11",
+        "value": "I treated a filtered NOT IN as a universal absence policy. On an empty blocked table, even a NULL request code passes NOT IN.\nI will state the missing-code policy first and keep the outer code IS NOT NULL guard when unknown requests must be excluded.",
+        "fileCount": null
+      },
+      {
+        "type": "click",
+        "isTrusted": true,
+        "id": "application-reflection",
+        "choice": null,
+        "reflectionItem": null,
+        "value": "",
+        "fileCount": null
+      },
+      {
+        "type": "input",
+        "isTrusted": true,
+        "id": "application-reflection",
+        "choice": null,
+        "reflectionItem": null,
+        "value": "For an eligibility report, I would keep requests with a known code and no equal blocked code. A correlated NOT EXISTS makes row absence explicit; the outer IS NOT NULL check states the policy for missing request codes.",
+        "fileCount": null
+      },
+      {
+        "type": "change",
+        "isTrusted": true,
+        "id": "application-reflection",
+        "choice": null,
+        "reflectionItem": null,
+        "value": "For an eligibility report, I would keep requests with a known code and no equal blocked code. A correlated NOT EXISTS makes row absence explicit; the outer IS NOT NULL check states the policy for missing request codes.",
+        "fileCount": null
+      },
+      {
+        "type": "click",
+        "isTrusted": true,
+        "id": "save-notes-button",
+        "choice": null,
+        "reflectionItem": null,
+        "value": null,
+        "fileCount": null
+      },
+      {
+        "type": "click",
+        "isTrusted": false,
+        "id": null,
+        "choice": null,
+        "reflectionItem": null,
+        "value": null,
+        "fileCount": null
+      }
+    ]
+  },
+  "scope": [
+    "actual retained --no-open command from /tmp",
+    "one separately delivered SQL learner session and physical text download",
+    "private headless Chrome, no Finder/default profile claim",
+    "no SQL, exporter/model oracle, old matrix, restore or source edit"
+  ],
+  "launch": {
+    "installation": "/Users/me/Applications/RecallWeaveEditDistance-c945953fdeb7",
+    "entry": "/Users/me/Applications/RecallWeaveEditDistance-c945953fdeb7/app/START-HERE.html",
+    "entry_uri": "file:///Users/me/Applications/RecallWeaveEditDistance-c945953fdeb7/app/START-HERE.html",
+    "marker": {
+      "bytes": 6337,
+      "sha256": "b1e419d2d168bf551b7ebdd27a5ec9989d9d9946a11805b1119a98dd5dcdfce9",
+      "git_blob": "29533be91a1d5ee937de08f4990e3720627ff6a7"
+    },
+    "original_archive": {
+      "bytes": 53535,
+      "sha256": "a86d823d70be98d08fd804ce9d8bccdb071b586adf5c30c0784a96a5db2a03e9",
+      "git_blob": "ae0f3ed4e067fd527b1db7e103270419242db0c2"
+    },
+    "opened": false
+  },
+  "entry_screenshot": {
+    "bytes": 201572,
+    "sha256": "5e283b202bbd97bb71e8f0737c0f1ef6ac2cb95c64a582fa59118b8ef68aee09",
+    "git_blob": "440fc6b73be2c9ba24cd0bcec6470e4edeebe190"
+  },
+  "reflection_screenshot": {
+    "bytes": 222258,
+    "sha256": "2e253d40799edf844132f04aa40ff1d4fb7d6b58a439aef527cdc904c0fe7eac",
+    "git_blob": "eb28b35127385296af8f7eedd4697c6bd81c7c61"
+  },
+  "notes_screenshot": {
+    "bytes": 95766,
+    "sha256": "51cde8f0a033584f057aba27d56bf1ef153a7361e701c272e791d95cd7de2ea9",
+    "git_blob": "d85b01379dbc8ed9866179c27aa95c2915a95ade"
+  },
+  "actuation": {
+    "mouse_clicks": "CDP Input.dispatchMouseEvent, isTrusted observed",
+    "writing": "CDP Input.insertText through focused rendered textareas",
+    "file_input": "DOM.setFileInputFiles selects the separately delivered physical SQL course; no constructed File/Blob",
+    "synthetic_product_state_changes": 0
+  },
+  "guards": [
+    {
+      "label": "before-installed-command",
+      "at": "2026-10-09T12:24:16.297Z",
+      "free_disk": 1268871168,
+      "conservative_memory": 10826448896,
+      "receiver_bytes": 114688,
+      "browser_bytes": 0,
+      "charged_metric": "max(logical, allocated)",
+      "receiver_allocation": {
+        "logical": 104997,
+        "allocated": 114688
+      },
+      "browser_allocation": {
+        "logical": 0,
+        "allocated": 0
+      }
+    },
+    {
+      "label": "before-one-browser",
+      "at": "2026-10-09T12:24:16.808Z",
+      "free_disk": 1268793344,
+      "conservative_memory": 10829938688,
+      "receiver_bytes": 131072,
+      "browser_bytes": 0,
+      "charged_metric": "max(logical, allocated)",
+      "receiver_allocation": {
+        "logical": 114854,
+        "allocated": 131072
+      },
+      "browser_allocation": {
+        "logical": 0,
+        "allocated": 0
+      }
+    },
+    {
+      "label": "before-one-session",
+      "at": "2026-10-09T12:24:21.813Z",
+      "free_disk": 1264984064,
+      "conservative_memory": 10615980032,
+      "receiver_bytes": 348160,
+      "browser_bytes": 8617549,
+      "charged_metric": "max(logical, allocated)",
+      "receiver_allocation": {
+        "logical": 325973,
+        "allocated": 348160
+      },
+      "browser_allocation": {
+        "logical": 8617549,
+        "allocated": 3092480
+      }
+    },
+    {
+      "label": "before-physical-notes",
+      "at": "2026-10-09T12:24:24.767Z",
+      "free_disk": 1264254976,
+      "conservative_memory": 10659168256,
+      "receiver_bytes": 610304,
+      "browser_bytes": 8947540,
+      "charged_metric": "max(logical, allocated)",
+      "receiver_allocation": {
+        "logical": 584094,
+        "allocated": 610304
+      },
+      "browser_allocation": {
+        "logical": 8947540,
+        "allocated": 3485696
+      }
+    },
+    {
+      "label": "after-browser-closure",
+      "at": "2026-10-09T12:24:29.959Z",
+      "free_disk": 1263583232,
+      "conservative_memory": 11217682432,
+      "receiver_bytes": 761856,
+      "browser_bytes": 8856327,
+      "charged_metric": "max(logical, allocated)",
+      "receiver_allocation": {
+        "logical": 723549,
+        "allocated": 761856
+      },
+      "browser_allocation": {
+        "logical": 8856327,
+        "allocated": 3518464
+      }
+    }
+  ],
+  "profile_census_disappearances": [],
+  "total_seconds": 14.213925000000001,
+  "completed_utc": "2026-10-09T12:24:30.318Z",
+  "controller_pid": 17783,
+  "controller_exit_pending_until_remote_tool_completion": true,
+  "owned_final": {
+    "source_evidence_bytes": 765952,
+    "browser_bytes": 8856327,
+    "charged_metric": "max(logical, allocated)",
+    "receiver_allocation": {
+      "logical": 724207,
+      "allocated": 765952
+    },
+    "browser_allocation": {
+      "logical": 8856327,
+      "allocated": 3518464
+    }
+  }
+}
