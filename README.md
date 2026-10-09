@@ -433,3 +433,9 @@ Open [the minimum-spanning-forest explorer](courses/minimum-spanning-forest-expl
 
 Download the full trace with its original entered text and selected frame, or save the original [twelve-question course](courses/minimum-spanning-forest.json) and [worked guide](courses/minimum-spanning-forest.md). Open the JSON through the learner's existing **Bring your own lesson** preview and **Start this deck** flow. No network, account, automatic storage or learner-session modification is involved. Rebuild the standalone page with `node tools/build-minimum-spanning-forest.mjs`; add `--check` to verify exact source parity.
 
+
+## Chemical equilibrium: direction, extent and what remains
+
+Open [the offline chemical-equilibrium lab](courses/chemical-equilibrium-lab.html) to compare a reaction quotient with K, inspect signed reaction extent and read the conserved component totals for an ideal A + B ⇌ C mixture. The lab keeps exact rational root bounds, makes zero-denominator and no-feasible-change cases explicit, and distinguishes composition inspection from reaction time. Inputs apply together; an edited draft retires the observation download until it is applied.
+
+The [original twelve-question course](courses/chemical-equilibrium.json) uses the unchanged learner, and the [worked guide](courses/chemical-equilibrium.md) contains derivations, examples and transfer answers. Rebuild this one standalone file with `node tools/build-chemical-equilibrium.mjs`; run its native checks with `node --test tests/chemical-equilibrium.test.mjs`. This fixed-temperature, fixed-volume ideal model supplies no substance-specific prediction or kinetics.
