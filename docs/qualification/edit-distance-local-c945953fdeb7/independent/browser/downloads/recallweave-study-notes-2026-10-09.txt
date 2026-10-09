@@ -1,0 +1,153 @@
+RecallWeave — study notes
+Edit distance: prefixes, costs and one optimal alignment
+Saved: 2026-10-09T08:06:24.419Z
+
+FIRST SESSION
+11 of 12 connections correct on the first try.
+This count describes this session; it is not a measure of your ability.
+
+ESTIMATED MASTERY — MODEL STATE, NOT A GRADE
+These estimates come from the demo’s learning model. They are not a validated assessment.
+Practice does not change the first-session estimates.
+Operations and costs: 90%
+Prefix subproblems: 98%
+Optimal reconstruction: 98%
+Representation and limits: 98%
+
+PRACTICE
+Not started. 1 missed connection is available for practice.
+Practice follows the explanations and is recorded separately from the first answers.
+
+REVIEW THE CONNECTIONS
+
+1. With insertion, deletion and substitution each costing 1, what is the minimum cost to turn cat into cut?
+Concept: Operations and costs
+Your first answer: 0, because the lengths match
+First try: needs review
+Correct answer: 1, by substituting the middle symbol
+Explanation: Only a changes to u. One substitution costs 1. Cost 0 would require identical scalar sequences, so 1 is minimal.
+Apply the idea: Find two equal-length strings that need more than one unit-cost edit.
+Your explanation — reflection, not scored:
+  > Equal lengths do not make cat and cut identical. With unit costs, changing a to u is one substitution.
+  > I will check the operation costs before counting edits.
+Practice answer: not recorded.
+
+2. D[i,j] uses prefix lengths i and j. What does it mean in this lab?
+Concept: Prefix subproblems
+Your first answer: The minimum cost to transform the first i source symbols into the first j target symbols
+First try: correct
+Correct answer: The minimum cost to transform the first i source symbols into the first j target symbols
+Explanation: The cell describes exactly two prefixes, including the empty prefix at length 0. This makes the last operation depend on smaller already-computed prefixes.
+Apply the idea: Describe D[2,0] in words before writing its formula.
+Your explanation — reflection, not scored:
+  Not written.
+
+3. Insertion costs 2 and deletion costs 3. What are the minimum costs of empty → abc and abc → empty, respectively?
+Concept: Operations and costs
+Your first answer: 6 and 9
+First try: correct
+Correct answer: 6 and 9
+Explanation: The empty source needs three insertions: 3×2=6. The empty target needs three deletions: 3×3=9. The same directional cost policy need not be symmetric.
+Apply the idea: Explain which cost you would use for a fourth target symbol when the source is empty.
+Your explanation — reflection, not scored:
+  Not written.
+
+4. For a → b, insertion and deletion cost 1 each, while substitution costs 4. Which result minimizes cost?
+Concept: Operations and costs
+Your first answer: Cost 2, using one deletion and one insertion
+First try: correct
+Correct answer: Cost 2, using one deletion and one insertion
+Explanation: A substitution costs 4. Deleting a and inserting b costs 1+1=2; either operation order can produce a valid transformation. Minimizing cost is not necessarily minimizing operation count.
+Apply the idea: Choose a substitution cost that ties deletion plus insertion under these same other costs.
+Your explanation — reflection, not scored:
+  Not written.
+
+5. For ab → ac with all edit costs 1, consider D[2,2]. D[1,1]=0, D[1,2]=1 and D[2,1]=1. What are the diagonal, deletion and insertion candidate costs?
+Concept: Prefix subproblems
+Your first answer: 1, 2, 2
+First try: correct
+Correct answer: 1, 2, 2
+Explanation: The last symbols b and c differ, so the diagonal candidate is 0+1=1. Deletion costs D[1,2]+1=2. Insertion costs D[2,1]+1=2. The cell takes their minimum, 1.
+Apply the idea: If b and c were the same symbol, which one candidate's added operation cost would change?
+Your explanation — reflection, not scored:
+  Not written.
+
+6. With unit costs, aa → a has minimum cost 1. A deterministic backtracker displays one alignment. What can you conclude?
+Concept: Optimal reconstruction
+Your first answer: Deleting either source occurrence gives an optimal alignment; a tie rule only chooses one
+First try: correct
+Correct answer: Deleting either source occurrence gives an optimal alignment; a tie rule only chooses one
+Explanation: Either source a can be retained while the other is deleted. Each alignment costs 1. Reproducible display order is not a proof that only one alignment minimizes cost.
+Apply the idea: Identify a table cell where multiple predecessors attain the same minimum.
+Your explanation — reflection, not scored:
+  Not written.
+
+7. Only insert, delete and substitute are allowed, each at cost 1. What is the minimum cost for ab → ba?
+Concept: Optimal reconstruction
+Your first answer: 2; swapping the two symbols is not a permitted single operation
+First try: correct
+Correct answer: 2; swapping the two symbols is not a permitted single operation
+Explanation: Two substitutions work at cost 2. Delete then insert also gives a cost-2 alignment. A single insertion or deletion changes length, and a single substitution changes only one position; none turns ab into ba.
+Apply the idea: Explain how adding transposition as a new operation could change the problem and its recurrence.
+Your explanation — reflection, not scored:
+  Not written.
+
+8. The source has 3 scalar values and the target has 4. How many prefix cells are in the full table, including empty prefixes?
+Concept: Representation and limits
+Your first answer: 20
+First try: correct
+Correct answer: 20
+Explanation: There are 3+1 source prefix lengths and 4+1 target prefix lengths, so the table has 4×5=20 cells. Interior work considers three predecessor candidates per cell.
+Apply the idea: Write the cell-count expression for general lengths m and n, including the case m=0.
+Your explanation — reflection, not scored:
+  Not written.
+
+9. The lab treats Unicode scalars literally and does not normalize text. The source is one scalar é (U+00E9); the target is e (U+0065) followed by combining acute (U+0301). With unit costs, what is the minimum?
+Concept: Representation and limits
+Your first answer: 2: one substitution and one insertion suffice; the literal sequences differ
+First try: correct
+Correct answer: 2: one substitution and one insertion suffice; the literal sequences differ
+Explanation: The source contains one scalar and the target contains two, neither identical to the source scalar. Substituting é with e and inserting the combining acute costs 2. One edit cannot both change the existing scalar and add a second scalar. A grapheme-aware or normalized comparison would be a different policy.
+Apply the idea: Explain why 😀 → empty costs 1 in this scalar model despite JavaScript reporting two UTF-16 code units.
+Your explanation — reflection, not scored:
+  Not written.
+
+10. With unit edit costs, why can tack → stack be achieved at cost 1 even though comparing equal screen positions shows several mismatches?
+Concept: Prefix subproblems
+Your first answer: One insertion of s shifts the entire unchanged tack suffix into alignment
+First try: correct
+Correct answer: One insertion of s shifts the entire unchanged tack suffix into alignment
+Explanation: Insert s before the existing tack. The remaining source symbols match the remaining target symbols in order. Fixed-position comparison misses that an insertion changes the alignment.
+Apply the idea: Construct another pair for which one leading insertion is better than replacing each mismatched position.
+Your explanation — reflection, not scored:
+  Not written.
+
+11. Which check establishes that a reconstructed alignment actually realizes the reported minimum for the accepted inputs?
+Concept: Optimal reconstruction
+Your first answer: It consumes the full source, emits the exact target and sums to the final cell's cost
+First try: correct
+Correct answer: It consumes the full source, emits the exact target and sums to the final cell's cost
+Explanation: A valid alignment consumes source symbols in order and emits target symbols in order. Its summed operation costs must equal D[m,n]. These checks verify the constructed witness; the recurrence establishes that no cheaper alignment exists.
+Apply the idea: Replay an alignment with an insertion and a deletion, tracking the remaining source and emitted target prefix.
+Your explanation — reflection, not scored:
+  Not written.
+
+12. A lab experiment reports minimum cost 0 under this positive-cost scalar policy. Which statement follows?
+Concept: Representation and limits
+Your first answer: The two literal scalar sequences are identical
+First try: correct
+Correct answer: The two literal scalar sequences are identical
+Explanation: Every insertion, deletion and unequal-symbol substitution has a positive cost. A zero-cost alignment can therefore contain only identical-symbol matches. This establishes literal scalar identity under the stated policy, not semantic equivalence.
+Apply the idea: Give two different strings with similar meanings and explain why this model can still assign a positive edit cost.
+Your explanation — reflection, not scored:
+  Not written.
+
+YOUR APPLICATION REFLECTION — NOT SCORED
+Prompt: Choose one connection from this deck and explain how it relates to another idea in your own words.
+  > For a spelling-checker explanation, I would show the accepted source and target, the operation costs, and one cheapest alignment. A zero score means the literal scalar sequences match; it does not prove the texts have the same meaning.
+
+DECK ATTRIBUTION
+Original course, examples and explanations authored for RecallWeave with AI assistance. Conceptual references: Wagner & Fischer, The String-to-String Correction Problem (JACM1974, doi:10.1145/321796.321811), and MIT OpenCourseWare6.006 Spring2020 Recitation16. No source questions, passages or code are copied.
+Original lesson content: CC BY 4.0. Reference works retain their own licenses.
+
+Saved from this browser session. The download does not upload the session or restore it after a refresh.

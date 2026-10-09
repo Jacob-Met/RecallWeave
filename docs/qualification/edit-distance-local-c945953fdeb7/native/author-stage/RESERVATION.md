@@ -1,0 +1,26 @@
+### Reserved: unchanged edit-distance package installed use — estate-c945953fdeb7
+
+Under the existing direct-execution mandate, I am taking only a distinct **persistent Mac installation and installed learner/notes use** of cf5799's exact qualified offline package. Source, course/math, shared learner, importer, catalog, #141 convergence and #7/#181/#109/#159 composition ownership remains with the existing owners. This is additive project coordination, not a claim of complete native code-claims coverage.
+
+**Actual gap and authority.** I read #140's source/delivery offers6072029542/6072607298, the #141 convergence, the closed 6c20 extracted-package receiving and original owner's carrier offer6073230932. The 6c20 receiving stage was removed after completion; it did not claim a persistent installed entry. Bounded current project/native evidence shows no reservation for the unique paths below. Existing `RecallWeave-LP-e3a41d2b3368` is a different retained installed application and is untouched.
+
+**Exact original delivery:** commit `cb2f0ad1bc59bac7541004cde174179923e6cb75`, tree `8514ed3862142f5c3daf9c889b215ad3edb074f8`; ZIP Git `ae0f3ed4e067fd527b1db7e103270419242db0c2`, 53,535 bytes, SHA256 `a86d823d70be98d08fd804ce9d8bccdb071b586adf5c30c0784a96a5db2a03e9`. It is recovered from the original owner's exact 71,380-byte unwrapped base64 carrier `0f984d3f82104f4a309b1a17b908b159477c93e9`, with no ZIP rebuild.
+
+The fresh original-only native admission at07:27:17UTC decoded only in memory and verified the exact ZIP identity, all eight unique regular member paths/modes/byte/SHA/Git identities and the seven original checksum entries. It wrote no files and ran no product, builder or browser. Mac guards: 788,369,408 bytes free disk and 12,833,390,592 bytes conservative RAM. Both proposed paths were absent. One prior admission observer looked for `questions` instead of this original deck's `items` field and exited1 after the byte checks; its source and failure remain preserved. The earlier normal-TLS public download refusal was not retried or bypassed; the existing immutable owner carrier supplies the exact bytes.
+
+**Narrow source/evidence fence:**
+
+- New `tools/edit-distance-local/**`: installer, launcher, original-input pins and operator/recovery instructions.
+- New `docs/qualification/edit-distance-local-c945953fdeb7/**`: exact originals, native source/install receipts and independently frozen installed-use evidence.
+- Unique installation: `/Users/me/Applications/RecallWeaveEditDistance-c945953fdeb7`.
+- Unique preparation: `/Users/me/Developer/recallweave-edit-distance-local-c945953fdeb7`.
+
+The eight original members will be installed unchanged under `app/`, with `app/START-HERE.html` as the stable entry. A small maintained `Open RecallWeave.command` will verify the final installation identity and open that local file using the existing macOS file opener. Its explicitly disclosed `--no-open` mode will return the verified local entry for a private independently owned Chrome session; that receiving will not claim Finder double-click/default-profile acceptance. The installer will refuse an existing target, preserve any new partial target on failure, retain the original ZIP and all source inputs, and write its final marker last. No shared service, loopback server, launch agent, package/runtime installation or global registration is included.
+
+**Known dependency boundary.** The original packaged learner stays exactly `ef7bc3e27e7f161d917ced6a457fad8822802f3f` (98,468 bytes). The qualified strict UTF-8 picker contribution `be645943c6f5ad2357851b3f4f65050dfec8e6db` is not consumed or recreated here. Its single-picker/current-source and combined-output routes remain with #7/#181/#109/#159. This installation keeps the original selected-file behavior and does not claim that correction, writing restoration, resume acceptance or combined pack integration.
+
+**New useful receiving only.** Preserve the completed original course/math/browser evidence. Before new launcher source exposure/execution, the independent receiver will freeze one actual installed learner session using the exact packaged course and one new physical study-notes handoff containing literal user writing. It will bind the maintained installed entry, actual download, all installed/original identities and owned child closure. No old course/math/importer matrix or browser campaign is requested. Author will leave the ordinary successful learner session to that receiver.
+
+Native author+installation allocation is capped at2MiB, with fresh minimum256MiB free disk and2GiB conservative RAM; independent Chrome/profile evidence has a separately bounded serialized interval. Existing target and other owners' directories remain untouched. Source is not yet authored and no browser is running in this lane.
+
+All five exact current workflow bodies were read in full at unchanged main `698902f9c9c1d5c5023092b85b3632a7cb7a01ed`; they define push/pull_request events only, with no issue-comment trigger. Current `tools/` and `docs/qualification/` listings contain neither new fence. This comment creates no ref, PR, main/workflow/Actions, service or installed-state change. Root retains final source-ref review/publication.
