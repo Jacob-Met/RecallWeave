@@ -1,0 +1,240 @@
+{
+  "schema": "recallweave-minimax-independent-literals.v1",
+  "status": "Hand-derived before candidate source or test exposure; no execution.",
+  "base": {
+    "commit": "698902f9c9c1d5c5023092b85b3632a7cb7a01ed",
+    "tree": "d6d3707b691850af7928299242631534cff89aa8"
+  },
+  "conventions": {
+    "utility": "Every terminal utility is measured for MAX; MIN chooses smaller values.",
+    "turns": "MAX R, then MIN branches, with a MAX counter node. Leaves may occur at unequal depth.",
+    "ties": "First declared child among equal best values.",
+    "representation": "Reviewer semantic nodes; not yet a product input/output schema."
+  },
+  "primary": {
+    "root": "R",
+    "nodes": [
+      {
+        "id": "R",
+        "turn": "MAX",
+        "children": [
+          "Cliff",
+          "Harbor"
+        ]
+      },
+      {
+        "id": "Cliff",
+        "turn": "MIN",
+        "children": [
+          "jackpot",
+          "setback"
+        ]
+      },
+      {
+        "id": "jackpot",
+        "utility": 11
+      },
+      {
+        "id": "setback",
+        "utility": -4
+      },
+      {
+        "id": "Harbor",
+        "turn": "MIN",
+        "children": [
+          "settle",
+          "counter"
+        ]
+      },
+      {
+        "id": "settle",
+        "utility": 3
+      },
+      {
+        "id": "counter",
+        "turn": "MAX",
+        "children": [
+          "low",
+          "recover"
+        ]
+      },
+      {
+        "id": "low",
+        "utility": -2
+      },
+      {
+        "id": "recover",
+        "utility": 5
+      }
+    ],
+    "expected": {
+      "values": {
+        "R": 3,
+        "Cliff": -4,
+        "jackpot": 11,
+        "setback": -4,
+        "Harbor": 3,
+        "settle": 3,
+        "counter": 5,
+        "low": -2,
+        "recover": 5
+      },
+      "selected": {
+        "R": "Harbor",
+        "Cliff": "setback",
+        "Harbor": "settle",
+        "counter": "recover"
+      },
+      "principalVariation": [
+        "R",
+        "Harbor",
+        "settle"
+      ],
+      "terminalUtility": 3,
+      "fullNodes": 9,
+      "fullLeaves": 5
+    },
+    "derivation": [
+      "counter=max(-2,5)=5",
+      "Harbor=min(3,5)=3",
+      "Cliff=min(11,-4)=-4",
+      "R=max(-4,3)=3"
+    ],
+    "wrongChoice": {
+      "chosen": "Cliff",
+      "temptation": "It contains the largest terminal utility, 11.",
+      "actualWorstCase": -4,
+      "correctChoice": "Harbor",
+      "correctWorstCase": 3,
+      "guaranteeGap": 7,
+      "label": "A deliberately wrong learner/greedy choice; not an observed bug in an existing product."
+    }
+  },
+  "pruning": {
+    "edits": [
+      {
+        "node": "R",
+        "children": [
+          "Harbor",
+          "Cliff"
+        ]
+      },
+      {
+        "node": "Cliff",
+        "children": [
+          "jackpot",
+          "setback",
+          "abyss"
+        ]
+      },
+      {
+        "id": "abyss",
+        "utility": -9
+      }
+    ],
+    "expected": {
+      "fullValues": {
+        "R": 3,
+        "Cliff": -9,
+        "Harbor": 3,
+        "counter": 5
+      },
+      "principalVariation": [
+        "R",
+        "Harbor",
+        "settle"
+      ],
+      "terminalVisitOrder": [
+        "settle",
+        "low",
+        "recover",
+        "jackpot",
+        "setback"
+      ],
+      "prunedTerminalIds": [
+        "abyss"
+      ],
+      "searchVisitedNodes": 9,
+      "searchVisitedLeaves": 5,
+      "referenceNodes": 10,
+      "referenceLeaves": 6,
+      "cliffAtCutoff": {
+        "alpha": 3,
+        "beta": -4,
+        "returnedValue": -4,
+        "bound": "upper",
+        "fullReferenceValue": -9
+      }
+    },
+    "derivation": [
+      "Harbor's MIN value 3 establishes the root alpha=3.",
+      "Cliff/MIN sees 11, then -4; beta=-4 <= alpha=3 permits skipping abyss.",
+      "The skipped abyss=-9 makes the complete Cliff value -9.",
+      "Thus the returned -4 bounds the true value from above and is not exact.",
+      "Root remains exactly 3: Harbor guarantees 3 and Cliff is bounded above by -4."
+    ]
+  },
+  "tie": {
+    "root": "Tie",
+    "nodes": [
+      {
+        "id": "Tie",
+        "turn": "MAX",
+        "children": [
+          "first",
+          "second"
+        ]
+      },
+      {
+        "id": "first",
+        "utility": 4
+      },
+      {
+        "id": "second",
+        "utility": 4
+      }
+    ],
+    "expected": {
+      "value": 4,
+      "chosen": "first",
+      "bothOptimal": [
+        "first",
+        "second"
+      ]
+    },
+    "reversedChildrenExpected": {
+      "value": 4,
+      "chosen": "second"
+    }
+  },
+  "sensitivityControls": [
+    {
+      "id": "greedy_max_leaf",
+      "wrongRootChoice": "Cliff",
+      "wrongRootValue": 11,
+      "mustFail": "primary root choice and value"
+    },
+    {
+      "id": "min_at_every_node",
+      "wrongCounterValue": -2,
+      "wrongHarborValue": -2,
+      "wrongRootValue": -4,
+      "mustFail": "MAX counter/root backups"
+    },
+    {
+      "id": "cutoff_return_as_exact",
+      "wrongCliffClassification": "exact -4",
+      "mustFail": "pruning bound differs from complete -9"
+    },
+    {
+      "id": "count_reference_as_pruning",
+      "wrongSearchLeafCount": 6,
+      "mustFail": "actual independent alpha-beta traversal visits only five leaves"
+    }
+  ],
+  "limits": [
+    "No candidate code, formula implementation or result was used to derive these literals.",
+    "No native execution, source mutation or owner claim accompanies this in-memory freeze.",
+    "The final product schema and precise count terminology require a separate pre-candidate interface supplement."
+  ]
+}

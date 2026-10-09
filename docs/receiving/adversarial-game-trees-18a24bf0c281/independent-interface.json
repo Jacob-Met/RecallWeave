@@ -1,0 +1,387 @@
+{
+  "schema": "recallweave-minimax-independent-interface.v1",
+  "status": "Pre-candidate in-memory schema binding; no executable solver or product result used.",
+  "authoredContract": {
+    "bytes": 9735,
+    "sha256": "0c03b46aef310d851311916617abad4c790a5d9cfd063f148caf8183e2d407e5",
+    "reportedComputedBlob": "160ad3d32d6432ab1e1c63d85421cfb8aba012af",
+    "source": "estate_product public interface message; no candidate source"
+  },
+  "semanticFreeze": {
+    "bytes": 5529,
+    "sha256": "2624f9acdaf4041bcb6f1baa96fa3546d5c54d1defcb9252360d6a544c8a53cb"
+  },
+  "api": "analyzeGameTree(input)",
+  "cli": "node tools/adversarial-game-trees.mjs --tree PATH|--stdin [--json]",
+  "primary": {
+    "input": {
+      "rootPlayer": "MAX",
+      "tree": {
+        "id": "R",
+        "children": [
+          {
+            "id": "Cliff",
+            "children": [
+              {
+                "id": "jackpot",
+                "utility": 11
+              },
+              {
+                "id": "setback",
+                "utility": -4
+              }
+            ]
+          },
+          {
+            "id": "Harbor",
+            "children": [
+              {
+                "id": "settle",
+                "utility": 3
+              },
+              {
+                "id": "counter",
+                "children": [
+                  {
+                    "id": "low",
+                    "utility": -2
+                  },
+                  {
+                    "id": "recover",
+                    "utility": 5
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "expected": {
+      "profile": "recallweave.adversarial-game-trees.v1",
+      "rootPlayer": "MAX",
+      "nodeCount": 9,
+      "leafCount": 5,
+      "maxDepth": 3,
+      "minimax": {
+        "value": 3,
+        "chosenChild": "Harbor",
+        "principalVariation": [
+          "R",
+          "Harbor",
+          "settle"
+        ],
+        "nodes": [
+          {
+            "id": "R",
+            "role": "MAX",
+            "value": 3,
+            "chosenChild": "Harbor"
+          },
+          {
+            "id": "Cliff",
+            "role": "MIN",
+            "value": -4,
+            "chosenChild": "setback"
+          },
+          {
+            "id": "jackpot",
+            "role": "TERMINAL",
+            "value": 11,
+            "chosenChild": null
+          },
+          {
+            "id": "setback",
+            "role": "TERMINAL",
+            "value": -4,
+            "chosenChild": null
+          },
+          {
+            "id": "Harbor",
+            "role": "MIN",
+            "value": 3,
+            "chosenChild": "settle"
+          },
+          {
+            "id": "settle",
+            "role": "TERMINAL",
+            "value": 3,
+            "chosenChild": null
+          },
+          {
+            "id": "counter",
+            "role": "MAX",
+            "value": 5,
+            "chosenChild": "recover"
+          },
+          {
+            "id": "low",
+            "role": "TERMINAL",
+            "value": -2,
+            "chosenChild": null
+          },
+          {
+            "id": "recover",
+            "role": "TERMINAL",
+            "value": 5,
+            "chosenChild": null
+          }
+        ]
+      },
+      "alphaBeta": {
+        "value": 3,
+        "visitedNodeIds": [
+          "R",
+          "Cliff",
+          "jackpot",
+          "setback",
+          "Harbor",
+          "settle",
+          "counter",
+          "low",
+          "recover"
+        ],
+        "visitedLeafIds": [
+          "jackpot",
+          "setback",
+          "settle",
+          "low",
+          "recover"
+        ],
+        "prunedNodeIds": [],
+        "visitedNodeCount": 9,
+        "visitedLeafCount": 5,
+        "prunedNodeCount": 0,
+        "cutoffs": []
+      }
+    }
+  },
+  "pruning": {
+    "input": {
+      "rootPlayer": "MAX",
+      "tree": {
+        "id": "R",
+        "children": [
+          {
+            "id": "Harbor",
+            "children": [
+              {
+                "id": "settle",
+                "utility": 3
+              },
+              {
+                "id": "counter",
+                "children": [
+                  {
+                    "id": "low",
+                    "utility": -2
+                  },
+                  {
+                    "id": "recover",
+                    "utility": 5
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "Cliff",
+            "children": [
+              {
+                "id": "jackpot",
+                "utility": 11
+              },
+              {
+                "id": "setback",
+                "utility": -4
+              },
+              {
+                "id": "abyss",
+                "utility": -9
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "expected": {
+      "profile": "recallweave.adversarial-game-trees.v1",
+      "rootPlayer": "MAX",
+      "nodeCount": 10,
+      "leafCount": 6,
+      "maxDepth": 3,
+      "minimax": {
+        "value": 3,
+        "chosenChild": "Harbor",
+        "principalVariation": [
+          "R",
+          "Harbor",
+          "settle"
+        ],
+        "nodes": [
+          {
+            "id": "R",
+            "role": "MAX",
+            "value": 3,
+            "chosenChild": "Harbor"
+          },
+          {
+            "id": "Harbor",
+            "role": "MIN",
+            "value": 3,
+            "chosenChild": "settle"
+          },
+          {
+            "id": "settle",
+            "role": "TERMINAL",
+            "value": 3,
+            "chosenChild": null
+          },
+          {
+            "id": "counter",
+            "role": "MAX",
+            "value": 5,
+            "chosenChild": "recover"
+          },
+          {
+            "id": "low",
+            "role": "TERMINAL",
+            "value": -2,
+            "chosenChild": null
+          },
+          {
+            "id": "recover",
+            "role": "TERMINAL",
+            "value": 5,
+            "chosenChild": null
+          },
+          {
+            "id": "Cliff",
+            "role": "MIN",
+            "value": -9,
+            "chosenChild": "abyss"
+          },
+          {
+            "id": "jackpot",
+            "role": "TERMINAL",
+            "value": 11,
+            "chosenChild": null
+          },
+          {
+            "id": "setback",
+            "role": "TERMINAL",
+            "value": -4,
+            "chosenChild": null
+          },
+          {
+            "id": "abyss",
+            "role": "TERMINAL",
+            "value": -9,
+            "chosenChild": null
+          }
+        ]
+      },
+      "alphaBeta": {
+        "value": 3,
+        "visitedNodeIds": [
+          "R",
+          "Harbor",
+          "settle",
+          "counter",
+          "low",
+          "recover",
+          "Cliff",
+          "jackpot",
+          "setback"
+        ],
+        "visitedLeafIds": [
+          "settle",
+          "low",
+          "recover",
+          "jackpot",
+          "setback"
+        ],
+        "prunedNodeIds": [
+          "abyss"
+        ],
+        "visitedNodeCount": 9,
+        "visitedLeafCount": 5,
+        "prunedNodeCount": 1,
+        "cutoffs": [
+          {
+            "nodeId": "Cliff",
+            "role": "MIN",
+            "bound": "upper",
+            "boundValue": -4,
+            "alpha": 3,
+            "beta": -4,
+            "skippedChildIds": [
+              "abyss"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "tie": {
+    "input": {
+      "rootPlayer": "MAX",
+      "tree": {
+        "id": "Tie",
+        "children": [
+          {
+            "id": "first",
+            "utility": 4
+          },
+          {
+            "id": "second",
+            "utility": 4
+          }
+        ]
+      }
+    },
+    "expectedValue": 4,
+    "expectedChosenChild": "first",
+    "expectedPrincipalVariation": [
+      "Tie",
+      "first"
+    ],
+    "expectedVisits": [
+      "Tie",
+      "first",
+      "second"
+    ],
+    "expectedCutoffs": [],
+    "reversedChildrenExpectedChosen": "second"
+  },
+  "terminalPerspective": {
+    "input": {
+      "rootPlayer": "MIN",
+      "tree": {
+        "id": "done",
+        "utility": -7
+      }
+    },
+    "expectedValue": -7,
+    "expectedRole": "TERMINAL",
+    "expectedChosenChild": null,
+    "expectedPrincipalVariation": [
+      "done"
+    ],
+    "expectedNodeCount": 1,
+    "expectedLeafCount": 1,
+    "expectedMaxDepth": 0,
+    "expectedVisits": [
+      "done"
+    ],
+    "expectedCutoffs": [],
+    "reason": "A terminal value remains MAX's utility even when the rootPlayer flag is MIN."
+  },
+  "wrongChoiceBaseline": {
+    "case": "primary",
+    "incorrectChoice": "Cliff",
+    "incorrectArgument": "Choose the branch containing payoff 11.",
+    "literalRefutation": "MIN can choose setback=-4; Harbor guarantees3.",
+    "status": "Hand-derived negative control only; not a native product failure."
+  }
+}

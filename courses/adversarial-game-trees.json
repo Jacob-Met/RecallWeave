@@ -1,0 +1,210 @@
+{
+  "format": "recallweave-deck/1",
+  "title": "Adversarial game trees: best replies, minimax and sound pruning",
+  "attribution": "Original game trees, questions, distractors, worked explanations and transfer prompts for RecallWeave. Algorithm background: MIT OpenCourseWare, 6.034 Artificial Intelligence (Fall 2010), Patrick H. Winston, Lecture 6: https://ocw.mit.edu/courses/6-034-artificial-intelligence-fall-2010/resources/lecture-6-search-games-minimax-and-alpha-beta/; MIT 6.034 recitation on alpha-beta pruning: https://web.mit.edu/6.034/wwwbob/L4/node14.html. No reference exercise, figure or passage is copied. AI assistance was used in drafting and implementation.",
+  "license": "Original course content authored for Jacob’s RecallWeave project; no additional reuse license is granted here. Linked reference material retains its published terms.",
+  "concepts": [
+    "alternating-choices",
+    "adversarial-backup",
+    "sound-pruning",
+    "model-limits"
+  ],
+  "items": [
+    {
+      "id": "agt-perspective",
+      "concept": "alternating-choices",
+      "prerequisites": [],
+      "prompt": "A MIN root R chooses between terminal A with utility −3 and terminal B with utility 5. Every utility is measured from MAX’s perspective. Which move and value does minimax assign to R?",
+      "options": [
+        "Choose B; R has value 5 because each player maximizes the displayed utility",
+        "Choose A; R has value −3 because MIN minimizes MAX’s utility",
+        "Choose A; R has value 3 after changing the utility’s sign",
+        "Choose neither; negative terminal utilities are unsupported"
+      ],
+      "answer": 1,
+      "explanation": "MIN chooses the smaller MAX-perspective utility: −3 rather than 5. The perspective does not flip when the player changes. R therefore chooses A and has value −3; no sign conversion is applied.",
+      "transfer": "If R were MAX with the same two terminal children, which move would it choose?"
+    },
+    {
+      "id": "agt-alternation",
+      "concept": "alternating-choices",
+      "prerequisites": [],
+      "prompt": "The entire tree is a chain R → A → B → T, where T is terminal with utility 4 and R is MAX. Internal roles alternate after every edge. What roles do A and B have?",
+      "options": [
+        "A is MAX and B is MIN",
+        "A and B are both MIN",
+        "A is MIN and B is MAX",
+        "A and B are both MAX"
+      ],
+      "answer": 2,
+      "explanation": "R is at depth 0 and is MAX. A at depth 1 is MIN; B at depth 2 is MAX. T is a terminal outcome, not another player turn. Every internal value is 4 in this one-choice chain.",
+      "transfer": "Add one internal node C between B and terminal T. What role does C have?"
+    },
+    {
+      "id": "agt-unequal-depth",
+      "concept": "alternating-choices",
+      "prerequisites": [],
+      "prompt": "MAX root R has two children: terminal L with utility 2, and internal M whose terminal children are U with utility 4 and V with utility 1. Roles alternate, so M is MIN. What does R choose?",
+      "options": [
+        "M, because its best-looking leaf has utility 4",
+        "L, with value 2; M’s exact value is 1",
+        "M, with value 5 after adding its leaves",
+        "The tree is invalid because its terminal leaves have unequal depths"
+      ],
+      "answer": 1,
+      "explanation": "M is MIN, so it backs up min(4, 1) = 1. R compares its terminal option 2 with M’s value 1 and chooses L. Terminal outcomes may occur at different depths in the explicit finite tree.",
+      "transfer": "Change V’s utility from 1 to 3. Which root option becomes better?"
+    },
+    {
+      "id": "agt-highest-leaf",
+      "concept": "adversarial-backup",
+      "prerequisites": [
+        "alternating-choices"
+      ],
+      "prompt": "MAX root R chooses Maple or Cedar. Both are MIN nodes. Maple’s terminal replies have utilities 10 and −5; Cedar’s have utilities 3 and 6. Which root decision is justified by an opponent who minimizes MAX’s utility?",
+      "options": [
+        "Maple, because 10 is the largest leaf in the whole tree",
+        "Maple, because its two leaves sum to 5",
+        "Either move, because the opponent’s reply is random",
+        "Cedar, whose worst reply is 3 rather than Maple’s −5"
+      ],
+      "answer": 3,
+      "explanation": "Maple backs up −5 and Cedar backs up 3. MAX chooses Cedar, guaranteeing 3 within this model. The attractive leaf 10 is not under MAX’s control after choosing Maple. Averaging or adding leaf utilities would answer a different question.",
+      "transfer": "Raise Maple’s −5 leaf to 4. Which root move now wins under the same opponent model?"
+    },
+    {
+      "id": "agt-negative",
+      "concept": "adversarial-backup",
+      "prerequisites": [
+        "alternating-choices"
+      ],
+      "prompt": "MAX root R chooses A or B, both MIN nodes. A has terminal utilities −3 and −8. B has terminal utilities −4 and −6. Which exact values and root move are correct?",
+      "options": [
+        "A = −8, B = −6; choose B with value −6",
+        "A = −3, B = −4; choose A with value −3",
+        "A = 8, B = 6; choose A with value 8",
+        "A = −11, B = −10; choose B with value −10"
+      ],
+      "answer": 0,
+      "explanation": "MIN takes the smaller value at each child: A = −8 and B = −6. MAX then takes the larger of those values, −6, by choosing B. Negative utility does not reverse the meaning of maximum or minimum.",
+      "transfer": "Replace B’s −6 with −9. Which move should R choose now?"
+    },
+    {
+      "id": "agt-first-tie",
+      "concept": "adversarial-backup",
+      "prerequisites": [
+        "alternating-choices"
+      ],
+      "prompt": "MIN root R lists First before Second. Both children are MAX nodes. First lists leaves Fm2 = −2, then F0 = 0. Second lists S0 = 0, then Sm3 = −3. Exact minimax chooses the first declared child when optimal values tie. What is R’s principal variation?",
+      "options": [
+        "R → Second → Sm3, value −3",
+        "R → First → Fm2, value −2",
+        "R → First → F0, value 0",
+        "R → Second → S0, value 0, because later ties replace earlier choices"
+      ],
+      "answer": 2,
+      "explanation": "First and Second each have exact MAX value 0. R is MIN, so these root options tie at 0; the declared first-child policy chooses First. Within First, MAX chooses F0. The principal variation is R → First → F0.",
+      "transfer": "Swap only the order of First and Second. Does the root value change, and which equal-value move is selected?"
+    },
+    {
+      "id": "agt-min-bound",
+      "concept": "sound-pruning",
+      "prerequisites": [
+        "adversarial-backup"
+      ],
+      "prompt": "MAX root R visits Oak before Pine. Each is MIN. Oak lists leaves O4 = 4 then O7 = 7; Pine lists P1 = 1 then Pm6 = −6. After Oak establishes alpha = 4, alpha-beta visits Pine’s first leaf 1 and skips −6. How should Pine’s returned 1 be interpreted?",
+      "options": [
+        "As Pine’s exact minimax value; skipped leaves cannot change it",
+        "As an upper bound; Pine’s separately computed exact value is −6",
+        "As a lower bound; Pine’s exact value must be at least 1",
+        "As the root’s exact value, replacing Oak’s 4"
+      ],
+      "answer": 1,
+      "explanation": "At Pine, MIN has already seen 1, so its exact value is at most 1. Since that cannot beat the root’s available 4, the remaining reply can be skipped in this search. Pine returns the upper bound 1; a full reference calculation sees the other leaf and gives −6. The root’s exact value remains 4.",
+      "transfer": "Change the skipped Pine leaf from −6 to −9. Which exact node value changes, and does the root decision change?"
+    },
+    {
+      "id": "agt-max-bound",
+      "concept": "sound-pruning",
+      "prerequisites": [
+        "adversarial-backup"
+      ],
+      "prompt": "MIN root R visits terminal L = 0 before internal Right, which is MAX. Right lists terminal A = 2 then B = 9. With beta = 0 from L, alpha-beta sees A = 2 and skips B. What does the returned 2 at Right establish?",
+      "options": [
+        "An exact value of 2 for Right and a new root value of 2",
+        "An upper bound of 2 for Right, whose exact value is 9",
+        "A lower bound of 2 for Right; its exact value is 9 and R still chooses L = 0",
+        "That B has utility 2 without visiting it"
+      ],
+      "answer": 2,
+      "explanation": "MAX at Right can already achieve 2, so Right’s exact value is at least 2. MIN at the root already has 0 and will not prefer this branch. The search returns a lower bound of 2; the full reference value is max(2, 9) = 9. R’s exact choice remains L with value 0.",
+      "transfer": "Change B from 9 to 20. Does the bound 2 remain valid, and does R’s choice change?"
+    },
+    {
+      "id": "agt-order",
+      "concept": "sound-pruning",
+      "prerequisites": [
+        "adversarial-backup"
+      ],
+      "prompt": "MAX root R chooses between MIN nodes Oak (leaves 4 then 7) and Pine (leaves 1 then −6). Compare two depth-first alpha-beta runs: Oak-first versus Pine-first, with each node’s leaf order unchanged. Which statement is correct?",
+      "options": [
+        "Both return root value 4; Oak-first visits 3 terminal leaves, while Pine-first visits all 4",
+        "Oak-first changes the game’s root value to 1 by skipping −6",
+        "Pine-first changes the game’s root value to −6",
+        "Both must visit the same leaves because the root value is the same"
+      ],
+      "answer": 0,
+      "explanation": "Oak-first establishes a root alternative of 4 before Pine, allowing Pine’s −6 leaf to be pruned after seeing 1. Pine-first must inspect both Pine leaves to establish −6; Oak then needs both of its leaves. The exact root value stays 4. The leaf-count difference is a search-work observation, not a measured timing result.",
+      "transfer": "Keep Oak first but swap Pine’s leaf order to −6 then 1. Which Pine leaf is skipped, and is the root value unchanged?"
+    },
+    {
+      "id": "agt-terminal-root",
+      "concept": "model-limits",
+      "prerequisites": [],
+      "prompt": "The complete tree is one terminal node R with utility −7; rootPlayer is MIN. What should an exact finite-tree analysis report?",
+      "options": [
+        "Value 7, after converting to MIN’s perspective",
+        "Value −7, no chosen move, principal variation [R], and one visited terminal leaf",
+        "No result because every root must have at least two children",
+        "Value 0 because no move has been played"
+      ],
+      "answer": 1,
+      "explanation": "A terminal outcome already supplies its MAX-perspective utility. No player chooses a child, so chosenChild is null and the principal variation contains only R. The reference and the separate alpha-beta traversal each inspect this one terminal node.",
+      "transfer": "Change rootPlayer to MAX without changing the terminal utility. Which reported value should remain unchanged?"
+    },
+    {
+      "id": "agt-counts",
+      "concept": "model-limits",
+      "prerequisites": [
+        "sound-pruning"
+      ],
+      "prompt": "For the seven-node tree MAX R → MIN Oak(4, 7), MIN Pine(1, −6), with Oak visited first, the tool computes a full minimax reference and then a separate alpha-beta search. The reference evaluates all 4 leaves. The search visits 4, 7 and 1 and prunes −6. What is the alphaBeta.visitedLeafCount field?",
+      "options": [
+        "7, because it must add the reference and search leaf evaluations",
+        "4, because every leaf was evaluated somewhere in the program",
+        "1, because only the root choice matters",
+        "3, counting only leaves entered by the separate alpha-beta traversal"
+      ],
+      "answer": 3,
+      "explanation": "The field is 3. The full reference calculation is separate work and is not included in the alpha-beta traversal count. Together these two calculations evaluate 7 terminal occurrences, so this teaching tool does not claim to have saved total work versus running only exhaustive minimax. It exposes which branches alpha-beta can avoid.",
+      "transfer": "If the same tool reports no pruned nodes on a different four-leaf tree, what alphaBeta.visitedLeafCount should it report?"
+    },
+    {
+      "id": "agt-model",
+      "concept": "model-limits",
+      "prerequisites": [
+        "adversarial-backup"
+      ],
+      "prompt": "A decision has a chance event after choosing A: utility 8 with probability 0.9 or −4 with probability 0.1. B gives utility 2 for certain. There is no opponent choosing the outcome. Can the alternating MAX/MIN tree tool interpret these probability-bearing branches as its stated model?",
+      "options": [
+        "Yes; a MIN node automatically computes the probability-weighted average",
+        "Yes; it should silently discard the probabilities and call that the same decision",
+        "No; chance probabilities require a different model, so probability fields must be refused rather than silently interpreted as MIN choices",
+        "No; positive utilities are invalid"
+      ],
+      "answer": 2,
+      "explanation": "This tool models an adversary who selects replies, not a random event. A chance model would use the stated probabilities and asks a different question. Unsupported probability fields are refused. The lesson’s guarantees apply only to the explicit finite, alternating, perfect-information, two-player zero-sum tree.",
+      "transfer": "What additional modeling choice would be needed if an opponent’s private information changed which actions were available?"
+    }
+  ]
+}
