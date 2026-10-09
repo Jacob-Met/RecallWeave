@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src 'none'; base-uri 'none'; form-action 'none'">
+<title>Genetic linkage lab — RecallWeave</title>
+<style>
+:root{color-scheme:light;--paper:#f4f4eb;--card:#fffef8;--ink:#183c32;--muted:#52695d;--edge:#c9d3c3;--green:#275f46;--pale:#e5eddb;--orange:#a34c1c;--error:#9c3028}
+*{box-sizing:border-box}[hidden]{display:none!important}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif}a{color:var(--green);text-underline-offset:.2em}button,input,select{font:inherit}button,input,select,a{touch-action:manipulation}button{padding:11px 16px;border:1px solid var(--green);border-radius:8px;background:var(--card);color:var(--green);cursor:pointer;min-height:44px}button:hover{background:var(--pale)}button:disabled{opacity:.5;cursor:default}.primary{background:var(--green);color:white;font-weight:700}.primary:hover{background:#174b35}button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible,.scroll:focus-visible{outline:3px solid var(--orange);outline-offset:3px}h1,h2,h3,p{margin-top:0}h1,h2{font-family:Georgia,"Times New Roman",serif;font-weight:500;line-height:1.1}h1{font-size:clamp(2.5rem,5.3vw,4.6rem);max-width:900px;margin-bottom:18px}h2{font-size:1.8rem;margin-bottom:16px}h3{font-size:1rem;margin-bottom:7px}p{margin-bottom:14px}.wrap{max-width:1160px;margin:auto;padding:0 26px}.hero{background:var(--ink);color:var(--paper);padding:22px 0 38px}.brand{display:flex;justify-content:space-between;gap:16px;padding-bottom:16px;margin-bottom:28px;border-bottom:1px solid #628172;font-size:.82rem;letter-spacing:.06em}.brand a{color:#dcecab}.eyebrow,.step{font-size:.75rem;text-transform:uppercase;letter-spacing:.1em;font-weight:750}.eyebrow{color:#dcecab}.lead{font-size:1.12rem;max-width:780px;margin-bottom:0;color:#e0e9dc}.skip{position:absolute;left:10px;top:-100px;background:white;padding:10px;z-index:2}.skip:focus{top:10px}.boundary{padding:23px 0;border-bottom:1px solid var(--edge);color:var(--muted)}.boundary p{margin:0}.workspace{display:grid;grid-template-columns:290px minmax(0,1fr);gap:24px;margin-top:26px;align-items:start}.card{background:var(--card);border:1px solid var(--edge);border-radius:14px;padding:23px;min-width:0}.step,.muted,.small{color:var(--muted)}.small{font-size:.87rem}.field{margin:18px 0}label{display:block;font-size:.9rem;font-weight:700;margin-bottom:7px}input,select{display:block;width:100%;min-height:44px;padding:9px 10px;border:1px solid #9bac94;border-radius:7px;background:white;color:var(--ink)}.hint{font-size:.82rem;color:var(--muted);margin:6px 0 0}.full{width:100%}.error{color:var(--error);font-weight:600;font-size:.9rem;margin:12px 0 0;overflow-wrap:anywhere}.status{font-size:.88rem;color:var(--muted);margin:13px 0 0}.intro-card{margin-bottom:0}.homologs{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin:12px 0 5px}.homologs [data-homolog]{font:700 1.5rem/1.1 ui-monospace,monospace;letter-spacing:.35em;border:2px solid var(--green);border-radius:25px;padding:12px 20px;background:var(--pale)}.scroll{overflow:auto;max-width:100%;border:1px solid var(--edge);border-radius:8px;margin:20px 0}table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;font-size:.88rem;min-width:505px}caption{text-align:left;padding:12px;background:var(--paper);color:var(--muted)}th,td{text-align:left;padding:10px 11px;border-bottom:1px solid var(--edge)}thead{background:var(--pale)}tbody th{font-family:ui-monospace,monospace}tbody tr:last-child>*{border-bottom:0}td[data-field=probability]{font-weight:750}.totals{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.total{background:var(--pale);padding:12px;border-radius:8px}.total strong{display:block;font-size:1.3rem;font-variant-numeric:tabular-nums}.total span{font-size:.8rem}.marginals{display:flex;flex-wrap:wrap;gap:7px 18px;padding:0;list-style:none;font-size:.9rem}.marginals strong{font-variant-numeric:tabular-nums}.compare{border-left:4px solid var(--green);background:#eff2e5;padding:16px;margin:18px 0}.compare p:last-child{margin-bottom:0}.actions{border-top:1px solid var(--edge);padding-top:18px;margin-top:20px}.learning{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin:24px 0}.learning li{margin:8px 0}.learning ol{padding-left:22px}.links{display:flex;align-items:center;flex-wrap:wrap;gap:15px;margin-top:20px}.assumptions{margin-bottom:28px}.assumptions summary{font-weight:750;cursor:pointer}.assumptions li{margin:9px 0}.footer{border-top:1px solid var(--edge);padding:23px 0;font-size:.82rem;color:var(--muted)}.footer p{margin:0}
+@media(max-width:860px){.workspace{grid-template-columns:250px minmax(0,1fr);gap:16px}.card{padding:19px}.totals{grid-template-columns:1fr}.total{display:flex;justify-content:space-between;align-items:center;gap:12px}.learning{gap:16px}}
+@media(max-width:650px){.wrap{padding:0 16px}.hero{padding-bottom:29px}.brand{font-size:.72rem;gap:12px}.workspace,.learning{grid-template-columns:1fr;gap:18px}.workspace{margin-top:19px}.card{padding:18px}h2{font-size:1.65rem}.boundary{padding:18px 0}.homologs{gap:8px}.homologs [data-homolog]{font-size:1.35rem}.learning{margin:18px 0}.totals{grid-template-columns:1fr}.scroll{margin:17px 0}.footer{font-size:.77rem}}
+</style>
+</head>
+<body>
+<a class="skip" href="#linkage-form">Skip to cross controls</a>
+<header class="hero"><div class="wrap">
+<div class="brand"><span>RECALLWEAVE / GENETICS LAB</span><a id="linkage-learner" href="../demo.html">Open the learner ↗</a></div>
+<p class="eyebrow">A continuation of Mendelian inheritance</p>
+<h1>Same genotype.<br>Different gametes.</h1>
+<p class="lead">AaBb does not tell the whole story. Place the alleles on their homologs, set a recombinant-gamete fraction, and follow exact probabilities through a testcross.</p>
+</div></header>
+<div class="wrap">
+<div class="boundary"><p><strong>A deliberately small model:</strong> hypothetical plants, two autosomal loci, equal allele segregation and an <strong>AaBb × aabb</strong> testcross. The percentage is given, not estimated from data. This is not a chromosome map or a prediction for a particular organism.</p></div>
+<main>
+<div class="workspace">
+<section class="card" aria-labelledby="choose-title">
+<p class="step">01 / Set the arrangement</p><h2 id="choose-title">Choose a phase</h2>
+<form id="linkage-form" novalidate>
+<div class="field"><label for="linkage-phase">AaBb chromosome phase</label><select id="linkage-phase"><option value="coupling">AB / ab</option><option value="repulsion">Ab / aB</option></select><p class="hint">AB / ab is coupling; Ab / aB is repulsion. Each slash separates the two homologs.</p></div>
+<div class="field"><label for="linkage-recombination">Recombinant gametes (%)</label><input id="linkage-recombination" type="text" inputmode="numeric" value="20" autocomplete="off" spellcheck="false" aria-describedby="percentage-hint"><p id="percentage-hint" class="hint">Whole numbers from 0 to 50. Each of the two recombinant classes gets half this percentage.</p></div>
+<button id="linkage-apply" class="primary full" type="submit">Apply cross</button>
+</form>
+<p id="linkage-error" class="error" role="alert"></p>
+<p id="linkage-status" class="status" role="status"></p>
+<p class="small" style="margin-top:20px">Changing either input retires the previous result. Apply again before interpreting or downloading the new cross.</p>
+</section>
+<section class="card" aria-labelledby="result-title">
+<p class="step">02 / Follow the probabilities</p><h2 id="result-title">From homologs to offspring</h2>
+<p class="intro-card muted">The AaBb parent supplies one gamete; the <strong>aabb tester always supplies ab</strong>. Apply the cross to see their four possible combinations.</p>
+<div id="linkage-result" hidden>
+<h3 style="margin-top:22px">The applied AaBb arrangement</h3>
+<div id="linkage-homologs" class="homologs" aria-label="Parent's homologous chromosomes"><span data-homolog="0"></span><span aria-hidden="true">/</span><span data-homolog="1"></span></div>
+<p class="small">An allele-arrangement schematic, not physical positions or a distance scale.</p>
+<div class="scroll" role="region" aria-label="Gamete and offspring probabilities" tabindex="0"><table>
+<caption>Exact probabilities for the applied testcross</caption>
+<thead><tr><th scope="col">Parent gamete</th><th scope="col">Class</th><th scope="col">Probability</th><th scope="col">Offspring with ab</th><th scope="col">Independent benchmark</th></tr></thead>
+<tbody id="linkage-rows"></tbody>
+</table></div>
+<div class="totals">
+<div class="total"><span>Parental total</span><strong id="linkage-parental-total"></strong></div>
+<div class="total"><span>Recombinant total</span><strong id="linkage-recombinant-total"></strong></div>
+<div class="total"><span>All gametes</span><strong id="linkage-all-total"></strong></div>
+</div>
+<h3 style="margin-top:20px">Individual alleles still segregate equally</h3>
+<ul id="linkage-marginals" class="marginals"><li>A: <strong data-allele="A"></strong></li><li>a: <strong data-allele="a"></strong></li><li>B: <strong data-allele="B"></strong></li><li>b: <strong data-allele="b"></strong></li></ul>
+<div class="compare"><h3 id="linkage-independent-match"></h3><p class="small">At 50%, all four combinations are 1/4 in either phase. That equality does not show whether the loci are on different chromosomes or far apart on the same chromosome.</p></div>
+</div>
+<div class="actions"><button type="button" id="linkage-download" disabled>Download this cross (.json)</button><p class="small" style="margin:10px 0 0">Keep the exact applied text, phase, assumptions and rational probabilities. This observation is a record, not an importable course.</p></div>
+</section>
+</div>
+<div class="learning">
+<section class="card" aria-labelledby="course-title"><p class="step">03 / Explain the connection</p><h2 id="course-title">Try the twelve-question lesson</h2><p>Connect chromosome phase, parental and recombinant gametes, weighted testcrosses, and the limits of the evidence.</p>
+<ol><li>Download the course JSON.</li><li>Open the learner and choose <strong>genetic-linkage.json</strong>.</li><li>Check the preview, then explicitly choose <strong>Start this deck</strong>.</li><li>Finish the lesson, review missed connections, try a practice round and download your notes.</li></ol>
+<div class="links"><button class="primary" type="button" id="linkage-course">Download course (.json)</button><a href="../demo.html">Open RecallWeave ↗</a></div>
+<p class="small" style="margin-top:14px">The course file is unchanged by lab inputs. Previewing it does not replace your lesson; choosing Start does.</p></section>
+<section class="card" aria-labelledby="limits-title"><p class="step">Interpret with care</p><h2 id="limits-title">A fraction is not an event count.</h2><p>The recombinant percentage describes <strong>gametes</strong>. It is not a count of crossover events or a physical distance.</p><p>Likewise, a probability of 1/10 is not a promise of exactly one occurrence in every ten offspring. Finite observations can vary.</p><p class="muted">The earlier Mendelian lab deliberately assumes independent assortment. This companion adds a different, explicit set of gamete weights without changing that lesson.</p><a id="linkage-guide" href="./genetic-linkage.md">Read the worked guide and scientific references ↗</a></section>
+</div>
+<details class="card assumptions"><summary>Read the full model assumptions</summary><ul id="linkage-assumptions"></ul></details>
+</main>
+<footer class="footer"><p>Original RecallWeave lesson text: CC0-1.0. References retain their own terms. No account, storage or network service is used by this lab. Inputs reset when the page reloads; downloads require your explicit action.</p></footer>
+</div>
+<script>
+const LINKAGE_DECK_TEXT = "{\n  \"format\": \"recallweave-deck/1\",\n  \"title\": \"Linked genes: same genotype, different gametes\",\n  \"attribution\": \"Original RecallWeave lesson. Scientific background: OpenStax Biology 2e §13.1, https://openstax.org/books/biology-2e/pages/13-1-chromosomal-theory-and-genetic-linkage ; NHGRI Linkage, https://www.genome.gov/genetics-glossary/Linkage ; NHGRI Crossing Over, https://www.genome.gov/genetics-glossary/Crossing-Over . All questions, explanations and examples are newly written; no textbook exercises or figures are reproduced.\",\n  \"license\": \"CC0-1.0 applies to this original lesson text. Referenced sources retain their own licenses.\",\n  \"concepts\": [\n    \"Chromosome phase\",\n    \"Parental and recombinant gametes\",\n    \"Weighted test crosses\",\n    \"Interpreting recombination evidence\"\n  ],\n  \"items\": [\n    {\n      \"id\": \"gl-phase-1\",\n      \"concept\": \"Chromosome phase\",\n      \"prerequisites\": [],\n      \"prompt\": \"A plant is described only as AaBb. What does that genotype tell you about which alleles share a homologous chromosome?\",\n      \"options\": [\n        \"A and B must be together, with a and b on the other homolog.\",\n        \"A and b must be together, with a and B on the other homolog.\",\n        \"Either arrangement is possible; the genotype alone does not specify the phase.\",\n        \"All four alleles must be together on one chromosome.\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"AaBb lists one copy of each allele at both loci. It does not say how the alleles are arranged across the two homologs. AB / ab is coupling; Ab / aB is repulsion. Both have genotype AaBb.\",\n      \"transfer\": \"Write the two homolog pairs for AaBb. Check that each pair contains exactly one A, a, B and b.\"\n    },\n    {\n      \"id\": \"gl-phase-2\",\n      \"concept\": \"Chromosome phase\",\n      \"prerequisites\": [],\n      \"prompt\": \"Two AaBb plants have phases AB / ab and Ab / aB. In the ideal model, what changes when you switch between these phases while keeping the same recombination percentage?\",\n      \"options\": [\n        \"The second plant becomes homozygous at both loci.\",\n        \"The parental gamete classes change, although the genotype remains AaBb.\",\n        \"The aabb tester must begin producing four types of gametes.\",\n        \"Every allele becomes more likely than its alternative.\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"Phase changes which allele combinations are parental: AB and ab in coupling, or Ab and aB in repulsion. Neither the parent's AaBb genotype nor the tester's ab gamete changes. Each single allele still has probability 1/2 under equal segregation.\",\n      \"transfer\": \"At a recombination percentage below 50, predict which two gamete classes become more frequent after the phase switch.\"\n    },\n    {\n      \"id\": \"gl-phase-3\",\n      \"concept\": \"Chromosome phase\",\n      \"prerequisites\": [],\n      \"prompt\": \"An AaBb parent has homologs Ab / aB. Which pair is parental, meaning it preserves the combinations present on those homologs?\",\n      \"options\": [\n        \"Ab and aB\",\n        \"AB and ab\",\n        \"Aa and Bb\",\n        \"AB and aB\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"The parental combinations are read directly from the homologs: Ab and aB. AB and ab recombine those combinations. Aa and Bb each contain two alleles of one locus, so neither is a gamete in this two-locus model.\",\n      \"transfer\": \"For AB / ab, classify all four possible gametes again. Which labels switch category?\"\n    },\n    {\n      \"id\": \"gl-recombination-1\",\n      \"concept\": \"Parental and recombinant gametes\",\n      \"prerequisites\": [\n        \"Chromosome phase\"\n      ],\n      \"prompt\": \"For AB / ab, suppose 20% of gametes are recombinant. Each parental class is equally likely, and each recombinant class is equally likely. What are P(AB) and P(Ab)?\",\n      \"options\": [\n        \"1/4 and 1/4\",\n        \"4/5 and 1/5\",\n        \"1/10 and 2/5\",\n        \"2/5 and 1/10\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"The two parental classes share the remaining 80%, giving AB = ab = 40% = 2/5. The two recombinant classes share 20%, giving Ab = aB = 10% = 1/10. The percentage describes the total of a category, not the probability of each member.\",\n      \"transfer\": \"Keep the same phase and change the recombinant total to 30%. Divide each category total between its two classes.\"\n    },\n    {\n      \"id\": \"gl-recombination-2\",\n      \"concept\": \"Parental and recombinant gametes\",\n      \"prerequisites\": [\n        \"Chromosome phase\"\n      ],\n      \"prompt\": \"The lab is given a recombination percentage of 30. Which interpretation is used by its probability model?\",\n      \"options\": [\n        \"The total probability of recombinant gametes is 3/10.\",\n        \"Exactly 30 crossover events occur in every 100 meioses.\",\n        \"The two loci are exactly 30 physical units apart on a chromosome.\",\n        \"Every group of ten offspring must contain exactly three recombinants.\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"The entered value stipulates a recombinant-gamete fraction. It is not an event count or a physical distance. Crossover events and the resulting gamete classifications are different quantities, and probabilities do not impose exact counts on finite samples.\",\n      \"transfer\": \"Explain why you would need additional observations and assumptions before making an event-count or physical-distance claim.\"\n    },\n    {\n      \"id\": \"gl-recombination-3\",\n      \"concept\": \"Parental and recombinant gametes\",\n      \"prerequisites\": [\n        \"Chromosome phase\"\n      ],\n      \"prompt\": \"The two parental gamete classes are equally likely. For Ab / aB with 0% recombinant gametes, which distribution follows the model? The order below is AB, Ab, aB, ab.\",\n      \"options\": [\n        \"1/4, 1/4, 1/4, 1/4\",\n        \"1/2, 0, 0, 1/2\",\n        \"0, 1/2, 1/2, 0\",\n        \"0, 1, 0, 0\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"At zero recombination, the parental combinations Ab and aB each receive probability 1/2. The recombinant combinations AB and ab have probability zero. Equal allele segregation still holds: A versus a, and B versus b, each remain 1/2.\",\n      \"transfer\": \"Use that distribution to add P(A) and P(B) separately. Unequal combination probabilities need not make individual alleles unequal.\"\n    },\n    {\n      \"id\": \"gl-testcross-1\",\n      \"concept\": \"Weighted test crosses\",\n      \"prerequisites\": [\n        \"Chromosome phase\",\n        \"Parental and recombinant gametes\"\n      ],\n      \"prompt\": \"In AaBb × aabb, the tester always contributes ab. If the AaBb parent contributes aB, what is the offspring genotype?\",\n      \"options\": [\n        \"AaBb\",\n        \"aaBb\",\n        \"Aabb\",\n        \"aabb\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"Combine the contributions one locus at a time: a with a gives aa, and B with b gives Bb. The offspring is aaBb. The homozygous tester makes the other parent's gamete identifiable from the offspring genotype in this ideal model.\",\n      \"transfer\": \"Map AB, Ab and ab through the same tester. Check that each gives a different offspring genotype.\"\n    },\n    {\n      \"id\": \"gl-testcross-2\",\n      \"concept\": \"Weighted test crosses\",\n      \"prerequisites\": [\n        \"Chromosome phase\",\n        \"Parental and recombinant gametes\"\n      ],\n      \"prompt\": \"The two parental gamete classes are equally likely. An AB / ab parent is testcrossed with aabb. Recombinant gametes total 40%, shared equally between their two classes. What is the probability of an aabb offspring?\",\n      \"options\": [\n        \"3/10\",\n        \"1/5\",\n        \"2/5\",\n        \"1/4\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"The aabb offspring requires ab from the AaBb parent, because the tester also supplies ab. In coupling, ab is parental. The two parental classes share 60%, so P(ab) = P(aabb) = 30% = 3/10.\",\n      \"transfer\": \"Switch to Ab / aB while retaining 40%. Is ab now parental or recombinant, and how does P(aabb) change?\"\n    },\n    {\n      \"id\": \"gl-testcross-3\",\n      \"concept\": \"Weighted test crosses\",\n      \"prerequisites\": [\n        \"Chromosome phase\",\n        \"Parental and recombinant gametes\"\n      ],\n      \"prompt\": \"The two recombinant gamete classes are equally likely. For Ab / aB × aabb with 20% recombinant gametes, what is P(AaBb), and how does it compare with the independent-assortment benchmark?\",\n      \"options\": [\n        \"2/5; it is above the 1/4 benchmark.\",\n        \"1/4; the genotype AaBb guarantees independent assortment.\",\n        \"1/5; each recombinant class gets the entire recombinant total.\",\n        \"1/10; it is below the 1/4 benchmark.\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"AaBb requires gamete AB. In repulsion, AB is recombinant and shares the 20% recombinant total with ab, so its probability is 10% = 1/10. The independent benchmark assigns 1/4 to each of the four combinations. A parent genotype alone cannot justify that benchmark.\",\n      \"transfer\": \"Find P(Aabb) for the same cross. Explain why it lies on the other side of the benchmark.\"\n    },\n    {\n      \"id\": \"gl-evidence-1\",\n      \"concept\": \"Interpreting recombination evidence\",\n      \"prerequisites\": [\n        \"Parental and recombinant gametes\",\n        \"Weighted test crosses\"\n      ],\n      \"prompt\": \"At 50% recombination, both phases give AB, Ab, aB and ab probability 1/4 each. What can this equality establish by itself?\",\n      \"options\": [\n        \"The loci must lie on different chromosomes.\",\n        \"The loci must be adjacent on the same chromosome.\",\n        \"The distribution matches independent assortment, but does not establish chromosome location.\",\n        \"Crossing over has stopped.\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"The four equal probabilities match the independent-assortment distribution. They do not uniquely locate the loci: loci on different chromosomes and sufficiently separated loci on the same chromosome can appear unlinked. The lab reports distribution equality, not a chromosome-location test.\",\n      \"transfer\": \"Separate two claims in your own words: 'these probabilities match' and 'these genes are on different chromosomes'.\"\n    },\n    {\n      \"id\": \"gl-evidence-2\",\n      \"concept\": \"Interpreting recombination evidence\",\n      \"prerequisites\": [\n        \"Parental and recombinant gametes\",\n        \"Weighted test crosses\"\n      ],\n      \"prompt\": \"A modeled offspring genotype has probability 1/10. A learner says, 'If I collect ten offspring, exactly one must have that genotype.' What is the best correction?\",\n      \"options\": [\n        \"Exactly one is guaranteed only if the parental phase is coupling.\",\n        \"One is the expected count, but the actual count in ten offspring can differ.\",\n        \"The probability must be changed to match the first ten observations.\",\n        \"Probability 1/10 means the genotype cannot appear before the tenth offspring.\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"For ten offspring with the stated probability, the expected count is 10 × 1/10 = 1. That is an average over repeated samples, not a quota for each sample. Finite data can deviate without invalidating the probability model.\",\n      \"transfer\": \"Would observing zero in one sample of ten prove that the modeled probability is zero? Explain the difference between a possibility and a guarantee.\"\n    },\n    {\n      \"id\": \"gl-evidence-3\",\n      \"concept\": \"Interpreting recombination evidence\",\n      \"prerequisites\": [\n        \"Parental and recombinant gametes\",\n        \"Weighted test crosses\"\n      ],\n      \"prompt\": \"In an ideal testcross, the AaBb parent's gamete contributions are inferred as AB: 41, Ab: 9, aB: 11, ab: 39. Assuming the lab's equal-segregation and no-survival-bias model is appropriate, which interpretation is best supported?\",\n      \"options\": [\n        \"The pattern is consistent with coupling and an observed recombinant fraction of 20/100; it does not prove an exact underlying fraction or physical distance.\",\n        \"The 41 versus 39 difference proves that one allele fails to segregate.\",\n        \"The genes must be on different chromosomes because all four classes occurred.\",\n        \"There must have been exactly twenty crossover events.\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"AB and ab are the more frequent pair, consistent with coupling under the stated model. The other pair contributes 9 + 11 = 20 of 100 observations. This observed fraction is an estimate, not proof of an exact underlying probability, a count of crossover events, or a physical map distance.\",\n      \"transfer\": \"Before interpreting an unfamiliar dataset, ask how the gamete contributions were identified and whether differential survival or segregation distortion could affect the counts.\"\n    }\n  ]\n}\n";
+/** Exact probabilities for a two-locus testcross; no sampling or physical map inference. */
+const LINKAGE_ASSUMPTIONS = Object.freeze([
+  "Hypothetical diploid plants; two autosomal loci A/a and B/b.",
+  "One double-heterozygous AaBb parent is crossed with an aabb tester that contributes ab.",
+  "Alleles segregate equally; the two parental gamete classes share probability equally, as do the two recombinant classes.",
+  "The entered recombination percentage is a stipulated recombinant-gamete fraction, not a count of crossover events.",
+  "No mutation, segregation distortion, differential gamete or offspring survival, or nonrandom fertilization is modeled.",
+  "Probabilities describe possible offspring; they are not quotas for a finite sample and do not locate genes on a physical chromosome map."
+]);
+
+function fraction(numerator, denominator) {
+  let a = numerator;
+  let b = denominator;
+  while (b) [a, b] = [b, a % b];
+  return Object.freeze({ numerator: numerator / a, denominator: denominator / a });
+}
+
+function analyzeLinkage(value) {
+  if (value === null || typeof value !== 'object' || Array.isArray(value)) {
+    throw new TypeError('Supply the phase and recombination percentage as a record.');
+  }
+  const prototype = Object.getPrototypeOf(value);
+  if (prototype !== Object.prototype && prototype !== null) throw new TypeError('Use an ordinary data record.');
+  const keys = Reflect.ownKeys(value);
+  if (keys.length !== 2 || !keys.includes('phase') || !keys.includes('recombinationPercent')) {
+    throw new TypeError('Supply exactly phase and recombinationPercent.');
+  }
+  const phaseField = Object.getOwnPropertyDescriptor(value, 'phase');
+  const percentField = Object.getOwnPropertyDescriptor(value, 'recombinationPercent');
+  if (!Object.hasOwn(phaseField, 'value') || !Object.hasOwn(percentField, 'value')) {
+    throw new TypeError('The two fields must be data properties.');
+  }
+  const phase = phaseField.value;
+  const rawPercent = percentField.value;
+  if (phase !== 'coupling' && phase !== 'repulsion') throw new RangeError('Choose coupling or repulsion.');
+  if (typeof rawPercent !== 'number' || !Number.isInteger(rawPercent) || rawPercent < 0 || rawPercent > 50) {
+    throw new RangeError('Recombination percentage must be an integer from 0 through 50.');
+  }
+  const recombinationPercent = rawPercent === 0 ? 0 : rawPercent;
+  const homologs = Object.freeze(phase === 'coupling' ? ['AB', 'ab'] : ['Ab', 'aB']);
+  const gametes = ['AB', 'Ab', 'aB', 'ab'];
+  const offspring = ['AaBb', 'Aabb', 'aaBb', 'aabb'];
+  const weights = gametes.map(gamete => homologs.includes(gamete) ? 100 - recombinationPercent : recombinationPercent);
+  const rows = Object.freeze(gametes.map((gamete, index) => Object.freeze({
+    gamete,
+    kind: homologs.includes(gamete) ? 'parental' : 'recombinant',
+    probability: fraction(weights[index], 200),
+    offspringGenotype: offspring[index]
+  })));
+  const total = predicate => fraction(weights.reduce((sum, weight, index) => sum + (predicate(rows[index]) ? weight : 0), 0), 200);
+  return Object.freeze({
+    format: 'recallweave-genetic-linkage/1',
+    input: Object.freeze({ phase, recombinationPercent }),
+    assumptions: LINKAGE_ASSUMPTIONS,
+    parent: Object.freeze({ genotype: 'AaBb', homologs }),
+    tester: Object.freeze({ genotype: 'aabb', gamete: 'ab' }),
+    rows,
+    totals: Object.freeze({
+      parental: total(row => row.kind === 'parental'),
+      recombinant: total(row => row.kind === 'recombinant'),
+      all: total(() => true)
+    }),
+    marginals: Object.freeze({
+      A: total(row => row.gamete[0] === 'A'),
+      a: total(row => row.gamete[0] === 'a'),
+      B: total(row => row.gamete[1] === 'B'),
+      b: total(row => row.gamete[1] === 'b')
+    }),
+    independentComparison: Object.freeze({
+      probability: fraction(1, 4),
+      matches: rows.every(row => row.probability.numerator === 1 && row.probability.denominator === 4)
+    })
+  });
+}
+
+
+const element = id => document.getElementById(id);
+const form = element('linkage-form');
+const phase = element('linkage-phase');
+const percent = element('linkage-recombination');
+const result = element('linkage-result');
+const status = element('linkage-status');
+const error = element('linkage-error');
+const download = element('linkage-download');
+let applied = null;
+
+function setText(id, value) { element(id).textContent = value; }
+function ratio(value) { return value.numerator + '/' + value.denominator; }
+function readDraft() { return { phase: phase.value, recombinationPercent: percent.value }; }
+function unchanged(draft) {
+  return applied && draft.phase === applied.entered.phase && draft.recombinationPercent === applied.entered.recombinationPercent;
+}
+function retire(message) {
+  applied = null;
+  result.hidden = true;
+  download.disabled = true;
+  error.textContent = '';
+  status.textContent = message;
+}
+function validateDraft(draft) {
+  const raw = draft.recombinationPercent;
+  if (raw.length > 32 || !/^[0-9]+$/.test(raw.trim())) {
+    throw new Error('Enter a whole percentage from 0 to 50 using digits; surrounding spaces are allowed.');
+  }
+  return analyzeLinkage({ phase: draft.phase, recombinationPercent: Number(raw.trim()) });
+}
+function render(analysis) {
+  analysis.parent.homologs.forEach((homolog, index) => {
+    element('linkage-homologs').querySelector('[data-homolog="' + index + '"]').textContent = homolog;
+  });
+  const rows = element('linkage-rows');
+  rows.replaceChildren();
+  for (const row of analysis.rows) {
+    const tr = document.createElement('tr');
+    tr.dataset.gamete = row.gamete;
+    const heading = document.createElement('th');
+    heading.scope = 'row';
+    heading.textContent = row.gamete;
+    tr.append(heading);
+    for (const [field, text] of [
+      ['kind', row.kind === 'parental' ? 'Parental' : 'Recombinant'],
+      ['probability', ratio(row.probability)],
+      ['offspring', row.offspringGenotype],
+      ['independent', ratio(analysis.independentComparison.probability)]
+    ]) {
+      const td = document.createElement('td');
+      td.dataset.field = field;
+      td.textContent = text;
+      tr.append(td);
+    }
+    rows.append(tr);
+  }
+  setText('linkage-parental-total', ratio(analysis.totals.parental));
+  setText('linkage-recombinant-total', ratio(analysis.totals.recombinant));
+  setText('linkage-all-total', ratio(analysis.totals.all));
+  for (const allele of ['A', 'a', 'B', 'b']) {
+    element('linkage-marginals').querySelector('[data-allele="' + allele + '"]').textContent = ratio(analysis.marginals[allele]);
+  }
+  setText('linkage-independent-match', analysis.independentComparison.matches
+    ? 'Matches independent assortment' : 'Differs from independent assortment');
+}
+for (const control of [phase, percent]) {
+  for (const event of ['input', 'change']) {
+    control.addEventListener(event, () => retire('Inputs changed. Apply the cross again to calculate and download it.'));
+  }
+}
+form.addEventListener('submit', event => {
+  event.preventDefault();
+  retire('');
+  try {
+    const entered = readDraft();
+    const analysis = validateDraft(entered);
+    render(analysis);
+    applied = Object.freeze({ entered: Object.freeze(entered), analysis });
+    result.hidden = false;
+    download.disabled = false;
+    status.textContent = 'Cross applied. Results and the observation download use these inputs.';
+  } catch (reason) {
+    error.textContent = reason instanceof Error ? reason.message : 'The cross could not be applied.';
+  }
+});
+
+function requestDownload(text, filename) {
+  let url;
+  let anchor;
+  try {
+    const blob = new Blob([text], { type: 'application/json;charset=utf-8' });
+    url = URL.createObjectURL(blob);
+    anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = filename;
+    anchor.hidden = true;
+    document.body.append(anchor);
+    anchor.click();
+  } finally {
+    if (anchor) anchor.remove();
+    if (url) {
+      const createdURL = url;
+      setTimeout(() => URL.revokeObjectURL(createdURL), 1000);
+    }
+  }
+}
+download.addEventListener('click', () => {
+  if (!unchanged(readDraft())) {
+    retire('Apply the current inputs before downloading a cross.');
+    return;
+  }
+  error.textContent = '';
+  try {
+    const observation = {
+      format: 'recallweave-genetic-linkage-observation/1',
+      entered: applied.entered,
+      analysis: applied.analysis
+    };
+    requestDownload(JSON.stringify(observation, null, 2) + '\n', 'genetic-linkage-observation.json');
+    status.textContent = 'Cross download requested. Check your browser downloads for the file.';
+  } catch {
+    error.textContent = 'The cross download could not be prepared. Your applied cross is retained; try again.';
+  }
+});
+element('linkage-course').addEventListener('click', () => {
+  error.textContent = '';
+  try {
+    requestDownload(LINKAGE_DECK_TEXT, 'genetic-linkage.json');
+    status.textContent = 'Course download requested. Choose that JSON file in the learner, preview it, then start the deck.';
+  } catch {
+    error.textContent = 'The course download could not be prepared. Try again.';
+  }
+});
+const assumptions = element('linkage-assumptions');
+for (const text of LINKAGE_ASSUMPTIONS) {
+  const li = document.createElement('li');
+  li.textContent = text;
+  assumptions.append(li);
+}
+retire('Choose the chromosome phase and percentage, then apply the cross.');
+
+</script>
+</body>
+</html>
