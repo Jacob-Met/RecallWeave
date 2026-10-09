@@ -1,0 +1,185 @@
+{
+  "format": "recallweave-genetic-linkage-public-contract/1",
+  "status": "Proposed immutable contract for root approval; no candidate source yet.",
+  "repository": "Jacob-Met/RecallWeave",
+  "base": "698902f9c9c1d5c5023092b85b3632a7cb7a01ed",
+  "tree": "d6d3707b691850af7928299242631534cff89aa8",
+  "benefit": "Continue the existing Mendelian lesson's explicit unequal-gamete limit with an original linkage lesson and bounded phase/testcross lab.",
+  "sourceFence": [
+    "courses/genetic-linkage.json",
+    "courses/genetic-linkage.md",
+    "courses/genetic-linkage-lab.html",
+    "templates/genetic-linkage-lab.html",
+    "src/genetic-linkage.mjs",
+    "src/genetic-linkage-ui.mjs",
+    "tools/build-genetic-linkage.mjs",
+    "tools/check-genetic-linkage-browser.mjs",
+    "tests/genetic-linkage.test.mjs",
+    "tests/genetic-linkage-course.test.mjs"
+  ],
+  "evidencePrefix": "docs/receiving/genetic-linkage-60b2c08feb01/",
+  "model": {
+    "module": "src/genetic-linkage.mjs",
+    "exports": [
+      "LINKAGE_ASSUMPTIONS",
+      "analyzeLinkage"
+    ],
+    "call": "analyzeLinkage({phase,recombinationPercent})",
+    "admission": [
+      "Input is a non-null, non-array object whose prototype is Object.prototype or null.",
+      "Exactly two own string keys, phase and recombinationPercent, and no own symbols. Both are data descriptors; enumerable or non-enumerable data fields are admitted. Required inherited fields, extra own fields and accessor fields refuse. Accessor values are not invoked; there is no general Proxy side-effect guarantee.",
+      "phase is exactly 'coupling' or 'repulsion'; recombinationPercent is a strict Number integer in [0,50], excluding NaN/infinities, booleans, strings and coercion. Negative zero is admitted and copied as positive zero.",
+      "Malformed input throws TypeError or RangeError and returns no partial result. Message wording and which of those two error classes is chosen for a particular refusal are not public contracts.",
+      "Input values, properties, descriptors, prototype and extensibility are unchanged."
+    ],
+    "schema": "{format:\"recallweave-genetic-linkage/1\",input:{phase,recombinationPercent},assumptions:LINKAGE_ASSUMPTIONS,parent:{genotype:\"AaBb\",homologs:[...]},tester:{genotype:\"aabb\",gamete:\"ab\"},rows:[{gamete,kind,probability:{numerator,denominator},offspringGenotype}],totals:{parental:<fraction>,recombinant:<fraction>,all:<fraction>},marginals:{A:<fraction>,a:<fraction>,B:<fraction>,b:<fraction>},independentComparison:{probability:{numerator:1,denominator:4},matches:<boolean>}}",
+    "ordering": "Result own key insertion order follows the schema above. input keys are phase,recombinationPercent; parent genotype,homologs; tester genotype,gamete; row gamete,kind,probability,offspringGenotype; fraction numerator,denominator. Rows are always AB,Ab,aB,ab. Totals and marginal keys follow the shown order.",
+    "phase": "coupling homologs=['AB','ab']; repulsion homologs=['Ab','aB']. A row matching either homolog is 'parental'; the other rows are 'recombinant'. These kind tags remain at 0 and 50 percent.",
+    "fractions": "Each parental row has (100-r)/200 and each recombinant row r/200. Reduce by integer gcd; positive denominator; canonical zero is 0/1. All numerators/denominators are exact safe Number integers. All four rows remain, including zero-probability rows.",
+    "offspring": "Tester ab maps AB→AaBb, Ab→Aabb, aB→aaBb, ab→aabb. This model does not calculate phenotypes or alter allele labels.",
+    "summary": "totals sum row probabilities by kind and overall. marginals sum rows carrying each indicated allele. independentComparison.probability is 1/4 and matches means every current gamete row equals 1/4, without inferring chromosome location.",
+    "immutability": "The result and every nested array/object are frozen copies. The already frozen LINKAGE_ASSUMPTIONS array may be shared; no mutable input reference is retained.",
+    "assumptions": [
+      "Hypothetical diploid plants; two autosomal loci A/a and B/b.",
+      "One double-heterozygous AaBb parent is crossed with an aabb tester that contributes ab.",
+      "Alleles segregate equally; the two parental gamete classes share probability equally, as do the two recombinant classes.",
+      "The entered recombination percentage is a stipulated recombinant-gamete fraction, not a count of crossover events.",
+      "No mutation, segregation distortion, differential gamete or offspring survival, or nonrandom fertilization is modeled.",
+      "Probabilities describe possible offspring; they are not quotas for a finite sample and do not locate genes on a physical chromosome map."
+    ]
+  },
+  "course": {
+    "format": "recallweave-deck/1",
+    "title": "Linked genes: same genotype, different gametes",
+    "filename": "genetic-linkage.json",
+    "questions": 12,
+    "concepts": [
+      {
+        "name": "Chromosome phase",
+        "ids": [
+          "gl-phase-1",
+          "gl-phase-2",
+          "gl-phase-3"
+        ],
+        "prerequisites": []
+      },
+      {
+        "name": "Parental and recombinant gametes",
+        "ids": [
+          "gl-recombination-1",
+          "gl-recombination-2",
+          "gl-recombination-3"
+        ],
+        "prerequisites": [
+          "Chromosome phase"
+        ]
+      },
+      {
+        "name": "Weighted test crosses",
+        "ids": [
+          "gl-testcross-1",
+          "gl-testcross-2",
+          "gl-testcross-3"
+        ],
+        "prerequisites": [
+          "Chromosome phase",
+          "Parental and recombinant gametes"
+        ]
+      },
+      {
+        "name": "Interpreting recombination evidence",
+        "ids": [
+          "gl-evidence-1",
+          "gl-evidence-2",
+          "gl-evidence-3"
+        ],
+        "prerequisites": [
+          "Parental and recombinant gametes",
+          "Weighted test crosses"
+        ]
+      }
+    ],
+    "outline": "Original questions distinguish unphased AaBb from two chromosome arrangements; parental/recombinant identity; exact gamete weights and fixed-tester offspring; model probabilities versus finite observations; recombinant gametes versus crossover events; and the lack of a physical-location conclusion at 50 percent.",
+    "authorship": "Entirely original wording, hypothetical plant scenarios, distractors, diagrams and worked transfers. Original course text/questions CC0-1.0; cited sources retain their own terms. No source exercise, passage, image or answer key is copied.",
+    "sourceReferences": [
+      "https://openstax.org/books/biology-2e/pages/13-1-chromosomal-theory-and-genetic-linkage",
+      "https://www.genome.gov/genetics-glossary/Crossing-Over",
+      "https://www.genome.gov/genetics-glossary/Linkage"
+    ],
+    "blindBoundary": "After authoring, a prompts/options-only packet with exact IDs/concepts is frozen for independent solving. No answer indices, explanations, guide solutions or authored-key tests are disclosed to the scientific receiver before its answers are sealed.",
+    "consumer": "Unchanged parseDeck validates exact course bytes. Existing file chooser→preview→explicit Start this deck→first-answer review→separate missed-item practice→study notes; no learner/model/catalog/source changes.",
+    "limitations": "Original prerequisite links are teaching/selection hints, not measured mastery or a validated sequence; no learner-efficacy, real-organism, medical or genetic-counseling claim."
+  },
+  "ui": {
+    "entry": "courses/genetic-linkage-lab.html",
+    "initial": "coupling and raw text '20'; unapplied, result hidden, observation download disabled; fixed course download available. No automatic calculation, presets, inference or storage.",
+    "form": {
+      "#linkage-form": "form",
+      "#linkage-phase": "select: coupling label 'AB / ab'; repulsion label 'Ab / aB'",
+      "#linkage-recombination": "text input with inputmode=numeric; label 'Recombinant gametes (%)'",
+      "#linkage-apply": "submit button 'Apply cross'",
+      "#linkage-status": "role=status",
+      "#linkage-error": "role=alert"
+    },
+    "grammar": "Raw percentage text length at most 32 UTF-16 code units. ECMAScript trim, then one or more ASCII digits; Number value must be 0..50. Leading zeros and surrounding whitespace accepted; blank/signed/decimal/exponent text refused. Observation retains original committed raw text.",
+    "commit": "Apply reads actual controls, validates and commits one complete analysis and exact entered values. On successful Apply show result; on refusal keep no stale result and display visible error. Input/change on either control synchronously retires applied result/observation availability, even on same-value round trips.",
+    "resultBindings": {
+      "#linkage-result": "result container, hidden until valid Apply",
+      "#linkage-homologs [data-homolog='0']": "first homolog literal",
+      "#linkage-homologs [data-homolog='1']": "second homolog literal",
+      "#linkage-rows tr[data-gamete]": "four fixed rows keyed AB,Ab,aB,ab",
+      "td[data-field='kind']": "Parental or Recombinant",
+      "td[data-field='probability']": "canonical n/d text, including 0/1",
+      "td[data-field='offspring']": "exact offspring genotype",
+      "td[data-field='independent']": "1/4",
+      "#linkage-parental-total": "canonical parental n/d",
+      "#linkage-recombinant-total": "canonical recombinant n/d",
+      "#linkage-all-total": "canonical total n/d",
+      "#linkage-marginals [data-allele]": "A,a,B,b canonical n/d",
+      "#linkage-independent-match": "Matches independent assortment OR Differs from independent assortment"
+    },
+    "presentation": "Visible original AaBb genotype and fixed aabb tester. Original homolog schematic is explicitly not a physical map/scale. All model assumptions are readable. Literal text is rendered as text, not HTML. Semantic labels, keyboard focus, announced status/errors, 375px layout; any table-only scrolling stays within its container.",
+    "links": {
+      "#linkage-learner": "../demo.html",
+      "#linkage-guide": "./genetic-linkage.md"
+    },
+    "network": "Self-contained built HTML with inline CSS/JS/course, no runtime HTTP/provider/font dependencies, automatic storage, uploads or learner-session mutation. Relative learner/guide links require the retained repository layout."
+  },
+  "downloads": {
+    "course": {
+      "selector": "#linkage-course",
+      "label": "Download course (.json)",
+      "filename": "genetic-linkage.json",
+      "bytes": "Exact frozen raw UTF-8 courses/genetic-linkage.json bytes, independent of every current form/result state."
+    },
+    "observation": {
+      "selector": "#linkage-download",
+      "label": "Download this cross (.json)",
+      "filename": "genetic-linkage-observation.json",
+      "schema": "{format:\"recallweave-genetic-linkage-observation/1\",entered:{phase:<exact selected enum>,recombinationPercent:<exact applied raw string>},analysis:<complete analyzeLinkage result>}",
+      "bytes": "UTF-8 JSON.stringify(payload,null,2)+'\\n', with property insertion order shown above and no BOM/timestamp.",
+      "lifetime": "Before preparation reread actual controls and compare their exact raw values with committed values. A mismatch or retired result refuses and retires observation availability, even when no input/change event was dispatched. A later edit does not rewrite an already downloaded snapshot."
+    },
+    "repeat": "Each explicit activation may initiate a download; unchanged observation downloads are byte-identical. No automatic download, duplicate suppression or download-busy Apply lock is promised.",
+    "failure": "Preparation errors are visible and preserve any still-current applied analysis for explicit retry. A course preparation failure does not retire the cross. No browser filesystem-delivery guarantee is inferred from click dispatch."
+  },
+  "builder": {
+    "module": "tools/build-genetic-linkage.mjs",
+    "export": "buildGeneticLinkageLab() returns deterministic HTML by reading current model/UI/template/course; import or calling the builder does not write.",
+    "commands": [
+      "node tools/build-genetic-linkage.mjs",
+      "node tools/build-genetic-linkage.mjs --check"
+    ],
+    "arguments": "Only no argument or sole --check is admitted; unsupported arguments fail without writing.",
+    "lineage": "Native Mendelian builder38151b99d898b85ae60cd47237c02961e316e0b6, templatee520fd18d904941712d8ed5288b5ff4693523bd1, unchanged parserf0f8a4b234489c2388f427633f548d56c6ed4c03. Retain realpath-based direct CLI entry, explicit single markers, no remaining module imports, refusal of script-closing source tokens, and safe embedded JSON string.",
+    "parity": "Maintained native test compares generated HTML to the checked-in standalone page and verifies exact embedded course download bytes. --check does not regenerate/write; stale output fails. No dependency or existing build/workflow changes."
+  },
+  "qualification": {
+    "author": "Focused native module/course/builder tests, exact source preservation, one ordinary browser default-coupling Apply/course+observation control; preserve first failures and corrections. Existing Linux Node24.19.0 and already installed browser only.",
+    "independentScientific": "Freeze integer/rational and scientific expectations before model disclosure; exhaust both phases×51 percentages plus own-data admission/refusal/immutability. Solve original questions/options before answer-key/guide exposure. Model arithmetic and biological assumptions are separate judgments.",
+    "independentBrowser": "Freeze public byte/interaction expectations before candidate access. Distinct repulsion14 raw whitespace/leading-zero input, 0/50 boundaries, edit and stale-control retirement, preparation failure/retry, exact physical repeat observation/course downloads, keyboard375px, and unchanged current learner import→12 first answers with intentional misses→review→bounded separate practice→exact study notes.",
+    "platformBoundary": "Focused Linux native/browser evidence does not establish Windows, all browsers/Node versions, installed adoption, educational efficacy, hosted Actions or deployment.",
+    "sourcePreservation": "All current inherited leaves remain exact. No existing Mendelian/course/learner/catalog/offline-pack/dependency/workflow edit; any later README link is separately root-owned.",
+    "hold": "No candidate before root freezes contract and confirms actual claim. No GitHub write without exact root slot; no Actions/install/provider/LA7 retry/hamon-ie."
+  }
+}
