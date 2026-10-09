@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Time stepping · RecallWeave</title>
+<style>
+:root{color-scheme:light;--ink:#23313f;--muted:#526575;--paper:#f5f3ed;--line:#d8dfdd;--accent:#006c91}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.55 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+main{max-width:1420px;padding:30px clamp(16px,3vw,44px) 48px;margin:auto}header{max-width:900px;margin-bottom:25px}
+.eyebrow{font-size:.76rem;letter-spacing:.12em;font-weight:750;text-transform:uppercase;color:var(--accent);margin:0}
+h1{font-size:clamp(2rem,4vw,3.2rem);line-height:1.1;letter-spacing:-.035em;margin:8px 0 14px}h2{font-size:1.22rem;margin:0 0 12px}h3{font-size:1rem;margin:18px 0 8px}
+p{margin:10px 0}.lead{font-size:1.08rem;max-width:780px}.muted,.hint{color:var(--muted)}.hint{font-size:.85rem}
+.layout{display:grid;grid-template-columns:300px minmax(0,1fr);gap:22px;align-items:start}
+.card{background:#fff;border:1px solid var(--line);border-radius:15px;padding:22px;box-shadow:0 3px 12px #24384305}
+.controls{position:sticky;top:18px}.settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+label{display:block;font-weight:650;font-size:.89rem}label small{display:block;color:var(--muted);font-weight:400;font-size:.75rem;margin:2px 0 6px}
+input[type=number]{width:100%;font:inherit;padding:9px;border:1px solid #8eaaa9;border-radius:7px;background:#fff;color:var(--ink)}
+button{font:inherit;font-size:.89rem;line-height:1.25;padding:10px 13px;border:1px solid #99b5bd;border-radius:7px;color:#14546e;background:#fff;cursor:pointer}
+button:hover:not(:disabled){background:#eaf3f5}button:disabled{opacity:.48;cursor:default}button.primary{background:#006c91;color:white;border-color:#006c91;font-weight:650}
+button.primary:hover{background:#005774}.apply{width:100%;margin-top:16px}button:focus-visible,input:focus-visible,a:focus-visible{outline:3px solid #d18120;outline-offset:3px}
+.preset-list{display:grid;grid-template-columns:1fr 1fr;gap:7px}.preset-list button{font-size:.78rem;padding:8px 6px;text-align:left}
+#status{margin:15px 0 0;font-size:.89rem;border-left:3px solid #8eaaa9;padding-left:10px}.error{color:#9b2819!important;border-color:#b94329!important}
+.equations{background:#e9f0ef;border-radius:9px;padding:11px 14px;font: .87rem/1.9 ui-monospace,SFMono-Regular,Consolas,monospace}
+.results-heading{display:flex;justify-content:space-between;gap:10px;align-items:baseline}.pill{font-size:.75rem;text-transform:uppercase;letter-spacing:.08em;color:#006c91}
+#applied-settings{font-size:.88rem;color:var(--muted)}.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:17px 0}
+.metric{border-radius:9px;background:#f1f5f4;padding:10px 13px}.metric span{display:block;color:var(--muted);font-size:.76rem}.metric strong{font-size:1.32rem;font-weight:700}
+#behavior{font-weight:700;color:#8b351e}#zero-note{border-left:3px solid #b94329;padding-left:10px;font-size:.9rem}
+.legend{display:flex;flex-wrap:wrap;gap:16px;font-size:.82rem;margin-top:15px}.legend span:before{content:"";display:inline-block;width:23px;margin:0 7px 3px 0;border-top:3px solid #273443}
+.legend .forward:before{border-top:3px dashed #bb3e24}.legend .backward:before{border-top:3px dotted #006c91}
+.plot-wrap{margin:8px -9px 0}svg{width:100%;height:auto;display:block;overflow:visible}.grid{stroke:#e1e7e6;stroke-width:1}.zero-axis{stroke:#a3b3b5;stroke-width:1.5}.tick{font:12px system-ui;fill:#536573}
+.axis-label{text-align:center;font-size:.76rem;color:var(--muted);margin-top:-12px}.navigation{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+#row-label{font-weight:700;margin:14px 0 8px}#selected-step{width:100%;accent-color:var(--accent);margin:10px 0 16px}
+.table-wrap{overflow-x:auto}table{width:100%;border-collapse:collapse;font-size:.87rem;font-variant-numeric:tabular-nums}th,td{text-align:right;padding:10px 8px;border-bottom:1px solid #e2e7e6;white-space:nowrap}th:first-child,td:first-child{text-align:left}th{font-weight:600;color:var(--muted)}
+.downloads{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0 10px}.bottom{margin-top:22px}.bottom a{color:#00688a}.bottom details{margin-top:15px}summary{cursor:pointer;font-weight:650}
+[hidden]{display:none!important}
+@media(max-width:850px){.layout{grid-template-columns:1fr}.controls{position:static}.settings-grid{grid-template-columns:repeat(4,1fr)}.preset-list{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:520px){main{padding-top:22px}.card{padding:17px}.settings-grid{grid-template-columns:1fr 1fr}.metrics{gap:6px}.metric{padding:9px}.metric strong{font-size:1.15rem}.metric span{font-size:.68rem}.preset-list{grid-template-columns:1fr 1fr}table{font-size:.8rem}.navigation button{padding:9px 11px}}
+@media print{body{background:white}.controls,.downloads,.navigation,input[type=range]{display:none}.layout{display:block}.card{border:1px solid #ccc;box-shadow:none;break-inside:avoid}.bottom{font-size:10pt}}
+</style>
+</head>
+<body>
+<main>
+<header>
+<p class="eyebrow">RecallWeave · Numerical methods</p>
+<h1>A decaying equation.<br>A step that can grow.</h1>
+<p class="lead">Compare the exact solution with forward and backward Euler at the <strong>same recorded times</strong>. Change the step, predict the multiplier, then inspect what the update actually does.</p>
+</header>
+<div class="layout">
+<section class="card controls" aria-labelledby="settings-title">
+<h2 id="settings-title">Set the experiment</h2>
+<form id="settings">
+<div class="settings-grid">
+<label for="lambda">Decay rate λ<small>s⁻¹ · 0.25 to 4</small><input id="lambda" name="lambda" type="number" min="0.25" max="4" step="0.25" required></label>
+<label for="step">Time step h<small>s · 1/32 to 2</small><input id="step" name="step" type="number" min="0.03125" max="2" step="0.03125" required></label>
+<label for="initial">Initial value y₀<small>−2 to 2 · step 0.25</small><input id="initial" name="initial" type="number" min="-2" max="2" step="0.25" required></label>
+<label for="steps">Updates N<small>1 to 64 · whole steps</small><input id="steps" name="steps" type="number" min="1" max="64" step="1" required></label>
+</div>
+<button class="primary apply" type="submit">Apply settings</button>
+</form>
+<p id="status" role="status" aria-live="polite"></p>
+<h3>Load a draft preset</h3>
+<div class="preset-list">
+<button type="button" data-preset="small">Small step</button>
+<button type="button" data-preset="alternating">Alternating decay</button>
+<button type="button" data-preset="boundary">Nondecaying boundary</button>
+<button type="button" data-preset="growing">Numerical growth</button>
+<button type="button" data-preset="negative">Negative start</button>
+<button type="button" data-preset="zero">Zero, growing multiplier</button>
+</div>
+<p class="hint">Presets and edits retire the old results. Apply explicitly before inspecting or downloading a new experiment.</p>
+<h3>One equation, two updates</h3>
+<div class="equations">y′ = −λy<br>exact: y₀ exp(−λt)<br>forward: (1 − λh)Fₙ<br>backward: Bₙ / (1 + λh)</div>
+<p class="hint">Ideal scalar model; fixed λ and h. No fitted data, adaptive solver or clipping.</p>
+</section>
+<div>
+<section class="card" id="results" aria-labelledby="results-title">
+<div class="results-heading"><h2 id="results-title">One applied experiment</h2><span class="pill">N + 1 rows</span></div>
+<p id="applied-settings"></p>
+<div class="metrics">
+<div class="metric"><span>Step product z = λh</span><strong id="product"></strong></div>
+<div class="metric"><span>Forward multiplier</span><strong id="forward-multiplier"></strong></div>
+<div class="metric"><span>Backward multiplier</span><strong id="backward-multiplier"></strong></div>
+</div>
+<p>Forward behavior: <span id="behavior"></span></p>
+<p id="zero-note" hidden>Zero stays zero even with a growing multiplier. A flat zero trajectory does not establish attraction: a nonzero perturbation would follow the same multiplier.</p>
+<div class="legend" aria-label="Curve key"><span>Exact solution · solid</span><span class="forward">Forward Euler · dashed</span><span class="backward">Backward Euler · dotted</span></div>
+<div class="plot-wrap">
+<svg id="plot" viewBox="0 0 900 350" role="img" aria-labelledby="plot-title plot-description">
+<title id="plot-title">State values on a shared linear scale</title><desc id="plot-description"></desc><g id="plot-content"></g>
+</svg></div>
+<div class="axis-label">Physical time t / seconds · vertical axis: dimensionless y</div>
+<p class="hint">Lines connect recorded rows; they do not add computed samples. A growing forward trace can flatten smaller curves visually on this shared scale. Inspect the values before calling a curve zero.</p>
+<div id="row-label" aria-live="polite"></div>
+<label for="selected-step" class="hint">Select a recorded update</label>
+<input id="selected-step" type="range" min="0" max="4" step="1" value="0">
+<div class="navigation"><button id="previous" type="button">Previous</button><button id="next" type="button">Next</button><button id="final" type="button">Final</button></div>
+<h3>Compare this row</h3>
+<div class="table-wrap">
+<table id="inspector"><caption class="hint">Signed error = numerical − exact. Values below are rounded; observation JSON retains full precision.</caption>
+<thead><tr><th scope="col">Method</th><th scope="col">Value</th><th scope="col">Signed error</th><th scope="col">Absolute error</th></tr></thead>
+<tbody>
+<tr><th scope="row">Exact</th><td id="value-exact"></td><td>—</td><td>—</td></tr>
+<tr><th scope="row">Forward Euler</th><td id="value-forward"></td><td id="value-forwardError"></td><td id="value-forwardAbsError"></td></tr>
+<tr><th scope="row">Backward Euler</th><td id="value-backward"></td><td id="value-backwardError"></td><td id="value-backwardAbsError"></td></tr>
+</tbody></table>
+</div>
+</section>
+<section class="card bottom" aria-labelledby="keep-title">
+<h2 id="keep-title">Keep the experiment. Test your explanation.</h2>
+<div class="downloads">
+<button id="download-observation" class="primary" type="button" disabled>Applied observation JSON</button>
+<button id="download-course" type="button">16-question course JSON</button>
+<button id="download-guide" type="button">Worked guide</button>
+</div>
+<p class="hint">The observation records this applied trace and selected row. The fixed course and guide do not change with the controls. Import the course into the existing <a href="../demo.html">RecallWeave learner</a>; observation JSON is not a learner deck.</p>
+<details><summary>What this experiment can and cannot show</summary>
+<p>A decaying numerical sequence need not be accurate. To compare refinement, hold the physical endpoint fixed: use h = 1, 1/2, 1/4, 1/8 with N = 1, 2, 4, 8 at T = 1.</p>
+<p>This bounded scalar example uses finite floating-point calculations. It does not prove general convergence, identify a physical device or establish improved learning outcomes. A negative initial value changes the sign of the state, not the multiplier classification.</p>
+<p>No browser storage or automatic network requests. All lab code, course and guide bytes are contained in this file. Relative learner links need the normal repository layout. Original lesson text: CC0-1.0, authored with AI assistance.</p>
+</details>
+</section>
+</div>
+</div>
+</main>
+<script id="documents" type="application/json">@@DOCUMENTS@@</script>
+<script type="module">
+@@MODEL@@
+@@UI@@
+</script>
+</body>
+</html>

@@ -1,0 +1,376 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Time stepping · RecallWeave</title>
+<style>
+:root{color-scheme:light;--ink:#23313f;--muted:#526575;--paper:#f5f3ed;--line:#d8dfdd;--accent:#006c91}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.55 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+main{max-width:1420px;padding:30px clamp(16px,3vw,44px) 48px;margin:auto}header{max-width:900px;margin-bottom:25px}
+.eyebrow{font-size:.76rem;letter-spacing:.12em;font-weight:750;text-transform:uppercase;color:var(--accent);margin:0}
+h1{font-size:clamp(2rem,4vw,3.2rem);line-height:1.1;letter-spacing:-.035em;margin:8px 0 14px}h2{font-size:1.22rem;margin:0 0 12px}h3{font-size:1rem;margin:18px 0 8px}
+p{margin:10px 0}.lead{font-size:1.08rem;max-width:780px}.muted,.hint{color:var(--muted)}.hint{font-size:.85rem}
+.layout{display:grid;grid-template-columns:300px minmax(0,1fr);gap:22px;align-items:start}
+.card{background:#fff;border:1px solid var(--line);border-radius:15px;padding:22px;box-shadow:0 3px 12px #24384305}
+.controls{position:sticky;top:18px}.settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+label{display:block;font-weight:650;font-size:.89rem}label small{display:block;color:var(--muted);font-weight:400;font-size:.75rem;margin:2px 0 6px}
+input[type=number]{width:100%;font:inherit;padding:9px;border:1px solid #8eaaa9;border-radius:7px;background:#fff;color:var(--ink)}
+button{font:inherit;font-size:.89rem;line-height:1.25;padding:10px 13px;border:1px solid #99b5bd;border-radius:7px;color:#14546e;background:#fff;cursor:pointer}
+button:hover:not(:disabled){background:#eaf3f5}button:disabled{opacity:.48;cursor:default}button.primary{background:#006c91;color:white;border-color:#006c91;font-weight:650}
+button.primary:hover{background:#005774}.apply{width:100%;margin-top:16px}button:focus-visible,input:focus-visible,a:focus-visible{outline:3px solid #d18120;outline-offset:3px}
+.preset-list{display:grid;grid-template-columns:1fr 1fr;gap:7px}.preset-list button{font-size:.78rem;padding:8px 6px;text-align:left}
+#status{margin:15px 0 0;font-size:.89rem;border-left:3px solid #8eaaa9;padding-left:10px}.error{color:#9b2819!important;border-color:#b94329!important}
+.equations{background:#e9f0ef;border-radius:9px;padding:11px 14px;font: .87rem/1.9 ui-monospace,SFMono-Regular,Consolas,monospace}
+.results-heading{display:flex;justify-content:space-between;gap:10px;align-items:baseline}.pill{font-size:.75rem;text-transform:uppercase;letter-spacing:.08em;color:#006c91}
+#applied-settings{font-size:.88rem;color:var(--muted)}.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:17px 0}
+.metric{border-radius:9px;background:#f1f5f4;padding:10px 13px}.metric span{display:block;color:var(--muted);font-size:.76rem}.metric strong{font-size:1.32rem;font-weight:700}
+#behavior{font-weight:700;color:#8b351e}#zero-note{border-left:3px solid #b94329;padding-left:10px;font-size:.9rem}
+.legend{display:flex;flex-wrap:wrap;gap:16px;font-size:.82rem;margin-top:15px}.legend span:before{content:"";display:inline-block;width:23px;margin:0 7px 3px 0;border-top:3px solid #273443}
+.legend .forward:before{border-top:3px dashed #bb3e24}.legend .backward:before{border-top:3px dotted #006c91}
+.plot-wrap{margin:8px -9px 0}svg{width:100%;height:auto;display:block;overflow:visible}.grid{stroke:#e1e7e6;stroke-width:1}.zero-axis{stroke:#a3b3b5;stroke-width:1.5}.tick{font:12px system-ui;fill:#536573}
+.axis-label{text-align:center;font-size:.76rem;color:var(--muted);margin-top:-12px}.navigation{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+#row-label{font-weight:700;margin:14px 0 8px}#selected-step{width:100%;accent-color:var(--accent);margin:10px 0 16px}
+.table-wrap{overflow-x:auto}table{width:100%;border-collapse:collapse;font-size:.87rem;font-variant-numeric:tabular-nums}th,td{text-align:right;padding:10px 8px;border-bottom:1px solid #e2e7e6;white-space:nowrap}th:first-child,td:first-child{text-align:left}th{font-weight:600;color:var(--muted)}
+.downloads{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0 10px}.bottom{margin-top:22px}.bottom a{color:#00688a}.bottom details{margin-top:15px}summary{cursor:pointer;font-weight:650}
+[hidden]{display:none!important}
+@media(max-width:850px){.layout{grid-template-columns:1fr}.controls{position:static}.settings-grid{grid-template-columns:repeat(4,1fr)}.preset-list{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:520px){main{padding-top:22px}.card{padding:17px}.settings-grid{grid-template-columns:1fr 1fr}.metrics{gap:6px}.metric{padding:9px}.metric strong{font-size:1.15rem}.metric span{font-size:.68rem}.preset-list{grid-template-columns:1fr 1fr}table{font-size:.8rem}.navigation button{padding:9px 11px}}
+@media print{body{background:white}.controls,.downloads,.navigation,input[type=range]{display:none}.layout{display:block}.card{border:1px solid #ccc;box-shadow:none;break-inside:avoid}.bottom{font-size:10pt}}
+</style>
+</head>
+<body>
+<main>
+<header>
+<p class="eyebrow">RecallWeave · Numerical methods</p>
+<h1>A decaying equation.<br>A step that can grow.</h1>
+<p class="lead">Compare the exact solution with forward and backward Euler at the <strong>same recorded times</strong>. Change the step, predict the multiplier, then inspect what the update actually does.</p>
+</header>
+<div class="layout">
+<section class="card controls" aria-labelledby="settings-title">
+<h2 id="settings-title">Set the experiment</h2>
+<form id="settings">
+<div class="settings-grid">
+<label for="lambda">Decay rate λ<small>s⁻¹ · 0.25 to 4</small><input id="lambda" name="lambda" type="number" min="0.25" max="4" step="0.25" required></label>
+<label for="step">Time step h<small>s · 1/32 to 2</small><input id="step" name="step" type="number" min="0.03125" max="2" step="0.03125" required></label>
+<label for="initial">Initial value y₀<small>−2 to 2 · step 0.25</small><input id="initial" name="initial" type="number" min="-2" max="2" step="0.25" required></label>
+<label for="steps">Updates N<small>1 to 64 · whole steps</small><input id="steps" name="steps" type="number" min="1" max="64" step="1" required></label>
+</div>
+<button class="primary apply" type="submit">Apply settings</button>
+</form>
+<p id="status" role="status" aria-live="polite"></p>
+<h3>Load a draft preset</h3>
+<div class="preset-list">
+<button type="button" data-preset="small">Small step</button>
+<button type="button" data-preset="alternating">Alternating decay</button>
+<button type="button" data-preset="boundary">Nondecaying boundary</button>
+<button type="button" data-preset="growing">Numerical growth</button>
+<button type="button" data-preset="negative">Negative start</button>
+<button type="button" data-preset="zero">Zero, growing multiplier</button>
+</div>
+<p class="hint">Presets and edits retire the old results. Apply explicitly before inspecting or downloading a new experiment.</p>
+<h3>One equation, two updates</h3>
+<div class="equations">y′ = −λy<br>exact: y₀ exp(−λt)<br>forward: (1 − λh)Fₙ<br>backward: Bₙ / (1 + λh)</div>
+<p class="hint">Ideal scalar model; fixed λ and h. No fitted data, adaptive solver or clipping.</p>
+</section>
+<div>
+<section class="card" id="results" aria-labelledby="results-title">
+<div class="results-heading"><h2 id="results-title">One applied experiment</h2><span class="pill">N + 1 rows</span></div>
+<p id="applied-settings"></p>
+<div class="metrics">
+<div class="metric"><span>Step product z = λh</span><strong id="product"></strong></div>
+<div class="metric"><span>Forward multiplier</span><strong id="forward-multiplier"></strong></div>
+<div class="metric"><span>Backward multiplier</span><strong id="backward-multiplier"></strong></div>
+</div>
+<p>Forward behavior: <span id="behavior"></span></p>
+<p id="zero-note" hidden>Zero stays zero even with a growing multiplier. A flat zero trajectory does not establish attraction: a nonzero perturbation would follow the same multiplier.</p>
+<div class="legend" aria-label="Curve key"><span>Exact solution · solid</span><span class="forward">Forward Euler · dashed</span><span class="backward">Backward Euler · dotted</span></div>
+<div class="plot-wrap">
+<svg id="plot" viewBox="0 0 900 350" role="img" aria-labelledby="plot-title plot-description">
+<title id="plot-title">State values on a shared linear scale</title><desc id="plot-description"></desc><g id="plot-content"></g>
+</svg></div>
+<div class="axis-label">Physical time t / seconds · vertical axis: dimensionless y</div>
+<p class="hint">Lines connect recorded rows; they do not add computed samples. A growing forward trace can flatten smaller curves visually on this shared scale. Inspect the values before calling a curve zero.</p>
+<div id="row-label" aria-live="polite"></div>
+<label for="selected-step" class="hint">Select a recorded update</label>
+<input id="selected-step" type="range" min="0" max="4" step="1" value="0">
+<div class="navigation"><button id="previous" type="button">Previous</button><button id="next" type="button">Next</button><button id="final" type="button">Final</button></div>
+<h3>Compare this row</h3>
+<div class="table-wrap">
+<table id="inspector"><caption class="hint">Signed error = numerical − exact. Values below are rounded; observation JSON retains full precision.</caption>
+<thead><tr><th scope="col">Method</th><th scope="col">Value</th><th scope="col">Signed error</th><th scope="col">Absolute error</th></tr></thead>
+<tbody>
+<tr><th scope="row">Exact</th><td id="value-exact"></td><td>—</td><td>—</td></tr>
+<tr><th scope="row">Forward Euler</th><td id="value-forward"></td><td id="value-forwardError"></td><td id="value-forwardAbsError"></td></tr>
+<tr><th scope="row">Backward Euler</th><td id="value-backward"></td><td id="value-backwardError"></td><td id="value-backwardAbsError"></td></tr>
+</tbody></table>
+</div>
+</section>
+<section class="card bottom" aria-labelledby="keep-title">
+<h2 id="keep-title">Keep the experiment. Test your explanation.</h2>
+<div class="downloads">
+<button id="download-observation" class="primary" type="button" disabled>Applied observation JSON</button>
+<button id="download-course" type="button">16-question course JSON</button>
+<button id="download-guide" type="button">Worked guide</button>
+</div>
+<p class="hint">The observation records this applied trace and selected row. The fixed course and guide do not change with the controls. Import the course into the existing <a href="../demo.html">RecallWeave learner</a>; observation JSON is not a learner deck.</p>
+<details><summary>What this experiment can and cannot show</summary>
+<p>A decaying numerical sequence need not be accurate. To compare refinement, hold the physical endpoint fixed: use h = 1, 1/2, 1/4, 1/8 with N = 1, 2, 4, 8 at T = 1.</p>
+<p>This bounded scalar example uses finite floating-point calculations. It does not prove general convergence, identify a physical device or establish improved learning outcomes. A negative initial value changes the sign of the state, not the multiplier classification.</p>
+<p>No browser storage or automatic network requests. All lab code, course and guide bytes are contained in this file. Relative learner links need the normal repository layout. Original lesson text: CC0-1.0, authored with AI assistance.</p>
+</details>
+</section>
+</div>
+</div>
+</main>
+<script id="documents" type="application/json">{"course":"{\n  \"format\": \"recallweave-deck/1\",\n  \"title\": \"Time stepping: decay, stability and accuracy\",\n  \"attribution\": \"Original questions, explanations and worked examples authored with AI assistance for RecallWeave. Ideal scalar y'=-lambda*y with lambda>0; lambda is in s^-1, time in seconds and y is dimensionless. Numerical method behavior is compared with the exact exponential, not measured device data. Background: MIT OpenCourseWare 18.330, Introduction to Numerical Analysis, Chapter 5 on ordinary differential equations. No textbook passages, exercises or figures are reproduced; no learning-efficacy claim.\",\n  \"license\": \"CC0-1.0 for this original course text and questions. Referenced MIT OpenCourseWare materials retain their own licenses.\",\n  \"concepts\": [\n    \"model-and-grid\",\n    \"forward-behavior\",\n    \"implicit-and-error\",\n    \"refinement-and-evidence\"\n  ],\n  \"items\": [\n    {\n      \"id\": \"step-units\",\n      \"prompt\": \"A decay rate is lambda = 2 s^-1 and the numerical time step is h = 0.25 s. What is z = lambda*h?\",\n      \"options\": [\n        \"0.125 s\",\n        \"0.5, with no units\",\n        \"2.25 s^-1\",\n        \"8, with no units\"\n      ],\n      \"concept\": \"model-and-grid\",\n      \"prerequisites\": [],\n      \"answer\": 1,\n      \"explanation\": \"Multiplying 2 s^-1 by 0.25 s gives 0.5. The time units cancel. This dimensionless product controls each Euler multiplier; neither lambda nor h alone determines it.\",\n      \"transfer\": \"Double lambda and halve h. Predict z and the numerical states at the same update indices, then explain why the physical time labels changed.\"\n    },\n    {\n      \"id\": \"step-exact\",\n      \"prompt\": \"For y' = -y with y(0) = 2, what is the exact value at t = 1 s?\",\n      \"options\": [\n        \"2 - 1 = 1\",\n        \"2e\",\n        \"0\",\n        \"2/e\"\n      ],\n      \"concept\": \"model-and-grid\",\n      \"prerequisites\": [],\n      \"answer\": 3,\n      \"explanation\": \"The exact solution is y(t)=2 exp(-t) for this initial condition and rate, so y(1)=2/e. The expression 2 - 1 ignores that the slope depends on y. It is neither the exact solution at t=1 nor the one-step forward-Euler result with h=1, which is 2-2=0.\",\n      \"transfer\": \"Set y(0)=-2. Predict the exact sign and magnitude at one second without solving a new equation.\"\n    },\n    {\n      \"id\": \"step-forward-update\",\n      \"prompt\": \"Forward Euler starts from F[0] = 1 for y' = -y and h = 0.5 s. What are F[1] and F[2]?\",\n      \"options\": [\n        \"0.5 and 0.25\",\n        \"2/3 and 4/9\",\n        \"exp(-0.5) and exp(-1)\",\n        \"0.5 and 0\"\n      ],\n      \"concept\": \"model-and-grid\",\n      \"prerequisites\": [],\n      \"answer\": 0,\n      \"explanation\": \"Forward Euler multiplies the current state by 1-lambda*h=1/2 at every update. Starting at one gives 1/2 and then 1/4. Backward Euler and the exact exponential have different multipliers.\",\n      \"transfer\": \"With h=0.25 s and lambda=1 s^-1, predict the first two forward states before using the lab.\"\n    },\n    {\n      \"id\": \"step-rows\",\n      \"prompt\": \"A trace starts at t = 0 and performs N = 4 updates with h = 0.5 s. Including the initial row, how many rows are recorded, and what is the final time?\",\n      \"options\": [\n        \"4 rows, 2 s\",\n        \"5 rows, 2.5 s\",\n        \"5 rows, 2 s\",\n        \"4 rows, 1.5 s\"\n      ],\n      \"concept\": \"model-and-grid\",\n      \"prerequisites\": [],\n      \"answer\": 2,\n      \"explanation\": \"The initial state is row zero. Four updates add rows one through four, so five rows are recorded. Their times are 0,0.5,1,1.5,2 seconds. Do not multiply the row count by h to obtain the endpoint.\",\n      \"transfer\": \"For eight updates at h=0.125 s, identify both the final row index and the final physical time.\"\n    },\n    {\n      \"id\": \"step-monotone\",\n      \"prompt\": \"For a positive initial value, which z makes forward Euler strictly positive and smaller at every update?\",\n      \"options\": [\n        \"z = 1.5\",\n        \"z = 2.5\",\n        \"z = 2\",\n        \"z = 0.25\"\n      ],\n      \"concept\": \"forward-behavior\",\n      \"prerequisites\": [\n        \"model-and-grid\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"At z=0.25 the multiplier is 0.75: positive and less than one. It preserves a positive sign and shrinks the magnitude. The other choices alternate in sign, and the z=2 boundary does not shrink.\",\n      \"transfer\": \"Choose a negative starting value with z=0.25. Describe decay in magnitude without calling the signed sequence decreasing.\"\n    },\n    {\n      \"id\": \"step-one-step-zero\",\n      \"prompt\": \"With y(0) = 1 and z = 1, forward Euler becomes zero after one update. What does this establish?\",\n      \"options\": [\n        \"The exact continuous solution also reaches zero at that time.\",\n        \"The discrete update multiplier is zero; the exact solution is still positive at every finite time.\",\n        \"The decay rate must have changed to zero.\",\n        \"Backward Euler also becomes zero after one update.\"\n      ],\n      \"concept\": \"forward-behavior\",\n      \"prerequisites\": [\n        \"model-and-grid\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"When z=1, the forward multiplier 1-z is zero. That numerical rule erases any starting state after one update. The exact exponential multiplier exp(-1) is positive; the equation has not reached equilibrium at a finite time.\",\n      \"transfer\": \"At z=1 compare the first exact, forward and backward values. Explain why the forward zero does not certify accuracy.\"\n    },\n    {\n      \"id\": \"step-alternating-decay\",\n      \"prompt\": \"Forward Euler has z = 1.5 and F[0] = 1. Which sequence gives its first four recorded states?\",\n      \"options\": [\n        \"1, -0.5, 0.25, -0.125\",\n        \"1, 0.5, 0.25, 0.125\",\n        \"1, -1.5, 2.25, -3.375\",\n        \"1, 0.4, 0.16, 0.064\"\n      ],\n      \"concept\": \"forward-behavior\",\n      \"prerequisites\": [\n        \"model-and-grid\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"The forward multiplier is 1-1.5=-0.5. Repeated multiplication produces 1,-0.5,0.25,-0.125. The sign alternates while the magnitude halves. The exact positive decay does not alternate.\",\n      \"transfer\": \"Change z from 1.5 to 2.5. Which part of the alternating behavior persists, and which part changes?\"\n    },\n    {\n      \"id\": \"step-boundary\",\n      \"prompt\": \"With z = 2 and F[0] = 1, forward Euler records 1, -1, 1, -1, ... . Which description is precise?\",\n      \"options\": [\n        \"It converges to the exact decaying solution as the number of updates grows at this fixed step.\",\n        \"It grows in magnitude at each update.\",\n        \"It is an alternating nondecaying boundary case.\",\n        \"Its alternating signs imply decreasing magnitude.\"\n      ],\n      \"concept\": \"forward-behavior\",\n      \"prerequisites\": [\n        \"model-and-grid\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"At z=2, the multiplier is -1, so the magnitude stays one and the sign alternates. This is a bounded but nondecaying boundary. It is not attraction to zero, and it is not growing magnitude.\",\n      \"transfer\": \"Compare the neighboring admitted settings just below and just above z=2. Predict what happens to a nonzero starting difference.\"\n    },\n    {\n      \"id\": \"step-growth\",\n      \"prompt\": \"For y' = -lambda*y with lambda > 0 and y(0) = 1, forward Euler uses z = 2.5. Why does its magnitude grow even though the exact solution decays?\",\n      \"options\": [\n        \"The continuous equation is growing because lambda is positive.\",\n        \"The numerical multiplier is -1.5, whose magnitude exceeds one.\",\n        \"All numerical methods grow for this equation.\",\n        \"The initial value must have been negative.\"\n      ],\n      \"concept\": \"implicit-and-error\",\n      \"prerequisites\": [\n        \"model-and-grid\",\n        \"forward-behavior\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"The continuous equation has a negative coefficient -lambda and its positive solution decays. The forward-Euler multiplier is 1-2.5=-1.5. Its magnitude exceeds one, so this chosen numerical step produces alternating growth.\",\n      \"transfer\": \"Keep lambda fixed and reduce h until z\u003c2. Explain which change belongs to the numerical method and which equation remains unchanged.\"\n    },\n    {\n      \"id\": \"step-implicit-update\",\n      \"prompt\": \"Backward Euler uses B[n+1] = B[n] - z*B[n+1]. Solving for the new state gives which update?\",\n      \"options\": [\n        \"B[n+1] = (1 - z)*B[n]\",\n        \"B[n+1] = B[n]/(1 - z)\",\n        \"B[n+1] = (1 + z)*B[n]\",\n        \"B[n+1] = B[n]/(1 + z)\"\n      ],\n      \"concept\": \"implicit-and-error\",\n      \"prerequisites\": [\n        \"model-and-grid\",\n        \"forward-behavior\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"Move z*B[n+1] to the left: (1+z)B[n+1]=B[n]. Dividing by 1+z gives the backward-Euler update. The new state appears on both sides before this algebraic solve.\",\n      \"transfer\": \"Derive the backward multiplier for z=2 and compare it with the forward multiplier at that same step.\"\n    },\n    {\n      \"id\": \"step-backward-rational\",\n      \"prompt\": \"Backward Euler starts from B[0] = 1 with z = 0.5. What is B[4]?\",\n      \"options\": [\n        \"1/16\",\n        \"exp(-2)\",\n        \"16/81\",\n        \"81/16\"\n      ],\n      \"concept\": \"implicit-and-error\",\n      \"prerequisites\": [\n        \"model-and-grid\",\n        \"forward-behavior\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"Here the backward multiplier is 1/(1+1/2)=2/3. Four updates give (2/3)^4=16/81. The value 1/16 belongs to forward Euler at the same settings, while exp(-2) is the exact value at the shared time.\",\n      \"transfer\": \"Start from -2 at z=0.5. Predict the fourth backward state using the same power and a changed initial factor.\"\n    },\n    {\n      \"id\": \"step-stability-accuracy\",\n      \"prompt\": \"For lambda = 1 s^-1, h = 2 s and y(0) = 1, backward Euler gives B[1] = 1/3 while the exact value is exp(-2), about 0.1353. What is the appropriate conclusion?\",\n      \"options\": [\n        \"A decaying numerical sequence can still have substantial error at a large time step.\",\n        \"Because backward Euler decays, it is exact.\",\n        \"The exact solution should be replaced by 1/3.\",\n        \"Backward Euler has become an alternating-growth method.\"\n      ],\n      \"concept\": \"implicit-and-error\",\n      \"prerequisites\": [\n        \"model-and-grid\",\n        \"forward-behavior\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"Backward Euler's multiplier is 1/3, so its sequence decays. At this large step its value is nevertheless far from exp(-2). A decay or stability statement does not promise small approximation error.\",\n      \"transfer\": \"Choose a smaller h while retaining the same endpoint. Check accuracy using numerical-minus-exact error, separately from multiplier decay.\"\n    },\n    {\n      \"id\": \"step-same-endpoint\",\n      \"prompt\": \"A run uses lambda = 1 s^-1, y(0) = 1, h = 0.5 s and N = 2. Which new run isolates time-step refinement at the same final physical time?\",\n      \"options\": [\n        \"h = 0.25 s and N = 2, with lambda and y(0) unchanged\",\n        \"h = 0.25 s and N = 4, with lambda and y(0) unchanged\",\n        \"h = 0.5 s and N = 4, with lambda and y(0) unchanged\",\n        \"h = 0.25 s and N = 4, but lambda doubled\"\n      ],\n      \"concept\": \"refinement-and-evidence\",\n      \"prerequisites\": [\n        \"model-and-grid\",\n        \"forward-behavior\",\n        \"implicit-and-error\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"The original final time is 2*0.5=1 second. Halving h to 0.25 requires four updates to reach the same endpoint, while preserving the equation and initial condition. Otherwise more than step resolution changes.\",\n      \"transfer\": \"At a final time of 2 seconds, write two runs with different h and the same lambda and initial state.\"\n    },\n    {\n      \"id\": \"step-negative-start\",\n      \"prompt\": \"Backward Euler uses lambda = 1 s^-1, h = 0.5 s and B[0] = -1. What is B[1]?\",\n      \"options\": [\n        \"1/2\",\n        \"2/3\",\n        \"-1/2\",\n        \"-2/3\"\n      ],\n      \"concept\": \"refinement-and-evidence\",\n      \"prerequisites\": [\n        \"model-and-grid\",\n        \"forward-behavior\",\n        \"implicit-and-error\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"The multiplier is 2/3, so multiplying the negative starting value by it gives -2/3. The state remains negative and moves toward zero in magnitude. The underlying linear equation does not discard the sign of the initial value.\",\n      \"transfer\": \"Compare traces starting at 1 and -1 with identical settings. Explain which values change sign and which absolute errors stay the same.\"\n    },\n    {\n      \"id\": \"step-zero-mask\",\n      \"prompt\": \"For z = 2.5, a forward-Euler trace starting at zero stays exactly zero. What can be concluded about a nonzero initial perturbation at the same settings?\",\n      \"options\": [\n        \"Nothing about the multiplier can be determined from the known equation.\",\n        \"Every nonzero perturbation also becomes zero immediately.\",\n        \"It is multiplied by -1.5 each update and grows in magnitude; the zero trace does not establish attraction.\",\n        \"It is multiplied by 2/7 each update and shrinks.\"\n      ],\n      \"concept\": \"refinement-and-evidence\",\n      \"prerequisites\": [\n        \"model-and-grid\",\n        \"forward-behavior\",\n        \"implicit-and-error\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"Zero is fixed by every scalar multiplier, including -1.5. Subtract two forward-Euler trajectories at the same settings: their difference is also multiplied by -1.5. A nonzero perturbation therefore grows even when the zero trajectory looks flat.\",\n      \"transfer\": \"Start at zero with the growing-step preset, then use a small admitted nonzero initial value. Relate both plots to the same multiplier.\"\n    },\n    {\n      \"id\": \"step-order\",\n      \"prompt\": \"For this smooth decay problem, both Euler methods have first-order global error at a fixed final time in exact arithmetic. Which interpretation is correct?\",\n      \"options\": [\n        \"As h becomes small, halving h makes the leading error approximately half as large; finite-step error ratios need not be exactly two.\",\n        \"At every admitted h, halving h divides the error by exactly two.\",\n        \"Doubling the final time always halves the error.\",\n        \"Any method that decays has zero global error.\"\n      ],\n      \"concept\": \"refinement-and-evidence\",\n      \"prerequisites\": [\n        \"model-and-grid\",\n        \"forward-behavior\",\n        \"implicit-and-error\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"First-order global convergence describes the leading error as proportional to h when the physical endpoint is held fixed and h becomes small. Higher-order terms mean a finite pair of steps need not have an exact ratio of two. Floating-point roundoff can eventually matter too.\",\n      \"transfer\": \"Use the four T=1 refinements in the guide. Compare consecutive absolute-error ratios and explain why none must equal exactly two.\"\n    }\n  ]\n}\n","guide":"# Time stepping: decay, stability and accuracy\n\nA differential equation describes change continuously. A numerical update moves between selected times. Those are different objects: a decaying equation can produce a growing numerical sequence when its step is poorly chosen.\n\nOpen [the offline time-stepping lab](time-stepping-lab.html). Predict one update, apply the settings and inspect the recorded rows. Download the [original 16-question course](time-stepping.json) into the existing [RecallWeave learner](../demo.html) for a separate question, review and retry session. The lab does not alter the learner.\n\nThis lesson connects the [RC transient guide](rc-transients.md), which gives an exact exponential response, with [discrete feedback](feedback-control.md), whose update index does not itself specify physical duration. It studies one scalar equation. Spatial diffusion, numerical quadrature and adaptive ODE solvers are outside this lesson.\n\n## 1. Keep the equation, time and state separate\n\nWe use the ideal model\n\n    y'(t) = -lambda y(t),     y(0) = y0,     lambda > 0.\n\nHere y is dimensionless, t is measured in seconds and lambda is in inverse seconds. Its exact solution is\n\n    y(t) = y0 exp(-lambda t).\n\nA positive initial value remains positive and approaches zero. A negative initial value remains negative and approaches zero in magnitude. Zero remains zero. A nonzero exact solution does not reach zero at any finite time.\n\nThis is a mathematical teaching example, not a fitted device or measured data. For an ideal unforced RC voltage gap, lambda could represent 1/(RC); the lab does not infer circuit parameters or simulate a complete circuit.\n\nChoose a time step h > 0. Row n is at physical time t[n] = n h. N updates record N+1 rows because row zero contains the initial condition. Changing h while keeping N fixed also changes the experiment's final time.\n\nThe product\n\n    z = lambda h\n\nhas no units. It will determine both numerical multipliers.\n\n## 2. Use the old slope: forward Euler\n\nForward Euler evaluates the derivative at the state already known:\n\n    F[n+1] = F[n] + h (-lambda F[n])\n           = (1 - z) F[n].\n\nFor lambda=1, h=0.5 and y0=1, the multiplier is 1/2. The first five values are\n\n    1, 1/2, 1/4, 1/8, 1/16.\n\nThey occur at 0, 0.5, 1, 1.5, 2 seconds. At the final time, the exact value is exp(-2), approximately 0.135335. The forward estimate1/16=0.0625 is smaller.\n\nForward Euler replaces an exponential response over one step with a linear increment based on the old slope. That replacement can alter signs and growth.\n\n## 3. Read the multiplier before trusting the plot\n\nFor this equation, forward Euler has multiplier q=1-z.\n\n| Step product z | Multiplier q | Behavior of a nonzero numerical starting state |\n| --- | --- | --- |\n| 0 \u003c z \u003c 1 | 0 \u003c q \u003c 1 | Keeps its sign and decays in magnitude |\n| z = 1 | q = 0 | Becomes zero after one update |\n| 1 \u003c z \u003c 2 | -1 \u003c q \u003c 0 | Alternates in sign and decays in magnitude |\n| z = 2 | q = -1 | Alternates without decaying |\n| z > 2 | q \u003c -1 | Alternates and grows in magnitude |\n\nThe boundary z=2 is bounded but nondecaying. Calling it a boundary avoids confusing boundedness with attraction to zero. The lab classifies the multiplier independently of y0.\n\nWith z=1.5 and y0=1, forward Euler gives\n\n    1, -1/2, 1/4, -1/8, 1/16.\n\nThe magnitude shrinks, but the negative values are absent from the exact positive decay. A decaying sequence can still have a poor shape or a large error.\n\nWith lambda=1.25 and h=2, z=2.5. The sequence starts\n\n    1, -3/2, 9/4, -27/8, 81/16.\n\nThe underlying equation still decays. The growth belongs to this chosen numerical update.\n\nAt y0=0 every computed state is zero, even if |q|>1. To interpret that flat plot, subtract two trajectories with the same settings. Their initial difference is multiplied by q at each update. A nonzero perturbation grows when |q|>1; the special zero trajectory does not establish attraction.\n\n## 4. Use the new slope: backward Euler\n\nBackward Euler evaluates the derivative at the next state:\n\n    B[n+1] = B[n] + h (-lambda B[n+1]).\n\nThe unknown appears on both sides. For this scalar linear equation we can solve it directly:\n\n    (1+z) B[n+1] = B[n],\n    B[n+1] = B[n] / (1+z).\n\nBecause z>0, its multiplier1/(1+z) lies strictly between zero and one. A nonzero starting state retains its sign and decays in magnitude for every admitted positive step.\n\nAt z=0.5 and y0=1, the first five values are\n\n    1, 2/3, 4/9, 8/27, 16/81.\n\nAt t=2 seconds, 16/81 is approximately 0.197531. The forward and backward methods bracket the exact value in this small-step positive example.\n\nThat bracket is not an assertion about every arbitrary differential equation, every numerical method, or every sign-changing forward trace.\n\n## 5. Stability does not supply accuracy\n\nWith lambda=1, h=2 and y0=1, backward Euler's first value is 1/3. The exact value at the same time is exp(-2), approximately 0.135335.\n\nThe numerical sequence decays, yet this first estimate has an absolute error of approximately 0.197998. Its decay property does not make it exact.\n\nThe inspector reports two errors for each method:\n\n    signed error = numerical value - exact value,\n    absolute error = |signed error|.\n\nThe signed error distinguishes an overestimate from an underestimate. Absolute error measures the magnitude in the same dimensionless state units. Initial-row errors are zero.\n\n## 6. Refine at the same physical endpoint\n\nTo isolate the effect of step size, retain lambda, y0 and the final physical time. For lambda=1, y0=1 and T=1 second:\n\n| h / s | N updates | Forward value at T | Backward value at T |\n| ---: | ---: | --- | --- |\n| 1 | 1 | 0 | 1/2 |\n| 1/2 | 2 | 1/4 | 4/9 |\n| 1/4 | 4 | 81/256 | 256/625 |\n| 1/8 | 8 | 5764801/16777216 | 16777216/43046721 |\n\nEvery row compares with the same exact value exp(-1). Both methods' absolute errors decrease through these refinements.\n\nBoth Euler methods have first-order global convergence for this smooth problem at a fixed endpoint. In exact arithmetic, the leading error is proportional to h as h becomes small. Consequently, halving a sufficiently small step approximately halves that leading error. A finite error ratio need not be exactly two. At sufficiently fine scales, floating-point roundoff can also affect what a computer reports.\n\nThe lab has a finite grid and horizon. It illustrates the argument and exposes counterexamples; a plot of a few runs is not a proof of general convergence.\n\n## 7. Work with one applied experiment\n\nThe initial small-step experiment is applied when the lab opens. Select a preset to load a draft, or edit the four settings. Any edit retires the previous results and disables the observation download. Select **Apply settings** to compute the new experiment.\n\nThe admitted controls are:\n\n| Control | Range and spacing |\n| --- | --- |\n| lambda / s^-1 |0.25 through4 in increments of0.25 |\n| h / s |1/32 through2 in increments of1/32 |\n| y0 |-2 through2 in increments of0.25 |\n| N |1 through64, integer |\n\nThese grids make z and the z=1 and z=2 boundaries exactly representable in binary arithmetic. Later recurrence values and exponentials still use finite floating-point arithmetic. All admitted traces remain finite; values are not clipped or smoothed.\n\nUse the step slider or **Previous**, **Next** and **Final** controls. The three plotted methods, selected markers and inspection table refer to one recorded row. They share one linear vertical scale. A rapidly growing forward trace can make the smaller curves appear flat at that scale; inspect the numeric table and download before interpreting a line as zero. Negative values remain signed.\n\nThe six presets are small step, alternating decay, nondecaying boundary, growing numerical sequence, a negative initial value, and zero with a growing multiplier. They are drafts until explicitly applied.\n\n### Downloads have separate purposes\n\n- **Applied observation JSON** contains the equation, assumptions, units, applied settings, multipliers, classification, all N+1 full-precision rows, selected index and selected row. It is an experiment record, not a learner trace or an importer format.\n- **Course JSON** is the exact fixed original 16-question deck. Settings and step selection do not change its questions or answer key.\n- **Worked guide** is this exact Markdown document.\n\nThe lab has no network dependency, makes no automatic remote requests and stores no browser state. It requires no server or installed package. Background reference links require a connection; relative links to the learner and adjacent guides require the normal repository layout.\n\n## Study in RecallWeave\n\n1. Open the existing root demo.html and choose the downloaded course under **Bring your own lesson**.\n2. Check the title, sixteen questions, four concepts, attribution and license in the preview. Cancel leaves the existing session intact.\n3. Start the deck explicitly. Answer before reading each explanation.\n4. At the end, inspect the first-answer review, then retry missed questions separately.\n5. Write what distinguishes a stable multiplier from an accurate approximation. Download study notes to retain the authored explanations, your reflection and the separate retry record.\n\nThe learner's estimates remain illustrative model state. This original lesson does not establish assessment validity or improved learning outcomes.\n\n## Original content and background\n\nQuestions, examples, derivations, diagrams and explanations were authored for this lesson with AI assistance. The original course and guide text are dedicated under CC0-1.0. No textbook passages, exercises or figures are reproduced.\n\nMathematical background is provided by MIT OpenCourseWare's [18.330 Introduction to Numerical Analysis, Chapter 5: Ordinary Differential Equations](https://ocw.mit.edu/courses/18-330-introduction-to-numerical-analysis-spring-2012/a9d2bd9be098f0ada172af40379a17cc_MIT18_330S12_Chapter5.pdf). That reference retains its own terms. It uses a signed coefficient for its test equation; this lesson instead writes the negative sign explicitly and restricts lambda to positive decay rates.\n\n## Maintainer checks\n\nThe new model and UI are separate modules. The builder embeds those modules and the exact course/guide bytes in the standalone page. It does not alter any existing learner, catalog or lesson.\n\n    node tools/build-time-stepping.mjs\n    node tools/build-time-stepping.mjs --check\n    node --test tests/time-stepping.test.mjs tests/time-stepping-course.test.mjs\n\nThe maintained model cases retain independently frozen rational-power expectations, distinct from the implemented step recurrence. Browser receiving is a separate resource-gated operation; source presence or native model tests do not establish an actual browser pass.\n"}</script>
+<script type="module">
+/** The bounded scalar teaching model. No DOM, I/O or external dependencies. */
+const FIELDS = ['lambda', 'step', 'steps', 'initial'];
+function admit(input) {
+  if (!input || typeof input !== 'object' || Array.isArray(input)) {
+    throw new TypeError('Settings must be an object with lambda, step, steps and initial.');
+  }
+  const keys = Reflect.ownKeys(input);
+  if (keys.length !== FIELDS.length || keys.some(key => !FIELDS.includes(key))) {
+    throw new TypeError('Provide exactly lambda, step, steps and initial.');
+  }
+  const settings = {};
+  for (const key of FIELDS) {
+    const value = input[key];
+    if (typeof value !== 'number' || !Number.isFinite(value)) {
+      throw new TypeError(key + ' must be a finite number.');
+    }
+    settings[key] = value === 0 ? 0 : value;
+  }
+  for (const [key, minimum, maximum, units] of [
+    ['lambda', 0.25, 4, 4], ['step', 1 / 32, 2, 32],
+    ['initial', -2, 2, 4], ['steps', 1, 64, 1]
+  ]) {
+    if (settings[key] < minimum || settings[key] > maximum ||
+        !Number.isInteger(settings[key] * units)) {
+      throw new RangeError(key + ' is outside the declared range or grid.');
+    }
+  }
+  return settings;
+}
+
+function behavior(z) {
+  if (z < 1) return 'monotone_decay';
+  if (z === 1) return 'one_step_zero';
+  if (z < 2) return 'alternating_decay';
+  if (z === 2) return 'alternating_boundary';
+  return 'alternating_growth';
+}
+
+/** N+1 shared-time rows; errors are numerical minus exact. */
+function simulate(input) {
+  const settings = admit(input);
+  const {lambda, step, steps, initial} = settings;
+  const z = lambda * step;
+  const forwardMultiplier = 1 - z;
+  const backwardMultiplier = 1 / (1 + z);
+  const rows = [];
+  let forward = initial, backward = initial;
+  for (let index = 0; index <= steps; index++) {
+    const time = index * step;
+    const exact = initial === 0 ? 0 : initial * Math.exp(-lambda * time);
+    const forwardError = forward - exact;
+    const backwardError = backward - exact;
+    rows.push(Object.freeze({index, time, exact, forward, backward,
+      forwardError, backwardError,
+      forwardAbsError: Math.abs(forwardError),
+      backwardAbsError: Math.abs(backwardError)}));
+    if (index < steps) {
+      forward *= forwardMultiplier;
+      backward /= 1 + z;
+      // Mathematical zero has no sign; do not alternate an IEEE negative zero.
+      if (forward === 0) forward = 0;
+      if (backward === 0) backward = 0;
+    }
+  }
+  return Object.freeze({settings: Object.freeze(settings), z,
+    forwardMultiplier, backwardMultiplier, forwardBehavior: behavior(z),
+    rows: Object.freeze(rows)});
+}
+
+/** A fresh complete observation of the applied settings and selected row. */
+function observation(settings, selectedIndex) {
+  const trace = simulate(settings);
+  if (!Number.isInteger(selectedIndex) || selectedIndex < 0 ||
+      selectedIndex > trace.settings.steps) {
+    throw new RangeError('Selected index must identify a recorded row.');
+  }
+  return {
+    schema: 'recallweave.time-stepping-observation.v1',
+    model: "y' = -lambda*y; lambda > 0; exact and two Euler updates",
+    units: {lambda: 's^-1', step: 's', time: 's', y: 'dimensionless',
+      error: 'dimensionless', index: 'update count'},
+    assumptions: [
+      'Ideal scalar teaching equation; no fitted device or measured data.',
+      'Fixed coefficients and time step; no adaptive solver or clipping.',
+      'Finite floating-point calculations; displayed values may be rounded.',
+      'Multiplier classification is independent of the chosen initial value.',
+      'Stability and numerical accuracy are different questions.'
+    ],
+    ...trace, selectedIndex, selected: trace.rows[selectedIndex]
+  };
+}
+
+
+const byId = id => document.getElementById(id);
+const form = byId('settings');
+const fields = ['lambda', 'step', 'steps', 'initial'];
+const presets = {
+  small: {lambda: 1, step: 0.5, steps: 4, initial: 1},
+  alternating: {lambda: 1, step: 1.5, steps: 8, initial: 1},
+  boundary: {lambda: 1, step: 2, steps: 8, initial: 1},
+  growing: {lambda: 1.25, step: 2, steps: 8, initial: 1},
+  negative: {lambda: 2, step: 0.25, steps: 8, initial: -2},
+  zero: {lambda: 4, step: 2, steps: 8, initial: 0}
+};
+const labels = {
+  monotone_decay: 'Keeps sign; decays in magnitude',
+  one_step_zero: 'Reaches zero after one update',
+  alternating_decay: 'Alternates; decays in magnitude',
+  alternating_boundary: 'Alternates; bounded but nondecaying',
+  alternating_growth: 'Alternates; grows in magnitude'
+};
+const documents = JSON.parse(byId('documents').textContent);
+const series = [
+  {key: 'exact', label: 'Exact solution', color: '#273443', dash: ''},
+  {key: 'forward', label: 'Forward Euler', color: '#bb3e24', dash: '9 4'},
+  {key: 'backward', label: 'Backward Euler', color: '#006c91', dash: '3 4'}
+];
+let trace = null, selected = 0;
+const format = value => value === 0 ? '0' : Number(value.toPrecision(7)).toString();
+const svgNS = 'http://www.w3.org/2000/svg';
+
+function node(tag, attributes = {}, content) {
+  const element = document.createElementNS(svgNS, tag);
+  for (const [key, value] of Object.entries(attributes)) element.setAttribute(key, value);
+  if (content !== undefined) element.textContent = content;
+  return element;
+}
+function status(text, error = false) {
+  byId('status').textContent = text;
+  byId('status').classList.toggle('error', error);
+}
+function retire() {
+  trace = null;
+  byId('results').hidden = true;
+  byId('download-observation').disabled = true;
+  status('Draft settings. Apply them to produce a new experiment.');
+}
+function fill(settings) {
+  for (const key of fields) byId(key).value = settings[key];
+}
+function draw() {
+  const plot = byId('plot-content');
+  plot.replaceChildren();
+  const width = 900, height = 350;
+  const margin = {left: 100, right: 22, top: 22, bottom: 50};
+  const values = trace.rows.flatMap(row => series.map(s => row[s.key]));
+  let low = Math.min(0, ...values), high = Math.max(0, ...values);
+  const span = high - low;
+  if (span === 0) { low = -1; high = 1; }
+  else { low -= span * 0.08; high += span * 0.08; }
+  const lastTime = trace.rows.at(-1).time;
+  const x = time => margin.left + time / lastTime * (width - margin.left - margin.right);
+  const y = value => margin.top + (high - value) / (high - low) * (height - margin.top - margin.bottom);
+  for (let i = 0; i <= 4; i++) {
+    const value = low + (high - low) * i / 4, time = lastTime * i / 4;
+    plot.append(node('line', {x1: margin.left, x2: width - margin.right, y1: y(value), y2: y(value), class: 'grid'}));
+    plot.append(node('text', {x: margin.left - 10, y: y(value) + 4, 'text-anchor': 'end', class: 'tick'}, format(value)));
+    plot.append(node('text', {x: x(time), y: height - 24, 'text-anchor': 'middle', class: 'tick'}, format(time)));
+  }
+  plot.append(node('line', {x1: margin.left, x2: width - margin.right, y1: y(0), y2: y(0), class: 'zero-axis'}));
+  for (const s of series) {
+    const path = trace.rows.map((row, index) => (index ? 'L' : 'M') + x(row.time) + ',' + y(row[s.key])).join(' ');
+    plot.append(node('path', {d: path, fill: 'none', stroke: s.color, 'stroke-width': 2.5,
+      'stroke-dasharray': s.dash, 'data-series': s.key}));
+  }
+  const row = trace.rows[selected];
+  plot.append(node('line', {x1: x(row.time), x2: x(row.time), y1: margin.top,
+    y2: height - margin.bottom, stroke: '#8c7165', 'stroke-dasharray': '2 5'}));
+  for (const s of series) {
+    plot.append(node('circle', {cx: x(row.time), cy: y(row[s.key]), r: s.key === 'exact' ? 6 : 4,
+      fill: s.color, stroke: 'white', 'stroke-width': 1.5, 'data-marker': s.key}));
+  }
+  byId('plot-description').textContent = 'Shared linear scale from ' + format(low) + ' to ' + format(high) +
+    '. Recorded times from 0 to ' + format(lastTime) + ' seconds. Selected row ' + selected + '. ' +
+    series.map(s => s.label + ' ' + format(row[s.key])).join('; ') + '.';
+}
+function select(index) {
+  if (!trace) return;
+  selected = Math.max(0, Math.min(trace.settings.steps, index));
+  const row = trace.rows[selected];
+  byId('selected-step').value = selected;
+  byId('row-label').textContent = 'Row ' + selected + ' of ' + trace.settings.steps + ' · t = ' + format(row.time) + ' s';
+  byId('selected-step').setAttribute('aria-valuetext', 'Row ' + selected + ', time ' + format(row.time) + ' seconds');
+  byId('previous').disabled = selected === 0;
+  byId('next').disabled = selected === trace.settings.steps;
+  byId('final').disabled = selected === trace.settings.steps;
+  for (const key of ['exact', 'forward', 'backward', 'forwardError', 'backwardError', 'forwardAbsError', 'backwardAbsError']) {
+    byId('value-' + key).textContent = format(row[key]);
+    byId('value-' + key).dataset.value = String(row[key]);
+  }
+  byId('inspector').dataset.index = String(selected);
+  draw();
+}
+function apply() {
+  try {
+    const settings = {};
+    for (const key of fields) {
+      const text = byId(key).value.trim();
+      if (!text) throw new TypeError('Enter a value for every setting.');
+      settings[key] = Number(text);
+    }
+    trace = simulate(settings);
+    byId('results').hidden = false;
+    byId('selected-step').max = trace.settings.steps;
+    byId('product').textContent = format(trace.z);
+    byId('forward-multiplier').textContent = format(trace.forwardMultiplier);
+    byId('backward-multiplier').textContent = format(trace.backwardMultiplier);
+    byId('behavior').textContent = labels[trace.forwardBehavior];
+    byId('behavior').dataset.behavior = trace.forwardBehavior;
+    byId('zero-note').hidden = trace.settings.initial !== 0;
+    byId('applied-settings').textContent = 'Applied: λ = ' + format(trace.settings.lambda) +
+      ' s⁻¹; h = ' + format(trace.settings.step) + ' s; y₀ = ' + format(trace.settings.initial) +
+      '; N = ' + trace.settings.steps + '; final time = ' + format(trace.rows.at(-1).time) + ' s.';
+    select(0);
+    byId('download-observation').disabled = false;
+    status('Experiment applied. Select a recorded row to compare values at the same time.');
+  } catch (error) {
+    retire();
+    status(error.message + ' Previous results are retired; no observation is available.', true);
+  }
+}
+function download(name, text, type) {
+  const blob = new Blob([text], {type});
+  const url = URL.createObjectURL(blob), link = document.createElement('a');
+  link.href = url; link.download = name;
+  document.body.append(link); link.click(); link.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+form.addEventListener('input', retire);
+form.addEventListener('submit', event => { event.preventDefault(); apply(); });
+for (const button of document.querySelectorAll('[data-preset]')) {
+  button.addEventListener('click', () => { fill(presets[button.dataset.preset]); retire(); });
+}
+byId('selected-step').addEventListener('input', event => select(Number(event.target.value)));
+byId('previous').addEventListener('click', () => select(selected - 1));
+byId('next').addEventListener('click', () => select(selected + 1));
+byId('final').addEventListener('click', () => select(trace.settings.steps));
+byId('download-observation').addEventListener('click', () => {
+  if (trace) download('time-stepping-observation.json',
+    JSON.stringify(observation(trace.settings, selected), null, 2) + '\n', 'application/json');
+});
+byId('download-course').addEventListener('click', () => download('time-stepping.json', documents.course, 'application/json'));
+byId('download-guide').addEventListener('click', () => download('time-stepping.md', documents.guide, 'text/markdown'));
+fill(presets.small);
+apply();
+
+</script>
+</body>
+</html>

@@ -1,0 +1,8 @@
+import json,tarfile,hashlib,sys
+from pathlib import Path
+root=Path(sys.argv[1]); manifest=json.loads((root/'manifest.json').read_bytes());expected={row['path']:row for row in manifest['files']}
+with tarfile.open(root/'independent-receiving.tar.gz','r:gz') as archive:
+ members=archive.getmembers(); assert len(members)==18; assert all(m.isfile() for m in members); assert set(m.name for m in members)==set(expected)
+ for member in members:
+  content=archive.extractfile(member).read(); row=expected[member.name]; assert len(content)==row['bytes']; assert hashlib.sha256(content).hexdigest()==row['sha256']
+print(json.dumps({'members':len(members),'payload_bytes':sum(row['bytes'] for row in expected.values()),'all_member_bytes_match_manifest':True,'product_replay':False}))

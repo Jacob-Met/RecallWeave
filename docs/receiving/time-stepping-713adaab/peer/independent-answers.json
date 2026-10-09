@@ -1,0 +1,133 @@
+{
+  "schema": "independent-question-only-review/1",
+  "actor": "chatgpt:/root/migration_execution",
+  "input": {
+    "path": "/Users/me/Developer/recall-time-stepping-20261009-713adaab/expectations/question-only.json",
+    "bytes": 6867,
+    "sha256": "ce04b5ddfe266b7256ffa32e5156aa756c2877a49d2f2727183422c7d71ec85d"
+  },
+  "review_type": "Blind mathematical derivation from original prompts/options and assumptions only, before authored answer-key/candidate exposure.",
+  "answer_indices": [
+    1,
+    3,
+    0,
+    2,
+    3,
+    1,
+    0,
+    2,
+    1,
+    3,
+    2,
+    0,
+    1,
+    3,
+    2,
+    0
+  ],
+  "items": [
+    {
+      "id": "step-units",
+      "answer_index": 1,
+      "derivation": "The product is (2 s^-1)(0.25 s)=0.5; the units cancel.",
+      "ambiguity": null
+    },
+    {
+      "id": "step-exact",
+      "answer_index": 3,
+      "derivation": "Separation gives y(t)=2 exp(-t), hence y(1)=2/e.",
+      "ambiguity": null
+    },
+    {
+      "id": "step-forward-update",
+      "answer_index": 0,
+      "derivation": "The forward multiplier is 1-0.5=0.5, giving 1/2 then 1/4.",
+      "ambiguity": null
+    },
+    {
+      "id": "step-rows",
+      "answer_index": 2,
+      "derivation": "Four updates add four rows to the initial state: five rows, final time 4*0.5=2 s.",
+      "ambiguity": null
+    },
+    {
+      "id": "step-monotone",
+      "answer_index": 3,
+      "derivation": "Strictly positive decay requires 0<1-z<1. Only z=0.25 meets that inequality.",
+      "ambiguity": null
+    },
+    {
+      "id": "step-one-step-zero",
+      "answer_index": 1,
+      "derivation": "At z=1 the discrete multiplier is zero. The continuous exponential remains positive for every finite time from y0=1.",
+      "ambiguity": null
+    },
+    {
+      "id": "step-alternating-decay",
+      "answer_index": 0,
+      "derivation": "Multiplier -0.5 gives 1,-1/2,1/4,-1/8.",
+      "ambiguity": null
+    },
+    {
+      "id": "step-boundary",
+      "answer_index": 2,
+      "derivation": "At z=2 the multiplier is -1: sign alternates and magnitude remains one. It is bounded but does not decay.",
+      "ambiguity": null
+    },
+    {
+      "id": "step-growth",
+      "answer_index": 1,
+      "derivation": "At z=2.5 the multiplier is -1.5, whose magnitude exceeds one, unlike the continuous exp(-lambda*t).",
+      "ambiguity": null
+    },
+    {
+      "id": "step-implicit-update",
+      "answer_index": 3,
+      "derivation": "Rearrange (1+z) B[n+1]=B[n]; division is allowed since z>0.",
+      "ambiguity": null
+    },
+    {
+      "id": "step-backward-rational",
+      "answer_index": 2,
+      "derivation": "The backward factor is 2/3, so after four updates B[4]=(2/3)^4=16/81.",
+      "ambiguity": null
+    },
+    {
+      "id": "step-stability-accuracy",
+      "answer_index": 0,
+      "derivation": "1/3 is decaying but differs from exp(-2) by about 0.1980. Decay stability does not imply accuracy at a large step.",
+      "ambiguity": null
+    },
+    {
+      "id": "step-same-endpoint",
+      "answer_index": 1,
+      "derivation": "The original final time is 0.5*2=1 s. Halving h and doubling N preserves that time while lambda and y0 remain fixed.",
+      "ambiguity": null
+    },
+    {
+      "id": "step-negative-start",
+      "answer_index": 3,
+      "derivation": "Divide -1 by 1.5, yielding -2/3; the positive backward factor preserves the initial sign.",
+      "ambiguity": null
+    },
+    {
+      "id": "step-zero-mask",
+      "answer_index": 2,
+      "derivation": "Zero is invariant for any multiplier. A nonzero perturbation is multiplied by -1.5 and grows, so the zero trace does not establish attraction.",
+      "ambiguity": null
+    },
+    {
+      "id": "step-order",
+      "answer_index": 0,
+      "derivation": "First-order global error means a leading C*h term at a fixed endpoint as h tends to zero. Higher-order terms prevent a general exact factor-two claim at finite steps.",
+      "ambiguity": null
+    }
+  ],
+  "decision": "All sixteen items have one correct option under the stated ideal assumptions. No correctness or ambiguity blocker.",
+  "limits": [
+    "No product, learner, lab, browser, model-code or answer-key execution/read.",
+    "This is a question-only mathematical source review, not a model accuracy or receiving gate.",
+    "The supplied exact-arithmetic and nonzero-initial-state conventions distinguish decay, boundedness and the z=2 boundary adequately."
+  ],
+  "observed_utc": "2026-10-09T03:38:49.427964+00:00"
+}

@@ -1,0 +1,290 @@
+{
+  "format": "recallweave-deck/1",
+  "title": "Time stepping: decay, stability and accuracy",
+  "attribution": "Original questions, explanations and worked examples authored with AI assistance for RecallWeave. Ideal scalar y'=-lambda*y with lambda>0; lambda is in s^-1, time in seconds and y is dimensionless. Numerical method behavior is compared with the exact exponential, not measured device data. Background: MIT OpenCourseWare 18.330, Introduction to Numerical Analysis, Chapter 5 on ordinary differential equations. No textbook passages, exercises or figures are reproduced; no learning-efficacy claim.",
+  "license": "CC0-1.0 for this original course text and questions. Referenced MIT OpenCourseWare materials retain their own licenses.",
+  "concepts": [
+    "model-and-grid",
+    "forward-behavior",
+    "implicit-and-error",
+    "refinement-and-evidence"
+  ],
+  "items": [
+    {
+      "id": "step-units",
+      "prompt": "A decay rate is lambda = 2 s^-1 and the numerical time step is h = 0.25 s. What is z = lambda*h?",
+      "options": [
+        "0.125 s",
+        "0.5, with no units",
+        "2.25 s^-1",
+        "8, with no units"
+      ],
+      "concept": "model-and-grid",
+      "prerequisites": [],
+      "answer": 1,
+      "explanation": "Multiplying 2 s^-1 by 0.25 s gives 0.5. The time units cancel. This dimensionless product controls each Euler multiplier; neither lambda nor h alone determines it.",
+      "transfer": "Double lambda and halve h. Predict z and the numerical states at the same update indices, then explain why the physical time labels changed."
+    },
+    {
+      "id": "step-exact",
+      "prompt": "For y' = -y with y(0) = 2, what is the exact value at t = 1 s?",
+      "options": [
+        "2 - 1 = 1",
+        "2e",
+        "0",
+        "2/e"
+      ],
+      "concept": "model-and-grid",
+      "prerequisites": [],
+      "answer": 3,
+      "explanation": "The exact solution is y(t)=2 exp(-t) for this initial condition and rate, so y(1)=2/e. The expression 2 - 1 ignores that the slope depends on y. It is neither the exact solution at t=1 nor the one-step forward-Euler result with h=1, which is 2-2=0.",
+      "transfer": "Set y(0)=-2. Predict the exact sign and magnitude at one second without solving a new equation."
+    },
+    {
+      "id": "step-forward-update",
+      "prompt": "Forward Euler starts from F[0] = 1 for y' = -y and h = 0.5 s. What are F[1] and F[2]?",
+      "options": [
+        "0.5 and 0.25",
+        "2/3 and 4/9",
+        "exp(-0.5) and exp(-1)",
+        "0.5 and 0"
+      ],
+      "concept": "model-and-grid",
+      "prerequisites": [],
+      "answer": 0,
+      "explanation": "Forward Euler multiplies the current state by 1-lambda*h=1/2 at every update. Starting at one gives 1/2 and then 1/4. Backward Euler and the exact exponential have different multipliers.",
+      "transfer": "With h=0.25 s and lambda=1 s^-1, predict the first two forward states before using the lab."
+    },
+    {
+      "id": "step-rows",
+      "prompt": "A trace starts at t = 0 and performs N = 4 updates with h = 0.5 s. Including the initial row, how many rows are recorded, and what is the final time?",
+      "options": [
+        "4 rows, 2 s",
+        "5 rows, 2.5 s",
+        "5 rows, 2 s",
+        "4 rows, 1.5 s"
+      ],
+      "concept": "model-and-grid",
+      "prerequisites": [],
+      "answer": 2,
+      "explanation": "The initial state is row zero. Four updates add rows one through four, so five rows are recorded. Their times are 0,0.5,1,1.5,2 seconds. Do not multiply the row count by h to obtain the endpoint.",
+      "transfer": "For eight updates at h=0.125 s, identify both the final row index and the final physical time."
+    },
+    {
+      "id": "step-monotone",
+      "prompt": "For a positive initial value, which z makes forward Euler strictly positive and smaller at every update?",
+      "options": [
+        "z = 1.5",
+        "z = 2.5",
+        "z = 2",
+        "z = 0.25"
+      ],
+      "concept": "forward-behavior",
+      "prerequisites": [
+        "model-and-grid"
+      ],
+      "answer": 3,
+      "explanation": "At z=0.25 the multiplier is 0.75: positive and less than one. It preserves a positive sign and shrinks the magnitude. The other choices alternate in sign, and the z=2 boundary does not shrink.",
+      "transfer": "Choose a negative starting value with z=0.25. Describe decay in magnitude without calling the signed sequence decreasing."
+    },
+    {
+      "id": "step-one-step-zero",
+      "prompt": "With y(0) = 1 and z = 1, forward Euler becomes zero after one update. What does this establish?",
+      "options": [
+        "The exact continuous solution also reaches zero at that time.",
+        "The discrete update multiplier is zero; the exact solution is still positive at every finite time.",
+        "The decay rate must have changed to zero.",
+        "Backward Euler also becomes zero after one update."
+      ],
+      "concept": "forward-behavior",
+      "prerequisites": [
+        "model-and-grid"
+      ],
+      "answer": 1,
+      "explanation": "When z=1, the forward multiplier 1-z is zero. That numerical rule erases any starting state after one update. The exact exponential multiplier exp(-1) is positive; the equation has not reached equilibrium at a finite time.",
+      "transfer": "At z=1 compare the first exact, forward and backward values. Explain why the forward zero does not certify accuracy."
+    },
+    {
+      "id": "step-alternating-decay",
+      "prompt": "Forward Euler has z = 1.5 and F[0] = 1. Which sequence gives its first four recorded states?",
+      "options": [
+        "1, -0.5, 0.25, -0.125",
+        "1, 0.5, 0.25, 0.125",
+        "1, -1.5, 2.25, -3.375",
+        "1, 0.4, 0.16, 0.064"
+      ],
+      "concept": "forward-behavior",
+      "prerequisites": [
+        "model-and-grid"
+      ],
+      "answer": 0,
+      "explanation": "The forward multiplier is 1-1.5=-0.5. Repeated multiplication produces 1,-0.5,0.25,-0.125. The sign alternates while the magnitude halves. The exact positive decay does not alternate.",
+      "transfer": "Change z from 1.5 to 2.5. Which part of the alternating behavior persists, and which part changes?"
+    },
+    {
+      "id": "step-boundary",
+      "prompt": "With z = 2 and F[0] = 1, forward Euler records 1, -1, 1, -1, ... . Which description is precise?",
+      "options": [
+        "It converges to the exact decaying solution as the number of updates grows at this fixed step.",
+        "It grows in magnitude at each update.",
+        "It is an alternating nondecaying boundary case.",
+        "Its alternating signs imply decreasing magnitude."
+      ],
+      "concept": "forward-behavior",
+      "prerequisites": [
+        "model-and-grid"
+      ],
+      "answer": 2,
+      "explanation": "At z=2, the multiplier is -1, so the magnitude stays one and the sign alternates. This is a bounded but nondecaying boundary. It is not attraction to zero, and it is not growing magnitude.",
+      "transfer": "Compare the neighboring admitted settings just below and just above z=2. Predict what happens to a nonzero starting difference."
+    },
+    {
+      "id": "step-growth",
+      "prompt": "For y' = -lambda*y with lambda > 0 and y(0) = 1, forward Euler uses z = 2.5. Why does its magnitude grow even though the exact solution decays?",
+      "options": [
+        "The continuous equation is growing because lambda is positive.",
+        "The numerical multiplier is -1.5, whose magnitude exceeds one.",
+        "All numerical methods grow for this equation.",
+        "The initial value must have been negative."
+      ],
+      "concept": "implicit-and-error",
+      "prerequisites": [
+        "model-and-grid",
+        "forward-behavior"
+      ],
+      "answer": 1,
+      "explanation": "The continuous equation has a negative coefficient -lambda and its positive solution decays. The forward-Euler multiplier is 1-2.5=-1.5. Its magnitude exceeds one, so this chosen numerical step produces alternating growth.",
+      "transfer": "Keep lambda fixed and reduce h until z<2. Explain which change belongs to the numerical method and which equation remains unchanged."
+    },
+    {
+      "id": "step-implicit-update",
+      "prompt": "Backward Euler uses B[n+1] = B[n] - z*B[n+1]. Solving for the new state gives which update?",
+      "options": [
+        "B[n+1] = (1 - z)*B[n]",
+        "B[n+1] = B[n]/(1 - z)",
+        "B[n+1] = (1 + z)*B[n]",
+        "B[n+1] = B[n]/(1 + z)"
+      ],
+      "concept": "implicit-and-error",
+      "prerequisites": [
+        "model-and-grid",
+        "forward-behavior"
+      ],
+      "answer": 3,
+      "explanation": "Move z*B[n+1] to the left: (1+z)B[n+1]=B[n]. Dividing by 1+z gives the backward-Euler update. The new state appears on both sides before this algebraic solve.",
+      "transfer": "Derive the backward multiplier for z=2 and compare it with the forward multiplier at that same step."
+    },
+    {
+      "id": "step-backward-rational",
+      "prompt": "Backward Euler starts from B[0] = 1 with z = 0.5. What is B[4]?",
+      "options": [
+        "1/16",
+        "exp(-2)",
+        "16/81",
+        "81/16"
+      ],
+      "concept": "implicit-and-error",
+      "prerequisites": [
+        "model-and-grid",
+        "forward-behavior"
+      ],
+      "answer": 2,
+      "explanation": "Here the backward multiplier is 1/(1+1/2)=2/3. Four updates give (2/3)^4=16/81. The value 1/16 belongs to forward Euler at the same settings, while exp(-2) is the exact value at the shared time.",
+      "transfer": "Start from -2 at z=0.5. Predict the fourth backward state using the same power and a changed initial factor."
+    },
+    {
+      "id": "step-stability-accuracy",
+      "prompt": "For lambda = 1 s^-1, h = 2 s and y(0) = 1, backward Euler gives B[1] = 1/3 while the exact value is exp(-2), about 0.1353. What is the appropriate conclusion?",
+      "options": [
+        "A decaying numerical sequence can still have substantial error at a large time step.",
+        "Because backward Euler decays, it is exact.",
+        "The exact solution should be replaced by 1/3.",
+        "Backward Euler has become an alternating-growth method."
+      ],
+      "concept": "implicit-and-error",
+      "prerequisites": [
+        "model-and-grid",
+        "forward-behavior"
+      ],
+      "answer": 0,
+      "explanation": "Backward Euler's multiplier is 1/3, so its sequence decays. At this large step its value is nevertheless far from exp(-2). A decay or stability statement does not promise small approximation error.",
+      "transfer": "Choose a smaller h while retaining the same endpoint. Check accuracy using numerical-minus-exact error, separately from multiplier decay."
+    },
+    {
+      "id": "step-same-endpoint",
+      "prompt": "A run uses lambda = 1 s^-1, y(0) = 1, h = 0.5 s and N = 2. Which new run isolates time-step refinement at the same final physical time?",
+      "options": [
+        "h = 0.25 s and N = 2, with lambda and y(0) unchanged",
+        "h = 0.25 s and N = 4, with lambda and y(0) unchanged",
+        "h = 0.5 s and N = 4, with lambda and y(0) unchanged",
+        "h = 0.25 s and N = 4, but lambda doubled"
+      ],
+      "concept": "refinement-and-evidence",
+      "prerequisites": [
+        "model-and-grid",
+        "forward-behavior",
+        "implicit-and-error"
+      ],
+      "answer": 1,
+      "explanation": "The original final time is 2*0.5=1 second. Halving h to 0.25 requires four updates to reach the same endpoint, while preserving the equation and initial condition. Otherwise more than step resolution changes.",
+      "transfer": "At a final time of 2 seconds, write two runs with different h and the same lambda and initial state."
+    },
+    {
+      "id": "step-negative-start",
+      "prompt": "Backward Euler uses lambda = 1 s^-1, h = 0.5 s and B[0] = -1. What is B[1]?",
+      "options": [
+        "1/2",
+        "2/3",
+        "-1/2",
+        "-2/3"
+      ],
+      "concept": "refinement-and-evidence",
+      "prerequisites": [
+        "model-and-grid",
+        "forward-behavior",
+        "implicit-and-error"
+      ],
+      "answer": 3,
+      "explanation": "The multiplier is 2/3, so multiplying the negative starting value by it gives -2/3. The state remains negative and moves toward zero in magnitude. The underlying linear equation does not discard the sign of the initial value.",
+      "transfer": "Compare traces starting at 1 and -1 with identical settings. Explain which values change sign and which absolute errors stay the same."
+    },
+    {
+      "id": "step-zero-mask",
+      "prompt": "For z = 2.5, a forward-Euler trace starting at zero stays exactly zero. What can be concluded about a nonzero initial perturbation at the same settings?",
+      "options": [
+        "Nothing about the multiplier can be determined from the known equation.",
+        "Every nonzero perturbation also becomes zero immediately.",
+        "It is multiplied by -1.5 each update and grows in magnitude; the zero trace does not establish attraction.",
+        "It is multiplied by 2/7 each update and shrinks."
+      ],
+      "concept": "refinement-and-evidence",
+      "prerequisites": [
+        "model-and-grid",
+        "forward-behavior",
+        "implicit-and-error"
+      ],
+      "answer": 2,
+      "explanation": "Zero is fixed by every scalar multiplier, including -1.5. Subtract two forward-Euler trajectories at the same settings: their difference is also multiplied by -1.5. A nonzero perturbation therefore grows even when the zero trajectory looks flat.",
+      "transfer": "Start at zero with the growing-step preset, then use a small admitted nonzero initial value. Relate both plots to the same multiplier."
+    },
+    {
+      "id": "step-order",
+      "prompt": "For this smooth decay problem, both Euler methods have first-order global error at a fixed final time in exact arithmetic. Which interpretation is correct?",
+      "options": [
+        "As h becomes small, halving h makes the leading error approximately half as large; finite-step error ratios need not be exactly two.",
+        "At every admitted h, halving h divides the error by exactly two.",
+        "Doubling the final time always halves the error.",
+        "Any method that decays has zero global error."
+      ],
+      "concept": "refinement-and-evidence",
+      "prerequisites": [
+        "model-and-grid",
+        "forward-behavior",
+        "implicit-and-error"
+      ],
+      "answer": 0,
+      "explanation": "First-order global convergence describes the leading error as proportional to h when the physical endpoint is held fixed and h becomes small. Higher-order terms mean a finite pair of steps need not have an exact ratio of two. Floating-point roundoff can eventually matter too.",
+      "transfer": "Use the four T=1 refinements in the guide. Compare consecutive absolute-error ratios and explain why none must equal exactly two."
+    }
+  ]
+}

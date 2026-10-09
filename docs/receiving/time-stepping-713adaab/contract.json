@@ -1,0 +1,157 @@
+{
+  "schema": "time-stepping-pre-candidate-contract/1",
+  "reservation": "https://github.com/Jacob-Met/RecallWeave/issues/204",
+  "parent": "698902f9c9c1d5c5023092b85b3632a7cb7a01ed",
+  "tree": "d6d3707b691850af7928299242631534cff89aa8",
+  "source_created": false,
+  "api": {
+    "export": "simulate(settings)",
+    "settings": [
+      "lambda",
+      "step",
+      "steps",
+      "initial"
+    ],
+    "returns": [
+      "settings",
+      "z",
+      "forwardMultiplier",
+      "backwardMultiplier",
+      "forwardBehavior",
+      "rows"
+    ],
+    "row_fields": [
+      "index",
+      "time",
+      "exact",
+      "forward",
+      "backward",
+      "forwardError",
+      "backwardError",
+      "forwardAbsError",
+      "backwardAbsError"
+    ]
+  },
+  "model": {
+    "equation": "y'=-lambda*y",
+    "units": {
+      "lambda": "s^-1",
+      "step": "s",
+      "time": "s",
+      "initial": "dimensionless",
+      "y": "dimensionless"
+    },
+    "domain": {
+      "lambda": {
+        "min": 0.25,
+        "max": 4,
+        "quantum": 0.25
+      },
+      "step": {
+        "min": 0.03125,
+        "max": 2,
+        "quantum": 0.03125
+      },
+      "initial": {
+        "min": -2,
+        "max": 2,
+        "quantum": 0.25
+      },
+      "steps": {
+        "min": 1,
+        "max": 64,
+        "integer": true
+      }
+    },
+    "rows": "N+1; index n at t=n*h; exact=y0*exp(-lambda*t); F[n+1]=(1-z)*F[n]; B[n+1]=B[n]/(1+z); numerical-minus-exact errors",
+    "behavior": [
+      "monotone_decay",
+      "one_step_zero",
+      "alternating_decay",
+      "alternating_boundary",
+      "alternating_growth"
+    ],
+    "zero_initial": "does not change multiplier classification",
+    "z_2_5_fixture": {
+      "lambda": 1.25,
+      "step": 2,
+      "initial": 1,
+      "steps": 4
+    },
+    "refinement": {
+      "lambda": 1,
+      "initial": 1,
+      "T": 1,
+      "steps": [
+        [
+          1,
+          1
+        ],
+        [
+          0.5,
+          2
+        ],
+        [
+          0.25,
+          4
+        ],
+        [
+          0.125,
+          8
+        ]
+      ]
+    }
+  },
+  "recipient": {
+    "course_questions": 16,
+    "concepts": 4,
+    "existing_learner": "unchanged checked-deck parser, selector, review, separate retry, reflection, notes; actual browser remains pending",
+    "lab": "offline explicit Apply, shared-scale signed traces, selected step inspector, complete applied JSON and exact course/guide downloads",
+    "draft": "any input edit retires prior computed results and disables observation download",
+    "storage": "no automatic browser storage or network dependencies",
+    "limits": [
+      "bounded scalar teaching model",
+      "not an adaptive solver or diffusion simulation",
+      "stability distinct from accuracy",
+      "finite floating calculations do not prove theoretical asymptotic convergence",
+      "no physical-device fit or learning-efficacy claim"
+    ]
+  },
+  "fence": [
+    "courses/time-stepping.json",
+    "courses/time-stepping.md",
+    "courses/time-stepping-lab.html",
+    "src/time-stepping.mjs",
+    "src/time-stepping-ui.mjs",
+    "templates/time-stepping-lab.html",
+    "tools/build-time-stepping.mjs",
+    "tools/check-time-stepping-browser.mjs",
+    "tests/time-stepping.test.mjs",
+    "tests/time-stepping-course.test.mjs",
+    "docs/receiving/time-stepping-713adaab/**"
+  ],
+  "budget": {
+    "total_new_lane_bytes": 8388608,
+    "min_remaining_disk_bytes": 134217728,
+    "browser_permitted": false
+  },
+  "candidate_waits_for": "root independently reasoned rational oracle freeze",
+  "ownership": {
+    "Conscience_write": false,
+    "adjacent_diffusion_claim": 5285,
+    "excluded": [
+      "RC",
+      "feedback",
+      "quadrature",
+      "catalog",
+      "learner",
+      "importer",
+      "shared README",
+      "workflow",
+      "dependencies"
+    ]
+  },
+  "frozen_at": "2026-10-09T03:30:56.099Z",
+  "native_capacity_bytes": 263376896,
+  "node": "v26.3.0"
+}
