@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>Absorbing walks · RecallWeave</title>
+<style>
+:root{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:#172f3d;background:#f4f2eb;line-height:1.55;font-size:16px}*{box-sizing:border-box}body{margin:0}main{max-width:1080px;margin:auto;padding:32px 24px 56px}header{border-bottom:2px solid #234b59;padding-bottom:24px;margin-bottom:24px}.eyebrow{color:#356c78;font-size:.76rem;font-weight:750;letter-spacing:.16em;text-transform:uppercase}h1{font-family:Georgia,serif;font-size:clamp(2.3rem,5vw,4rem);line-height:1.08;max-width:780px;margin:12px 0 18px;letter-spacing:-.035em}h2{font-family:Georgia,serif;font-size:1.65rem;margin:0 0 10px}h3{font-size:1.05rem;margin:0 0 10px}p{max-width:78ch}header p{font-size:1.08rem;margin-bottom:0;color:#415863}.panel{border:1px solid #cad3cf;background:#fffdf8;border-radius:14px;padding:24px;margin:20px 0;box-shadow:0 2px 0 #dce2db}.intro{display:grid;grid-template-columns:1.4fr 1fr;gap:24px}.note{background:#e8efe9;border-left:4px solid #427565;padding:16px 18px;border-radius:4px}.note p{margin:0}.inputs{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px;margin:20px 0}label{display:block;font-size:.88rem;font-weight:650}input,select,button{font:inherit;max-width:100%}input[type=number],select{width:100%;border:1px solid #92a7ad;border-radius:7px;background:white;color:#172f3d;padding:10px;margin-top:6px}small,.muted{color:#526773;font-size:.84rem}label small{display:block;font-weight:400;line-height:1.4;margin-top:4px}button,.link-button{border:1px solid #456672;border-radius:8px;background:#fffdf8;color:#183e4c;padding:10px 15px;min-height:44px;font-weight:650;cursor:pointer;text-decoration:none;display:inline-block}button:hover:not(:disabled),.link-button:hover{background:#e5edeb}button.primary{background:#224f5c;color:white;border-color:#224f5c}button.primary:hover{background:#163e4b}button:disabled{opacity:.46;cursor:default}button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible{outline:3px solid #c87437;outline-offset:3px}.actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.preset{display:flex;gap:10px;align-items:end;flex-wrap:wrap;margin-top:16px}.preset label{flex:1;min-width:180px}.status{border-radius:6px;background:#edf2ef;padding:12px;margin:16px 0 0;overflow-wrap:anywhere}.status[data-state=invalid]{background:#fff0e8;border-left:4px solid #a74427}.nav{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:16px 0}.step-range{flex:1;min-width:160px}input[type=range]{width:100%;accent-color:#224f5c;min-height:36px}.step-label{font-size:1.3rem;font-weight:750;color:#224f5c}#probability-strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(62px,1fr));gap:9px;align-items:end;margin:24px 0}.state-bar{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:.75rem}.bar-track{height:116px;width:100%;max-width:70px;background:#e9eee9;border-radius:5px 5px 0 0;display:flex;align-items:end;border-bottom:1px solid #66818a}.bar-fill{display:block;width:100%;background:#357a8b;border-radius:4px 4px 0 0}.state-bar:first-child .bar-fill,.state-bar:last-child .bar-fill{background:#ba743e}.state-bar strong{font-size:.95rem}.metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin:20px 0}.metrics>div{background:#eef2ec;padding:14px;border-radius:8px}.metrics dt{font-size:.82rem;color:#445e67}.metrics dd{margin:7px 0 0;font-size:1.25rem;font-weight:700;overflow-wrap:anywhere}.metrics dd small{font-weight:400}.table-wrap{max-width:100%;overflow-x:auto;border:1px solid #d1dad4;border-radius:7px;margin:14px 0}table{border-collapse:collapse;width:100%;font-size:.86rem}th,td{padding:10px 12px;text-align:left;border-bottom:1px solid #dce3dd;vertical-align:top;overflow-wrap:anywhere}thead th{background:#eaf0eb;font-weight:700}tbody th{font-weight:600}.selected{background:#fff0d9}.fraction{font-variant-numeric:tabular-nums;overflow-wrap:anywhere}details{margin:16px 0}summary{cursor:pointer;font-weight:650;padding:8px 0}.two-columns{display:grid;grid-template-columns:1fr 1fr;gap:20px}.download-section{border-top:2px solid #234b59;padding-top:24px;margin-top:30px}footer{font-size:.82rem;color:#506571;margin-top:30px}a{color:#1e657b}.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}[hidden]{display:none!important}
+@media(max-width:720px){main{padding:24px 16px 40px}.intro,.two-columns{grid-template-columns:1fr;gap:8px}.inputs{grid-template-columns:repeat(2,minmax(0,1fr))}.inputs label:last-child{grid-column:1/-1}.panel{padding:18px}.metrics{grid-template-columns:1fr;gap:9px}.metrics>div{padding:12px}.nav button{flex:1}.step-range{flex-basis:100%}.bar-track{height:90px}th,td{padding:9px 7px}.actions>*{flex-grow:1;text-align:center}}
+</style>
+</head>
+<body><main>
+<header><div class="eyebrow">RecallWeave / probability field lab</div><h1>When does the walk stop?</h1><p>Follow exact probability mass to two absorbing boundaries. Separate the arrivals on one step from everything that has arrived so far.</p></header>
+<section class="intro" aria-label="Model overview"><div><h2>A small walk, three different questions</h2><p>At an interior state, move right with probability <strong>p</strong> or left with <strong>1−p</strong>. At either endpoint, stay there. <strong>T</strong> counts steps until the first boundary visit; starting there gives T=0.</p></div><aside class="note"><p><strong>Exact distributions, not sampled paths.</strong><br>This hypothetical model keeps every probability as a reduced fraction. A finite horizon limits the trace, not the eventual stopping-time calculation.</p></aside></section>
+<section class="panel" aria-labelledby="inputs-title"><h2 id="inputs-title">Choose the walk</h2><form id="walk-form" novalidate>
+<div class="inputs">
+<label>Right endpoint N<input name="upper" type="number" min="2" max="8" step="1" value="6"><small>States 0 through N · 2–8</small></label>
+<label>Starting state i<input name="start" type="number" min="0" max="8" step="1" value="3"><small>0 through N, inclusive</small></label>
+<label>Right numerator a<input name="rightNumerator" type="number" min="0" max="12" step="1" value="1"><small>p=a/b · 0 through b</small></label>
+<label>Right denominator b<input name="rightDenominator" type="number" min="1" max="12" step="1" value="2"><small>1–12 · left probability 1−p</small></label>
+<label>Horizon H<input name="horizon" type="number" min="0" max="30" step="1" value="12"><small>Show every step from 0 to H · 0–30</small></label>
+</div><button id="apply" type="submit" class="primary">Apply exact walk</button>
+</form>
+<div class="preset"><label for="preset">Teaching example<select id="preset"></select></label><button id="load-preset" type="button">Load example</button></div>
+<p id="status" class="status" role="status" aria-live="polite">Choose inputs, then Apply. Nothing is saved automatically.</p></section>
+<section id="results" hidden aria-label="Applied experiment">
+<section class="panel"><h2>Inspect a step</h2><output id="step-label" class="step-label" for="step">Step 0</output>
+<div class="nav"><button id="first" disabled>First</button><button id="previous" disabled>Previous</button><label class="step-range" for="step">Selected step<input id="step" type="range" min="0" max="12" step="1" value="0" disabled></label><button id="next" disabled>Next</button><button id="last" disabled>Last</button></div>
+<p class="muted">The applied inputs stay fixed while you navigate. Bars and percentages are rounded aids; the fractions below are exact.</p>
+<div id="probability-strip" aria-hidden="true"></div>
+<div class="table-wrap"><table id="distribution-table"><caption class="sr-only">Exact probability at each state on the selected step</caption><thead><tr><th scope="col">State</th><th scope="col">Exact mass</th><th scope="col">Approximate</th></tr></thead><tbody></tbody></table></div>
+<dl class="metrics"><div><dt>First arrival at 0 on this step</dt><dd id="first-left"></dd></div><div><dt>First arrival at N on this step</dt><dd id="first-right"></dd></div><div><dt>Still inside: P(T&gt;step)</dt><dd id="survival"></dd></div></dl>
+</section>
+<section class="panel"><h2>Arrival is not accumulation</h2><p>First arrival counts only new boundary hits on that exact step. Cumulative absorption also includes all earlier hits. The highlighted row is the selected step.</p>
+<div class="table-wrap"><table id="arrival-table"><caption class="sr-only">All finite steps, exact first arrivals, cumulative absorption and survival</caption><thead><tr><th scope="col">Step</th><th scope="col">First left</th><th scope="col">First right</th><th scope="col">Cumulative left</th><th scope="col">Cumulative right</th><th scope="col">Survival</th></tr></thead><tbody></tbody></table></div></section>
+<section class="panel"><h2>How long, on average?</h2><dl id="time-comparison" class="metrics"></dl><p>The finite observation sums survival before the selected step. Expected excess is averaged over <em>all</em> paths; it is not the remaining time conditioned on still being inside.</p>
+<h3>Eventual results from every starting state</h3><p class="muted">These exact boundary solutions do not depend on the chosen horizon. The applied starting state is highlighted.</p>
+<div class="table-wrap"><table id="eventual-table"><caption class="sr-only">Eventual absorption probabilities and expected stopping time</caption><thead><tr><th scope="col">Start</th><th scope="col">Left probability</th><th scope="col">Right probability</th><th scope="col">E[T], steps</th></tr></thead><tbody></tbody></table></div></section>
+<section class="panel"><details><summary>Inspect every transition contribution</summary><p id="contribution-note"></p><div class="table-wrap"><table id="contribution-table"><caption class="sr-only">Contributions into the selected step</caption><thead><tr><th scope="col">Edge</th><th scope="col">Transition probability</th><th scope="col">Transferred mass</th></tr></thead><tbody></tbody></table></div></details></section>
+</section>
+<section class="download-section" aria-labelledby="take-title"><h2 id="take-title">Take the experiment. Learn the ideas.</h2><p>The experiment contains the full exact trace and selected step. The twelve-question course and worked guide stay fixed when you change the controls.</p><div class="actions"><button id="download-experiment" disabled>Download experiment</button><button id="download-course">Download course</button><button id="download-guide">Download guide</button><a class="link-button" href="../demo.html">Open companion learner</a></div><p class="muted">In the companion learner, choose the downloaded course file, inspect its preview, then select Start this deck. The lab works when copied alone; the learner link needs the companion package.</p></section>
+<footer>Fixed probabilities and independent directions are assumptions, not conclusions about real events. No network, storage or random sampling is used by this lab. Original lesson text: CC BY 4.0. Standard derivation and scope are documented in the downloadable guide.</footer>
+<script id="course-bytes" type="application/octet-stream">ewogICJmb3JtYXQiOiAicmVjYWxsd2VhdmUtZGVjay8xIiwKICAidGl0bGUiOiAiQWJzb3JiaW5nIHJhbmRvbSB3YWxrczogYXJyaXZhbCBhbmQgc3RvcHBpbmciLAogICJhdHRyaWJ1dGlvbiI6ICJPcmlnaW5hbCBSZWNhbGxXZWF2ZSBsZXNzb24gYW5kIHdvcmtlZCBleGFtcGxlcy4gU3RhbmRhcmQgZmluaXRlLXdhbGsgYm91bmRhcnkgZXF1YXRpb25zOiBNSVQgUkVTLjYtMDEyLCBsZWN0dXJlIDI2LjkgKFNwcmluZyAyMDE4KSwgaHR0cHM6Ly9vY3cubWl0LmVkdS9jb3Vyc2VzL3Jlcy02LTAxMi1pbnRyb2R1Y3Rpb24tdG8tcHJvYmFiaWxpdHktc3ByaW5nLTIwMTgvY2RlOTA1YThjZDdlNTM1MjljNGZlOTk5YjcwNzkwZmFfTmUybG1BWkk0LUkucGRmIiwKICAibGljZW5zZSI6ICJPcmlnaW5hbCBsZXNzb24gdGV4dDogQ0MgQlkgNC4wLiBMaW5rZWQgcmVmZXJlbmNlIHJldGFpbnMgaXRzIG93biBsaWNlbnNlLiIsCiAgImNvbmNlcHRzIjogWwogICAgIkJvdW5kYXJ5IHJ1bGVzIiwKICAgICJGaXJzdCBhcnJpdmFsIiwKICAgICJGaW5pdGUgaG9yaXpvbnMiLAogICAgIkV2ZW50dWFsIG91dGNvbWVzIiwKICAgICJFeHBlY3RlZCBzdG9wcGluZyB0aW1lIiwKICAgICJNb2RlbCBsaW1pdHMiCiAgXSwKICAiaXRlbXMiOiBbCiAgICB7CiAgICAgICJpZCI6ICJib3VuZGFyeS1zdGFydCIsCiAgICAgICJjb25jZXB0IjogIkJvdW5kYXJ5IHJ1bGVzIiwKICAgICAgInByZXJlcXVpc2l0ZXMiOiBbXSwKICAgICAgInByb21wdCI6ICJBIHdhbGsgc3RhcnRzIGF0IHRoZSByaWdodCBlbmRwb2ludCBOLiBUIGlzIHRoZSBmaXJzdCB0aW1lIGVpdGhlciBlbmRwb2ludCBpcyByZWFjaGVkLiBXaGF0IGlzIFQ/IiwKICAgICAgIm9wdGlvbnMiOiBbCiAgICAgICAgIjA6IHRoZSBzdGFydGluZyBwb3NpdGlvbiBhbHJlYWR5IG1lZXRzIHRoZSBzdG9wcGluZyBjb25kaXRpb24uIiwKICAgICAgICAiMTogYSBzdGVwIGlzIGFsd2F5cyByZXF1aXJlZC4iLAogICAgICAgICJOOiB0aGUgZW5kcG9pbnQgbGFiZWwgaXMgdGhlIGVsYXBzZWQgdGltZS4iLAogICAgICAgICJJdCBkZXBlbmRzIG9uIHRoZSByaWdodC1zdGVwIHByb2JhYmlsaXR5LiIKICAgICAgXSwKICAgICAgImFuc3dlciI6IDAsCiAgICAgICJleHBsYW5hdGlvbiI6ICJUaGUgaW5pdGlhbCBzdGF0ZSBpcyBvYnNlcnZlZCBhdCB0aW1lIDAuIEFic29yYmluZyBtZWFucyB0aGF0IHRoZSBlbmRwb2ludCByZXRhaW5zIGl0cyBwcm9iYWJpbGl0eSBtYXNzIG9uIGxhdGVyIHN0ZXBzOyBpdCBkb2VzIG5vdCBwb3N0cG9uZSB0aGUgZmlyc3QgaGl0LiIsCiAgICAgICJ0cmFuc2ZlciI6ICJDb21wYXJlIGEgZmlyc3QgdmlzaXQgYXQgdGltZSAwIHdpdGggcmVtYWluaW5nIGF0IHRoZSBzYW1lIHN0YXRlIGF0IHRpbWUgMS4iCiAgICB9LAogICAgewogICAgICAiaWQiOiAiY29uZGl0aW9uYWwtc3RlcCIsCiAgICAgICJjb25jZXB0IjogIkJvdW5kYXJ5IHJ1bGVzIiwKICAgICAgInByZXJlcXVpc2l0ZXMiOiBbXSwKICAgICAgInByb21wdCI6ICJBdCBhbiBpbnRlcmlvciBzdGF0ZSBqLCB0aGUgd2FsayBtb3ZlcyByaWdodCB3aXRoIHByb2JhYmlsaXR5IDIvMy4gSWYgdGhlIGN1cnJlbnQgcHJvYmFiaWxpdHkgbWFzcyBhdCBqIGlzIDMvOCwgaG93IG11Y2ggbWFzcyBkb2VzIHRoYXQgcmlnaHQgZWRnZSB0cmFuc2Zlcj8iLAogICAgICAib3B0aW9ucyI6IFsKICAgICAgICAiMi8zIiwKICAgICAgICAiMy84IiwKICAgICAgICAiMS80IiwKICAgICAgICAiMSIKICAgICAgXSwKICAgICAgImFuc3dlciI6IDIsCiAgICAgICJleHBsYW5hdGlvbiI6ICJUcmFuc2ZlcnJlZCBtYXNzIGlzIGN1cnJlbnQgbWFzcyB0aW1lcyB0aGUgY29uZGl0aW9uYWwgdHJhbnNpdGlvbiBwcm9iYWJpbGl0eTogKDMvOCkoMi8zKT0xLzQuIFRoZSBlZGdlIHByb2JhYmlsaXR5IGFsb25lIGlzIG5vdCB0aGUgbmV4dCBzdGF0ZSdzIHRvdGFsIG1hc3MuIiwKICAgICAgInRyYW5zZmVyIjogIkEgZGVzdGluYXRpb24gY2FuIHJlY2VpdmUgbWFzcyBmcm9tIHNldmVyYWwgc291cmNlcy4gSG93IHdvdWxkIHlvdSBjb21iaW5lIHRob3NlIGNvbnRyaWJ1dGlvbnM/IgogICAgfSwKICAgIHsKICAgICAgImlkIjogImZpcnN0LXZlcnN1cy1yZXRhaW5lZCIsCiAgICAgICJjb25jZXB0IjogIkZpcnN0IGFycml2YWwiLAogICAgICAicHJlcmVxdWlzaXRlcyI6IFsKICAgICAgICAiQm91bmRhcnkgcnVsZXMiCiAgICAgIF0sCiAgICAgICJwcm9tcHQiOiAiRm9yIGEgZmFpciB3YWxrIG9uIDAsMSwyLDMgc3RhcnRpbmcgYXQgMSwgbGVmdCBhYnNvcnB0aW9uIGlzIDEvMiBhdCBzdGVwIDIgYW5kIDUvOCBhdCBzdGVwIDMuIFdoYXQgaXMgdGhlIHByb2JhYmlsaXR5IG9mIGZpcnN0IHJlYWNoaW5nIDAgYXQgc3RlcCAzPyIsCiAgICAgICJvcHRpb25zIjogWwogICAgICAgICI1LzgiLAogICAgICAgICIxLzgiLAogICAgICAgICIxLzIiLAogICAgICAgICIwIgogICAgICBdLAogICAgICAiYW5zd2VyIjogMSwKICAgICAgImV4cGxhbmF0aW9uIjogIk5ldyBhcnJpdmFscyBhcmUgdGhlIGluY3JlYXNlIGluIGN1bXVsYXRpdmUgbGVmdCBhYnNvcnB0aW9uOiA1LzjiiJIxLzI9MS84LiBUaGUgbWFzcyBhbHJlYWR5IGF0IDAgcmVtYWlucyB0aGVyZSBidXQgaXMgbm90IGEgbmV3IGFycml2YWwuIiwKICAgICAgInRyYW5zZmVyIjogIkNoZWNrIHRoYXQgYWRkaW5nIGZpcnN0IGFycml2YWxzIGZyb20gdGltZSAwIHRocm91Z2ggYSBjaG9zZW4gc3RlcCByZXByb2R1Y2VzIGN1bXVsYXRpdmUgYWJzb3JwdGlvbi4iCiAgICB9LAogICAgewogICAgICAiaWQiOiAiZmlyc3QtcmlnaHQiLAogICAgICAiY29uY2VwdCI6ICJGaXJzdCBhcnJpdmFsIiwKICAgICAgInByZXJlcXVpc2l0ZXMiOiBbCiAgICAgICAgIkJvdW5kYXJ5IHJ1bGVzIgogICAgICBdLAogICAgICAicHJvbXB0IjogIkZvciB0aGF0IHNhbWUgZmFpciB3YWxrIHN0YXJ0aW5nIGF0IDEsIHdoYXQgaXMgdGhlIHByb2JhYmlsaXR5IG9mIGZpcnN0IHJlYWNoaW5nIGVuZHBvaW50IDMgYXQgc3RlcCAyPyIsCiAgICAgICJvcHRpb25zIjogWwogICAgICAgICIxLzIiLAogICAgICAgICIxLzMiLAogICAgICAgICIwIiwKICAgICAgICAiMS80IgogICAgICBdLAogICAgICAiYW5zd2VyIjogMywKICAgICAgImV4cGxhbmF0aW9uIjogIk9ubHkgdHdvIHJpZ2h0IG1vdmVzIHJlYWNoIDMgaW4gdHdvIHN0ZXBzLCB3aXRoIHByb2JhYmlsaXR5ICgxLzIpKDEvMik9MS80LiBUaGlzIGlzIGFuIGV4YWN0LXN0ZXAgZXZlbnQ7IGV2ZW50dWFsIHJpZ2h0IGFic29ycHRpb24gaXMgYSBkaWZmZXJlbnQgcXVhbnRpdHkuIiwKICAgICAgInRyYW5zZmVyIjogIldoeSBjYW4gdGhlIGV2ZW50dWFsIHByb2JhYmlsaXR5IGV4Y2VlZCB0aGUgcHJvYmFiaWxpdHkgb2YgYXJyaXZpbmcgb24gb25lIHBhcnRpY3VsYXIgc3RlcD8iCiAgICB9LAogICAgewogICAgICAiaWQiOiAic3Vydml2YWwtdHdvIiwKICAgICAgImNvbmNlcHQiOiAiRmluaXRlIGhvcml6b25zIiwKICAgICAgInByZXJlcXVpc2l0ZXMiOiBbCiAgICAgICAgIkZpcnN0IGFycml2YWwiCiAgICAgIF0sCiAgICAgICJwcm9tcHQiOiAiQXQgc3RlcCAyIG9mIHRoZSBmYWlyIDAuLjMgd2FsayBzdGFydGluZyBhdCAxLCBjdW11bGF0aXZlIGxlZnQgYWJzb3JwdGlvbiBpcyAxLzIgYW5kIHJpZ2h0IGFic29ycHRpb24gaXMgMS80LiBXaGF0IGlzIFAoVD4yKT8iLAogICAgICAib3B0aW9ucyI6IFsKICAgICAgICAiMS80IiwKICAgICAgICAiMy80IiwKICAgICAgICAiMS8yIiwKICAgICAgICAiMCIKICAgICAgXSwKICAgICAgImFuc3dlciI6IDAsCiAgICAgICJleHBsYW5hdGlvbiI6ICJTdXJ2aXZhbCBpcyBwcm9iYWJpbGl0eSBzdGlsbCBhdCBhbiBpbnRlcmlvciBzdGF0ZTogMeKIkjEvMuKIkjEvND0xLzQuIEN1bXVsYXRpdmUgYWJzb3JwdGlvbiBhbmQgc3Vydml2YWwgcGFydGl0aW9uIHRoZSBwcm9iYWJpbGl0eSBtYXNzLiIsCiAgICAgICJ0cmFuc2ZlciI6ICJVc2UgdGhlIGNvbXBsZXRlIGRpc3RyaWJ1dGlvbiB0byBjaGVjayB0aGlzIGNvbXBsZW1lbnQgd2l0aG91dCByZWx5aW5nIG9uIGEgY2hhcnQuIgogICAgfSwKICAgIHsKICAgICAgImlkIjogInplcm8taG9yaXpvbiIsCiAgICAgICJjb25jZXB0IjogIkZpbml0ZSBob3Jpem9ucyIsCiAgICAgICJwcmVyZXF1aXNpdGVzIjogWwogICAgICAgICJCb3VuZGFyeSBydWxlcyIKICAgICAgXSwKICAgICAgInByb21wdCI6ICJBbiBpbnRlcmlvciBzdGFydCBpcyBvYnNlcnZlZCBvbmx5IHRocm91Z2ggaG9yaXpvbiBIPTAuIFdoaWNoIHN0YXRlbWVudCBpcyBjb3JyZWN0PyIsCiAgICAgICJvcHRpb25zIjogWwogICAgICAgICJUaGUgd2FsayBoYXMgY2VydGFpbmx5IGJlZW4gYWJzb3JiZWQuIiwKICAgICAgICAiRXZlbnR1YWwgZXhwZWN0ZWQgc3RvcHBpbmcgdGltZSBpcyB6ZXJvLiIsCiAgICAgICAgIkVbbWluKFQsMCldPTAsIHdoaWxlIHN1cnZpdmFsIGF0IHRpbWUgMCBpcyAxLiIsCiAgICAgICAgIlRoZSBpbnB1dCBpcyBpbnZhbGlkIGJlY2F1c2UgYSBob3Jpem9uIG5lZWRzIGEgc3RlcC4iCiAgICAgIF0sCiAgICAgICJhbnN3ZXIiOiAyLAogICAgICAiZXhwbGFuYXRpb24iOiAiVGhlIHRydW5jYXRlZCBvYnNlcnZhdGlvbiBjb250YWlucyBubyB0cmFuc2l0aW9ucy4gQW4gaW50ZXJpb3Igc3RhcnQgaGFzIG5vdCBoaXQgYSBib3VuZGFyeSBhdCB0aW1lIDAsIGJ1dCBtaW4oVCwwKSBpcyBhbHdheXMgemVyby4gVGhpcyBkb2VzIG5vdCBtYWtlIGV2ZW50dWFsIEVbVF0gemVyby4iLAogICAgICAidHJhbnNmZXIiOiAiQ29tcGFyZSB0aGlzIGNhc2Ugd2l0aCBzdGFydGluZyBhdCBhIGJvdW5kYXJ5IGF0IHRpbWUgMC4iCiAgICB9LAogICAgewogICAgICAiaWQiOiAiZmFpci1ldmVudHVhbCIsCiAgICAgICJjb25jZXB0IjogIkV2ZW50dWFsIG91dGNvbWVzIiwKICAgICAgInByZXJlcXVpc2l0ZXMiOiBbCiAgICAgICAgIkJvdW5kYXJ5IHJ1bGVzIgogICAgICBdLAogICAgICAicHJvbXB0IjogIkZvciBhIGZhaXIgd2FsayBvbiBzdGF0ZXMgMC4uNiBzdGFydGluZyBhdCAyLCB3aGF0IGlzIHRoZSBldmVudHVhbCBwcm9iYWJpbGl0eSBvZiBhYnNvcnB0aW9uIGF0IDY/IiwKICAgICAgIm9wdGlvbnMiOiBbCiAgICAgICAgIjEvMiIsCiAgICAgICAgIjEvMyIsCiAgICAgICAgIjIvMyIsCiAgICAgICAgIjEiCiAgICAgIF0sCiAgICAgICJhbnN3ZXIiOiAxLAogICAgICAiZXhwbGFuYXRpb24iOiAiRm9yIGEgZmFpciBmaW5pdGUgd2FsaywgdGhlIHJpZ2h0LWJvdW5kYXJ5IHByb2JhYmlsaXR5IGZyb20gaSBpcyBpL04uIEhlcmUgMi82PTEvMy4gSXQgc2F0aXNmaWVzIGJvdGggYm91bmRhcnkgdmFsdWVzIGFuZCB0aGUgaW50ZXJpb3IgYXZlcmFnaW5nIGVxdWF0aW9uLiIsCiAgICAgICJ0cmFuc2ZlciI6ICJQcmVkaWN0IHRoZSByZXN1bHQgZnJvbSBzdGFydCA0IHdpdGhvdXQgY29tcHV0aW5nIGV2ZXJ5IGZpbml0ZSBmcmFtZS4iCiAgICB9LAogICAgewogICAgICAiaWQiOiAiYmlhc2VkLWV2ZW50dWFsIiwKICAgICAgImNvbmNlcHQiOiAiRXZlbnR1YWwgb3V0Y29tZXMiLAogICAgICAicHJlcmVxdWlzaXRlcyI6IFsKICAgICAgICAiQm91bmRhcnkgcnVsZXMiCiAgICAgIF0sCiAgICAgICJwcm9tcHQiOiAiRm9yIHN0YXRlcyAwLi40LCBzdGFydCAyIGFuZCByaWdodCBwcm9iYWJpbGl0eSAyLzMsIHRoZSByYXRpbyBxL3AgaXMgMS8yLiBXaGF0IGlzIHRoZSBldmVudHVhbCByaWdodC1ib3VuZGFyeSBwcm9iYWJpbGl0eT8iLAogICAgICAib3B0aW9ucyI6IFsKICAgICAgICAiMS8yIiwKICAgICAgICAiMi8zIiwKICAgICAgICAiMy80IiwKICAgICAgICAiNC81IgogICAgICBdLAogICAgICAiYW5zd2VyIjogMywKICAgICAgImV4cGxhbmF0aW9uIjogIlRoZSBleGFjdCBib3VuZGFyeSBzb2x1dGlvbiBpcyBbMeKIkihxL3ApXmldL1sx4oiSKHEvcCleTl0uIEhlcmUgKDHiiJIxLzQpLygx4oiSMS8xNik9KDMvNCkvKDE1LzE2KT00LzUuIFRoZSBwcm9iYWJpbGl0eSBvZiBvbmUgcmlnaHQgc3RlcCBpcyBub3QgdGhlIGV2ZW50dWFsIGVuZHBvaW50IHByb2JhYmlsaXR5LiIsCiAgICAgICJ0cmFuc2ZlciI6ICJSZXZlcnNlIHRoZSBiaWFzIGFuZCBjb21wYXJlIHRoZSB0d28gZW5kcG9pbnQgcHJvYmFiaWxpdGllcyBmcm9tIHRoZSBzeW1tZXRyaWMgc3RhcnRpbmcgc3RhdGUuIgogICAgfSwKICAgIHsKICAgICAgImlkIjogImZhaXItZHVyYXRpb24iLAogICAgICAiY29uY2VwdCI6ICJFeHBlY3RlZCBzdG9wcGluZyB0aW1lIiwKICAgICAgInByZXJlcXVpc2l0ZXMiOiBbCiAgICAgICAgIkV2ZW50dWFsIG91dGNvbWVzIgogICAgICBdLAogICAgICAicHJvbXB0IjogIkZvciBhIGZhaXIgd2FsayBvbiBzdGF0ZXMgMC4uNiBzdGFydGluZyBhdCAzLCB3aGF0IGlzIEVbVF0/IiwKICAgICAgIm9wdGlvbnMiOiBbCiAgICAgICAgIjMgc3RlcHMiLAogICAgICAgICI2IHN0ZXBzIiwKICAgICAgICAiOSBzdGVwcyIsCiAgICAgICAgIjEyIHN0ZXBzIgogICAgICBdLAogICAgICAiYW5zd2VyIjogMiwKICAgICAgImV4cGxhbmF0aW9uIjogIkZvciBhIGZhaXIgZmluaXRlIHdhbGssIEVbVF09aShO4oiSaSkuIFRodXMgMyg24oiSMyk9OSBzdGVwcy4gU29tZSBwYXRocyBhcmUgc2hvcnRlciBhbmQgc29tZSBsb25nZXI7IGFuIGV4cGVjdGF0aW9uIGlzIG5vdCBhIGd1YXJhbnRlZWQgc3RvcHBpbmcgZGVhZGxpbmUuIiwKICAgICAgInRyYW5zZmVyIjogIkNvbXBhcmUgc3RhcnRzIDEgYW5kIDMuIFdoaWNoIGhhcyB0aGUgZ3JlYXRlciBleHBlY3RlZCBzdG9wcGluZyB0aW1lLCBhbmQgd2h5PyIKICAgIH0sCiAgICB7CiAgICAgICJpZCI6ICJ0cnVuY2F0ZWQtdGFpbCIsCiAgICAgICJjb25jZXB0IjogIkV4cGVjdGVkIHN0b3BwaW5nIHRpbWUiLAogICAgICAicHJlcmVxdWlzaXRlcyI6IFsKICAgICAgICAiRmluaXRlIGhvcml6b25zIiwKICAgICAgICAiRXZlbnR1YWwgb3V0Y29tZXMiCiAgICAgIF0sCiAgICAgICJwcm9tcHQiOiAiRm9yIHRoZSBmYWlyIDAuLjMgd2FsayBzdGFydGluZyBhdCAxLCBzdXJ2aXZhbCBhdCB0aW1lcyAwIGFuZCAxIGlzIDEgYW5kIDEvMiwgYW5kIEVbVF09Mi4gV2hhdCBhcmUgRVttaW4oVCwyKV0gYW5kIEVbVF3iiJJFW21pbihULDIpXT8iLAogICAgICAib3B0aW9ucyI6IFsKICAgICAgICAiMy8yIGFuZCAxLzIiLAogICAgICAgICIxLzIgYW5kIDMvMiIsCiAgICAgICAgIjIgYW5kIDAiLAogICAgICAgICIxIGFuZCAxIgogICAgICBdLAogICAgICAiYW5zd2VyIjogMCwKICAgICAgImV4cGxhbmF0aW9uIjogIlRoZSB0cnVuY2F0ZWQgZXhwZWN0YXRpb24gaXMgdGhlIHN1cnZpdmFsIHN1bSBiZWZvcmUgdGhlIGhvcml6b246IDErMS8yPTMvMi4gVGhlIHVuY29uZGl0aW9uYWwgZXhwZWN0ZWQgZXhjZXNzIGlzIDLiiJIzLzI9MS8yLiBJdCBpcyBub3QgdGhlIGNvbmRpdGlvbmFsIHJlbWFpbmluZyB0aW1lIGdpdmVuIHN1cnZpdmFsLiIsCiAgICAgICJ0cmFuc2ZlciI6ICJFeHBsYWluIHdoeSBzdG9wcGluZyBhIHBsb3QgYXQgc3RlcCAyIGNhbm5vdCBlc3RhYmxpc2ggdGhhdCBldmVyeSBwYXRoIGhhcyBlbmRlZC4iCiAgICB9LAogICAgewogICAgICAiaWQiOiAiZGV0ZXJtaW5pc3RpYyIsCiAgICAgICJjb25jZXB0IjogIkV4cGVjdGVkIHN0b3BwaW5nIHRpbWUiLAogICAgICAicHJlcmVxdWlzaXRlcyI6IFsKICAgICAgICAiQm91bmRhcnkgcnVsZXMiCiAgICAgIF0sCiAgICAgICJwcm9tcHQiOiAiQSB3YWxrIG9uIDAuLjYgc3RhcnRzIGF0IDQgYW5kIGhhcyByaWdodCBwcm9iYWJpbGl0eSAwLiBXaGF0IGhhcHBlbnM/IiwKICAgICAgIm9wdGlvbnMiOiBbCiAgICAgICAgIkl0IG5ldmVyIHN0b3BzIGJlY2F1c2UgcmlnaHQgbW92ZXMgYXJlIGltcG9zc2libGUuIiwKICAgICAgICAiSXQgcmVhY2hlcyAwIGFmdGVyIGV4YWN0bHkgNCBzdGVwcy4iLAogICAgICAgICJJdCByZWFjaGVzIDYgYWZ0ZXIgZXhhY3RseSAyIHN0ZXBzLiIsCiAgICAgICAgIkl0IG11c3QgdXNlIHRoZSBmYWlyLXdhbGsgZXhwZWN0YXRpb24gNCg24oiSNCkuIgogICAgICBdLAogICAgICAiYW5zd2VyIjogMSwKICAgICAgImV4cGxhbmF0aW9uIjogIkV2ZXJ5IG1vdmUgZ29lcyBsZWZ0LiBUaGUgcGF0aCBpcyA0LDMsMiwxLDAsIHNvIFQ9NCBleGFjdGx5IGFuZCByaWdodCBhYnNvcnB0aW9uIGhhcyBwcm9iYWJpbGl0eSB6ZXJvLiBEZXRlcm1pbmlzdGljIGVuZHBvaW50IGNhc2VzIG11c3QgYmUgaGFuZGxlZCB3aXRob3V0IGRpdmlkaW5nIGJ5IGEgemVybyBwcm9iYWJpbGl0eS4iLAogICAgICAidHJhbnNmZXIiOiAiQ2hhbmdlIG9ubHkgdGhlIHN0YXJ0IHRvIDAuIFdoeSBkb2VzIHRoZSBzdG9wcGluZyB0aW1lIGJlY29tZSB6ZXJvIHJhdGhlciB0aGFuIGZvdXI/IgogICAgfSwKICAgIHsKICAgICAgImlkIjogInNjb3BlIiwKICAgICAgImNvbmNlcHQiOiAiTW9kZWwgbGltaXRzIiwKICAgICAgInByZXJlcXVpc2l0ZXMiOiBbCiAgICAgICAgIkZpbml0ZSBob3Jpem9ucyIsCiAgICAgICAgIkV4cGVjdGVkIHN0b3BwaW5nIHRpbWUiCiAgICAgIF0sCiAgICAgICJwcm9tcHQiOiAiV2hpY2ggY29uY2x1c2lvbiBpcyBqdXN0aWZpZWQgYnkgdGhpcyBsYWI/IiwKICAgICAgIm9wdGlvbnMiOiBbCiAgICAgICAgIlRoZSBjaG9zZW4gaG9yaXpvbiBndWFyYW50ZWVzIGFic29ycHRpb24gZm9yIGV2ZXJ5IHJhbmRvbSBwYXRoLiIsCiAgICAgICAgIkEgZmluaXRlIGRpc3RyaWJ1dGlvbiBwcmVkaWN0cyB0aGUgbmV4dCBvdXRjb21lIG9mIGEgcmVhbCBwZXJzb24gb3IgbWFya2V0LiIsCiAgICAgICAgIkluY3JlYXNpbmcgdGhlIGhvcml6b24gY2hhbmdlcyB0aGUgZXZlbnR1YWwgYm91bmRhcnkgZXF1YXRpb25zLiIsCiAgICAgICAgIkV4YWN0IHJlc3VsdHMgZGVzY3JpYmUgdGhlIHNwZWNpZmllZCBmaXhlZC1wcm9iYWJpbGl0eSB3YWxrOyB0aGV5IGRvIG5vdCB2YWxpZGF0ZSBhIHJlYWwtd29ybGQgZm9yZWNhc3QuIgogICAgICBdLAogICAgICAiYW5zd2VyIjogMywKICAgICAgImV4cGxhbmF0aW9uIjogIlRoZSBsYWIgYW5hbHl6ZXMgYSBmaW5pdGUsIHRpbWUtaG9tb2dlbmVvdXMgbW9kZWwgd2l0aCBpbmRlcGVuZGVudCBkaXJlY3Rpb25zIGFuZCBmaXhlZCBhYnNvcmJpbmcgYm91bmRhcmllcy4gRXhhY3QgYXJpdGhtZXRpYyByZW1vdmVzIHJvdW5kaW5nIGZyb20gdGhhdCBtb2RlbDsgaXQgZG9lcyBub3QgZXN0YWJsaXNoIHRoYXQgYSByZWFsIHByb2Nlc3MgZm9sbG93cyBpdHMgYXNzdW1wdGlvbnMuIiwKICAgICAgInRyYW5zZmVyIjogIk5hbWUgb25lIGFzc3VtcHRpb24geW91IHdvdWxkIG5lZWQgdG8gaW52ZXN0aWdhdGUgYmVmb3JlIGFwcGx5aW5nIGEgcmFuZG9tLXdhbGsgbW9kZWwgdG8gb2JzZXJ2ZWQgZGF0YS4iCiAgICB9CiAgXQp9Cg==</script>
+<script id="guide-bytes" type="application/octet-stream">IyBBYnNvcmJpbmcgcmFuZG9tIHdhbGtzOiBhcnJpdmFsIGFuZCBzdG9wcGluZwoKTW92ZSBhIGh5cG90aGV0aWNhbCB3YWxrZXIgYWxvbmcgc3RhdGVzIDAgdGhyb3VnaCBOLiBFdmVyeSBpbnRlcmlvciBzdGVwIGdvZXMgcmlnaHQgd2l0aCBwcm9iYWJpbGl0eSBwPWEvYiBhbmQgbGVmdCB3aXRoIHE9MeKIknAuIEF0IDAgb3IgTiB0aGUgd2Fsa2VyIHN0YXlzIHRoZXJlLiBUIGlzIHRoZSBmaXJzdCB0aW1lIGFuIGVuZHBvaW50IGlzIHJlYWNoZWQsIGNvdW50aW5nIHRoZSBzdGFydGluZyBwb3NpdGlvbiBhcyB0aW1lIDAuCgpUaGlzIGlzIGEgZmluaXRlLCB0aW1lLWhvbW9nZW5lb3VzIHByb2JhYmlsaXR5IG1vZGVsLCBub3QgYSBnYW1ibGluZyBzdHJhdGVneSBvciBhIHJlYWwtd29ybGQgZm9yZWNhc3QuIERpcmVjdGlvbnMgaGF2ZSB0aGUgc2FtZSBwcm9iYWJpbGl0aWVzIGF0IGVhY2ggc3RlcC4gVGhlcmUgaXMgbm8gc2ltdWxhdGVkIHNhbXBsZSBwYXRoIG9yIHJhbmRvbSBzZWVkOiB0aGUgbGFiIGNvbXB1dGVzIHRoZSBlbnRpcmUgZGlzdHJpYnV0aW9uIGV4YWN0bHkuCgojIyBPcGVuIGFuZCB1c2UgdGhlIGxhYgoKT3BlbiBhYnNvcmJpbmctd2Fsay1sYWIuaHRtbCBkaXJlY3RseSBpbiBhIGJyb3dzZXIuIEl0IG5lZWRzIG5vIG5ldHdvcmsgb3IgaW5zdGFsbGF0aW9uLiBTZXQgdGhlIGZpdmUgbGFiZWxlZCBpbnRlZ2VyIGlucHV0cyBhbmQgc2VsZWN0IEFwcGx5LiBGaXJzdCwgUHJldmlvdXMsIE5leHQsIExhc3QgYW5kIHRoZSBzZWxlY3RlZC1zdGVwIGNvbnRyb2wgbmF2aWdhdGUgdGhlIHNhbWUgYXBwbGllZCBleHBlcmltZW50LiBFdmVyeSBleGFjdCBmcmFjdGlvbiByZW1haW5zIHZpc2libGUgaW4gdGhlIHRleHQgdGFibGVzOyB0aGUgYmFycyBhcmUgYXBwcm94aW1hdGUgdmlzdWFsIGFpZHMuCgpDaGFuZ2luZyBhbnkgaW5wdXQgcmV0aXJlcyB0aGUgcHJldmlvdXMgcmVzdWx0IGFuZCBkaXNhYmxlcyBEb3dubG9hZCBleHBlcmltZW50IHVudGlsIGEgdmFsaWQgQXBwbHkuIFByZXNldHMgYXBwbHkgYSBuYW1lZCBleGFtcGxlIGF0IHN0ZXAgMC4gVGhlIGV4cGVyaW1lbnQgSlNPTiBpbmNsdWRlcyBhbGwgZnJhbWVzLCBhbGwgdHJhbnNpdGlvbiBjb250cmlidXRpb25zLCB0aGUgb3JpZ2luYWwgYXBwbGllZCBpbnB1dHMgYW5kIHRoZSBzZWxlY3RlZCBzdGVwLiBFbnRlcmluZyA0LzYgcHJlc2VydmVzIDQgYW5kIDYgaW4gdGhvc2UgaW5wdXRzIHdoaWxlIGNhbGN1bGF0ZWQgcHJvYmFiaWxpdGllcyB1c2UgdGhlIHJlZHVjZWQgZnJhY3Rpb24gMi8zLgoKTiBpcyAyLi44LCB0aGUgc3RhcnQgaXMgMC4uTiwgYiBpcyAxLi4xMiwgYSBpcyAwLi5iLCBhbmQgdGhlIGhvcml6b24gSCBpcyAwLi4zMC4gWmVybyBhbmQgdW5pdCBwcm9iYWJpbGl0aWVzLCBlbmRwb2ludCBzdGFydHMgYW5kIGEgemVybyBob3Jpem9uIGFyZSBhbGwgbWVhbmluZ2Z1bC4gSW52YWxpZCB2YWx1ZXMgYXJlIHJlZnVzZWQ7IHRoZXkgYXJlIG5vdCBzaWxlbnRseSBjbGlwcGVkLgoKRG93bmxvYWQgY291cnNlIGFsd2F5cyBzYXZlcyB0aGUgc2FtZSBvcmlnaW5hbCB0d2VsdmUtcXVlc3Rpb24gZGVjay4gSW4gdGhlIGNvbXBhbmlvbiBwYWNrYWdlLCBvcGVuIGRlbW8uaHRtbCwgY2hvb3NlIHRoYXQgYWN0dWFsIGRvd25sb2FkZWQgSlNPTiBmaWxlLCBpbnNwZWN0IHRoZSBwcmV2aWV3LCBhbmQgc2VsZWN0IFN0YXJ0IHRoaXMgZGVjay4gQ29tcGxldGUgdGhlIGxlc3NvbiwgcmV2aWV3IGFueSBtaXNzZWQgY29ubmVjdGlvbnMsIHByYWN0aWNlIHRoZW0gYW5kIGRvd25sb2FkIHN0dWR5IG5vdGVzLiBUaGUgb3JkaW5hcnkgUmVjYWxsV2VhdmUgbGVhcm5pbmcgbW9kZWwgaXMgdW5jaGFuZ2VkOyBpdHMgZXN0aW1hdGVzIGFyZSBpbGx1c3RyYXRpdmUsIG5vdCBhbiBhc3Nlc3NtZW50IG9mIGFiaWxpdHkuIERvd25sb2FkIGd1aWRlIHNhdmVzIHRoaXMgdGV4dC4gTm90aGluZyBpcyBzYXZlZCBhdXRvbWF0aWNhbGx5IGFuZCB0aGUgbGFiIHVzZXMgbm8gYnJvd3NlciBzdG9yYWdlLgoKIyMgQSBzaG9ydCB3YWxrIHdvcmtlZCBleGFjdGx5CgpUYWtlIE49Mywgc3RhcnQgaT0xIGFuZCBwPXE9MS8yLgoKfCBTdGVwIHwgRGlzdHJpYnV0aW9uIG92ZXIgWzAsMSwyLDNdIHwgRmlyc3QgbGVmdCB8IEZpcnN0IHJpZ2h0IHwgU3Vydml2YWwgfAp8IC0tLSB8IC0tLSB8IC0tLSB8IC0tLSB8IC0tLSB8CnwgMCB8IFswLDEsMCwwXSB8IDAgfCAwIHwgMSB8CnwgMSB8IFsxLzIsMCwxLzIsMF0gfCAxLzIgfCAwIHwgMS8yIHwKfCAyIHwgWzEvMiwxLzQsMCwxLzRdIHwgMCB8IDEvNCB8IDEvNCB8CnwgMyB8IFs1LzgsMCwxLzgsMS80XSB8IDEvOCB8IDAgfCAxLzggfAoKQXQgc3RlcCAzLCB0aGUgbGVmdCBlbmRwb2ludCBjb250YWlucyA1Lzggb2YgdGhlIHByb2JhYmlsaXR5IG1hc3MsIGJ1dCBvbmx5IDEvOCBhcnJpdmVkIG9uIHRoYXQgc3RlcC4gVGhlIG90aGVyIDEvMiB3YXMgYWxyZWFkeSBhYnNvcmJlZC4gVGhpcyBkaXN0aW5jdGlvbiBpcyB3aHkgdGhlIGxhYiByZXRhaW5zIGJvdGggZmlyc3QtYXJyaXZhbCBhbmQgY3VtdWxhdGl2ZS1hYnNvcnB0aW9uIGNvbHVtbnMuCgpGb3IgZWFjaCBpbnRlcmlvciBzb3VyY2UgaiwgbXVsdGlwbHkgaXRzIGN1cnJlbnQgbWFzcyBieSBxIGZvciBlZGdlIGrihpJq4oiSMSBhbmQgYnkgcCBmb3IgZWRnZSBq4oaSaisxLiBFYWNoIGVuZHBvaW50IHRyYW5zZmVycyBhbGwgb2YgaXRzIG1hc3MgdG8gaXRzZWxmLiBBZGQgaW5jb21pbmcgY29udHJpYnV0aW9ucyBhdCBlYWNoIGRlc3RpbmF0aW9uIHRvIHJlY292ZXIgdGhlIG5leHQgZGlzdHJpYnV0aW9uLiBUaGUgY29udHJpYnV0aW9uIHRhYmxlIHJldGFpbnMgemVybyBlZGdlcyB0b28sIGluIHNvdXJjZSBvcmRlciwgbGVmdCBiZWZvcmUgcmlnaHQuCgpUaGUgY29tcGxldGUgZGlzdHJpYnV0aW9uIGFsd2F5cyB0b3RhbHMgb25lLiBDdW11bGF0aXZlIGxlZnQgYWJzb3JwdGlvbiBwbHVzIGN1bXVsYXRpdmUgcmlnaHQgYWJzb3JwdGlvbiBwbHVzIHN1cnZpdmFsIGVxdWFscyBvbmUuIFN1bW1pbmcgZmlyc3QgYXJyaXZhbHMgYXQgZWFjaCBlbmRwb2ludCB0aHJvdWdoIGEgc3RlcCByZWNvdmVycyBpdHMgY3VtdWxhdGl2ZSBhYnNvcnB0aW9uLiBBdCB0aW1lIDAsIGFuIGVuZHBvaW50IHN0YXJ0IGNvdW50cyBhcyBhIGZpcnN0IGFycml2YWwgd2l0aCBwcm9iYWJpbGl0eSBvbmU7IGxhdGVyIHJldGFpbmVkIGVuZHBvaW50IG1hc3MgZG9lcyBub3QgY291bnQgYWdhaW4uCgojIyBGaW5pdGUgaG9yaXpvbiBpcyBub3QgZXZlbnR1YWwgYWJzb3JwdGlvbgoKVGhlIGxhYiBzaG93cyBzdXJ2aXZhbCBQKFQ+dCksIHRoZSBwcm9iYWJpbGl0eSBzdGlsbCBhdCBhbiBpbnRlcmlvciBzdGF0ZSBhZnRlciBzdGVwIHQuIEluIHRoZSB3b3JrZWQgZXhhbXBsZSBpdCBpcyAxLCAxLzIsIDEvNCBhbmQgMS84IGF0IHN0ZXBzIDAuLjMuIEEgdmlzaWJsZSBub256ZXJvIHRhaWwgZG9lcyBub3QgbWVhbiBhYnNvcnB0aW9uIGlzIGltcG9zc2libGUuIEEgc2hvcnQgcGxvdCBpcyBub3QgYSBzdG9wcGluZyBndWFyYW50ZWUuCgpGb3IgYW4gaW50ZWdlciBob3Jpem9uIEg6CgogICAgRVttaW4oVCxIKV0gPSBzdW0gb2YgUChUPnQpLCBmb3IgdD0wLC4uLixI4oiSMS4KCkZvciB0aGUgd29ya2VkIGV4YW1wbGUgYXQgSD0yLCB0aGlzIGlzIDErMS8yPTMvMi4gSXRzIGV2ZW50dWFsIEVbVF0gaXMgMiwgc28gdGhlIHVuY29uZGl0aW9uYWwgZXhwZWN0ZWQgZXhjZXNzIEVbVF3iiJJFW21pbihULDIpXSBpcyAxLzIuIFRoZSBleGNlc3MgYXZlcmFnZXMgb3ZlciBhbGwgcGF0aHMuIEl0IGlzIG5vdCBFW1TiiJJIIHwgVD5IXSwgd2hpY2ggd291bGQgY29uZGl0aW9uIG9uIHN1cnZpdmFsLiBBdCBIPTAgdGhlIHRydW5jYXRlZCBzdW0gaXMgZW1wdHkgYW5kIGVxdWFscyB6ZXJvLgoKIyMgRXZlbnR1YWwgYm91bmRhcnkgcHJvYmFiaWxpdGllcwoKTGV0IHVfaSBiZSB0aGUgZXZlbnR1YWwgcHJvYmFiaWxpdHkgb2YgcmVhY2hpbmcgTiBmcm9tIGkuIFRoZSBib3VuZGFyaWVzIGdpdmUgdV8wPTAgYW5kIHVfTj0xLiBDb25kaXRpb25pbmcgb24gdGhlIGZpcnN0IHN0ZXAgZ2l2ZXMKCiAgICB1X2kgPSBwIHVfKGkrMSkgKyBxIHVfKGniiJIxKS4KCkZvciBhIGZhaXIgd2FsaywgdV9pPWkvTi4gT24gMC4uNiBmcm9tIDIsIHRoZSByaWdodCBwcm9iYWJpbGl0eSBpcyAxLzMuIEEgbWlkcG9pbnQgc3RhcnQgaGFzIGVxdWFsIGVuZHBvaW50IHByb2JhYmlsaXRpZXMsIGJ1dCBiZWluZyBjbG9zZXIgdG8gb25lIGJvdW5kYXJ5IGNoYW5nZXMgdGhlIHJlc3VsdC4KCkZvciAwPHA8MSBhbmQgcOKJoDEvMiwgcHV0IHI9cS9wOgoKICAgIHVfaSA9ICgx4oiScl5pKS8oMeKIknJeTikuCgpGb3IgTj00LCBpPTIgYW5kIHA9Mi8zLCByPTEvMiBhbmQgdV8yPSgzLzQpLygxNS8xNik9NC81LiBMZWZ0IGFic29ycHRpb24gaXMgMS81LiBSZXZlcnNlIHRoZSBiaWFzIGZyb20gdGhlIHNhbWUgbWlkcG9pbnQgYW5kIHRob3NlIHByb2JhYmlsaXRpZXMgc3dhcC4gVGhlIHByb2JhYmlsaXR5IG9mIG9uZSByaWdodCBzdGVwLCAyLzMsIGlzIG5vdCB0aGUgZXZlbnR1YWwgcmlnaHQtYm91bmRhcnkgcHJvYmFiaWxpdHksIDQvNS4KCiMjIEV4cGVjdGVkIHN0b3BwaW5nIHRpbWUKCkxldCBlX2k9RVtUXSBmcm9tIGkuIFRoZSBib3VuZGFyaWVzIGdpdmUgZV8wPWVfTj0wLiBFdmVyeSBpbnRlcmlvciBwYXRoIGZpcnN0IHNwZW5kcyBvbmUgc3RlcDoKCiAgICBlX2kgPSAxICsgcCBlXyhpKzEpICsgcSBlXyhp4oiSMSkuCgpGb3IgYSBmYWlyIHdhbGssIGVfaT1pKE7iiJJpKS4gT24gMC4uNiBmcm9tIDMgdGhpcyBpcyA5IHN0ZXBzLiBJdCBpcyBhbiBhdmVyYWdlIG92ZXIgYWxsIHBvc3NpYmxlIHBhdGggbGVuZ3Rocywgbm90IGEgZGVhZGxpbmUuCgpGb3IgMDxwPDEgYW5kIHDiiaAxLzI6CgogICAgZV9pID0gKGniiJJOIHVfaSkvKHHiiJJwKS4KCkluIHRoZSBiaWFzZWQgTj00IG1pZHBvaW50IGV4YW1wbGUgdGhpcyBpcyAoMuKIkjTCtzQvNSkvKDEvM+KIkjIvMyk9MTgvNS4gVGhlIGxhYiBwcm92aWRlcyB1X2kgYW5kIGVfaSBmb3IgZXZlcnkgcG9zc2libGUgc3RhcnRpbmcgc3RhdGUsIG5vdCBqdXN0IHRoZSBhcHBsaWVkIHN0YXJ0LiBDaGVjayB0aGUgYm91bmRhcnkgdmFsdWVzIGFuZCB0aGUgdHdvIHJlY3VycmVuY2VzIGRpcmVjdGx5LgoKV2hlbiBwPTAgZXZlcnkgaW50ZXJpb3Igc3RlcCBpcyBsZWZ0LCBzbyBUPWkgZXhhY3RseS4gV2hlbiBwPTEgZXZlcnkgaW50ZXJpb3Igc3RlcCBpcyByaWdodCwgc28gVD1O4oiSaSBleGFjdGx5LiBFbmRwb2ludCBzdGFydHMgYWx3YXlzIGhhdmUgVD0wIHJlZ2FyZGxlc3Mgb2YgcC4gVGhlc2UgY2FzZXMgYXJlIGV2YWx1YXRlZCBzZXBhcmF0ZWx5OyBubyBkaXZpc2lvbiBieSB6ZXJvIGlzIHVzZWQuCgojIyBBcml0aG1ldGljIGFuZCBsaW1pdGF0aW9ucwoKRXZlcnkgcHJvYmFiaWxpdHkgYW5kIGV4cGVjdGF0aW9uIGlzIGEgcmVkdWNlZCBmcmFjdGlvbiBvZiBhcmJpdHJhcnktcHJlY2lzaW9uIGludGVnZXJzLiBKU09OIHN0b3JlcyBudW1lcmF0b3IgYW5kIGRlbm9taW5hdG9yIGFzIGRlY2ltYWwgc3RyaW5ncyBzbyBpdCBkb2VzIG5vdCBsb3NlIGludGVnZXIgcHJlY2lzaW9uLiBaZXJvIGlzIGFsd2F5cyAwLzEgYW5kIGRlbm9taW5hdG9ycyBhcmUgcG9zaXRpdmUuIERlY2ltYWwgbGFiZWxzIGFuZCBiYXIgd2lkdGhzIGFyZSBvbmx5IHJvdW5kZWQgcHJlc2VudGF0aW9uOyB0aGV5IGRvIG5vdCBkcml2ZSBwcm9wYWdhdGlvbiBvciBkZWNpc2lvbnMuCgpOIGFuZCBIIGFyZSBib3VuZGVkIHRvIGtlZXAgdGhlIGNvbXBsZXRlIHRyYWNlIHJlYWRhYmxlIGFuZCBmYXN0LiBUaGUgZmluaXRlIGhvcml6b24gbGltaXRzIHdoaWNoIGZyYW1lcyBhcmUgZGlzcGxheWVkLCBub3QgdGhlIGV2ZW50dWFsIGVxdWF0aW9ucy4gSW5kZXBlbmRlbmNlLCBmaXhlZCB0cmFuc2l0aW9uIHByb2JhYmlsaXRpZXMgYW5kIGZpeGVkIGJvdW5kYXJpZXMgYXJlIGFzc3VtcHRpb25zIG9mIHRoaXMgdGVhY2hpbmcgbW9kZWw7IGV4YWN0IGFyaXRobWV0aWMgZG9lcyBub3QgdmFsaWRhdGUgdGhlbSBmb3IgYSByZWFsIHByb2Nlc3MuCgpTdGFuZGFyZCBtYXRoZW1hdGljYWwgcmVmZXJlbmNlOiBbTUlUIFJFUy42LTAxMiwgSW50cm9kdWN0aW9uIHRvIFByb2JhYmlsaXR5LCBTcHJpbmcgMjAxOCwgbGVjdHVyZSAyNi45XShodHRwczovL29jdy5taXQuZWR1L2NvdXJzZXMvcmVzLTYtMDEyLWludHJvZHVjdGlvbi10by1wcm9iYWJpbGl0eS1zcHJpbmctMjAxOC9jZGU5MDVhOGNkN2U1MzUyOWM0ZmU5OTliNzA3OTBmYV9OZTJsbUFaSTQtSS5wZGYpLCB3aGljaCBkZXJpdmVzIHRoZSBmaW5pdGUtd2FsayBlbmRwb2ludCBwcm9iYWJpbGl0aWVzIGFuZCBleHBlY3RlZCBzdG9wcGluZyB0aW1lcy4gVGhpcyBsZXNzb24sIGl0cyB3b3JrZWQgZXhhbXBsZXMgYW5kIGl0cyBxdWVzdGlvbnMgYXJlIG9yaWdpbmFsLCBub3QgY29waWVkIGZyb20gdGhlIHJlZmVyZW5jZS4KCk9yaWdpbmFsIGxlc3NvbiB0ZXh0OiBDQyBCWSA0LjAuIFRoZSBsaW5rZWQgcmVmZXJlbmNlIHJldGFpbnMgaXRzIG93biBsaWNlbnNlLgo=</script>
+<script type="module">
+/** Exact finite absorbing walks. All probabilities are hypothetical; no sampling. */
+const WALK_FORMAT = 'recallweave-absorbing-walk/1';
+const fields = ['upper', 'start', 'rightNumerator', 'rightDenominator', 'horizon'];
+function gcd(a, b) { while (b) [a, b] = [b, a % b]; return a < 0n ? -a : a; }
+function fraction(n, d = 1n) {
+  if (d === 0n) throw new Error('An internal denominator cannot be zero.');
+  if (d < 0n) { n = -n; d = -d; }
+  const g = gcd(n, d); return {n: n / g, d: d / g};
+}
+const zero = fraction(0n), one = fraction(1n);
+const integer = n => fraction(BigInt(n));
+const add = (a, b) => fraction(a.n * b.d + b.n * a.d, a.d * b.d);
+const subtract = (a, b) => fraction(a.n * b.d - b.n * a.d, a.d * b.d);
+const multiply = (a, b) => fraction(a.n * b.n, a.d * b.d);
+const divide = (a, b) => fraction(a.n * b.d, a.d * b.n);
+const power = (a, n) => fraction(a.n ** BigInt(n), a.d ** BigInt(n));
+const jsonFraction = a => ({numerator: String(a.n), denominator: String(a.d)});
+
+function validated(input) {
+  if (!input || typeof input !== 'object' || Array.isArray(input)) {
+    throw new Error('Provide one object with the five walk inputs.');
+  }
+  if (Reflect.ownKeys(input).length !== fields.length ||
+      fields.some(key => !Object.hasOwn(input, key))) {
+    throw new Error('Provide exactly upper, start, rightNumerator, rightDenominator and horizon.');
+  }
+  for (const key of fields) {
+    if (typeof input[key] !== 'number' || !Number.isInteger(input[key])) {
+      throw new Error(key + ' must be a finite integer; text and fractions are not accepted.');
+    }
+  }
+  const {upper, start, rightNumerator, rightDenominator, horizon} = input;
+  if (upper < 2 || upper > 8) throw new Error('upper must be from 2 to 8.');
+  if (start < 0 || start > upper) throw new Error('start must be from 0 to upper.');
+  if (rightDenominator < 1 || rightDenominator > 12) throw new Error('rightDenominator must be from 1 to 12.');
+  if (rightNumerator < 0 || rightNumerator > rightDenominator) throw new Error('rightNumerator must be from 0 to rightDenominator.');
+  if (horizon < 0 || horizon > 30) throw new Error('horizon must be from 0 to 30.');
+  return {upper, start, rightNumerator, rightDenominator, horizon};
+}
+
+function eventualFrom(start, upper, p, q) {
+  if (start === 0) return {left: one, right: zero, expectedSteps: zero};
+  if (start === upper) return {left: zero, right: one, expectedSteps: zero};
+  let right, expectedSteps;
+  if (p.n === 0n) { right = zero; expectedSteps = integer(start); }
+  else if (q.n === 0n) { right = one; expectedSteps = integer(upper - start); }
+  else if (p.n === q.n && p.d === q.d) {
+    right = fraction(BigInt(start), BigInt(upper));
+    expectedSteps = integer(start * (upper - start));
+  } else {
+    const ratio = divide(q, p);
+    right = divide(subtract(one, power(ratio, start)), subtract(one, power(ratio, upper)));
+    expectedSteps = divide(subtract(integer(start), multiply(integer(upper), right)), subtract(q, p));
+  }
+  return {left: subtract(one, right), right, expectedSteps};
+}
+
+/** Every frame is exact, including zero edges and mass already at a boundary. */
+function analyzeWalk(source) {
+  const input = validated(source);
+  const {upper, start, rightNumerator, rightDenominator, horizon} = input;
+  const p = fraction(BigInt(rightNumerator), BigInt(rightDenominator));
+  const q = subtract(one, p);
+  const eventualRaw = Array.from({length: upper + 1}, (_, i) => eventualFrom(i, upper, p, q));
+  const eventual = eventualRaw.map((row, i) => ({
+    start: i, left: jsonFraction(row.left), right: jsonFraction(row.right),
+    expectedSteps: jsonFraction(row.expectedSteps)
+  }));
+  let distribution = Array.from({length: upper + 1}, (_, i) => i === start ? one : zero);
+  let truncated = zero;
+  const frames = [];
+  for (let step = 0; step <= horizon; step++) {
+    const contributions = [];
+    let firstLeft = start === 0 && step === 0 ? one : zero;
+    let firstRight = start === upper && step === 0 ? one : zero;
+    if (step > 0) {
+      const previous = distribution;
+      const previousSurvival = subtract(one, add(previous[0], previous[upper]));
+      truncated = add(truncated, previousSurvival);
+      firstLeft = multiply(previous[1], q);
+      firstRight = multiply(previous[upper - 1], p);
+      distribution = Array.from({length: upper + 1}, () => zero);
+      const transfer = (from, to, probability) => {
+        const mass = multiply(previous[from], probability);
+        distribution[to] = add(distribution[to], mass);
+        contributions.push({from, to, probability: jsonFraction(probability), mass: jsonFraction(mass)});
+      };
+      for (let from = 0; from <= upper; from++) {
+        if (from === 0 || from === upper) transfer(from, from, one);
+        else { transfer(from, from - 1, q); transfer(from, from + 1, p); }
+      }
+    }
+    frames.push({
+      step,
+      distribution: distribution.map(jsonFraction),
+      firstArrival: {left: jsonFraction(firstLeft), right: jsonFraction(firstRight)},
+      absorbed: {left: jsonFraction(distribution[0]), right: jsonFraction(distribution[upper])},
+      survival: jsonFraction(subtract(one, add(distribution[0], distribution[upper]))),
+      truncatedExpectedSteps: jsonFraction(truncated),
+      expectedExcessSteps: jsonFraction(subtract(eventualRaw[start].expectedSteps, truncated)),
+      contributions
+    });
+  }
+  return {format: WALK_FORMAT, input, probabilities: {right: jsonFraction(p), left: jsonFraction(q)}, eventual, frames};
+}
+
+
+const $ = selector => document.querySelector(selector);
+const form = $('#walk-form');
+const names = ['upper','start','rightNumerator','rightDenominator','horizon'];
+const presets = [
+  ['Fair center',6,3,1,2,12],
+  ['Near the left boundary',6,1,1,2,12],
+  ['Right bias',4,2,2,3,12],
+  ['Always left',6,3,0,1,8],
+  ['Already absorbed',6,6,1,2,8]
+];
+let analysis = null;
+let selectedStep = 0;
+const fractionText = x => x.denominator === '1' ? x.numerator : x.numerator + '/' + x.denominator;
+const approximate = x => Number(x.numerator) / Number(x.denominator);
+const percentage = x => (approximate(x) * 100).toFixed(2) + '%';
+const exact = x => '<span class="fraction">' + fractionText(x) + '</span>';
+const courseText = new TextDecoder().decode(Uint8Array.from(atob($('#course-bytes').textContent), c => c.charCodeAt(0)));
+const guideText = new TextDecoder().decode(Uint8Array.from(atob($('#guide-bytes').textContent), c => c.charCodeAt(0)));
+for (const [index,preset] of presets.entries()) {
+  const option = document.createElement('option');
+  option.value = String(index); option.textContent = preset[0]; $('#preset').append(option);
+}
+function status(text, state) { $('#status').textContent = text; $('#status').dataset.state = state; }
+function retire() {
+  analysis = null;
+  $('#results').hidden = true;
+  $('#download-experiment').disabled = true;
+  for (const id of ['first','previous','next','last','step']) $('#'+id).disabled = true;
+  status('Inputs changed. Apply to calculate a fresh exact trace; the previous experiment is retired.', 'dirty');
+}
+function apply() {
+  try {
+    const input = {};
+    for (const name of names) {
+      const value = form.elements.namedItem(name).value.trim();
+      if (!/^-?\d+$/.test(value)) throw new Error(name + ': enter a whole integer.');
+      input[name] = Number(value);
+    }
+    analysis = analyzeWalk(input); selectedStep = 0;
+    $('#step').max = String(input.horizon); $('#step').disabled = false;
+    $('#results').hidden = false; $('#download-experiment').disabled = false;
+    status('Applied exact walk: states 0–'+input.upper+', start '+input.start+', right '+fractionText(analysis.probabilities.right)+', horizon '+input.horizon+'.', 'applied');
+    render();
+  } catch (error) {
+    retire(); status('Cannot apply: '+error.message, 'invalid');
+  }
+}
+function render() {
+  const frame = analysis.frames[selectedStep], input = analysis.input;
+  $('#step').value = String(selectedStep);
+  $('#step-label').textContent = 'Step '+selectedStep+' of '+input.horizon;
+  $('#first').disabled = $('#previous').disabled = selectedStep === 0;
+  $('#last').disabled = $('#next').disabled = selectedStep === input.horizon;
+  const strip = $('#probability-strip'); strip.replaceChildren();
+  for (const [state,mass] of frame.distribution.entries()) {
+    const item = document.createElement('div'); item.className = 'state-bar';
+    const bar = document.createElement('span'); bar.className = 'bar-fill'; bar.style.height = (approximate(mass)*100)+'%';
+    const track = document.createElement('span'); track.className = 'bar-track'; track.append(bar);
+    const label = document.createElement('strong'); label.textContent = String(state);
+    const value = document.createElement('span'); value.textContent = percentage(mass);
+    item.append(track,label,value); strip.append(item);
+  }
+  $('#distribution-table tbody').innerHTML = frame.distribution.map((mass,state) =>
+    '<tr><th scope="row">'+state+(state===0?' · left boundary':state===input.upper?' · right boundary':'')+'</th><td>'+exact(mass)+'</td><td>'+percentage(mass)+'</td></tr>').join('');
+  $('#first-left').textContent = fractionText(frame.firstArrival.left);
+  $('#first-right').textContent = fractionText(frame.firstArrival.right);
+  $('#survival').textContent = fractionText(frame.survival);
+  const eventual = analysis.eventual[input.start];
+  $('#time-comparison').innerHTML =
+    '<div><dt>Eventual E[T]</dt><dd>'+exact(eventual.expectedSteps)+' <small>steps</small></dd></div>'+
+    '<div><dt>Observed through step '+selectedStep+': E[min(T,'+selectedStep+')]</dt><dd>'+exact(frame.truncatedExpectedSteps)+' <small>steps</small></dd></div>'+
+    '<div><dt>Unconditional expected excess</dt><dd>'+exact(frame.expectedExcessSteps)+' <small>steps</small></dd></div>';
+  $('#arrival-table tbody').innerHTML = analysis.frames.map(f =>
+    '<tr'+(f.step===selectedStep?' class="selected" aria-current="step"':'')+'><th scope="row">'+f.step+'</th>'+
+    [f.firstArrival.left,f.firstArrival.right,f.absorbed.left,f.absorbed.right,f.survival].map(x=>'<td>'+exact(x)+'</td>').join('')+'</tr>').join('');
+  $('#eventual-table tbody').innerHTML = analysis.eventual.map(row =>
+    '<tr'+(row.start===input.start?' class="selected"':'')+'><th scope="row">'+row.start+'</th><td>'+exact(row.left)+'</td><td>'+exact(row.right)+'</td><td>'+exact(row.expectedSteps)+'</td></tr>').join('');
+  $('#contribution-table tbody').innerHTML = frame.contributions.map(edge =>
+    '<tr><th scope="row">'+edge.from+' → '+edge.to+'</th><td>'+exact(edge.probability)+'</td><td>'+exact(edge.mass)+'</td></tr>').join('');
+  $('#contribution-note').textContent = selectedStep === 0
+    ? 'At time 0 there is no preceding transition. The table is empty.'
+    : 'From step '+(selectedStep-1)+' to '+selectedStep+'. All allowed edges are retained, including zero mass; endpoint self-edges retain previously absorbed mass.';
+}
+function selectStep(value) {
+  if (!analysis) return;
+  if (!Number.isInteger(value) || value<0 || value>analysis.input.horizon) return;
+  selectedStep = value; render();
+}
+function download(text,name,type) {
+  const url=URL.createObjectURL(new Blob([text],{type}));
+  const a=document.createElement('a');a.href=url;a.download=name;document.body.append(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+form.addEventListener('submit', event=>{event.preventDefault();apply();});
+for (const name of names) form.elements.namedItem(name).addEventListener('input',retire);
+$('#load-preset').addEventListener('click',()=>{
+  const preset=presets[Number($('#preset').value)];
+  names.forEach((name,i)=>{form.elements.namedItem(name).value=String(preset[i+1]);});
+  retire();apply();
+});
+$('#step').addEventListener('input',()=>selectStep(Number($('#step').value)));
+for (const [id,fn] of [['first',()=>0],['previous',()=>selectedStep-1],['next',()=>selectedStep+1],['last',()=>analysis.input.horizon]]) {
+  $('#'+id).addEventListener('click',()=>{if(analysis)selectStep(fn());});
+}
+$('#download-experiment').addEventListener('click',()=>{
+  if(analysis)download(JSON.stringify({...analysis,selectedStep},null,2)+'\n','absorbing-walk-experiment.json','application/json;charset=utf-8');
+});
+$('#download-course').addEventListener('click',()=>download(courseText,'absorbing-walk.json','application/json;charset=utf-8'));
+$('#download-guide').addEventListener('click',()=>download(guideText,'absorbing-walk.md','text/markdown;charset=utf-8'));
+
+</script>
+</main></body></html>

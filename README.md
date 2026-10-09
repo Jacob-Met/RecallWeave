@@ -433,3 +433,12 @@ Open [the minimum-spanning-forest explorer](courses/minimum-spanning-forest-expl
 
 Download the full trace with its original entered text and selected frame, or save the original [twelve-question course](courses/minimum-spanning-forest.json) and [worked guide](courses/minimum-spanning-forest.md). Open the JSON through the learner's existing **Bring your own lesson** preview and **Start this deck** flow. No network, account, automatic storage or learner-session modification is involved. Rebuild the standalone page with `node tools/build-minimum-spanning-forest.mjs`; add `--check` to verify exact source parity.
 
+
+
+## Exact absorbing random walks
+
+Open [the offline absorbing-walk lab](courses/absorbing-walk-lab.html) to follow exact probability mass from an interior state to two absorbing endpoints. Separate first arrival from cumulative absorption and survival, compare finite-horizon observation time with eventual expected stopping time, and inspect every transition contribution. Inputs are bounded integer ratios; arithmetic and exported fractions are exact. These are hypothetical fixed-probability walks, not forecasts.
+
+Read the [worked guide](courses/absorbing-walk.md), or download the original [twelve-question course](courses/absorbing-walk.json) from the lab. In the unchanged [standalone learner](demo.html), choose the actual course file, inspect the preview, select **Start this deck**, and use ordinary review, practice and study notes. The lab's course and guide downloads remain fixed when experiment controls change. The lab works when copied alone; its learner link requires the repository or companion package.
+
+Rebuild with `node tools/build-absorbing-walk.mjs`. Check the model, conservation laws, boundary equations and embedded course bytes with `node --test tests/absorbing-walk.test.mjs tests/absorbing-walk-course.test.mjs`. The optional actual-browser driver uses Node 22+ and an installed Chromium-family browser; no npm dependency is required.
