@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>Choice visibility review | RecallWeave</title>
+<style>
+:root{font-family:system-ui,-apple-system,sans-serif;color:#19313a;background:#f4f6f3;line-height:1.55}*{box-sizing:border-box}body{margin:0}header{background:#143b42;color:white;padding:3.5rem max(1rem,calc((100vw - 900px)/2)) 2.3rem}h1{font-size:clamp(2rem,5vw,3rem);line-height:1.1;margin:.5rem 0}header p{max-width:60ch;color:#e1f0ed}main{max-width:900px;margin:auto;padding:2rem 1rem 4rem}section{background:white;padding:1.5rem;border:1px solid #cddbd4;border-radius:12px;margin:0 0 1.3rem}h2{margin-top:0}label{display:block;font-weight:700;margin-bottom:.55rem}input[type=file]{display:block;max-width:100%;width:100%;padding:.9rem;border:2px dashed #829b91;border-radius:9px}button{font:inherit;cursor:pointer;background:#146874;color:white;border:0;padding:.65rem 1rem;border-radius:6px}button:disabled{background:#9da9a9;cursor:default}button:focus-visible,input:focus-visible{outline:3px solid #bd6b15;outline-offset:3px}ul{padding-left:1.5rem}.finding{border-left:4px solid #bd6b15;background:#fff9f0;padding:1rem;margin:1rem 0}.finding h3{margin:0 0 .35rem}.finding p{margin:.5rem 0}.raw{font-family:ui-monospace,monospace;overflow-wrap:anywhere;white-space:pre-wrap;padding:.4rem;background:#eef1ed;border-radius:4px}.muted{color:#466069;font-size:.92rem}.good{background:#e8f5ee;border-left:4px solid #268758;padding:.8rem}.error{color:#8d1a20;font-weight:700}#results-heading:focus{outline:2px solid #bd6b15}footer{max-width:900px;margin:auto;padding:1rem;color:#576a6c;font-size:.86rem}
+</style>
+</head>
+<body>
+<header><strong>RecallWeave · course-author quality check</strong><h1>Can two answers look identical?</h1>
+<p>Check a local course before sharing it. This read-only review detects answer choices that collapse to the same visible wording in the current learner, even when their raw JSON text differs.</p></header>
+<main><section><h2>Choose a local RecallWeave lesson</h2><label for="deck-file">JSON course file</label>
+<input type="file" id="deck-file" accept=".json,application/json" aria-describedby="privacy">
+<p class="muted" id="privacy">Processed only in this browser. No network, account, automatic upload, saved record, or modification of your file. Import rules come from the unchanged native RecallWeave parser.</p></section>
+<section id="results" aria-live="polite" aria-atomic="false"><h2 id="results-heading" tabindex="-1">Review results</h2>
+<p id="status" role="status">Choose a file to begin.</p><div id="findings"></div><button id="export" type="button" disabled>Download review JSON</button></section></main>
+<footer>Advisory, not an admission-policy change: do not silently normalize mathematical strings, programming examples, or answer keys. The author decides how to rewrite ambiguous options.</footer>
+<script>
+'use strict';
+/** Local lesson content. Imported data cannot replace the model or run code. */
+const DECK_FORMAT = 'recallweave-deck/1';
+const MAX_DECK_BYTES = 262144;
+
+function deckRecord(value, path) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    throw new Error(`${path} must be an object.`);
+  }
+  return value;
+}
+
+function deckText(value, path, limit) {
+  if (typeof value !== 'string' || !value.trim() || value.length > limit) {
+    throw new Error(`${path} must be nonempty text of at most ${limit} characters.`);
+  }
+  return value;
+}
+
+function deckList(value, path, minimum, maximum) {
+  if (!Array.isArray(value) || value.length < minimum || value.length > maximum) {
+    throw new Error(`${path} must contain ${minimum}–${maximum} entries.`);
+  }
+  return value;
+}
+
+/** Validate and copy only the content fields used by the existing lesson runtime. */
+function validateDeck(value) {
+  const input = deckRecord(value, 'Deck');
+  if (input.format !== undefined && input.format !== DECK_FORMAT) {
+    throw new Error(`Unsupported deck format. Use ${DECK_FORMAT}.`);
+  }
+  const title = deckText(input.title, 'title', 160);
+  const attribution = deckText(input.attribution, 'attribution', 2000);
+  const license = deckText(input.license, 'license', 2000);
+  const concepts = deckList(input.concepts, 'concepts', 1, 32).map((concept, index) =>
+    deckText(concept, `concepts[${index}]`, 80));
+  if (new Set(concepts).size !== concepts.length) throw new Error('Concept names must be unique.');
+  const knownConcepts = new Set(concepts);
+  const ids = new Set();
+  const coveredConcepts = new Set();
+  const links = new Map(concepts.map(concept => [concept, new Set()]));
+  const items = deckList(input.items, 'items', 1, 100).map((value, index) => {
+    const path = `items[${index}]`;
+    const item = deckRecord(value, path);
+    const id = deckText(item.id, `${path}.id`, 80);
+    if (ids.has(id)) throw new Error(`${path}.id duplicates another question ID.`);
+    ids.add(id);
+    const concept = deckText(item.concept, `${path}.concept`, 80);
+    if (!knownConcepts.has(concept)) throw new Error(`${path}.concept is not in concepts.`);
+    coveredConcepts.add(concept);
+    const prerequisites = deckList(item.prerequisites, `${path}.prerequisites`, 0, 31).map((name, p) => {
+      deckText(name, `${path}.prerequisites[${p}]`, 80);
+      if (!knownConcepts.has(name)) throw new Error(`${path}.prerequisites contains an unknown concept.`);
+      if (name === concept) throw new Error(`${path} cannot require its own concept.`);
+      links.get(concept).add(name);
+      return name;
+    });
+    if (new Set(prerequisites).size !== prerequisites.length) throw new Error(`${path}.prerequisites contains a duplicate.`);
+    const options = deckList(item.options, `${path}.options`, 2, 6).map((option, o) =>
+      deckText(option, `${path}.options[${o}]`, 1000));
+    if (new Set(options).size !== options.length) throw new Error(`${path}.options must be distinct.`);
+    if (!Number.isInteger(item.answer) || item.answer < 0 || item.answer >= options.length) {
+      throw new Error(`${path}.answer must be a zero-based index of an option.`);
+    }
+    return Object.freeze({
+      id, concept, prerequisites: Object.freeze(prerequisites),
+      prompt: deckText(item.prompt, `${path}.prompt`, 2000),
+      options: Object.freeze(options), answer: item.answer,
+      explanation: deckText(item.explanation, `${path}.explanation`, 4000),
+      transfer: deckText(item.transfer, `${path}.transfer`, 2000)
+    });
+  });
+  if (coveredConcepts.size !== concepts.length) throw new Error('Every concept must have at least one question.');
+  const visiting = new Set();
+  const visited = new Set();
+  const visit = concept => {
+    if (visiting.has(concept)) throw new Error('Prerequisite links must not form a cycle.');
+    if (visited.has(concept)) return;
+    visiting.add(concept);
+    for (const prerequisite of links.get(concept)) visit(prerequisite);
+    visiting.delete(concept);
+    visited.add(concept);
+  };
+  concepts.forEach(visit);
+  return Object.freeze({
+    format: DECK_FORMAT, title, attribution, license,
+    concepts: Object.freeze(concepts), items: Object.freeze(items)
+  });
+}
+
+/** The same size limit applies to a File and to programmatically supplied UTF-8 JSON. */
+function parseDeck(text) {
+  if (typeof text !== 'string' || new TextEncoder().encode(text).length > MAX_DECK_BYTES) {
+    throw new Error('Choose a JSON deck no larger than 256 KiB.');
+  }
+  let value;
+  try { value = JSON.parse(text); }
+  catch { throw new Error('The file is not valid JSON. Check its commas, quotes and brackets.'); }
+  return validateDeck(value);
+}
+
+/** Export the existing bundled lesson as an editable example of the same contract. */
+function serializeDeck(deck) {
+  return JSON.stringify(validateDeck(deck), null, 2) + '\n';
+}
+
+/**
+ * Advisory on per-question choice visibility under RecallWeave's existing
+ * .choice button (CSS white-space:normal). Does not change deck admission,
+ * answer indices, text, or semantics. Caller supplies an already validated deck.
+ */
+const AUDIT_FORMAT = 'recallweave.choice-visibility-report/1';
+
+function renderedChoiceKey(raw) {
+  if (typeof raw !== 'string') throw new TypeError('Choice must be a string.');
+  // CSS white-space:normal collapses ASCII spacing, tabs and segment breaks.
+  // Keep nonbreaking/format characters intact: they are reported separately.
+  return raw.replace(/[\t\n\f\r ]+/g, ' ').replace(/^ +| +$/g, '');
+}
+
+function inspectChoices(deck) {
+  if (!deck || !Array.isArray(deck.items) || typeof deck.title !== 'string')
+    throw new TypeError('Supply a validated RecallWeave deck.');
+  const collisions = [], invisible = [];
+  for (const item of deck.items) {
+    if (!item || typeof item.id !== 'string' || !Array.isArray(item.options))
+      throw new TypeError('The deck must have validated questions.');
+    const groups = new Map();
+    item.options.forEach((option, index) => {
+      const label = renderedChoiceKey(option);
+      const prior = groups.get(label) ?? [];
+      prior.push(index);
+      groups.set(label, prior);
+      if (/[\u00a0\u200b-\u200f\u2060-\u206f\ufeff]/u.test(option)) {
+        invisible.push(Object.freeze({questionId:item.id, optionIndex:index, exactText:option,
+          note:'Nonbreaking space or invisible formatting character; review its intended display and meaning.'}));
+      }
+    });
+    for (const [renderedText, indices] of groups.entries()) {
+      if (indices.length < 2) continue;
+      collisions.push(Object.freeze({questionId:item.id, renderedText,
+        optionIndexes:Object.freeze(indices),
+        exactTexts:Object.freeze(indices.map(index => item.options[index]))}));
+    }
+  }
+  return Object.freeze({format:AUDIT_FORMAT, title:deck.title, questionsScanned:deck.items.length,
+    collisions:Object.freeze(collisions), invisible:Object.freeze(invisible),
+    disclaimer:'Advisory only. No original question, answer, spacing, or course was modified. ' +
+      'A collision is equality after ordinary CSS whitespace collapsing; semantic alternatives may still differ. ' +
+      'Invisible-format observations are separately flagged for review.'});
+}
+
+const fileInput=document.getElementById('deck-file');
+const status=document.getElementById('status');
+const findings=document.getElementById('findings');
+const exportButton=document.getElementById('export');
+const heading=document.getElementById('results-heading');
+let generation=0, ready=null;
+function appendText(parent,tag,text,className='') {
+  const e=document.createElement(tag);e.textContent=String(text);if(className)e.className=className;parent.appendChild(e);return e;
+}
+function clearResult(message,className='') {
+  ready=null; exportButton.disabled=true;findings.replaceChildren();status.textContent=message;status.className=className;
+}
+function showReport(report) {
+  const total=report.collisions.length+report.invisible.length;
+  status.textContent=`${report.title}: ${report.questionsScanned} questions checked; ${report.collisions.length} display collisions; ${report.invisible.length} formatting-character warnings.`;
+  if(!total)appendText(findings,'p','No potentially indistinguishable answer choices found under this checker. This does not prove every question is unambiguous.','good');
+  report.collisions.forEach(record=>{
+    const box=appendText(findings,'article','','finding');
+    appendText(box,'h3',`Question ${record.questionId} · visually colliding choices`);
+    appendText(box,'p',`Choice positions ${record.optionIndexes.map(i=>i+1).join(' and ')} collapse to the same visible text.`);
+    record.exactTexts.forEach((raw,index)=>appendText(box,'p',`Option ${record.optionIndexes[index]+1} raw JSON: ${JSON.stringify(raw)}`,'raw'));
+    appendText(box,'p','Correct by rewriting the authored alternatives; do not silently trim or change the answer key.','muted');
+  });
+  report.invisible.forEach(record=>{
+    const box=appendText(findings,'article','','finding');
+    appendText(box,'h3',`Question ${record.questionId} · option ${record.optionIndex+1} contains invisible/nonbreaking spacing`);
+    appendText(box,'p',`Raw JSON: ${JSON.stringify(record.exactText)}`,'raw');
+    appendText(box,'p',record.note,'muted');
+  });
+  ready=report;exportButton.disabled=false;
+}
+fileInput.addEventListener('change',async()=>{
+  const version=++generation;clearResult('Reading local file…');
+  const file=fileInput.files?.[0];if(!file){clearResult('Choose a file to begin.');return;}
+  if(file.size>MAX_DECK_BYTES){clearResult('The selected file exceeds the native 256 KiB limit.','error');return;}
+  try{
+    const source=await file.text();if(version!==generation)return;
+    const deck=parseDeck(source);const report=inspectChoices(deck);
+    showReport(report);heading.focus({preventScroll:true});
+  }catch(error){if(version!==generation)return;clearResult(`Not a supported course: ${error.message}`,'error');}
+});
+exportButton.addEventListener('click',()=>{
+  if(!ready)return;
+  const blob=new Blob([JSON.stringify(ready,null,2)+'\n'],{type:'application/json'});
+  const url=URL.createObjectURL(blob),link=document.createElement('a');link.href=url;link.download='recallweave-choice-visibility-review.json';
+  document.body.appendChild(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),10000);
+});
+</script></body></html>

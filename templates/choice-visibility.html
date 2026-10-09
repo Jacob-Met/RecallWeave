@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>Choice visibility review | RecallWeave</title>
+<style>
+:root{font-family:system-ui,-apple-system,sans-serif;color:#19313a;background:#f4f6f3;line-height:1.55}*{box-sizing:border-box}body{margin:0}header{background:#143b42;color:white;padding:3.5rem max(1rem,calc((100vw - 900px)/2)) 2.3rem}h1{font-size:clamp(2rem,5vw,3rem);line-height:1.1;margin:.5rem 0}header p{max-width:60ch;color:#e1f0ed}main{max-width:900px;margin:auto;padding:2rem 1rem 4rem}section{background:white;padding:1.5rem;border:1px solid #cddbd4;border-radius:12px;margin:0 0 1.3rem}h2{margin-top:0}label{display:block;font-weight:700;margin-bottom:.55rem}input[type=file]{display:block;max-width:100%;width:100%;padding:.9rem;border:2px dashed #829b91;border-radius:9px}button{font:inherit;cursor:pointer;background:#146874;color:white;border:0;padding:.65rem 1rem;border-radius:6px}button:disabled{background:#9da9a9;cursor:default}button:focus-visible,input:focus-visible{outline:3px solid #bd6b15;outline-offset:3px}ul{padding-left:1.5rem}.finding{border-left:4px solid #bd6b15;background:#fff9f0;padding:1rem;margin:1rem 0}.finding h3{margin:0 0 .35rem}.finding p{margin:.5rem 0}.raw{font-family:ui-monospace,monospace;overflow-wrap:anywhere;white-space:pre-wrap;padding:.4rem;background:#eef1ed;border-radius:4px}.muted{color:#466069;font-size:.92rem}.good{background:#e8f5ee;border-left:4px solid #268758;padding:.8rem}.error{color:#8d1a20;font-weight:700}#results-heading:focus{outline:2px solid #bd6b15}footer{max-width:900px;margin:auto;padding:1rem;color:#576a6c;font-size:.86rem}
+</style>
+</head>
+<body>
+<header><strong>RecallWeave · course-author quality check</strong><h1>Can two answers look identical?</h1>
+<p>Check a local course before sharing it. This read-only review detects answer choices that collapse to the same visible wording in the current learner, even when their raw JSON text differs.</p></header>
+<main><section><h2>Choose a local RecallWeave lesson</h2><label for="deck-file">JSON course file</label>
+<input type="file" id="deck-file" accept=".json,application/json" aria-describedby="privacy">
+<p class="muted" id="privacy">Processed only in this browser. No network, account, automatic upload, saved record, or modification of your file. Import rules come from the unchanged native RecallWeave parser.</p></section>
+<section id="results" aria-live="polite" aria-atomic="false"><h2 id="results-heading" tabindex="-1">Review results</h2>
+<p id="status" role="status">Choose a file to begin.</p><div id="findings"></div><button id="export" type="button" disabled>Download review JSON</button></section></main>
+<footer>Advisory, not an admission-policy change: do not silently normalize mathematical strings, programming examples, or answer keys. The author decides how to rewrite ambiguous options.</footer>
+<script>
+'use strict';
+/*__NATIVE_DECK__*/
+/*__CHOICE_AUDIT__*/
+const fileInput=document.getElementById('deck-file');
+const status=document.getElementById('status');
+const findings=document.getElementById('findings');
+const exportButton=document.getElementById('export');
+const heading=document.getElementById('results-heading');
+let generation=0, ready=null;
+function appendText(parent,tag,text,className='') {
+  const e=document.createElement(tag);e.textContent=String(text);if(className)e.className=className;parent.appendChild(e);return e;
+}
+function clearResult(message,className='') {
+  ready=null; exportButton.disabled=true;findings.replaceChildren();status.textContent=message;status.className=className;
+}
+function showReport(report) {
+  const total=report.collisions.length+report.invisible.length;
+  status.textContent=`${report.title}: ${report.questionsScanned} questions checked; ${report.collisions.length} display collisions; ${report.invisible.length} formatting-character warnings.`;
+  if(!total)appendText(findings,'p','No potentially indistinguishable answer choices found under this checker. This does not prove every question is unambiguous.','good');
+  report.collisions.forEach(record=>{
+    const box=appendText(findings,'article','','finding');
+    appendText(box,'h3',`Question ${record.questionId} · visually colliding choices`);
+    appendText(box,'p',`Choice positions ${record.optionIndexes.map(i=>i+1).join(' and ')} collapse to the same visible text.`);
+    record.exactTexts.forEach((raw,index)=>appendText(box,'p',`Option ${record.optionIndexes[index]+1} raw JSON: ${JSON.stringify(raw)}`,'raw'));
+    appendText(box,'p','Correct by rewriting the authored alternatives; do not silently trim or change the answer key.','muted');
+  });
+  report.invisible.forEach(record=>{
+    const box=appendText(findings,'article','','finding');
+    appendText(box,'h3',`Question ${record.questionId} · option ${record.optionIndex+1} contains invisible/nonbreaking spacing`);
+    appendText(box,'p',`Raw JSON: ${JSON.stringify(record.exactText)}`,'raw');
+    appendText(box,'p',record.note,'muted');
+  });
+  ready=report;exportButton.disabled=false;
+}
+fileInput.addEventListener('change',async()=>{
+  const version=++generation;clearResult('Reading local file…');
+  const file=fileInput.files?.[0];if(!file){clearResult('Choose a file to begin.');return;}
+  if(file.size>MAX_DECK_BYTES){clearResult('The selected file exceeds the native 256 KiB limit.','error');return;}
+  try{
+    const source=await file.text();if(version!==generation)return;
+    const deck=parseDeck(source);const report=inspectChoices(deck);
+    showReport(report);heading.focus({preventScroll:true});
+  }catch(error){if(version!==generation)return;clearResult(`Not a supported course: ${error.message}`,'error');}
+});
+exportButton.addEventListener('click',()=>{
+  if(!ready)return;
+  const blob=new Blob([JSON.stringify(ready,null,2)+'\n'],{type:'application/json'});
+  const url=URL.createObjectURL(blob),link=document.createElement('a');link.href=url;link.download='recallweave-choice-visibility-review.json';
+  document.body.appendChild(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),10000);
+});
+</script></body></html>
