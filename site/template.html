@@ -13,25 +13,29 @@
   <div class="page">
     <header>
       <a class="brand" href="index.html"><span class="mark" aria-hidden="true">r</span>recall<span>weave</span></a>
-      <nav aria-label="Main navigation"><a href="#courses">Courses &amp; labs</a><a href="#tools">Study tools</a><a href="https://github.com/Jacob-Met/RecallWeave">GitHub ↗</a></nav>
+      <nav aria-label="Main navigation"><a href="#courses">Courses &amp; labs</a><a href="#tools">Study tools</a><a class="nav-learner" href="demo.html">Open learner <span aria-hidden="true">↗</span></a></nav>
     </header>
     <main id="main">
       <section class="hero" aria-labelledby="title">
         <div>
-          <p class="eyebrow">A local toolkit for connected learning</p>
-          <h1 id="title">Follow an idea.<br><em>Make the connection.</em></h1>
-          <p class="lede">Retrieve what you know, inspect how it works, and explain it in your own words. Explore science, mathematics and computing with courses and experiments you can keep.</p>
-          <div class="hero-actions"><a class="primary" href="#courses">Find a course <span aria-hidden="true">↓</span></a><a href="demo.html">Try the biology starter <span aria-hidden="true">↗</span></a></div>
+          <p class="eyebrow"><span class="status-dot" aria-hidden="true"></span> A little curiosity. A lasting connection.</p>
+          <h1 id="title">Learn the links.<br><em>Keep the ideas.</em></h1>
+          <p class="lede">Lessons to think through. Labs to experiment with. Tools to make the learning your own. Follow your curiosity across science, mathematics and computing.</p>
+          <div class="hero-actions"><a class="primary" href="#courses">Find your next course <span aria-hidden="true">↓</span></a><a class="starter-link" href="demo.html">Try a short lesson <span aria-hidden="true">↗</span></a></div>
+          <p class="hero-note">Start in your browser. Keep what you learn with explicit downloads.</p>
         </div>
         <aside class="field-card" aria-label="What's in the toolkit">
-          <p class="eyebrow">Open the notebook</p>
-          <div class="stat"><strong>{{COURSE_COUNT}}</strong><span>downloadable courses<br>with worked guides</span></div>
-          <div class="stat"><strong>{{LAB_COUNT}}</strong><span>interactive labs<br>and algorithm explorers</span></div>
-          <p class="field-note">No account or API key. Learning stays in your tab; save progress and notes with explicit downloads.</p>
+          <div class="field-heading"><p class="eyebrow">Ideas grow through connections</p><span aria-hidden="true">↗</span></div>
+          <div class="connection-map" role="img" aria-label="Recall what you know, explore how it works, explain it in your own words">
+            <svg viewBox="0 0 420 225" aria-hidden="true" focusable="false"><path d="M76 124 C110 124 105 52 205 52 S300 155 350 155"/><path class="return-path" d="M350 155 C290 230 112 230 76 124"/><circle cx="76" cy="124" r="6"/><circle cx="205" cy="52" r="6"/><circle cx="350" cy="155" r="6"/></svg>
+            <span class="map-label recall"><small>01 / RETRIEVE</small>Recall</span><span class="map-label explore"><small>02 / EXPERIMENT</small>Explore</span><span class="map-label explain"><small>03 / CONNECT</small>Explain</span>
+          </div>
+          <div class="field-stats"><div class="stat"><strong>{{COURSE_COUNT}}</strong><span>courses &amp;<br>worked guides</span></div><div class="stat"><strong>{{LAB_COUNT}}</strong><span>labs &amp;<br>explorers</span></div></div>
+          <p class="field-note">Your notebook, on your device. No account or API key needed.</p>
         </aside>
       </section>
       <section id="tools" class="tools" aria-labelledby="tools-title">
-        <div class="section-heading"><div><p class="eyebrow">Choose your next step</p><h2 id="tools-title">A whole learning workflow.</h2></div><a href="offline/">Take the courses offline ↗</a></div>
+        <div class="section-heading"><div><p class="eyebrow">From a question to your own explanation</p><h2 id="tools-title">Make room for understanding.</h2></div><a href="offline/">Take the courses offline ↗</a></div>
         <div class="tool-grid">
           <a class="tool" href="demo.html"><span class="tool-number">01 / LEARN</span><h3>Adaptive learner <span aria-hidden="true">↗</span></h3><p>Import a course, connect ideas, review answers and practice missed questions. Save or resume a lesson.</p></a>
           <a class="tool" href="author.html"><span class="tool-number">02 / CREATE</span><h3>Deck studio <span aria-hidden="true">↗</span></h3><p>Write and validate your own questions, explanations and prerequisite links. Export a local lesson deck.</p></a>
@@ -44,8 +48,11 @@
       <section id="courses" class="courses" aria-labelledby="courses-title">
         <div class="section-heading"><div><p class="eyebrow">Science · Mathematics · Computing</p><h2 id="courses-title">Pick a thread to follow.</h2></div><span class="inventory-note">{{COURSE_COUNT}} courses · {{LAB_COUNT}} labs</span></div>
         <p class="course-help">Open a lab to explore an idea immediately. To study a course, download its JSON, open the <a href="demo.html">learner</a>, and choose the file under <strong>Bring your own lesson</strong>. Preview it, then select <strong>Start this deck</strong>. Worked guides open on GitHub.</p>
-        <div class="filters"><div class="search-field"><label for="course-search">Find a title or concept</label><input id="course-search" type="search" placeholder="Try Fourier, graphs, energy…" autocomplete="off"></div><label class="checkbox"><input id="labs-only" type="checkbox"> With interactive labs</label><p id="result-count" role="status">{{COURSE_COUNT}} of {{COURSE_COUNT}} courses</p></div>
-        <div class="course-grid">{{COURSE_CARDS}}</div>
+        <div class="filter-panel">
+          <div class="filters"><div class="search-field"><label for="course-search">Find a title or concept</label><div class="search-input"><span aria-hidden="true">⌕</span><input id="course-search" type="search" placeholder="What are you curious about?" autocomplete="off"></div></div><label class="checkbox"><input id="labs-only" type="checkbox"> With interactive labs</label><button id="compact-view" class="view-button" type="button" aria-pressed="false" aria-controls="course-directory"><span aria-hidden="true">☷</span> Compact view</button></div>
+          <div class="filter-meta"><p id="result-count" role="status">{{COURSE_COUNT}} of {{COURSE_COUNT}} courses</p><button id="clear-filters" type="button">Clear filters</button></div>
+        </div>
+        <div id="course-directory" class="course-grid">{{COURSE_CARDS}}</div>
         <p id="empty-results" class="empty" hidden>No matching courses. Try another concept or clear the lab filter.</p>
         <noscript><p>All courses are shown. Enable JavaScript to search and filter.</p></noscript>
       </section>
