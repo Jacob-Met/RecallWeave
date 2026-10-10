@@ -369,9 +369,12 @@ function expectedInformationGain(mastery, parameters = DEFAULT_BKT) {
   const p = clamp(mastery);
   const { guess, slip } = parameters;
   const pCorrect = p * (1 - slip) + (1 - p) * guess;
-  const correctPosterior = p * (1 - slip) / pCorrect;
-  const wrongPosterior = p * slip / (p * slip + (1 - p) * (1 - guess));
-  return Math.max(0, entropy(p) - pCorrect * entropy(correctPosterior) - (1 - pCorrect) * entropy(wrongPosterior));
+  // A zero-probability response contributes zero conditional entropy.
+  // Do not evaluate its undefined posterior (0/0), even in an unused term.
+  const correctEntropy = pCorrect === 0 ? 0 : entropy(p * (1 - slip) / pCorrect);
+  const pWrong = p * slip + (1 - p) * (1 - guess);
+  const wrongEntropy = pWrong === 0 ? 0 : entropy(p * slip / pWrong);
+  return Math.max(0, entropy(p) - pCorrect * correctEntropy - (1 - pCorrect) * wrongEntropy);
 }
 
 /**

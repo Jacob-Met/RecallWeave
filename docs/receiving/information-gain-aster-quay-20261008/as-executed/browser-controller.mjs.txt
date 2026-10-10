@@ -1,0 +1,45 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import {fileURLToPath,pathToFileURL} from 'node:url';
+import {spawn,spawnSync} from 'node:child_process';
+import crypto from 'node:crypto';
+import assert from 'node:assert/strict';
+const root=path.dirname(fileURLToPath(import.meta.url));
+const out=path.join(root,'browser-evidence');
+assert.ok(!fs.existsSync(out),'Reconcile any previous browser run instead of overwriting');fs.mkdirSync(out);
+const profile=path.join(out,'owned-empty-profile');fs.mkdirSync(profile);
+const old=spawnSync('git',['-c','credential.helper=','show','5b9b86fc54e1f7538d05c549b2fab02a98af2b50:demo.html'],{cwd:path.join(root,'source'),encoding:'utf8',windowsHide:true,timeout:30000});assert.equal(old.status,0);
+const oldPage=path.join(out,'baseline-demo.html');fs.writeFileSync(oldPage,old.stdout);
+const executable='C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe';
+const args=['--headless=new','--remote-debugging-address=127.0.0.1','--remote-debugging-port=0','--user-data-dir='+profile,'--no-first-run','--no-default-browser-check','--disable-background-networking','--disable-sync','--disable-extensions','about:blank'];
+const stdout=fs.openSync(path.join(out,'browser.stdout'),'w'),stderr=fs.openSync(path.join(out,'browser.stderr'),'w');
+const child=spawn(executable,args,{stdio:['ignore',stdout,stderr],windowsHide:true});
+const delay=ms=>new Promise(r=>setTimeout(r,ms));const hash=b=>crypto.createHash('sha256').update(b).digest('hex');
+const receipt={started:new Date().toISOString(),node:process.version,browserPid:child.pid,ownEmptyProfile:true,observations:[],exceptions:[],independentWorkerReview:false};
+const persist=()=>fs.writeFileSync(path.join(out,'receipt.json'),JSON.stringify(receipt,null,2)+'\n');persist();
+let ws;let sequence=0;const pending=new Map();
+function call(method,params={}){return new Promise((resolve,reject)=>{const id=++sequence;const timer=setTimeout(()=>{pending.delete(id);reject(new Error(method+' timed out'));},10000);pending.set(id,{resolve,reject,timer});ws.send(JSON.stringify({id,method,params}));});}
+try{
+ const portFile=path.join(profile,'DevToolsActivePort');for(let i=0;i<100&&!fs.existsSync(portFile);i++){if(child.exitCode!==null)throw new Error('Owned browser exited before DevTools became ready');await delay(100);}
+ assert.ok(fs.existsSync(portFile),'Owned browser readiness');const port=fs.readFileSync(portFile,'utf8').split('\n')[0];
+ const targets=await(await fetch('http://127.0.0.1:'+port+'/json/list',{signal:AbortSignal.timeout(5000)})).json();const target=targets.find(t=>t.type==='page');assert.ok(target);
+ ws=new WebSocket(target.webSocketDebuggerUrl);ws.addEventListener('message',e=>{const m=JSON.parse(e.data);if(m.id){const p=pending.get(m.id);if(!p)return;pending.delete(m.id);clearTimeout(p.timer);m.error?p.reject(new Error(JSON.stringify(m.error))):p.resolve(m.result);}else if(m.method==='Runtime.exceptionThrown'){receipt.exceptions.push(m.params.exceptionDetails);persist();}});
+ await new Promise((res,rej)=>{ws.addEventListener('open',res,{once:true});ws.addEventListener('error',rej,{once:true});});
+ receipt.browser=await call('Browser.getVersion');await call('Page.enable');await call('Runtime.enable');await call('Network.enable');await call('Network.setBlockedURLs',{urls:['http://*','https://*']});
+ const pages=[['baseline-demo',oldPage],['candidate-demo',path.join(root,'current','demo.html')],['candidate-trace-reader',path.join(root,'current','compare-traces.html')]];
+ let defaultGain;
+ for(const [name,page] of pages){
+  await call('Page.navigate',{url:pathToFileURL(page).href});let ready=false;for(let i=0;i<100;i++){const r=await call('Runtime.evaluate',{expression:"document.readyState === 'complete' && typeof expectedInformationGain === 'function'",returnByValue:true});if(r.result.value===true){ready=true;break;}await delay(100);}assert.ok(ready,name+' ready');
+  const expression=`(() => { const perfect={...DEFAULT_BKT,guess:0,slip:0};const shown=x=>Number.isNaN(x)?'NaN':x;const items=[{id:'a',concept:'certain',prerequisites:[]},{id:'z',concept:'uncertain',prerequisites:[]}];return {title:document.title,certainGain:shown(expectedInformationGain(0,perfect)),uncertainGain:shown(expectedInformationGain(.5,perfect)),constantResponseGain:shown(expectedInformationGain(.5,{...DEFAULT_BKT,guess:1,slip:0})),selected:selectNextItem(items,new Set(),{certain:0,uncertain:.5},perfect).id,defaultGain:expectedInformationGain(.5),gainFunction:expectedInformationGain.toString()};})()`;
+  const r=await call('Runtime.evaluate',{expression,returnByValue:true});assert.ok(!r.exceptionDetails,name+' evaluation');const v=r.result.value;
+  const observation={name,pageSha256:hash(fs.readFileSync(page)),pageBytes:fs.statSync(page).size,...v,gainFunctionSha256:hash(v.gainFunction)};delete observation.gainFunction;receipt.observations.push(observation);persist();
+  if(name==='baseline-demo'){assert.equal(v.certainGain,'NaN');assert.equal(v.constantResponseGain,'NaN');assert.equal(v.selected,'a');defaultGain=v.defaultGain;}else{assert.equal(v.certainGain,0);assert.equal(v.uncertainGain,1);assert.equal(v.constantResponseGain,0);assert.equal(v.selected,'z');assert.equal(v.defaultGain,defaultGain);}
+ }
+ assert.deepEqual(receipt.exceptions,[]);receipt.status='pass';
+}catch(e){receipt.status='fail';receipt.failure={message:e.message,stack:e.stack};process.exitCode=1;}
+finally{
+ if(ws?.readyState===WebSocket.OPEN){try{await call('Browser.close');receipt.browserCloseRequested=true;}catch(e){receipt.closeMessage=e.message;}ws.close();}
+ for(let i=0;i<30&&child.exitCode===null;i++)await delay(100);
+ if(child.exitCode===null){child.kill();receipt.ownedProcessTerminatedAfterCloseTimeout=true;}
+ receipt.finished=new Date().toISOString();receipt.browserExitCode=child.exitCode;persist();fs.closeSync(stdout);fs.closeSync(stderr);console.log(JSON.stringify(receipt,null,2));
+}
