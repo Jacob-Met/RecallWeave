@@ -5,6 +5,7 @@ import { mountDeckPicker } from './deck-picker.mjs';
 import { createStudyNotes } from './session-export.mjs';
 import { mountTraceArchive } from './trace-archive-ui.mjs';
 import { mountLessonArchive } from './lesson-archive-ui.mjs';
+import { mountReflectionFile } from './reflection-file-ui.mjs';
 import { APPLICATION_PROMPT, createReflections, itemReflection, updateReflection, updateApplicationReflection } from './reflections.mjs';
 import { orderOptions } from './answer-order.mjs';
 
@@ -25,6 +26,7 @@ let practice = null;
 let inPractice = false;
 let traceArchiveControls = null;
 let lessonArchiveControls = null;
+let reflectionFileControls = null;
 let lessonPhase = null;
 let lessonItemId = null;
 let lessonSessionRevision = 0;
@@ -88,6 +90,7 @@ function resetSession(nextDeck = deck) {
 function setProgress() {
   traceArchiveControls?.refresh();
   lessonArchiveControls?.refresh();
+  reflectionFileControls?.refresh();
   const count = inPractice ? practice.answers.length : answers.length;
   const total = inPractice ? practice.items.length : deck.items.length;
   stepCount.textContent = `${count} / ${total}`;
@@ -165,12 +168,14 @@ function renderResults() {
     field.value = itemReflection(reflections, field.dataset.reflectionItem);
     field.addEventListener('input', () => {
       reflections = updateReflection(reflections, field.dataset.reflectionItem, field.value);
+      reflectionFileControls?.refresh();
     });
   });
   const application = root.querySelector('#application-reflection');
   application.value = reflections.application;
   application.addEventListener('input', () => {
     reflections = updateApplicationReflection(reflections, application.value);
+    reflectionFileControls?.refresh();
   });
   const resetButton = root.querySelector('#reset-button');
   resetButton.insertAdjacentHTML('beforebegin', '<section class="practice-summary" aria-labelledby="save-notes-title"><h3 id="save-notes-title">Keep these connections</h3><p>Save your questions, first answers, explanations, reflections, and any practice answers as a text file.</p><button class="reset-button" id="save-notes-button" aria-describedby="save-notes-status">Download study notes (.txt)</button><p id="save-notes-status" role="status">Your session stays in this tab until you refresh. Download notes to keep a copy.</p></section>');
@@ -315,6 +320,16 @@ traceArchiveControls = mountTraceArchive({
     review = state.review;
     practice = state.practice;
     renderResults();
+  }
+});
+reflectionFileControls = mountReflectionFile({
+  container: document.querySelector('#reflection-file-controls'),
+  getDeck: () => deck === bundledDeck ? bundledSource : deck,
+  getReflections: () => reflections,
+  getRevision: () => lessonSessionRevision,
+  replaceReflections: writing => {
+    reflections = writing;
+    if (review && !inPractice) renderResults();
   }
 });
 setProgress();

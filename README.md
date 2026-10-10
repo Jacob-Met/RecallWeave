@@ -199,6 +199,12 @@ Each completed review panel has a **Your explanation** field beside the existing
 
 Writing stays attached to its question while you open other panels or pause and resume practice. Edits take effect as you type; clearing a field clears that reflection. Your writing is not scored and does not change your first answers, practice results, or model estimates. Starting another deck or a fresh local session clears the writing; a fresh session keeps the selected deck. Reloading also clears writing and returns to the bundled lesson. Download study notes to keep a readable copy.
 
+### Reopen editable explanations
+
+Use **Save or reopen your written explanations** to download a separate JSON file containing the exact course and your editable question explanations and application response. On another visit, open the same course, choose the file, inspect its full writing preview, then select **Replace my writing**. Confirmation replaces every writing field, including empty ones; answers, practice and model estimates stay unchanged. Canceling or selecting an invalid file preserves current writing.
+
+Keep a completed learning trace separately if you want to reopen answers as well. Download study notes for a readable copy. Writing is saved only when you request a download; there is no automatic browser storage or upload. See the [written-explanations guide](docs/written-explanations.md) for the exact-course requirement, file limits and separate restore flows.
+
 ### Keep your study notes
 
 After the first session, choose **Download study notes (.txt)** to save a readable copy of the complete learning trace. The file includes the question order, actual first answers, corrections, explanations, transfer prompts, the first-session model estimates, and deck attribution. Any recorded practice answers appear separately; a paused round reports how many questions are still unanswered.
