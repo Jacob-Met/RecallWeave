@@ -13,20 +13,10 @@ import { dirname, join, resolve, relative, sep } from 'node:path';
 import { tmpdir, freemem } from 'node:os';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
-const COURSE_FILES = [
-  'binary-search.json', 'dependency-graphs.json',
-  'measurement-uncertainty.json', 'sql-query-foundations.json',
-  'enzymes-energy-and-control.json',
-  'numerical-precision.json',
-  'reading-data-and-evidence.json',
-  'sampling-aliasing.json',
-  'shortest-paths.json',
-  'stoichiometry-foundations.json',
-  'vector-geometry.json',
-];
 const MIN_DISK_BYTES = 1024n ** 3n;
 const MIN_MEMORY_BYTES = 512 * 1024 * 1024;
-const PACKET_LIMIT = 2 * 1024 * 1024;
+// Evidence includes original downloads, screenshots and (for the pack) its extracted copy.
+const PACKET_LIMIT = 8 * 1024 * 1024;
 const sha256 = bytes => createHash('sha256').update(bytes).digest('hex');
 const sleep = ms => new Promise(done => setTimeout(done, ms));
 
@@ -152,13 +142,13 @@ async function emitBundle(output) {
   for (const path of paths.sort()) {
     const info = await lstat(path);
     total += info.size;
-    assert.ok(total <= PACKET_LIMIT, 'Evidence packet exceeds 2 MiB; refusing incomplete export');
+    assert.ok(total <= PACKET_LIMIT, 'Evidence packet exceeds 8 MiB; refusing incomplete export');
     const bytes = await readFile(path);
     files.push({path: relative(output, path).split(sep).join('/'), bytes: bytes.length,
       sha256: sha256(bytes), base64: bytes.toString('base64')});
   }
   const payload = Buffer.from(JSON.stringify({version: 1, files}));
-  assert.ok(payload.length <= PACKET_LIMIT, 'Decoded evidence packet exceeds 2 MiB; refusing incomplete export');
+  assert.ok(payload.length <= PACKET_LIMIT, 'Decoded evidence packet exceeds 8 MiB; refusing incomplete export');
   const encoded = payload.toString('base64');
   const chunks = Math.ceil(encoded.length / 4096);
   console.log('RECALLWEAVE_CATALOG_BUNDLE_BEGIN ' + JSON.stringify({
@@ -171,6 +161,7 @@ async function emitBundle(output) {
 
 async function main(settings) {
   const {root, output, browser: executable} = settings;
+  const COURSE_FILES = [];
   try {
     const info = await lstat(output);
     assert.ok(info.isDirectory() && !info.isSymbolicLink(), 'Evidence destination must be a real directory');
@@ -433,6 +424,12 @@ async function main(settings) {
     console.log('HEADROOM ' + JSON.stringify(report.headroom));
     try { report.checkout = execFileSync('git', ['rev-parse', 'HEAD'], {cwd: root, encoding: 'utf8'}).trim(); }
     catch { report.checkout = null; }
+    // Independently inventory canonical originals; never infer expected files
+    // from the generated catalog or downloaded ZIP being checked.
+    COURSE_FILES.push(...(await readdir(join(root, 'courses')))
+      .filter(name => /^[a-z0-9-]+\.json$/.test(name)).sort());
+    assert.ok(COURSE_FILES.length >= 1 && COURSE_FILES.length <= 128,
+      'Canonical course inventory must stay within the catalog admission bound');
     const sources = [
       'catalog.html', 'catalog/courses.json', 'catalog/template.html', 'catalog/catalog.css',
       'src/course-catalog.mjs', 'src/course-catalog-ui.mjs', 'tools/build-course-catalog.mjs',
@@ -445,6 +442,8 @@ async function main(settings) {
       sourceBytes.set(path, bytes);
       report.sourceSha256[path] = sha256(bytes);
     }
+    assert.deepEqual(JSON.parse(sourceBytes.get('catalog/courses.json').toString('utf8')),
+      COURSE_FILES.map(name => 'courses/' + name), 'Registry matches the independent canonical course inventory');
     for (const filename of COURSE_FILES) {
       const bytes = sourceBytes.get('courses/' + filename);
       courseBytes.set(filename, bytes);

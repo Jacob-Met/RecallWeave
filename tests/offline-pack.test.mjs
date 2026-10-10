@@ -186,7 +186,7 @@ test('invalid registration never replaces a previous archive', async t => {
     [], ['courses/z-course.json', 'courses/z-course.json'],
     ['../outside.json'], ['/outside.json'], ['courses/sub/file.json'],
     ['courses\\file.json'], [null], { courses: ['courses/a-course.json'] },
-    Array.from({ length: 33 }, (_, index) => 'courses/course-' + index + '.json')
+    Array.from({ length: 129 }, (_, index) => 'courses/course-' + index + '.json')
   ];
   for (const paths of cases) {
     await t.test(JSON.stringify(paths).slice(0, 100), async sub => {
