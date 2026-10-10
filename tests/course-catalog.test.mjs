@@ -1,10 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
+import { readFile, readdir } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { Script } from 'node:vm';
 import { spawnSync } from 'node:child_process';
-import { createCourseCatalog, filterCourseCatalog, validateCatalogPaths } from '../src/course-catalog.mjs';
+import { createCourseCatalog, filterCourseCatalog, validateCatalogPaths, MAX_CATALOG_COURSES } from '../src/course-catalog.mjs';
 import { buildCourseCatalog, renderCourseCatalog } from '../tools/build-course-catalog.mjs';
 
 const root = new URL('../', import.meta.url);
@@ -63,7 +63,7 @@ test('curated paths reject traversal, external URLs, authoring sources and dupli
     [], ['../course.json'], ['/courses/one.json'],
     ['https://example.test/one.json'], ['courses/one.source.json'],
     ['courses/nested/one.json'], ['courses/one.json', 'courses/one.json'],
-    Array.from({ length: 33 }, (_, i) => 'courses/course-' + i + '.json')
+    Array.from({ length: MAX_CATALOG_COURSES + 1 }, (_, i) => 'courses/course-' + i + '.json')
   ]) assert.throws(() => validateCatalogPaths(paths));
   assert.throws(() => createCourseCatalog(null));
   assert.throws(() => createCourseCatalog([null]));
@@ -72,6 +72,18 @@ test('curated paths reject traversal, external URLs, authoring sources and dupli
   assert.throws(() => createCourseCatalog([{
     path: 'courses/large.json', text: ' '.repeat(262145)
   }]), /256 KiB/);
+});
+
+test('every published course is registered, including courses beyond the original 32-course bound', async () => {
+  const files = (await readdir(new URL('courses/', root)))
+    .filter(name => /^[a-z0-9-]+\.json$/.test(name))
+    .sort().map(name => 'courses/' + name);
+  const paths = JSON.parse(await read('catalog/courses.json'));
+  assert.deepEqual(paths, files, 'New course files must be discoverable in the catalog');
+  assert.ok(paths.length > 32);
+  assert.equal(validateCatalogPaths(paths).length, paths.length);
+  assert.equal(validateCatalogPaths(Array.from({length: MAX_CATALOG_COURSES}, (_, i) =>
+    'courses/course-' + i + '.json')).length, MAX_CATALOG_COURSES);
 });
 
 test('search uses title and concept substrings with stable order and trimmed case', () => {

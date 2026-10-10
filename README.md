@@ -1,6 +1,27 @@
 # RecallWeave
 
-**ForgeHacks 2026 · AI + Education** — an original, static, browser-only learning experience whose bundled lesson connects ideas in cellular energy. Learners can also bring a local JSON lesson deck. The official track framing on ForgeHacks is “Reimagining how people learn and teach.” This demo responds to that brief by helping a learner retrieve concepts, see links, and apply them—not by generating chat answers.
+RecallWeave is a static, browser-only toolkit for connected learning across science, mathematics and computing. It combines an adaptive learner, downloadable courses with worked guides, interactive labs and algorithm explorers, and tools for creating lessons, preparing handouts and comparing saved learning traces. The bundled starter lesson connects ideas in cellular energy.
+
+**[Explore the live toolkit](https://jacobmetoyer.com/RecallWeave/explore.html)** · [Try the learner](https://jacobmetoyer.com/RecallWeave/demo.html) · [Course downloads](https://jacobmetoyer.com/RecallWeave/catalog.html) · [Offline course pack](https://jacobmetoyer.com/RecallWeave/offline/)
+
+## Find the courses and tools
+
+Open [the toolkit directory](explore.html) to find every published course, its worked guide and any companion labs. Search course titles and concepts, or filter for interactive labs. Download a course JSON, open the learner, choose it under **Bring your own lesson**, preview it and select **Start this deck**.
+
+The directory also links [Deck studio](author.html), [Lesson focus](focus.html), [Course handouts](handout.html) and [Compare learning traces](compare-traces.html). These tools work with local files. Learning records and writing remain in the tab unless explicitly downloaded; there is no account or automatic browser storage.
+
+The published inventory is generated from validated course files, `catalog/courses.json` and the explicit lab mapping in `catalog/companions.json`. Add every new canonical course to both registries (use an empty lab array when needed), and supply its matching Markdown guide. The build rejects missing courses, guides, duplicate lab links and unlinked published labs. Authoring source files and HTML templates are excluded.
+
+Rebuild the public artifacts in order:
+
+```sh
+python3 tools/make_demo.py
+node tools/build-site-directory.mjs
+node tools/build-course-catalog.mjs
+python3 tools/build-offline-pack.py
+```
+
+The directory, catalog and pack builders accept `--check`; CI checks their committed output against the current repository. No network or package installation is required to build them.
 
 ## Run it
 

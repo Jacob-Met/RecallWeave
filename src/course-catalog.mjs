@@ -1,12 +1,12 @@
 import { parseDeck } from './deck.mjs';
 
-export const MAX_CATALOG_COURSES = 32;
+export const MAX_CATALOG_COURSES = 128;
 const COURSE_PATH = /^courses\/[a-z0-9][a-z0-9-]*\.json$/;
 
 /** Curated repository paths only; authoring source files are not course decks. */
 export function validateCatalogPaths(paths) {
   if (!Array.isArray(paths) || paths.length < 1 || paths.length > MAX_CATALOG_COURSES) {
-    throw new Error('The catalog must list 1–32 course files.');
+    throw new Error('The catalog must list 1–128 course files.');
   }
   const seen = new Set();
   return Object.freeze(paths.map(path => {

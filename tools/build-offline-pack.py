@@ -72,8 +72,8 @@ class CatalogData(HTMLParser):
 def build_pack(root=ROOT):
     registry = read_regular(root, "catalog/courses.json")
     paths = strict_json(registry.decode("utf-8"))
-    if not isinstance(paths, list) or not 1 <= len(paths) <= 32:
-        raise ValueError("The catalog must register 1-32 course files.")
+    if not isinstance(paths, list) or not 1 <= len(paths) <= 128:
+        raise ValueError("The catalog must register 1-128 course files.")
     if any(not isinstance(path, str) or
            not re.fullmatch(r"courses/[a-z0-9][a-z0-9-]*\.json", path)
            for path in paths):

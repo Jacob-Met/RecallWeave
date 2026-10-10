@@ -19,6 +19,11 @@ jobs:
           node-version: "20"
       - name: run dependency-free unit/property tests
         run: node --test tests/*.test.mjs
+      - name: verify site directory, course catalog and offline pack
+        run: |
+          node tools/build-site-directory.mjs --check
+          node tools/build-course-catalog.mjs --check
+          python3 tools/build-offline-pack.py --check
       - name: verify demo.html is in sync with sources
         run: |
           cp demo.html /tmp/demo-before.html
