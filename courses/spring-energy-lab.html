@@ -1,0 +1,501 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>Spring energy · RecallWeave</title>
+<style>
+:root{font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#182b39;background:#eef3f1;line-height:1.55;--ink:#163343;--teal:#087b72;--blue:#3366a4;--gold:#b65f12;--line:#ccd9d5}
+*{box-sizing:border-box}body{margin:0}button,input{font:inherit}button,a,input,[tabindex]{outline-offset:4px}
+button{cursor:pointer;border:1px solid #76948d;border-radius:9px;background:#fff;color:var(--ink);padding:.62rem .85rem;line-height:1.3}
+button:hover:not(:disabled){background:#e7f3ef;border-color:var(--teal)}button:disabled{cursor:default;opacity:.5}
+button.primary{background:var(--teal);border-color:var(--teal);color:#fff;font-weight:700}button.primary:hover{background:#05615b}
+a{color:#08645e;text-underline-offset:3px}header{background:var(--ink);color:#fff;padding:2.6rem max(1rem,calc((100vw - 1280px)/2))}
+.eyebrow{text-transform:uppercase;letter-spacing:.13em;font-size:.78rem;font-weight:750;color:#9ee3d0;margin:0 0 .7rem}
+h1{font-size:clamp(2rem,4vw,3.25rem);line-height:1.12;margin:0 0 .85rem;max-width:22ch;letter-spacing:-.04em}
+header p:last-child{max-width:74ch;margin:0;color:#d5e5e6}main{max-width:1280px;margin:auto;padding:1.4rem 1rem 3rem}
+h2{font-size:1.3rem;line-height:1.3;margin:0 0 .75rem}h3{font-size:1.05rem;margin:0 0 .5rem}p{margin:.55rem 0 1rem}
+.layout{display:grid;grid-template-columns:minmax(265px,330px) minmax(0,1fr);gap:1.2rem;align-items:start}
+.panel{background:#fff;border:1px solid var(--line);border-radius:16px;padding:1.25rem;box-shadow:0 4px 14px #173b2d05}
+.stack{display:grid;grid-template-columns:minmax(0,1fr);gap:1.2rem;min-width:0}.small{font-size:.9rem;color:#4e656f}.quiet{color:#4e656f}
+.step{display:inline-grid;place-items:center;background:#deeee7;border-radius:50%;width:1.65rem;height:1.65rem;font-size:.85rem;margin-right:.4rem;color:#076359}
+.field{display:block;margin-bottom:.85rem;font-weight:650}.field small{font-weight:400;display:block;color:#5a6d73;margin:.16rem 0}
+.field input{display:block;width:100%;min-width:0;border:1px solid #8da59f;border-radius:8px;padding:.58rem .7rem;margin-top:.25rem;background:#fcfdfc;color:#182b39}
+.field input[aria-invalid=true]{border:2px solid #a73325}.actions{display:flex;flex-wrap:wrap;gap:.55rem;margin-top:.8rem}
+fieldset{border:0;padding:0;margin:0;min-width:0}legend{font-weight:700;margin-bottom:.45rem}.presets{display:grid;gap:.4rem;margin-top:.6rem}
+.presets button{text-align:left;font-size:.9rem}.divider{border-top:1px solid var(--line);margin-top:1.2rem;padding-top:1.1rem}
+.status{border-left:4px solid var(--teal);padding:.65rem .85rem;background:#edf7f3;border-radius:0 8px 8px 0;font-size:.92rem}
+.status.pending{border-color:var(--gold);background:#fff4df}.error{padding:.7rem .85rem;background:#fff0eb;border-left:4px solid #a73325;color:#752218;border-radius:0 8px 8px 0}
+[hidden]{display:none!important}.summary{font-weight:600;margin:.3rem 0 1rem}.phase-line{display:flex;justify-content:space-between;gap:1rem;align-items:baseline;margin-bottom:.3rem}
+#phase-slider{width:100%;height:30px;accent-color:var(--teal)}.phase-buttons{display:flex;gap:.35rem;flex-wrap:wrap}.phase-buttons button{flex:1;min-width:52px;padding:.5rem}
+.phase-buttons button[aria-pressed=true]{background:#dfefea;border:2px solid var(--teal);font-weight:700}
+.diagram-wrap{margin:1rem -.1rem .45rem;border:1px solid #dce7e2;border-radius:12px;background:#fbfdfb;overflow:hidden}
+svg{display:block;width:100%;height:auto}svg text{font-family:inherit}.motion-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.7rem}
+.metric{border-top:3px solid #86b3a7;padding:.7rem .6rem;background:#f5f9f7;border-radius:0 0 8px 8px;min-width:0}
+.metric span{display:block;font-size:.8rem;color:#4e656f}.metric strong{display:block;font-variant-numeric:tabular-nums;font-size:1.12rem;overflow-wrap:anywhere}
+.period-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.7rem;margin-top:.75rem}
+.period-grid div{font-size:.86rem}.period-grid strong{display:block;font-variant-numeric:tabular-nums}
+.energybar{height:38px;display:flex;border:1px solid #3a6474;border-radius:8px;overflow:hidden;background:repeating-linear-gradient(135deg,#f5f7f4,#f5f7f4 5px,#e7ece9 5px,#e7ece9 10px)}
+.energybar span{display:block;min-width:0}.kinetic{background:var(--blue)}.potential{background:var(--gold)}
+.energy-keys{display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin:.8rem 0}.energy-keys strong{display:block;font-size:1.13rem;font-variant-numeric:tabular-nums}
+.swatch{display:inline-block;width:.75rem;height:.75rem;margin-right:.35rem;border:1px solid #263d4e;border-radius:2px}
+dl{margin:.5rem 0}dl div{display:flex;justify-content:space-between;gap:1rem;padding:.35rem 0;border-bottom:1px solid #e1e9e5}dt{color:#4d626c}dd{margin:0;font-variant-numeric:tabular-nums;text-align:right}
+.compare{background:#eef5f2;border-radius:10px;padding:.85rem;margin-top:1rem}.compare p{margin:.2rem 0}
+.table-region{max-height:345px;overflow:auto;border:1px solid var(--line);border-radius:9px;margin-top:.8rem}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums;font-size:.82rem;white-space:nowrap}
+th,td{text-align:right;padding:.48rem .6rem;border-bottom:1px solid #dce6e1}th{position:sticky;top:0;background:#e6f0eb;color:#213f4b;z-index:1}
+tbody tr:nth-child(2n){background:#f6f9f7}tbody tr[data-current=true]{background:#deefe8;font-weight:700}
+footer{border-top:1px solid var(--line);margin-top:1.2rem;padding-top:1rem}.links{display:flex;flex-wrap:wrap;gap:.6rem 1.2rem}
+@media(max-width:900px){.layout{grid-template-columns:1fr}.motion-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.period-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:690px){svg text{font-size:30px}header{padding:1.7rem 1rem}.layout{grid-template-columns:1fr}.panel{padding:1rem}.period-grid{grid-template-columns:repeat(3,minmax(0,1fr))}main{padding:.9rem .65rem 2rem}.small{font-size:.86rem}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto}}
+@media print{header{background:#fff;color:#182b39;padding:1rem 0}.eyebrow,header p:last-child{color:#384f57}.layout{display:block}.panel{break-inside:avoid;box-shadow:none;margin-bottom:1rem}button,input,.presets,#phase-controls{display:none}.table-region{max-height:none;overflow:visible}.stack{display:block}.panel{border:1px solid #aab7b1}th{position:static}footer{break-inside:avoid}}
+</style>
+</head>
+<body>
+<header>
+<p class="eyebrow">RecallWeave · an offline physics lab</p>
+<h1>Where does the spring's energy go?</h1>
+<p>Release a block, inspect its motion, and compare separate preparations. The spring pulls toward equilibrium; the direction of motion depends on the phase.</p>
+</header>
+<main>
+<div class="layout">
+<aside class="panel">
+<h2><span class="step">1</span>Prepare a release</h2>
+<p class="small">A horizontal, frictionless spring and a point mass. Every Apply starts a separately prepared trajectory at its chosen phase; it does not modify a moving apparatus.</p>
+<form id="parameters" novalidate>
+<label class="field" for="mass">Mass <small>0.1–10 kg</small><input id="mass" name="massKg" type="text" inputmode="decimal" value="2" maxlength="64"></label>
+<label class="field" for="stiffness">Spring stiffness <small>1–200 N/m</small><input id="stiffness" name="stiffnessNPerM" type="text" inputmode="decimal" value="50" maxlength="64"></label>
+<label class="field" for="amplitude">Release amplitude <small>0–0.5 m; zero means rest</small><input id="amplitude" name="amplitudeM" type="text" inputmode="decimal" value="0.2" maxlength="64"></label>
+<label class="field" for="phase">Phase <small>0–360 degrees from release at the right turning point</small><input id="phase" name="phaseDegrees" type="text" inputmode="decimal" value="0" maxlength="64"></label>
+<div class="actions"><button type="submit" class="primary" id="apply">Apply inputs</button><button type="button" id="reset">Reset example</button></div>
+</form>
+<p id="input-error" class="error" role="alert" hidden></p>
+<fieldset class="divider">
+<legend>Compare with the default</legend>
+<p class="small">Each preset releases the block from rest at phase 0°.</p>
+<div class="presets">
+<button type="button" data-preset="heavy">4× mass · 8 kg, same spring and amplitude</button>
+<button type="button" data-preset="stiff">4× stiffness · 200 N/m, same mass and amplitude</button>
+<button type="button" data-preset="large">2× amplitude · 0.4 m, same mass and spring</button>
+</div>
+</fieldset>
+<div class="divider">
+<h3>Try a prediction first</h3>
+<p class="small">At 90°, which way is the block moving? At 270°, what changes? Then double the release amplitude: does the period double too?</p>
+<button type="button" id="download-course">Download the 12-question lesson</button>
+<p class="small">Open <a href="../demo.html">the RecallWeave learner</a>, choose this deck, preview it, and explicitly start when ready.</p>
+</div>
+</aside>
+<div class="stack">
+<section class="panel" aria-labelledby="motion-title">
+<h2 id="motion-title"><span class="step">2</span>Inspect the motion</h2>
+<p id="applied-summary" class="summary"></p>
+<p id="draft-status" class="status" role="status" aria-live="polite"></p>
+<fieldset id="phase-controls">
+<legend class="phase-line">Move through one cycle <output id="phase-readout" for="phase-slider"></output></legend>
+<label for="phase-slider" class="small">Phase slider · arrow keys change one degree</label>
+<input id="phase-slider" type="range" min="0" max="360" step="any" value="0">
+<div class="phase-buttons" aria-label="Canonical phases">
+<button type="button" data-phase="0">0°</button><button type="button" data-phase="90">90°</button><button type="button" data-phase="180">180°</button><button type="button" data-phase="270">270°</button><button type="button" data-phase="360">360°</button>
+</div>
+</fieldset>
+<div class="diagram-wrap">
+<svg id="motion-diagram" viewBox="0 0 720 320" role="img" aria-labelledby="diagram-title diagram-description">
+<title id="diagram-title">Horizontal spring oscillator</title>
+<desc id="diagram-description"></desc>
+<defs><marker id="motion-arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L8,4 L0,8 Z" fill="#3366a4"></path></marker><marker id="force-arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L8,4 L0,8 Z" fill="#a34c14"></path></marker></defs>
+<path d="M64 82 V206 M48 91 L64 82 M48 116 L64 107 M48 141 L64 132 M48 166 L64 157 M48 191 L64 182" fill="none" stroke="#526c75" stroke-width="3"></path>
+<line x1="80" y1="206" x2="640" y2="206" stroke="#819a95" stroke-width="2"></line>
+<line x1="360" y1="55" x2="360" y2="232" stroke="#9eb9ae" stroke-width="2" stroke-dasharray="5 5"></line>
+<text x="360" y="38" text-anchor="middle" font-size="17" fill="#526973">equilibrium</text>
+<path id="spring-shape" d="" fill="none" stroke="#477d71" stroke-width="3"></path>
+<rect id="mass-block" x="416" y="127" width="64" height="78" rx="8" fill="#d5ece4" stroke="#17695e" stroke-width="3"></rect>
+<text id="mass-label" x="448" y="172" text-anchor="middle" font-size="18" fill="#164c46">m</text>
+<line id="force-vector" x1="448" y1="83" x2="370" y2="83" stroke="#a34c14" stroke-width="3" marker-end="url(#force-arrow)"></line>
+<text id="force-direction" x="448" y="68" text-anchor="middle" font-size="16" fill="#934512"></text>
+<line id="velocity-vector" x1="448" y1="110" x2="370" y2="110" stroke="#3366a4" stroke-width="3" marker-end="url(#motion-arrow)"></line>
+<text id="velocity-direction" x="448" y="246" text-anchor="middle" font-size="16" fill="#27578d"></text>
+<line x1="140" y1="270" x2="580" y2="270" stroke="#536d75" stroke-width="2"></line>
+<path d="M140 264 V276 M360 264 V276 M580 264 V276" stroke="#536d75" stroke-width="2"></path>
+<text x="140" y="294" text-anchor="middle" font-size="16" fill="#435e68">−0.5 m</text><text x="360" y="294" text-anchor="middle" font-size="16" fill="#435e68">0</text><text x="580" y="294" text-anchor="middle" font-size="16" fill="#435e68">+0.5 m</text>
+</svg>
+</div>
+<p class="small">Fixed displacement scale. Arrows show direction only; their lengths do not compare magnitudes. The block's drawing size does not encode its mass.</p>
+<div class="motion-grid">
+<div class="metric"><span>Position x</span><strong data-value="position" data-unit="m"></strong></div>
+<div class="metric"><span>Velocity v</span><strong data-value="velocity" data-unit="m/s"></strong></div>
+<div class="metric"><span>Acceleration a</span><strong data-value="acceleration" data-unit="m/s²"></strong></div>
+<div class="metric"><span>Spring force F</span><strong data-value="force" data-unit="N"></strong></div>
+</div>
+<div class="period-grid">
+<div>Natural period T<strong data-value="period" data-unit="s"></strong></div>
+<div>Frequency f<strong data-value="frequency" data-unit="Hz"></strong></div>
+<div>Angular frequency ω<strong data-value="omega" data-unit="rad/s"></strong></div>
+</div>
+<p id="elapsed" class="small"></p>
+</section>
+<section class="panel" aria-labelledby="energy-title">
+<h2 id="energy-title"><span class="step">3</span>Follow the energy</h2>
+<p class="small">Spring potential energy is zero at equilibrium. The bar divides this release's energy between motion and the spring; it does not compare absolute energies between presets.</p>
+<div id="energy-bar" class="energybar" role="img" aria-label=""><span id="kinetic-bar" class="kinetic"></span><span id="potential-bar" class="potential"></span></div>
+<div class="energy-keys">
+<div><span class="swatch kinetic"></span>Kinetic K<strong id="kinetic-value"></strong><span id="kinetic-fraction" class="small"></span></div>
+<div><span class="swatch potential"></span>Spring potential U<strong id="potential-value"></strong><span id="potential-fraction" class="small"></span></div>
+</div>
+<p id="energy-note" class="small"></p>
+<dl><div><dt>Calculated K + U</dt><dd data-value="totalEnergy" data-unit="J"></dd></div><div><dt>Release energy ½kA²</dt><dd data-value="releaseEnergy" data-unit="J"></dd></div><div><dt>Numerical residual (K + U) − ½kA²</dt><dd data-value="energyResidual" data-unit="J"></dd></div></dl>
+<p class="small">K = ½mv² and U = ½kx² are calculated separately. Their tiny floating-point residual, when present, is not physical dissipation.</p>
+<div class="compare"><h3>Compared with the default release</h3><p class="small">Default: 2 kg, 50 N/m, 0.2 m · T = 1.25664 s · E = 1 J.</p><p id="comparison"></p></div>
+<div class="actions"><button type="button" id="download-experiment" class="primary">Download applied experiment JSON</button></div>
+<p id="download-status" class="small" role="status" aria-live="polite"></p>
+</section>
+<section class="panel" aria-labelledby="cycle-title">
+<h2 id="cycle-title">One complete cycle</h2>
+<p class="small">73 observations at 5° steps, including both endpoints. Values below are rounded for reading; the experiment JSON retains every original numeric value. A chosen phase between rows still has its exact observation above.</p>
+<div class="table-region" tabindex="0" role="region" aria-label="Complete cycle table; scroll horizontally for all quantities">
+<table><thead><tr><th scope="col">Phase (°)</th><th scope="col">Time (s)</th><th scope="col">x (m)</th><th scope="col">v (m/s)</th><th scope="col">a (m/s²)</th><th scope="col">F (N)</th><th scope="col">K (J)</th><th scope="col">U (J)</th><th scope="col">K + U (J)</th></tr></thead><tbody id="cycle-rows"></tbody></table>
+</div>
+</section>
+</div>
+</div>
+<footer class="small">
+<p>This ideal model has no damping or drive. Each input set describes a separate release at rest from x = +A; changing parameters does not model work done on an oscillator already moving. Zero amplitude is rest, even though the natural period of the system is defined.</p>
+<div class="links"><a href="spring-energy.md">Worked guide and transfer solutions</a><a href="../demo.html">RecallWeave learner</a><a href="https://ocw.mit.edu/courses/8-01sc-classical-mechanics-fall-2016/mit8_01scs22_chapter23.pdf">Physics reference · MIT 8.01SC, chapter 23</a></div>
+</footer>
+</main>
+<script id="spring-course-data" type="application/json">"{\n  \"format\": \"recallweave-deck/1\",\n  \"title\": \"Spring energy: motion, force and conservation\",\n  \"attribution\": \"Original RecallWeave lesson by the HAMON estate team with AI assistance, 2026-10-08. Scientific concepts checked against MIT OpenCourseWare 8.01SC, Chapter 23, sections 23.2–23.3 (https://ocw.mit.edu/courses/8-01sc-classical-mechanics-fall-2016/mit8_01scs22_chapter23.pdf) and OpenStax University Physics Volume 1, section 15.1 (https://openstax.org/books/university-physics-volume-1/pages/15-1-simple-harmonic-motion). No textbook questions, passages or figures are reproduced.\",\n  \"license\": \"Original question wording, explanations and transfer exercises are offered under CC BY 4.0. Linked reference works retain their own licenses; this statement does not relicense them.\",\n  \"concepts\": [\n    \"Restoring force\",\n    \"Phase and period\",\n    \"Energy exchange\",\n    \"Changing the system\"\n  ],\n  \"items\": [\n    {\n      \"id\": \"spring-force-1\",\n      \"concept\": \"Restoring force\",\n      \"prerequisites\": [],\n      \"prompt\": \"An ideal horizontal spring has stiffness k = 80 N/m. Take rightward displacement as positive. When its block is at x = +0.15 m from equilibrium, what horizontal force does the spring exert on the block?\",\n      \"options\": [\n        \"+12 N\",\n        \"−0.15 N\",\n        \"−12 N\",\n        \"−80 N\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"Hooke's law gives F = −kx = −(80 N/m)(0.15 m) = −12 N. The negative sign means leftward, toward equilibrium. The stiffness is a force per displacement, so it must be multiplied by x; it is not itself the force.\",\n      \"transfer\": \"A different spring has k = 120 N/m and x = −0.05 m. Calculate its force and state its direction.\"\n    },\n    {\n      \"id\": \"spring-force-2\",\n      \"concept\": \"Restoring force\",\n      \"prerequisites\": [],\n      \"prompt\": \"An ideal horizontal spring is the only horizontal force on a 2 kg block. Its stiffness is 50 N/m and the block is at x = −0.08 m, with rightward positive. What is the block's acceleration at this instant?\",\n      \"options\": [\n        \"+2 m/s²\",\n        \"−2 m/s²\",\n        \"+4 m/s²\",\n        \"0 m/s²\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"The spring force is −kx = −50(−0.08) = +4 N. Newton's second law then gives a = F/m = 4/2 = +2 m/s². The block accelerates toward equilibrium, whether it is currently moving left or right.\",\n      \"transfer\": \"For k = 60 N/m, m = 3 kg and x = +0.10 m, find both force and acceleration. What would the acceleration be for a separate 6 kg block at the same displacement?\"\n    },\n    {\n      \"id\": \"spring-force-3\",\n      \"concept\": \"Restoring force\",\n      \"prerequisites\": [],\n      \"prompt\": \"A block has a nonzero amplitude in an ideal frictionless spring oscillator. As it passes through the equilibrium position, which description is correct?\",\n      \"options\": [\n        \"Its speed is zero and its acceleration is zero.\",\n        \"Its speed is zero and its acceleration magnitude is largest.\",\n        \"Its speed and its acceleration magnitude are both largest.\",\n        \"Its speed is largest and its acceleration is zero.\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"At equilibrium x = 0, so F = −kx and a = F/m are zero. The block has converted its spring potential energy into kinetic energy, so its speed is greatest there. Zero instantaneous acceleration does not require zero velocity.\",\n      \"transfer\": \"At the left turning point x = −A, identify the velocity and the direction of acceleration. Explain why zero velocity there does not keep the block at rest.\"\n    },\n    {\n      \"id\": \"spring-phase-1\",\n      \"concept\": \"Phase and period\",\n      \"prerequisites\": [\n        \"Restoring force\"\n      ],\n      \"prompt\": \"An ideal horizontal oscillator has m = 2 kg and k = 32 N/m. What is its natural period?\",\n      \"options\": [\n        \"0.50 s\",\n        \"π/2 s\",\n        \"2π s\",\n        \"4π s\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"The angular frequency is ω = √(k/m) = √16 = 4 rad/s. A full cycle is 2π radians, so T = 2π/ω = π/2 s, approximately 1.571 s. The angular frequency 4 rad/s is not the ordinary frequency in cycles per second.\",\n      \"transfer\": \"Find ω, T and the ordinary frequency f for m = 2 kg and k = 18 N/m. State the unit of each.\"\n    },\n    {\n      \"id\": \"spring-phase-2\",\n      \"concept\": \"Phase and period\",\n      \"prerequisites\": [\n        \"Restoring force\"\n      ],\n      \"prompt\": \"A block is released from rest at x = +0.20 m in an ideal oscillator with angular frequency ω = 5 rad/s. Rightward is positive. What is its velocity one quarter of a period after release?\",\n      \"options\": [\n        \"+1.0 m/s\",\n        \"0 m/s\",\n        \"−1.0 m/s\",\n        \"−0.20 m/s\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"For this release, x = A cos(ωt) and v = −Aω sin(ωt). After T/4 the phase is π/2, so v = −(0.20)(5) = −1.0 m/s. The block is crossing equilibrium toward the left, not turning around.\",\n      \"transfer\": \"For A = 0.30 m and ω = 4 rad/s with the same release convention, find x, v and a after half a period.\"\n    },\n    {\n      \"id\": \"spring-phase-3\",\n      \"concept\": \"Phase and period\",\n      \"prerequisites\": [\n        \"Restoring force\"\n      ],\n      \"prompt\": \"Use x = A cos θ and v = −Aω sin θ, with A > 0 and θ increasing with time from release at the right turning point. At which phase is the block at equilibrium and moving right?\",\n      \"options\": [\n        \"270°\",\n        \"0°\",\n        \"90°\",\n        \"180°\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"At 270°, cos θ = 0 and sin θ = −1. Thus x = 0 and v = +Aω, so the block is moving right. It also crosses equilibrium at 90°, but its velocity is negative on that crossing.\",\n      \"transfer\": \"Compare phases 45° and 315°. Which of position, force, speed and velocity are equal, and which differ?\"\n    },\n    {\n      \"id\": \"spring-energy-1\",\n      \"concept\": \"Energy exchange\",\n      \"prerequisites\": [\n        \"Restoring force\",\n        \"Phase and period\"\n      ],\n      \"prompt\": \"An ideal oscillator is released from rest with amplitude A = 0.20 m and spring stiffness k = 100 N/m. What is its total mechanical energy, taking spring potential energy as zero at equilibrium?\",\n      \"options\": [\n        \"0.20 J\",\n        \"1 J\",\n        \"20 J\",\n        \"2 J\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"At release the block is at rest, so all the mechanical energy is spring potential energy: E = ½kA² = ½(100)(0.20)² = 2 J. Squaring the amplitude is essential. During this ideal motion K + U remains 2 J.\",\n      \"transfer\": \"For k = 80 N/m and A = 0.25 m, find total energy, then divide it into kinetic and spring potential energy at a turning point and at equilibrium.\"\n    },\n    {\n      \"id\": \"spring-energy-2\",\n      \"concept\": \"Energy exchange\",\n      \"prerequisites\": [\n        \"Restoring force\",\n        \"Phase and period\"\n      ],\n      \"prompt\": \"An ideal spring oscillator has total mechanical energy E = 20 J and positive amplitude A. Take spring potential energy as zero at equilibrium. At an instant when x = A/2, what are its kinetic energy K and spring potential energy U?\",\n      \"options\": [\n        \"K = 5 J; U = 15 J\",\n        \"K = 15 J; U = 5 J\",\n        \"K = 10 J; U = 10 J\",\n        \"K = 0 J; U = 20 J\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"U/E = x²/A² = (1/2)² = 1/4, so U = 5 J. Conservation gives K = E − U = 15 J. Half the maximum displacement does not mean half the potential energy, and the energy split does not determine the direction of motion.\",\n      \"transfer\": \"At x = A/√2 in a different oscillator with total energy 8 J, find K and U. Can those energies tell you whether the block is moving left or right?\"\n    },\n    {\n      \"id\": \"spring-energy-3\",\n      \"concept\": \"Energy exchange\",\n      \"prerequisites\": [\n        \"Restoring force\",\n        \"Phase and period\"\n      ],\n      \"prompt\": \"Compare two separately prepared ideal releases with the same mass and spring stiffness, taking spring potential energy as zero at equilibrium. Their amplitudes are 0.10 m and 0.20 m. What is the second release's total mechanical energy divided by the first release's?\",\n      \"options\": [\n        \"×2\",\n        \"×1/2\",\n        \"×4\",\n        \"×1\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"The energy of each release is E = ½kA². Doubling A multiplies A² by four, so the second energy is four times the first. This compares two preparations; it does not describe changing amplitude during an otherwise isolated motion.\",\n      \"transfer\": \"Keeping m and k fixed, a new release has half the amplitude. How do its total energy, maximum speed and natural period compare?\"\n    },\n    {\n      \"id\": \"spring-change-1\",\n      \"concept\": \"Changing the system\",\n      \"prerequisites\": [\n        \"Phase and period\",\n        \"Energy exchange\"\n      ],\n      \"prompt\": \"Compare two separately prepared ideal oscillators with the same spring stiffness and nonzero release amplitude. One block has mass 0.5 kg; the other has mass 2 kg. How does the 2 kg block's natural period compare?\",\n      \"options\": [\n        \"It doubles.\",\n        \"It halves.\",\n        \"It quadruples.\",\n        \"It stays the same.\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"T = 2π√(m/k), so multiplying mass by four multiplies the period by √4 = 2. With the same k and A, the release energy ½kA² stays the same, while the maximum speed A√(k/m) halves.\",\n      \"transfer\": \"In that four-times-mass comparison at the same phase, how do spring force, acceleration and kinetic energy compare? Keep the same stiffness and amplitude.\"\n    },\n    {\n      \"id\": \"spring-change-2\",\n      \"concept\": \"Changing the system\",\n      \"prerequisites\": [\n        \"Phase and period\",\n        \"Energy exchange\"\n      ],\n      \"prompt\": \"Compare two separately prepared ideal oscillators with the same mass and the same nonzero release amplitude. Take spring potential energy as zero at equilibrium. Stiffness increases from 25 N/m to 100 N/m. How do the new natural period and total mechanical energy compare?\",\n      \"options\": [\n        \"Period ×2; energy ×4\",\n        \"Period ×1/2; energy unchanged\",\n        \"Period unchanged; energy ×4\",\n        \"Period ×1/2; energy ×4\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"Stiffness increases fourfold. Since T is proportional to 1/√k, the new period is half as long. Since E = ½kA² at fixed amplitude, the new energy is four times as large. The larger energy belongs to the different preparation, not to energy appearing inside one isolated oscillator.\",\n      \"transfer\": \"For two releases with the same m and A but k = 10 N/m and k = 90 N/m, compare natural period, maximum speed and total energy.\"\n    },\n    {\n      \"id\": \"spring-change-3\",\n      \"concept\": \"Changing the system\",\n      \"prerequisites\": [\n        \"Phase and period\",\n        \"Energy exchange\"\n      ],\n      \"prompt\": \"In the ideal release model, set amplitude A = 0 while keeping mass and spring stiffness positive. The block begins at equilibrium and at rest. Take spring potential energy as zero at equilibrium. Which description follows?\",\n      \"options\": [\n        \"It moves because a positive stiffness creates a nonzero force.\",\n        \"It stays at equilibrium with zero kinetic and spring potential energy.\",\n        \"Its spring force alternates even though its position stays fixed.\",\n        \"It crosses equilibrium with the ordinary maximum speed.\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"With A = 0, x = A cos θ, v = −Aω sin θ and a = −ω²x are all zero. The spring force and both energies are zero too. The system still has a natural frequency √(k/m), which describes its response to a nonzero disturbance; the present resting block is not completing observed cycles.\",\n      \"transfer\": \"Why should a display avoid reporting a kinetic-energy percentage by dividing 0 J by the total 0 J? What remains meaningful about the natural period shown for this resting system?\"\n    }\n  ]\n}\n"</script>
+<script>
+/** Ideal horizontal Hooke-law oscillator, inspected analytically over one cycle. */
+const OSCILLATOR_LIMITS = Object.freeze({
+  massKg: Object.freeze({ label: 'Mass', min: 0.1, max: 10, unit: 'kg' }),
+  stiffnessNPerM: Object.freeze({ label: 'Spring stiffness', min: 1, max: 200, unit: 'N/m' }),
+  amplitudeM: Object.freeze({ label: 'Release amplitude', min: 0, max: 0.5, unit: 'm' }),
+  phaseDegrees: Object.freeze({ label: 'Phase', min: 0, max: 360, unit: 'degrees' }),
+});
+const OSCILLATOR_DEFAULT = Object.freeze({
+  massKg: 2, stiffnessNPerM: 50, amplitudeM: 0.2, phaseDegrees: 0,
+});
+const OSCILLATOR_ASSUMPTIONS = Object.freeze([
+  'One positive point mass, one massless horizontal Hooke-law spring and a fixed equilibrium.',
+  'No friction, drive or other horizontal force. Rightward displacement is positive.',
+  'Each applied parameter set is a separate release from positive maximum displacement at rest.',
+  'Phase increases with elapsed time. This is an analytical inspection, not a numerical time step.',
+  'The natural period is a system property; zero amplitude describes rest without an observed cycle.',
+]);
+const positiveZero = value => value === 0 ? 0 : value;
+
+function inputRecord(value) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    throw new TypeError('Oscillator inputs must be an object.');
+  }
+  return value;
+}
+
+function admittedInput(value) {
+  const record = inputRecord(value);
+  const input = {};
+  for (const [key, limit] of Object.entries(OSCILLATOR_LIMITS)) {
+    const number = record[key];
+    if (typeof number !== 'number' || !Number.isFinite(number)) {
+      throw new TypeError(limit.label + ' must be a finite number.');
+    }
+    if (number < limit.min || number > limit.max) {
+      throw new RangeError(limit.label + ' must be between ' + limit.min + ' and ' + limit.max + ' ' + limit.unit + '.');
+    }
+    input[key] = positiveZero(number);
+  }
+  return Object.freeze(input);
+}
+
+/** Parse all four explicit decimal fields before returning an admitted parameter set. */
+function parseOscillatorInput(textFields) {
+  const fields = inputRecord(textFields);
+  const input = {};
+  for (const [key, limit] of Object.entries(OSCILLATOR_LIMITS)) {
+    const text = fields[key];
+    if (typeof text !== 'string' || text.length > 64 ||
+        !/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$/.test(text.trim())) {
+      throw new TypeError(limit.label + ' needs a decimal number of at most 64 characters.');
+    }
+    input[key] = Number(text.trim());
+  }
+  return admittedInput(input);
+}
+
+function phaseTrig(degrees) {
+  // Exact cardinal states avoid drawing a force at equilibrium due to cos(pi / 2).
+  if (degrees === 0 || degrees === 360) return [1, 0];
+  if (degrees === 90) return [0, 1];
+  if (degrees === 180) return [-1, 0];
+  if (degrees === 270) return [0, -1];
+  const radians = degrees * Math.PI / 180;
+  return [Math.cos(radians), Math.sin(radians)];
+}
+
+/** A new immutable observation; input objects and prior observations are never changed. */
+function inspectOscillator(value) {
+  const input = admittedInput(value);
+  const { massKg: mass, stiffnessNPerM: stiffness, amplitudeM: amplitude, phaseDegrees: phase } = input;
+  const omega = Math.sqrt(stiffness / mass);
+  const period = 2 * Math.PI / omega;
+  const [cosine, sine] = phaseTrig(phase);
+  const position = positiveZero(amplitude * cosine);
+  const velocity = positiveZero(-amplitude * omega * sine);
+  const force = positiveZero(-stiffness * position);
+  const acceleration = positiveZero(force / mass);
+  const kineticEnergy = 0.5 * mass * velocity * velocity;
+  const potentialEnergy = 0.5 * stiffness * position * position;
+  const totalEnergy = kineticEnergy + potentialEnergy;
+  const releaseEnergy = 0.5 * stiffness * amplitude * amplitude;
+  return Object.freeze({
+    input, omega, period, frequency: 1 / period, time: phase / 360 * period,
+    position, velocity, acceleration, force, kineticEnergy, potentialEnergy,
+    totalEnergy, releaseEnergy, energyResidual: positiveZero(totalEnergy - releaseEnergy),
+  });
+}
+
+/** Both endpoints are retained: the same physical state, separated by one natural period. */
+function sampleOscillatorCycle(value) {
+  const input = admittedInput(value);
+  return Object.freeze(Array.from({ length: 73 }, (_, index) =>
+    inspectOscillator({ ...input, phaseDegrees: index * 5 })));
+}
+
+/** Recompute from admitted inputs, so callers cannot substitute stale or altered result values. */
+function serializeOscillatorExperiment(value) {
+  const observation = inspectOscillator(value);
+  return JSON.stringify({
+    format: 'recallweave-spring-energy-observation/1',
+    assumptions: OSCILLATOR_ASSUMPTIONS,
+    units: {
+      massKg: 'kg', stiffnessNPerM: 'N/m', amplitudeM: 'm', phaseDegrees: 'degrees',
+      omega: 'rad/s', period: 's', frequency: 'Hz', time: 's', position: 'm',
+      velocity: 'm/s', acceleration: 'm/s^2', force: 'N',
+      kineticEnergy: 'J', potentialEnergy: 'J', totalEnergy: 'J',
+      releaseEnergy: 'J', energyResidual: 'J',
+    },
+    input: observation.input,
+    observation,
+    cycle: sampleOscillatorCycle(observation.input),
+  }, null, 2) + '\n';
+}
+
+
+const element = id => document.getElementById(id);
+const form = element('parameters');
+const fields = Object.fromEntries(Object.keys(OSCILLATOR_LIMITS).map(key => [key, form.elements.namedItem(key)]));
+const courseText = JSON.parse(element('spring-course-data').textContent);
+const defaultObservation = inspectOscillator(OSCILLATOR_DEFAULT);
+let applied = defaultObservation;
+let dirty = false;
+
+function numberText(value) {
+  if (value === 0) return '0';
+  const magnitude = Math.abs(value);
+  return magnitude < 0.0001 || magnitude >= 100000
+    ? value.toExponential(5)
+    : String(Number(value.toPrecision(6)));
+}
+
+function direction(value) {
+  return value === 0 ? 'zero' : value > 0 ? 'right' : 'left';
+}
+
+function svgAttribute(id, attributes) {
+  const target = element(id);
+  for (const [key, value] of Object.entries(attributes)) target.setAttribute(key, String(value));
+}
+
+function drawMotion() {
+  const center = 360 + 440 * applied.position;
+  const end = center - 32;
+  const start = 64, lead = 12, zigStart = start + lead, zigEnd = end - lead;
+  let spring = 'M' + start + ' 164 L' + zigStart + ' 164';
+  for (let i = 1; i <= 12; i++) {
+    const x = zigStart + (zigEnd - zigStart) * i / 13;
+    spring += ' L' + x + ' ' + (i % 2 ? 151 : 177);
+  }
+  spring += ' L' + zigEnd + ' 164 L' + end + ' 164';
+  svgAttribute('spring-shape', { d: spring });
+  svgAttribute('mass-block', { x: center - 32 });
+  svgAttribute('mass-label', { x: center });
+  for (const [name, value] of [['force', applied.force], ['velocity', applied.velocity]]) {
+    svgAttribute(name + '-vector', {
+      x1: center, x2: center + Math.sign(value) * 78,
+      visibility: value === 0 ? 'hidden' : 'visible',
+    });
+    svgAttribute(name + '-direction', { x: center });
+    element(name + '-direction').textContent = (name === 'force' ? 'F: ' : 'v: ') + direction(value);
+  }
+  element('diagram-description').textContent = 'Block at ' + numberText(applied.position) +
+    ' metres from equilibrium. Velocity ' + direction(applied.velocity) + '; spring force ' +
+    direction(applied.force) + '. Arrows indicate direction only, on a fixed displacement scale.';
+}
+
+function drawEnergy() {
+  const total = applied.releaseEnergy;
+  element('kinetic-value').textContent = numberText(applied.kineticEnergy) + ' J';
+  element('potential-value').textContent = numberText(applied.potentialEnergy) + ' J';
+  const resolved = total > 0;
+  const kineticPercent = resolved ? 100 * applied.kineticEnergy / total : 0;
+  const potentialPercent = resolved ? 100 * applied.potentialEnergy / total : 0;
+  element('kinetic-bar').style.width = Math.min(100, Math.max(0, kineticPercent)) + '%';
+  element('potential-bar').style.width = Math.min(100, Math.max(0, potentialPercent)) + '%';
+  element('kinetic-fraction').textContent = resolved ? numberText(kineticPercent) + '% of this release' : 'fraction undefined';
+  element('potential-fraction').textContent = resolved ? numberText(potentialPercent) + '% of this release' : 'fraction undefined';
+  const rest = applied.input.amplitudeM === 0;
+  element('energy-note').textContent = resolved
+    ? 'As the phase changes, energy moves between K and U while their total stays constant.'
+    : rest
+      ? 'Zero amplitude: the block is at rest. Dividing either zero energy by the zero total would be undefined.'
+      : 'This positive amplitude is too small for its energy to be represented by ordinary floating-point numbers; no energy fraction is reported.';
+  element('energy-bar').setAttribute('aria-label', resolved
+    ? 'Kinetic energy ' + numberText(kineticPercent) + ' percent; spring potential energy ' + numberText(potentialPercent) + ' percent of this release.'
+    : 'No energy fractions are defined for a represented total of zero joules.');
+}
+
+function drawCycle() {
+  const fragment = document.createDocumentFragment();
+  for (const row of sampleOscillatorCycle(applied.input)) {
+    const tr = document.createElement('tr');
+    tr.dataset.phase = String(row.input.phaseDegrees);
+    tr.dataset.current = String(row.input.phaseDegrees === applied.input.phaseDegrees);
+    for (const value of [row.input.phaseDegrees, row.time, row.position, row.velocity,
+      row.acceleration, row.force, row.kineticEnergy, row.potentialEnergy, row.totalEnergy]) {
+      const td = document.createElement('td');
+      td.textContent = numberText(value);
+      tr.append(td);
+    }
+    fragment.append(tr);
+  }
+  element('cycle-rows').replaceChildren(fragment);
+}
+
+function renderApplied() {
+  const p = applied.input;
+  element('applied-summary').textContent = 'Applied release: ' + numberText(p.massKg) + ' kg · ' +
+    numberText(p.stiffnessNPerM) + ' N/m · amplitude ' + numberText(p.amplitudeM) + ' m · phase ' +
+    numberText(p.phaseDegrees) + '°.';
+  element('phase-slider').value = String(p.phaseDegrees);
+  element('phase-slider').setAttribute('aria-valuetext', numberText(p.phaseDegrees) + ' degrees from release');
+  element('phase-readout').textContent = numberText(p.phaseDegrees) + '°';
+  for (const button of document.querySelectorAll('[data-phase]')) {
+    button.setAttribute('aria-pressed', String(Number(button.dataset.phase) === p.phaseDegrees));
+  }
+  for (const target of document.querySelectorAll('[data-value]')) {
+    target.textContent = numberText(applied[target.dataset.value]) + ' ' + target.dataset.unit;
+  }
+  element('elapsed').textContent = p.amplitudeM === 0
+    ? 'Resting system. The selected phase labels a natural-cycle coordinate; no physical cycle is being observed.'
+    : 'Elapsed time from release: ' + numberText(applied.time) + ' s (' +
+      numberText(p.phaseDegrees / 360) + ' of a natural period).';
+  element('comparison').textContent = 'Period ×' + numberText(applied.period / defaultObservation.period) +
+    '; release energy ×' + numberText(applied.releaseEnergy / defaultObservation.releaseEnergy) + '.';
+  drawMotion();
+  drawEnergy();
+  drawCycle();
+}
+
+function updateDraftState() {
+  element('phase-controls').disabled = dirty;
+  element('download-experiment').disabled = dirty;
+  element('draft-status').classList.toggle('pending', dirty);
+  element('draft-status').textContent = dirty
+    ? 'Unapplied edits. The diagram, numbers and table still show the last applied release. Apply all inputs to continue.'
+    : 'All displayed values and the experiment download use this applied release.';
+}
+
+function clearError() {
+  element('input-error').hidden = true;
+  element('input-error').textContent = '';
+  for (const field of Object.values(fields)) field.removeAttribute('aria-invalid');
+}
+
+function applyInput(input) {
+  const next = inspectOscillator(input);
+  applied = next;
+  dirty = false;
+  for (const [key, field] of Object.entries(fields)) field.value = String(next.input[key]);
+  clearError();
+  element('download-status').textContent = '';
+  renderApplied();
+  updateDraftState();
+}
+
+form.addEventListener('input', () => {
+  dirty = true;
+  clearError();
+  element('download-status').textContent = '';
+  updateDraftState();
+});
+form.addEventListener('submit', event => {
+  event.preventDefault();
+  clearError();
+  try {
+    const input = Object.fromEntries(Object.entries(fields).map(([key, field]) => [key, field.value]));
+    applyInput(parseOscillatorInput(input));
+  } catch (error) {
+    dirty = true;
+    element('input-error').textContent = error.message;
+    element('input-error').hidden = false;
+    for (const [key, limit] of Object.entries(OSCILLATOR_LIMITS)) {
+      if (error.message.startsWith(limit.label)) fields[key].setAttribute('aria-invalid', 'true');
+    }
+    updateDraftState();
+  }
+});
+element('reset').addEventListener('click', () => applyInput(OSCILLATOR_DEFAULT));
+const presets = {
+  heavy: { ...OSCILLATOR_DEFAULT, massKg: 8 },
+  stiff: { ...OSCILLATOR_DEFAULT, stiffnessNPerM: 200 },
+  large: { ...OSCILLATOR_DEFAULT, amplitudeM: 0.4 },
+};
+for (const button of document.querySelectorAll('[data-preset]')) {
+  button.addEventListener('click', () => applyInput(presets[button.dataset.preset]));
+}
+
+function changePhase(phaseDegrees) {
+  if (!dirty) applyInput({ ...applied.input, phaseDegrees });
+}
+element('phase-slider').addEventListener('input', event => changePhase(Number(event.target.value)));
+element('phase-slider').addEventListener('keydown', event => {
+  const steps = { ArrowLeft: -1, ArrowDown: -1, ArrowRight: 1, ArrowUp: 1, PageDown: -15, PageUp: 15 };
+  if (dirty || !(event.key in steps || event.key === 'Home' || event.key === 'End')) return;
+  event.preventDefault();
+  const phase = event.key === 'Home' ? 0 : event.key === 'End' ? 360
+    : Math.min(360, Math.max(0, applied.input.phaseDegrees + steps[event.key]));
+  changePhase(phase);
+});
+for (const button of document.querySelectorAll('[data-phase]')) {
+  button.addEventListener('click', () => changePhase(Number(button.dataset.phase)));
+}
+
+function downloadText(name, text) {
+  let url;
+  let anchor;
+  try {
+    url = URL.createObjectURL(new Blob([text], { type: 'application/json;charset=utf-8' }));
+    anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = name;
+    document.body.append(anchor);
+    anchor.click();
+    element('download-status').textContent = 'Download requested: ' + name + '.';
+  } catch (error) {
+    element('download-status').textContent = 'Download could not be requested: ' + error.message;
+  } finally {
+    anchor?.remove();
+    if (url) setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+}
+element('download-course').addEventListener('click', () => downloadText('spring-energy.json', courseText));
+element('download-experiment').addEventListener('click', () => {
+  if (!dirty) downloadText('spring-energy-experiment.json', serializeOscillatorExperiment(applied.input));
+});
+applyInput(OSCILLATOR_DEFAULT);
+
+</script>
+</body>
+</html>

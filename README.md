@@ -323,6 +323,12 @@ Open **[Hash tables: follow the probe](courses/hash-tables-explorer.html)** for 
 
 Question text and distractors are newly authored for this demo. Scientific concepts are checked against [OpenStax, *Biology 2e*](https://openstax.org/books/biology-2e/pages/1-introduction), sections 6.4, 7.1, 7.4 and 8.1–8.3, by Mary Ann Clark, Matthew Douglas and Jung Choi (Rice University). The current linked reference textbook content is licensed CC BY-NC-SA 4.0. [The item-level content review](docs/deck-content-review-20261008.md) records the scientific distinctions and references. Attribution is embedded in `data/deck.json`, shown at completion and included in downloaded notes. This demo uses original wording and does not copy textbook passages, figures or an existing hackathon entry.
 
+## Explore spring motion and energy
+
+Open the **[offline spring-energy lab](courses/spring-energy-lab.html)** to prepare an ideal release and inspect signed position, velocity, acceleration and restoring force beside kinetic and spring potential energy. Compare separate preparations with different mass, stiffness or amplitude, move through the phase with native keyboard controls, and download the applied experiment with its complete cycle.
+
+The original **[twelve-question course](courses/spring-energy.json)** enters the existing learner through preview and explicit Start, with first answers and later practice kept separate. The **[worked guide](courses/spring-energy.md)** explains the assumptions, predictions, transfer solutions and build/check commands. The schematic has a fixed displacement scale; its arrows show direction only.
+
 ## Tests
 
 Run the unit/property tests with Node 20+ and Python 3 (`python3` on your PATH): `node --test tests/*.test.mjs`. The local-file tests use Node's global [`File`](https://nodejs.org/api/globals.html#class-file), added in Node 20; Python verifies that the checked-in standalone author HTML matches its modular sources. No npm packages are required. Tests cover bounded probabilities over repeated updates, directional evidence behavior, invalid parameter rejection, entropy/information-gain bounds, prerequisite selection, exhaustion, and initialization.
