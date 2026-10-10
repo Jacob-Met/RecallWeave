@@ -18,7 +18,8 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 const START_HERE = "RecallWeave offline course pack\n\n1. Extract the entire ZIP. Keep the RecallWeave folder together.\n2. Open catalog.html in a web browser with JavaScript enabled.\n3. Choose Open learner to open the sibling demo.html.\n4. Under Bring your own lesson, choose a JSON file from the courses folder\n   (or a course file downloaded from the catalog).\n5. Inspect the preview, then select Start this deck.\n\nOpening and previewing a file leaves the current lesson in place. Start this deck\nbegins a fresh session. The catalog and learner need no server, account or network.\nOptional links to other tools or the public download page may need a connection\nor a separate download.\n\nCourse files keep their original source and permission statements. Learning-model\nestimates are illustrative, not grades or evidence of learning efficacy.\nUse the learner's explicit download controls to keep a study record; reloading\nclears the tab's in-memory session.\n\nSHA256SUMS.json lists the byte length and SHA-256 hash of every other file in this\npack. It describes file integrity, not authorship or an authenticated signature.\n";
 const MIN_DISK_BYTES = 1024n ** 3n;
 const MIN_MEMORY_BYTES = 512 * 1024 * 1024;
-const PACKET_LIMIT = 2 * 1024 * 1024;
+// Evidence includes original downloads, screenshots and (for the pack) its extracted copy.
+const PACKET_LIMIT = 8 * 1024 * 1024;
 const sha256 = bytes => createHash('sha256').update(bytes).digest('hex');
 const sleep = ms => new Promise(done => setTimeout(done, ms));
 
@@ -369,13 +370,13 @@ async function emitBundle(output) {
   for (const path of paths.sort()) {
     const info = await lstat(path);
     total += info.size;
-    assert.ok(total <= PACKET_LIMIT, 'Evidence packet exceeds 2 MiB; refusing incomplete export');
+    assert.ok(total <= PACKET_LIMIT, 'Evidence packet exceeds 8 MiB; refusing incomplete export');
     const bytes = await readFile(path);
     files.push({path: relative(output, path).split(sep).join('/'), bytes: bytes.length,
       sha256: sha256(bytes), base64: bytes.toString('base64')});
   }
   const payload = Buffer.from(JSON.stringify({version: 1, files}));
-  assert.ok(payload.length <= PACKET_LIMIT, 'Decoded evidence packet exceeds 2 MiB; refusing incomplete export');
+  assert.ok(payload.length <= PACKET_LIMIT, 'Decoded evidence packet exceeds 8 MiB; refusing incomplete export');
   const encoded = payload.toString('base64');
   const chunks = Math.ceil(encoded.length / 4096);
   console.log('RECALLWEAVE_OFFLINE_PACK_BUNDLE_BEGIN ' + JSON.stringify({

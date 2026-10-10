@@ -15,7 +15,8 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const MIN_DISK_BYTES = 1024n ** 3n;
 const MIN_MEMORY_BYTES = 512 * 1024 * 1024;
-const PACKET_LIMIT = 2 * 1024 * 1024;
+// Evidence includes original downloads, screenshots and (for the pack) its extracted copy.
+const PACKET_LIMIT = 8 * 1024 * 1024;
 const sha256 = bytes => createHash('sha256').update(bytes).digest('hex');
 const sleep = ms => new Promise(done => setTimeout(done, ms));
 
@@ -141,13 +142,13 @@ async function emitBundle(output) {
   for (const path of paths.sort()) {
     const info = await lstat(path);
     total += info.size;
-    assert.ok(total <= PACKET_LIMIT, 'Evidence packet exceeds 2 MiB; refusing incomplete export');
+    assert.ok(total <= PACKET_LIMIT, 'Evidence packet exceeds 8 MiB; refusing incomplete export');
     const bytes = await readFile(path);
     files.push({path: relative(output, path).split(sep).join('/'), bytes: bytes.length,
       sha256: sha256(bytes), base64: bytes.toString('base64')});
   }
   const payload = Buffer.from(JSON.stringify({version: 1, files}));
-  assert.ok(payload.length <= PACKET_LIMIT, 'Decoded evidence packet exceeds 2 MiB; refusing incomplete export');
+  assert.ok(payload.length <= PACKET_LIMIT, 'Decoded evidence packet exceeds 8 MiB; refusing incomplete export');
   const encoded = payload.toString('base64');
   const chunks = Math.ceil(encoded.length / 4096);
   console.log('RECALLWEAVE_CATALOG_BUNDLE_BEGIN ' + JSON.stringify({
