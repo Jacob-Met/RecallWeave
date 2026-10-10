@@ -1,0 +1,25 @@
+--- executed-v3-1923ecf1
++++ proposed-v4-3fccad06
+@@ -406,7 +406,12 @@
+       return { feedback: firstFeedback, archive: publicDownload(feedbackSave.download) };
+     });
+     await group("changed-locale-question-resume", async () => {
+-      const ids = course.items.map(x => x.id);
++      const savedFirstItem = course.items.find(x => x.id === firstQuestion.itemId);
++      assert.ok(savedFirstItem, "Saved first question belongs to the exact course");
++      const ids = course.items.filter(x => x.concept === savedFirstItem.concept
++        && JSON.stringify(x.prerequisites) === JSON.stringify(savedFirstItem.prerequisites)).map(x => x.id);
++      assert.ok(ids.length >= 2, "Controlled tie needs a same-concept prerequisite peer");
++      assert.ok(ids.includes(firstQuestion.itemId));
+       const install = function (ids) {
+         const known = new Set(ids), original = String.prototype.localeCompare, calls = [];
+         const controlled = function (other, ...args) {
+@@ -428,7 +433,7 @@
+       assert.deepEqual(await question(), firstQuestion);
+       const resave = await saveLesson("question-resaved.json"); assert.deepEqual(sansDate(resave.doc), sansDate(questionSave.doc));
+       const captureRow = await capture("question-resumed.png");
+-      return { counterfactual, original: firstQuestion, equalScoreBasis: "No answers; identical concept/mastery and prerequisite structure. The unchanged selector score depends on concept mastery and downstream count, which are equal for this same-concept pair.", preview, resave: publicDownload(resave.download), capture: captureRow };
++      return { controlledIds: ids, counterfactual, original: firstQuestion, equalScoreBasis: "No answers; identical concept/mastery and prerequisite structure. The unchanged selector score depends on concept mastery and downstream count, which are equal for this same-concept pair.", preview, resave: publicDownload(resave.download), capture: captureRow };
+     });
+     await group("changed-locale-feedback-resume", async () => {
+       const preview = await previewLesson(feedbackSave.download.file); await click("#resume-lesson-confirm");
