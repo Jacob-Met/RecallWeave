@@ -105,6 +105,12 @@ Each saved HTML file opens and prints offline on its own. The worksheet file con
 
 Open the [Boolean explorer](courses/boolean-logic-explorer.html) directly from your files to compare expressions, inspect complete truth tables, and find a counterexample when two expressions differ. Download the current full table as CSV or the original twelve-question course as JSON. Import that course through the learner’s existing preview and explicit start flow, then review, practice and save your notes. The [course guide](courses/boolean-logic.md) explains the supported grammar, worked answers and content sources.
 
+## Solve two remainder conditions together
+
+Open the [Congruences together lab](courses/congruences-explorer.html) directly from your files. Enter two signed remainders with positive moduli, then inspect an exact gcd/Bézout construction, a compatible solution class or an explicit contradiction. Shared factors, repeated conditions and modulus 1 remain distinct cases. The integer inspector shows every value in a bounded 24-integer window without rounding large integers or confusing an empty window with impossibility.
+
+Download the exact applied observation, the original [fourteen-question course](courses/congruences.json), or its [worked guide](courses/congruences.md). Import the course through **Bring your own lesson** for the existing feedback, review, separate practice and notes flow. The lab needs no connection or automatic browser storage. Rebuild with `node tools/build-congruences.mjs`, or add `--check` to verify source parity.
+
 ## Explore Euclid's algorithm
 
 Open the **[Euclidean algorithm explorer](courses/euclidean-algorithm-explorer.html)** directly from your files. Enter two nonnegative integers, inspect every exact division and remainder, and see the gcd expressed as an integer combination of the original pair. Previous, Next and Last division controls walk the full trace; an explicit download keeps the computed steps. The page explains zero inputs and distinguishes exact arithmetic from approximate diagram widths.
