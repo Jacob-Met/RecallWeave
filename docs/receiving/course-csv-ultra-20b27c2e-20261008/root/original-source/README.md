@@ -1,55 +1,10 @@
 # RecallWeave
 
-RecallWeave is a static, browser-only toolkit for connected learning across science, mathematics and computing. It combines an adaptive learner, downloadable courses with worked guides, interactive labs and algorithm explorers, and tools for creating lessons, preparing handouts and comparing saved learning traces. The bundled starter lesson connects ideas in cellular energy.
-
-**[Explore the live toolkit](https://jacobmetoyer.com/RecallWeave/explore.html)** · [Try the learner](https://jacobmetoyer.com/RecallWeave/demo.html) · [Course downloads](https://jacobmetoyer.com/RecallWeave/catalog.html) · [Offline course pack](https://jacobmetoyer.com/RecallWeave/offline/)
-
-## Find the courses and tools
-
-Open [the toolkit directory](explore.html) to find every published course, its worked guide and any companion labs. Search course titles and concepts, or filter for interactive labs. Download a course JSON, open the learner, choose it under **Bring your own lesson**, preview it and select **Start this deck**.
-
-The directory also links [Deck studio](author.html), [Lesson focus](focus.html), [Course handouts](handout.html) and [Compare learning traces](compare-traces.html). These tools work with local files. Learning records and writing remain in the tab unless explicitly downloaded; there is no account or automatic browser storage.
-
-The published inventory is generated from validated course files, `catalog/courses.json` and the explicit lab mapping in `catalog/companions.json`. Add every new canonical course to both registries (use an empty lab array when needed), and supply its matching Markdown guide. The build rejects missing courses, guides, duplicate lab links and unlinked published labs. Authoring source files and HTML templates are excluded.
-
-Rebuild the public artifacts in order:
-
-```sh
-python3 tools/make_demo.py
-node tools/build-site-directory.mjs
-node tools/build-course-catalog.mjs
-python3 tools/build-offline-pack.py
-```
-
-The directory, catalog and pack builders accept `--check`; CI checks their committed output against the current repository. No network or package installation is required to build them.
+**ForgeHacks 2026 · AI + Education** — an original, static, browser-only learning experience whose bundled lesson connects ideas in cellular energy. Learners can also bring a local JSON lesson deck. The official track framing on ForgeHacks is “Reimagining how people learn and teach.” This demo responds to that brief by helping a learner retrieve concepts, see links, and apply them—not by generating chat answers.
 
 ## Run it
 
 Open `demo.html` directly in a browser—no server, install, build step, internet, login, API key, or user data storage is required. It is a single self-contained file with embedded CSS, JavaScript and deck. The modular source is in `index.html`, `src/`, and `data/`; to test that version locally, serve this directory with `python3 -m http.server 8080` and visit `http://localhost:8080`. Rebuild the direct-open demo with `python3 tools/make_demo.py` after source changes. No hosted endpoint is called by either version.
-
-## Explore RC transients
-
-Open **[RC transients: where the energy goes](courses/rc-transients-lab.html)** directly in a browser to follow the response of one resistor and capacitor after an ideal source step. Compare charging, discharge, reversed polarity, a precharged capacitor returning energy to the source, resistance scaling and equilibrium. Voltage, signed current, charge, stored energy, resistor heat and source work share the same applied circuit and time cursor.
-
-Edit the resistance, capacitance, source voltage and initial capacitor voltage, then select **Apply circuit**. Draft edits retire the previous result. Inspect 161 samples from 0 to 8 time constants and download the full observation with physical units and assumptions. The finite horizon is not an exact steady-state endpoint.
-
-The original [sixteen-question course](courses/rc-transients.json) and [worked guide](courses/rc-transients.md) connect the lab to voltage continuity, time constants and energy balance. Download the course and choose it under **Bring your own lesson** for the existing preview, review, practice and notes flow. The standalone lab needs no server or connection and uses no automatic browser storage. Rebuild it with `node tools/build-rc-transients.mjs`, or verify exact source and embedded-download parity with `--check`.
-
-## Trace a maximum flow
-
-Open **[More flow needs a way through](courses/network-flow-explorer.html)** directly in a browser to follow a small directed capacity network from zero assignment to a matching flow-and-cut certificate. Inspect each breadth-first residual path, including cancellation of an earlier edge assignment, and keep independently supplied opposite edges distinct. The original-edge, residual and conservation tables expose every integer value.
-
-Load a worked example or enter 2–8 named vertices and capacities from 0 to 99, then select **Build the trace**. Back, Next and the step selector inspect retained snapshots. Editing retires the displayed result until another successful build. Download the exact applied observation, the original [fourteen-question course](courses/network-flow.json) or its [worked guide](courses/network-flow.md). Import the course through **Bring your own lesson** to use the existing feedback, review, practice and notes flow.
-
-The self-contained page needs no server, account, connection or automatic browser storage. Its observation is a mathematical teaching trace, separate from learner-answer archives. Rebuild with `node tools/build-network-flow.mjs`; add `--check` to verify exact model, UI, template, course and guide parity.
-
-## Interactive binary-search companion
-
-Open [the binary-search explorer](courses/binary-search-explorer.html) to step through the exact lower-bound loop from the existing **Binary search: precise boundaries** course. The file works directly in a browser without a server or connection. Enter up to 32 sorted integers, choose a target, and inspect each comparison, the classified prefix/suffix, unresolved element indices `[lo, hi)`, and possible answer boundaries `[lo, hi]`. Repeated values, absent targets, empty arrays and the boundary after the last element have explicit examples.
-
-**Build trace**, then use **Next**, **Back**, **First** or **Finish**. Editing either input retires the previous displayed trace until you build again. The final insertion boundary is separate from the equality check for membership. Ordering-comparison counts exclude input validation, rendering, sorting, insertion and that final equality check.
-
-The companion downloads the complete trace with its entered text, plus the original unchanged course JSON and worked guide. To study the course, open RecallWeave, choose the downloaded JSON under **Bring your own lesson**, inspect the preview, then choose **Start this deck**. Downloads do not change an existing learner session. Rebuild the standalone page with `node tools/build-binary-search-explorer.mjs`; verify exact source/course parity with `--check`.
 
 ## Follow recursive calls and returns
 
@@ -58,36 +13,6 @@ Open **[Calls go down. Answers come back.](courses/recursion-call-stack-explorer
 Inputs are whole numbers from 0 to 10. Every invocation counts, including base cases and cache hits; factorial uses only the zero base case, and Fibonacci uses F(0) = 0 and F(1) = 1. The memoized algorithm starts with an empty cache and stores base results too. Download the full exact trace with its selected inspection step, or download the original [twelve-question course](courses/recursion-call-stack.json) and open it through **Bring your own lesson**. The [worked guide](courses/recursion-call-stack.md) includes the shared conventions, answer explanations, and transfer prompts.
 
 The explorer needs no server or account and keeps no automatic browser storage. Its trace is an algorithm inspection record, separate from learner-answer archives. Rebuild it with `node tools/build_recursion_call_stack.mjs`; add `--check` to verify that the checked-in page matches its exact sources and validated deck.
-
-## Explore coupled motion
-
-Open **[Coupled motion: two patterns inside one system](courses/normal-modes-lab.html)** directly in a browser. Set the masses, spring stiffnesses and initial motion, then inspect how two independent normal modes combine into the motion of two coupled masses. Compare in-phase, opposite, localized and uncoupled motion; the exact values and energy decomposition accompany the schematic and time traces.
-
-The original **[sixteen-question course](courses/normal-modes.json)** and **[worked guide](courses/normal-modes.md)** develop the force balance, initial-value solution, conserved modal energies and zero-coupling limit. Download the course from the lab and open it through **Bring your own lesson**, preview it and choose **Start this deck** in RecallWeave. The separate observation download retains the applied parameters, inspection time and full analytical trajectory.
-
-The lab works offline and saves only explicit downloads. Rebuild with `node tools/build-normal-modes.mjs`; `--check` verifies exact source, course and guide parity. Run its focused native controls with `node --test tests/normal-modes.test.mjs`.
-
-## Explore coherent waves
-
-Open **[Coherent waves: from phasors to interference](courses/phasor-interference-lab.html)** for an offline lab that connects two rotating complex amplitudes to their real cosine signals. Predict cancellation, vary relative and common phase, and compare the arrow diagram with the time trace and downloadable values. The [worked guide](courses/phasor-interference.md) explains the assumptions and original examples; save the [sixteen-question course](courses/phasor-interference.json) and open it through **Bring your own lesson** to practice the connections.
-
-## Discrete Fourier: coefficients and reconstruction
-
-Open the **[offline Fourier lab](courses/discrete-fourier-lab.html)** to enter 4, 8 or 16 real samples, inspect every complex coefficient, and reconstruct the finite sample grid from selected conjugate pairs. Compare the original and reconstructed points, residuals and normalization-aware energy values. DC and Nyquist remain single-bin selections; unresolved phase is labeled rather than assigned a confident angle.
-
-The **[worked guide](courses/discrete-fourier.md)** connects the existing sampling and phasor lessons to four experiments. Download the original **[twelve-question course](courses/discrete-fourier.json)** from the lab, then use **Bring your own lesson**, preview it and select **Start this deck** in the unchanged learner. A separate analysis JSON records the numerical inputs, pair selection and raw calculations. The lab runs from a local file with no network requests or automatic saving; it does not infer a continuous signal between samples.
-
-Rebuild only this lab with `node tools/build-discrete-fourier.mjs`, or verify its committed artifact with `--check`. Run its focused regression checks with `node --test tests/discrete-fourier.test.mjs tests/discrete-fourier-course.test.mjs`.
-
-## Explore rates and accumulation
-
-Open **[Rates become change](courses/rates-accumulation-explorer.html)** for an offline motion explorer. Edit a continuous velocity curve, inspect a moment, and compare signed displacement with total distance. Exact fractions expose a sign crossing between recorded points; the display also distinguishes instantaneous velocity, interval average velocity and an undefined acceleration at a corner.
-
-The [worked guide](courses/rates-accumulation.md) develops the examples from slopes and signed areas. Download the original [twelve-question course](courses/rates-accumulation.json) from the explorer, then choose it under **Bring your own lesson** in RecallWeave. The lesson, guide and current calculation download without a server or account. Rebuild the standalone explorer with `node tools/build-rates-accumulation.mjs`, or verify the checked-in file with `--check`.
-
-## Explore complex multiplication
-
-Open **[Turn, scale, repeat](courses/complex-plane-lab.html)** to multiply a starting complex point by a fixed multiplier, inspect equal-scale coordinates and follow up to eight repeated products. The offline explorer shows the zero cases explicitly and downloads the current experiment with its numeric values and conventions. Its [worked guide](courses/complex-plane.md) connects the algebra and geometry. Download the original [twelve-question lesson](courses/complex-plane.json), then choose it under **Bring your own lesson** in RecallWeave to study it with the existing review, practice and notes flow.
 
 ## Explore grouped rates
 
@@ -105,24 +30,6 @@ Open [Course handouts](handout.html), choose a checked local deck JSON, review i
 
 Each saved HTML file opens and prints offline on its own. The worksheet file contains questions only; the teacher’s builder and the separate key receive the full checked deck. Cancelling a selection or choosing an invalid file leaves the current handout in place. This is a separate preparation flow; it does not start or change a learning session. Modular source lives in `handout/` and `src/course-handout*.mjs`; rebuild `handout.html` with `python3 tools/make_handout.py`, or verify it with `--check`.
 
-## Explore Boolean logic
-
-Open the [Boolean explorer](courses/boolean-logic-explorer.html) directly from your files to compare expressions, inspect complete truth tables, and find a counterexample when two expressions differ. Download the current full table as CSV or the original twelve-question course as JSON. Import that course through the learner’s existing preview and explicit start flow, then review, practice and save your notes. The [course guide](courses/boolean-logic.md) explains the supported grammar, worked answers and content sources.
-
-## Explore Euclid's algorithm
-
-Open the **[Euclidean algorithm explorer](courses/euclidean-algorithm-explorer.html)** directly from your files. Enter two nonnegative integers, inspect every exact division and remainder, and see the gcd expressed as an integer combination of the original pair. Previous, Next and Last division controls walk the full trace; an explicit download keeps the computed steps. The page explains zero inputs and distinguishes exact arithmetic from approximate diagram widths.
-
-The **[worked companion](courses/euclidean-algorithm.md)** includes proofs, examples and transfer responses. Download its original **[twelve-question course](courses/euclidean-algorithm.json)** and select it under **Bring your own lesson** to use RecallWeave's existing review, separate practice and saved-note flows. The explorer requires no server, account or dependency.
-
-## Explore counting principles
-
-Open **[Same labels. Different counts.](courses/counting-principles-explorer.html)** directly in a browser. Choose 0–8 label types and 0–6 items, then compare all four models: order matters or not, with or without reuse. Inspect every outcome through direct page controls; unordered selections appear once in canonical order. Exact counts and ordered-representation multiplicities explain why distinct unordered outcomes need not be equally likely.
-
-The explorer distinguishes one empty selection from an impossible selection. Editing the inputs retires the old result until you apply the new settings. Download the applied page of at most 24 outcomes, or save the original **[twelve-question course](courses/counting-principles.json)** and open it through **Bring your own lesson**, preview and **Start this deck**. The **[worked guide](courses/counting-principles.md)** develops the formulas, examples and transfer answers.
-
-This separate page works offline without dependencies or automatic storage. Rebuild it with `node tools/build-counting-principles.mjs`; `--check` verifies exact generated-source and embedded-course parity.
-
 ## Core and interaction
 
 - `src/knowledge.mjs` implements a transparent BKT update: initial knowledge, learning transition, guess, and slip are explicit probabilities. It also computes binary entropy and expected information gain.
@@ -131,20 +38,6 @@ This separate page works offline without dependencies or automatic storage. Rebu
 - `src/app.mjs` records the current session only in memory, gives item-level explanations/transfer prompts, and shows estimated mastery as a model state, never a grade or validated diagnosis.
 - The completed learning trace keeps every question, the learner's first answer, its correct answer, explanation, and transfer prompt available in keyboard-operable review panels. `src/review.mjs` takes an immutable snapshot and keeps a bounded practice round separate from the first session.
 - The welcome panel includes a clearly labeled, deterministic synthetic learner simulation comparing adaptive selection with fixed deck order using the same toy learner assumptions and random seed. Its tiny run is demonstrative, not empirical evidence or an efficacy claim. Test coverage separately evaluates model invariants, not learning outcomes.
-
-## Download the complete offline course pack
-
-Save [the offline course pack](offline/) as one ZIP, extract the entire
-RecallWeave folder, and open its catalog.html. The matching demo.html and original
-registered course files are included. Choose a course from the courses folder
-under **Bring your own lesson**, inspect its preview, then explicitly start it.
-
-After changing the learner, rebuild it with `python3 tools/make_demo.py`.
-After catalog or registered-course changes, run `node tools/build-course-catalog.mjs`.
-Then run `python3 tools/build-offline-pack.py` to update the ZIP;
-`python3 tools/build-offline-pack.py --check` checks exact bytes without writing.
-The pack uses the explicit catalog/courses.json registration list. Its
-SHA256SUMS.json records every other included file's byte length and content hash.
 
 ## Bring your own lesson
 
@@ -315,14 +208,6 @@ teaching order. Rebuild it with `python3 tools/make_focus.py`, or verify its
 standalone parity with `python3 tools/make_focus.py --check`. Its focused native
 and builder tests are included in the existing Node test command.
 
-## Optional Markov-chain course
-
-Open the [Markov-chain explorer](courses/markov-chains-explorer.html) to edit a three-state transition table, follow probability flow, and compare mixing, alternation and absorbing states. It works as a single offline HTML file. Download its original fourteen-question course and import it through **Bring your own lesson**, or read the [course guide and worked checks](courses/markov-chains.md). The observation download keeps applied inputs and the complete computed trace; it is separate from a learner's answers.
-
-## Explore hash-table probes
-
-Open **[Hash tables: follow the probe](courses/hash-tables-explorer.html)** for an original offline integer-set explorer. Edit insert, find and delete operations, inspect exact slot visits, and compare collisions, wraparound, tombstones, duplicate checks and full-table results. The [worked guide](courses/hash-tables.md) explains the fixed-capacity model. Download its [twelve-question lesson](courses/hash-tables.json) and start it through **Bring your own lesson** to use the existing learner, review and study notes.
-
 ## Demo deck provenance
 
 Question text and distractors are newly authored for this demo. Scientific concepts are checked against [OpenStax, *Biology 2e*](https://openstax.org/books/biology-2e/pages/1-introduction), sections 6.4, 7.1, 7.4 and 8.1–8.3, by Mary Ann Clark, Matthew Douglas and Jung Choi (Rice University). The current linked reference textbook content is licensed CC BY-NC-SA 4.0. [The item-level content review](docs/deck-content-review-20261008.md) records the scientific distinctions and references. Attribution is embedded in `data/deck.json`, shown at completion and included in downloaded notes. This demo uses original wording and does not copy textbook passages, figures or an existing hackathon entry.
@@ -395,72 +280,3 @@ This public source repository supports the ForgeHacks 2026 demo. The Devpost acc
 [Open the offline lab](courses/mendelian-inheritance-lab.html), [download the original course](courses/mendelian-inheritance.json), or [read the worked guide](courses/mendelian-inheritance.md). Twelve questions connect allele segregation, genotype and phenotype, one-locus crosses and independent two-locus crosses. The explorer follows each parental gamete route and shows exact genotype and phenotype fractions, with explicit complete-dominance and independent-assortment assumptions. Its downloads preserve the checked course and a worked cross record.
 
 Import the course through the existing local-file preview and **Start this deck** flow, then use the learner's review, separate missed-item practice and study-note downloads. All traits are hypothetical plant examples; the model gives probabilities, not guaranteed finite offspring counts. Build and optional browser-receiving commands are in the guide.
-
-
-## Explore cache decisions
-
-Open **[Cache decisions: FIFO and LRU](courses/cache-replacement.html)** directly in a browser to inspect both policies on the same request sequence. Step through hits and evictions, compare complete-sequence misses across capacities, and download the accepted experiment. The worked examples include a trace where FIFO has fewer misses than LRU and the classic FIFO capacity anomaly; counts describe those inputs, not measured computer performance.
-
-The [worked guide](courses/cache-replacement.md) explains the empty-start, equal-size model and original derivations. Download the [twelve-question course](courses/cache-replacement.json) from the explorer or this link, then use **Bring your own lesson**, preview it, and explicitly start it in the unchanged learner. This separate lab works offline and does not alter learner or archive state. Rebuild only its standalone file with `node tools/build-cache-replacement.mjs`; `--check` verifies the committed artifact. Native controls run with `node --test tests/cache-replacement.test.mjs`.
-
-## Weighted interval scheduling
-
-The [weighted-intervals explorer](courses/weighted-intervals-explorer.html) is a self-contained offline lab for choosing compatible activities by total value. Edit a small schedule, inspect take/skip decisions, reconstruct the chosen prefix, and compare it with earliest finish. Download its [twelve-question course](courses/weighted-interval-scheduling.json) into the existing learner, or use the [course guide](courses/weighted-interval-scheduling.md) for the worked table, answer derivations, assumptions and build/check commands.
-
-## Fit a line and inspect its residuals
-
-Open the **[least-squares lab](courses/least-squares-lab.html)** directly in a browser. Edit paired points, try a line, and compare exact fitted coefficients, signed vertical residuals, every squared residual, the mean point and total squared error. Six original fictional examples cover a noisy trend, a perfect line, a curved pattern, ordinary repeated x, all-equal x and an influential distant row.
-
-The fit minimizes equal-weight squared vertical errors for the entered rows. Repeated rows count separately. If all x values are equal, the lab shows the family of minimizing lines and the one observed fitted value; it does not invent unique coefficients or a prediction elsewhere. Query values distinguish the observed x range from extrapolation. A minimum SSE does not establish linearity, predictive accuracy or causation.
-
-Download the fixed **[sixteen-question course](courses/least-squares.json)** from the lab or this link, then use **Bring your own lesson**, preview it and choose **Start this deck** in the existing learner. The **[worked guide](courses/least-squares.md)** derives the six examples, the minimum identity and all sixteen transfer answers. Editing the lab never changes the course download; tab changes are not automatically saved or uploaded.
-
-Build with `node tools/build_least_squares.mjs`; `--check` verifies the generated standalone file. Run the focused native tests with `node --test tests/least-squares.test.mjs`. The [receiving packet](docs/receiving/least-squares-db371a37f4c8/README.md) records the separate independent mathematical review, actual course download/import/review flow and responsive browser checks. The shared learner, importer and catalog are unchanged.
-
-## Mathematical induction: a base, a bridge, every integer
-
-[Open the offline proof lab](courses/mathematical-induction-lab.html), download the [twelve-question lesson](courses/mathematical-induction.json), or read the [worked guide](courses/mathematical-induction.md). Compare an arithmetic sum with a proposed formula, inspect the exact base and symbolic successor step, and see why a few matching values do not prove every case. The lab keeps its finite examples separate from the induction argument and saves an explicit proof record. Import its lesson JSON through the existing learner preview and Start this deck controls.
-
-
-## Inspect rounding and stored geometry
-
-Open the offline [Floating-point lab](courses/floating-point-lab.html) to inspect binary32 input rounding, neighbors, halfway cases, subnormal values, overflow, and a triangle whose stored coordinates change after translation. Compare the exact source and stored signed areas, change the origin and power-of-two unit, and download the current experiment.
-
-The [worked guide](courses/floating-point.md) explains the numerical boundaries and the separate-origin alternative. Download the original [fourteen-question course](courses/floating-point.json), then use the existing **Bring your own lesson** preview and explicit **Start this deck** flow. The lesson complements the existing [Numerical precision guide](courses/numerical-precision.md).
-
-## Momentum and collisions
-
-[Open the offline explorer](courses/momentum-collisions-explorer.html) to compare signed momentum and kinetic energy in ideal one-dimensional elastic and completely inelastic encounters. Enter two positive masses and signed incoming velocities, inspect exact fraction results on a shared velocity scale, and download the complete analysis. Equal or growing initial gaps explicitly produce no future collision endpoints.
-
-The [original twelve-question course](courses/momentum-collisions.json) imports through the existing learner's preview and **Start this deck** flow, including feedback, separate missed-item practice and study-note downloads. The [worked guide](courses/momentum-collisions.md) derives the formulas, explains the physical assumptions and provides build/check commands. Open the explorer directly from disk; it requires no server or network and saves nothing automatically.
-
-## Build a curve from repeated interpolation
-
-Open **[Straight steps. Curved paths.](courses/bezier-curves-explorer.html)** directly in a browser to construct a linear, quadratic or cubic Bézier curve from exact fractions. Inspect each interpolation level, split the curve into two exact subcurves, and compare derivatives with parameter-dependent travel. The tables preserve signed rational coordinates, including stationary and coincident-control cases.
-
-Download the original [sixteen-question lesson](courses/bezier-curves.json) and [worked guide](courses/bezier-curves.md), then use **Bring your own lesson** for the existing learner, review, practice and study-notes flow. The standalone page works offline without installation or automatic storage. Rebuild it with `node tools/build-bezier-curves.mjs`; use `--check` to verify parity with its exact sources and validated course.
-
-## Newton’s method: follow the tangent, inspect the result
-
-Open the **[Newton method explorer](courses/newton-method-explorer.html)** directly in a browser. Choose one of eight examples or enter a polynomial of degree at most three and an exact starting value. Follow each tangent intercept, inspect the exact residual and derivative, and compare an approaching square root, a horizontal tangent, an exact two-cycle and a repeated root. Every completed point is retained in a downloadable exact record.
-
-An exact root, a zero slope away from a root, a repeated cycle, a chosen step limit and an arithmetic limit have separate outcomes. Rounded plotting coordinates never determine those outcomes. Editing any input retires the previous record until the next explicit run.
-
-Download the **[twelve-question lesson](courses/newton-method.json)** from the explorer or this link, then use the existing learner’s file preview and **Start this deck** controls. The **[worked guide](courses/newton-method.md)** derives the tangent update and the original examples, with exact fractions and explicit limits. The explorer includes the exact lesson and guide download bytes and works as a standalone local file.
-
-Build with node tools/build-newton-method.mjs; add --check to verify its generated page. Run the focused checks with node --test tests/newton-method.test.mjs tests/newton-method-course.test.mjs. The [receiving packet](docs/receiving/newton-method-c77045b4/README.md) contains independent mathematical and actual browser/course evidence.
-
-## Connect a graph with minimum total weight
-
-Open [the minimum-spanning-forest explorer](courses/minimum-spanning-forest-explorer.html) directly in a browser. Enter an undirected graph with up to eight vertices and integer weights, then inspect Kruskal's accepted edges, cycle rejections, component snapshots and running total. Equal weights follow the original input order; negative weights, disconnected graphs, isolated vertices and a single-vertex empty tree are explicit examples.
-
-**Build forest trace**, then use **Next**, **Previous**, **First** or **Finish**. Editing either input retires the old trace. The page records a decision for every edge, including later cycle rejections; this count excludes sorting comparisons, component lookups, validation and rendering. A minimum spanning forest minimizes the total chosen connection weight, not every shortest route.
-
-Download the full trace with its original entered text and selected frame, or save the original [twelve-question course](courses/minimum-spanning-forest.json) and [worked guide](courses/minimum-spanning-forest.md). Open the JSON through the learner's existing **Bring your own lesson** preview and **Start this deck** flow. No network, account, automatic storage or learner-session modification is involved. Rebuild the standalone page with `node tools/build-minimum-spanning-forest.mjs`; add `--check` to verify exact source parity.
-
-
-## Read causal order with logical clocks
-
-Study the original [sixteen-question logical-clocks course](courses/logical-clocks.json) with its [worked guide](courses/logical-clocks.md). Follow a complete ten-event execution, calculate Lamport and vector timestamps, and distinguish causal order, concurrency and an agreed total order. The guide includes the exact receive calculations, counterexamples and original transfer responses.
-
-Open `demo.html`, choose the JSON under **Bring your own lesson**, inspect the preview and select **Start this deck**. Review, separate practice and downloaded notes use the existing offline learner. Run the focused course checks with `node --test tests/logical-clocks-course.test.mjs`.
