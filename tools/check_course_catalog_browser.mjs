@@ -13,17 +13,6 @@ import { dirname, join, resolve, relative, sep } from 'node:path';
 import { tmpdir, freemem } from 'node:os';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
-const COURSE_FILES = [
-  'binary-search.json', 'dependency-graphs.json',
-  'measurement-uncertainty.json', 'sql-query-foundations.json',
-  'enzymes-energy-and-control.json',
-  'numerical-precision.json',
-  'reading-data-and-evidence.json',
-  'sampling-aliasing.json',
-  'shortest-paths.json',
-  'stoichiometry-foundations.json',
-  'vector-geometry.json',
-];
 const MIN_DISK_BYTES = 1024n ** 3n;
 const MIN_MEMORY_BYTES = 512 * 1024 * 1024;
 const PACKET_LIMIT = 2 * 1024 * 1024;
@@ -171,6 +160,7 @@ async function emitBundle(output) {
 
 async function main(settings) {
   const {root, output, browser: executable} = settings;
+  const COURSE_FILES = [];
   try {
     const info = await lstat(output);
     assert.ok(info.isDirectory() && !info.isSymbolicLink(), 'Evidence destination must be a real directory');
@@ -433,6 +423,12 @@ async function main(settings) {
     console.log('HEADROOM ' + JSON.stringify(report.headroom));
     try { report.checkout = execFileSync('git', ['rev-parse', 'HEAD'], {cwd: root, encoding: 'utf8'}).trim(); }
     catch { report.checkout = null; }
+    // Independently inventory canonical originals; never infer expected files
+    // from the generated catalog or downloaded ZIP being checked.
+    COURSE_FILES.push(...(await readdir(join(root, 'courses')))
+      .filter(name => /^[a-z0-9-]+\.json$/.test(name)).sort());
+    assert.ok(COURSE_FILES.length >= 1 && COURSE_FILES.length <= 128,
+      'Canonical course inventory must stay within the catalog admission bound');
     const sources = [
       'catalog.html', 'catalog/courses.json', 'catalog/template.html', 'catalog/catalog.css',
       'src/course-catalog.mjs', 'src/course-catalog-ui.mjs', 'tools/build-course-catalog.mjs',
@@ -445,6 +441,8 @@ async function main(settings) {
       sourceBytes.set(path, bytes);
       report.sourceSha256[path] = sha256(bytes);
     }
+    assert.deepEqual(JSON.parse(sourceBytes.get('catalog/courses.json').toString('utf8')),
+      COURSE_FILES.map(name => 'courses/' + name), 'Registry matches the independent canonical course inventory');
     for (const filename of COURSE_FILES) {
       const bytes = sourceBytes.get('courses/' + filename);
       courseBytes.set(filename, bytes);
