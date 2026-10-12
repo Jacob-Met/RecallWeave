@@ -1,0 +1,346 @@
+{
+  "format": "recallweave-deck/1",
+  "title": "From PCR to sequence evidence: what a DNA result can and cannot tell you",
+  "attribution": "Original AI-assisted educational deck for HAMON RecallWeave, created 2026-10-12. Scientific grounding: NCBI Bookshelf PCR (https://www.ncbi.nlm.nih.gov/books/NBK589663/); Cold Spring Harbor Protocols PCR 2019 (https://cshprotocols.cshlp.org/content/2019/6/pdb.top095109.full); ACMG/Genetics in Medicine technical standard on NGS coverage and variant calling (https://www.nature.com/articles/s41436-021-01139-4); and Nature Reviews Genetics, Sequencing depth and coverage (https://www.nature.com/articles/nrg3642). Explanations and questions are original, not reproduced. Conceptual instruction only; not a laboratory or clinical protocol.",
+  "license": "Original authored questions, distractors, explanations and transfer prompts are dedicated to the public domain under CC0-1.0. External sources and RecallWeave software retain their own licenses.",
+  "concepts": [
+    "pcr-mechanism",
+    "amplification-and-controls",
+    "reads-and-coverage",
+    "inference-boundaries"
+  ],
+  "items": [
+    {
+      "id": "pcr-01-strand-separation",
+      "concept": "pcr-mechanism",
+      "prerequisites": [],
+      "prompt": "During the denaturation phase of a conventional DNA PCR cycle, what happens to a double-stranded DNA template?",
+      "options": [
+        "Its two strands separate",
+        "Its sequence is translated to protein",
+        "Its DNA becomes RNA",
+        "Its primers are permanently joined"
+      ],
+      "answer": 0,
+      "explanation": "Heating disrupts the interactions holding complementary DNA strands together, allowing each strand to serve as a template in later steps. Denaturation does not translate or transcribe DNA.",
+      "transfer": "Why would primers have difficulty accessing both target strands if they remained paired?"
+    },
+    {
+      "id": "pcr-02-primer-annealing",
+      "concept": "pcr-mechanism",
+      "prerequisites": [],
+      "prompt": "Which event most directly defines the annealing phase of a conventional PCR cycle?",
+      "options": [
+        "A primer binds a complementary region on a template",
+        "A ribosome reads a messenger RNA",
+        "Double-stranded DNA is cut at random",
+        "A sequence read is aligned to a reference"
+      ],
+      "answer": 0,
+      "explanation": "Short oligonucleotide primers can hybridize with complementary template regions during annealing. Primer-template pairing helps specify which DNA interval is amplified.",
+      "transfer": "What would an unintended additional primer-binding location imply for specificity?"
+    },
+    {
+      "id": "pcr-03-extension-direction",
+      "concept": "pcr-mechanism",
+      "prerequisites": [],
+      "prompt": "DNA polymerase extends an annealed primer by adding nucleotides to its 3′ end. In which direction is the newly synthesized strand extended?",
+      "options": [
+        "3′ to 5′",
+        "5′ to 3′",
+        "Simultaneously in both directions on one strand",
+        "Neither direction because primers cannot be extended"
+      ],
+      "answer": 1,
+      "explanation": "Polymerases add nucleotides to the growing strand’s 3′ hydroxyl, so synthesis proceeds 5′ to 3′. Template reading is antiparallel.",
+      "transfer": "Draw an antiparallel primer-template pair and label the growing 3′ end."
+    },
+    {
+      "id": "pcr-04-target-specificity",
+      "concept": "pcr-mechanism",
+      "prerequisites": [],
+      "prompt": "Two primer sequences are chosen to flank a particular DNA region. What is their primary role?",
+      "options": [
+        "To guarantee every DNA molecule amplifies equally",
+        "To define complementary binding locations for amplification",
+        "To determine how long sequencing instruments run",
+        "To count proteins in a sample"
+      ],
+      "answer": 1,
+      "explanation": "A primer pair can select an interval by complementary binding. Specificity is conditional: unexpected binding, contamination or sequence changes can alter what is amplified.",
+      "transfer": "If one primer also binds elsewhere in the genome, what extra observation would help detect nonspecific products?"
+    },
+    {
+      "id": "pcr-05-rna-bridge",
+      "concept": "pcr-mechanism",
+      "prerequisites": [],
+      "prompt": "A researcher starts with an RNA target but plans to use a DNA-dependent PCR polymerase. What conversion is necessary in an RT-PCR workflow before conventional DNA amplification?",
+      "options": [
+        "RNA into complementary DNA",
+        "DNA into lipid",
+        "RNA into an amino-acid chain",
+        "DNA into a fluorescent photograph"
+      ],
+      "answer": 0,
+      "explanation": "Reverse transcriptase can produce complementary DNA (cDNA) from RNA. That DNA can then be amplified by PCR. The presence of an amplification signal alone does not measure infectivity or prove viable material.",
+      "transfer": "Why can detecting target RNA-derived cDNA and observing a living organism answer different questions?"
+    },
+    {
+      "id": "pcr-06-ideal-five-cycles",
+      "concept": "amplification-and-controls",
+      "prerequisites": [
+        "pcr-mechanism"
+      ],
+      "prompt": "In an idealized model where every target DNA molecule doubles each cycle, one starting copy undergoes five cycles. How many copies does the model predict?",
+      "options": [
+        "5",
+        "10",
+        "16",
+        "32"
+      ],
+      "answer": 3,
+      "explanation": "One copy multiplied by 2 five times gives 2^5 = 32. The ideal model assumes perfect doubling and does not include reagents, competing products or plateau effects.",
+      "transfer": "In the same ideal model, how many copies follow seven cycles?"
+    },
+    {
+      "id": "pcr-07-ideal-two-starts",
+      "concept": "amplification-and-controls",
+      "prerequisites": [
+        "pcr-mechanism"
+      ],
+      "prompt": "Under the same ideal doubling model, four initial target copies undergo three cycles. What is the modeled final count?",
+      "options": [
+        "7",
+        "12",
+        "24",
+        "32"
+      ],
+      "answer": 3,
+      "explanation": "The model is N = N₀ × 2^cycles, giving 4 × 8 = 32. This is a mathematical exercise, not an assay estimate.",
+      "transfer": "If the starting count were 8 instead, what would three ideal cycles predict?"
+    },
+    {
+      "id": "pcr-08-less-than-ideal",
+      "concept": "amplification-and-controls",
+      "prerequisites": [
+        "pcr-mechanism"
+      ],
+      "prompt": "A simplified efficiency model multiplies target quantity by 1.8 per cycle rather than by 2. Starting from 10 units, what does it predict after two cycles?",
+      "options": [
+        "18 units",
+        "32.4 units",
+        "36 units",
+        "100 units"
+      ],
+      "answer": 1,
+      "explanation": "The stated model gives 10 × 1.8 × 1.8 = 32.4 units. Fractions are permissible in an expected-quantity model even though individual DNA molecules are discrete. Real efficiency can vary with cycle and context.",
+      "transfer": "How would the ratio between the ideal and 1.8-fold models change after additional cycles?"
+    },
+    {
+      "id": "pcr-09-plateau",
+      "concept": "amplification-and-controls",
+      "prerequisites": [
+        "pcr-mechanism"
+      ],
+      "prompt": "A reaction no longer approximately doubles its product each cycle after many cycles. Which interpretation best fits PCR chemistry?",
+      "options": [
+        "The cycle number was necessarily counted backward",
+        "Reagent limits and competing reactions can reduce amplification efficiency",
+        "All target molecules disappeared immediately",
+        "Each product is automatically a correct sequence"
+      ],
+      "answer": 1,
+      "explanation": "PCR amplification need not remain exponential indefinitely. Reagent depletion, inhibitors and competing reactions can contribute to a plateau. An ideal growth curve must not be extrapolated without evidence.",
+      "transfer": "Why is doubling a late-cycle signal a poor way to estimate an original sample quantity?"
+    },
+    {
+      "id": "pcr-10-no-template-control",
+      "concept": "amplification-and-controls",
+      "prerequisites": [
+        "pcr-mechanism"
+      ],
+      "prompt": "A no-template control (NTC) is prepared without intentional target DNA, yet it produces an apparent target amplification signal. Which conclusion is safest?",
+      "options": [
+        "The sample result is validated automatically",
+        "The NTC signal should prompt investigation of contamination or nonspecific amplification",
+        "The target was definitely absent everywhere",
+        "The polymerase cannot add nucleotides"
+      ],
+      "answer": 1,
+      "explanation": "An unexpected NTC signal is a warning that the run or assay may have contamination or nonspecific products. It does not establish which mechanism occurred or validate other samples.",
+      "transfer": "What would you check before treating a positive sample result from the same run as reliable?"
+    },
+    {
+      "id": "pcr-11-local-depth",
+      "concept": "reads-and-coverage",
+      "prerequisites": [
+        "pcr-mechanism"
+      ],
+      "prompt": "An aligned sequence pileup has 12 quality-filtered read alignments covering one reference position. What is the observed alignment depth at that position?",
+      "options": [
+        "1×",
+        "6×",
+        "12×",
+        "144×"
+      ],
+      "answer": 2,
+      "explanation": "Depth at a position counts overlapping read alignments under the stated filtering rules: here, 12. This is not a claim that all 12 observations are independent molecules.",
+      "transfer": "How could PCR duplication make read depth overstate independent-molecule support?"
+    },
+    {
+      "id": "pcr-12-mean-vs-local",
+      "concept": "reads-and-coverage",
+      "prerequisites": [
+        "pcr-mechanism"
+      ],
+      "prompt": "A 100-base target has 50 bases at depth 20 and 50 bases at depth 0. What is the mean aligned depth and what crucial gap remains?",
+      "options": [
+        "Mean 20×; every base is observed",
+        "Mean 10×; half the target has zero coverage",
+        "Mean 10×; every base is observed",
+        "Mean 0×; no base is observed"
+      ],
+      "answer": 1,
+      "explanation": "Mean depth is (50 × 20 + 50 × 0)/100 = 10×, but only half the target is covered at all. An average can hide uncovered intervals.",
+      "transfer": "Describe a different depth distribution with the same 10× mean but no uncovered bases."
+    },
+    {
+      "id": "pcr-13-duplicate-reads",
+      "concept": "reads-and-coverage",
+      "prerequisites": [
+        "pcr-mechanism"
+      ],
+      "prompt": "Twenty aligned reads match an alternate base, but all twenty may derive from amplification of one original molecule. What is the strongest defensible statement?",
+      "options": [
+        "Twenty independent molecules necessarily support the base",
+        "An instrument has directly counted twenty organisms",
+        "There are twenty aligned observations, but molecular independence remains uncertain",
+        "The alternate base cannot be real"
+      ],
+      "answer": 2,
+      "explanation": "Read counts alone need not equal independent starting molecules. PCR duplication, mapping and library preparation affect evidence strength; unique molecular identifiers can help when the protocol includes them.",
+      "transfer": "What independent-molecule information would strengthen this observation without changing the observed base?"
+    },
+    {
+      "id": "pcr-14-phred-q20",
+      "concept": "reads-and-coverage",
+      "prerequisites": [
+        "pcr-mechanism"
+      ],
+      "prompt": "Under the standard Phred convention Q = −10 log₁₀(p), what nominal base-call error probability corresponds to Q20?",
+      "options": [
+        "10%",
+        "1%",
+        "0.1%",
+        "20%"
+      ],
+      "answer": 1,
+      "explanation": "Rearranging gives p = 10^(−Q/10). At Q20 that is 10^(−2) = 0.01, or 1%. This is a model-based error-probability encoding, not proof that any particular base is correct.",
+      "transfer": "Calculate the nominal error probability for Q30 using the same convention."
+    },
+    {
+      "id": "pcr-15-ambiguous-mapping",
+      "concept": "reads-and-coverage",
+      "prerequisites": [
+        "pcr-mechanism"
+      ],
+      "prompt": "A short read aligns equally well to two repeated regions of a reference genome. What interpretation is appropriate?",
+      "options": [
+        "Its genomic origin is ambiguous under the alignment evidence",
+        "It must originate from both locations simultaneously",
+        "It proves an insertion at both sites",
+        "It is automatically a unique read"
+      ],
+      "answer": 0,
+      "explanation": "Repeated sequences can create multi-mapping. Without evidence to distinguish the loci, assigning a single genomic origin can overstate localization certainty.",
+      "transfer": "How might a longer read containing unique flanking sequence change the mapping question?"
+    },
+    {
+      "id": "pcr-16-positive-is-not-proof",
+      "concept": "inference-boundaries",
+      "prerequisites": [
+        "amplification-and-controls",
+        "reads-and-coverage"
+      ],
+      "prompt": "A PCR assay produces an expected-size product in a sample but its no-template control also amplifies. What is justified?",
+      "options": [
+        "The sample must contain the target without ambiguity",
+        "The controls raise a reliability concern; further validation is needed",
+        "The read count has infinite precision",
+        "The assay establishes organism viability"
+      ],
+      "answer": 1,
+      "explanation": "An expected-size band or signal can be useful evidence, but an unexpected control signal weakens interpretation. Product size alone does not determine exact sequence or contamination origin.",
+      "transfer": "How would an independent target-specific confirmation differ from repeating the same observation?"
+    },
+    {
+      "id": "pcr-17-absence-of-reads",
+      "concept": "inference-boundaries",
+      "prerequisites": [
+        "reads-and-coverage"
+      ],
+      "prompt": "An interval has zero usable aligned sequence reads. Which claim is warranted about its sequence?",
+      "options": [
+        "It exactly matches the reference",
+        "It contains no variants",
+        "Its bases are not established by these reads",
+        "Its sequence is guaranteed to be all A bases"
+      ],
+      "answer": 2,
+      "explanation": "No coverage supplies no sequence observations at that interval. Treating reference bases as measured specimen bases there would confuse a reference with evidence.",
+      "transfer": "How should a comparison viewer represent an uncovered reference position?"
+    },
+    {
+      "id": "pcr-18-allele-fraction",
+      "concept": "inference-boundaries",
+      "prerequisites": [
+        "reads-and-coverage"
+      ],
+      "prompt": "At one position, 7 of 14 aligned reads show an alternate base. What is the observed alternate-read fraction, and what does it NOT prove?",
+      "options": [
+        "50%; it does not by itself prove heterozygosity",
+        "7%; it proves heterozygosity",
+        "14%; it proves a sequencing error",
+        "100%; it proves the reference is wrong"
+      ],
+      "answer": 0,
+      "explanation": "7/14 = 0.5. Read fractions can be affected by sampling, amplification bias, mapping, copy number and noise. A 50% alternate-read fraction alone is not a clinical genotype call.",
+      "transfer": "Name two quality checks needed before treating an alternate-read fraction as genomic evidence."
+    },
+    {
+      "id": "pcr-19-reference-is-not-ground-truth",
+      "concept": "inference-boundaries",
+      "prerequisites": [
+        "reads-and-coverage"
+      ],
+      "prompt": "A sequencing report shows a difference between reads and the chosen reference genome. What does that comparison alone establish?",
+      "options": [
+        "That some observed reads differ from the chosen reference, subject to quality checks",
+        "That the specimen has a disease",
+        "That the reference is universally incorrect",
+        "That every specimen from the same species differs there"
+      ],
+      "answer": 0,
+      "explanation": "The observed aligned reads and selected reference disagree at that position. The difference could involve biology, an artifact or an alignment error; specimen genotype and significance require additional validation.",
+      "transfer": "How would changing the reference build affect the coordinates and interpretation of a reported difference?"
+    },
+    {
+      "id": "pcr-20-different-questions",
+      "concept": "inference-boundaries",
+      "prerequisites": [
+        "pcr-mechanism",
+        "reads-and-coverage"
+      ],
+      "prompt": "A PCR assay detects a target, while high-quality sequencing reads reveal its base sequence. Which statement best distinguishes their evidential roles?",
+      "options": [
+        "PCR alone identifies every base accurately",
+        "A positive amplification signal can support target detection; sequence reads may test base identities subject to quality and coverage",
+        "Sequencing eliminates contamination and sampling limitations",
+        "Either observation proves a living organism is present"
+      ],
+      "answer": 1,
+      "explanation": "PCR amplification and sequence determination address different but related questions. A positive target signal is not itself a complete sequence or proof of viability; sequencing evidence has its own mapping, coverage and error limits.",
+      "transfer": "Design a minimal report that separately lists target detection, sequence evidence, control results and unresolved uncertainty."
+    }
+  ]
+}
