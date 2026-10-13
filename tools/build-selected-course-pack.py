@@ -82,6 +82,12 @@ def selected_catalog(catalog, selection):
         '<p class="intro-description">Explore every published course across science, mathematics and computing. See the ideas it connects, download the lesson, and study it in the RecallWeave learner.</p>',
         '<p class="intro-description">This pack contains your selected courses, in the order chosen. Download a lesson below and study it in the bundled RecallWeave learner.</p>',
     )
+    # Deck studio is a separate online tool, not a bundled selected-pack file.
+    result = replace_once(
+        result,
+        "<a href=\"author.html\" target=\"_blank\" rel=\"noopener\">Have a lesson to share? Open Deck studio ",
+        "<a href=\"https://jacobmetoyer.com/RecallWeave/author.html\" target=\"_blank\" rel=\"noopener\">Have a lesson to share? Open Deck studio online ",
+    )
     return result.encode("utf-8")
 
 

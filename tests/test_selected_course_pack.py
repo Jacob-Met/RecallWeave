@@ -24,6 +24,7 @@ def catalog_for(sources):
     payload = json.dumps(sources, ensure_ascii=True).replace("<", "\\u003c")
     return ('<!doctype html>\r\n<html><head><title>Course catalog · RecallWeave</title></head>'
             '<body>' + INTRO + '<a id="open-learner" href="demo.html">Open learner</a>'
+            '<a href="author.html" target="_blank" rel="noopener">Have a lesson to share? Open Deck studio </a>'
             '<script type="application/json" id="course-data">' + payload + '</script>'
             '<script>/* unchanged catalog controls */</script></body></html>\r\n').encode("utf-8")
 
@@ -110,6 +111,9 @@ class SelectedCoursePackTests(unittest.TestCase):
         self.assertNotIn("</script><script>throw 1</script>", html)
         self.assertEqual(html.count("</script>"), 2)
         self.assertIn('<a id="open-learner" href="demo.html">Open learner</a>', html)
+        self.assertIn('<a href="https://jacobmetoyer.com/RecallWeave/author.html" '
+                      'target="_blank" rel="noopener">Have a lesson to share? Open Deck studio online ', html)
+        self.assertNotIn('href="author.html"', html)
         self.assertIn('<script>/* unchanged catalog controls */</script>', html)
         parsed = PACK.FULL_PACK.CatalogData(); parsed.feed(html); parsed.close()
         self.assertEqual(json.loads("".join(parsed.parts))[0]["text"].encode("utf-8"), self.originals[self.paths[1]])

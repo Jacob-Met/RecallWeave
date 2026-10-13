@@ -43,8 +43,10 @@ Starting a deck begins a new session. Use the existing explicit study-record
 downloads to retain work before reloading or replacing that session.
 
 The selected catalog and learner work offline. Interactive labs, worked guides,
-Deck studio and the other tools are separate downloads; optional navigation to
-them may need a connection or a separately supplied file.
+Deck studio and the other tools are separate downloads. The selected catalog's
+**Open Deck studio online** link uses the same published HTTPS destination as the
+learner and needs a connection; it does not look for an unbundled local file.
+Other optional tools may need a connection or a separately supplied file.
 
 ## What is in the ZIP
 
@@ -79,7 +81,7 @@ read or trust the committed ZIP as its input. Original member and total ZIP size
 limits still apply: 1 MiB per member and 2 MiB for a complete archive.
 
 The catalog adapter recognizes the current compiled page's single course-data
-script, title and introductory paragraph. If that page structure changes, it
+script, title, introductory paragraph and Deck studio link. If that page structure changes, it
 refuses instead of silently producing an ambiguously labeled selection. Update
 and receive the adapter alongside such a future catalog change.
 
