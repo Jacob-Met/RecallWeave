@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bloom filters: shared bits and exact evidence · RecallWeave</title>
+<style>
+:root{color-scheme:light;--ink:#183b35;--muted:#53695f;--paper:#f6f5ed;--card:#fffef9;--line:#cbd6ca;--green:#146052;--wash:#e5efe3;--amber:#a45122;--red:#873c2e}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 system-ui,-apple-system,"Segoe UI",sans-serif}a{color:var(--green);text-underline-offset:.2em;overflow-wrap:anywhere}button,select{font:inherit;min-height:44px;border:1px solid var(--green);border-radius:8px;padding:.5rem .8rem;background:var(--card);color:var(--ink)}button{cursor:pointer;font-weight:650}button:hover{background:var(--wash)}button.primary{background:var(--green);color:white}select{max-width:100%}button:disabled,select:disabled{opacity:.5;cursor:default}button:focus-visible,a:focus-visible,select:focus-visible,summary:focus-visible{outline:3px solid var(--amber);outline-offset:3px}h1,h2,h3,p{margin-top:0}h1{font:600 clamp(2.6rem,5.6vw,4.3rem)/1.05 Georgia,serif;letter-spacing:-.04em;max-width:15ch;margin:.6rem 0 1rem}h2{font:600 1.65rem/1.2 Georgia,serif;margin-bottom:.7rem}h3{font-size:1rem;margin-bottom:.5rem}p:last-child{margin-bottom:0}.page{max-width:1180px;margin:auto;padding:1.5rem 2rem 3rem}.topline{display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;border-bottom:1px solid var(--line);padding-bottom:.9rem;font-size:.8rem;font-weight:700}.hero{display:grid;grid-template-columns:1.3fr 1fr;gap:3rem;align-items:end;margin:2.2rem 0}.eyebrow{font-size:.75rem;text-transform:uppercase;letter-spacing:.12em;font-weight:750;color:var(--green)}.lead{font-size:1.1rem;color:var(--muted);max-width:48ch}.rule{border-left:3px solid var(--green);padding-left:1.2rem}.small{font-size:.87rem;color:var(--muted)}.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:1.35rem;min-width:0}.workspace{display:grid;grid-template-columns:minmax(250px,.85fr) minmax(0,1.5fr);gap:1.1rem;align-items:start}.number{display:inline-flex;width:1.65rem;height:1.65rem;align-items:center;justify-content:center;border-radius:50%;background:var(--wash);font:650 .8rem system-ui;margin-right:.45rem;vertical-align:middle}.keys{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.5rem;margin:1rem 0}.key-button{padding:.45rem .25rem;display:flex;flex-direction:column;align-items:center;min-height:66px}.key-button strong{font-size:1.12rem}.key-button span{font-size:.75rem;font-weight:450}.key-button.inserted{background:var(--wash);box-shadow:inset 0 -3px var(--green)}.actions{display:flex;gap:.6rem;flex-wrap:wrap}.status{margin-top:1rem;font-size:.86rem;min-height:3.9em;border-left:3px solid var(--line);padding-left:.7rem;color:var(--muted)}.exact-box{background:var(--wash);padding:.8rem 1rem;border-radius:9px;margin:1rem 0}.exact-box strong{font:650 1.25rem ui-monospace,monospace;display:block;overflow-wrap:anywhere}.exact-box .small{margin-bottom:.25rem}.counts{display:flex;gap:1rem;font-size:.8rem;color:var(--muted)}.bits{list-style:none;display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:.4rem;padding:0;margin:1.3rem 0 .65rem}.bit{display:flex;flex-direction:column;text-align:center;border:1px solid var(--line);border-radius:8px;background:#f7f8f2;padding:.3rem .1rem .5rem;min-width:0}.bit.set{background:var(--wash);border-color:#83ab8b}.bit.probe{outline:2px solid var(--amber);outline-offset:1px}.bit .index{font-size:.72rem;color:var(--muted)}.bit strong{font-size:1.45rem;line-height:1.4}.legend{font-size:.77rem;color:var(--muted);margin-bottom:1rem}.query-controls{display:flex;align-items:center;gap:.7rem;flex-wrap:wrap;margin:1rem 0}.query-controls label{font-weight:650}.answers{display:grid;grid-template-columns:1fr 1fr;gap:.7rem}.answers p{margin:0;background:#f0f3eb;border-radius:8px;padding:.75rem .85rem;font-size:.76rem;color:var(--muted)}.answers strong{display:block;font-size:1rem;color:var(--ink);margin-top:.2rem}.verdict{border-left:3px solid var(--green);padding:.6rem .9rem;margin:1rem 0 0;font-size:.9rem}.verdict.false-positive{border-color:var(--amber);background:#fff3df}.section{margin-top:1.2rem}.section-head{display:flex;gap:1rem;align-items:baseline;justify-content:space-between;flex-wrap:wrap}.label{font-weight:650}.preview-pair{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;margin-top:1rem}.preview-pair>div{min-width:0}.preview-pair .bits{margin-top:.6rem;gap:.3rem}.preview-pair .bit strong{font-size:1.1rem}.preview-pair .bit .index{font-size:.68rem}.preview-note{padding:.8rem 1rem;border-radius:8px;background:#edf1e8;font-size:.9rem;margin-top:1rem}.preview-note.warning{background:#fff0de;border-left:3px solid var(--amber)}.experiments{display:grid;grid-template-columns:1.15fr 1fr;gap:1.1rem;margin-top:1.2rem;align-items:start}.fraction{font:600 2.3rem/1.2 Georgia,serif;color:var(--green);margin:.8rem 0 .35rem}.experiment-label{display:inline-block;color:var(--green);font-size:.73rem;letter-spacing:.08em;font-weight:750;text-transform:uppercase;border-bottom:2px solid var(--green);padding-bottom:.2rem;margin-bottom:.9rem}table{border-collapse:collapse;width:100%;font-size:.84rem;margin:.9rem 0}caption{text-align:left;color:var(--muted);font-size:.8rem;margin-bottom:.45rem}th,td{border-bottom:1px solid var(--line);padding:.55rem .45rem;text-align:left}th{font-weight:650}.matrix{table-layout:fixed}.matrix th,.matrix td{text-align:center;padding:.3rem .05rem;height:30px}.matrix td{border:1px solid var(--paper)}.matrix .accepted{background:#d6e8d3;color:#134b3b;font-weight:750}.matrix .rejected{background:#eff1e9;color:#5f7266}.matrix thead th{font-size:.72rem}.matrix tbody th{font-size:.72rem}.comparison{border-left:3px solid var(--amber);padding:.6rem .9rem;background:#fff4e2;margin-top:1rem;font-size:.88rem}.lesson{margin-top:1.2rem;background:var(--wash);display:grid;grid-template-columns:1.2fr 1fr;gap:2rem}.lesson .actions{align-items:center;margin:1rem 0}.source-credit{font-size:.8rem;color:var(--muted);overflow-wrap:anywhere}summary{cursor:pointer;min-height:44px;font-weight:650;padding:.45rem 0}.footer{display:flex;justify-content:space-between;flex-wrap:wrap;gap:1rem;border-top:1px solid var(--line);margin-top:1.4rem;padding-top:1rem;font-size:.8rem;color:var(--muted)}.skip{position:absolute;left:1rem;top:-6rem;background:white;padding:.7rem;z-index:3}.skip:focus{top:1rem}.js-only{display:none}.ready .js-only{display:block}.ready .js-note{display:none}[hidden]{display:none!important}
+@media(max-width:850px){.page{padding:1.2rem}.workspace{grid-template-columns:1fr}.hero{gap:1.5rem}.keys{grid-template-columns:repeat(7,minmax(0,1fr))}.experiments{grid-template-columns:1fr 1fr}.preview-pair{gap:.8rem}}
+@media(max-width:600px){.page{padding:1rem .75rem 2rem}.hero,.experiments,.lesson{grid-template-columns:1fr;gap:1rem}.hero{margin:1.5rem 0}.card{padding:1rem}.keys{grid-template-columns:repeat(4,minmax(0,1fr))}.bits{gap:.27rem}.bit strong{font-size:1.25rem}.answers,.preview-pair{grid-template-columns:1fr}.answers{gap:.4rem}.preview-pair{gap:1rem}.topline{font-size:.72rem}.fraction{font-size:2.15rem}.rule{font-size:.93rem}.query-controls select{flex:1;min-width:0}.matrix th,.matrix td{height:32px}}
+@media print{body{background:white}.page{padding:0}.topline,.skip,.actions,.query-controls,.keys,.js-note{display:none}.card{break-inside:avoid}.hero,.workspace,.experiments,.lesson{display:block}.card{margin:1rem 0}.preview-pair{grid-template-columns:1fr 1fr}.footer{display:none}}
+</style>
+</head>
+<body>
+<a class="skip" href="#live-state">Skip to the current bits</a>
+<div class="page">
+<header class="topline"><span>RecallWeave / Algorithms</span><span>ORIGINAL LESSON · LOCAL EXPLORER</span></header>
+<section class="hero" aria-labelledby="page-title">
+<div><p class="eyebrow">Bloom filters</p><h1 id="page-title">See what the bits remember.</h1><p class="lead">Insert a key. Follow its two positions. Separate the filter’s answer from the exact set that produced it.</p></div>
+<div class="rule"><p><strong>Zero can prove absence.<br>Ones can be shared.</strong></p><p class="small">This fixed example has eight bits and two declared positions per key. The exact member list stays visible for teaching; an ordinary Bloom filter stores the bits, not that list.</p></div>
+</section>
+<p class="js-note card">Enable JavaScript to use the controls. The page computes locally. In the opening example, A sets positions 1 and 4; B sets 4 and 6. X checks 1 and 6, so it passes even though X was never inserted.</p>
+<main class="js-only">
+<div class="workspace">
+<section class="card" aria-labelledby="insert-title">
+<h2 id="insert-title"><span class="number">1</span>Build the exact set</h2>
+<p class="small">Choose a key to insert. Its two fixed positions appear below its name. Repeating an insertion is allowed and changes nothing.</p>
+<div id="insert-buttons" class="keys" aria-label="Insert a declared toy key"></div>
+<div class="actions"><button id="load-example" type="button">Load A + B</button><button id="reset" type="button">Reset empty</button></div>
+<div class="exact-box"><p class="small">Exact members, kept separately</p><strong id="exact-members"></strong></div>
+<div class="counts"><span id="member-count"></span><span id="bit-count"></span></div>
+<p id="operation-status" class="status" role="status" aria-atomic="true">A and B are inserted. X queries their shared bits.</p>
+<p class="small">Here C maps to (4, 4) and Z to (2, 2): repeated positions are allowed. D uses the same two positions as A in the opposite order. Distinct key counts cannot be recovered from the bits alone.</p>
+</section>
+<section id="live-state" class="card" aria-labelledby="query-title" tabindex="-1">
+<h2 id="query-title"><span class="number">2</span>Ask what is present</h2>
+<ol id="live-bits" class="bits" aria-label="Current eight bits, positions zero through seven"></ol>
+<p class="legend">Small numbers are positions. Green cells contain 1; amber outlines mark the queried positions.</p>
+<div class="query-controls"><label for="query-key">Query key</label><select id="query-key"></select></div>
+<p id="probe-detail" class="small"></p>
+<div class="answers"><p>FILTER ANSWER<strong id="filter-answer"></strong></p><p>EXACT LOOKUP<strong id="exact-answer"></strong></p></div>
+<p id="classification" class="verdict" role="status" aria-atomic="true"></p>
+<p class="small" style="margin-top:1rem">Querying never inserts the key. Repeating a fixed key checks the same positions again; it does not draw new random hashes.</p>
+</section>
+</div>
+<section class="card section" aria-labelledby="deletion-title">
+<div class="section-head"><h2 id="deletion-title"><span class="number">3</span>Preview a deletion on a copy</h2><span class="small">The current set above stays unchanged.</span></div>
+<p class="small">Bits do not record which keys need them. Compare clearing a removed key’s positions with rebuilding the filter from all remaining exact members.</p>
+<div class="query-controls"><label for="remove-key">Preview removal of</label><select id="remove-key"></select></div>
+<p id="deletion-empty" class="small" hidden>Insert a key to preview its removal.</p>
+<div id="deletion-preview">
+<p class="small">Remaining exact members in the preview: <strong id="remaining-members"></strong></p>
+<div class="preview-pair"><div><h3>Unsafe: clear its positions</h3><ol id="unsafe-bits" class="bits" aria-label="Unsafe clear preview bits"></ol></div><div><h3>Correct: rebuild the remaining set</h3><ol id="rebuilt-bits" class="bits" aria-label="Rebuilt preview bits"></ol></div></div>
+<p id="deletion-detail" class="preview-note" role="status" aria-atomic="true"></p>
+</div>
+</section>
+<div class="experiments">
+<section class="card" aria-labelledby="fixed-title">
+<span class="experiment-label">Experiment A · This fixed bit array</span>
+<h2 id="fixed-title">Count every query pair.</h2>
+<p class="small">For a hypothetical nonmember, draw each query position independently and uniformly from 0–7, with replacement. The bit array stays fixed.</p>
+<p id="fixed-count" class="fraction"></p><p id="fixed-formula" class="small"></p>
+<table class="matrix"><caption>All 64 ordered position pairs. ✓ = both bits set; · = at least one zero. Diagonal pairs count too.</caption><thead><tr><th scope="col" aria-label="First position down, second position across">↓ / →</th><th scope="col">0</th><th scope="col">1</th><th scope="col">2</th><th scope="col">3</th><th scope="col">4</th><th scope="col">5</th><th scope="col">6</th><th scope="col">7</th></tr></thead><tbody id="fixed-body"></tbody></table>
+<p class="small"><strong>This is a separate probability model.</strong> It is not a uniform choice among the seven named toy keys above. Their mappings are fixed; this grid instead counts independent random positions conditional on the displayed bits.</p>
+</section>
+<section class="card" aria-labelledby="random-title">
+<span class="experiment-label">Experiment B · A separate two-bit filter</span>
+<h2 id="random-title">Now randomize construction.</h2>
+<p class="small">Use just two bits, one inserted key and two hash positions per key. Draw the two insertion positions and two nonmember query positions independently and uniformly from {0, 1}. Each of the 16 four-draw outcomes is equally likely.</p>
+<table><caption>Four insertion outcomes, each with four equally likely query pairs</caption><thead><tr><th scope="col">Insertion pair</th><th scope="col">Set bits</th><th scope="col">Queries accepted</th></tr></thead><tbody id="random-body"></tbody></table>
+<p id="random-count" class="fraction"></p>
+<p class="small">The acceptance counts are 1 + 4 + 4 + 1 = 10. The middle insertion outcomes fill both bits, so all four query pairs pass.</p>
+<div class="comparison"><strong>Square before you average.</strong> The mean fraction of set bits is 3/4, but (3/4)² = 9/16 differs from the exact 10/16. Average each constructed array’s acceptance probability; squaring its mean occupancy loses the variation.</div>
+<p class="small" style="margin-top:1rem">This finite experiment does not use or change the eight-bit set above. It is not a measured false-positive rate of a deployed filter.</p>
+</section>
+</div>
+<section class="card lesson" aria-labelledby="lesson-title">
+<div><p class="eyebrow">Practice the full lesson</p><h2 id="lesson-title">Take the sixteen questions with you.</h2><p class="small">Download the original Bloom-filter deck. In your RecallWeave learner, use <strong>Bring your own lesson</strong> to choose the JSON, inspect the preview and start the deck. The questions also cover compatible union and intersection, fixed-key evidence and exact backing lookups.</p><div class="actions"><button id="download-course" class="primary" type="button">Download lesson (.json)</button></div><p class="small">This download is the original complete deck, unchanged by your experiments. The explorer keeps no saved state; reopening it restores A + B.</p></div>
+<div><details><summary>Sources and scope</summary><p class="source-credit">Original examples, questions and explorer by Jacob Metoyer / HAMON, shared under CC BY 4.0. Referenced sources retain their own rights.</p><p class="source-credit">Primary references: <a href="https://www.nist.gov/publications/new-analysis-false-positive-rate-bloom-filter">Christensen, Roginsky and Jimeno, A New Analysis of the False-Positive Rate of a Bloom Filter</a>; <a href="https://www.kernel.org/doc/html/latest/bpf/map_bloom_filter.html">Linux kernel Bloom filter map documentation</a>.</p><p class="source-credit">This small model declares toy mappings instead of implementing a production hash function. No benchmark, production membership system or learning-effectiveness result is claimed. Every interaction and the embedded lesson download works without a connection; the reference links require one.</p></details></div>
+</section>
+</main>
+<footer class="footer"><span>Local computation · No accounts or stored experiments</span><span>Eight declared bits · Two distinct probability experiments</span></footer>
+</div>
+<script type="module">
+/*__MODEL__*/
+/*__COURSE__*/
+/*__UI__*/
+</script>
+</body>
+</html>
