@@ -1,0 +1,153 @@
+RecallWeave — study notes
+Expected loss: choose an action, value information
+Saved: 2026-10-13T04:26:13.341Z
+
+FIRST SESSION
+10 of 12 connections correct on the first try.
+This count describes this session; it is not a measure of your ability.
+
+ESTIMATED MASTERY — MODEL STATE, NOT A GRADE
+These estimates come from the demo’s learning model. They are not a validated assessment.
+Practice does not change the first-session estimates.
+expected-loss: 62%
+action-thresholds: 98%
+decision-limits: 98%
+value-of-information: 98%
+
+PRACTICE
+Not started. 2 missed connections are available for practice.
+Practice follows the explanations and is recorded separately from the first answers.
+
+REVIEW THE CONNECTIONS
+
+1. A fictional workshop tile is good with probability 0.75 and flawed with probability 0.25. Release loses 0 points if good and 20 if flawed. Hold loses 4 points in either state. Which action minimizes expected loss?
+Concept: expected-loss
+Your first answer: Release: expected loss 0, because good is more likely.
+First try: needs review
+Correct answer: Hold: expected loss 4, versus Release: 5.
+Explanation: Weight each state's loss by that state's probability. Release has 0.75×0 + 0.25×20 = 5 expected loss points. Hold has 0.75×4 + 0.25×4 = 4. Hold therefore minimizes the stated objective even though a good tile is more likely. Five is an average under the model, not a claim that releasing this one tile realizes five points. The 15-point distractor weights the flawed loss by the good-state probability.
+Apply the idea: Keep Release losses [0,20] and Hold losses [4,4]. Find the flawed probability at which they tie. State which action wins on either side, and distinguish that expected value from a single realized outcome.
+Your explanation — reflection, not scored:
+  > Native receiver fixture: preserve this explanation with the selected course.
+Practice answer: not recorded.
+
+2. Let p be the probability that a fictional tile is flawed. Release loses [0,18] and Rework loses [2,0] in [good,flawed] order. Which rule minimizes expected loss for 0<=p<=1?
+Concept: action-thresholds
+Your first answer: Rework when p>0.10, Release when p<0.10, and either at p=0.10.
+First try: correct
+Correct answer: Rework when p>0.10, Release when p<0.10, and either at p=0.10.
+Explanation: Release has expected loss 18p. Rework has 2(1-p). Rework is better exactly when 2(1-p) < 18p, or 2 < 20p, hence p > 0.10. Below 0.10 choose Release; at 0.10 both minimize expected loss. The threshold comes from the loss table, not a universal 0.50 rule. At p=0 and p=1 the rule also gives the respective zero-loss action.
+Apply the idea: Replace 18 by a positive miss loss M and 2 by a positive unnecessary-rework loss C. Derive the threshold C/(M+C), and explain which direction it moves when M increases.
+Your explanation — reflection, not scored:
+  Not written.
+
+3. Given the evidence, a fictional tile is flawed with probability 0.20 and good with probability 0.80. Release loses [0,12] and Hold loses [3,1], listed in [good,flawed] order. Which comparison is correct?
+Concept: expected-loss
+Your first answer: Hold: 2.6 points, versus Release: 9.6.
+First try: needs review
+Correct answer: Release: 2.4 points, versus Hold: 2.6.
+Explanation: Release has 0.80×0 + 0.20×12 = 2.4 expected loss points. Hold has 0.80×3 + 0.20×1 = 2.6. Release is the minimizer. Both states contribute to Hold; its nonzero flawed-state loss cannot be discarded. The evidence has already been summarized in the given probabilities, so no second probability update is needed. Using 0.80 for Release's flawed loss would reverse the state weighting.
+Apply the idea: If Hold's good-state loss falls from 3 to 2 while its flawed-state loss stays 1, recompute both action losses at p=0.20. Explain why an unchanged probability need not preserve the decision.
+Your explanation — reflection, not scored:
+  Not written.
+Practice answer: not recorded.
+
+4. Three fictional states S1, S2, S3 have probabilities [0.50,0.30,0.20]. The losses in that order are A=[0,4,12], B=[3,3,3], C=[1,6,7]. Which action has the smallest expected loss?
+Concept: expected-loss
+Your first answer: B, with expected loss 3.
+First try: correct
+Correct answer: B, with expected loss 3.
+Explanation: A has 0.50×0 + 0.30×4 + 0.20×12 = 3.6 expected points. B has (0.50+0.30+0.20)×3 = 3. C has 0.50×1 + 0.30×6 + 0.20×7 = 3.7. B is uniquely best among these three actions. Choosing A or C from only its S1 loss ignores the other states. A constant-loss action can be optimal without being best in any one selected state.
+Apply the idea: Keep all three loss rows but use probabilities [0.80,0.10,0.10]. Compute every expected loss before choosing. What tempting shortcut does this example test?
+Your explanation — reflection, not scored:
+  Not written.
+
+5. For p=0.10, Release loses [0,18] and Rework loses [2,0] in [good,flawed] order. What does the expected-loss objective alone select?
+Concept: action-thresholds
+Your first answer: Both actions minimize it; each has expected loss 1.8.
+First try: correct
+Correct answer: Both actions minimize it; each has expected loss 1.8.
+Explanation: At p=0.10, Release has 18×0.10 = 1.8 expected points and Rework has 2×0.90 = 1.8. Both actions minimize the given objective; it does not specify a unique choice. A separate tie-breaking rule could select one, but it would be an additional rule. The largest single loss or the most likely state does not break this equality of weighted averages.
+Apply the idea: Name one explicit tie-breaking rule that would choose an action without pretending it improves expected loss. Explain why a rounded display near p=0.10 should not establish an exact tie.
+Your explanation — reflection, not scored:
+  Not written.
+
+6. A and B are the only available actions. Their losses in [good,flawed] order are A=[1,4] and B=[2,5]. The flawed probability p is unknown but lies in [0,1]. What follows without assigning any distribution to p?
+Concept: decision-limits
+Your first answer: A has exactly one point less expected loss than B for every p.
+First try: correct
+Correct answer: A has exactly one point less expected loss than B for every p.
+Explanation: For any p, A has (1-p)×1 + p×4 = 1+3p expected points, whereas B has (1-p)×2 + p×5 = 2+3p. B is exactly one point worse in every state and every mixture, including p=0 and p=1. Thus A strictly dominates B within this two-action model. A precise probability is unnecessary for this comparison; it would still be needed for many tables whose action rows cross.
+Apply the idea: Modify B to [0,5]. Does A still dominate it? Derive the probability at which the two actions tie and explain why the state-by-state comparison changed.
+Your explanation — reflection, not scored:
+  Not written.
+
+7. States [good,flawed] have probabilities [0.60,0.40]. Action A loses [0,5]; action B loses [5,5]. A fair coin independent of the state chooses A on heads and B on tails. What is this randomized policy's expected loss?
+Concept: decision-limits
+Your first answer: 3.5 points; it cannot beat always choosing A, whose expected loss is 2.
+First try: correct
+Correct answer: 3.5 points; it cannot beat always choosing A, whose expected loss is 2.
+Explanation: Always A has 0.60×0 + 0.40×5 = 2 expected points. Always B has 5. An independent fair choice between them has 0.5×2 + 0.5×5 = 3.5. A mixture of fixed action losses cannot fall below their minimum under this linear expected-loss objective. This statement relies on the coin being independent of the state; an informative signal could support a different, state-correlated policy.
+Apply the idea: Use A with probability q and B with probability 1-q, independently of the state. Express expected loss as a function of q. What q minimizes it, and what changes if the choice is informed by a signal?
+Your explanation — reflection, not scored:
+  Not written.
+
+8. A fictional tile is flawed with probability 0.20. Release loses [0,10] and Rework loses [3,0] in [good,flawed] order. A perfect free observation reveals the state before the action, without changing losses or action availability. What is its gross value, measured as the decrease in minimum expected loss?
+Concept: value-of-information
+Your first answer: 2 points: minimum expected loss falls from 2 to 0.
+First try: correct
+Correct answer: 2 points: minimum expected loss falls from 2 to 0.
+Explanation: Without information, Release has 0.20×10 = 2 expected points and Rework has 0.80×3 = 2.4, so the relevant baseline is 2. Perfect observation permits Release if good and Rework if flawed. That policy has zero loss in either state. The gross value is 2-0 = 2 points, before any observation fee. It is not the difference from an arbitrary suboptimal no-information action.
+Apply the idea: If perfect observation costs 1.50 points, compare the best total expected losses with and without it. Why is a gross information value an upper bound on a worthwhile fee under these assumptions?
+Your explanation — reflection, not scored:
+  Not written.
+
+9. Use flawed probability 0.20 and losses Release=[0,10], Rework=[3,0] in [good,flawed] order. A free signal has P(positive|flawed)=0.80 and P(positive|good)=0.10. Observe it before choosing an action; negative is the complement. What are the minimum expected loss after using the signal and its gross value relative to no signal?
+Concept: value-of-information
+Your first answer: Loss 0.64; gross value 1.36.
+First try: correct
+Correct answer: Loss 0.64; gross value 1.36.
+Explanation: The joint probabilities are good/positive=0.08, flawed/positive=0.16, good/negative=0.72 and flawed/negative=0.04. A positive signal has probability 0.24 and flawed posterior 2/3: Rework has conditional expected loss 1, below Release's 20/3. A negative signal has probability 0.76 and flawed posterior 1/19: Release has 10/19, below Rework's 54/19. The resulting average is 0.24×1 + 0.76×(10/19) = 0.64. Against the best no-signal loss 2, gross value is 2-0.64 = 1.36 points. It is below perfect information's value 2.
+Apply the idea: Suppose positive and negative had the same flawed posterior as the prior. Could the signal still improve the optimal action loss? Explain by comparing contingent and constant policies, not by counting signal labels.
+Your explanation — reflection, not scored:
+  Not written.
+
+10. Keep p=0.15 and Rework losses [2,0]. Change Release losses from [0,18] to [0,8], in [good,flawed] order; all else stays fixed. How does the minimizing action change?
+Concept: action-thresholds
+Your first answer: It changes from Rework to Release when the flawed-release loss decreases.
+First try: correct
+Correct answer: It changes from Rework to Release when the flawed-release loss decreases.
+Explanation: With the original table, Release has 18×0.15 = 2.7 while Rework has 2×0.85 = 1.7, so choose Rework. With the reduced flawed-release loss, Release has 8×0.15 = 1.2 while Rework remains 1.7, so choose Release. The new threshold is 2/(8+2) = 0.20 rather than 0.10. A posterior alone does not determine the action; changing consequences can change the decision without changing a belief.
+Apply the idea: Increase the flawed-release loss while keeping all other quantities fixed. Explain why the threshold for Rework moves downward, and which model inputs would be needed before using this calculation elsewhere.
+Your explanation — reflection, not scored:
+  Not written.
+
+11. Release loses [0,18] and Rework loses [2,0] in [good,flawed] order. All that is known is p in [0.05,0.25]; no distribution over p or extra decision criterion is specified. What can the expected-loss comparison establish?
+Concept: decision-limits
+Your first answer: Release is better at the low endpoint and Rework at the high endpoint; no one action minimizes expected loss throughout the interval.
+First try: correct
+Correct answer: Release is better at the low endpoint and Rework at the high endpoint; no one action minimizes expected loss throughout the interval.
+Explanation: The action boundary is p=0.10. At p=0.05, Release has 0.9 points and Rework has 1.9, so Release wins. At p=0.25, Release has 4.5 and Rework has 1.5, so Rework wins. Neither action is best throughout the stated interval. An interval does not itself supply a uniform probability distribution or justify its midpoint. A precise belief or another explicitly chosen decision criterion would be extra information.
+Apply the idea: Would knowing only p in [0.15,0.25] make one action best throughout? Explain why that conclusion would not require inventing a distribution over the interval.
+Your explanation — reflection, not scored:
+  Not written.
+
+12. A fictional tile is flawed with probability 0.20. Release loses [0,10] and Rework loses [3,0], in [good,flawed] order. A signal has P(positive|flawed)=0.80 and P(positive|good)=0.10; negative is the complement. If acquired, it is observed before choosing one action, with the same losses and actions available. Acquiring it costs a certain 1.50 loss points and is optional. Which plan minimizes total expected loss?
+Concept: value-of-information
+Your first answer: Do not acquire it: no-signal loss is 2, versus 2.14 including the signal fee.
+First try: correct
+Correct answer: Do not acquire it: no-signal loss is 2, versus 2.14 including the signal fee.
+Explanation: The best contingent policy is Rework after positive and Release after negative. Its expected action loss is 3×0.08 + 10×0.04 = 0.64. Adding the certain acquisition fee gives 0.64+1.50 = 2.14, larger than the no-signal minimum 2. Do not acquire it under this model. The gross value 1.36 is nonnegative because free information may be ignored; that fact does not make every fee worthwhile. Here the net benefit of acquiring is 1.36-1.50 = -0.14 points.
+Apply the idea: Find the acquisition fee that produces a tie between buying this signal and not buying it. Explain why the nonnegative gross-value argument requires the option to ignore information and unchanged available actions.
+Your explanation — reflection, not scored:
+  Not written.
+
+YOUR APPLICATION REFLECTION — NOT SCORED
+Prompt: Choose one connection from this deck and explain how it relates to another idea in your own words.
+Not written.
+
+DECK ATTRIBUTION
+Original fictional questions, explanations and transfer prompts authored for RecallWeave by HAMON product-8d5ac72a6fae with AI assistance. Background: Yuri Ivanov, MIT 9.913 Bayesian Decision Theory (Fall 2004), and David L. Poole / Alan K. Mackworth, Artificial Intelligence: Foundations of Computational Agents, 3rd edition, sections 12.2 and 12.4. No source exercises or illustrations are reproduced. Worked derivations, assumptions and links: courses/expected-loss-decisions.md.
+CC0-1.0 for this original course content. Referenced publications retain their own terms and are not included in this deck.
+
+Saved from this browser session. The download does not upload the session or restore it after a refresh.

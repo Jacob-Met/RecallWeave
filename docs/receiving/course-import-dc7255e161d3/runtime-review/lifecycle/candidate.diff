@@ -1,0 +1,139 @@
+--- tools/check_course_import_browser.mjs
++++ tools/check_course_import_browser.mjs
+@@ -58,7 +58,20 @@
+ const checks = [], exceptions = [], requests = [], responses = [], downloads = [], layouts = [], sessions = [], httpServed = [], networkFailures = [], fileChoosers = [];
+ const pending = new Map();
+ let browser, socket, session, next = 0, fatal = null, server, mode = null, browserVersion = null;
+-let browserClosed = false;
++let launcherClosed = false, browserPid = null, socketClosedByBrowser = false, localSocketClose = false;
++const browserLifecycle = {launcherExit: null, endpointSource: null, actualBrowserPid: null, closeRequested: false};
++function processRunning(pid) {
++  if (!Number.isSafeInteger(pid) || pid <= 0) return null;
++  try { process.kill(pid, 0); return true; }
++  catch (error) { return error.code === 'ESRCH' ? false : null; }
++}
++function profileEndpoint(text) {
++  const lines = text.trim().split(/\r?\n/);
++  const port = Number(lines[0]);
++  if (lines.length !== 2 || !/^\d+$/.test(lines[0]) || !Number.isInteger(port) || port < 1 || port > 65535 ||
++      !/^\/devtools\/browser\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/.test(lines[1])) return null;
++  return 'ws://127.0.0.1:' + port + lines[1];
++}
+ const startedAt = new Date().toISOString();
+ const reflection = 'Native receiver fixture: preserve this explanation with the selected course.';
+ 
+@@ -368,15 +381,34 @@
+   await fs.writeFile(path.join(evidence,'http-self-probe.json'),JSON.stringify({status:selfResponse.status,sha256:sha(selfBytes),bytes:selfBytes.length},null,2)+'\n');
+ 
+   browser = spawn(chromium, ['--headless=new', '--disable-gpu', '--no-first-run', '--no-default-browser-check', '--disable-background-networking', '--disable-component-update', '--disable-sync', '--disable-extensions', '--password-store=basic', '--remote-debugging-address=127.0.0.1', '--remote-debugging-port=0', `--user-data-dir=${profile}`, 'about:blank'], { stdio: ['ignore', 'ignore', 'pipe'] });
+-  const endpoint = await new Promise((resolve, reject) => {
+-    let stderr = '';
+-    const timer = setTimeout(() => reject(Error('Chromium startup timeout: ' + stderr.slice(-2000))), 15000);
+-    browser.on('error', error => { clearTimeout(timer); reject(error); });
+-    browser.on('exit', code => { clearTimeout(timer); reject(Error('Chromium exited ' + code)); });
+-    browser.once('close', () => { browserClosed = true; });
+-    browser.stderr.on('data', bytes => { fs.appendFile(path.join(evidence, 'chrome.stderr.log'), bytes).catch(() => {}); stderr += bytes; const match = stderr.match(/DevTools listening on (ws:\/\/127\.0\.0\.1:[^\s]+)/); if (match) { clearTimeout(timer); resolve(match[1]); } });
+-  });
++  let startupError = null, startupStderr = '', stderrEndpoint = null;
++  browser.on('error', error => { startupError = error; });
++  browser.on('exit', (code, signal) => { browserLifecycle.launcherExit = {code, signal}; });
++  browser.once('close', () => { launcherClosed = true; });
++  browser.stderr.on('data', bytes => {
++    fs.appendFile(path.join(evidence, 'chrome.stderr.log'), bytes).catch(() => {});
++    startupStderr = (startupStderr + bytes.toString()).slice(-8000);
++    const match = startupStderr.match(/DevTools listening on (ws:\/\/127\.0\.0\.1:\d+\/devtools\/browser\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})/);
++    if (match) stderrEndpoint = match[1];
++  });
++  let endpoint = null;
++  const startupDeadline = Date.now() + 15000;
++  while (Date.now() < startupDeadline) {
++    if (startupError) throw startupError;
++    if (stderrEndpoint) { endpoint = stderrEndpoint; browserLifecycle.endpointSource = 'owned-launcher-stderr'; break; }
++    try {
++      endpoint = profileEndpoint(await fs.readFile(path.join(profile, 'DevToolsActivePort'), 'utf8'));
++      if (endpoint) { browserLifecycle.endpointSource = 'fresh-owned-profile'; break; }
++    } catch (error) { if (error.code !== 'ENOENT') throw error; }
++    if (browserLifecycle.launcherExit && browserLifecycle.launcherExit.code !== 0) {
++      throw Error('Chromium launcher failed: ' + JSON.stringify(browserLifecycle.launcherExit));
++    }
++    // A successful launcher may hand the private browser to another process.
++    await delay(50);
++  }
++  if (!endpoint) throw Error('Chromium startup timeout: ' + JSON.stringify(browserLifecycle.launcherExit) + ' ' + startupStderr.slice(-2000));
+   socket = new WebSocket(endpoint);
++  socket.addEventListener('close', () => { if (!localSocketClose) socketClosedByBrowser = true; });
+   await new Promise((resolve, reject) => { socket.addEventListener('open', resolve, { once: true }); socket.addEventListener('error', reject, { once: true }); });
+   socket.addEventListener('message', event => {
+     const message = JSON.parse(event.data);
+@@ -389,6 +421,13 @@
+     if (message.method === 'Browser.downloadWillBegin') downloads.push({ mode, ...message.params });
+     if (message.method === 'Browser.downloadProgress') { const download = downloads.find(item => item.guid === message.params.guid); if (download) Object.assign(download, message.params); }
+   });
++  const processInfo = (await send('SystemInfo.getProcessInfo', {}, null)).processInfo;
++  const browserProcesses = processInfo.filter(item => item.type === 'browser');
++  assert.equal(browserProcesses.length, 1, 'CDP must identify exactly one owned browser process');
++  browserPid = browserProcesses[0].id;
++  assert.ok(Number.isSafeInteger(browserPid) && browserPid > 0 && browserPid !== process.pid, 'CDP must identify a valid browser PID');
++  assert.equal(processRunning(browserPid), true, 'Actual browser process must be observable');
++  browserLifecycle.actualBrowserPid = browserPid;
+   browserVersion=(await send('Browser.getVersion',{},null)).product;
+   await send('Browser.setDownloadBehavior', { behavior: 'allowAndName', downloadPath: path.join(evidence, 'downloads'), eventsEnabled: true }, null);
+   await runEntry({ name: 'desktop-http', width: 1360, height: 1000, url: `http://127.0.0.1:${server.address().port}/index.html` });
+@@ -410,22 +449,36 @@
+   fatal = error.stack || String(error);
+   if (socket?.readyState === 1 && session) { try { await shot('failure'); } catch {} }
+ } finally {
+-  if (socket?.readyState === 1) { try { await send('Browser.close', {}, null); } catch {} socket.close(); }
+-  if (browser && !browserClosed) {
+-    for (let i = 0; i < 20 && !browserClosed; i++) await delay(50);
+-    if (!browserClosed) browser.kill('SIGTERM');
+-    for (let i = 0; i < 40 && !browserClosed; i++) await delay(50);
+-    if (!browserClosed) browser.kill('SIGKILL');
+-    for (let i = 0; i < 40 && !browserClosed; i++) await delay(50);
+-  }
++  if (socket?.readyState === 1) {
++    browserLifecycle.closeRequested = true;
++    try { await send('Browser.close', {}, null); }
++    catch (error) { browserLifecycle.closeError = error.message; }
++  }
++  for (let i = 0; browserPid !== null && i < 100; i++) {
++    if (processRunning(browserPid) === false && socketClosedByBrowser) break;
++    await delay(50);
++  }
++  // Only the handle returned by our own spawn is eligible for signal fallback.
++  if (browser && !launcherClosed) {
++    for (let i = 0; i < 20 && !launcherClosed; i++) await delay(50);
++    if (!launcherClosed) browser.kill('SIGTERM');
++    for (let i = 0; i < 40 && !launcherClosed; i++) await delay(50);
++    if (!launcherClosed) browser.kill('SIGKILL');
++    for (let i = 0; i < 40 && !launcherClosed; i++) await delay(50);
++  }
++  browserLifecycle.actualBrowserRunningAfterClose = processRunning(browserPid);
++  browserLifecycle.remoteSocketClosed = socketClosedByBrowser;
++  const browserClosed = !browser?.pid || (browserPid !== null &&
++    browserLifecycle.actualBrowserRunningAfterClose === false && socketClosedByBrowser);
++  if (socket) { localSocketClose = true; socket.close(); }
+   if (server) { server.closeAllConnections(); await new Promise(resolve => server.close(resolve)); }
+   for (const item of pending.values()) clearTimeout(item.timer);
+   let profileRemoved = false;
+-  if (!browser || browserClosed) {
+-    try { await fs.rm(profile, {recursive: true, force: true}); profileRemoved = true; }
++  if (browserClosed && (!browser || launcherClosed)) {
++    try { await fs.rm(profile, {recursive: true, force: true, maxRetries: 10, retryDelay: 100}); profileRemoved = true; }
+     catch (error) { fatal ||= 'Profile cleanup failed: ' + error.message; }
+   }
+-  if (!profileRemoved || (browser && !browserClosed)) fatal ||= 'Owned browser cleanup did not complete.';
++  if (!profileRemoved || !browserClosed || (browser && !launcherClosed)) fatal ||= 'Owned browser cleanup could not be verified.';
+   const receipt = {
+     schema: 'recallweave.selected-course-browser-receiving.v1',
+     startedAt, completedAt: new Date().toISOString(), source, course: deckPath,
+@@ -436,7 +489,8 @@
+     expectationsBasis: 'Selected course answer key and literal content; subject correctness needs separate review.',
+     node: process.version, chromium: browserVersion,
+     checks, sessions, requests, responses, downloads, exceptions, httpServed, networkFailures, fileChoosers, fatal,
+-    cleanup: {ownServerClosed: !server?.listening, ownBrowserClosed: !browser || browserClosed, ownProfileRemoved: profileRemoved},
++    browserLifecycle,
++    cleanup: {ownServerClosed: !server?.listening, ownBrowserClosed: browserClosed, ownLauncherClosed: !browser || launcherClosed, ownProfileRemoved: profileRemoved},
+     qualification: 'Actual native Chromium presentation, pointer input, local-file selection and downloaded notes; no learning-efficacy or hosted deployment claim.'
+   };
+   await fs.writeFile(path.join(evidence, 'browser-receipt.json'), JSON.stringify(receipt, null, 2) + '\n');

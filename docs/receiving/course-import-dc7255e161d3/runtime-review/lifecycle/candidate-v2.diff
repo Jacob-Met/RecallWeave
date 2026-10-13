@@ -1,0 +1,52 @@
+--- candidate-b4b.mjs
++++ candidate-v2.mjs
+@@ -59,7 +59,7 @@
+ const pending = new Map();
+ let browser, socket, session, next = 0, fatal = null, server, mode = null, browserVersion = null;
+ let launcherClosed = false, browserPid = null, socketClosedByBrowser = false, localSocketClose = false;
+-const browserLifecycle = {launcherExit: null, endpointSource: null, actualBrowserPid: null, closeRequested: false};
++const browserLifecycle = {launcherPid: null, launcherExit: null, ownedProfile: profile, endpointSource: null, endpointBusyRetries: 0, actualBrowserPid: null, closeRequested: false};
+ function processRunning(pid) {
+   if (!Number.isSafeInteger(pid) || pid <= 0) return null;
+   try { process.kill(pid, 0); return true; }
+@@ -381,6 +381,7 @@
+   await fs.writeFile(path.join(evidence,'http-self-probe.json'),JSON.stringify({status:selfResponse.status,sha256:sha(selfBytes),bytes:selfBytes.length},null,2)+'\n');
+ 
+   browser = spawn(chromium, ['--headless=new', '--disable-gpu', '--no-first-run', '--no-default-browser-check', '--disable-background-networking', '--disable-component-update', '--disable-sync', '--disable-extensions', '--password-store=basic', '--remote-debugging-address=127.0.0.1', '--remote-debugging-port=0', `--user-data-dir=${profile}`, 'about:blank'], { stdio: ['ignore', 'ignore', 'pipe'] });
++  browserLifecycle.launcherPid = browser.pid ?? null;
+   let startupError = null, startupStderr = '', stderrEndpoint = null;
+   browser.on('error', error => { startupError = error; });
+   browser.on('exit', (code, signal) => { browserLifecycle.launcherExit = {code, signal}; });
+@@ -399,7 +400,10 @@
+     try {
+       endpoint = profileEndpoint(await fs.readFile(path.join(profile, 'DevToolsActivePort'), 'utf8'));
+       if (endpoint) { browserLifecycle.endpointSource = 'fresh-owned-profile'; break; }
+-    } catch (error) { if (error.code !== 'ENOENT') throw error; }
++    } catch (error) {
++      if (error.code === 'EBUSY') browserLifecycle.endpointBusyRetries++;
++      else if (error.code !== 'ENOENT') throw error;
++    }
+     if (browserLifecycle.launcherExit && browserLifecycle.launcherExit.code !== 0) {
+       throw Error('Chromium launcher failed: ' + JSON.stringify(browserLifecycle.launcherExit));
+     }
+@@ -449,15 +453,19 @@
+   fatal = error.stack || String(error);
+   if (socket?.readyState === 1 && session) { try { await shot('failure'); } catch {} }
+ } finally {
++  const closeWaitStarted = performance.now();
++  browserLifecycle.closeObservationStartedAt = new Date().toISOString();
+   if (socket?.readyState === 1) {
+     browserLifecycle.closeRequested = true;
+     try { await send('Browser.close', {}, null); }
+     catch (error) { browserLifecycle.closeError = error.message; }
+   }
+-  for (let i = 0; browserPid !== null && i < 100; i++) {
++  const closeDeadline = performance.now() + 30000;
++  while (browserPid !== null && performance.now() < closeDeadline) {
+     if (processRunning(browserPid) === false && socketClosedByBrowser) break;
+     await delay(50);
+   }
++  browserLifecycle.closeWaitElapsedMs = performance.now() - closeWaitStarted;
+   // Only the handle returned by our own spawn is eligible for signal fallback.
+   if (browser && !launcherClosed) {
+     for (let i = 0; i < 20 && !launcherClosed; i++) await delay(50);
