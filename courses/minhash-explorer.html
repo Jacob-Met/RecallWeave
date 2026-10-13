@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MinHash · The first label tells the story</title>
+<style>
+:root{color-scheme:light;--ink:#172f35;--muted:#4d6568;--paper:#f6f3eb;--line:#cad4cd;--green:#12645b;--orange:#964815;--blue:#2b5778}*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.55 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+a{color:var(--green)}button,textarea,select{font:inherit}button,select{min-height:44px}button{cursor:pointer;border:1px solid var(--line);border-radius:7px;background:white;padding:.55rem .85rem;color:var(--ink);font-weight:650}button:hover{border-color:var(--green)}button:disabled{cursor:default;opacity:.55}button:focus-visible,a:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid #d3672a;outline-offset:3px}
+.skip{position:absolute;top:-100px;background:white;padding:1rem}.skip:focus{top:0;z-index:10}
+header{background:var(--ink);color:#fff;padding:2rem max(1.1rem,calc((100vw - 1120px)/2));border-bottom:7px solid #bada9f}
+.eyebrow{font-size:.75rem;letter-spacing:.16em;font-weight:750;text-transform:uppercase;margin:0 0 .65rem;color:#c6dcc3}
+h1{font-size:clamp(2rem,5vw,3.7rem);letter-spacing:-.04em;line-height:1.06;max-width:800px;margin:.2rem 0 1rem}header p:last-child{max-width:760px;margin:0;color:#d8e4df}
+main{max-width:1156px;margin:auto;padding:1.5rem 1.1rem 3rem}h2{font-size:1.35rem;line-height:1.25;margin:0 0 .8rem}h3{font-size:1rem;margin:1rem 0 .5rem}p{margin:.55rem 0 1rem}.muted,small{color:var(--muted)}.card{padding:1.35rem;background:#fff;border:1px solid var(--line);border-radius:12px;margin-bottom:1.25rem}
+.step{font-size:.72rem;font-weight:800;letter-spacing:.12em;color:var(--green);text-transform:uppercase;margin:0 0 .4rem}
+.fields{display:grid;grid-template-columns:1fr 1fr;gap:1rem}label{display:block;font-weight:700}textarea{display:block;width:100%;min-height:90px;padding:.7rem;border:1px solid #9aaeaa;border-radius:7px;background:#fbfcf8;color:var(--ink);font-family:ui-monospace,SFMono-Regular,Consolas,monospace;resize:vertical}textarea:focus{border-color:var(--green)}.actions,.examples,.navigator{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center}.actions{margin-top:1rem}.primary{background:var(--green);color:white;border-color:var(--green)}.examples{margin:.8rem 0}.examples button{font-size:.85rem;min-height:38px;padding:.35rem .6rem}.error{color:#a52d20;font-weight:650}.status{min-height:1.4em;font-size:.9rem}
+dl{display:grid;grid-template-columns:max-content 1fr;gap:.35rem 1rem;margin:0}dt{font-weight:700}dd{margin:0;overflow-wrap:anywhere;white-space:pre-wrap;font-family:ui-monospace,Consolas,monospace}
+.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:.8rem;margin:1rem 0}.metric{padding:1rem;border-radius:9px;background:#f0f5e9;border:1px solid #c9d9bd}.metric span{display:block;font-size:.78rem;font-weight:650}.metric strong{font-size:2rem;font-variant-numeric:tabular-nums;line-height:1.5}.metric small{display:block}
+.navigator label{font-size:.85rem}.navigator select{background:white;border:1px solid #9aaeaa;border-radius:6px;padding:.4rem;max-width:100%}.row-state{font-weight:650;color:var(--green);margin:.8rem 0}
+.ranks{list-style:none;display:flex;flex-wrap:wrap;gap:.55rem;padding:0;margin:1rem 0}.ranks li{flex:1 1 140px;min-width:0;border:2px solid;padding:.65rem .8rem;border-radius:8px}.ranks .shared{background:#e8f4db;border-color:#799a5f}.ranks .only-a{background:#eaf1fa;border-color:#7494b4}.ranks .only-b{background:#fff0e5;border-color:#ba8c69}.rank,.membership{display:block;font-size:.7rem;font-weight:750;letter-spacing:.05em}.ranks code{display:block;font-size:1rem;font-weight:700;overflow-wrap:anywhere;white-space:pre-wrap;margin:.35rem 0}
+.minimums{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.75rem}.minimums>div{border-left:3px solid var(--line);padding:.4rem .65rem;min-width:0}.minimums span{display:block;font-size:.75rem;color:var(--muted)}.minimums strong{display:block;overflow-wrap:anywhere;white-space:pre-wrap;font-size:1rem}
+.notice{padding:.8rem 1rem;border-left:4px solid #c59837;background:#fff9df;font-size:.92rem}.table-wrap{max-width:100%;overflow-x:auto;border:1px solid var(--line);border-radius:7px;margin:.8rem 0}table{border-collapse:collapse;width:100%;font-size:.88rem}th,td{text-align:left;padding:.55rem .65rem;border-bottom:1px solid #dde4de;vertical-align:top;white-space:pre-wrap;overflow-wrap:anywhere}th{background:#eef2ec;font-size:.75rem;text-transform:uppercase;letter-spacing:.025em}.all-rows{min-width:660px}.all-rows td:nth-child(2){min-width:220px}tr:last-child td{border-bottom:0}.selected{background:#e8f4db}.row-select{font-size:.85rem;min-width:44px;padding:.2rem .45rem}.row-select[aria-pressed=true]{background:var(--green);color:white}summary{cursor:pointer;font-weight:700;min-height:44px;padding:.5rem 0}.proof{max-width:850px}.formula{font:700 clamp(1rem,2.5vw,1.4rem)/1.6 ui-monospace,Consolas,monospace;overflow-wrap:anywhere}footer{font-size:.85rem;color:var(--muted);border-top:1px solid var(--line);padding-top:1rem}code{font-family:ui-monospace,Consolas,monospace}noscript{display:block;padding:1rem;background:#fff0e5}
+[hidden]{display:none!important}
+@media(max-width:620px){header{padding:1.5rem 1.1rem}.card{padding:1rem}.fields,.metrics{grid-template-columns:1fr}.metrics{gap:.5rem}.metric{display:grid;grid-template-columns:1fr auto;gap:0 .5rem;padding:.65rem 1rem}.metric strong{grid-column:2;grid-row:1/3;align-self:center;font-size:1.65rem}.metric small{grid-column:1}.minimums{grid-template-columns:1fr}.minimums>div{border-left-width:3px}dl{grid-template-columns:1fr;gap:.1rem}dd{margin-bottom:.65rem}.ranks li{flex-basis:100px}.navigator{align-items:stretch}.navigator label{width:100%}}
+@media print{header{background:white;color:#172f35;padding:1rem 0}header p:last-child,.eyebrow{color:#172f35}main{padding:1rem 0}form,.actions,.examples,.navigator,.skip,footer{display:none!important}.card{break-inside:avoid}details:not([open]){display:none}.table-wrap{overflow:visible}}
+</style>
+</head>
+<body>
+<a class="skip" href="#inputs">Skip to the sets</a>
+<header><p class="eyebrow">RecallWeave · Finite probability lab</p><h1>The first label<br>tells the story.</h1><p>Compare two sets. Inspect every possible order. See exactly when their minimum labels match—and why the full collision fraction equals their overlap.</p></header>
+<main>
+<noscript>This companion needs JavaScript enabled to calculate permutations. Its worked guide and probability course are also provided as separate files.</noscript>
+<section class="card" id="inputs" aria-labelledby="inputs-title">
+<p class="step">01 · Define the sets</p><h2 id="inputs-title">Small sets. Every possible order.</h2>
+<p>Enter two JSON arrays of labels. Use at most five distinct labels across both sets. Exact repeats count once; labels are case sensitive and their spaces are preserved.</p>
+<div class="examples" aria-label="Load example inputs">
+<button type="button" data-example="overlap">Partial overlap</button><button type="button" data-example="identical">Identical</button><button type="button" data-example="disjoint">Disjoint</button><button type="button" data-example="subset">Subset</button><button type="button" data-example="boundary">Five labels</button><button type="button" data-example="literal">Literal labels</button>
+</div>
+<form id="compare-form" novalidate>
+<div class="fields"><label for="set-a">Set A<textarea id="set-a" spellcheck="false" maxlength="4096" aria-describedby="input-help">["a","b"]</textarea></label><label for="set-b">Set B<textarea id="set-b" spellcheck="false" maxlength="4096" aria-describedby="input-help">["b","c"]</textarea></label></div>
+<p id="input-help" class="muted"><small>Both arrays must be nonempty: 1–20 entries each, up to 40 Unicode characters per label. Blank labels, control characters and incomplete Unicode are refused. Labels are displayed in quotes so spaces remain visible.</small></p>
+<div class="actions"><button class="primary" type="submit">Compare all permutations</button><button type="button" id="download-observation" disabled>Download observation</button></div>
+<p id="status" class="status" role="status" aria-live="polite">Choose Compare all permutations to calculate the shown inputs.</p><p id="error" class="error" role="alert"></p>
+</form>
+</section>
+<div id="results" hidden>
+<section class="card" aria-labelledby="counts-title">
+<p class="step">02 · Count the whole space</p><h2 id="counts-title">A set fraction and a collision fraction</h2>
+<dl><dt>Distinct A</dt><dd id="set-a-result"></dd><dt>Distinct B</dt><dd id="set-b-result"></dd><dt>Union</dt><dd id="union-result"></dd><dt>Intersection</dt><dd id="intersection-result"></dd></dl>
+<p id="duplicates" class="muted"></p>
+<div class="metrics"><div class="metric"><span>JACCARD SIMILARITY</span><strong id="jaccard"></strong><small>Shared labels / union labels</small></div><div class="metric"><span>ALL PERMUTATIONS</span><strong id="frequency"></strong><small>Matches / complete set of orders</small></div><div class="metric"><span>SAME REDUCED FRACTION</span><strong id="reduced"></strong><small>Exact rational value</small></div></div>
+<p class="notice">The probability interpretation assumes a <strong>uniformly chosen permutation</strong>. This page enumerates every permutation exactly. It does not sample random orders or run an approximate hash function.</p>
+</section>
+<section class="card" aria-labelledby="inspect-title">
+<p class="step">03 · Inspect one order</p><h2 id="inspect-title">Scan left to right. Find each set’s first member.</h2>
+<div class="navigator"><button type="button" id="previous">Previous</button><label for="permutation">Permutation <select id="permutation"></select></label><button type="button" id="next">Next</button></div>
+<p id="row-status" class="row-state" role="status" aria-live="polite"></p>
+<ol id="ranked-labels" class="ranks" aria-label="Labels in the selected permutation"></ol>
+<div class="minimums"><div><span>MINIMUM OF A</span><strong id="min-a"></strong></div><div><span>MINIMUM OF B</span><strong id="min-b"></strong></div><div><span>THIS ORDER’S COLLISION</span><strong id="row-collision"></strong></div></div>
+<p id="row-explanation"></p>
+<p class="notice">A chosen order gives a single <strong>0 or 1</strong>. It does not establish that the sets are identical or disjoint, and it is separate from the exact full-enumeration fraction above.</p>
+<details><summary>Inspect all orders and their minimum labels</summary><p class="muted">Rows follow the union’s first-seen input order. Reordering the inputs can reorder this table, but cannot change the full fraction.</p><div class="table-wrap" tabindex="0" role="region" aria-label="All permutations, scroll horizontally on small screens"><table class="all-rows"><thead><tr><th scope="col">Inspect</th><th scope="col">Permutation</th><th scope="col">Minimum A</th><th scope="col">Minimum B</th><th scope="col">Collision</th></tr></thead><tbody id="permutation-rows"></tbody></table></div></details>
+</section>
+<section class="card proof" aria-labelledby="proof-title">
+<p class="step">04 · Explain the count</p><h2 id="proof-title">Every union label gets the same number of first places.</h2>
+<p>Let <em>n</em> be the number of union labels and <em>k</em> the number shared by both sets. There are <em>n!</em> complete orders. Fixing any one label in first place leaves <em>(n−1)!</em> orders for the rest.</p>
+<div class="table-wrap"><table><thead><tr><th scope="col">First union label</th><th scope="col">Membership</th><th scope="col">Orders starting here</th><th scope="col">Matching minima</th></tr></thead><tbody id="first-rows"></tbody></table></div>
+<p>The minima match exactly when that first label is shared. Each of the <em>k</em> shared labels therefore contributes <em>(n−1)!</em> matching orders.</p><p class="formula">k × (n−1)! / n! = k / n = |A ∩ B| / |A ∪ B|</p>
+<p>This finite argument explains the ideal permutation model. It does not prove that an arbitrary practical hash function behaves like a uniform random permutation. Empty sets are outside this lab because their minimum label is undefined.</p>
+</section>
+</div>
+<section class="card" aria-labelledby="keep-title"><h2 id="keep-title">Keep the reasoning and study the foundations</h2><p>Download the worked guide for the proof, examples and conventions. The unchanged <strong>Probability foundations</strong> course can be imported through RecallWeave’s <strong>Bring your own lesson → Preview → Start this deck</strong> flow.</p>
+<div class="actions"><button type="button" id="download-guide">Download worked guide</button><button type="button" id="download-course">Download probability course</button></div><p class="muted"><small>The observation contains the exact applied inputs, all permutations and the selected row. It is a separate teaching record, not a learner-answer archive. Nothing is automatically stored or uploaded.</small></p></section>
+<footer>Original finite teaching examples and implementation. Background: Broder, Charikar, Frieze and Mitzenmacher, <a href="https://www.math.cmu.edu/~af1p/Texfiles/mw0.pdf">Min-Wise Independent Permutations</a>. This standalone page requires no network, account or installation. Edits retire the old calculation until you compare again.</footer>
+</main>
+<script type="application/json" id="course-data">"{\n  \"format\": \"recallweave-deck/1\",\n  \"title\": \"Probability foundations: count, condition, and update\",\n  \"attribution\": \"Original questions, explanations and transfer prompts authored for RecallWeave by estate-7a9310dad255 with AI assistance. All scenarios and numerical data are fictional. Mathematical background: Jeremy Orloff and Jonathan Bloom, MIT 18.05 (Spring 2022), Readings 2 and 3; source links and worked derivations are in courses/probability-foundations.md. No source exercises or illustrations are reproduced.\",\n  \"license\": \"CC0-1.0 for this original course content. Referenced MIT materials retain their own terms; they are not included in this deck.\",\n  \"concepts\": [\n    \"Sample spaces\",\n    \"Conditional probability\",\n    \"Independence\",\n    \"Bayes' rule\"\n  ],\n  \"items\": [\n    {\n      \"id\": \"pf-s1\",\n      \"concept\": \"Sample spaces\",\n      \"prerequisites\": [],\n      \"prompt\": \"A spinner produces one of the integers 1 through 8, with all eight outcomes equally likely. What is the probability that the result is at least 6?\",\n      \"options\": [\n        \"1/8\",\n        \"3/8\",\n        \"3/5\",\n        \"5/8\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"The event contains three outcomes: 6, 7 and 8. Each has probability 1/8, so their probabilities add to 3/8. The denominator counts all eight possible outcomes. Using 5 counts the excluded outcomes instead; 5/8 is the probability of a result below 6.\",\n      \"transfer\": \"If the eight outcomes were not equally likely, what information would you need before adding the probabilities of 6, 7 and 8?\"\n    },\n    {\n      \"id\": \"pf-s2\",\n      \"concept\": \"Sample spaces\",\n      \"prerequisites\": [],\n      \"prompt\": \"In a fictional model, every manufactured part either needs rework or does not need rework. The probability that a randomly selected part needs rework is 0.27. What is the probability that it does not?\",\n      \"options\": [\n        \"0.27\",\n        \"0.37\",\n        \"0.63\",\n        \"0.73\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"These two events cover every outcome and cannot both happen, so their probabilities sum to 1. The complement therefore has probability 1 - 0.27 = 0.73. This conclusion uses the stated two-way classification; it does not require independence or a count of actual parts.\",\n      \"transfer\": \"A service reports a 0.08 probability of missing its deadline. State the complementary event and its probability.\"\n    },\n    {\n      \"id\": \"pf-s3\",\n      \"concept\": \"Sample spaces\",\n      \"prerequisites\": [],\n      \"prompt\": \"In a fictional group of 60 learners, 30 joined a drawing club, 24 joined a coding club, and 12 joined both. A learner is selected uniformly at random from the 60. What is the probability that they joined at least one of the two clubs?\",\n      \"options\": [\n        \"0.70\",\n        \"0.90\",\n        \"0.50\",\n        \"0.20\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"Adding the club counts counts the 12 shared members twice. There are 30 + 24 - 12 = 42 members in at least one club, so the probability is 42/60 = 0.70. The answer 0.90 double-counts the overlap, 0.50 counts only the drawing club, and 0.20 counts only those in both.\",\n      \"transfer\": \"How many learners joined neither club? Explain how the complement and the corrected club count give the same result.\"\n    },\n    {\n      \"id\": \"pf-c1\",\n      \"concept\": \"Conditional probability\",\n      \"prerequisites\": [\n        \"Sample spaces\"\n      ],\n      \"prompt\": \"A fictional log contains 100 builds: 30 ran on Windows and 70 on Linux. Of the Windows builds, 6 failed; of the Linux builds, 4 failed. A build is selected uniformly at random from the log. Given that it ran on Windows, what is the probability that it failed?\",\n      \"options\": [\n        \"0.06\",\n        \"0.60\",\n        \"0.20\",\n        \"0.80\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"The condition restricts the relevant group to the 30 Windows builds. Six of those failed, so P(failed given Windows) = 6/30 = 0.20. Dividing by 100 gives the joint probability of Windows and failure (0.06). Dividing by all 10 failures answers the reverse question, P(Windows given failed) = 0.60.\",\n      \"transfer\": \"Using the same log, compute P(failed given Linux). Name the group that supplies the denominator before calculating.\"\n    },\n    {\n      \"id\": \"pf-c2\",\n      \"concept\": \"Conditional probability\",\n      \"prerequisites\": [\n        \"Sample spaces\"\n      ],\n      \"prompt\": \"A fictional delivery list has 240 parcels. Exactly 60 were priority parcels. Of the 30 parcels that arrived late, 18 were priority parcels. A parcel is selected uniformly at random from this list. Given that it arrived late, what is the probability that it was a priority parcel?\",\n      \"options\": [\n        \"0.60\",\n        \"0.30\",\n        \"0.075\",\n        \"0.25\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"Conditioning on late delivery leaves 30 possible parcels, including 18 priority parcels. The probability is 18/30 = 0.60. The ratio 18/60 = 0.30 instead means late given priority. The ratio 18/240 = 0.075 is the joint probability, and 60/240 = 0.25 is the unconditional priority probability.\",\n      \"transfer\": \"Write the numerator and denominator for P(late given priority). Explain why it uses a different denominator from P(priority given late).\"\n    },\n    {\n      \"id\": \"pf-c3\",\n      \"concept\": \"Conditional probability\",\n      \"prerequisites\": [\n        \"Sample spaces\"\n      ],\n      \"prompt\": \"A bag contains 3 red tokens and 2 blue tokens. Two tokens are drawn uniformly at random, one at a time, without replacement. Given that the first token was red, what is the probability that the second token is red?\",\n      \"options\": [\n        \"3/5\",\n        \"1/2\",\n        \"2/5\",\n        \"3/4\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"After a red token is removed, 2 red and 2 blue tokens remain. The second draw is uniform over those four tokens, so its conditional probability of red is 2/4 = 1/2. Keeping 3/5 assumes the original bag is unchanged; 2/5 removes a red token from the numerator but not from the total.\",\n      \"transfer\": \"If the first token were returned and the bag mixed before the second draw, what would the conditional probability become?\"\n    },\n    {\n      \"id\": \"pf-i1\",\n      \"concept\": \"Independence\",\n      \"prerequisites\": [\n        \"Sample spaces\",\n        \"Conditional probability\"\n      ],\n      \"prompt\": \"A fully specified probability model gives P(A) = 0.4, P(B) = 0.5, and P(A and B) = 0.2. Are the two events independent in this model, and which calculation establishes your answer?\",\n      \"options\": [\n        \"No: 0.4 and 0.5 are different probabilities.\",\n        \"No: 0.2 is smaller than either event's probability.\",\n        \"Yes: 0.4 and 0.5 add to a number below 1.\",\n        \"Yes: 0.2 equals the product 0.4 × 0.5.\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"Two events are independent when P(A and B) = P(A) × P(B). Here 0.4 × 0.5 = 0.2, which matches the stated joint probability. Equivalently, P(A given B) = 0.2/0.5 = 0.4. Different event probabilities do not imply dependence. This checks an exact model, not evidence that a finite sample proves real-world independence.\",\n      \"transfer\": \"Keep P(A) = 0.4 and P(B) = 0.5, but change P(A and B) to 0.3. Compute P(A given B) and decide whether independence remains.\"\n    },\n    {\n      \"id\": \"pf-i2\",\n      \"concept\": \"Independence\",\n      \"prerequisites\": [\n        \"Sample spaces\",\n        \"Conditional probability\"\n      ],\n      \"prompt\": \"Events A and B are mutually exclusive: they cannot occur together. Their probabilities are P(A) = 0.3 and P(B) = 0.2. Which answer correctly states whether they are independent and explains why?\",\n      \"options\": [\n        \"Yes: never occurring together means observing either tells us nothing.\",\n        \"No: if B occurs, A has probability 0 instead of its original 0.3.\",\n        \"Yes: adding 0.3 and 0.2 gives 0.5, which is a valid probability.\",\n        \"No: every pair of different events must change each other's probability.\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"Because the events cannot occur together, P(A and B) = 0 and P(A given B) = 0/0.2 = 0. That differs from P(A) = 0.3, so knowing B occurred changes A's probability. Equivalently, 0 is not 0.3 × 0.2 = 0.06. Mutually exclusive events with positive probabilities are dependent; merely being different events is not enough.\",\n      \"transfer\": \"When selecting one integer uniformly from 1 through 10, let A mean 'at most 3' and B mean 'at least 9'. Identify their overlap and test independence.\"\n    },\n    {\n      \"id\": \"pf-i3\",\n      \"concept\": \"Independence\",\n      \"prerequisites\": [\n        \"Sample spaces\",\n        \"Conditional probability\"\n      ],\n      \"prompt\": \"In a fictional system model, module A fails during a run with probability 0.10 and module B fails with probability 0.20. The two failure events are explicitly assumed independent. What is the probability that at least one module fails during a run?\",\n      \"options\": [\n        \"0.02\",\n        \"0.30\",\n        \"0.28\",\n        \"0.70\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"Independence gives P(both fail) = 0.10 × 0.20 = 0.02. Correcting the overlap gives P(at least one fails) = 0.10 + 0.20 - 0.02 = 0.28. The complement agrees: P(neither fails) = 0.90 × 0.80 = 0.72, so 1 - 0.72 = 0.28. Adding without subtracting the overlap gives 0.30; 0.02 answers the different question 'both'.\",\n      \"transfer\": \"If the failure events were dependent, which additional joint or conditional probability would let you compute the probability of at least one failure?\"\n    },\n    {\n      \"id\": \"pf-b1\",\n      \"concept\": \"Bayes' rule\",\n      \"prerequisites\": [\n        \"Sample spaces\",\n        \"Conditional probability\"\n      ],\n      \"prompt\": \"In a fictional supply model, workshop A makes 60% of the sensors and workshop B makes 40%. A sensor from A is defective with probability 2%; one from B is defective with probability 6%. A sensor is selected uniformly at random from the combined supply. Given that it is defective, what is the probability it came from B?\",\n      \"options\": [\n        \"1/3\",\n        \"2/5\",\n        \"2/3\",\n        \"3/4\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"The probability of B and defective is 0.40 × 0.06 = 0.024. The total defective probability is 0.60 × 0.02 + 0.40 × 0.06 = 0.036. Therefore P(B given defective) = 0.024/0.036 = 2/3. The value 2/5 ignores the new information; 3/4 compares defect rates without weighting each workshop's share. No independence assumption between workshop and defect is used.\",\n      \"transfer\": \"If both workshops supplied equal shares while their defect probabilities stayed 2% and 6%, what would P(B given defective) become?\"\n    },\n    {\n      \"id\": \"pf-b2\",\n      \"concept\": \"Bayes' rule\",\n      \"prerequisites\": [\n        \"Sample spaces\",\n        \"Conditional probability\"\n      ],\n      \"prompt\": \"In a fictional collection, 1% of files are defective. A checker flags 90% of defective files and also flags 10% of nondefective files. A file is selected uniformly at random. Given that the checker flags it, what is the probability that it is defective?\",\n      \"options\": [\n        \"9/10\",\n        \"1/10\",\n        \"1/100\",\n        \"1/12\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"Use 1,000 equally likely files with the stated proportions: 10 are defective and 990 are not. The checker flags 9 defective files and 99 nondefective files. Among the 108 flagged files, 9 are defective, giving 9/108 = 1/12, about 8.33%. The 90% rate is P(flagged given defective), not its reverse. The much larger nondefective group contributes most flags.\",\n      \"transfer\": \"Using the same counts, what is the probability that a randomly selected file is both defective and flagged? Explain why its denominator differs from the question's.\"\n    },\n    {\n      \"id\": \"pf-b3\",\n      \"concept\": \"Bayes' rule\",\n      \"prerequisites\": [\n        \"Sample spaces\",\n        \"Conditional probability\"\n      ],\n      \"prompt\": \"A fictional checker flags 90% of defective files and 10% of nondefective files. Compare two collections where the defective share is 1% and 10%, respectively. A file is selected uniformly at random from each collection. The checker's conditional flagging rates stay the same. How does P(defective given flagged) change as the defective share rises?\",\n      \"options\": [\n        \"It rises from 1/12 to 1/2.\",\n        \"It stays at 9/10 in both collections.\",\n        \"It falls from 1/12 to 1/100.\",\n        \"It stays at 1/10 in both collections.\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"For a defective share p, the probability is (0.90 × p) / (0.90 × p + 0.10 × (1 - p)). At p = 0.01 this is 0.009/0.108 = 1/12. At p = 0.10 it is 0.09/0.18 = 1/2. The same conditional flagging rates can produce different probabilities among flagged files because the underlying group sizes changed.\",\n      \"transfer\": \"With the same checker but a defective share of 50%, compute the defective probability among flagged files. Which part of Bayes' rule accounts for the change?\"\n    }\n  ]\n}\n"</script>
+<script type="application/json" id="guide-data">"# MinHash: the first label tells the story\n\nOpen **minhash-explorer.html** directly in a modern browser. It is a\nself-contained teaching page: no server, package installation, account or\nnetwork is required. The page compares two small sets under every ordering\nof their union. It displays the exact calculation and an inspectable proof.\n\n## Use the companion\n\n1. Enter each set as a JSON array, for example `[\"a\",\"b\"]` and `[\"b\",\"c\"]`.\n2. Select **Compare all permutations**. Inspect the distinct sets, their union\n   and intersection, and both exact fractions.\n3. Use **Previous**, **Next**, the permutation selector, or a row's **Inspect**\n   button to inspect one complete ordering. The colored rank cards label\n   membership as A only, B only, or A and B; color is supplementary.\n4. Expand the complete-order table to see every minimum label and collision.\n   On a narrow screen, that table has its own horizontal scrolling region.\n5. Download the observation to keep the applied input text, all rows and the\n   selected permutation. Editing either input retires the displayed result and\n   disables its download until a successful new comparison.\n\nExample buttons fill the inputs but do not apply them. The existing result is\nretired immediately so a draft cannot be mistaken for an applied calculation.\nInvalid input produces an explicit error and no current downloadable result.\nPrevious and Next stop at the first and last row. Nothing is automatically saved.\n\n## What the model means\n\nBoth sets are nonempty. A label is a literal string; exact duplicates contribute\nonly one set member. Case, leading and trailing spaces, and distinct Unicode\nforms remain distinct. For example, `\"a\"`, `\" a\"` and `\"A\"` are different.\nThe quoted display makes those differences inspectable. This is a set model,\nnot a multiset or frequency-weighted similarity measure.\n\nThe union contains at most five distinct labels, so the page can enumerate\nall of its at most 120 permutations. The union's displayed order is first-seen\nSet A followed by previously unseen labels in Set B. That determines the table\norder, not any probability weighting. Reordering the inputs changes the row\norder but not the collection of orders or the collision fraction.\n\nRead a permutation from left to right, with ranks starting at 1. The ideal\nMinHash signature of A in this order is the rank of A's first member; B uses\nthe same order. The page shows both the literal first label and its rank.\nDistinct labels have distinct ranks, so matching minimum labels and matching\nminimum ranks are equivalent here.\n\nA collision is 1 when the two minima match and 0 otherwise. This term describes\nthe two set signatures, not a collision between two distinct labels assigned\nthe same hash value: this model uses permutations, whose ranks are unique.\n\n## The exact count\n\nWrite n = |A union B| and k = |A intersection B|. The Jaccard similarity is k/n.\n\nThere are n! orderings of n distinct labels. If one particular label is fixed\nfirst, the remaining n−1 labels can be ordered in (n−1)! ways. Thus every\nunion label appears first equally often.\n\nThe two minima match **if and only if the first union label belongs to both\nsets**:\n\n- If that first label is shared, each set already has its first member at\n  rank 1. The minima match.\n- If it belongs to only one set, that set starts at rank 1 and the other starts\n  later. Their minima differ.\n\nEach of the k shared labels therefore starts (n−1)! matching orders:\n\n```text\nmatching orders / all orders = k × (n−1)! / n! = k/n\n```\n\nUnder a uniformly chosen permutation, this same fraction is the probability\nof a collision. The page enumerates the complete space; it does not generate\nrandom samples. A table prefix, one manually selected row, or a reordered\nprefix is not presented as an unbiased estimate.\n\nThe argument also covers n=1: 0!=1, and the only possible nonempty sets both\ncontain the same single label. The one order matches. Empty sets are refused\nbecause their minimum member is undefined; the page does not silently choose\na convention for two empty sets.\n\n## Worked examples\n\n### Partial overlap\n\nA = {a,b}, B = {b,c}. The union is {a,b,c}, the intersection is {b}, so J = 1/3.\n\n| Order | Minimum A | Minimum B | Match |\n| --- | --- | --- | --- |\n| a b c | a, rank 1 | b, rank 2 | 0 |\n| a c b | a, rank 1 | c, rank 2 | 0 |\n| b a c | b, rank 1 | b, rank 1 | 1 |\n| b c a | b, rank 1 | b, rank 1 | 1 |\n| c a b | a, rank 2 | c, rank 1 | 0 |\n| c b a | b, rank 2 | c, rank 1 | 0 |\n\nThere are two matches among six orders: 2/6 = 1/3. Selecting the first row\nshows 0, while selecting the third shows 1. Neither selected row changes the\nexact set similarity. A single collision does not prove identical sets, and\na single noncollision does not prove disjoint sets.\n\n### Identical and disjoint sets\n\nA = B = {a,b} gives two matching orders out of two, so J = 1.\nA = {a}, B = {b,c} gives no matching order out of six, so J = 0.\n\nThese endpoint examples differ from one selected result for partially\noverlapping sets. In the endpoint cases, **every** row has the same result.\n\n### A proper subset\n\nA = {b}, B = {a,b,c} also gives J = 1/3 and two matches out of six. The\nJaccard fraction alone does not tell whether either set contains the other.\nThe distinct-set display retains that additional information.\n\n### Five labels\n\nA = {a,b,c}, B = {b,d,e}. There are five union labels and one shared label.\nEach label starts 4! = 24 orders. Only the 24 orders starting with b match,\namong 5! = 120 total orders. The fraction is 24/120 = 1/5.\n\n### Literal labels and duplicate entries\n\nA = [\"a\",\" a\",\"é\"], B = [\"a\",\"A\",\"é\"] has four distinct union labels and two\nshared labels. There are 12 matching orders among 24: 1/2. The leading space\nand capital letter are retained, not normalized away.\n\nReplacing A's first entry with two repeated \"a\" entries does not change the\nset, although the exact original input entries remain in the observation.\nAn accented character and a visually similar combining-character sequence\nalso remain distinct strings. This page does not infer linguistic equivalence.\n\n## Downloads and the existing learner\n\n**Download observation** writes `recallweave.minhash-observation/1` JSON.\nIt includes:\n\n- The exact applied textarea strings, including their spacing.\n- Both original arrays, normalized distinct sets, union and intersection.\n- Every complete permutation, 1-based index and minimum ranks, and collision.\n- Exact totals, reduced Jaccard fraction and groups by first label.\n- The selected 1-based permutation and explicit uniform-permutation assumptions.\n\nThe observation is a mathematical record, not a RecallWeave answer archive.\nDo not import it as a lesson. It contains the labels you entered.\n\n**Download probability course** returns the unchanged existing\n`courses/probability-foundations.json`, Git identity\n`82cc4bdd8bf22afc5ca84098a0b19c3d485d2f45`. Open the existing learner\n(`demo.html`), choose **Bring your own lesson**, preview that file and choose\n**Start this deck**. That existing course develops probability foundations;\nit is not represented as a newly authored MinHash question set. Its original\ncontent, attribution and permission remain intact.\n\n**Download worked guide** returns this complete Markdown file. Neither course\nnor guide download changes a learning session or marks a copy as saved.\n\n## Input and source contracts\n\nEach input is a JSON array with 1–20 strings. Each label contains 1–40 Unicode\ncode points, is not all whitespace, is well-formed Unicode and contains no C0\ncontrol character or DEL. The combined distinct union has at most five labels.\nEach input text is bounded at 4096 JavaScript UTF-16 code units. Strings are\ncompared exactly; whitespace is inspected for the nonblank check but is not\ntrimmed from accepted labels.\n\nThe public module exports:\n\n| Function | Result |\n| --- | --- |\n| `parseSetText(text, name)` | A fresh validated array; JSON errors have a readable input label |\n| `validateLabels(array, name)` | A fresh validated copy, rejecting sparse holes and invalid labels |\n| `analyzeMinHash(arrayA, arrayB)` | A deeply frozen `recallweave.minhash-analysis/1` record |\n\nIndices and ranks are one-based. Neither caller array is mutated. The model\nuses integer arithmetic bounded by five labels and 120 permutations. The\nreduced fraction is exact; there is no floating-point probability decision,\nrandom seed or statistical confidence interval.\n\nRebuild only this companion from the repository:\n\n```sh\nnode tools/build-minhash.mjs\nnode tools/build-minhash.mjs --check\nnode --test tests/minhash.test.mjs\n```\n\nThe builder reads its own repository-relative sources, validates the existing\nprobability deck and verifies its fixed byte identity, then embeds the exact\ncourse and guide strings. It does not rebuild or modify the learner, catalog\nor other labs. The standalone page is intended for direct local use; a\nseparate reviewed registry handoff can link it into a future directory build.\n\nThe maintained tests include all 961 ordered pairs of nonempty subsets of\na five-label universe, literal input and immutability checks. Their actual\nexecution and the separately frozen independent oracle are recorded with the\nreceiving evidence; source test presence alone is not an execution claim.\n\n## Scope and reference\n\nThe equality is for the ideal uniform-permutation model. An arbitrary\npractical hash function, a restricted or biased family of orders, or colliding\nhash values need additional analysis. The page does not compare real documents,\nimplement a production sketch, estimate practical error or make a security\nclaim. Its small complete enumeration supports understanding of the theorem.\n\nBackground reference: Andrei Z. Broder, Moses Charikar, Alan M. Frieze and\nMichael Mitzenmacher, *Min-Wise Independent Permutations*,\n[author-hosted paper](https://www.math.cmu.edu/~af1p/Texfiles/mw0.pdf).\nThe displayed examples, finite counting argument, interface and wording are\noriginal teaching material. No paper text or figures are copied.\n\nAI assistance was used to develop the implementation and explanations.\nThe page itself makes no provider calls.\n"</script>
+<script type="module">
+/** Exact finite-permutation teaching model. No sampling or hash approximation. */
+function validateLabels(value, name = 'Set') {
+  if (!Array.isArray(value) || value.length < 1 || value.length > 20)
+    throw new Error(name + ' must be a JSON array of 1–20 labels.');
+  return Array.from(value, (label, i) => {
+    if (typeof label !== 'string' || !label.trim() || [...label].length > 40 ||
+        /[\u0000-\u001f\u007f]/u.test(label))
+      throw new Error(name + ' label ' + (i + 1) + ' must be nonblank text of at most 40 Unicode characters, without control characters.');
+    for (let j = 0; j < label.length; j++) {
+      const c = label.charCodeAt(j);
+      if (c >= 0xd800 && c <= 0xdbff) {
+        const next = label.charCodeAt(++j);
+        if (!(next >= 0xdc00 && next <= 0xdfff)) throw new Error(name + ' contains an unpaired Unicode surrogate.');
+      } else if (c >= 0xdc00 && c <= 0xdfff) throw new Error(name + ' contains an unpaired Unicode surrogate.');
+    }
+    return label;
+  });
+}
+
+function parseSetText(text, name = 'Set') {
+  if (typeof text !== 'string' || text.length > 4096)
+    throw new Error(name + ' input must be text of at most 4096 characters.');
+  let value;
+  try { value = JSON.parse(text); } catch { throw new Error(name + ' must be valid JSON: for example ["a", "b"].'); }
+  return validateLabels(value, name);
+}
+
+function freezeDeep(value) {
+  if (value && typeof value === 'object') {
+    Object.values(value).forEach(freezeDeep);
+    Object.freeze(value);
+  }
+  return value;
+}
+
+function permutationsOf(labels) {
+  if (labels.length === 0) return [[]];
+  return labels.flatMap((label, i) =>
+    permutationsOf(labels.filter((_, j) => j !== i)).map(tail => [label, ...tail]));
+}
+
+function analyzeMinHash(inputA, inputB) {
+  const a = validateLabels(inputA, 'Set A'), b = validateLabels(inputB, 'Set B');
+  const setA = [...new Set(a)], setB = [...new Set(b)];
+  const union = [...new Set([...setA, ...setB])];
+  if (union.length > 5) throw new Error('The two sets may contain at most five distinct labels together.');
+  const aMembership = new Set(setA), bMembership = new Set(setB);
+  const intersection = union.filter(label => aMembership.has(label) && bMembership.has(label));
+  const rows = permutationsOf(union).map((order, i) => {
+    const rankA = order.findIndex(label => aMembership.has(label)) + 1;
+    const rankB = order.findIndex(label => bMembership.has(label)) + 1;
+    const minA = order[rankA - 1], minB = order[rankB - 1];
+    return { index: i + 1, order, minA, minB, rankA, rankB, first: order[0], collision: minA === minB };
+  });
+  const byFirst = union.map(label => {
+    const group = rows.filter(row => row.first === label);
+    return { label, inA: aMembership.has(label), inB: bMembership.has(label),
+      permutations: group.length, collisions: group.filter(row => row.collision).length };
+  });
+  let n = intersection.length, d = union.length;
+  while (d) [n, d] = [d, n % d];
+  return freezeDeep({ format: 'recallweave.minhash-analysis/1',
+    inputA: a, inputB: b, setA, setB, union, intersection, rows,
+    permutations: rows.length, collisions: rows.filter(row => row.collision).length,
+    fraction: { numerator: intersection.length / n, denominator: union.length / n }, byFirst });
+}
+
+const $ = id => document.getElementById(id);
+const quote = label => JSON.stringify(label);
+let applied = null;
+let selected = 1;
+function node(tag, value, className) {
+  const el = document.createElement(tag);
+  if (value !== undefined) el.textContent = value;
+  if (className) el.className = className;
+  return el;
+}
+function retire() {
+  applied = null;
+  $('results').hidden = true;
+  $('download-observation').disabled = true;
+  $('error').textContent = '';
+  $('status').textContent = 'Inputs changed. Choose Compare all permutations to calculate this draft.';
+}
+function download(filename, text, type) {
+  const url = URL.createObjectURL(new Blob([text], { type }));
+  const a = node('a'); a.href = url; a.download = filename;
+  document.body.append(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+function showRow() {
+  if (!applied) return;
+  const a = applied.analysis, row = a.rows[selected - 1];
+  $('permutation').value = String(selected);
+  $('previous').disabled = selected === 1;
+  $('next').disabled = selected === a.permutations;
+  $('row-status').textContent = 'Permutation ' + selected + ' of ' + a.permutations + ': ' +
+    (row.collision ? 'same minimum label' : 'different minimum labels') + '.';
+  $('ranked-labels').replaceChildren(...row.order.map((label, i) => {
+    const inA = a.setA.includes(label), inB = a.setB.includes(label);
+    const tile = node('li', undefined, inA && inB ? 'shared' : inA ? 'only-a' : 'only-b');
+    tile.append(node('span', 'RANK ' + (i + 1), 'rank'), node('code', quote(label)),
+      node('span', inA && inB ? 'A and B' : inA ? 'A only' : 'B only', 'membership'));
+    return tile;
+  }));
+  $('min-a').textContent = quote(row.minA) + ' · rank ' + row.rankA;
+  $('min-b').textContent = quote(row.minB) + ' · rank ' + row.rankB;
+  $('row-collision').textContent = row.collision ? '1 · MATCH' : '0 · DIFFER';
+  $('row-explanation').textContent = row.collision
+    ? 'The first union label ' + quote(row.first) + ' belongs to both sets. It is the first member of A and of B, so their minimum ranks match.'
+    : 'The first union label ' + quote(row.first) + ' belongs to just one set. The other set first appears later, so their minimum ranks differ.';
+  for (const button of $('permutation-rows').querySelectorAll('button')) {
+    const active = Number(button.dataset.index) === selected;
+    button.setAttribute('aria-pressed', String(active));
+    button.closest('tr').classList.toggle('selected', active);
+  }
+}
+function render() {
+  const a = applied.analysis;
+  $('set-a-result').textContent = JSON.stringify(a.setA);
+  $('set-b-result').textContent = JSON.stringify(a.setB);
+  $('union-result').textContent = JSON.stringify(a.union);
+  $('intersection-result').textContent = JSON.stringify(a.intersection);
+  $('jaccard').textContent = a.intersection.length + ' / ' + a.union.length;
+  $('frequency').textContent = a.collisions + ' / ' + a.permutations;
+  $('reduced').textContent = a.fraction.numerator + ' / ' + a.fraction.denominator;
+  $('duplicates').textContent = 'Exact repeated labels removed: A ' + (a.inputA.length - a.setA.length) +
+    ', B ' + (a.inputB.length - a.setB.length) + '. Case, spaces and Unicode forms remain distinct.';
+  $('permutation').replaceChildren(...a.rows.map(row => {
+    const opt = node('option', String(row.index) + (row.collision ? ' · match' : ' · differ'));
+    opt.value = String(row.index); return opt;
+  }));
+  $('first-rows').replaceChildren(...a.byFirst.map(group => {
+    const tr = node('tr');
+    [quote(group.label), group.inA && group.inB ? 'A and B' : group.inA ? 'A only' : 'B only',
+      String(group.permutations), String(group.collisions)].forEach(value => tr.append(node('td', value)));
+    return tr;
+  }));
+  $('permutation-rows').replaceChildren(...a.rows.map(row => {
+    const tr = node('tr'), cell = node('td'), button = node('button', String(row.index), 'row-select');
+    button.type = 'button'; button.dataset.index = String(row.index);
+    button.setAttribute('aria-label', 'Inspect permutation ' + row.index);
+    button.addEventListener('click', () => { selected = row.index; showRow(); });
+    cell.append(button); tr.append(cell);
+    [row.order.map(quote).join(' → '), quote(row.minA), quote(row.minB), row.collision ? '1 · match' : '0 · differ']
+      .forEach(value => tr.append(node('td', value)));
+    return tr;
+  }));
+  $('results').hidden = false;
+  $('download-observation').disabled = false;
+  $('error').textContent = '';
+  $('status').textContent = 'Calculated all ' + a.permutations + ' permutations. This is a complete finite enumeration.';
+  showRow();
+}
+$('compare-form').addEventListener('submit', event => {
+  event.preventDefault();
+  const textA = $('set-a').value, textB = $('set-b').value;
+  retire();
+  try {
+    const analysis = analyzeMinHash(parseSetText(textA, 'Set A'), parseSetText(textB, 'Set B'));
+    applied = { textA, textB, analysis }; selected = 1; render();
+  } catch (error) {
+    $('status').textContent = 'No current result. Correct the inputs and compare again.';
+    $('error').textContent = error.message;
+  }
+});
+for (const id of ['set-a', 'set-b']) $(id).addEventListener('input', retire);
+const examples = {
+  overlap: [['a', 'b'], ['b', 'c']],
+  identical: [['a', 'b'], ['a', 'b']],
+  disjoint: [['a'], ['b', 'c']],
+  subset: [['b'], ['a', 'b', 'c']],
+  boundary: [['a', 'b', 'c'], ['b', 'd', 'e']],
+  literal: [['a', ' a', 'é'], ['a', 'A', 'é']]
+};
+for (const button of document.querySelectorAll('[data-example]')) button.addEventListener('click', () => {
+  const [a, b] = examples[button.dataset.example];
+  $('set-a').value = JSON.stringify(a); $('set-b').value = JSON.stringify(b); retire();
+  $('status').textContent = 'Example loaded. Choose Compare all permutations.';
+});
+$('permutation').addEventListener('change', () => { selected = Number($('permutation').value); showRow(); });
+$('previous').addEventListener('click', () => { if (applied && selected > 1) { selected--; showRow(); } });
+$('next').addEventListener('click', () => { if (applied && selected < applied.analysis.permutations) { selected++; showRow(); } });
+$('download-observation').addEventListener('click', () => {
+  if (!applied) return;
+  const observation = { format: 'recallweave.minhash-observation/1',
+    assumptions: { both_sets_nonempty: true, uniform_permutation_for_probability: true,
+      complete_enumeration: true, sampled_randomness: false, exact_literal_set_membership: true,
+      indices_and_ranks: 'one-based', union_order: 'first-seen Set A, then Set B' },
+    entered: { a: applied.textA, b: applied.textB }, selected_permutation: selected, analysis: applied.analysis };
+  download('minhash-observation.json', JSON.stringify(observation, null, 2) + '\n', 'application/json;charset=utf-8');
+});
+$('download-course').addEventListener('click', () => download('probability-foundations.json',
+  JSON.parse($('course-data').textContent), 'application/json;charset=utf-8'));
+$('download-guide').addEventListener('click', () => download('minhash.md',
+  JSON.parse($('guide-data').textContent), 'text/markdown;charset=utf-8'));
+
+</script>
+</body>
+</html>
