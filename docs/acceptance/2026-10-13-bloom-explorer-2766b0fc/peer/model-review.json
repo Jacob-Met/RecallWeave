@@ -1,0 +1,17 @@
+{
+  "schema": "bloom-explorer-independent-source-review/1",
+  "reviewer": "2766b0fc4581/estate_product",
+  "status": "PASS",
+  "files": {
+    "src/bloom-filters.mjs": "fbda080c74e1b637c76baccc129d32f538bb7a5e2dad7891778e5b7750076117",
+    "tests/bloom-filters-explorer.test.mjs": "aa8f039e98a6ac1d20c7647cd686b4aad165566ab94c93b7ab238f2fcaf3a98c"
+  },
+  "scope": "Complete pure model and six-test source review; no duplicate test execution, UI, browser or efficacy claim.",
+  "findings": [
+    "Fixed mappings are frozen and exact members are tracked separately from ORed bits; duplicate keys canonicalize without mutating caller arrays. Query labels deliberately allow false-negative observations when passed an unsafe preview mask.",
+    "Bit masks admit exactly integers0..255, with negative zero normalized. Deletion removes only an inserted key and returns a separate unsafe mask plus a freshly rebuilt state; clearing shared bits can miss B after removing A, whereas rebuilding leaves bits4and6. All returned nested authored states are frozen.",
+    "The fixed-state experiment enumerates all64 ordered uniform query pairs with replacement, so s set bits admit s squared pairs. The separate two-bit construction has four insertion pairs with accepted query counts1,4,4,1, totaling10/16; averaging occupancy then squaring gives9/16 and is not the same experiment.",
+    "The six tests compare all128 exact-member subsets to a separately constructed cell-array oracle, all256 masks to s squared, every inserted-key removal to reconstruction, and sixteen construction/query draws to a Set oracle. The mapping C=(4,4) and Z=(2,2) is explicit and internally consistent."
+  ],
+  "qualification": "The seven named toy keys are not a random hash sample. UI prose must keep the fixed uniform query experiment and independent two-bit construction distinct from the finite named-key query controls."
+}
