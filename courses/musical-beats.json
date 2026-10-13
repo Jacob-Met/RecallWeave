@@ -1,0 +1,280 @@
+{
+  "format": "recallweave-deck/1",
+  "title": "When two notes breathe: beats, detuning and musical fifths",
+  "attribution": "Original AI-assisted teaching questions, distractors, explanations and worked examples produced for RecallWeave / HAMON on 2026-10-10. Mathematical reference: OpenStax University Physics, Volume 1, section 17.6, Beats (https://openstax.org/books/university-physics-volume-1/pages/17-6-beats); John C. Baez, The Mathematics of Tuning Systems (https://math.ucr.edu/home/baez/tuning/). No questions, figures or prose reproduced from those sources.",
+  "license": "All original questions, worked examples and written explanations in this deck are offered under CC0-1.0. Existing RecallWeave work and referenced educational publications retain their own licenses.",
+  "concepts": [
+    "tone-superposition",
+    "beat-envelope",
+    "tuning-comparison",
+    "model-boundaries"
+  ],
+  "items": [
+    {
+      "id": "beats-sum-at-zero",
+      "concept": "tone-superposition",
+      "prerequisites": [],
+      "prompt": "Two ideal cosine signals are x1(t) = cos(2π · 440t) and x2(t) = cos(2π · 442t). Both start at their maxima. What is their arithmetic sum at t = 0?",
+      "options": [
+        "0",
+        "1",
+        "2",
+        "442"
+      ],
+      "answer": 2,
+      "explanation": "Each cosine equals 1 at zero time, so the sum is 1 + 1 = 2 in arbitrary signal units. This is not an acoustic decibel measurement.",
+      "transfer": "If both signals instead start at their minima, calculate their sum at t = 0."
+    },
+    {
+      "id": "beats-equal-frequencies",
+      "concept": "tone-superposition",
+      "prerequisites": [],
+      "prompt": "Two equal-amplitude, zero-phase cosines have exactly the same frequency, 440 Hz. What is their sum?",
+      "options": [
+        "A constant zero",
+        "A cosine at 880 Hz",
+        "A cosine at 440 Hz with twice the amplitude",
+        "An alternating 440 Hz silence"
+      ],
+      "answer": 2,
+      "explanation": "Equal-frequency, equal-phase cosines add point by point: cos(2π440t) + cos(2π440t) = 2cos(2π440t). Frequency stays 440 Hz. Their relative phase does not drift.",
+      "transfer": "Keep the frequency equal but reverse the second tone by 180°. What does their sum become?"
+    },
+    {
+      "id": "beats-average-frequency",
+      "concept": "tone-superposition",
+      "prerequisites": [],
+      "prompt": "Which frequency multiplies time inside the rapidly oscillating cosine in the identity cos(2πf1t) + cos(2πf2t) = 2cos(π(f2 − f1)t)cos(2πf_meant)?",
+      "options": [
+        "f1 + f2",
+        "(f1 + f2)/2",
+        "|f2 − f1|",
+        "f1 × f2"
+      ],
+      "answer": 1,
+      "explanation": "The fast carrier uses the arithmetic mean f_mean = (f1 + f2)/2. The other cosine produces a slowly varying signed amplitude when frequencies are nearby.",
+      "transfer": "For 330 Hz and 335 Hz, compute the carrier frequency and the detuning separately."
+    },
+    {
+      "id": "beats-instant-cancellation",
+      "concept": "tone-superposition",
+      "prerequisites": [],
+      "prompt": "Two unit-amplitude cosines initially add constructively. Their frequency difference is 2 Hz. At t = 0.25 seconds, what is their exact sum?",
+      "options": [
+        "+2",
+        "−2",
+        "0",
+        "+1"
+      ],
+      "answer": 2,
+      "explanation": "The envelope factor is 2cos(π·2·0.25) = 2cos(π/2) = 0, so the sum vanishes regardless of the fast carrier phase. This cancellation is at a moment, not for all time.",
+      "transfer": "Find the first cancellation time after t = 0 when the difference is 5 Hz."
+    },
+    {
+      "id": "beats-count",
+      "concept": "beat-envelope",
+      "prerequisites": [
+        "tone-superposition"
+      ],
+      "prompt": "Two nearby pure tones have frequencies 440 Hz and 442 Hz. In the ideal equal-amplitude superposition, how many successive maxima of the absolute envelope occur per second?",
+      "options": [
+        "1",
+        "2",
+        "4",
+        "441"
+      ],
+      "answer": 1,
+      "explanation": "The amplitude-modulation magnitude is |2cos(π(f2 − f1)t)|. Its maxima repeat at |f2 − f1| = 2 per second. The signed cosine changes sign between neighboring magnitude maxima.",
+      "transfer": "Count the magnitude-envelope peaks per second for 330 Hz and 335 Hz."
+    },
+    {
+      "id": "beats-period",
+      "concept": "beat-envelope",
+      "prerequisites": [
+        "tone-superposition"
+      ],
+      "prompt": "Two zero-phase, equal-amplitude tones have frequencies 330 Hz and 335 Hz. What is the time between neighboring maxima of the envelope magnitude?",
+      "options": [
+        "0.05 seconds",
+        "0.2 seconds",
+        "2 seconds",
+        "5 seconds"
+      ],
+      "answer": 1,
+      "explanation": "The beat rate is |335 − 330| = 5 Hz, giving an envelope-peak interval 1/5 = 0.2 seconds. Do not confuse a rate in inverse seconds with a time interval.",
+      "transfer": "A measured envelope interval is 0.125 seconds. Infer only the absolute frequency difference."
+    },
+    {
+      "id": "beats-inverted-detune",
+      "concept": "beat-envelope",
+      "prerequisites": [
+        "tone-superposition"
+      ],
+      "prompt": "Compare cos(2π·438t) + cos(2π·440t) with cos(2π·442t) + cos(2π·440t). What agrees between their ideal beat envelopes?",
+      "options": [
+        "Only their instantaneous waveform sums",
+        "Their absolute beat rate of 2 Hz",
+        "Their mean frequencies",
+        "The frequencies of all component tones"
+      ],
+      "answer": 1,
+      "explanation": "Both differences have magnitude 2 Hz, so both absolute envelopes repeat at 2 Hz. Mean carrier frequencies differ: 439 Hz versus 441 Hz. Their complete signals need not coincide.",
+      "transfer": "Why is hearing the beat rate alone insufficient to tell whether the other note is sharp or flat?"
+    },
+    {
+      "id": "beats-signed-envelope",
+      "concept": "beat-envelope",
+      "prerequisites": [
+        "tone-superposition"
+      ],
+      "prompt": "The identity contains the slowly varying factor 2cos(πΔft). Why is its sign-changing cosine not itself a 1/|Δf| period waveform when Δf is nonzero?",
+      "options": [
+        "Its signed period is 2/|Δf|, while its magnitude peaks every 1/|Δf|",
+        "A cosine has no period",
+        "Its signed period is 1/|Δf| and its magnitude period is 2/|Δf|",
+        "The sign is a measurement error"
+      ],
+      "answer": 0,
+      "explanation": "A complete signed cosine needs a 2π phase increase: π|Δf|·T = 2π gives T = 2/|Δf|. Taking the absolute value identifies successive positive and negative lobes, halving the repetition interval to 1/|Δf|.",
+      "transfer": "Sketch the sign of 2cos(π·2t) at times 0, 0.5 and 1 seconds."
+    },
+    {
+      "id": "fifth-just-frequency",
+      "concept": "tuning-comparison",
+      "prerequisites": [
+        "beat-envelope"
+      ],
+      "prompt": "Using a reference pitch of 440 Hz, what frequency is a pure just fifth above it, with ratio 3:2?",
+      "options": [
+        "586.67 Hz",
+        "660 Hz",
+        "880 Hz",
+        "659.26 Hz"
+      ],
+      "answer": 1,
+      "explanation": "A just fifth is defined here by the rational ratio 3/2. Multiplying 440 × 3/2 gives exactly 660 Hz. The nearby 12-tone equal-tempered fifth is not exactly this ratio.",
+      "transfer": "Calculate the just fifth above 300 Hz. Do not infer instrument timbre from the ratio."
+    },
+    {
+      "id": "fifth-et-rule",
+      "concept": "tuning-comparison",
+      "prerequisites": [
+        "beat-envelope"
+      ],
+      "prompt": "In twelve-tone equal temperament, a semitone multiplies pitch by 2^(1/12). What ratio spans seven semitones?",
+      "options": [
+        "7/12",
+        "2^(7/12)",
+        "3/2 exactly",
+        "2^7/12"
+      ],
+      "answer": 1,
+      "explanation": "Multiplying the semitone ratio seven times gives 2^(7/12). The fifth is close to, but not identical to, the 3/2 just-fifth ratio.",
+      "transfer": "Write the equal-tempered ratio for an octave and explain why it equals 2."
+    },
+    {
+      "id": "fifth-frequency-gap",
+      "concept": "tuning-comparison",
+      "prerequisites": [
+        "beat-envelope"
+      ],
+      "prompt": "Starting at 440 Hz, the just fifth is 660 Hz and the 12-tone equal-tempered fifth is 440×2^(7/12) ≈ 659.255 Hz. What absolute difference should their ideal two-tone comparison show?",
+      "options": [
+        "About 0.745 Hz",
+        "About 1.5 Hz",
+        "Exactly 0 Hz",
+        "About 219.255 Hz"
+      ],
+      "answer": 0,
+      "explanation": "Subtract the two pitches: 660 − 659.255 ≈ 0.745 Hz. In the ideal pure-tone model that gives a beat interval of about 1.34 seconds. Rounding both pitches to the nearest hertz would erase the difference.",
+      "transfer": "Estimate the interval between beat peaks from 1/0.745 and state how rounding affects it."
+    },
+    {
+      "id": "fifth-pitch-direction",
+      "concept": "tuning-comparison",
+      "prerequisites": [
+        "beat-envelope"
+      ],
+      "prompt": "Relative to an exact 3/2 fifth above 440 Hz, the 12-tone equal-tempered fifth near 659.255 Hz is…",
+      "options": [
+        "Higher by about 0.745 Hz",
+        "Lower by about 0.745 Hz",
+        "Exactly equal",
+        "Lower by about 440 Hz"
+      ],
+      "answer": 1,
+      "explanation": "The equal-tempered fifth is roughly 659.255 Hz, below the just fifth at 660 Hz. A positive absolute beat rate does not by itself tell the direction: the starting pitch reference supplies that information.",
+      "transfer": "If a measured second pitch were 660.745 Hz instead, what would the beat rate reveal, and what would the reference reveal?"
+    },
+    {
+      "id": "fifth-ratio-vs-beat",
+      "concept": "tuning-comparison",
+      "prerequisites": [
+        "beat-envelope"
+      ],
+      "prompt": "At 440 Hz, two candidate fifths differ by about 0.745 Hz. If the reference pitch were doubled to 880 Hz while both ratios stayed fixed, what happens to their absolute frequency difference?",
+      "options": [
+        "It stays 0.745 Hz",
+        "It halves to about 0.373 Hz",
+        "It doubles to about 1.490 Hz",
+        "It vanishes because the ratios are fixed"
+      ],
+      "answer": 2,
+      "explanation": "For fixed ratios, each target pitch scales with the reference. Doubling 440 to 880 doubles both targets and their difference. Musical intervals can be ratio-invariant while an absolute difference in Hz changes.",
+      "transfer": "Would the beat interval become longer or shorter after doubling the reference, assuming the same two pure-tone comparison?"
+    },
+    {
+      "id": "beats-not-meter",
+      "concept": "model-boundaries",
+      "prerequisites": [
+        "beat-envelope"
+      ],
+      "prompt": "An offline plot shows the exact arithmetic sum of two ideal unit cosines at one mathematical point. Which statement is justified?",
+      "options": [
+        "It directly measures how loud a violin will sound",
+        "It predicts every room reflection",
+        "It illustrates a frequency-difference envelope under specified assumptions",
+        "It proves which temperament all listeners prefer"
+      ],
+      "answer": 2,
+      "explanation": "The plotted envelope follows the given equation. Instrument overtones, phase, stereo position, auditory masking, room propagation, calibrated loudness and personal preference are not measured by this model.",
+      "transfer": "Name one acoustic factor that could alter recorded beating without changing the two specified fundamental frequencies."
+    },
+    {
+      "id": "beats-bounded-listening",
+      "concept": "model-boundaries",
+      "prerequisites": [
+        "tone-superposition",
+        "beat-envelope"
+      ],
+      "prompt": "The lab creates two synthetic oscillators after the listener presses Play. Which inference should a careful learner avoid?",
+      "options": [
+        "The requested oscillator frequencies match the displayed model parameters",
+        "The frequencies can be changed before a new playback",
+        "The browser playback is an instrument-blind physical hearing test",
+        "The visual envelope remains available when audio is unavailable"
+      ],
+      "answer": 2,
+      "explanation": "Browsers, speakers, headphones, volume limits and hearing all affect what is perceived. Web Audio is optional illustration, not a calibrated psychophysical experiment. The mathematical plot does not require audio.",
+      "transfer": "Describe one way to inspect the beat interval without turning on sound."
+    },
+    {
+      "id": "beats-different-amplitudes",
+      "concept": "model-boundaries",
+      "prerequisites": [
+        "tone-superposition",
+        "beat-envelope"
+      ],
+      "prompt": "The lab assumes both tones have unit amplitude. What breaks when one amplitude changes to 0.5 while the other remains 1?",
+      "options": [
+        "The beat difference is no longer |f2 − f1|",
+        "The sum no longer has the lab’s exact equal-amplitude 2cos(πΔft) envelope and cannot cancel completely from those two tones alone",
+        "All frequency components become 220 Hz",
+        "The larger oscillator always stops"
+      ],
+      "answer": 1,
+      "explanation": "The original factorization uses equal amplitudes. With unequal amplitudes, the vector sum has a strictly positive minimum amplitude |1 − 0.5| = 0.5 and a maximum 1.5. The amplitude-modulation rate remains tied to the difference in frequencies.",
+      "transfer": "For amplitudes 2 and 0.75, predict the maximum and minimum resultant amplitudes."
+    }
+  ]
+}
