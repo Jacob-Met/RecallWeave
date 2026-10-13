@@ -1,0 +1,69 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { spawnSync } from 'node:child_process';
+import crypto from 'node:crypto';
+import assert from 'node:assert/strict';
+const root=path.dirname(fileURLToPath(import.meta.url));
+const repo=path.join(root,'source');
+const out=path.join(root,'native-evidence');
+fs.mkdirSync(out,{recursive:true});
+const marker=path.join(out,'started.json');
+assert.ok(!fs.existsSync(marker),'Inspect earlier effects before repeating this controller');
+fs.writeFileSync(marker,JSON.stringify({started:new Date().toISOString(),pid:process.pid})+'\n');
+const events=[];
+const env={...process.env,GIT_TERMINAL_PROMPT:'0',GIT_LFS_SKIP_SMUDGE:'1',GCM_INTERACTIVE:'Never',PYTHONUTF8:'1',PYTHON:'python'};
+const hash=b=>crypto.createHash('sha256').update(b).digest('hex');
+const blob=b=>crypto.createHash('sha1').update(`blob ${b.length}\0`).update(b).digest('hex');
+const read=p=>fs.readFileSync(path.join(repo,p));
+const write=(p,b)=>fs.writeFileSync(path.join(repo,p),b);
+function save(name,obj){fs.writeFileSync(path.join(out,name),JSON.stringify(obj,null,2)+'\n');}
+function run(name,command,args,required=true){
+ const started=new Date().toISOString();
+ const r=spawnSync(command,args,{cwd:repo,env,encoding:'utf8',timeout:120000,maxBuffer:12*1024*1024,windowsHide:true});
+ fs.writeFileSync(path.join(out,name+'.stdout'),r.stdout||'');fs.writeFileSync(path.join(out,name+'.stderr'),r.stderr||'');
+ events.push({name,command,args,started,ended:new Date().toISOString(),status:r.status,error:r.error?.message,stdoutSha256:hash(r.stdout||''),stderrSha256:hash(r.stderr||'')});
+ save('commands.json',events);console.log(JSON.stringify({name,status:r.status,error:r.error?.code}));
+ if(required) assert.equal(r.status,0,name+' failed; preserved logs');
+ return r;
+}
+try {
+ const base=read('src/knowledge.mjs');
+ assert.equal(blob(base),'1a3a714dc0cf643b911ec196265746fb61c1f5cc');
+ assert.equal(hash(read('tests/information-gain-boundaries.test.mjs')),'fd00205b6b7f232cafb05d887d4a09e2ab4279c745210b44ea3fbea3a2fded22');
+ run('materialize-courses','git',['-c','credential.helper=','-c','core.autocrlf=false','sparse-checkout','add','courses']);
+ const fixture='docs/receiving/mathematical-induction-0378a7b6/questions-only.json';
+ const f=run('materialize-one-fixture','git',['-c','credential.helper=','show','HEAD:'+fixture]);
+ fs.mkdirSync(path.dirname(path.join(repo,fixture)),{recursive:true});write(fixture,f.stdout);
+ const tests=fs.readdirSync(path.join(repo,'tests')).filter(f=>f.endsWith('.test.mjs')&&f!=='information-gain-boundaries.test.mjs').map(f=>'tests/'+f).sort();
+ const before=run('baseline-full-suite','node',['--test','--test-reporter=tap','--test-concurrency=2',...tests],false);
+ const regression=run('frozen-regressions-on-baseline','node',['--test','--test-reporter=tap','tests/information-gain-boundaries.test.mjs'],false);
+ assert.equal(regression.status,1);assert.match(regression.stdout,/# pass 3\b/);assert.match(regression.stdout,/# fail 4\b/);
+ const pages=['demo.html','compare-traces.html'];
+ const originalPages=Object.fromEntries(pages.map(p=>[p,read(p)]));
+ const builds=[];
+ function build(label){
+  run(label+'-demo','python',['-X','utf8','tools/make_demo.py']);
+  const raw=read('demo.html');const normalized=Buffer.from(raw.toString('utf8').replace(/\r\n/g,'\n'));
+  write('demo.html',normalized);
+  run(label+'-trace','node',['tools/build-trace-comparison.mjs']);
+  builds.push({label,demoNativeBytes:raw.length,demoNativeSha256:hash(raw),demoCanonicalBytes:normalized.length,demoCanonicalSha256:hash(normalized),lineEndingNormalization:'CRLF to LF after the unmodified official Python builder on Windows',traceBytes:read('compare-traces.html').length,traceSha256:hash(read('compare-traces.html'))});
+  save('builds.json',builds);
+ }
+ build('baseline');for(const p of pages)assert.deepEqual(read(p),originalPages[p],p+' baseline parity');
+ const old=`  const correctPosterior = p * (1 - slip) / pCorrect;\n  const wrongPosterior = p * slip / (p * slip + (1 - p) * (1 - guess));\n  return Math.max(0, entropy(p) - pCorrect * entropy(correctPosterior) - (1 - pCorrect) * entropy(wrongPosterior));`;
+ const replacement=`  // A zero-probability response contributes zero conditional entropy.\n  // Do not evaluate its undefined posterior (0/0), even in an unused term.\n  const correctEntropy = pCorrect === 0 ? 0 : entropy(p * (1 - slip) / pCorrect);\n  const pWrong = p * slip + (1 - p) * (1 - guess);\n  const wrongEntropy = pWrong === 0 ? 0 : entropy(p * slip / pWrong);\n  return Math.max(0, entropy(p) - pCorrect * correctEntropy - (1 - pCorrect) * wrongEntropy);`;
+ assert.equal(base.toString('utf8').split(old).length,2);
+ const candidate=Buffer.from(base.toString('utf8').replace(old,replacement));
+ assert.equal(blob(candidate),'d30528e33eb2dbf00125c688c606402a8c92e1e9');write('src/knowledge.mjs',candidate);
+ run('candidate-regressions','node',['--test','--test-reporter=tap','tests/information-gain-boundaries.test.mjs']);
+ build('candidate');const candidatePages=Object.fromEntries(pages.map(p=>[p,read(p)]));
+ for(const p of pages)assert.deepEqual(read(p),Buffer.from(originalPages[p].toString('utf8').replace(old,replacement)),p+' generated function-only change');
+ build('candidate-repeat');for(const p of pages)assert.deepEqual(read(p),candidatePages[p],p+' repeated generation');
+ const after=run('candidate-full-suite','node',['--test','--test-reporter=tap','--test-concurrency=2',...tests,'tests/information-gain-boundaries.test.mjs'],false);
+ const failures=s=>(s.match(/^not ok .+$/gm)||[]).map(l=>l.replace(/^not ok \d+ - /,''));
+ assert.deepEqual(failures(after.stdout),failures(before.stdout),'New full-suite failures');
+ const summary={finished:new Date().toISOString(),runtime:process.version,platform:process.platform,arch:process.arch,base:'5b9b86fc54e1f7538d05c549b2fab02a98af2b50',sourceBefore:{bytes:base.length,sha256:hash(base),blob:blob(base)},sourceAfter:{bytes:candidate.length,sha256:hash(candidate),blob:blob(candidate)},testSha256:hash(read('tests/information-gain-boundaries.test.mjs')),baselineFullSuiteStatus:before.status,candidateFullSuiteStatus:after.status,baselineFullSuiteCounts:before.stdout.match(/^# (tests|pass|fail|skipped) .+$/gm),candidateFullSuiteCounts:after.stdout.match(/^# (tests|pass|fail|skipped) .+$/gm),unchangedFullSuiteFailures:failures(before.stdout),regressions:{baselinePass:3,baselineFail:4,candidatePass:7,candidateFail:0},generatedPages:pages.map(p=>({path:p,bytes:read(p).length,sha256:hash(read(p)),blob:blob(read(p))})),baselineBuildersMatchTrackedPages:true,onlyExpectedFunctionChangedInGeneratedPages:true,repeatedBuildsByteIdentical:true,independentWorkerReview:false};
+ save('receipt.json',summary);run('final-scope','git',['diff','--stat']);run('function-and-generated-diff','git',['diff','--','src/knowledge.mjs','demo.html','compare-traces.html']);
+ console.log(JSON.stringify(summary,null,2));
+} catch(e) {save('controller-failure.json',{timestamp:new Date().toISOString(),message:e.message,stack:e.stack});console.error(e.stack);process.exitCode=1;}
