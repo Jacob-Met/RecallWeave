@@ -27,6 +27,12 @@ The directory, catalog and pack builders accept `--check`; CI checks their commi
 
 Open `demo.html` directly in a browser—no server, install, build step, internet, login, API key, or user data storage is required. It is a single self-contained file with embedded CSS, JavaScript and deck. The modular source is in `index.html`, `src/`, and `data/`; to test that version locally, serve this directory with `python3 -m http.server 8080` and visit `http://localhost:8080`. Rebuild the direct-open demo with `python3 tools/make_demo.py` after source changes. No hosted endpoint is called by either version.
 
+## Compare ranked preferences
+
+The original [sixteen-question course](courses/ranked-voting.json), **Same rankings, different voting outcomes**, follows one fully specified set of hypothetical rankings through plurality, a top-two runoff, Borda scores and pairwise majorities. The [worked guide](courses/ranked-voting.md) shows every tally, a strict majority cycle, an explicit score tie, and how a first-place summary loses information.
+
+Find the course in the [directory](explore.html) or [download catalog](catalog.html), then choose its JSON under **Bring your own lesson** in the existing learner. Preview, answer the questions, practice a missed connection and download study notes to retain your explanations. The course assumes complete strict rankings and equally weighted ballots; it makes no empirical or political recommendation. The offline pack includes the course and learner; keep the worked guide separately when you want the full derivations offline.
+
 ## Explore RC transients
 
 Open **[RC transients: where the energy goes](courses/rc-transients-lab.html)** directly in a browser to follow the response of one resistor and capacitor after an ideal source step. Compare charging, discharge, reversed polarity, a precharged capacitor returning energy to the source, resistance scaling and equilibrium. Voltage, signed current, charge, stored energy, resistor heat and source work share the same applied circuit and time cursor.
