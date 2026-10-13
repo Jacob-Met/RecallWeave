@@ -41,6 +41,7 @@ let sessionId;
 let browserLog = '';
 const pageErrors = [];
 let pageRequests = [];
+let discardingDocument = false;
 const pending = new Map();
 let sequence = 0;
 
@@ -102,8 +103,11 @@ async function setOrderSeed(seed) {
 async function navigate(url, width = 1280, height = 1000) {
   await command('Emulation.setDeviceMetricsOverride', {width, height, deviceScaleFactor: 1, mobile: false});
   pageRequests = [];
-  await command('Page.navigate', {url});
-  await waitFor(() => evaluate(`document.URL === ${JSON.stringify(url)} && document.readyState === 'complete' && !!document.querySelector('#start-button')`), 'lesson welcome');
+  discardingDocument = true;
+  try {
+    await command('Page.navigate', {url});
+    await waitFor(() => evaluate(`document.URL === ${JSON.stringify(url)} && document.readyState === 'complete' && !!document.querySelector('#start-button')`), 'lesson welcome');
+  } finally { discardingDocument = false; }
 }
 async function snapshot() {
   return evaluate(`({
@@ -181,6 +185,11 @@ try {
       pageErrors.push(message.params.exceptionDetails.exception?.description ?? message.params.exceptionDetails.text);
     } else if (message.method === 'Network.requestWillBeSent') {
       pageRequests.push(message.params.request.url);
+    } else if (message.method === 'Page.javascriptDialogOpening' && message.params.type === 'beforeunload') {
+      // This receiver deliberately starts a fresh document between its lesson courses.
+      if (!discardingDocument) pageErrors.push('Unexpected leave prompt outside document replacement');
+      command('Page.handleJavaScriptDialog', {accept: discardingDocument})
+        .catch(error => pageErrors.push(String(error)));
     }
   });
   await new Promise((resolve, reject) => { socket.addEventListener('open', resolve, {once: true}); socket.addEventListener('error', reject, {once: true}); });
