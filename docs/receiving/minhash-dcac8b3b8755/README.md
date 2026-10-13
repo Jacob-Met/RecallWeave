@@ -1,4 +1,4 @@
-# MinHash finite-permutation companion — receiving in progress
+# MinHash finite-permutation companion — received for standalone use
 
 Source scope: seven new model/UI/template/build/test/guide/standalone paths.
 The original probability course and learner/importer remain byte-identical.
@@ -55,13 +55,56 @@ The native publication packet was87,056 bytes and contained13 exact files;
 the standalone HTML is at its production path, while the other12 raw files
 are under author/. Native raw receipts and streams are never reserialized.
 
-## Browser and delivery boundary
+## Actual browser and complementary review
 
-A separate UI contract was frozen before UI exposure, Git
-e1549c36f1f6fcb991c7083fc5a1a1cc02bf2c17. Its actual browser course is pending;
-no displayed/downloaded/viewport acceptance is claimed yet. Complementary
-source review of the UI/build/guide is also pending. This is a concrete
-reviewable source checkpoint, not a final runtime acceptance or deployment.
+The independent UI contract was frozen before UI exposure, Git
+e1549c36f1f6fcb991c7083fc5a1a1cc02bf2c17. The receiver then opened the exact
+native HTML directly on MSI/Veria with Chrome154.0.8037.97,
+Playwright1.62.0 and Python3.11.9. OuterPID25020 collected exit0 in27.61s.
+The single course passed167 checks. The full raw receipt is
+browser/browser-receiving-v1/receiving.json,160,327 bytes,SHA-256
+11e80f6829dfb75f3f681e1a90ca0eca7fa082431866002a916f3638807b5711,
+Git437b5fb5f99d084fee92a9aa51bd33cedb4ebf1a.
+
+The course checked applied and retired draft states, invalid-input recovery,
+all six example buttons, first/last and selected-row navigation, displayed
+minimum labels/ranks, literal labels, duplicate set normalization, and all120
+five-label rows and first-label buckets. Four actual observation downloads
+match complete independent expected analyses; the actual probability-course
+and worked-guide downloads are byte-exact copies of their source files.
+No external request, storage write, page error or console error was observed.
+All seven source/oracle/observer witnesses retained their bytes and metadata.
+
+At390px the document width is390px; the660px permutation table stays in its
+own319px scrolling region. Four actual screenshots are retained and were
+inspected independently by root. The mobile-results image shows the interior
+of the expanded order table; it is not a summary/minimum screenshot.
+No keyboard, screen-reader, physical-device or other-browser course is claimed.
+
+Managed browser disconnection was observed after context/browser cleanup;
+OS-level browser process exit was not measured. The raw Windows CRLF receipt
+and all native downloads remain byte-exact. An initial text-reader-normalized
+unreferenced Git blob was rejected during custody; it supplies no evidence.
+The corrected base64 custody packet was691,220 bytes,Git
+db8afd58cad293565bf2bfaeb809b896f8f7934e. It preserved all21 native records
+without rerunning the browser course.
+
+Root read the receiver and launcher, checked every actual/expected value,
+independently compared all four downloaded analyses with the frozen oracle,
+verified all17 text-file byte identities and inspected all four native PNGs.
+The source peer separately reviewed the final UI/template/build/guide and
+reconstructed the actual HTML exactly, including its exact embedded downloads:
+[review](https://github.com/Jacob-Met/RecallWeave/issues/333#issuecomment-6153155929).
+Its complementary browser-observer/raw review also found no material blocker.
+
+## Delivery and integration boundary
+
+The HTML is qualified for standalone local use. This source branch has not
+changed the course directory mapping, rebuilt the shared directory, adopted
+an installed copy or published a hosted endpoint. Those consumer steps can
+follow as separate reviewed increments. Source scope is pinned by the initial
+product commit0d3fa410ea4476efb0e3025081782adc209bbd22; this successor adds
+receiving evidence and updates its index, with the seven product blobs unchanged.
 
 MANIFEST.json records exact identities of the retained native raw records and
 initial source-review witness. It excludes this index and itself. File paths in
@@ -71,4 +114,4 @@ normal usage and the maintained build/test commands.
 
 Tracks [issue333](https://github.com/Jacob-Met/RecallWeave/issues/333). No
 dependency, workflow, installed-copy, learner model, directory registry, held
-main or hosted endpoint is changed by this source checkpoint.
+main or hosted endpoint is changed by this evidence increment.
