@@ -1,0 +1,278 @@
+{
+  "format": "recallweave-deck/1",
+  "title": "Bloom filters: what the bits can prove",
+  "attribution": "Original questions, finite examples and worked explanations for RecallWeave by Jacob / HAMON, 2026-10-13. Technical references: Christensen, Roginsky and Jimeno, A New Analysis of the False-Positive Rate of a Bloom Filter (2010), https://doi.org/10.1016/j.ipl.2010.07.024 and NIST manuscript https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=903775; official Linux Bloom-filter documentation https://www.kernel.org/doc/html/latest/bpf/map_bloom_filter.html. No source exercises or prose are reproduced.",
+  "license": "Original lesson content: CC BY 4.0, https://creativecommons.org/licenses/by/4.0/. Referenced works retain their own rights; this license applies only to the original lesson.",
+  "concepts": [
+    "bit-updates",
+    "membership-evidence",
+    "composition-limits",
+    "probability-and-use"
+  ],
+  "items": [
+    {
+      "id": "bf-insert",
+      "concept": "bit-updates",
+      "prerequisites": [],
+      "prompt": "An 8-bit Bloom filter starts with every bit 0; positions are 0 through 7. Insertion sets both listed positions to 1. Insert A, whose positions are (1, 4), and B, whose positions are (4, 6). Which positions are now 1?",
+      "options": [
+        "{1, 4, 6}",
+        "{1, 6}",
+        "{1, 4, 4, 6}, with bit 4 storing 2",
+        "{0, 1, 4, 6}"
+      ],
+      "answer": 0,
+      "explanation": "Each insertion sets bits; it does not add to a counter or toggle an existing 1. A sets 1 and 4. B leaves 4 set and adds 6, so exactly the three distinct positions {1, 4, 6} are 1.",
+      "transfer": "When checking a compact index, distinguish a bit that says at least one insertion touched it from a counter that records how many did."
+    },
+    {
+      "id": "bf-reinsert",
+      "concept": "bit-updates",
+      "prerequisites": [],
+      "prompt": "An 8-bit Bloom filter has 1s exactly at {1, 4, 6}. A always maps to (1, 4). With ordinary set-to-1 insertion, what happens if A is inserted again?",
+      "options": [
+        "Bits 1 and 4 become 0.",
+        "The bit array stays unchanged.",
+        "Exactly two new bits become 1.",
+        "The array records a second copy of A."
+      ],
+      "answer": 1,
+      "explanation": "Both target bits are already 1. Setting them to 1 again changes nothing. The bit array alone cannot distinguish one insertion of A from repeated insertions of A.",
+      "transfer": "An idempotent update can be useful for repeated messages, but it does not by itself preserve multiplicity or count distinct records."
+    },
+    {
+      "id": "bf-same-position",
+      "concept": "bit-updates",
+      "prerequisites": [],
+      "prompt": "An initially empty 8-bit Bloom filter uses two fixed hash functions. For key C, both functions happen to return position 2. What does inserting C do?",
+      "options": [
+        "The insertion must be rejected because hash outputs cannot coincide.",
+        "Bits 2 and 3 become 1 to keep the positions distinct.",
+        "Only bit 2 becomes 1, and a later query for C checks that bit twice.",
+        "Bit 2 returns to 0 after being toggled twice."
+      ],
+      "answer": 2,
+      "explanation": "Different hash functions may return the same position for a key. This model permits that collision. Both writes set bit 2 to 1, and both query checks find it set; insertion does not choose a replacement position.",
+      "transfer": "Before using a probability formula, check whether repeated hash positions are permitted. Drawing with replacement and forcing distinct positions describe different models."
+    },
+    {
+      "id": "bf-cardinality",
+      "concept": "bit-updates",
+      "prerequisites": [],
+      "prompt": "A maps to (1, 4), and a different key D maps to (4, 1). Starting from zero, history H1 inserts only A; H2 inserts A and D. What can the final ordinary Bloom-filter bits tell you about the number of distinct inserted keys?",
+      "options": [
+        "They prove that exactly one distinct key was inserted.",
+        "They prove that exactly two distinct keys were inserted.",
+        "The bit at position 4 records which history occurred.",
+        "They cannot distinguish H1 from H2: both leave exactly {1, 4} set."
+      ],
+      "answer": 3,
+      "explanation": "H1 contains one distinct key and H2 contains two, yet both histories produce the same two set bits. This explicit pair of histories shows that the bit array does not determine an exact distinct-key count.",
+      "transfer": "If a later decision needs an exact count or the original identities, retain suitable exact data instead of trying to recover it from this summary."
+    },
+    {
+      "id": "bf-false-positive",
+      "concept": "membership-evidence",
+      "prerequisites": [
+        "bit-updates"
+      ],
+      "prompt": "An 8-bit filter contains exactly the inserted keys A and B, mapping to (1, 4) and (4, 6). Querying a key reports maybe present exactly when both of its positions are 1. A different, never-inserted key X maps to (1, 6). What is the result for X?",
+      "options": [
+        "Maybe present: this is a false positive.",
+        "Definitely absent, because X was never inserted.",
+        "Definitely present: the bits prove X was inserted.",
+        "A false negative, because A and B share a bit."
+      ],
+      "answer": 0,
+      "explanation": "Insertions of A and B leave {1, 4, 6} set, so both positions of X are 1. The known insertion history says X is absent. A positive answer for this nonmember is a false positive.",
+      "transfer": "Use a maybe result to decide whether an exact lookup is worth doing. Do not interpret the combination of shared bits as a stored identity."
+    },
+    {
+      "id": "bf-zero-witness",
+      "concept": "membership-evidence",
+      "prerequisites": [
+        "bit-updates"
+      ],
+      "prompt": "An unchanged 8-bit filter has set bits {1, 4, 6}. All completed insertions used the same two hash functions, with no deletion, reset, corruption or incomplete writes. Y maps to (3, 6). What does its query establish about completed insertions into this filter?",
+      "options": [
+        "Y was inserted, because bit 6 is 1.",
+        "Y was not among those completed insertions, because bit 3 is 0.",
+        "Y has a 50% chance of having been inserted.",
+        "No absence conclusion is possible even under the stated assumptions."
+      ],
+      "answer": 1,
+      "explanation": "If Y had been inserted, that completed insertion would have set bit 3. No allowed operation subsequently clears it. The observed 0 therefore rules out Y in the set represented by this filter; one set bit does not outweigh that witness.",
+      "transfer": "A negative result is about the represented, fully updated set. A stale filter cannot establish absence from a newer backing collection."
+    },
+    {
+      "id": "bf-guarantee",
+      "concept": "membership-evidence",
+      "prerequisites": [
+        "bit-updates"
+      ],
+      "prompt": "A key was inserted into a plain Bloom filter. Which operating condition supports the usual no-false-negatives guarantee for a later query about that represented set?",
+      "options": [
+        "Change the hash seed but keep the bit array.",
+        "Clear a key’s positions whenever a different key is removed.",
+        "Query with the same mapping after completed insertions, while retaining every bit those insertions set.",
+        "Query before the key’s bit writes complete."
+      ],
+      "answer": 2,
+      "explanation": "The proof is direct: insertion sets every position the later query will inspect, and those positions remain 1. A changed mapping, erased shared bit or incomplete update breaks that proof. The guarantee is conditional on the filter being maintained correctly.",
+      "transfer": "Carry the hash configuration and update boundary with a saved filter. Version identity is part of interpreting the bits correctly."
+    },
+    {
+      "id": "bf-saturation",
+      "concept": "membership-evidence",
+      "prerequisites": [
+        "bit-updates"
+      ],
+      "prompt": "Every bit of an 8-bit filter is 1. Queries inspect two positions and return maybe present if both are 1. What can this filter now tell you?",
+      "options": [
+        "Every possible key must have been inserted.",
+        "The next insertion must cause a false negative.",
+        "A query with two different positions is definitely absent.",
+        "Every query returns maybe present; the array can no longer rule out any key."
+      ],
+      "answer": 3,
+      "explanation": "Whichever positions a query selects, both are 1. This does not establish that every key was inserted: enough collisions can fill the array. The filter has lost its ability to reject nonmembers under this query rule.",
+      "transfer": "Monitor whether a probabilistic summary still saves useful work. A filter that says maybe to everything adds a check without eliminating exact lookups."
+    },
+    {
+      "id": "bf-naive-delete",
+      "concept": "composition-limits",
+      "prerequisites": [
+        "membership-evidence"
+      ],
+      "prompt": "Only A and B were inserted: A maps to (1, 4), B to (4, 6), leaving {1, 4, 6} set. A is removed from the exact set. Someone clears both of A’s bit positions in the plain filter. What happens to a query for the still-present B?",
+      "options": [
+        "It returns definitely absent because shared bit 4 was cleared: a false negative.",
+        "It still returns maybe because bit 6 alone is enough.",
+        "It returns a false positive because A was removed.",
+        "The filter automatically restores bit 4 from B’s identity."
+      ],
+      "answer": 0,
+      "explanation": "Clearing positions 1 and 4 leaves only bit 6 set. B requires both 4 and 6, so its query now fails even though B remains in the exact set. Plain bits do not record which other keys still need a position.",
+      "transfer": "Use an appropriate deletion-capable design or rebuild from retained exact members; clearing shared bits is not a valid deletion procedure for this plain filter."
+    },
+    {
+      "id": "bf-union",
+      "concept": "composition-limits",
+      "prerequisites": [
+        "membership-evidence"
+      ],
+      "prompt": "Two 8-bit filters use identical hash functions and bit numbering. The first represents {A}, with A at (1, 4); the second represents {B}, with B at (4, 6). What does their bitwise OR produce?",
+      "options": [
+        "Set bits {4}, exactly representing the union without false positives.",
+        "Set bits {1, 4, 6}, exactly the array obtained by inserting both A and B into one empty filter.",
+        "Set bits {1, 6}, because the shared bit cancels.",
+        "A list containing the original identities A and B."
+      ],
+      "answer": 1,
+      "explanation": "OR retains any position set in either input. That is the same rule as accumulating the inserts for their set union: {1, 4} union {4, 6} is {1, 4, 6}. False positives remain possible and no identities are recovered.",
+      "transfer": "Compatible summaries can support useful composition even when they do not contain enough information to reconstruct the underlying records."
+    },
+    {
+      "id": "bf-configuration",
+      "concept": "composition-limits",
+      "prerequisites": [
+        "membership-evidence"
+      ],
+      "prompt": "Two 8-bit filters have equal lengths but different hash seeds. They are ORed, and queries use only the first filter’s seed. Which statement is justified about inserted members of the second filter?",
+      "options": [
+        "They are guaranteed not to be missed because OR never clears bits.",
+        "The seeds no longer matter once the arrays have the same length.",
+        "Equal length is insufficient; the second filter’s members may be missed under the first mapping.",
+        "Their original identities can be decoded to repair the mapping."
+      ],
+      "answer": 2,
+      "explanation": "OR preserves existing 1s, but those 1s may be at positions unrelated to where the first mapping queries the second filter’s keys. Matching size alone does not establish a common meaning for each bit. Use compatible mappings and bit numbering for this union operation.",
+      "transfer": "Before combining persisted indexes, verify their configuration identity as well as their shape. Equal-sized bytes need not have equal semantics."
+    },
+    {
+      "id": "bf-intersection",
+      "concept": "composition-limits",
+      "prerequisites": [
+        "membership-evidence"
+      ],
+      "prompt": "With one common mapping, filter F represents only A at (1, 4), and G represents only B at (4, 6), where A and B differ. Their exact sets have empty intersection. A never-inserted key C maps to (4, 4). What does querying C in the bitwise AND of F and G show?",
+      "options": [
+        "C returns definitely absent because the exact intersection is empty.",
+        "The positive answer proves C is in both underlying sets.",
+        "The AND has set bits {1, 4, 6}, so all three keys are present.",
+        "The AND leaves bit 4 set, so C returns maybe; it is not an exact test of set intersection."
+      ],
+      "answer": 3,
+      "explanation": "Both input arrays have bit 4 set, so their AND keeps it. Both query positions for C are 4; the query therefore passes even though C belongs to neither set. This counterexample rules out interpreting AND as exact intersection membership. It does not claim that a compatible AND loses true intersection members.",
+      "transfer": "When composing approximate summaries, distinguish preserving true members from identifying the exact set. Those are different properties."
+    },
+    {
+      "id": "bf-fixed-probability",
+      "concept": "probability-and-use",
+      "prerequisites": [
+        "composition-limits"
+      ],
+      "prompt": "A fixed 8-bit filter has exactly the set bits {1, 4, 6}. For a known nonmember, model its two query positions as independent uniform draws from 0 through 7, with replacement and independent of this fixed array. Among all 64 equally likely ordered pairs, how many return maybe?",
+      "options": [
+        "9 of 64",
+        "3 of 8",
+        "6 of 64",
+        "0 of 64"
+      ],
+      "answer": 0,
+      "explanation": "Each query position has three acceptable values. Repetition is allowed, so there are 3 times 3 = 9 accepted ordered pairs out of 8 times 8 = 64. The conditional false-positive probability for this fixed state and stated query model is 9/64.",
+      "transfer": "Write down what is fixed, what is random and whether sampling permits repeats before multiplying probabilities."
+    },
+    {
+      "id": "bf-random-construction",
+      "concept": "probability-and-use",
+      "prerequisites": [
+        "composition-limits"
+      ],
+      "prompt": "A different experiment starts with two zero bits, positions 0 and 1. Insert one key using two independent uniform hash positions with replacement. Query a distinct, known nonmember whose two positions are also independent uniform draws, independent of the insertion draws. Across the 16 equally likely four-draw outcomes, what is the exact false-positive probability?",
+      "options": [
+        "9/16, obtained by squaring the average fraction of set bits",
+        "10/16 = 5/8",
+        "1/4, because only one key was inserted",
+        "1, because there are two hash functions and two bits"
+      ],
+      "answer": 1,
+      "explanation": "The four insertion pairs are 00, 01, 10 and 11. Pairs 00 and 11 each leave one bit set, accepting 1 of 4 query pairs. Pairs 01 and 10 fill both bits, accepting all 4 query pairs each. Thus 1 + 4 + 4 + 1 = 10 of the 16 outcomes are false positives. Averaging each state’s query probability differs from squaring the average occupancy.",
+      "transfer": "For a nonlinear quantity, evaluate it within each possible state before averaging. Replacing a random input by its mean can change the answer."
+    },
+    {
+      "id": "bf-fixed-key",
+      "concept": "probability-and-use",
+      "prerequisites": [
+        "composition-limits"
+      ],
+      "prompt": "The filter bits and deterministic hash functions are fixed. You repeatedly query the same nonmember without changing anything. Does the lesson’s 9/64 calculation mean each repeated query independently has a 9/64 chance of returning maybe?",
+      "options": [
+        "Yes. Repeating a query redraws both hash positions automatically.",
+        "Yes. After exactly 64 queries it must have returned maybe exactly 9 times.",
+        "No. The same fixed key checks the same positions and returns the same result each time.",
+        "No. Repeated querying eventually removes its false positive."
+      ],
+      "answer": 2,
+      "explanation": "The 9/64 calculation describes the stated random-position model, not fresh randomness generated by an unchanged deterministic lookup. A fixed key with fixed hashes and fixed bits has a fixed answer. Repetition alone does not resample the experiment.",
+      "transfer": "Distinguish uncertainty across keys or randomly chosen configurations from randomness on each call of a deterministic procedure."
+    },
+    {
+      "id": "bf-exact-lookup",
+      "concept": "probability-and-use",
+      "prerequisites": [
+        "composition-limits"
+      ],
+      "prompt": "A document importer must never discard a genuinely new document as a duplicate. Its plain Bloom filter is correctly maintained for completed entries in an exact document-ID set. What should it do when the filter says maybe present for an incoming ID?",
+      "options": [
+        "Discard it immediately because maybe proves prior insertion.",
+        "Repeat the identical filter query until it returns absent.",
+        "Clear the ID’s two filter positions and then decide.",
+        "Check the exact ID set before classifying it as a duplicate."
+      ],
+      "answer": 3,
+      "explanation": "A nonmember can produce a positive filter result through shared bits. An exact set lookup distinguishes a real duplicate from that false positive. Repeating unchanged queries cannot resolve the ambiguity, and clearing bits can damage other keys’ answers.",
+      "transfer": "Choose the downstream action according to the cost of an error. Here the filter can avoid some exact checks, while the exact set decides whether an ID already exists."
+    }
+  ]
+}
