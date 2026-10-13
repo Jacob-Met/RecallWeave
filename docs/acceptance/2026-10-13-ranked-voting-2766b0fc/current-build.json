@@ -1,0 +1,140 @@
+{
+  "baseCommit": "db385449dbd94fa72a746801dfc1647076837f55",
+  "startedUTC": "2026-10-13T03:55:39.286Z",
+  "finishedUTC": "2026-10-13T03:55:40.707Z",
+  "node": "v24.14.0",
+  "commands": [
+    {
+      "exe": "node",
+      "args": [
+        "tools/build-site-directory.mjs"
+      ],
+      "status": 0,
+      "stdout": "Built explore.html from the validated repository inventory.\n",
+      "stderr": ""
+    },
+    {
+      "exe": "node",
+      "args": [
+        "tools/build-course-catalog.mjs"
+      ],
+      "status": 0,
+      "stdout": "Built catalog.html from validated original course files.\n",
+      "stderr": ""
+    },
+    {
+      "exe": "python",
+      "args": [
+        "tools/build-offline-pack.py"
+      ],
+      "status": 0,
+      "stdout": "Built offline/recallweave-offline.zip (1431414 bytes, 44 registered courses).\r\n",
+      "stderr": ""
+    },
+    {
+      "exe": "node",
+      "args": [
+        "tools/build-site-directory.mjs",
+        "--check"
+      ],
+      "status": 0,
+      "stdout": "explore.html covers every published course, lab and worked guide.\n",
+      "stderr": ""
+    },
+    {
+      "exe": "node",
+      "args": [
+        "tools/build-course-catalog.mjs",
+        "--check"
+      ],
+      "status": 0,
+      "stdout": "catalog.html matches the catalog sources and original course files.\n",
+      "stderr": ""
+    },
+    {
+      "exe": "python",
+      "args": [
+        "tools/build-offline-pack.py",
+        "--check"
+      ],
+      "status": 0,
+      "stdout": "Offline pack matches 44 registered courses and the compiled pages.\r\n",
+      "stderr": ""
+    },
+    {
+      "exe": "node",
+      "args": [
+        "--test",
+        "tests/deck.test.mjs",
+        "tests/course-catalog.test.mjs",
+        "tests/logical-clocks-course.test.mjs",
+        "tests/ranked-voting-course.test.mjs"
+      ],
+      "status": 0,
+      "stdout": "✔ catalog keeps exact raw text and an immutable copy of checked metadata (2.8972ms)\n✔ curated paths reject traversal, external URLs, authoring sources and duplicates (1.416ms)\n✔ every published course is registered, including courses beyond the original 32-course bound (6.3431ms)\n✔ search uses title and concept substrings with stable order and trimmed case (0.8362ms)\n✔ standalone build matches checked-in HTML and embeds every original file unchanged (66.3631ms)\n✔ embedded course text cannot terminate the data script or become executable markup (3.2399ms)\n✔ builder refuses extra arguments before writing the generated page (88.8197ms)\n✔ the existing bundled deck imports unchanged without a format field (1.9663ms)\n✔ a deck is an immutable copy, and unknown fields cannot configure the runtime (0.7006ms)\n✔ malformed JSON, unsupported versions and wrong top-level values give actionable errors (0.2889ms)\n✔ JSON byte limit counts multibyte text and accepts the exact boundary (2.0259ms)\n✔ required readable metadata and bounded question fields are validated (0.6576ms)\n✔ empty and oversized collections and duplicate identities are refused (0.3774ms)\n✔ every question and prerequisite must name a known covered concept (1.1184ms)\n✔ self-requirements and concept cycles across different questions are refused (0.1961ms)\n✔ choices require distinct readable options and an actual integer answer index (0.3912ms)\n✔ 100 questions and 32 concepts work through the existing selector to exhaustion (82.2906ms)\n✔ imported answer indices, literal text and object-key names survive learning and practice (0.643ms)\n✔ downloadable example round-trips through the import contract with full attribution (0.2838ms)\n✔ logical clocks is a complete existing-format deck with four connected concepts (4.0044ms)\n✔ the selected calculation answers follow the stated increment and merge rules (0.2285ms)\n✔ the authored distinctions retain partial order, strict vector comparison and their limits (0.3034ms)\n✔ the unchanged learner completes all sixteen questions and preserves the first session through practice and notes (14.2341ms)\n✔ ranked voting is a round-trippable original 16-question course with an answer guide (3.6301ms)\n✔ profile P exactly separates plurality, top-two runoff and Borda outcomes (1.2399ms)\n✔ the information-loss example preserves first places but reverses the runoff (0.2445ms)\n✔ profile Q has a strict cycle, agenda-dependent sequential outcomes and an explicit Borda tie (0.2623ms)\n✔ 729 small profiles preserve pair complements, Borda identity, point shifts and majority implications (14.2928ms)\n✔ all questions traverse unchanged adaptive selection, missed-answer practice and complete study notes (15.0004ms)\nℹ tests 29\nℹ suites 0\nℹ pass 29\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 266.9747\n",
+      "stderr": ""
+    }
+  ],
+  "files": [
+    {
+      "path": "courses/ranked-voting.json",
+      "gitBlob": "b365e1c6fb708e4a2bb39aeb10ce8d40d1cb7978",
+      "bytes": 17679,
+      "sha256": "ab2365370e2c643ecb9f09b0525c4ace9eb1a5b29342db1e191caf13b17ad1fa"
+    },
+    {
+      "path": "courses/ranked-voting.md",
+      "gitBlob": "8721e82c731cad2a9b3843483cec3d7d2e009471",
+      "bytes": 15911,
+      "sha256": "946581761429d39971ff44442b92d448f9c9df37dbfe9b88a34d7cb12857be03"
+    },
+    {
+      "path": "tests/ranked-voting-course.test.mjs",
+      "gitBlob": "354ba572a244f7de69e45a2dd797b97d638d6fb3",
+      "bytes": 10603,
+      "sha256": "338e0b607a4622bcd8d48d04efb2d9e1d36dd5f086aa138852ff62deeedc9355"
+    },
+    {
+      "path": "catalog/courses.json",
+      "gitBlob": "f11125cdee166724595de018daebb98f793f915d",
+      "bytes": 1603,
+      "sha256": "50bfe2a04228d1633d3dbfac27901bc49ceeafe5ef688e3d47e1c57c11890efc"
+    },
+    {
+      "path": "catalog/companions.json",
+      "gitBlob": "9e6b29beeb4e1f72c26aa8aa1770cbdd8a45fc8a",
+      "bytes": 3547,
+      "sha256": "18c4e449edc06e38282b73f1a3632aca24529c4cd05e891ba4d029be9a3c6704"
+    },
+    {
+      "path": "README.md",
+      "gitBlob": "6a343058cb584c8a989223ce84175034f32b1a69",
+      "bytes": 54750,
+      "sha256": "69447470b38c822453189478985a4a0f0f7a6b62c58ca71f9ed32b7a8794c3b9"
+    },
+    {
+      "path": "explore.html",
+      "gitBlob": "21ecc58e6028d48736bf91a1a71bfe9e27f5db46",
+      "bytes": 63994,
+      "sha256": "61889f795751168318abdcc9d16da0ca347bd58b5db2f92523d1573bb304ab4a"
+    },
+    {
+      "path": "catalog.html",
+      "gitBlob": "ea9f755b971b2b40080e6dd8058b51ce87d5bc55",
+      "bytes": 683220,
+      "sha256": "5197e8287ee76763994e479fa0378bd217e41e658b0010bfbbddb01a5125f19f"
+    },
+    {
+      "path": "offline/recallweave-offline.zip",
+      "gitBlob": "eee59b5b260c955ce18250deb75a217c66ae1f13",
+      "bytes": 1431414,
+      "sha256": "7b1ebea713e50a82a80fcce477592e53e32a59139258b6f497f107614f0feb04"
+    },
+    {
+      "path": "demo.html",
+      "gitBlob": "921cc359b000111e916a3aa3e387cc8c81de205a",
+      "bytes": 107651,
+      "sha256": "b9fc516195776c8ceca2d00cd1167765b32c32cef68f91c7b772dcc3c85e62b7"
+    }
+  ]
+}

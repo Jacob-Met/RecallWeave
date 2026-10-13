@@ -12,7 +12,7 @@ Use it when a course's content has already been reviewed and you need to verify 
 - An existing UTF-8 course accepted by `src/deck.mjs`'s `parseDeck`. Every question prompt must be unique, because the receiver identifies visible questions by prompt and visible options by text.
 - A new output-directory path with a writable parent. Browser profile, temporary-file, source and output locations must be accessible under the selected browser's normal operating rules.
 
-The receiver creates its own browser profile, loopback HTTP server, tabs and output files. It closes those resources when the run ends. It does not attach to an existing browser profile or alter the learner source.
+The receiver creates its own browser profile, loopback HTTP server, tabs and output files. It requests browser shutdown when the run ends and verifies that the actual browser process has exited and its debugging connection has closed before removing the profile. A successful launcher exit alone is insufficient: the receiver follows a launcher handoff through its fresh profile's own debugging endpoint. Cleanup has a bounded 30-second process/connection observation period after the close request; protocol calls have separate bounded timeouts, and inability to verify it fails the run and preserves the profile for investigation. It does not attach to an existing browser profile or alter the learner source.
 
 The current receiver checks this repository's maintained DOM and study-notes format. A future intentional UI change may require a reviewed receiver update. A receiver failure is evidence to investigate, rather than an automatic diagnosis of a content or learner defect.
 
@@ -59,6 +59,10 @@ The output also contains screenshots, the real study-notes text files, intermedi
 A canceled or incomplete download fails receiving even if the questions worked. Keep the failed receipt and determine whether the cause is the application, browser behavior, filesystem capacity or an operating-environment restriction. A successful parser, builder or question-only pass does not establish successful downloaded notes.
 
 The tool has no GitHub Actions, deployment, network publication or scheduling behavior. Publishing source and delivering its evidence remain explicit project work.
+
+## Recorded receiving
+
+The [receiving packet](receiving/course-import-dc7255e161d3/README.md) records the first complete run of the separately reviewed twelve-question expected-loss course on the verified MSI device, with Node 24.19.0 and Microsoft Edge 155.0.4283.45. It includes the exact source/course identities, successful browser receipt, four actual note downloads, representative screenshots, independent review and the earlier failed attempts. The screenshots and notes come from a synthetic receiving session that deliberately misses two questions; they are not a real learner assessment.
 
 ## Provenance
 

@@ -1,0 +1,278 @@
+{
+  "format": "recallweave-deck/1",
+  "title": "Same rankings, different voting outcomes",
+  "attribution": "Original questions, ballot counts, calculations, explanations and transfer prompts by HAMON contributors for RecallWeave (2026). Definitions: Carnegie Mellon University, Voting Methods, 21-301 (2018), https://www.math.cmu.edu/~mradclif/teaching/301S18/voting_methods.pdf; Ben Olken, Condorcet’s Paradox and Arrow’s Impossibility Theorem, MIT OpenCourseWare 14.75 (2012), https://ocw.mit.edu/courses/14-75-political-economy-and-economic-development-fall-2012/a9fd8e5ab75a325016094e6bbe625b2a_MIT14_75F12_Lec12.pdf. The original finite examples illustrate the defined rules; no empirical or political recommendation is made.",
+  "license": "Original lesson text and examples: Creative Commons Attribution 4.0 International (CC BY 4.0), https://creativecommons.org/licenses/by/4.0/. Attribution: HAMON contributors for RecallWeave, Same rankings, different voting outcomes, 2026. This permission covers the original lesson, not the linked source documents.",
+  "concepts": [
+    "reading-rankings",
+    "plurality-and-runoff",
+    "borda-scores",
+    "pairwise-majorities"
+  ],
+  "items": [
+    {
+      "id": "rv-profile-count",
+      "concept": "reading-rankings",
+      "prerequisites": [],
+      "prompt": "Profile P has 27 complete strict ballots: 11 rank A > B > C; 9 rank C > B > A; 5 rank B > C > A; 2 rank B > A > C. How many individual ballots rank B above A?",
+      "options": [
+        "16",
+        "7",
+        "11",
+        "27"
+      ],
+      "answer": 0,
+      "explanation": "The 9 C > B > A ballots, 5 B > C > A ballots and 2 B > A > C ballots all place B above A. Their counts sum to 16. Only 7 ballots rank B first, but a pairwise comparison uses relative order, not just first place.",
+      "transfer": "Write the analogous sum for the number of ballots that rank A above C. Check that the two opposite counts add to 27."
+    },
+    {
+      "id": "rv-majority-threshold",
+      "concept": "reading-rankings",
+      "prerequisites": [],
+      "prompt": "There are 27 equally weighted, complete ballots and no abstentions in a comparison. A strict majority means more than half of those ballots. What is the smallest number that is a strict majority?",
+      "options": [
+        "13",
+        "14",
+        "13.5",
+        "27"
+      ],
+      "answer": 1,
+      "explanation": "Half of 27 is 13.5. Counts are whole numbers, so the smallest count strictly above half is 14. The threshold concerns the specified denominator; it should be reconsidered if another problem permits abstentions or exhausted ballots.",
+      "transfer": "Repeat the calculation for 28 ballots. Explain why exactly 14 is not a strict majority of 28."
+    },
+    {
+      "id": "rv-complete-strict",
+      "concept": "reading-rankings",
+      "prerequisites": [],
+      "prompt": "Every ballot in this lesson must rank each of A, B and C exactly once, with no ties. Which ballot meets that rule?",
+      "options": [
+        "A > B = C",
+        "A > B > A",
+        "C > A > B",
+        "B > A"
+      ],
+      "answer": 2,
+      "explanation": "C > A > B includes all three distinct alternatives once and puts every pair in a definite order. The other ballots introduce a tie, a repeated alternative or a missing alternative. They need additional rules and are outside this lesson’s model.",
+      "transfer": "List all complete strict rankings of three alternatives. How can you know the list contains every possibility without duplicates?"
+    },
+    {
+      "id": "rv-first-counts-insufficient",
+      "concept": "reading-rankings",
+      "prerequisites": [],
+      "prompt": "A report gives only first-place counts: A has 11, B has 7 and C has 9. The 27 original ballots were complete strict rankings, but their lower ranks were not retained. What can you determine from this report alone?",
+      "options": [
+        "A must also win every pairwise comparison.",
+        "B must be the Borda winner.",
+        "C must win the runoff against A.",
+        "A is the unique plurality leader; the Borda and pairwise outcomes are not determined."
+      ],
+      "answer": 3,
+      "explanation": "Plurality uses first places only, so 11 exceeds 9 and 7. Borda needs each position, and a pairwise or runoff comparison needs the relative ordering of its two alternatives. Different lower ranks can preserve these first counts while changing those outcomes.",
+      "transfer": "Create two sets of complete rankings with these same first counts but opposite A-versus-C majorities. Keep each ballot’s first alternative fixed."
+    },
+    {
+      "id": "rv-plurality-finalists",
+      "concept": "plurality-and-runoff",
+      "prerequisites": [
+        "reading-rankings"
+      ],
+      "prompt": "Profile P has 27 complete strict ballots: 11 rank A > B > C; 9 rank C > B > A; 5 rank B > C > A; 2 rank B > A > C. For the stated two-round rule, first choose the two alternatives with the highest first-place counts. Which pair reaches the final comparison?",
+      "options": [
+        "A and C",
+        "A and B",
+        "B and C",
+        "All three; someone must first have a majority."
+      ],
+      "answer": 0,
+      "explanation": "The first-place counts are A = 11, B = 5 + 2 = 7, and C = 9. The top two are A and C. This lesson’s runoff uses that pair regardless of whether the first round contains a majority; the remaining comparison uses every ballot’s relative ranking of the finalists.",
+      "transfer": "Describe what extra rule would be needed if B and C tied for the last finalist position. Do not silently use alphabetical order."
+    },
+    {
+      "id": "rv-runoff-transfer",
+      "concept": "plurality-and-runoff",
+      "prerequisites": [
+        "reading-rankings"
+      ],
+      "prompt": "Profile P has 27 complete strict ballots: 11 rank A > B > C; 9 rank C > B > A; 5 rank B > C > A; 2 rank B > A > C. A and C are the finalists. How do the 7 ballots whose first choice was B divide when each supports its higher-ranked finalist?",
+      "options": [
+        "All 7 support C because C has more first places than B.",
+        "5 support C and 2 support A.",
+        "All 7 become abstentions.",
+        "5 support A and 2 support C."
+      ],
+      "answer": 1,
+      "explanation": "The 5 B > C > A ballots prefer C over A. The 2 B > A > C ballots prefer A over C. Every ballot is complete, so all 7 express a preference between the finalists; none is exhausted. The two B-first groups cannot be treated as identical.",
+      "transfer": "Explain why the single first-place total B = 7 cannot reveal this split without the lower rankings."
+    },
+    {
+      "id": "rv-runoff-winner",
+      "concept": "plurality-and-runoff",
+      "prerequisites": [
+        "reading-rankings"
+      ],
+      "prompt": "Profile P has 27 complete strict ballots: 11 rank A > B > C; 9 rank C > B > A; 5 rank B > C > A; 2 rank B > A > C. The two-round rule compares the top two first-place alternatives, A and C. Which final result follows from all 27 unchanged rankings?",
+      "options": [
+        "A wins by 11 to 9.",
+        "B wins by 16 to 11.",
+        "C wins by 14 to 13.",
+        "A and C tie at 13.5 each."
+      ],
+      "answer": 2,
+      "explanation": "C receives the 9 C-first ballots plus the 5 B > C > A ballots, totaling 14. A receives the 11 A-first ballots plus the 2 B > A > C ballots, totaling 13. The plurality leader A therefore differs from this runoff’s winner C.",
+      "transfer": "Check the final total and strict-majority threshold. Explain why adding an eliminated alternative’s first count wholesale would be incorrect here."
+    },
+    {
+      "id": "rv-reduced-ballot",
+      "concept": "plurality-and-runoff",
+      "prerequisites": [
+        "reading-rankings"
+      ],
+      "prompt": "Profile P has 27 complete strict ballots: 11 rank A > B > C; 9 rank C > B > A; 5 rank B > C > A; 2 rank B > A > C. Now consider a separate calculation with C removed from every ranking, keeping the relative order of A and B. Under plurality on those two alternatives, who wins?",
+      "options": [
+        "A wins because its original first-place total was largest.",
+        "C wins because it was the runoff winner.",
+        "A and B tie because C was removed.",
+        "B wins by 16 to 11."
+      ],
+      "answer": 3,
+      "explanation": "The 9 C > B > A ballots become B > A, joining the other 7 B-first ballots. All 11 A > B > C ballots become A > B. Thus B has 16 and A has 11. The alternative set and the rule’s inputs were changed explicitly; this is a new calculation, not an alteration of Profile P’s original plurality tally.",
+      "transfer": "Compare the original three-alternative plurality winner with the reduced two-alternative winner. State exactly which relative preferences were preserved."
+    },
+    {
+      "id": "rv-borda-group",
+      "concept": "borda-scores",
+      "prerequisites": [
+        "reading-rankings"
+      ],
+      "prompt": "Use Borda points 2 for first, 1 for second and 0 for third. A group contains 11 ballots A > B > C. What contributions does this group make to the totals (A, B, C)?",
+      "options": [
+        "(22, 11, 0)",
+        "(11, 0, 0)",
+        "(2, 1, 0)",
+        "(33, 22, 11)"
+      ],
+      "answer": 0,
+      "explanation": "Each ballot contributes (2, 1, 0), so 11 identical ballots contribute 11 times those points: (22, 11, 0). The group size multiplies every rank’s score. The tuple (33, 22, 11) instead uses the different 3, 2, 1 point convention.",
+      "transfer": "Compute the contribution of 9 ballots C > B > A in the same fixed (A, B, C) order."
+    },
+    {
+      "id": "rv-borda-totals",
+      "concept": "borda-scores",
+      "prerequisites": [
+        "reading-rankings"
+      ],
+      "prompt": "Profile P has 27 complete strict ballots: 11 rank A > B > C; 9 rank C > B > A; 5 rank B > C > A; 2 rank B > A > C. Use Borda points 2, 1, 0 from first to third. What are the totals in the order (A, B, C)?",
+      "options": [
+        "(11, 7, 9)",
+        "(24, 34, 23)",
+        "(22, 34, 25)",
+        "(51, 61, 50)"
+      ],
+      "answer": 1,
+      "explanation": "A receives 2·11 + 0·9 + 0·5 + 1·2 = 24. B receives 1·11 + 1·9 + 2·5 + 2·2 = 34. C receives 0·11 + 2·9 + 1·5 + 0·2 = 23. Their sum is 81 = 27·3, because each complete ballot supplies 3 points. B is the unique Borda winner.",
+      "transfer": "Use the total-points identity to catch a tallying mistake. Explain why a correct grand total alone still cannot establish every individual total."
+    },
+    {
+      "id": "rv-borda-shift",
+      "concept": "borda-scores",
+      "prerequisites": [
+        "reading-rankings"
+      ],
+      "prompt": "Profile P has 27 complete strict ballots: 11 rank A > B > C; 9 rank C > B > A; 5 rank B > C > A; 2 rank B > A > C. With 2, 1, 0 Borda points the totals are (24, 34, 23). If every complete ballot instead uses 3, 2, 1 points, what happens?",
+      "options": [
+        "The totals remain (24, 34, 23) because only the winner matters.",
+        "A becomes the winner because first places gain a point.",
+        "The totals become (51, 61, 50); B remains the unique winner.",
+        "The totals double to (48, 68, 46)."
+      ],
+      "answer": 2,
+      "explanation": "Every alternative gains 1 point on each of the same 27 complete ballots, so all totals increase by 27. The differences stay unchanged: 24+27=51, 34+27=61, 23+27=50. This argument depends on each alternative appearing on every ballot; it does not settle how an unrelated partial-ballot rule should work.",
+      "transfer": "Show algebraically why adding the same constant to every total preserves ties as well as strict ordering."
+    },
+    {
+      "id": "rv-borda-pair-sum",
+      "concept": "borda-scores",
+      "prerequisites": [
+        "reading-rankings"
+      ],
+      "prompt": "Profile P has 27 complete strict ballots: 11 rank A > B > C; 9 rank C > B > A; 5 rank B > C > A; 2 rank B > A > C. Exactly 16 ballots rank B above A, and 18 rank B above C. Why is B’s 2, 1, 0 Borda score equal to 16 + 18 = 34?",
+      "options": [
+        "Every pairwise victory contributes 17 Borda points.",
+        "Borda counts only the ballots that rank B first.",
+        "The equality requires B to win both pairwise comparisons.",
+        "On each complete ballot, B’s Borda points equal the number of other alternatives below B."
+      ],
+      "answer": 3,
+      "explanation": "If B is first, two alternatives are below it and it earns 2; second gives one and 1; third gives none and 0. Summing that count by ballot equals summing, for each opponent, the ballots that put B above that opponent. The identity holds for every alternative, whether it wins or loses its pairwise comparisons.",
+      "transfer": "Verify the same identity for A using 11 ballots above B and 13 above C. Then check C using 14 above A and 9 above B."
+    },
+    {
+      "id": "rv-condorcet-winner",
+      "concept": "pairwise-majorities",
+      "prerequisites": [
+        "reading-rankings"
+      ],
+      "prompt": "Profile P has 27 complete strict ballots: 11 rank A > B > C; 9 rank C > B > A; 5 rank B > C > A; 2 rank B > A > C. A Condorcet winner must defeat each other alternative in a strict head-to-head majority. Which statement is correct?",
+      "options": [
+        "B is the Condorcet winner: it beats A by 16–11 and C by 18–9.",
+        "A is the Condorcet winner because it has the most first places.",
+        "C is the Condorcet winner because it wins the runoff.",
+        "There is no Condorcet winner because no alternative has 14 first places."
+      ],
+      "answer": 0,
+      "explanation": "Against A, B is preferred by the 9+5+2=16 ballots that do not rank A first. Against C, B is preferred by the 11+5+2=18 ballots outside the C-first group. Both are strict majorities. A first-place majority is sufficient but not required to be a Condorcet winner; B has only 7 first places here.",
+      "transfer": "Compute the third contest A versus C and explain why it cannot change whether B defeats both opponents."
+    },
+    {
+      "id": "rv-cycle-tallies",
+      "concept": "pairwise-majorities",
+      "prerequisites": [
+        "reading-rankings"
+      ],
+      "prompt": "Profile Q has 9 complete strict ballots: 4 rank A > B > C; 3 rank B > C > A; 2 rank C > A > B. Which set of head-to-head results is correct?",
+      "options": [
+        "A beats B 4–3; B beats C 3–2; A beats C 4–2.",
+        "A beats B 6–3; B beats C 7–2; C beats A 5–4.",
+        "A beats B 6–3; C beats B 7–2; A beats C 5–4.",
+        "All three comparisons tie because there are three ranking groups."
+      ],
+      "answer": 1,
+      "explanation": "A>B is supported by the 4 A>B>C and 2 C>A>B ballots, so 6–3. B>C is supported by the first two groups, so 7–2. C>A is supported by the 3 B>C>A and 2 C>A>B ballots, so 5–4. Each comparison uses all 9 ballots. Group counts are voters, not one vote per distinct ranking.",
+      "transfer": "Draw one arrow for each strict majority. Verify that following the arrows returns to the starting alternative."
+    },
+    {
+      "id": "rv-cycle-meaning",
+      "concept": "pairwise-majorities",
+      "prerequisites": [
+        "reading-rankings"
+      ],
+      "prompt": "Profile Q has 9 complete strict ballots: 4 rank A > B > C; 3 rank B > C > A; 2 rank C > A > B. Its pairwise majorities are A over B, B over C and C over A. What follows?",
+      "options": [
+        "One individual ballot must contain a preference cycle.",
+        "A is the Condorcet winner because A beats B and B beats C.",
+        "No alternative defeats both opponents, although every individual ballot is a consistent strict ranking.",
+        "The arithmetic is inconsistent because an odd number of voters cannot produce a cycle."
+      ],
+      "answer": 2,
+      "explanation": "A loses to C, B loses to A, and C loses to B, so none is a Condorcet winner. The ballots themselves are linear orders. Combining different supporting majorities does not preserve transitivity: the group supporting A over B is not required to be the same group supporting B over C.",
+      "transfer": "Name the supporting groups for each majority. Explain why the existence of a cycle in this example makes no claim about how frequent cycles are in actual elections."
+    },
+    {
+      "id": "rv-cycle-agenda",
+      "concept": "pairwise-majorities",
+      "prerequisites": [
+        "reading-rankings"
+      ],
+      "prompt": "Profile Q has 9 complete strict ballots: 4 rank A > B > C; 3 rank B > C > A; 2 rank C > A > B. The head-to-head winners are A over B, B over C and C over A. In a sequential procedure, the winner of the first comparison meets the remaining alternative. Which pair of outcomes is correct?",
+      "options": [
+        "A versus B first leads to A; A versus C first leads to A.",
+        "Both orders must lead to the Condorcet winner A.",
+        "Both orders end in a tie because the overall majority relation cycles.",
+        "A versus B first leads to C; A versus C first leads to B."
+      ],
+      "answer": 3,
+      "explanation": "A beats B first, then C beats A, so the first order leaves C. C beats A first, then B beats C, so the second leaves B. These calculations use the same fixed rankings; only the specified comparison order changes. A sequential winner need not defeat every alternative.",
+      "transfer": "Calculate the survivor if B versus C is first. State the procedural choice that must accompany the ballot data to make this sequential result reproducible."
+    }
+  ]
+}
