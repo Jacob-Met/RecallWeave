@@ -1,0 +1,277 @@
+{
+  "schema": "recallweave.independent-minhash-browser-contract/1",
+  "frozen_before_ui_source": true,
+  "pure_model_already_received": {
+    "git_blob": "ab254cb22748da7b477debaa250dd26a6e37168c",
+    "receipt_git_blob": "7768ae68a82f816fd1b53b2a602be0affe6ace8d",
+    "mathematical_oracle": "bccd7e3f9242b5d41f20d90ef0a39648c712c9d7",
+    "complete_rows_oracle": "c364ee57f830586e9f1b37b801668c38b113f07b"
+  },
+  "selectors": {
+    "form": "#compare-form",
+    "inputA": "#set-a",
+    "inputB": "#set-b",
+    "submit_text": "Compare all permutations",
+    "results": "#results",
+    "error": "#error",
+    "jaccard": "#jaccard",
+    "frequency": "#frequency",
+    "reduced": "#reduced",
+    "permutation": "#permutation",
+    "previous": "#previous",
+    "next": "#next",
+    "minimumA": "#min-a",
+    "minimumB": "#min-b",
+    "collision": "#row-collision",
+    "rankedLabels": "#ranked-labels",
+    "firstRows": "#first-rows",
+    "permutationRows": "#permutation-rows",
+    "observation": "#download-observation",
+    "course": "#download-course",
+    "guide": "#download-guide"
+  },
+  "checks": [
+    {
+      "id": "initial_unapplied",
+      "expected": {
+        "a": [
+          "a",
+          "b"
+        ],
+        "b": [
+          "b",
+          "c"
+        ],
+        "results_hidden": true,
+        "observation_disabled": true
+      }
+    },
+    {
+      "id": "partial_apply",
+      "oracle_case": "partial_overlap",
+      "expected": {
+        "jaccard": "1 / 3",
+        "frequency": "2 / 6",
+        "reduced": "1 / 3",
+        "selected": 1,
+        "minA": "\"a\" · rank 1",
+        "minB": "\"b\" · rank 2",
+        "collision": "0 · DIFFER",
+        "previous_disabled": true,
+        "next_disabled": false,
+        "rows": 6,
+        "details_initially_collapsed": true
+      }
+    },
+    {
+      "id": "permutation_navigation",
+      "expected_rows": [
+        {
+          "selected": 2,
+          "order": [
+            "a",
+            "c",
+            "b"
+          ],
+          "minA": "a",
+          "minB": "c",
+          "rankA": 1,
+          "rankB": 2,
+          "collision": false
+        },
+        {
+          "selected": 3,
+          "order": [
+            "b",
+            "a",
+            "c"
+          ],
+          "minA": "b",
+          "minB": "b",
+          "rankA": 1,
+          "rankB": 1,
+          "collision": true
+        },
+        {
+          "selected": 6,
+          "order": [
+            "c",
+            "b",
+            "a"
+          ],
+          "minA": "b",
+          "minB": "c",
+          "rankA": 2,
+          "rankB": 1,
+          "collision": false
+        }
+      ],
+      "requirements": [
+        "Next and Previous update visible minima and selection.",
+        "A row Inspect button chooses its own row.",
+        "The select can return to row 1.",
+        "Boundary buttons disable at the first and last row."
+      ]
+    },
+    {
+      "id": "observation_download",
+      "selected": 3,
+      "expected_format": "recallweave.minhash-observation/1",
+      "exact_fields": [
+        "format",
+        "assumptions",
+        "entered",
+        "selected_permutation",
+        "analysis"
+      ],
+      "assumptions": {
+        "both_sets_nonempty": true,
+        "uniform_permutation_for_probability": true,
+        "complete_enumeration": true,
+        "sampled_randomness": false,
+        "exact_literal_set_membership": true,
+        "indices_and_ranks": "one-based",
+        "union_order": "first-seen Set A, then Set B"
+      },
+      "requirements": [
+        "Actual download bytes parse as JSON.",
+        "entered.a and entered.b equal the exact last applied textarea strings, including JSON whitespace.",
+        "selected_permutation is the actual selected 1-based row.",
+        "Entire analysis equals the independent expected model with only schema renamed to format.",
+        "No timestamp or randomness is introduced."
+      ]
+    },
+    {
+      "id": "draft_retirement",
+      "requirements": [
+        "An input event hides previous results and disables observation download before another Apply.",
+        "The edited text remains in the textarea.",
+        "Invalid JSON produces visible role=alert feedback with no stale result or observation.",
+        "Six distinct union labels are refused with no stale result or observation.",
+        "A subsequent valid Apply restores consistent results."
+      ]
+    },
+    {
+      "id": "examples_only_load",
+      "examples": [
+        "overlap",
+        "identical",
+        "disjoint",
+        "subset",
+        "boundary",
+        "literal"
+      ],
+      "requirements": [
+        "Each example only loads inputs and retires any result.",
+        "The learner must Apply to compute the newly loaded example.",
+        "Applied example counts are checked by independent finite-set arithmetic; the candidate model is not used as an oracle."
+      ]
+    },
+    {
+      "id": "five_label_boundary",
+      "oracle_case": "five_label_boundary",
+      "a": [
+        "a",
+        "b",
+        "c"
+      ],
+      "b": [
+        "c",
+        "d",
+        "e"
+      ],
+      "expected": {
+        "jaccard": "1 / 5",
+        "frequency": "24 / 120",
+        "reduced": "1 / 5",
+        "rows": 120,
+        "first_buckets": 5,
+        "per_bucket": 24
+      },
+      "selected_last": {
+        "index": 120,
+        "order": [
+          "e",
+          "d",
+          "c",
+          "b",
+          "a"
+        ],
+        "minA": "c",
+        "rankA": 3,
+        "minB": "e",
+        "rankB": 1,
+        "collision": false
+      }
+    },
+    {
+      "id": "literal_labels",
+      "oracle_case": "literal_labels",
+      "a": [
+        "Case",
+        "case",
+        " café"
+      ],
+      "b": [
+        "case",
+        "café",
+        " café"
+      ],
+      "expected": {
+        "jaccard": "2 / 4",
+        "frequency": "12 / 24",
+        "reduced": "1 / 2"
+      },
+      "requirements": [
+        "JSON-quoted labels retain case, accents and leading spaces in visible minima/ranked labels.",
+        "Actual observation retains exact entered JSON text and all literal labels."
+      ]
+    },
+    {
+      "id": "duplicate_normalization",
+      "oracle_case": "duplicate_entries",
+      "a": [
+        "x",
+        "x",
+        "y"
+      ],
+      "b": [
+        "y",
+        "y"
+      ],
+      "expected": {
+        "jaccard": "1 / 2",
+        "frequency": "1 / 2",
+        "reduced": "1 / 2"
+      },
+      "requirements": [
+        "Downloaded input arrays retain duplicates.",
+        "Set arrays deduplicate by exact string equality and retain first occurrence."
+      ]
+    },
+    {
+      "id": "fixed_downloads",
+      "course": {
+        "bytes": 13164,
+        "sha256": "17a35b359ab5c1f097931bba29dcf7deddc75c98accbf1cced8ae5eca9e9ad01",
+        "git_blob": "82cc4bdd8bf22afc5ca84098a0b19c3d485d2f45"
+      },
+      "guide": "Match the final frozen guide bytes and source identity when exposed; do not regenerate or normalize it."
+    },
+    {
+      "id": "actual_opening_and_visuals",
+      "requirements": [
+        "Open the complete qualified HTML directly in a fresh owned browser context.",
+        "No external request, storage write or application page error.",
+        "Readable desktop viewport and 390px layout; broad tables may scroll only inside their local horizontal regions.",
+        "Retain actual HTML identity, actual downloads, DOM text observations, viewport screenshots and raw receipt.",
+        "Close only the owned browser context/process and preserve source/HTML/fixture byte and metadata witnesses."
+      ]
+    }
+  ],
+  "scope_limits": [
+    "No learner course import replay, random generator, approximate hash, provider request, dependency install, service or source/main adoption.",
+    "This is a new offline teaching UI; earlier pure model receiving is retained separately and not recounted as browser checks.",
+    "Source v1 sparse-array issue was a static review finding, not an executed failing course."
+  ]
+}
