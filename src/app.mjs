@@ -85,7 +85,21 @@ function resetSession(nextDeck = deck) {
   heading.focus();
 }
 
+function confirmLeave(event) {
+  event.preventDefault();
+  event.returnValue = true;
+}
+
+function updateLeavePrompt() {
+  const hasRecords = answers.length > 0 || (practice?.answers.length ?? 0) > 0
+    || reflections.application.length > 0
+    || reflections.notes.some(note => note.text.length > 0);
+  if (hasRecords) window.addEventListener('beforeunload', confirmLeave);
+  else window.removeEventListener('beforeunload', confirmLeave);
+}
+
 function setProgress() {
+  updateLeavePrompt();
   traceArchiveControls?.refresh();
   lessonArchiveControls?.refresh();
   const count = inPractice ? practice.answers.length : answers.length;
@@ -165,12 +179,14 @@ function renderResults() {
     field.value = itemReflection(reflections, field.dataset.reflectionItem);
     field.addEventListener('input', () => {
       reflections = updateReflection(reflections, field.dataset.reflectionItem, field.value);
+      updateLeavePrompt();
     });
   });
   const application = root.querySelector('#application-reflection');
   application.value = reflections.application;
   application.addEventListener('input', () => {
     reflections = updateApplicationReflection(reflections, application.value);
+    updateLeavePrompt();
   });
   const resetButton = root.querySelector('#reset-button');
   resetButton.insertAdjacentHTML('beforebegin', '<section class="practice-summary" aria-labelledby="save-notes-title"><h3 id="save-notes-title">Keep these connections</h3><p>Save your questions, first answers, explanations, reflections, and any practice answers as a text file.</p><button class="reset-button" id="save-notes-button" aria-describedby="save-notes-status">Download study notes (.txt)</button><p id="save-notes-status" role="status">Your session stays in this tab until you refresh. Download notes to keep a copy.</p></section>');

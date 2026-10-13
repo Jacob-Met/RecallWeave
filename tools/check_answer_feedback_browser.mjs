@@ -99,6 +99,7 @@ async function main(settings) {
   let server, browser, socket, sessionId, profile, base = '';
   let browserDidClose = true, browserClosed = Promise.resolve();
   let browserLog = '', closing = false, sequence = 0, emitted = 0, seedScript;
+  let discardingDocument = false;
   const pending = new Map(), downloads = new Map(), sources = new Map();
 
   async function headroom(label) {
@@ -186,16 +187,19 @@ async function main(settings) {
     }));
     await command('Emulation.setDeviceMetricsOverride', {width, height: 1000, deviceScaleFactor: 1, mobile: false});
     await command('Emulation.setEmulatedMedia', {features: [{name: 'forced-colors', value: 'active'}]});
-    const navigation = await command('Page.navigate', {url});
-    assert.ok(!navigation.errorText, navigation.errorText);
-    assert.ok(navigation.loaderId, 'A fresh document is required');
-    await waitFor(async () => {
-      const frame = await command('Page.getFrameTree');
-      if (frame.frameTree.frame.loaderId !== navigation.loaderId) return false;
-      return inPage(expected => location.href === expected && document.readyState === 'complete' &&
-        !!document.querySelector('#start-button') && !!document.querySelector('#deck-file') &&
-        !!document.querySelector('#lesson-file'), url);
-    }, 'fresh learner document');
+    discardingDocument = true;
+    try {
+      const navigation = await command('Page.navigate', {url});
+      assert.ok(!navigation.errorText, navigation.errorText);
+      assert.ok(navigation.loaderId, 'A fresh document is required');
+      await waitFor(async () => {
+        const frame = await command('Page.getFrameTree');
+        if (frame.frameTree.frame.loaderId !== navigation.loaderId) return false;
+        return inPage(expected => location.href === expected && document.readyState === 'complete' &&
+          !!document.querySelector('#start-button') && !!document.querySelector('#deck-file') &&
+          !!document.querySelector('#lesson-file'), url);
+      }, 'fresh learner document');
+    } finally { discardingDocument = false; }
     assert.ok(await inPage(() => matchMedia('(forced-colors: active)').matches), 'Forced-color mode must be active');
   }
   async function chooseFile(selector, path) {
@@ -371,6 +375,11 @@ async function main(settings) {
         report.pageErrors.push(message.params.exceptionDetails.exception?.description ?? message.params.exceptionDetails.text);
       } else if (message.method === 'Network.requestWillBeSent') {
         report.requests.push(message.params.request.url);
+      } else if (message.method === 'Page.javascriptDialogOpening' && message.params.type === 'beforeunload') {
+        // Accept only the receiver's explicit replacement of an answered document.
+        if (!discardingDocument) report.harnessErrors.push('Unexpected leave prompt outside document replacement');
+        command('Page.handleJavaScriptDialog', {accept: discardingDocument})
+          .catch(error => report.harnessErrors.push(String(error)));
       } else if (message.method === 'Browser.downloadWillBegin' || message.method === 'Browser.downloadProgress') {
         downloads.set(message.params.guid, {...downloads.get(message.params.guid), ...message.params});
       } else if (message.method === 'Fetch.requestPaused') {
