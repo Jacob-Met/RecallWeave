@@ -1,0 +1,405 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta name="description" content="Choose events, inspect Lamport and vector clock updates, and trace causality in a fixed three-process graph.">
+  <link rel="icon" href="data:,">
+  <title>Logical clocks, step by step · RecallWeave</title>
+  <style>
+    :root { color: #193d36; background: #f2f5ee; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-synthesis: none; line-height: 1.55; }
+    * { box-sizing: border-box; }
+    body { margin: 0; }
+    [hidden] { display: none !important; }
+    a { color: #155c78; text-underline-offset: .18em; }
+    button, input, select { font: inherit; }
+    button, select { min-height: 44px; }
+    button { padding: 10px 14px; border: 1px solid #89a899; border-radius: 9px; color: #193d36; background: #f7faf3; font-weight: 650; cursor: pointer; touch-action: manipulation; }
+    button:hover:not(:disabled) { background: #e2ecde; border-color: #537e66; }
+    button:disabled { color: #68776f; background: #eff2ec; border-color: #cdd7cd; cursor: default; }
+    select { width: 100%; padding: 9px 12px; border: 1px solid #89a899; border-radius: 8px; color: #193d36; background: white; }
+    :focus-visible { outline: 3px solid #b24f20; outline-offset: 4px; }
+    .skip-link { position: absolute; top: -80px; left: 18px; z-index: 2; padding: 12px; background: white; }
+    .skip-link:focus { top: 12px; }
+    header, main, footer { width: min(1320px, 100%); margin-inline: auto; padding-inline: 24px; }
+    header { padding-top: 34px; padding-bottom: 25px; }
+    .brand { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; font-weight: 750; }
+    .brand-name { font-size: 1rem; letter-spacing: -.02em; }
+    .badge { padding: 4px 10px; border: 1px solid #b6c9b5; border-radius: 999px; background: #e7efdf; font-size: .74rem; letter-spacing: .08em; text-transform: uppercase; }
+    .sibling-nav { margin-left: auto; font-size: .85rem; font-weight: 500; }
+    h1 { max-width: 860px; margin: 23px 0 12px; font-size: clamp(2.2rem, 4.7vw, 3.65rem); line-height: 1.08; letter-spacing: -.035em; font-weight: 760; }
+    .lede { max-width: 830px; color: #476258; font-size: 1.12rem; }
+    .rule-ribbon { display: flex; flex-wrap: wrap; gap: 8px 24px; padding-top: 9px; color: #476258; font-size: .84rem; }
+    .rule-ribbon strong { color: #193d36; }
+    main { padding-bottom: 24px; }
+    .workbench { display: grid; grid-template-columns: 310px minmax(0, 1fr); gap: 20px; align-items: start; }
+    .stage { display: grid; gap: 20px; min-width: 0; }
+    .panel { min-width: 0; margin-bottom: 20px; padding: 23px; border: 1px solid #cddbcf; border-radius: 15px; background: #fff; box-shadow: 0 3px 15px #213b2b05; }
+    .workbench .panel { margin-bottom: 0; }
+    h2 { margin: 0 0 10px; font-size: 1.32rem; line-height: 1.28; letter-spacing: -.01em; }
+    h3 { margin: 0 0 9px; font-size: 1rem; line-height: 1.35; }
+    p { margin: 9px 0 14px; }
+    .eyebrow { margin: 0 0 9px; color: #54715e; font-size: .72rem; font-weight: 760; text-transform: uppercase; letter-spacing: .1em; }
+    .small, .help { color: #4c655a; font-size: .85rem; }
+    .help { margin: 6px 0 13px; }
+    .muted { color: #53695f; }
+    .step-panel { border-top: 5px solid #2f7054; }
+    .process-card { margin-top: 14px; padding: 15px; background: #f4f8ef; border: 1px solid #d0dfc9; border-radius: 11px; }
+    .process-heading { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+    .process-heading h3 { margin: 0; }
+    .process-mark { display: inline-grid; place-items: center; width: 29px; height: 29px; margin-right: 5px; border-radius: 8px; color: white; background: #346750; }
+    .clock-pair { display: flex; flex-wrap: wrap; gap: 7px 20px; margin: 12px 0; }
+    .clock-pair div { min-width: 0; }
+    .clock-pair dt { font-size: .7rem; text-transform: uppercase; letter-spacing: .07em; color: #57705f; }
+    .clock-pair dd { margin: 3px 0 0; font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: 1.15rem; font-weight: 700; }
+    .process-card button { width: 100%; text-align: left; background: white; }
+    .process-card .help { min-height: 2.6em; margin-bottom: 0; font-size: .78rem; }
+    .step-foot { margin: 18px 0 0; }
+    #reset-presentation { width: 100%; margin-top: 9px; background: #fff; }
+    .status { min-height: 1.5em; margin: 12px 0 0; color: #426455; font-size: .84rem; overflow-wrap: anywhere; }
+    .error { padding: 12px; background: #fff2eb; border-left: 4px solid #a74828; color: #8a321d; }
+    .result-heading { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 8px 20px; }
+    .result-heading p { margin: 0; }
+    #snapshot-mode { color: #47705b; font-size: .78rem; font-weight: 700; }
+    #snapshot-label { font-size: 1.4rem; margin-top: 5px; }
+    #snapshot-count { font-variant-numeric: tabular-nums; }
+    .progress { height: 7px; overflow: hidden; margin: 12px 0 6px; border-radius: 99px; background: #e4ece0; }
+    #progress-fill { height: 100%; width: 0; background: #3d7a59; }
+    #progress-label { margin: 0 0 15px; font-size: .76rem; color: #58705f; }
+    .navigation { display: flex; flex-wrap: wrap; gap: 9px; margin-bottom: 12px; }
+    #return-latest { background: #205f49; border-color: #205f49; color: white; }
+    .slider-label { display: block; margin-bottom: 2px; color: #4c655a; font-size: .85rem; font-weight: 650; }
+    input[type="range"] { display: block; width: 100%; min-height: 36px; accent-color: #2f7054; cursor: pointer; }
+    #presentation-history { display: flex; flex-wrap: wrap; gap: 6px; padding: 0; margin: 15px 0 3px; list-style: none; }
+    #presentation-history button { padding: 6px 10px; min-height: 42px; border-color: #d0dbcf; border-radius: 8px; background: #f7f9f3; font-size: .79rem; font-variant-numeric: tabular-nums; }
+    #presentation-history button[aria-current="step"] { color: white; background: #285f4b; border-color: #285f4b; }
+    #presentation-history button.ahead { border-style: dashed; color: #526c62; background: white; }
+    .map-scroll, .table-scroll { max-width: 100%; overflow-x: auto; overscroll-behavior-x: contain; border: 1px solid #dae4d7; border-radius: 9px; }
+    .map-scroll:focus-visible, .table-scroll:focus-visible { outline-offset: -3px; }
+    .map-scroll { background: #fafcf7; }
+    #clock-graph svg { display: block; width: 100%; min-width: 790px; }
+    .process-lane { fill: #f1f5ec; stroke: #e2e9dc; stroke-width: 1; }
+    .lane-label { font-size: 13px; font-weight: 750; fill: #4d6c58; }
+    .graph-edge { stroke: #657b76; stroke-width: 2; fill: none; }
+    .graph-edge.message { stroke-dasharray: 6 4; }
+    .graph-edge.witness { stroke: #1d568d; stroke-width: 3.2; }
+    .graph-event circle { fill: white; stroke: #9fb2a5; stroke-width: 1.8; }
+    .graph-event.recorded circle { fill: #dbeccd; stroke: #39734e; }
+    .graph-event.enabled circle { fill: #fff2c7; stroke: #96732a; stroke-dasharray: 3 2; }
+    .graph-event.inspected circle { stroke: #a84b23; stroke-width: 3.6; }
+    .event-id { font-size: 13px; font-weight: 750; fill: #163d33; }
+    .event-clock { font-size: 11px; font-family: ui-monospace, SFMono-Regular, Consolas, monospace; fill: #254e3d; }
+    .message-label { font-size: 11px; font-weight: 700; fill: #42626b; paint-order: stroke; stroke: #fafcf7; stroke-width: 5px; stroke-linejoin: round; }
+    .legend { display: flex; flex-wrap: wrap; gap: 7px 18px; margin: 13px 0 9px; padding: 0; list-style: none; color: #52695d; font-size: .76rem; }
+    .legend .swatch { display: inline-block; width: 11px; height: 11px; margin-right: 5px; border: 1px solid #789882; border-radius: 50%; vertical-align: -1px; }
+    .legend .recorded { background: #dbeccd; }
+    .legend .enabled { background: #fff2c7; border-color: #96732a; border-style: dashed; }
+    .legend .inspected { border: 3px solid #a84b23; }
+    .legend .witness { background: #1d568d; border-color: #1d568d; border-radius: 2px; }
+    figure { margin: 0; }
+    figcaption { margin: 8px 0 0; color: #536b60; font-size: .78rem; }
+    .readout-grid { display: grid; grid-template-columns: minmax(0, 1.18fr) minmax(0, 1fr); gap: 20px; margin-top: 20px; }
+    .readout-grid .panel { margin-bottom: 20px; }
+    table { width: 100%; border-collapse: collapse; font-size: .82rem; }
+    th, td { text-align: left; vertical-align: top; padding: 10px 12px; border-bottom: 1px solid #dde5d9; }
+    thead th { color: #536d5c; background: #f5f8ef; font-size: .76rem; font-weight: 700; }
+    tbody tr:last-child th, tbody tr:last-child td { border-bottom: 0; }
+    tbody th { font-weight: 700; }
+    caption { text-align: left; padding: 10px 12px; background: #fafcf7; color: #4f685a; font-size: .78rem; }
+    .clock-table { min-width: 580px; }
+    .message-table { min-width: 480px; }
+    .event-table { min-width: 600px; }
+    .component-table { min-width: 260px; }
+    .edge-table { min-width: 430px; }
+    .current-row { background: #fff7e5; }
+    .equation { margin: 11px 0; padding: 12px 14px; border-left: 3px solid #528062; background: #eff5e8; border-radius: 0 8px 8px 0; font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: .89rem; overflow-wrap: anywhere; }
+    .empty { padding: 17px; color: #546e60; background: #f6f9f1; border: 1px dashed #bdcdb7; border-radius: 9px; }
+    fieldset { min-width: 0; margin: 18px 0; padding: 0; border: 0; }
+    legend { padding: 0; margin-bottom: 8px; color: #526b5e; font-size: .83rem; font-weight: 650; }
+    .pair-controls { display: grid; grid-template-columns: minmax(120px, 190px) minmax(120px, 190px) minmax(180px, 1fr); gap: 14px; align-items: end; }
+    .pair-controls label { display: block; margin-bottom: 5px; font-size: .83rem; font-weight: 700; }
+    .examples { display: flex; flex-wrap: wrap; gap: 7px; }
+    .examples button { font-size: .82rem; background: white; }
+    .relation { display: inline-block; margin: 5px 0 7px; padding: 9px 14px; border-radius: 8px; background: #e6f0df; color: #285438; font-size: 1.16rem; font-weight: 750; }
+    .relation.concurrent { background: #edf0fa; color: #374b79; }
+    .relation.same { background: #f2efe7; color: #63523f; }
+    .comparison-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 22px; margin-top: 18px; }
+    .comparison-grid > div { min-width: 0; }
+    .subpanel { padding: 17px; border: 1px solid #dce5d6; border-radius: 10px; background: #fafcf7; }
+    .total-order { margin-top: 22px; padding-top: 19px; border-top: 1px solid #dbe4d6; }
+    .tie-label { display: block; max-width: 330px; margin-bottom: 10px; color: #476558; font-size: .84rem; font-weight: 650; }
+    .tie-label select { margin-top: 5px; }
+    #scalar-order { display: flex; flex-wrap: wrap; gap: 7px; margin: 13px 0; padding: 0; list-style-position: inside; }
+    #scalar-order li { padding: 7px 10px; border: 1px solid #d4dfca; border-radius: 7px; background: #eff5e8; font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: .82rem; }
+    .learning-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .learning-grid > section { min-width: 0; }
+    .download-controls { display: flex; flex-wrap: wrap; gap: 9px; margin: 18px 0 10px; }
+    .download-controls button { color: white; background: #285f4b; border-color: #285f4b; }
+    .download-controls button:hover:not(:disabled) { background: #1c4c39; }
+    details { margin: 16px 0 0; }
+    summary { padding: 9px 0; cursor: pointer; font-weight: 650; }
+    details ul { padding-left: 22px; }
+    details li { margin: 8px 0; }
+    .model-note { padding: 14px 16px; border-left: 3px solid #4f7965; background: #f0f5eb; border-radius: 0 9px 9px 0; }
+    .model-note p:last-child { margin-bottom: 0; }
+    footer { padding-top: 6px; padding-bottom: 35px; color: #536b5f; font-size: .8rem; }
+    footer p { max-width: 1050px; }
+    footer ul { display: flex; flex-wrap: wrap; gap: 9px 24px; margin: 8px 0; padding-left: 18px; }
+    noscript p { margin: 0 24px 20px; padding: 18px; border: 1px solid #bc7b5d; background: #fff2e7; }
+    @media (max-width: 980px) {
+      .workbench { grid-template-columns: 270px minmax(0, 1fr); gap: 16px; }
+      .panel { padding: 18px; }
+      .readout-grid { grid-template-columns: minmax(0, 1fr); gap: 0; }
+      .pair-controls { grid-template-columns: 1fr 1fr; }
+      .pair-controls .examples { grid-column: 1 / -1; }
+    }
+    @media (max-width: 730px) {
+      header, main, footer { padding-inline: 15px; }
+      header { padding-top: 24px; }
+      .sibling-nav { margin-left: 0; width: 100%; }
+      .workbench, .comparison-grid, .learning-grid { grid-template-columns: minmax(0, 1fr); }
+      .workbench { gap: 20px; }
+      .process-card { padding: 13px; }
+      .process-card .help { min-height: 0; }
+      .panel { border-radius: 12px; padding: 18px; }
+      .readout-grid { margin-top: 20px; }
+      .comparison-grid { gap: 15px; }
+      .learning-grid { gap: 0; }
+      .pair-controls { gap: 10px; }
+      .navigation button { flex: 1 1 auto; }
+      h1 { max-width: 600px; }
+    }
+    @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+    @media print {
+      :root { background: white; color: black; }
+      header, main, footer { width: 100%; padding-inline: 0; }
+      .workbench, .readout-grid, .comparison-grid, .learning-grid { display: block; }
+      .panel { border: 0; box-shadow: none; padding: 12px 0; break-inside: avoid; }
+      .skip-link, button, input, select, .sibling-nav, .download-controls, #clock-status { display: none !important; }
+      .table-scroll, .map-scroll { overflow: visible; }
+      #clock-graph svg, table { min-width: 0 !important; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#step-panel">Skip to event controls</a>
+  <header>
+    <div class="brand">
+      <span class="brand-name">RecallWeave</span>
+      <span class="badge">Distributed systems · interactive companion</span>
+      <a class="sibling-nav" href="../explore.html">Course directory · sibling page</a>
+    </div>
+    <h1>Logical clocks,<br>step by step.</h1>
+    <p class="lede">Three processes. Three messages. Choose what happens next, watch the clocks change, and follow the difference between an ordered label and a causal path.</p>
+    <div class="rule-ribbon">
+      <span><strong>10 events</strong> in one fixed graph</span>
+      <span><strong>L</strong> is a Lamport label</span>
+      <span><strong>V = [A, B, C]</strong> is a vector clock</span>
+      <span><strong>All clocks start at zero</strong></span>
+    </div>
+  </header>
+  <noscript><p>This explorer needs JavaScript for event calculations and its embedded downloads. Within the repository folder layout, you can still <a href="logical-clocks.md">read the original guide</a>.</p></noscript>
+  <main>
+    <div class="workbench">
+      <section class="panel step-panel" id="step-panel" aria-labelledby="choose-heading" tabindex="-1">
+        <p class="eyebrow">01 · Choose an event</p>
+        <h2 id="choose-heading">Advance one process</h2>
+        <p class="help">Choose any enabled next event. A receive waits for its matching send; choosing an event is a presentation step, not a physical-time measurement.</p>
+        <div class="process-card">
+          <div class="process-heading"><h3><span class="process-mark">A</span> Process A</h3></div>
+          <dl class="clock-pair"><div><dt>Lamport</dt><dd id="lamport-A">0</dd></div><div><dt>Vector [A, B, C]</dt><dd id="vector-A">[0, 0, 0]</dd></div></dl>
+          <button type="button" id="step-A" aria-describedby="waiting-A">Record A1 · local</button>
+          <p class="help" id="waiting-A">This is the next event in its process.</p>
+        </div>
+        <div class="process-card">
+          <div class="process-heading"><h3><span class="process-mark">B</span> Process B</h3></div>
+          <dl class="clock-pair"><div><dt>Lamport</dt><dd id="lamport-B">0</dd></div><div><dt>Vector [A, B, C]</dt><dd id="vector-B">[0, 0, 0]</dd></div></dl>
+          <button type="button" id="step-B" aria-describedby="waiting-B">Record B1 · local</button>
+          <p class="help" id="waiting-B">This is the next event in its process.</p>
+        </div>
+        <div class="process-card">
+          <div class="process-heading"><h3><span class="process-mark">C</span> Process C</h3></div>
+          <dl class="clock-pair"><div><dt>Lamport</dt><dd id="lamport-C">0</dd></div><div><dt>Vector [A, B, C]</dt><dd id="vector-C">[0, 0, 0]</dd></div></dl>
+          <button type="button" id="step-C" aria-describedby="waiting-C">Record C1 · local</button>
+          <p class="help" id="waiting-C">This is the next event in its process.</p>
+        </div>
+        <p class="step-foot small">Reset to try a different legal presentation. The fixed events receive the same timestamps in every legal presentation.</p>
+        <button type="button" id="reset-presentation">Reset presentation</button>
+        <p id="clock-error" class="error" role="alert" hidden></p>
+        <p id="clock-status" class="status" role="status" aria-live="polite">Ready. Choose A1, B1 or C1 to begin.</p>
+      </section>
+      <div class="stage">
+        <section class="panel" aria-labelledby="history-heading">
+          <div class="result-heading">
+            <p class="eyebrow" id="history-heading">02 · Inspect a snapshot</p>
+            <span id="snapshot-mode">Latest snapshot</span>
+          </div>
+          <div class="result-heading"><h2 id="snapshot-label">Before any event</h2><output id="snapshot-count" for="snapshot-slider">Snapshot 0 of 0</output></div>
+          <div class="progress" aria-hidden="true"><div id="progress-fill"></div></div>
+          <p id="progress-label">0 of 10 events recorded</p>
+          <div class="navigation">
+            <button type="button" id="previous-step" disabled>← Previous snapshot</button>
+            <button type="button" id="next-step" disabled>Next snapshot →</button>
+            <button type="button" id="return-latest" hidden disabled>Return to latest</button>
+          </div>
+          <label class="slider-label" for="snapshot-slider">Inspect saved snapshots</label>
+          <input id="snapshot-slider" type="range" min="0" max="0" step="1" value="0" disabled aria-describedby="history-note">
+          <p class="help" id="history-note">Choose any enabled event. The other process clocks do not advance with your click.</p>
+          <ol id="presentation-history" aria-label="Saved presentation snapshots"></ol>
+        </section>
+        <section class="panel" aria-labelledby="graph-heading">
+          <div class="result-heading"><h2 id="graph-heading">Follow the arrows</h2><span class="small">The same graph at every step</span></div>
+          <figure>
+            <div class="map-scroll" tabindex="0" role="region" aria-label="Scrollable fixed event graph"><div id="clock-graph"></div></div>
+            <ul class="legend" aria-label="Graph legend">
+              <li><span class="swatch recorded"></span>Recorded</li>
+              <li><span class="swatch enabled"></span>Enabled in this snapshot</li>
+              <li><span class="swatch inspected"></span>Just inspected</li>
+              <li><span class="swatch witness"></span>Selected causal path</li>
+            </ul>
+            <figcaption>Solid arrows show consecutive events in a process; dashed arrows carry messages. Horizontal spacing is a drawing choice, not physical time. Scroll the diagram if needed; the tables below give exact text alternatives.</figcaption>
+          </figure>
+          <details>
+            <summary>Read every edge as text</summary>
+            <div class="table-scroll" tabindex="0" role="region" aria-label="Exact graph edges">
+              <table class="edge-table"><thead><tr><th scope="col">Kind</th><th scope="col">Directed edges</th></tr></thead><tbody>
+                <tr><th scope="row">Process A</th><td>A1 → A2; A2 → A3; A3 → A4</td></tr>
+                <tr><th scope="row">Process B</th><td>B1 → B2; B2 → B3</td></tr>
+                <tr><th scope="row">Process C</th><td>C1 → C2; C2 → C3</td></tr>
+                <tr><th scope="row">Message mAB</th><td>A2 → B2</td></tr>
+                <tr><th scope="row">Message mBC</th><td>B3 → C2</td></tr>
+                <tr><th scope="row">Message mCA</th><td>C3 → A4</td></tr>
+              </tbody></table>
+            </div>
+          </details>
+        </section>
+      </div>
+    </div>
+
+    <div class="readout-grid">
+      <section class="panel" aria-labelledby="calculation-heading">
+        <p class="eyebrow">03 · Inspect the calculation</p>
+        <h2 id="calculation-heading">One event, one increment</h2>
+        <h3 id="update-title">The first increment is yours</h3>
+        <p class="empty" id="update-empty">Record an event to see its complete before, incoming, merged and after values. Local and send events increment their own clocks once. Receives merge first.</p>
+        <div id="update-detail" hidden>
+          <div class="table-scroll" tabindex="0" role="region" aria-label="Exact clock update">
+            <table class="clock-table"><caption>Vector components are always [A, B, C].</caption><thead><tr><th scope="col">Stage</th><th scope="col">L</th><th scope="col">V</th><th scope="col">What happens</th></tr></thead><tbody id="update-rows"></tbody></table>
+          </div>
+          <p class="small">Scalar calculation</p><p class="equation" id="scalar-equation"></p>
+          <p class="small">Vector calculation</p><p class="equation" id="vector-equation"></p>
+        </div>
+      </section>
+      <section class="panel" aria-labelledby="messages-heading">
+        <p class="eyebrow">Message state · selected snapshot</p>
+        <h2 id="messages-heading">A send keeps its own clocks</h2>
+        <p class="help">The message carries the clock values at its send event. Its payload stays fixed even if the sender later advances. Delivered messages retain their payload here for inspection.</p>
+        <div class="table-scroll" tabindex="0" role="region" aria-label="Message status and clock payloads">
+          <table class="message-table"><thead><tr><th scope="col">Message</th><th scope="col">Route</th><th scope="col">State</th><th scope="col">L</th><th scope="col">V [A, B, C]</th></tr></thead><tbody id="message-rows"></tbody></table>
+        </div>
+      </section>
+    </div>
+
+    <section class="panel" aria-labelledby="comparison-heading">
+      <p class="eyebrow">04 · Compare two recorded events</p>
+      <h2 id="comparison-heading">A label is not a causal path</h2>
+      <p class="help">Only events recorded in the selected snapshot are available. A directed path establishes happens-before. Complete componentwise vector order agrees with that path relation in this fixed model.</p>
+      <fieldset>
+        <legend>Choose the left and right event</legend>
+        <div class="pair-controls">
+          <div><label for="compare-left">Left event</label><select id="compare-left" disabled><option value="">Record an event first</option></select></div>
+          <div><label for="compare-right">Right event</label><select id="compare-right" disabled><option value="">Record an event first</option></select></div>
+          <div class="examples"><button type="button" id="example-unequal" disabled>Try A3 vs C3</button><button type="button" id="example-tie" disabled>Try A3 vs B2</button></div>
+        </div>
+      </fieldset>
+      <p class="empty" id="compare-empty">Record an event to start comparing. Record A3 and C3 to inspect a concurrent pair with unequal Lamport labels; A3 and B2 expose a scalar tie.</p>
+      <div id="compare-detail" hidden>
+        <p class="relation" id="relation-result"></p>
+        <p id="path-result"></p>
+        <div class="comparison-grid">
+          <div class="subpanel">
+            <h3>Lamport labels</h3>
+            <p class="equation" id="scalar-comparison"></p>
+            <p class="small" id="scalar-meaning"></p>
+            <p class="small"><strong>One-way implication:</strong> a happens-before path implies a smaller scalar label. A smaller scalar label alone does not establish a path.</p>
+          </div>
+          <div class="subpanel">
+            <h3>Compare all three vector components</h3>
+            <div class="table-scroll" tabindex="0" role="region" aria-label="Componentwise vector comparison">
+              <table class="component-table"><thead><tr><th scope="col">Component</th><th scope="col" id="vector-left-label">Left</th><th scope="col">Relation</th><th scope="col" id="vector-right-label">Right</th></tr></thead><tbody id="component-rows"></tbody></table>
+            </div>
+            <p class="small" id="vector-meaning"></p>
+            <p class="small">Strict vector order requires every component to be no larger and at least one to be smaller. Equal components are allowed; identical events are not concurrent.</p>
+          </div>
+        </div>
+      </div>
+      <div class="total-order">
+        <h3>Choose a scalar tie convention</h3>
+        <p class="help">Sort by Lamport label, then use the chosen process order when labels tie. This creates a total display order. It does not add a causal edge or change any clock.</p>
+        <label class="tie-label" for="tie-order">Process order for equal Lamport labels
+          <select id="tie-order"><option value="ABC">A before B before C</option><option value="CBA">C before B before A</option></select>
+        </label>
+        <p class="empty" id="order-empty">The list appears as events are recorded.</p>
+        <ol id="scalar-order" aria-label="Scalar total order of recorded events"></ol>
+        <p class="small" id="tie-effect"></p>
+      </div>
+    </section>
+
+    <section class="panel" aria-labelledby="record-heading">
+      <div class="result-heading"><h2 id="record-heading">Exact event record</h2><span class="small">Selected snapshot only</span></div>
+      <p class="help">Rows follow your chosen presentation. “Presented at” is the click order; it is not a causal relation or a wall-clock timestamp. Highlighting marks the event just inspected.</p>
+      <p class="empty" id="events-empty">No events are recorded in this snapshot.</p>
+      <div class="table-scroll" tabindex="0" role="region" aria-label="Recorded event clock table">
+        <table class="event-table"><thead><tr><th scope="col">Event</th><th scope="col">Action</th><th scope="col">L</th><th scope="col">V [A, B, C]</th><th scope="col">Presented at</th></tr></thead><tbody id="event-rows"></tbody></table>
+      </div>
+    </section>
+
+    <div class="learning-grid">
+      <section class="panel" aria-labelledby="study-heading">
+        <p class="eyebrow">Continue the lesson</p>
+        <h2 id="study-heading">Keep the course and worked guide</h2>
+        <p>The original 16-question course connects clock calculations, causal paths, concurrency and transfer cases. Both downloads below contain the complete original text, answers, source references and attribution.</p>
+        <div class="download-controls">
+          <button type="button" id="download-course">Download course (.json)</button>
+          <button type="button" id="download-guide">Download worked guide (.md)</button>
+        </div>
+        <p class="status" id="download-status" role="status" aria-live="polite"></p>
+        <p class="small"><a href="../demo.html" target="_blank" rel="noopener">Open the learner · sibling page</a>. Choose the downloaded JSON file, inspect its preview, then select <strong>Start this deck</strong>. This link requires the repository folder layout.</p>
+        <p class="small">The explorer and its embedded downloads work when this HTML file is saved on its own. Sibling links require their neighboring files. The existing RecallWeave offline ZIP contains the learner and courses; it does not include companion explorers.</p>
+      </section>
+      <section class="panel" aria-labelledby="model-heading">
+        <p class="eyebrow">Read the assumptions</p>
+        <h2 id="model-heading">A complete model, not a clock service</h2>
+        <div class="model-note">
+          <p class="small">This is the guide’s fixed ten-event graph with exactly the program-order and message edges shown above. All events and messages are known. There are no hidden communications, reused process identities or clock resets within a presentation.</p>
+          <p class="small">“Concurrent” means no happens-before path in either direction in this complete model. Missing observations in a real system would require an uncertainty assessment; this explorer does not infer concurrency from an incomplete log.</p>
+        </div>
+        <details>
+          <summary>Clock rules and useful checks</summary>
+          <ul class="small">
+            <li>Local and send events increment the scalar and their own vector component once. A send then attaches those recorded clocks to its message.</li>
+            <li>A receive takes the maximum local/message scalar and each component maximum, then increments its own scalar and vector component once.</li>
+            <li>At A4, inspect how A’s newer local component survives the merge with the incoming message.</li>
+            <li>Finish one presentation, note the event table, then reset and choose another legal order. Each fixed event keeps its clock labels.</li>
+            <li>Reset starts a new presentation. It does not introduce a reset event into the graph.</li>
+          </ul>
+        </details>
+        <p class="small">No wall-clock accuracy, synchronization, authentication, conflict-resolution policy or learning-effect claim is made. <a href="logical-clocks.md">Read the original guide · sibling file</a> for the mathematical scope and references.</p>
+      </section>
+    </div>
+  </main>
+  <footer>
+    <p>Original lesson text and the ten-event example: HAMON contributors for RecallWeave (2026), <a href="https://creativecommons.org/licenses/by/4.0/" rel="noreferrer">CC BY 4.0</a>. This companion is an additional AI-assisted HAMON contribution, estate-6e5752b49b6f. Original course and guide downloads retain their complete attribution. The source papers supply the definitions and algorithms and remain separately licensed.</p>
+    <ul>
+      <li><a href="https://lamport.azurewebsites.net/pubs/time-clocks.pdf" rel="noreferrer">Leslie Lamport · Time, Clocks, and the Ordering of Events in a Distributed System (1978)</a></li>
+      <li><a href="https://vs.inf.ethz.ch/publ/papers/VirtTimeGlobStates.pdf" rel="noreferrer">Friedemann Mattern · Virtual Time and Global States of Distributed Systems (1989)</a></li>
+    </ul>
+  </footer>
+  <script>
+const embeddedCourse = @@LOGICAL_CLOCKS_COURSE@@;
+const embeddedGuide = @@LOGICAL_CLOCKS_GUIDE@@;
+@@LOGICAL_CLOCKS_SCRIPT@@
+  </script>
+</body>
+</html>
