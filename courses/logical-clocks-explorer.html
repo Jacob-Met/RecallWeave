@@ -1,0 +1,1114 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta name="description" content="Choose events, inspect Lamport and vector clock updates, and trace causality in a fixed three-process graph.">
+  <link rel="icon" href="data:,">
+  <title>Logical clocks, step by step · RecallWeave</title>
+  <style>
+    :root { color: #193d36; background: #f2f5ee; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-synthesis: none; line-height: 1.55; }
+    * { box-sizing: border-box; }
+    body { margin: 0; }
+    [hidden] { display: none !important; }
+    a { color: #155c78; text-underline-offset: .18em; }
+    button, input, select { font: inherit; }
+    button, select { min-height: 44px; }
+    button { padding: 10px 14px; border: 1px solid #89a899; border-radius: 9px; color: #193d36; background: #f7faf3; font-weight: 650; cursor: pointer; touch-action: manipulation; }
+    button:hover:not(:disabled) { background: #e2ecde; border-color: #537e66; }
+    button:disabled { color: #68776f; background: #eff2ec; border-color: #cdd7cd; cursor: default; }
+    select { width: 100%; padding: 9px 12px; border: 1px solid #89a899; border-radius: 8px; color: #193d36; background: white; }
+    :focus-visible { outline: 3px solid #b24f20; outline-offset: 4px; }
+    .skip-link { position: absolute; top: -80px; left: 18px; z-index: 2; padding: 12px; background: white; }
+    .skip-link:focus { top: 12px; }
+    header, main, footer { width: min(1320px, 100%); margin-inline: auto; padding-inline: 24px; }
+    header { padding-top: 34px; padding-bottom: 25px; }
+    .brand { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; font-weight: 750; }
+    .brand-name { font-size: 1rem; letter-spacing: -.02em; }
+    .badge { padding: 4px 10px; border: 1px solid #b6c9b5; border-radius: 999px; background: #e7efdf; font-size: .74rem; letter-spacing: .08em; text-transform: uppercase; }
+    .sibling-nav { margin-left: auto; font-size: .85rem; font-weight: 500; }
+    h1 { max-width: 860px; margin: 23px 0 12px; font-size: clamp(2.2rem, 4.7vw, 3.65rem); line-height: 1.08; letter-spacing: -.035em; font-weight: 760; }
+    .lede { max-width: 830px; color: #476258; font-size: 1.12rem; }
+    .rule-ribbon { display: flex; flex-wrap: wrap; gap: 8px 24px; padding-top: 9px; color: #476258; font-size: .84rem; }
+    .rule-ribbon strong { color: #193d36; }
+    main { padding-bottom: 24px; }
+    .workbench { display: grid; grid-template-columns: 310px minmax(0, 1fr); gap: 20px; align-items: start; }
+    .stage { display: grid; gap: 20px; min-width: 0; }
+    .panel { min-width: 0; margin-bottom: 20px; padding: 23px; border: 1px solid #cddbcf; border-radius: 15px; background: #fff; box-shadow: 0 3px 15px #213b2b05; }
+    .workbench .panel { margin-bottom: 0; }
+    h2 { margin: 0 0 10px; font-size: 1.32rem; line-height: 1.28; letter-spacing: -.01em; }
+    h3 { margin: 0 0 9px; font-size: 1rem; line-height: 1.35; }
+    p { margin: 9px 0 14px; }
+    .eyebrow { margin: 0 0 9px; color: #54715e; font-size: .72rem; font-weight: 760; text-transform: uppercase; letter-spacing: .1em; }
+    .small, .help { color: #4c655a; font-size: .85rem; }
+    .help { margin: 6px 0 13px; }
+    .muted { color: #53695f; }
+    .step-panel { border-top: 5px solid #2f7054; }
+    .process-card { margin-top: 14px; padding: 15px; background: #f4f8ef; border: 1px solid #d0dfc9; border-radius: 11px; }
+    .process-heading { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+    .process-heading h3 { margin: 0; }
+    .process-mark { display: inline-grid; place-items: center; width: 29px; height: 29px; margin-right: 5px; border-radius: 8px; color: white; background: #346750; }
+    .clock-pair { display: flex; flex-wrap: wrap; gap: 7px 20px; margin: 12px 0; }
+    .clock-pair div { min-width: 0; }
+    .clock-pair dt { font-size: .7rem; text-transform: uppercase; letter-spacing: .07em; color: #57705f; }
+    .clock-pair dd { margin: 3px 0 0; font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: 1.15rem; font-weight: 700; }
+    .process-card button { width: 100%; text-align: left; background: white; }
+    .process-card .help { min-height: 2.6em; margin-bottom: 0; font-size: .78rem; }
+    .step-foot { margin: 18px 0 0; }
+    #reset-presentation { width: 100%; margin-top: 9px; background: #fff; }
+    .status { min-height: 1.5em; margin: 12px 0 0; color: #426455; font-size: .84rem; overflow-wrap: anywhere; }
+    .error { padding: 12px; background: #fff2eb; border-left: 4px solid #a74828; color: #8a321d; }
+    .result-heading { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 8px 20px; }
+    .result-heading p { margin: 0; }
+    #snapshot-mode { color: #47705b; font-size: .78rem; font-weight: 700; }
+    #snapshot-label { font-size: 1.4rem; margin-top: 5px; }
+    #snapshot-count { font-variant-numeric: tabular-nums; }
+    .progress { height: 7px; overflow: hidden; margin: 12px 0 6px; border-radius: 99px; background: #e4ece0; }
+    #progress-fill { height: 100%; width: 0; background: #3d7a59; }
+    #progress-label { margin: 0 0 15px; font-size: .76rem; color: #58705f; }
+    .navigation { display: flex; flex-wrap: wrap; gap: 9px; margin-bottom: 12px; }
+    #return-latest { background: #205f49; border-color: #205f49; color: white; }
+    .slider-label { display: block; margin-bottom: 2px; color: #4c655a; font-size: .85rem; font-weight: 650; }
+    input[type="range"] { display: block; width: 100%; min-height: 36px; accent-color: #2f7054; cursor: pointer; }
+    #presentation-history { display: flex; flex-wrap: wrap; gap: 6px; padding: 0; margin: 15px 0 3px; list-style: none; }
+    #presentation-history button { padding: 6px 10px; min-height: 42px; border-color: #d0dbcf; border-radius: 8px; background: #f7f9f3; font-size: .79rem; font-variant-numeric: tabular-nums; }
+    #presentation-history button[aria-current="step"] { color: white; background: #285f4b; border-color: #285f4b; }
+    #presentation-history button.ahead { border-style: dashed; color: #526c62; background: white; }
+    .map-scroll, .table-scroll { max-width: 100%; overflow-x: auto; overscroll-behavior-x: contain; border: 1px solid #dae4d7; border-radius: 9px; }
+    .map-scroll:focus-visible, .table-scroll:focus-visible { outline-offset: -3px; }
+    .map-scroll { background: #fafcf7; }
+    #clock-graph svg { display: block; width: 100%; min-width: 790px; }
+    .process-lane { fill: #f1f5ec; stroke: #e2e9dc; stroke-width: 1; }
+    .lane-label { font-size: 13px; font-weight: 750; fill: #4d6c58; }
+    .graph-edge { stroke: #657b76; stroke-width: 2; fill: none; }
+    .graph-edge.message { stroke-dasharray: 6 4; }
+    .graph-edge.witness { stroke: #1d568d; stroke-width: 3.2; }
+    .graph-event circle { fill: white; stroke: #9fb2a5; stroke-width: 1.8; }
+    .graph-event.recorded circle { fill: #dbeccd; stroke: #39734e; }
+    .graph-event.enabled circle { fill: #fff2c7; stroke: #96732a; stroke-dasharray: 3 2; }
+    .graph-event.inspected circle { stroke: #a84b23; stroke-width: 3.6; }
+    .event-id { font-size: 13px; font-weight: 750; fill: #163d33; }
+    .event-clock { font-size: 11px; font-family: ui-monospace, SFMono-Regular, Consolas, monospace; fill: #254e3d; }
+    .message-label { font-size: 11px; font-weight: 700; fill: #42626b; paint-order: stroke; stroke: #fafcf7; stroke-width: 5px; stroke-linejoin: round; }
+    .legend { display: flex; flex-wrap: wrap; gap: 7px 18px; margin: 13px 0 9px; padding: 0; list-style: none; color: #52695d; font-size: .76rem; }
+    .legend .swatch { display: inline-block; width: 11px; height: 11px; margin-right: 5px; border: 1px solid #789882; border-radius: 50%; vertical-align: -1px; }
+    .legend .recorded { background: #dbeccd; }
+    .legend .enabled { background: #fff2c7; border-color: #96732a; border-style: dashed; }
+    .legend .inspected { border: 3px solid #a84b23; }
+    .legend .witness { background: #1d568d; border-color: #1d568d; border-radius: 2px; }
+    figure { margin: 0; }
+    figcaption { margin: 8px 0 0; color: #536b60; font-size: .78rem; }
+    .readout-grid { display: grid; grid-template-columns: minmax(0, 1.18fr) minmax(0, 1fr); gap: 20px; margin-top: 20px; }
+    .readout-grid .panel { margin-bottom: 20px; }
+    table { width: 100%; border-collapse: collapse; font-size: .82rem; }
+    th, td { text-align: left; vertical-align: top; padding: 10px 12px; border-bottom: 1px solid #dde5d9; }
+    thead th { color: #536d5c; background: #f5f8ef; font-size: .76rem; font-weight: 700; }
+    tbody tr:last-child th, tbody tr:last-child td { border-bottom: 0; }
+    tbody th { font-weight: 700; }
+    caption { text-align: left; padding: 10px 12px; background: #fafcf7; color: #4f685a; font-size: .78rem; }
+    .clock-table { min-width: 580px; }
+    .message-table { min-width: 480px; }
+    .event-table { min-width: 600px; }
+    .component-table { min-width: 260px; }
+    .edge-table { min-width: 430px; }
+    .current-row { background: #fff7e5; }
+    .equation { margin: 11px 0; padding: 12px 14px; border-left: 3px solid #528062; background: #eff5e8; border-radius: 0 8px 8px 0; font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: .89rem; overflow-wrap: anywhere; }
+    .empty { padding: 17px; color: #546e60; background: #f6f9f1; border: 1px dashed #bdcdb7; border-radius: 9px; }
+    fieldset { min-width: 0; margin: 18px 0; padding: 0; border: 0; }
+    legend { padding: 0; margin-bottom: 8px; color: #526b5e; font-size: .83rem; font-weight: 650; }
+    .pair-controls { display: grid; grid-template-columns: minmax(120px, 190px) minmax(120px, 190px) minmax(180px, 1fr); gap: 14px; align-items: end; }
+    .pair-controls label { display: block; margin-bottom: 5px; font-size: .83rem; font-weight: 700; }
+    .examples { display: flex; flex-wrap: wrap; gap: 7px; }
+    .examples button { font-size: .82rem; background: white; }
+    .relation { display: inline-block; margin: 5px 0 7px; padding: 9px 14px; border-radius: 8px; background: #e6f0df; color: #285438; font-size: 1.16rem; font-weight: 750; }
+    .relation.concurrent { background: #edf0fa; color: #374b79; }
+    .relation.same { background: #f2efe7; color: #63523f; }
+    .comparison-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 22px; margin-top: 18px; }
+    .comparison-grid > div { min-width: 0; }
+    .subpanel { padding: 17px; border: 1px solid #dce5d6; border-radius: 10px; background: #fafcf7; }
+    .total-order { margin-top: 22px; padding-top: 19px; border-top: 1px solid #dbe4d6; }
+    .tie-label { display: block; max-width: 330px; margin-bottom: 10px; color: #476558; font-size: .84rem; font-weight: 650; }
+    .tie-label select { margin-top: 5px; }
+    #scalar-order { display: flex; flex-wrap: wrap; gap: 7px; margin: 13px 0; padding: 0; list-style-position: inside; }
+    #scalar-order li { padding: 7px 10px; border: 1px solid #d4dfca; border-radius: 7px; background: #eff5e8; font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: .82rem; }
+    .learning-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .learning-grid > section { min-width: 0; }
+    .download-controls { display: flex; flex-wrap: wrap; gap: 9px; margin: 18px 0 10px; }
+    .download-controls button { color: white; background: #285f4b; border-color: #285f4b; }
+    .download-controls button:hover:not(:disabled) { background: #1c4c39; }
+    details { margin: 16px 0 0; }
+    summary { padding: 9px 0; cursor: pointer; font-weight: 650; }
+    details ul { padding-left: 22px; }
+    details li { margin: 8px 0; }
+    .model-note { padding: 14px 16px; border-left: 3px solid #4f7965; background: #f0f5eb; border-radius: 0 9px 9px 0; }
+    .model-note p:last-child { margin-bottom: 0; }
+    footer { padding-top: 6px; padding-bottom: 35px; color: #536b5f; font-size: .8rem; }
+    footer p { max-width: 1050px; }
+    footer ul { display: flex; flex-wrap: wrap; gap: 9px 24px; margin: 8px 0; padding-left: 18px; }
+    noscript p { margin: 0 24px 20px; padding: 18px; border: 1px solid #bc7b5d; background: #fff2e7; }
+    @media (max-width: 980px) {
+      .workbench { grid-template-columns: 270px minmax(0, 1fr); gap: 16px; }
+      .panel { padding: 18px; }
+      .readout-grid { grid-template-columns: minmax(0, 1fr); gap: 0; }
+      .pair-controls { grid-template-columns: 1fr 1fr; }
+      .pair-controls .examples { grid-column: 1 / -1; }
+    }
+    @media (max-width: 730px) {
+      header, main, footer { padding-inline: 15px; }
+      header { padding-top: 24px; }
+      .sibling-nav { margin-left: 0; width: 100%; }
+      .workbench, .comparison-grid, .learning-grid { grid-template-columns: minmax(0, 1fr); }
+      .workbench { gap: 20px; }
+      .process-card { padding: 13px; }
+      .process-card .help { min-height: 0; }
+      .panel { border-radius: 12px; padding: 18px; }
+      .readout-grid { margin-top: 20px; }
+      .comparison-grid { gap: 15px; }
+      .learning-grid { gap: 0; }
+      .pair-controls { gap: 10px; }
+      .navigation button { flex: 1 1 auto; }
+      h1 { max-width: 600px; }
+    }
+    @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+    @media print {
+      :root { background: white; color: black; }
+      header, main, footer { width: 100%; padding-inline: 0; }
+      .workbench, .readout-grid, .comparison-grid, .learning-grid { display: block; }
+      .panel { border: 0; box-shadow: none; padding: 12px 0; break-inside: avoid; }
+      .skip-link, button, input, select, .sibling-nav, .download-controls, #clock-status { display: none !important; }
+      .table-scroll, .map-scroll { overflow: visible; }
+      #clock-graph svg, table { min-width: 0 !important; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#step-panel">Skip to event controls</a>
+  <header>
+    <div class="brand">
+      <span class="brand-name">RecallWeave</span>
+      <span class="badge">Distributed systems · interactive companion</span>
+      <a class="sibling-nav" href="../explore.html">Course directory · sibling page</a>
+    </div>
+    <h1>Logical clocks,<br>step by step.</h1>
+    <p class="lede">Three processes. Three messages. Choose what happens next, watch the clocks change, and follow the difference between an ordered label and a causal path.</p>
+    <div class="rule-ribbon">
+      <span><strong>10 events</strong> in one fixed graph</span>
+      <span><strong>L</strong> is a Lamport label</span>
+      <span><strong>V = [A, B, C]</strong> is a vector clock</span>
+      <span><strong>All clocks start at zero</strong></span>
+    </div>
+  </header>
+  <noscript><p>This explorer needs JavaScript for event calculations and its embedded downloads. Within the repository folder layout, you can still <a href="logical-clocks.md">read the original guide</a>.</p></noscript>
+  <main>
+    <div class="workbench">
+      <section class="panel step-panel" id="step-panel" aria-labelledby="choose-heading" tabindex="-1">
+        <p class="eyebrow">01 · Choose an event</p>
+        <h2 id="choose-heading">Advance one process</h2>
+        <p class="help">Choose any enabled next event. A receive waits for its matching send; choosing an event is a presentation step, not a physical-time measurement.</p>
+        <div class="process-card">
+          <div class="process-heading"><h3><span class="process-mark">A</span> Process A</h3></div>
+          <dl class="clock-pair"><div><dt>Lamport</dt><dd id="lamport-A">0</dd></div><div><dt>Vector [A, B, C]</dt><dd id="vector-A">[0, 0, 0]</dd></div></dl>
+          <button type="button" id="step-A" aria-describedby="waiting-A">Record A1 · local</button>
+          <p class="help" id="waiting-A">This is the next event in its process.</p>
+        </div>
+        <div class="process-card">
+          <div class="process-heading"><h3><span class="process-mark">B</span> Process B</h3></div>
+          <dl class="clock-pair"><div><dt>Lamport</dt><dd id="lamport-B">0</dd></div><div><dt>Vector [A, B, C]</dt><dd id="vector-B">[0, 0, 0]</dd></div></dl>
+          <button type="button" id="step-B" aria-describedby="waiting-B">Record B1 · local</button>
+          <p class="help" id="waiting-B">This is the next event in its process.</p>
+        </div>
+        <div class="process-card">
+          <div class="process-heading"><h3><span class="process-mark">C</span> Process C</h3></div>
+          <dl class="clock-pair"><div><dt>Lamport</dt><dd id="lamport-C">0</dd></div><div><dt>Vector [A, B, C]</dt><dd id="vector-C">[0, 0, 0]</dd></div></dl>
+          <button type="button" id="step-C" aria-describedby="waiting-C">Record C1 · local</button>
+          <p class="help" id="waiting-C">This is the next event in its process.</p>
+        </div>
+        <p class="step-foot small">Reset to try a different legal presentation. The fixed events receive the same timestamps in every legal presentation.</p>
+        <button type="button" id="reset-presentation">Reset presentation</button>
+        <p id="clock-error" class="error" role="alert" hidden></p>
+        <p id="clock-status" class="status" role="status" aria-live="polite">Ready. Choose A1, B1 or C1 to begin.</p>
+      </section>
+      <div class="stage">
+        <section class="panel" aria-labelledby="history-heading">
+          <div class="result-heading">
+            <p class="eyebrow" id="history-heading">02 · Inspect a snapshot</p>
+            <span id="snapshot-mode">Latest snapshot</span>
+          </div>
+          <div class="result-heading"><h2 id="snapshot-label">Before any event</h2><output id="snapshot-count" for="snapshot-slider">Snapshot 0 of 0</output></div>
+          <div class="progress" aria-hidden="true"><div id="progress-fill"></div></div>
+          <p id="progress-label">0 of 10 events recorded</p>
+          <div class="navigation">
+            <button type="button" id="previous-step" disabled>← Previous snapshot</button>
+            <button type="button" id="next-step" disabled>Next snapshot →</button>
+            <button type="button" id="return-latest" hidden disabled>Return to latest</button>
+          </div>
+          <label class="slider-label" for="snapshot-slider">Inspect saved snapshots</label>
+          <input id="snapshot-slider" type="range" min="0" max="0" step="1" value="0" disabled aria-describedby="history-note">
+          <p class="help" id="history-note">Choose any enabled event. The other process clocks do not advance with your click.</p>
+          <ol id="presentation-history" aria-label="Saved presentation snapshots"></ol>
+        </section>
+        <section class="panel" aria-labelledby="graph-heading">
+          <div class="result-heading"><h2 id="graph-heading">Follow the arrows</h2><span class="small">The same graph at every step</span></div>
+          <figure>
+            <div class="map-scroll" tabindex="0" role="region" aria-label="Scrollable fixed event graph"><div id="clock-graph"></div></div>
+            <ul class="legend" aria-label="Graph legend">
+              <li><span class="swatch recorded"></span>Recorded</li>
+              <li><span class="swatch enabled"></span>Enabled in this snapshot</li>
+              <li><span class="swatch inspected"></span>Just inspected</li>
+              <li><span class="swatch witness"></span>Selected causal path</li>
+            </ul>
+            <figcaption>Solid arrows show consecutive events in a process; dashed arrows carry messages. Horizontal spacing is a drawing choice, not physical time. Scroll the diagram if needed; the tables below give exact text alternatives.</figcaption>
+          </figure>
+          <details>
+            <summary>Read every edge as text</summary>
+            <div class="table-scroll" tabindex="0" role="region" aria-label="Exact graph edges">
+              <table class="edge-table"><thead><tr><th scope="col">Kind</th><th scope="col">Directed edges</th></tr></thead><tbody>
+                <tr><th scope="row">Process A</th><td>A1 → A2; A2 → A3; A3 → A4</td></tr>
+                <tr><th scope="row">Process B</th><td>B1 → B2; B2 → B3</td></tr>
+                <tr><th scope="row">Process C</th><td>C1 → C2; C2 → C3</td></tr>
+                <tr><th scope="row">Message mAB</th><td>A2 → B2</td></tr>
+                <tr><th scope="row">Message mBC</th><td>B3 → C2</td></tr>
+                <tr><th scope="row">Message mCA</th><td>C3 → A4</td></tr>
+              </tbody></table>
+            </div>
+          </details>
+        </section>
+      </div>
+    </div>
+
+    <div class="readout-grid">
+      <section class="panel" aria-labelledby="calculation-heading">
+        <p class="eyebrow">03 · Inspect the calculation</p>
+        <h2 id="calculation-heading">One event, one increment</h2>
+        <h3 id="update-title">The first increment is yours</h3>
+        <p class="empty" id="update-empty">Record an event to see its complete before, incoming, merged and after values. Local and send events increment their own clocks once. Receives merge first.</p>
+        <div id="update-detail" hidden>
+          <div class="table-scroll" tabindex="0" role="region" aria-label="Exact clock update">
+            <table class="clock-table"><caption>Vector components are always [A, B, C].</caption><thead><tr><th scope="col">Stage</th><th scope="col">L</th><th scope="col">V</th><th scope="col">What happens</th></tr></thead><tbody id="update-rows"></tbody></table>
+          </div>
+          <p class="small">Scalar calculation</p><p class="equation" id="scalar-equation"></p>
+          <p class="small">Vector calculation</p><p class="equation" id="vector-equation"></p>
+        </div>
+      </section>
+      <section class="panel" aria-labelledby="messages-heading">
+        <p class="eyebrow">Message state · selected snapshot</p>
+        <h2 id="messages-heading">A send keeps its own clocks</h2>
+        <p class="help">The message carries the clock values at its send event. Its payload stays fixed even if the sender later advances. Delivered messages retain their payload here for inspection.</p>
+        <div class="table-scroll" tabindex="0" role="region" aria-label="Message status and clock payloads">
+          <table class="message-table"><thead><tr><th scope="col">Message</th><th scope="col">Route</th><th scope="col">State</th><th scope="col">L</th><th scope="col">V [A, B, C]</th></tr></thead><tbody id="message-rows"></tbody></table>
+        </div>
+      </section>
+    </div>
+
+    <section class="panel" aria-labelledby="comparison-heading">
+      <p class="eyebrow">04 · Compare two recorded events</p>
+      <h2 id="comparison-heading">A label is not a causal path</h2>
+      <p class="help">Only events recorded in the selected snapshot are available. A directed path establishes happens-before. Complete componentwise vector order agrees with that path relation in this fixed model.</p>
+      <fieldset>
+        <legend>Choose the left and right event</legend>
+        <div class="pair-controls">
+          <div><label for="compare-left">Left event</label><select id="compare-left" disabled><option value="">Record an event first</option></select></div>
+          <div><label for="compare-right">Right event</label><select id="compare-right" disabled><option value="">Record an event first</option></select></div>
+          <div class="examples"><button type="button" id="example-unequal" disabled>Try A3 vs C3</button><button type="button" id="example-tie" disabled>Try A3 vs B2</button></div>
+        </div>
+      </fieldset>
+      <p class="empty" id="compare-empty">Record an event to start comparing. Record A3 and C3 to inspect a concurrent pair with unequal Lamport labels; A3 and B2 expose a scalar tie.</p>
+      <div id="compare-detail" hidden>
+        <p class="relation" id="relation-result"></p>
+        <p id="path-result"></p>
+        <div class="comparison-grid">
+          <div class="subpanel">
+            <h3>Lamport labels</h3>
+            <p class="equation" id="scalar-comparison"></p>
+            <p class="small" id="scalar-meaning"></p>
+            <p class="small"><strong>One-way implication:</strong> a happens-before path implies a smaller scalar label. A smaller scalar label alone does not establish a path.</p>
+          </div>
+          <div class="subpanel">
+            <h3>Compare all three vector components</h3>
+            <div class="table-scroll" tabindex="0" role="region" aria-label="Componentwise vector comparison">
+              <table class="component-table"><thead><tr><th scope="col">Component</th><th scope="col" id="vector-left-label">Left</th><th scope="col">Relation</th><th scope="col" id="vector-right-label">Right</th></tr></thead><tbody id="component-rows"></tbody></table>
+            </div>
+            <p class="small" id="vector-meaning"></p>
+            <p class="small">Strict vector order requires every component to be no larger and at least one to be smaller. Equal components are allowed; identical events are not concurrent.</p>
+          </div>
+        </div>
+      </div>
+      <div class="total-order">
+        <h3>Choose a scalar tie convention</h3>
+        <p class="help">Sort by Lamport label, then use the chosen process order when labels tie. This creates a total display order. It does not add a causal edge or change any clock.</p>
+        <label class="tie-label" for="tie-order">Process order for equal Lamport labels
+          <select id="tie-order"><option value="ABC">A before B before C</option><option value="CBA">C before B before A</option></select>
+        </label>
+        <p class="empty" id="order-empty">The list appears as events are recorded.</p>
+        <ol id="scalar-order" aria-label="Scalar total order of recorded events"></ol>
+        <p class="small" id="tie-effect"></p>
+      </div>
+    </section>
+
+    <section class="panel" aria-labelledby="record-heading">
+      <div class="result-heading"><h2 id="record-heading">Exact event record</h2><span class="small">Selected snapshot only</span></div>
+      <p class="help">Rows follow your chosen presentation. “Presented at” is the click order; it is not a causal relation or a wall-clock timestamp. Highlighting marks the event just inspected.</p>
+      <p class="empty" id="events-empty">No events are recorded in this snapshot.</p>
+      <div class="table-scroll" tabindex="0" role="region" aria-label="Recorded event clock table">
+        <table class="event-table"><thead><tr><th scope="col">Event</th><th scope="col">Action</th><th scope="col">L</th><th scope="col">V [A, B, C]</th><th scope="col">Presented at</th></tr></thead><tbody id="event-rows"></tbody></table>
+      </div>
+    </section>
+
+    <div class="learning-grid">
+      <section class="panel" aria-labelledby="study-heading">
+        <p class="eyebrow">Continue the lesson</p>
+        <h2 id="study-heading">Keep the course and worked guide</h2>
+        <p>The original 16-question course connects clock calculations, causal paths, concurrency and transfer cases. Both downloads below contain the complete original text, answers, source references and attribution.</p>
+        <div class="download-controls">
+          <button type="button" id="download-course">Download course (.json)</button>
+          <button type="button" id="download-guide">Download worked guide (.md)</button>
+        </div>
+        <p class="status" id="download-status" role="status" aria-live="polite"></p>
+        <p class="small"><a href="../demo.html" target="_blank" rel="noopener">Open the learner · sibling page</a>. Choose the downloaded JSON file, inspect its preview, then select <strong>Start this deck</strong>. This link requires the repository folder layout.</p>
+        <p class="small">The explorer and its embedded downloads work when this HTML file is saved on its own. Sibling links require their neighboring files. The existing RecallWeave offline ZIP contains the learner and courses; it does not include companion explorers.</p>
+      </section>
+      <section class="panel" aria-labelledby="model-heading">
+        <p class="eyebrow">Read the assumptions</p>
+        <h2 id="model-heading">A complete model, not a clock service</h2>
+        <div class="model-note">
+          <p class="small">This is the guide’s fixed ten-event graph with exactly the program-order and message edges shown above. All events and messages are known. There are no hidden communications, reused process identities or clock resets within a presentation.</p>
+          <p class="small">“Concurrent” means no happens-before path in either direction in this complete model. Missing observations in a real system would require an uncertainty assessment; this explorer does not infer concurrency from an incomplete log.</p>
+        </div>
+        <details>
+          <summary>Clock rules and useful checks</summary>
+          <ul class="small">
+            <li>Local and send events increment the scalar and their own vector component once. A send then attaches those recorded clocks to its message.</li>
+            <li>A receive takes the maximum local/message scalar and each component maximum, then increments its own scalar and vector component once.</li>
+            <li>At A4, inspect how A’s newer local component survives the merge with the incoming message.</li>
+            <li>Finish one presentation, note the event table, then reset and choose another legal order. Each fixed event keeps its clock labels.</li>
+            <li>Reset starts a new presentation. It does not introduce a reset event into the graph.</li>
+          </ul>
+        </details>
+        <p class="small">No wall-clock accuracy, synchronization, authentication, conflict-resolution policy or learning-effect claim is made. <a href="logical-clocks.md">Read the original guide · sibling file</a> for the mathematical scope and references.</p>
+      </section>
+    </div>
+  </main>
+  <footer>
+    <p>Original lesson text and the ten-event example: HAMON contributors for RecallWeave (2026), <a href="https://creativecommons.org/licenses/by/4.0/" rel="noreferrer">CC BY 4.0</a>. This companion is an additional AI-assisted HAMON contribution, estate-6e5752b49b6f. Original course and guide downloads retain their complete attribution. The source papers supply the definitions and algorithms and remain separately licensed.</p>
+    <ul>
+      <li><a href="https://lamport.azurewebsites.net/pubs/time-clocks.pdf" rel="noreferrer">Leslie Lamport · Time, Clocks, and the Ordering of Events in a Distributed System (1978)</a></li>
+      <li><a href="https://vs.inf.ethz.ch/publ/papers/VirtTimeGlobStates.pdf" rel="noreferrer">Friedemann Mattern · Virtual Time and Global States of Distributed Systems (1989)</a></li>
+    </ul>
+  </footer>
+  <script>
+const embeddedCourse = "{\n  \"format\": \"recallweave-deck/1\",\n  \"title\": \"Causal order with Lamport and vector clocks\",\n  \"attribution\": \"Original questions, examples, explanations and transfer prompts by HAMON contributors for RecallWeave (2026). Mathematical sources: Leslie Lamport, Time, Clocks, and the Ordering of Events in a Distributed System (1978), https://lamport.azurewebsites.net/pubs/time-clocks.pdf; Friedemann Mattern, Virtual Time and Global States of Distributed Systems (1989), https://vs.inf.ethz.ch/publ/papers/VirtTimeGlobStates.pdf. The source papers supply the definitions and algorithms; these lesson questions and the worked event graph are original.\",\n  \"license\": \"Original lesson text and examples: Creative Commons Attribution 4.0 International (CC BY 4.0), https://creativecommons.org/licenses/by/4.0/. Attribution: HAMON contributors for RecallWeave, Causal order with Lamport and vector clocks, 2026. This permission covers the original lesson, not the linked source papers.\",\n  \"concepts\": [\n    \"causal-order\",\n    \"lamport-clocks\",\n    \"vector-clocks\",\n    \"reading-concurrency\"\n  ],\n  \"items\": [\n    {\n      \"id\": \"lc-causal-send\",\n      \"concept\": \"causal-order\",\n      \"prerequisites\": [],\n      \"prompt\": \"A sends message m at event S, and B receives that same message at distinct event R. In the happens-before relation generated by program order, message delivery and transitivity, which statement holds?\",\n      \"options\": [\n        \"R happens before S because receiving reveals the message.\",\n        \"S and R are concurrent because they are on different processes.\",\n        \"S happens before R.\",\n        \"S and R must have the same logical timestamp.\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"A message send is a generating edge of happens-before to the corresponding receive: S → R. Different processes can be causally connected. The sender and receiver record distinct events, and a correct scalar clock assigns the receive a strictly larger value than the send.\",\n      \"transfer\": \"Sketch a request and its reply. Include the receive and the later reply-send as separate events, then mark a transitive path from the original request-send to the reply-receive.\"\n    },\n    {\n      \"id\": \"lc-causal-chain\",\n      \"concept\": \"causal-order\",\n      \"prerequisites\": [],\n      \"prompt\": \"A sends at A1. B receives that message at B2, then sends a new message at B3. C receives B's message at C2. The receive at B2 and send at B3 are distinct events in that program order. Which relation follows?\",\n      \"options\": [\n        \"C2 happens before A1.\",\n        \"A1 happens before C2.\",\n        \"A1 and C2 are concurrent until clocks are assigned.\",\n        \"B3 happens before B2.\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"The path is A1 → B2 → B3 → C2. The first and last edges are message deliveries; B2 → B3 is B's program order. Transitivity gives A1 → C2. Clocks describe this relation; assigning timestamps is not what creates it.\",\n      \"transfer\": \"In a three-service workflow, identify the actual send/receive and local-order edges that let information from the first service reach the third.\"\n    },\n    {\n      \"id\": \"lc-causal-fork\",\n      \"concept\": \"causal-order\",\n      \"prerequisites\": [],\n      \"prompt\": \"The complete event graph has program order A1 → A2 → A3 and B1 → B2 → B3. Its only message edge is A2 → B2. Here → denotes a generating happens-before edge. How are A3 and B3 related?\",\n      \"options\": [\n        \"They are concurrent: neither has a directed path to the other.\",\n        \"A3 happens before B3 because A3 follows the send at A2.\",\n        \"B3 happens before A3 because B received A's message.\",\n        \"They are the same event because both have local index 3.\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"A2 reaches both later A3 and B3, but sharing a predecessor does not create a path between those later events. A3 cannot travel backward to A2, and no message leaves A3 for B. Neither A3 → B3 nor B3 → A3 exists, so they are concurrent in this complete graph. That does not claim physical simultaneity.\",\n      \"transfer\": \"Draw a common ancestor with two descendants. Explain why evidence that both descendants depend on the ancestor does not establish an order between the descendants.\"\n    },\n    {\n      \"id\": \"lc-causal-wall-time\",\n      \"concept\": \"causal-order\",\n      \"prerequisites\": [],\n      \"prompt\": \"Two different processes log events a at 10:00:01 and b at 10:00:02 using wall clocks whose offsets and synchronization error are unknown. No program-order or communication relationship between the events is supplied. What do these two readings establish by themselves?\",\n      \"options\": [\n        \"a causally precedes b by exactly one second.\",\n        \"a physically occurred first, although causality remains unknown.\",\n        \"The events are concurrent because the readings differ.\",\n        \"Neither a causal relation nor which event physically occurred first.\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"Unknown clock offsets can reverse the apparent order of these readings. The readings supply no message or program-order path between the events, so they do not establish causality either. The available evidence also does not prove concurrency: an unreported causal path may exist. 'Unknown' is different from 'known concurrent in a complete graph.'\",\n      \"transfer\": \"When inspecting logs from two machines, list the synchronization bounds and communication evidence you would need before making an ordering claim.\"\n    },\n    {\n      \"id\": \"lc-lamport-send\",\n      \"concept\": \"lamport-clocks\",\n      \"prerequisites\": [\n        \"causal-order\"\n      ],\n      \"prompt\": \"A process starts with Lamport counter 0. Each local event or send increments its counter by 1, and a send carries the resulting value. It performs two local events, then sends a message. What timestamp does the message carry?\",\n      \"options\": [\n        \"2\",\n        \"3\",\n        \"1\",\n        \"0\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"The counter starts at 0, becomes 1 at the first local event and 2 at the second, then increments to 3 for the send. The message carries the send event's post-increment value. These are event counters, not elapsed seconds.\",\n      \"transfer\": \"If another local event is inserted before this send, recompute the sent value and explain why the difference says nothing about how long the event took.\"\n    },\n    {\n      \"id\": \"lc-lamport-receive-low\",\n      \"concept\": \"lamport-clocks\",\n      \"prerequisites\": [\n        \"causal-order\"\n      ],\n      \"prompt\": \"A Lamport counter is 7 immediately before a receive. The incoming message carries timestamp 3. The receive rule is max(local counter, message timestamp) + 1. What timestamp is assigned to this receive event?\",\n      \"options\": [\n        \"4\",\n        \"7\",\n        \"10\",\n        \"8\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"max(7, 3) + 1 = 8. The receive follows both the receiver's already-recorded history and the send represented by the incoming timestamp. Replacing 7 with 3 would move the local clock backward; adding the two counters is not the receive rule.\",\n      \"transfer\": \"Suppose a local counter is 12 and a delayed message is stamped 4. Calculate the receive timestamp and identify the larger constraint.\"\n    },\n    {\n      \"id\": \"lc-lamport-receive-high\",\n      \"concept\": \"lamport-clocks\",\n      \"prerequisites\": [\n        \"causal-order\"\n      ],\n      \"prompt\": \"A process has Lamport counter 2. It receives a message stamped 8 using max(local, message) + 1, then performs one local event, which increments by 1. What are the receive timestamp and the following local-event timestamp, in that order?\",\n      \"options\": [\n        \"9, then 10\",\n        \"8, then 9\",\n        \"3, then 4\",\n        \"11, then 12\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"The receive uses max(2, 8) + 1 = 9. The subsequent local event increments 9 to 10. The receive can jump over unused scalar values; it does not claim the process executed every skipped count or waited that many time units.\",\n      \"transfer\": \"Calculate a receive followed by a send when the local counter is 5 and the incoming timestamp is 11. State the value actually attached to the outgoing message.\"\n    },\n    {\n      \"id\": \"lc-lamport-one-way\",\n      \"concept\": \"lamport-clocks\",\n      \"prerequisites\": [\n        \"causal-order\"\n      ],\n      \"prompt\": \"Correct Lamport clocks give distinct events a and b timestamps L(a) = 4 and L(b) = 9. The clock condition says that causal precedence implies a strictly smaller timestamp. What can you conclude?\",\n      \"options\": [\n        \"a must causally precede b.\",\n        \"a and b must be concurrent.\",\n        \"b cannot causally precede a; a may precede b or be concurrent with b.\",\n        \"b must causally precede a because its timestamp is larger.\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"If b causally preceded a, the clock condition would require L(b) \u003c L(a), which contradicts 9 > 4. That direction is therefore impossible. The smaller timestamp of a is compatible with a preceding b and also with a being concurrent with b; scalar order alone does not choose between those cases.\",\n      \"transfer\": \"Find two concurrent events in the worked graph that have different Lamport timestamps. Explain the useful direction that the inequality rules out and the direction it fails to prove.\"\n    },\n    {\n      \"id\": \"lc-vector-send\",\n      \"concept\": \"vector-clocks\",\n      \"prerequisites\": [\n        \"lamport-clocks\"\n      ],\n      \"prompt\": \"Vector components are ordered [A, B, C] and start at [0, 0, 0]. Each local event or send increments only the acting process's component before recording or sending the vector. B performs one local event, then sends. What vector does this message carry?\",\n      \"options\": [\n        \"[2, 0, 0]\",\n        \"[0, 1, 0]\",\n        \"[1, 1, 1]\",\n        \"[0, 2, 0]\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"B owns the middle component. Its local event changes [0, 0, 0] to [0, 1, 0], and its send changes that to [0, 2, 0]. With no received messages, B has learned nothing about A or C. A vector is recorded after the event's increment in this convention.\",\n      \"transfer\": \"If C instead performs three local events and then sends without receiving anything, write its outgoing [A, B, C] vector.\"\n    },\n    {\n      \"id\": \"lc-vector-receive\",\n      \"concept\": \"vector-clocks\",\n      \"prerequisites\": [\n        \"lamport-clocks\"\n      ],\n      \"prompt\": \"Components are [A, B, C]. Immediately before receiving a message, C has vector [2, 0, 4]. The message carries [1, 3, 2]. A receive takes the componentwise maximum, then increments C's component once. What vector labels the receive event?\",\n      \"options\": [\n        \"[1, 3, 3]\",\n        \"[2, 3, 5]\",\n        \"[3, 4, 5]\",\n        \"[2, 3, 4]\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"The componentwise maximum of [2, 0, 4] and [1, 3, 2] is [2, 3, 4]. Increment the receiver's C component once to get [2, 3, 5]. The lower A and C values in the message do not erase local knowledge; the message does add B's history through count 3.\",\n      \"transfer\": \"Try a receive whose incoming vector is smaller in every component. Explain why the receiver still records a new event even though the merge adds no remote information.\"\n    },\n    {\n      \"id\": \"lc-vector-strict-order\",\n      \"concept\": \"vector-clocks\",\n      \"prerequisites\": [\n        \"lamport-clocks\"\n      ],\n      \"prompt\": \"Assume standard vector clocks that record every relevant event and message, with no resets. Define u \u003c v to mean every component of u is at most the corresponding component of v, with at least one strict inequality. Distinct events have vectors [2, 1, 0] and [2, 3, 1]. What follows?\",\n      \"options\": [\n        \"The events are concurrent because their A components are equal.\",\n        \"The second event causally precedes the first.\",\n        \"The first event causally precedes the second.\",\n        \"No relation is available unless every component is strictly smaller.\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"Compare components: 2 ≤ 2, 1 ≤ 3 and 0 ≤ 1, with strict inequalities in B and C. The first vector is strictly below the second under the stated definition. In the standard complete model this means the first event causally precedes the second. Requiring every component to be strictly smaller would wrongly discard causal links that leave other processes' knowledge unchanged.\",\n      \"transfer\": \"Compare [1, 0, 0] with [2, 0, 0]. Explain why two unchanged components do not make the corresponding events concurrent.\"\n    },\n    {\n      \"id\": \"lc-vector-incomparable\",\n      \"concept\": \"vector-clocks\",\n      \"prerequisites\": [\n        \"lamport-clocks\"\n      ],\n      \"prompt\": \"Under standard, complete vector-clock instrumentation with no resets, distinct events a and b have vectors [3, 1, 0] and [2, 2, 0]. Causal precedence corresponds to componentwise ≤ with at least one strict component. Which relation holds?\",\n      \"options\": [\n        \"The events are concurrent: each vector exceeds the other in a different component.\",\n        \"a causally precedes b because its component sum is smaller.\",\n        \"b causally precedes a because its A component is smaller.\",\n        \"The events are identical because their component sums are equal.\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"The first vector has more A history (3 > 2), while the second has more B history (2 > 1). Neither is componentwise at most the other, so the vectors are incomparable and the distinct events are concurrent under the stated model. Adding components or comparing one chosen component loses this information.\",\n      \"transfer\": \"Construct another pair of incomparable three-component vectors, and point to one coordinate that blocks each possible ordering.\"\n    },\n    {\n      \"id\": \"lc-reading-scalar-trap\",\n      \"concept\": \"reading-concurrency\",\n      \"prerequisites\": [\n        \"causal-order\",\n        \"lamport-clocks\",\n        \"vector-clocks\"\n      ],\n      \"prompt\": \"In a correctly and completely instrumented execution, A3 has Lamport timestamp 3 and vector [3, 0, 0]; C3 has Lamport timestamp 6 and vector [2, 3, 3]. Which interpretation is valid?\",\n      \"options\": [\n        \"A3 caused C3 because 3 \u003c 6.\",\n        \"C3 caused A3 because C3's B and C components are larger.\",\n        \"The clock implementations disagree, so one timestamp must be invalid.\",\n        \"A3 and C3 are concurrent; the scalar inequality does not prove causality.\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"A3's A component is larger (3 > 2), but C3's B and C components are larger (3 > 0). The vectors are incomparable. Their valid scalar timestamps can still satisfy 3 \u003c 6 because the Lamport clock condition is one-way. In the worked graph, A2 sent before A3 occurred, so A3 is not part of the history carried onward to C3.\",\n      \"transfer\": \"Trace the message chain A2 → B2 → B3 → C2 → C3 and identify exactly which local A event is absent from that chain.\"\n    },\n    {\n      \"id\": \"lc-reading-equal-components\",\n      \"concept\": \"reading-concurrency\",\n      \"prerequisites\": [\n        \"causal-order\",\n        \"lamport-clocks\",\n        \"vector-clocks\"\n      ],\n      \"prompt\": \"In a complete execution, B3 sends a message with vector [2, 3, 0]. C receives it at C2 and records [2, 3, 2]. The listed send and receive are distinct. Which reading is correct?\",\n      \"options\": [\n        \"B3 causally precedes C2; equality in A and B does not prevent strict vector order.\",\n        \"The events are concurrent because two components are equal.\",\n        \"C2 causally precedes B3 because its C component is greater.\",\n        \"All three components must differ before a message can carry causal information.\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"The explicit send-to-receive edge already establishes B3 → C2. The vector comparison agrees: [2, 3, 0] is componentwise at most [2, 3, 2], with a strict C component. Equality in A and B is allowed. C's local history and this receive explain why the last component is 2.\",\n      \"transfer\": \"Use C's pre-receive vector [0, 0, 1] to calculate max([0, 0, 1], [2, 3, 0]) plus one C event.\"\n    },\n    {\n      \"id\": \"lc-reading-tie-break\",\n      \"concept\": \"reading-concurrency\",\n      \"prerequisites\": [\n        \"causal-order\",\n        \"lamport-clocks\",\n        \"vector-clocks\"\n      ],\n      \"prompt\": \"Distinct events A3 and B2 both have valid Lamport timestamp 3. A system orders all events lexicographically by (Lamport timestamp, process ID), with A before B. What does placing A3 before B2 mean?\",\n      \"options\": [\n        \"The process-ID tie-break proves A3 caused B2.\",\n        \"The tie-break chooses an order for these concurrent events; it creates no causal edge.\",\n        \"B2 must physically occur later by one clock tick.\",\n        \"Equal Lamport timestamps make this total ordering impossible.\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"Causally ordered distinct events must have strictly increasing Lamport timestamps. These equal timestamps therefore rule out either causal direction in a valid execution. The process-ID tie-break chooses A3 before B2 to make a total order, but it adds no message or program-order edge and says nothing about elapsed physical time.\",\n      \"transfer\": \"Reverse the agreed process-ID order. Explain what happens to the A3/B2 tie and what remains unchanged in the causal graph.\"\n    },\n    {\n      \"id\": \"lc-reading-conflict-policy\",\n      \"concept\": \"reading-concurrency\",\n      \"prerequisites\": [\n        \"causal-order\",\n        \"lamport-clocks\",\n        \"vector-clocks\"\n      ],\n      \"prompt\": \"Two document edits have incomparable vector clocks in a model that records all relevant edit events and communications. What does this establish, and what must the application still decide?\",\n      \"options\": [\n        \"The edits are duplicates, so it can discard either without inspecting content.\",\n        \"The edit with the larger component sum is the correct version.\",\n        \"The edits are concurrent; a content or conflict-resolution policy must still decide how to handle them.\",\n        \"Vector clocks authenticate both authors and identify which text is factually correct.\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"Incomparable vectors establish concurrency within the stated event and communication model. They do not choose the appropriate merged document, settle a semantic conflict, authenticate a writer or establish factual truth. The application still needs a content-aware merge rule, a user decision or another explicit policy.\",\n      \"transfer\": \"Describe a concurrent change to a document title and a concurrent change to its body. Then describe two competing edits to the same word. Why might the application handle these cases differently even though both are concurrent?\"\n    }\n  ]\n}\n";
+const embeddedGuide = "# Causal order with Lamport and vector clocks\n\nA later number does not, by itself, prove a causal connection. This lesson builds the distinction from an event graph, calculates two kinds of logical timestamp, and uses them to separate causal order from concurrency.\n\nThe [sixteen-question lesson](logical-clocks.json) uses RecallWeave's existing learner. Open the accompanying `demo.html`, choose the JSON under **Bring your own lesson**, inspect its preview, then select **Start this deck**. The learner can show questions in an adaptive order and shuffle their answer choices. Match answers by their meaning, not a remembered letter. After the first session, review the explanations, retry missed questions and download your study notes.\n\nThe lesson and this guide are original educational material. The worked execution is deliberately small enough to calculate by hand. No distributed service, account, network connection or running cluster is needed.\n\n## 1. Start with events and edges\n\nAn **event** is a local action, a send or a receive. The send of a message and its receipt are separate events, even when a diagram places them close together.\n\nThe relation *happens-before*, written `a → b`, is generated by:\n\n1. **Program order:** an earlier event on a process precedes a later event on that same process.\n2. **Message order:** sending a particular message precedes receiving it.\n3. **Transitivity:** if `a → b` and `b → c`, then `a → c`.\n\nEquivalently, there is a directed path from `a` to `b` in the event graph. A timestamp describes the graph; assigning a timestamp does not create its communication edges.\n\nTwo **distinct events are concurrent** when there is no directed path in either direction. Concurrency here describes the absence of a causal ordering in the complete model. It does not assert that the events happened at the same physical instant.\n\nKeep these two statements separate:\n\n- **Known concurrent:** the complete relevant event graph has no path in either direction.\n- **Order unknown from the evidence:** the available observations do not establish a path, but relevant events or messages may be missing.\n\nAn isolated pair of unsynchronized wall-clock readings gives the second situation. It cannot establish physical order when offsets and error bounds are unknown, and it cannot establish concurrency when the communication history is missing. Lamport's original paper defines the event relation and distinguishes it from a physical-clock measurement.[1]\n\n### A common ancestor does not order its descendants\n\nSuppose A has `A1 → A2 → A3`, B has `B1 → B2 → B3`, and the only message edge is `A2 → B2`. Both A3 and B3 follow A2. Nevertheless, neither A3 nor B3 has a directed path to the other.\n\nA path may follow arrows forward. It cannot travel backward from A3 to A2 and then forward to B3. Shared history alone does not make one later branch cause the other.\n\n## 2. The complete worked execution\n\nThere are three processes, A, B and C. Their complete program orders and actions are:\n\n| Process | Events in program order |\n|---|---|\n| A | A1 local → A2 send mAB → A3 local → A4 receive mCA |\n| B | B1 local → B2 receive mAB → B3 send mBC |\n| C | C1 local → C2 receive mBC → C3 send mCA |\n\nThe only message edges are:\n\n| Message | Send | Receive |\n|---|---|---|\n| mAB | A2 | B2 |\n| mBC | B3 | C2 |\n| mCA | C3 | A4 |\n\nEvery local, send and receive action shown is one event. There are ten events. The presentation of rows does not introduce an order between different processes. Only the listed program-order edges, the three message edges and their transitive consequences count.\n\nFor example, `A2 → B2 → B3 → C2 → C3 → A4` is a path. A3 also precedes A4 through A's own program order, but no message carries A3 onward to B or C before C3.\n\n## 3. Lamport clocks: an order-compatible number\n\nEach process starts with scalar counter 0. Use this precise convention:\n\n- At a local event or send, increment the local counter by 1.\n- Record the resulting value as that event's timestamp.\n- A send carries its recorded timestamp.\n- At a receive, set the counter to `max(current local counter, received timestamp) + 1` and record that value.\n\nThe extra increment at a receive puts it strictly after both the receiving process's preceding event and the matching send. A process can skip scalar values after receiving a high timestamp. Skipped numbers are not a count of missing local actions or elapsed seconds.\n\n### Calculate the three receives\n\nFor **B2**, B's previous event B1 left its counter at 1. Message mAB carries A2's timestamp 2:\n\n`L(B2) = max(1, 2) + 1 = 3.`\n\nB3 is the next send on B, so it increments to 4.\n\nFor **C2**, C1 left the local counter at 1 and mBC carries 4:\n\n`L(C2) = max(1, 4) + 1 = 5.`\n\nC3 then sends with timestamp 6.\n\nFor **A4**, A3 left A's counter at 3 and mCA carries 6:\n\n`L(A4) = max(3, 6) + 1 = 7.`\n\n### What the clock condition says\n\nIf `a → b`, then `L(a) \u003c L(b)`. Every generating edge increases the clock, so every directed path does too.[1]\n\nThe converse does not hold: `L(a) \u003c L(b)` does not prove `a → b`.\n\nThere is still a useful conclusion. If `L(a) = 4` and `L(b) = 9`, then **b cannot precede a**, because that would require `9 \u003c 4`. Either a precedes b, or they are concurrent. Scalar order rules out the reverse causal direction without proving the forward one.\n\nTwo distinct events with equal valid Lamport timestamps cannot precede one another in either direction. If either direction existed, the clock condition would require a strict increase.\n\n## 4. Vector clocks: retain the separate histories\n\nUse one component per process, in the fixed order **[A, B, C]**. Every process starts with `[0, 0, 0]`.\n\nFor this lesson:\n\n- A local event or send increments only the acting process's component.\n- The event records the updated vector.\n- A send carries that vector.\n- A receive first takes the **componentwise maximum** of its current vector and the message vector, then increments the receiver's component once.\n\nThe maximum merges known histories without erasing information. The final increment records the new receive event. This is a precise choice of event-count convention; always establish a source's convention before comparing numeric examples.[2]\n\n### B2: learn A's history and record B's receive\n\nBefore B2, B has `[0, 1, 0]`. Message mAB carries `[2, 0, 0]`.\n\n`max([0, 1, 0], [2, 0, 0]) = [2, 1, 0].`\n\nIncrement B:\n\n`V(B2) = [2, 2, 0].`\n\nB3 increments B again and sends `[2, 3, 0]`.\n\n### C2: carry the chain through B to C\n\nBefore C2, C has `[0, 0, 1]`. Message mBC carries `[2, 3, 0]`.\n\n`max([0, 0, 1], [2, 3, 0]) = [2, 3, 1].`\n\nIncrement C:\n\n`V(C2) = [2, 3, 2].`\n\nC3 increments C again and sends `[2, 3, 3]`.\n\n### A4: merge remote information with A's newer local history\n\nBefore A4, A has `[3, 0, 0]`. Message mCA carries `[2, 3, 3]`.\n\n`max([3, 0, 0], [2, 3, 3]) = [3, 3, 3].`\n\nIncrement A:\n\n`V(A4) = [4, 3, 3].`\n\nThe message's A component is only 2: its chain began at A2, before A3. Taking the maximum preserves A's own knowledge of A3 instead of replacing 3 with the stale 2.\n\n### Full timestamp table\n\n| Event | Action | Lamport timestamp | Vector [A, B, C] |\n|---|---|---:|---|\n| A1 | Local | 1 | [1, 0, 0] |\n| A2 | Send mAB | 2 | [2, 0, 0] |\n| A3 | Local | 3 | [3, 0, 0] |\n| A4 | Receive mCA | 7 | [4, 3, 3] |\n| B1 | Local | 1 | [0, 1, 0] |\n| B2 | Receive mAB | 3 | [2, 2, 0] |\n| B3 | Send mBC | 4 | [2, 3, 0] |\n| C1 | Local | 1 | [0, 0, 1] |\n| C2 | Receive mBC | 5 | [2, 3, 2] |\n| C3 | Send mCA | 6 | [2, 3, 3] |\n\nWithin this event-count convention, a component records the included prefix of that process's history. A4's vector summarizes A's four events, B's three and C's three: all ten events including A4. Its strict causal past contains the other nine events.\n\n## 5. Compare vectors carefully\n\nDefine `u ≤ v` when every component of u is at most the corresponding component of v. Define **strict vector order** `u \u003c v` when `u ≤ v` and `u ≠ v`.\n\nThat means **all components are at most and at least one is strictly smaller**. It does not mean that every component must be strictly smaller.\n\nWith standard vector clocks over the complete event and message model, causal precedence and this strict vector order agree.[2] Consequently, distinct events with incomparable vectors are concurrent.\n\n| Pair | Component comparison | Conclusion |\n|---|---|---|\n| A1 [1,0,0], A2 [2,0,0] | A grows; B and C stay equal | A1 precedes A2 |\n| B3 [2,3,0], C2 [2,3,2] | C grows; A and B stay equal | B3 precedes C2 |\n| A3 [3,0,0], B2 [2,2,0] | First has more A; second has more B | Concurrent |\n| A3 [3,0,0], C3 [2,3,3] | First has more A; second has more B and C | Concurrent |\n| C3 [2,3,3], A4 [4,3,3] | A grows; B and C stay equal | C3 precedes A4 |\n\nA3 and C3 are the central scalar counterexample: their Lamport values satisfy `3 \u003c 6`, but their vectors are incomparable and the graph has no path in either direction.\n\nNeither adding vector components nor inspecting one chosen component gives the componentwise order. For `[3,1,0]` and `[2,2,0]`, even the equal sums conceal two incompatible histories.\n\nConcurrency is also not transitive. In this graph, A1 is concurrent with B1, and B1 is concurrent with A2, while A1 precedes A2.\n\n### A small completeness check\n\nThe ten events have 45 unordered pairs. Of those, 32 are causally ordered and 13 are concurrent. Listed once each, the concurrent pairs are:\n\n`A1–B1, A1–C1, A2–B1, A2–C1, A3–B1, A3–B2, A3–B3, A3–C1, A3–C2, A3–C3, B1–C1, B2–C1, B3–C1.`\n\nOnly four of these concurrent pairs share equal scalar timestamps: A1–B1, A1–C1, B1–C1 and A3–B2. The other nine show that unequal scalar timestamps remain compatible with concurrency.\n\n## 6. A total order can make a choice without discovering a cause\n\nA system can sort events by **(Lamport timestamp, process ID)**, with a fixed process order A before B before C. In this model, each process's Lamport values increase strictly, so the pair uniquely orders these events.\n\nThe resulting order is:\n\n`A1, B1, C1, A2, A3, B2, B3, C2, C3, A4.`\n\nIt respects every causal edge because causal edges already increase the scalar timestamp. It also chooses an order for concurrent events. Lamport describes this kind of extension from a partial order to a total order.[1]\n\nA3 and B2 both have scalar timestamp 3. The process rule puts A3 first. Reversing the agreed process order puts B2 first. Neither convention creates a causal edge between them.\n\nDo not treat the tie-break as a physical-time measurement. Do not treat it as an application-specific merge policy either. Sorting two concurrent document edits does not tell you whether they affect different fields, conflict on the same word, or require a human decision.\n\n## 7. Answer connections and worked transfers\n\nThe learner displays a complete explanation after each answer. These stable item IDs help connect shuffled questions to the ideas in this guide.\n\n| Item | Correct connection | Worked transfer |\n|---|---|---|\n| lc-causal-send | The send precedes its matching receive. | Request-send → request-receive → later reply-send → reply-receive establishes a path from the original request to the reply's receipt. |\n| lc-causal-chain | A1 precedes C2 through B2 and B3. | A multi-service claim needs actual message and local-order edges, not merely three log entries shown in a list. |\n| lc-causal-fork | A3 and B3 are concurrent. | Two descendants can share an ancestor without reaching one another. |\n| lc-causal-wall-time | The readings alone establish neither causal nor physical order. | Look for known clock-error bounds and the actual communication history; missing history is not proof of concurrency. |\n| lc-lamport-send | The send carries 3. | Inserting one more local event before it changes the stamp to 4, without specifying a duration. |\n| lc-lamport-receive-low | The receive is stamped 8. | A local counter 12 receiving timestamp 4 becomes 13. The receiver's own prior history supplies the larger constraint. |\n| lc-lamport-receive-high | The receive is 9, then the local event is 10. | Local counter 5 receiving stamp 11 becomes 12; the following send carries 13. |\n| lc-lamport-one-way | b cannot precede a; a may precede b or be concurrent. | A3's scalar 3 is smaller than B3's 4, but the events are concurrent. The inequality rules out B3 preceding A3 without proving the opposite direction. |\n| lc-vector-send | B sends [0,2,0]. | C's three local events followed by a send, with no messages received, produce [0,0,4]. |\n| lc-vector-receive | C records [2,3,5]. | Current [4,3,5] receiving [2,1,3] at C merges to [4,3,5], then records the new receive as [4,3,6]. |\n| lc-vector-strict-order | [2,1,0] strictly precedes [2,3,1]. | [1,0,0] \u003c [2,0,0] even though two components are unchanged. |\n| lc-vector-incomparable | [3,1,0] and [2,2,0] are concurrent. | [4,1,2] and [3,2,2] are another incomparable pair: A blocks the first ≤ second, and B blocks the reverse. |\n| lc-reading-scalar-trap | A3 and C3 are concurrent despite 3 \u003c 6. | The chain leaving A2 never includes A3 before reaching C3. |\n| lc-reading-equal-components | B3 precedes C2. | max([0,0,1], [2,3,0]) + [0,0,1] = [2,3,2]. |\n| lc-reading-tie-break | A3/B2 receive a conventional order without a new causal edge. | Reversing process order reverses this tie while the graph remains unchanged. |\n| lc-reading-conflict-policy | Concurrent edits still require a content or conflict policy. | A title edit and a body edit may combine cleanly; competing replacements of the same word may require another rule or a choice. The concurrency relation alone does not settle either case. |\n\n## 8. What this model assumes\n\nThis lesson uses a fixed, known set of three processes, a common component order, monotonically increasing counters and complete instrumentation of the relevant events and communications. There are no counter resets, omitted messages or reused process identities in the worked execution.\n\nThese assumptions matter. An out-of-band communication that is absent from the model can carry information the vectors do not record. Comparing unrelated vector namespaces, restarted counters or incomplete logs does not automatically inherit the conclusions established for this model.\n\nLogical timestamps do not authenticate events, measure elapsed seconds, synchronize physical clocks or determine which document content is correct. Real systems need explicit decisions for identity, restarts, instrumentation and application behavior.\n\nRecallWeave's estimated mastery values are illustrative model state, not a validated assessment. This lesson's mathematical checking establishes content consistency under its stated assumptions. It does not demonstrate that a learner's ability improved.\n\n## Sources and reuse\n\n[1] Leslie Lamport. **Time, Clocks, and the Ordering of Events in a Distributed System**. *Communications of the ACM* 21(7), 1978, pp. 558–565. [Author-hosted paper](https://lamport.azurewebsites.net/pubs/time-clocks.pdf). The happens-before relation is on printed p. 559; the scalar clock condition, update constraints and total-order extension are on pp. 560–561.\n\n[2] Friedemann Mattern. **Virtual Time and Global States of Distributed Systems**. In *Parallel and Distributed Algorithms*, 1989, pp. 215–226. [Author-hosted reprint](https://vs.inf.ethz.ch/publ/papers/VirtTimeGlobStates.pdf). Section 7 develops vector time, its componentwise comparison and its connection to causality.\n\nThe questions, explanations, transfer responses and ten-event worked example were written for this lesson. No source-paper exercise, figure or extended passage is reproduced.\n\nOriginal lesson text and examples © 2026 HAMON contributors for RecallWeave, licensed under **Creative Commons Attribution 4.0 International (CC BY 4.0)**: https://creativecommons.org/licenses/by/4.0/. Attribute “HAMON contributors for RecallWeave, Causal order with Lamport and vector clocks, 2026.” This permission does not relicense the linked papers.\n";
+(() => {
+'use strict';
+/**
+ * Fixed ten-event logical-clock model for RecallWeave.
+ * Graph and clock conventions: courses/logical-clocks.md.
+ * A chosen event order is a legal presentation, not a physical-time observation.
+ * Inputs are passive arrays of event IDs; this is not a hostile-object sandbox.
+ */
+
+function freezeTree(value) {
+  if (value !== null && typeof value === 'object') {
+    for (const child of Object.values(value)) freezeTree(child);
+    Object.freeze(value);
+  }
+  return value;
+}
+
+const CLOCK_GRAPH = freezeTree({
+  processes: ['A', 'B', 'C'],
+  events: [
+    { id: 'A1', process: 'A', kind: 'local', message: null },
+    { id: 'A2', process: 'A', kind: 'send', message: 'mAB' },
+    { id: 'A3', process: 'A', kind: 'local', message: null },
+    { id: 'A4', process: 'A', kind: 'receive', message: 'mCA' },
+    { id: 'B1', process: 'B', kind: 'local', message: null },
+    { id: 'B2', process: 'B', kind: 'receive', message: 'mAB' },
+    { id: 'B3', process: 'B', kind: 'send', message: 'mBC' },
+    { id: 'C1', process: 'C', kind: 'local', message: null },
+    { id: 'C2', process: 'C', kind: 'receive', message: 'mBC' },
+    { id: 'C3', process: 'C', kind: 'send', message: 'mCA' },
+  ],
+  messages: [
+    { id: 'mAB', send: 'A2', receive: 'B2' },
+    { id: 'mBC', send: 'B3', receive: 'C2' },
+    { id: 'mCA', send: 'C3', receive: 'A4' },
+  ],
+  edges: [
+    { from: 'A1', to: 'A2', kind: 'program', message: null },
+    { from: 'A2', to: 'A3', kind: 'program', message: null },
+    { from: 'A3', to: 'A4', kind: 'program', message: null },
+    { from: 'B1', to: 'B2', kind: 'program', message: null },
+    { from: 'B2', to: 'B3', kind: 'program', message: null },
+    { from: 'C1', to: 'C2', kind: 'program', message: null },
+    { from: 'C2', to: 'C3', kind: 'program', message: null },
+    { from: 'A2', to: 'B2', kind: 'message', message: 'mAB' },
+    { from: 'B3', to: 'C2', kind: 'message', message: 'mBC' },
+    { from: 'C3', to: 'A4', kind: 'message', message: 'mCA' },
+  ],
+});
+
+const eventById = new Map(CLOCK_GRAPH.events.map(event => [event.id, event]));
+const sequences = CLOCK_GRAPH.processes.map(process =>
+  CLOCK_GRAPH.events.filter(event => event.process === process).map(event => event.id));
+
+function copyClock(clock) {
+  return { lamport: clock.lamport, vector: [...clock.vector] };
+}
+
+function copyEvent(event) {
+  return { id: event.id, process: event.process, kind: event.kind, message: event.message };
+}
+
+function copyMessage(message) {
+  return {
+    id: message.id,
+    send: message.send,
+    receive: message.receive,
+    status: message.status,
+    lamport: message.lamport,
+    vector: message.vector === null ? null : [...message.vector],
+  };
+}
+
+function enabledEvents(states, messages) {
+  const enabled = [];
+  for (let process = 0; process < states.length; process += 1) {
+    const id = sequences[process][states[process].next];
+    if (id === undefined) continue;
+    const event = eventById.get(id);
+    if (event.kind !== 'receive' ||
+        messages.find(message => message.id === event.message).status === 'in-flight') {
+      enabled.push(id);
+    }
+  }
+  return enabled;
+}
+
+function saveSnapshot(states, messages, records, update) {
+  return freezeTree({
+    step: records.length,
+    event: update === null ? null : update.event.id,
+    processes: states.map((state, process) => ({
+      id: CLOCK_GRAPH.processes[process],
+      nextEvent: sequences[process][state.next] ?? null,
+      ...copyClock(state),
+    })),
+    messages: messages.map(copyMessage),
+    recorded: records.map(record => ({ ...copyEvent(record), ...copyClock(record) })),
+    enabled: enabledEvents(states, messages),
+    update,
+  });
+}
+
+/**
+ * Build an immutable trace from a dense prefix of the fixed graph's event IDs.
+ * Admission is sequential: unknown, duplicate, program order, then send dependency.
+ * No caller array or earlier snapshot is modified, including on refusal.
+ */
+function createClockTrace(order = []) {
+  if (!Array.isArray(order)) throw new TypeError('Order must be an array of event IDs.');
+  if (order.length > CLOCK_GRAPH.events.length) {
+    throw new RangeError('Order must contain at most 10 events.');
+  }
+  const states = CLOCK_GRAPH.processes.map(() => ({
+    next: 0, lamport: 0, vector: [0, 0, 0],
+  }));
+  const messages = CLOCK_GRAPH.messages.map(message => ({
+    ...message, status: 'unsent', lamport: null, vector: null,
+  }));
+  const records = [];
+  const accepted = [];
+  const seen = new Set();
+  const snapshots = [saveSnapshot(states, messages, records, null)];
+
+  for (let index = 0; index < order.length; index += 1) {
+    if (!Object.prototype.hasOwnProperty.call(order, index) ||
+        typeof order[index] !== 'string' || !eventById.has(order[index])) {
+      throw new RangeError('Order contains an unknown event ID.');
+    }
+    const id = order[index];
+    if (seen.has(id)) throw new RangeError('Order contains a duplicate event ID.');
+    const event = eventById.get(id);
+    const process = CLOCK_GRAPH.processes.indexOf(event.process);
+    const state = states[process];
+    if (sequences[process][state.next] !== id) {
+      throw new RangeError('Event is not next in its process.');
+    }
+    const message = event.message === null ? null :
+      messages.find(item => item.id === event.message);
+    if (event.kind === 'receive' && message.status !== 'in-flight') {
+      throw new RangeError('Receive requires its matching send.');
+    }
+
+    const before = copyClock(state);
+    const incoming = event.kind === 'receive' ? {
+      id: message.id,
+      send: message.send,
+      receive: message.receive,
+      lamport: message.lamport,
+      vector: [...message.vector],
+    } : null;
+    const merged = incoming === null ? copyClock(state) : {
+      lamport: Math.max(state.lamport, incoming.lamport),
+      vector: state.vector.map((value, component) => Math.max(value, incoming.vector[component])),
+    };
+    const after = { lamport: merged.lamport + 1, vector: [...merged.vector] };
+    after.vector[process] += 1;
+    state.lamport = after.lamport;
+    state.vector = [...after.vector];
+    state.next += 1;
+
+    if (event.kind === 'send') {
+      message.status = 'in-flight';
+      message.lamport = after.lamport;
+      message.vector = [...after.vector];
+    } else if (event.kind === 'receive') {
+      message.status = 'delivered';
+    }
+
+    records.push({ ...copyEvent(event), ...copyClock(after) });
+    accepted.push(id);
+    seen.add(id);
+    snapshots.push(saveSnapshot(states, messages, records, {
+      event: copyEvent(event), before, incoming, merged, after,
+    }));
+  }
+
+  return freezeTree({ order: accepted, snapshots });
+}
+
+function forwardPath(start, end) {
+  const queue = [[start]];
+  const visited = new Set([start]);
+  for (let cursor = 0; cursor < queue.length; cursor += 1) {
+    const path = queue[cursor];
+    const last = path[path.length - 1];
+    for (const edge of CLOCK_GRAPH.edges) {
+      if (edge.from !== last || visited.has(edge.to)) continue;
+      const next = [...path, edge.to];
+      if (edge.to === end) return next;
+      visited.add(edge.to);
+      queue.push(next);
+    }
+  }
+  return [];
+}
+
+function compareNumber(left, right) {
+  return left < right ? '<' : left > right ? '>' : '=';
+}
+
+/**
+ * Compare two recorded events from an admitted prefix.
+ * Witnesses run from the causal predecessor to the successor. They are not a
+ * claim that this is the only path. Scalar or presentation order never creates
+ * a causal edge. A same-event comparison is not concurrency.
+ */
+function compareClockEvents(order, leftId, rightId) {
+  const trace = createClockTrace(order);
+  const recorded = trace.snapshots[trace.snapshots.length - 1].recorded;
+  const left = recorded.find(event => event.id === leftId);
+  const right = recorded.find(event => event.id === rightId);
+  if (left === undefined || right === undefined) {
+    throw new RangeError('Both events must be recorded in the selected prefix.');
+  }
+  const leftLeqRight = left.vector.every((value, index) => value <= right.vector[index]);
+  const rightLeqLeft = right.vector.every((value, index) => value <= left.vector[index]);
+  const leftStrictlyBefore = leftLeqRight &&
+    left.vector.some((value, index) => value < right.vector[index]);
+  const rightStrictlyBefore = rightLeqLeft &&
+    right.vector.some((value, index) => value < left.vector[index]);
+  let relation = 'same';
+  let path = [];
+  if (leftId !== rightId) {
+    path = forwardPath(leftId, rightId);
+    if (path.length > 0) {
+      relation = 'before';
+    } else {
+      path = forwardPath(rightId, leftId);
+      relation = path.length > 0 ? 'after' : 'concurrent';
+    }
+  }
+  return freezeTree({
+    left: leftId,
+    right: rightId,
+    relation,
+    path,
+    scalar: {
+      left: left.lamport,
+      right: right.lamport,
+      comparison: compareNumber(left.lamport, right.lamport),
+    },
+    vector: {
+      left: [...left.vector],
+      right: [...right.vector],
+      components: CLOCK_GRAPH.processes.map((process, index) => ({
+        process, left: left.vector[index], right: right.vector[index],
+        comparison: compareNumber(left.vector[index], right.vector[index]),
+      })),
+      leftLeqRight,
+      rightLeqLeft,
+      leftStrictlyBefore,
+      rightStrictlyBefore,
+    },
+  });
+}
+
+/** A chosen total order is a convention, not a causal or physical-time claim. */
+function clockTotalOrder(order, tieOrder = 'ABC') {
+  const trace = createClockTrace(order);
+  if (tieOrder !== 'ABC' && tieOrder !== 'CBA') {
+    throw new RangeError('Tie order must be ABC or CBA.');
+  }
+  const recorded = trace.snapshots[trace.snapshots.length - 1].recorded;
+  return freezeTree([...recorded].sort((left, right) =>
+    left.lamport - right.lamport ||
+    tieOrder.indexOf(left.process) - tieOrder.indexOf(right.process)).map(event => event.id));
+}
+
+
+/** Browser view for the fixed lesson. All state changes go through admitted event-ID prefixes. */
+const uiById = id => document.getElementById(id);
+const uiEventById = new Map(CLOCK_GRAPH.events.map(event => [event.id, event]));
+const uiSvgNS = 'http://www.w3.org/2000/svg';
+const uiPositions = {
+  A1: [90, 75], A2: [230, 75], A3: [370, 75], A4: [930, 75],
+  B1: [90, 195], B2: [370, 195], B3: [510, 195],
+  C1: [90, 315], C2: [650, 315], C3: [790, 315],
+};
+let uiTrace = createClockTrace();
+let uiCursor = 0;
+let uiLeft = '';
+let uiRight = '';
+
+function uiElement(tag, text, className) {
+  const node = document.createElement(tag);
+  if (text !== undefined) node.textContent = text;
+  if (className) node.className = className;
+  return node;
+}
+
+function uiSvgElement(tag, attributes, text) {
+  const node = document.createElementNS(uiSvgNS, tag);
+  for (const [name, value] of Object.entries(attributes)) node.setAttribute(name, String(value));
+  if (text !== undefined) node.textContent = text;
+  return node;
+}
+
+function uiVector(values) {
+  return '[' + values.join(', ') + ']';
+}
+
+function uiAction(event) {
+  return event.kind === 'local' ? 'local' : event.kind + ' ' + event.message;
+}
+
+function uiAnnounce(text) {
+  uiById('clock-status').textContent = text;
+}
+
+function uiError(error) {
+  const box = uiById('clock-error');
+  box.textContent = error instanceof Error ? error.message : 'The requested event could not be recorded.';
+  box.hidden = false;
+}
+
+function uiClearError() {
+  uiById('clock-error').hidden = true;
+  uiById('clock-error').textContent = '';
+}
+
+function uiRow(values) {
+  const row = uiElement('tr');
+  values.forEach((value, index) => {
+    const cell = uiElement(index === 0 ? 'th' : 'td', String(value));
+    if (index === 0) cell.scope = 'row';
+    row.append(cell);
+  });
+  return row;
+}
+
+function uiClockRow(label, clock, explanation) {
+  return uiRow([label, clock === null ? '—' : clock.lamport,
+    clock === null ? '—' : uiVector(clock.vector), explanation]);
+}
+
+function uiRenderProcesses(snapshot) {
+  const atTip = uiCursor === uiTrace.order.length;
+  for (const process of snapshot.processes) {
+    uiById('lamport-' + process.id).textContent = String(process.lamport);
+    uiById('vector-' + process.id).textContent = uiVector(process.vector);
+    const button = uiById('step-' + process.id);
+    const waiting = uiById('waiting-' + process.id);
+    const next = process.nextEvent === null ? null : uiEventById.get(process.nextEvent);
+    const enabled = next !== null && snapshot.enabled.includes(next.id);
+    button.disabled = !atTip || !enabled;
+    button.textContent = next === null ? 'Process complete' : 'Record ' + next.id + ' · ' + uiAction(next);
+    if (!atTip) {
+      waiting.textContent = 'Viewing history. Return to latest to record another event.';
+    } else if (next === null) {
+      waiting.textContent = 'All events in this process are recorded.';
+    } else if (enabled) {
+      waiting.textContent = next.kind === 'receive'
+        ? 'Its message is in flight; this receive is enabled.'
+        : 'This is the next event in its process.';
+    } else {
+      const message = CLOCK_GRAPH.messages.find(item => item.id === next.message);
+      waiting.textContent = 'Waiting for ' + message.send + ' to send ' + message.id + '.';
+    }
+  }
+}
+
+function uiRenderNavigation(snapshot) {
+  const tip = uiTrace.order.length;
+  uiById('snapshot-count').textContent = 'Snapshot ' + uiCursor + ' of ' + tip;
+  uiById('snapshot-label').textContent = snapshot.event === null ? 'Before any event' : 'After ' + snapshot.event;
+  uiById('snapshot-mode').textContent = uiCursor === tip ? 'Latest snapshot' : 'Inspecting saved history';
+  uiById('previous-step').disabled = uiCursor === 0;
+  uiById('next-step').disabled = uiCursor === tip;
+  uiById('return-latest').hidden = uiCursor === tip;
+  uiById('return-latest').disabled = uiCursor === tip;
+  const slider = uiById('snapshot-slider');
+  slider.max = String(tip);
+  slider.value = String(uiCursor);
+  slider.disabled = tip === 0;
+  slider.setAttribute('aria-valuetext', 'Snapshot ' + uiCursor + ' of ' + tip +
+    (snapshot.event === null ? ', initial clocks' : ', after ' + snapshot.event));
+  uiById('progress-fill').style.width = String(tip * 10) + '%';
+  uiById('progress-label').textContent = tip + ' of 10 events recorded';
+  uiById('history-note').textContent = uiCursor === tip
+    ? (tip === 10 ? 'The presentation is complete. Compare events, inspect earlier snapshots, or reset to choose another legal order.'
+      : 'Choose any enabled event. The other process clocks do not advance with your click.')
+    : 'Later snapshots remain saved. Inspection does not undo events or change their timestamps.';
+  const history = uiById('presentation-history');
+  history.replaceChildren();
+  [null, ...uiTrace.order].forEach((id, index) => {
+    const item = uiElement('li');
+    const button = uiElement('button', id === null ? '0 · start' : index + ' · ' + id);
+    button.type = 'button';
+    button.dataset.snapshot = String(index);
+    button.setAttribute('aria-label', 'Inspect snapshot ' + index + (id === null ? ', before any event' : ', after ' + id));
+    if (index === uiCursor) button.setAttribute('aria-current', 'step');
+    if (index > uiCursor) button.classList.add('ahead');
+    button.addEventListener('click', () => uiInspect(index, true));
+    item.append(button);
+    history.append(item);
+  });
+}
+
+function uiRenderUpdate(snapshot) {
+  const update = snapshot.update;
+  uiById('update-empty').hidden = update !== null;
+  uiById('update-detail').hidden = update === null;
+  const rows = uiById('update-rows');
+  rows.replaceChildren();
+  if (update === null) {
+    uiById('update-title').textContent = 'The first increment is yours';
+    uiById('scalar-equation').textContent = '';
+    uiById('vector-equation').textContent = '';
+    return;
+  }
+  const event = update.event;
+  uiById('update-title').textContent = event.id + ' · ' + uiAction(event);
+  rows.append(uiClockRow('Before', update.before, 'Local state of process ' + event.process + ' before this event.'));
+  rows.append(uiClockRow('Incoming', update.incoming,
+    update.incoming === null ? 'No incoming message for a local or send event.'
+      : update.incoming.id + ' retains the clocks recorded at ' + update.incoming.send + '.'));
+  rows.append(uiClockRow('Merged', update.merged,
+    update.incoming === null ? 'Keep the local clock; no receive merge.'
+      : 'Take the scalar maximum and each vector component maximum.'));
+  rows.append(uiClockRow('After', update.after,
+    'Increment the scalar and component ' + event.process + ' once; record these event clocks.'));
+  uiById('scalar-equation').textContent = update.incoming === null
+    ? update.before.lamport + ' + 1 = ' + update.after.lamport
+    : 'max(' + update.before.lamport + ', ' + update.incoming.lamport + ') + 1 = ' + update.after.lamport;
+  uiById('vector-equation').textContent = (update.incoming === null
+    ? 'Start with ' + uiVector(update.before.vector)
+    : 'max(' + uiVector(update.before.vector) + ', ' + uiVector(update.incoming.vector) + ') = ' + uiVector(update.merged.vector)) +
+    '; increment ' + event.process + ' → ' + uiVector(update.after.vector) + '.';
+}
+
+function uiRenderTables(snapshot) {
+  const messageRows = uiById('message-rows');
+  messageRows.replaceChildren();
+  for (const message of snapshot.messages) {
+    messageRows.append(uiRow([message.id, message.send + ' → ' + message.receive,
+      message.status === 'in-flight' ? 'in flight' : message.status,
+      message.lamport === null ? '—' : message.lamport,
+      message.vector === null ? '—' : uiVector(message.vector)]));
+  }
+  const eventRows = uiById('event-rows');
+  eventRows.replaceChildren();
+  uiById('events-empty').hidden = snapshot.recorded.length > 0;
+  for (const [index, event] of snapshot.recorded.entries()) {
+    const row = uiRow([event.id, uiAction(event), event.lamport, uiVector(event.vector), index + 1]);
+    if (event.id === snapshot.event) row.classList.add('current-row');
+    eventRows.append(row);
+  }
+}
+
+function uiFillSelect(select, ids, selected) {
+  select.replaceChildren();
+  if (ids.length === 0) {
+    const option = uiElement('option', 'Record an event first');
+    option.value = '';
+    select.append(option);
+  }
+  for (const id of ids) {
+    const option = uiElement('option', id);
+    option.value = id;
+    select.append(option);
+  }
+  select.disabled = ids.length === 0;
+  select.value = selected;
+}
+
+function uiRenderComparison(snapshot, prefix) {
+  const ids = snapshot.recorded.map(event => event.id);
+  uiLeft = ids.includes(uiLeft) ? uiLeft : (ids[0] ?? '');
+  uiRight = ids.includes(uiRight) ? uiRight : (ids[ids.length - 1] ?? '');
+  uiFillSelect(uiById('compare-left'), ids, uiLeft);
+  uiFillSelect(uiById('compare-right'), ids, uiRight);
+  uiById('compare-empty').hidden = ids.length > 0;
+  uiById('compare-detail').hidden = ids.length === 0;
+  uiById('example-unequal').disabled = !ids.includes('A3') || !ids.includes('C3');
+  uiById('example-tie').disabled = !ids.includes('A3') || !ids.includes('B2');
+  const componentRows = uiById('component-rows');
+  componentRows.replaceChildren();
+  if (ids.length === 0) return null;
+  const result = compareClockEvents(prefix, uiLeft, uiRight);
+  const relation = uiById('relation-result');
+  relation.className = 'relation ' + result.relation;
+  if (result.relation === 'same') {
+    relation.textContent = uiLeft + ' is the same event';
+    uiById('path-result').textContent = 'An event is not strictly before itself. Equal clocks here describe one event, not a concurrent pair.';
+  } else if (result.relation === 'concurrent') {
+    relation.textContent = uiLeft + ' ∥ ' + uiRight + ' · concurrent';
+    uiById('path-result').textContent = 'There is no directed path in either direction in this complete, fixed graph.';
+  } else {
+    const earlier = result.relation === 'before' ? uiLeft : uiRight;
+    const later = result.relation === 'before' ? uiRight : uiLeft;
+    relation.textContent = earlier + ' → ' + later + ' · happens before';
+    uiById('path-result').textContent = 'One valid causal path: ' + result.path.join(' → ') + '. Every segment is a program-order or message edge.';
+  }
+  uiById('scalar-comparison').textContent = 'L(' + uiLeft + ') = ' + result.scalar.left + ' ' +
+    result.scalar.comparison + ' ' + result.scalar.right + ' = L(' + uiRight + ').';
+  uiById('scalar-meaning').textContent = result.relation === 'same'
+    ? 'The same event has the same label.'
+    : result.scalar.comparison === '='
+      ? 'Distinct events with equal Lamport labels cannot be causally ordered in this model. A tie convention only chooses their display order.'
+      : result.relation === 'concurrent'
+        ? 'Unequal scalar labels do not establish causality. This pair has no causal path in either direction.'
+        : 'The path establishes causality; the increasing Lamport labels are consistent with it. Scalar inequality alone would not establish the path.';
+  uiById('vector-left-label').textContent = uiLeft;
+  uiById('vector-right-label').textContent = uiRight;
+  for (const component of result.vector.components) {
+    componentRows.append(uiRow([component.process, component.left, component.comparison, component.right]));
+  }
+  uiById('vector-meaning').textContent =
+    'V(' + uiLeft + ') ≤ V(' + uiRight + ') in every component: ' + (result.vector.leftLeqRight ? 'yes' : 'no') +
+    '. Strictly before (also at least one smaller component): ' + (result.vector.leftStrictlyBefore ? 'yes' : 'no') +
+    '. Reverse componentwise ≤: ' + (result.vector.rightLeqLeft ? 'yes' : 'no') +
+    '; reverse strict order: ' + (result.vector.rightStrictlyBefore ? 'yes' : 'no') + '.';
+  return result;
+}
+
+function uiRenderOrder(prefix, snapshot) {
+  const tieOrder = uiById('tie-order').value;
+  const ordered = clockTotalOrder(prefix, tieOrder);
+  const other = clockTotalOrder(prefix, tieOrder === 'ABC' ? 'CBA' : 'ABC');
+  const events = new Map(snapshot.recorded.map(event => [event.id, event]));
+  const list = uiById('scalar-order');
+  list.replaceChildren();
+  for (const id of ordered) {
+    list.append(uiElement('li', id + ' · L=' + events.get(id).lamport));
+  }
+  uiById('order-empty').hidden = ordered.length > 0;
+  uiById('tie-effect').textContent = ordered.join(',') === other.join(',')
+    ? 'The two conventions currently give the same list. Record A3 and B2 to expose their scalar tie.'
+    : 'Switching the convention changes tied entries in this list. Timestamps, edges and causal relations stay the same.';
+}
+
+function uiRenderGraph(snapshot, comparison) {
+  const host = uiById('clock-graph');
+  const svg = uiSvgElement('svg', { viewBox: '0 0 1020 405', role: 'img', 'aria-labelledby': 'graph-svg-title graph-svg-description' });
+  svg.append(uiSvgElement('title', { id: 'graph-svg-title' }, 'Fixed event graph at snapshot ' + uiCursor));
+  svg.append(uiSvgElement('desc', { id: 'graph-svg-description' },
+    'Three process lanes A, B and C. Solid arrows are program order; dashed arrows carry messages. ' +
+    'Recorded events have clock labels. Highlighted blue edges show the selected causal witness. ' +
+    'Exact edges, event clocks and comparison text appear in the adjacent tables.'));
+  const defs = uiSvgElement('defs', {});
+  for (const [id, fill] of [['graph-arrow', '#657b76'], ['graph-witness-arrow', '#1d568d']]) {
+    const marker = uiSvgElement('marker', { id, markerWidth: 9, markerHeight: 9, refX: 8, refY: 4, orient: 'auto', markerUnits: 'userSpaceOnUse' });
+    marker.append(uiSvgElement('path', { d: 'M0,0 L8,4 L0,8 Z', fill }));
+    defs.append(marker);
+  }
+  svg.append(defs);
+  for (const [process, y] of [['A', 75], ['B', 195], ['C', 315]]) {
+    svg.append(uiSvgElement('rect', { x: 18, y: y - 40, width: 984, height: 95, rx: 12, class: 'process-lane' }));
+    svg.append(uiSvgElement('text', { x: 30, y: y - 17, class: 'lane-label' }, process));
+  }
+  const witness = new Set();
+  if (comparison !== null) {
+    for (let index = 1; index < comparison.path.length; index += 1) {
+      witness.add(comparison.path[index - 1] + ':' + comparison.path[index]);
+    }
+  }
+  for (const edge of CLOCK_GRAPH.edges) {
+    const [x1, y1] = uiPositions[edge.from];
+    const [x2, y2] = uiPositions[edge.to];
+    const dx = x2 - x1, dy = y2 - y1, length = Math.hypot(dx, dy);
+    const isWitness = witness.has(edge.from + ':' + edge.to);
+    const line = uiSvgElement('line', {
+      x1: x1 + dx / length * 21, y1: y1 + dy / length * 21,
+      x2: x2 - dx / length * 25, y2: y2 - dy / length * 25,
+      class: 'graph-edge ' + edge.kind + (isWitness ? ' witness' : ''),
+      'marker-end': 'url(#' + (isWitness ? 'graph-witness-arrow' : 'graph-arrow') + ')',
+    });
+    line.append(uiSvgElement('title', {}, edge.from + ' → ' + edge.to + ': ' +
+      (edge.kind === 'message' ? edge.message : 'program order')));
+    svg.append(line);
+    if (edge.kind === 'message') {
+      const label = uiSvgElement('text', { x: (x1 + x2) / 2 + 10, y: (y1 + y2) / 2 - 8, class: 'message-label' }, edge.message);
+      svg.append(label);
+    }
+  }
+  const records = new Map(snapshot.recorded.map(event => [event.id, event]));
+  for (const event of CLOCK_GRAPH.events) {
+    const [x, y] = uiPositions[event.id];
+    const recorded = records.get(event.id);
+    const state = recorded ? 'recorded' : snapshot.enabled.includes(event.id) ? 'enabled' : 'pending';
+    const group = uiSvgElement('g', { class: 'graph-event ' + state + (snapshot.event === event.id ? ' inspected' : '') });
+    group.append(uiSvgElement('title', {}, event.id + ', ' + uiAction(event) + ', ' + state +
+      (recorded ? ', Lamport ' + recorded.lamport + ', vector ' + uiVector(recorded.vector) : '')));
+    group.append(uiSvgElement('circle', { cx: x, cy: y, r: 20 }));
+    group.append(uiSvgElement('text', { x, y: y + 5, 'text-anchor': 'middle', class: 'event-id' }, event.id));
+    if (recorded) group.append(uiSvgElement('text', { x, y: y + 39, 'text-anchor': 'middle', class: 'event-clock' },
+      'L' + recorded.lamport + ' · ' + uiVector(recorded.vector)));
+    svg.append(group);
+  }
+  host.replaceChildren(svg);
+}
+
+function uiRender() {
+  const snapshot = uiTrace.snapshots[uiCursor];
+  const prefix = uiTrace.order.slice(0, uiCursor);
+  uiRenderProcesses(snapshot);
+  uiRenderNavigation(snapshot);
+  uiRenderUpdate(snapshot);
+  uiRenderTables(snapshot);
+  const comparison = uiRenderComparison(snapshot, prefix);
+  uiRenderOrder(prefix, snapshot);
+  uiRenderGraph(snapshot, comparison);
+}
+
+function uiInspect(index, restoreHistoryFocus = false) {
+  if (!Number.isInteger(index) || index < 0 || index > uiTrace.order.length) return;
+  uiClearError();
+  uiCursor = index;
+  uiRender();
+  if (restoreHistoryFocus) {
+    uiById('presentation-history').querySelector('[data-snapshot="' + index + '"]').focus();
+  }
+  uiAnnounce('Inspecting snapshot ' + index + (uiTrace.snapshots[index].event === null
+    ? ', before any event.' : ', after ' + uiTrace.snapshots[index].event + '.') +
+    (index < uiTrace.order.length ? ' Later snapshots remain saved; return to latest to record an event.' : ' This is the latest saved snapshot.'));
+}
+
+for (const process of CLOCK_GRAPH.processes) {
+  uiById('step-' + process).addEventListener('click', () => {
+    if (uiCursor !== uiTrace.order.length) return;
+    const snapshot = uiTrace.snapshots[uiCursor];
+    const next = snapshot.processes.find(item => item.id === process).nextEvent;
+    if (next === null || !snapshot.enabled.includes(next)) return;
+    try {
+      const nextTrace = createClockTrace([...uiTrace.order, next]);
+      uiTrace = nextTrace;
+      uiCursor = nextTrace.order.length;
+      uiClearError();
+      uiRender();
+      uiAnnounce('Recorded ' + next + '. Snapshot ' + uiCursor + ' of 10; ' +
+        (uiCursor === 10 ? 'presentation complete.' : 'choose another enabled event.'));
+    } catch (error) {
+      uiError(error);
+    }
+  });
+}
+
+uiById('previous-step').addEventListener('click', () => uiInspect(uiCursor - 1));
+uiById('next-step').addEventListener('click', () => uiInspect(uiCursor + 1));
+uiById('return-latest').addEventListener('click', () => uiInspect(uiTrace.order.length));
+uiById('snapshot-slider').addEventListener('input', event => uiInspect(Number(event.target.value)));
+uiById('reset-presentation').addEventListener('click', () => {
+  uiTrace = createClockTrace();
+  uiCursor = 0;
+  uiLeft = '';
+  uiRight = '';
+  uiById('tie-order').value = 'ABC';
+  uiClearError();
+  uiRender();
+  uiAnnounce('Presentation reset. All process clocks are zero and all three messages are unsent.');
+});
+
+for (const id of ['compare-left', 'compare-right']) {
+  uiById(id).addEventListener('change', () => {
+    uiLeft = uiById('compare-left').value;
+    uiRight = uiById('compare-right').value;
+    uiRender();
+    uiAnnounce('Comparison updated: ' + uiLeft + ' and ' + uiRight + '.');
+  });
+}
+
+uiById('tie-order').addEventListener('change', () => {
+  const snapshot = uiTrace.snapshots[uiCursor];
+  uiRenderOrder(uiTrace.order.slice(0, uiCursor), snapshot);
+  uiAnnounce('Scalar tie convention changed. Event clocks and causal relations are unchanged.');
+});
+
+for (const [id, left, right] of [['example-unequal', 'A3', 'C3'], ['example-tie', 'A3', 'B2']]) {
+  uiById(id).addEventListener('click', () => {
+    const ids = uiTrace.snapshots[uiCursor].recorded.map(event => event.id);
+    if (!ids.includes(left) || !ids.includes(right)) return;
+    uiLeft = left;
+    uiRight = right;
+    uiRender();
+    uiAnnounce('Comparing ' + left + ' and ' + right + '. Read the path, scalar and vector evidence below.');
+  });
+}
+
+function uiDownload(text, filename, type, buttonId) {
+  const button = uiById(buttonId);
+  let url = null;
+  let anchor = null;
+  button.disabled = true;
+  try {
+    url = URL.createObjectURL(new Blob([text], { type }));
+    anchor = uiElement('a');
+    anchor.href = url;
+    anchor.download = filename;
+    anchor.hidden = true;
+    document.body.append(anchor);
+    anchor.click();
+    uiById('download-status').textContent = 'Download requested: ' + filename + '. The complete original text, including attribution and licensing, is preserved.';
+  } catch {
+    uiById('download-status').textContent = 'The download could not be started. Try again in a browser that supports file downloads.';
+  } finally {
+    if (anchor !== null) anchor.remove();
+    if (url !== null) setTimeout(() => URL.revokeObjectURL(url), 1000);
+    button.disabled = false;
+  }
+}
+
+uiById('download-course').addEventListener('click', () =>
+  uiDownload(embeddedCourse, 'logical-clocks.json', 'application/json;charset=utf-8', 'download-course'));
+uiById('download-guide').addEventListener('click', () =>
+  uiDownload(embeddedGuide, 'logical-clocks.md', 'text/markdown;charset=utf-8', 'download-guide'));
+
+uiRender();
+
+})();
+  </script>
+</body>
+</html>
