@@ -1,0 +1,251 @@
+{
+  "format": "recallweave-deck/1",
+  "title": "Congruences together: when two remainder conditions agree",
+  "attribution": "RecallWeave contributors. Original questions, explanations, numerical examples and presentation. Mathematical background: MIT OpenCourseWare, Abhinav Kumar, 18.781 Theory of Numbers, Spring 2012, Lecture 5, Linear Congruences and the Chinese Remainder Theorem (https://ocw.mit.edu/courses/18-781-theory-of-numbers-spring-2012/7b36e2ada32c5ed0638783d4e66af60c_MIT18_781S12_lec5.pdf). No source exercise, passage or figure is reproduced.",
+  "license": "Original lesson material may be used, adapted and redistributed with attribution to RecallWeave contributors. The linked MIT material retains its own terms and is not reproduced.",
+  "concepts": [
+    "Residue classes",
+    "Modular inverses",
+    "Compatibility",
+    "Constructing a solution",
+    "Complete solution classes"
+  ],
+  "items": [
+    {
+      "id": "congruences-residue-1",
+      "concept": "Residue classes",
+      "prerequisites": [],
+      "prompt": "Which number is the canonical remainder of −14 modulo 5? A canonical remainder r satisfies 0 ≤ r < 5.",
+      "options": [
+        "−4",
+        "4",
+        "1",
+        "0"
+      ],
+      "answer": 2,
+      "explanation": "The identity −14 = (−3) × 5 + 1 has remainder 1 in the required range. The negative remainder −4 also differs from −14 by a multiple of 5, but is not the canonical representative. Neither 4 nor 0 is congruent to −14 modulo 5.",
+      "transfer": "Find the canonical remainder of −23 modulo 6. Verify it by writing −23 = 6q + r."
+    },
+    {
+      "id": "congruences-residue-2",
+      "concept": "Residue classes",
+      "prerequisites": [],
+      "prompt": "Which list contains only integers congruent to 3 modulo 7?",
+      "options": [
+        "−11, 3, 17",
+        "−7, 0, 7",
+        "−4, 4, 11",
+        "3, 7, 10"
+      ],
+      "answer": 0,
+      "explanation": "Subtracting 3 from −11, 3 and 17 gives −14, 0 and 14, each divisible by 7. A congruence describes infinitely many integers, including negative ones; it is not an equation that forces x = 3.",
+      "transfer": "Write three other members of this residue class, including a negative integer, and check their differences from 3."
+    },
+    {
+      "id": "congruences-residue-3",
+      "concept": "Residue classes",
+      "prerequisites": [],
+      "prompt": "What restriction does x ≡ 4 (mod 1) impose on an integer x?",
+      "options": [
+        "x must equal 4.",
+        "x must be positive.",
+        "x must be a multiple of 4.",
+        "It imposes no restriction."
+      ],
+      "answer": 3,
+      "explanation": "Every integer difference x − 4 is divisible by 1. The sole canonical residue modulo 1 is zero, so normalizing the written residue 4 gives 0. Modulus 1 is valid and does not discard any integer candidate.",
+      "transfer": "Combine x ≡ 4 (mod 1) with x ≡ 3 (mod 8). Give the least nonnegative solution and the period."
+    },
+    {
+      "id": "congruences-inverse-1",
+      "concept": "Modular inverses",
+      "prerequisites": [
+        "Residue classes"
+      ],
+      "prompt": "Which integer is the multiplicative inverse of 7 modulo 11?",
+      "options": [
+        "4",
+        "8",
+        "7",
+        "3"
+      ],
+      "answer": 1,
+      "explanation": "7 × 8 = 56 = 5 × 11 + 1, so 8 is an inverse. The other products have remainders 6, 5 and 10. An inverse is a multiplicative identity witness modulo the modulus, not an ordinary fraction.",
+      "transfer": "Use the inverse to solve 7k ≡ 2 (mod 11), and check your k in the original congruence."
+    },
+    {
+      "id": "congruences-inverse-2",
+      "concept": "Modular inverses",
+      "prerequisites": [
+        "Residue classes"
+      ],
+      "prompt": "Does 6 have a multiplicative inverse modulo 9?",
+      "options": [
+        "Yes: the inverse is 6.",
+        "Yes: the inverse is 3.",
+        "No: every 6k is divisible by 3.",
+        "No: inverses require a prime input."
+      ],
+      "answer": 2,
+      "explanation": "If 6k were congruent to 1 modulo 9, then 6k − 1 would be divisible by 9 and hence by 3. But 6k is divisible by 3 and 1 is not. The obstruction is gcd(6, 9) = 3, not whether the input is prime.",
+      "transfer": "Explain why 8 does have an inverse modulo 15 although both numbers are composite. Find one witness."
+    },
+    {
+      "id": "congruences-compatible-1",
+      "concept": "Compatibility",
+      "prerequisites": [
+        "Residue classes"
+      ],
+      "prompt": "For x ≡ 2 (mod 6) and x ≡ 5 (mod 9), which compatibility check is correct?",
+      "options": [
+        "gcd 3 divides difference 3, so a solution exists.",
+        "gcd 3 differs from 1, so no solution exists.",
+        "Product 54 divides difference 3, so a solution exists.",
+        "Residues 2 and 5 differ, so no solution exists."
+      ],
+      "answer": 0,
+      "explanation": "The gcd is 3 and the normalized residue difference is 5 − 2 = 3. Divisibility by the gcd is the condition. Shared factors do not automatically cause a contradiction; here 14 leaves remainders 2 and 5. Coprime moduli guarantee compatibility for every residue pair, but they are not necessary for this particular pair.",
+      "transfer": "Change only the second residue so the system becomes incompatible. State the new difference and its remainder modulo the gcd."
+    },
+    {
+      "id": "congruences-compatible-2",
+      "concept": "Compatibility",
+      "prerequisites": [
+        "Residue classes"
+      ],
+      "prompt": "Why is there no integer satisfying x ≡ 1 (mod 4) and x ≡ 2 (mod 6)?",
+      "options": [
+        "The two moduli are different.",
+        "The product of the moduli is too large.",
+        "Every nonzero pair of residues is incompatible.",
+        "The first condition requires odd x; the second requires even x."
+      ],
+      "answer": 3,
+      "explanation": "The first class consists of odd integers and the second of even integers. Equivalently, gcd(4, 6) = 2 does not divide the difference 2 − 1 = 1. This is an exact contradiction, not a failed search within a small displayed range.",
+      "transfer": "Replace the second residue with an odd one and determine whether the two constraints become compatible."
+    },
+    {
+      "id": "congruences-compatible-3",
+      "concept": "Compatibility",
+      "prerequisites": [
+        "Residue classes"
+      ],
+      "prompt": "How do x ≡ 6 (mod 7) and x ≡ −1 (mod 7) combine?",
+      "options": [
+        "They contradict because the written residues differ.",
+        "They are the same class, x ≡ 6 (mod 7).",
+        "They give the single integer x = 6.",
+        "They repeat only every 49 integers."
+      ],
+      "answer": 1,
+      "explanation": "−1 normalizes to 6 modulo 7. Both conditions select the same integers. Repeating an identical condition adds no restriction and does not multiply its period. The complete class is 6 + 7k for integer k.",
+      "transfer": "Give two differently written residues modulo 9 that describe the same class, then two that describe incompatible classes."
+    },
+    {
+      "id": "congruences-construct-1",
+      "concept": "Constructing a solution",
+      "prerequisites": [
+        "Modular inverses",
+        "Compatibility"
+      ],
+      "prompt": "What is the least nonnegative integer satisfying x ≡ 3 (mod 4) and x ≡ 2 (mod 5)?",
+      "options": [
+        "3",
+        "12",
+        "7",
+        "17"
+      ],
+      "answer": 2,
+      "explanation": "The integers 3, 7, 11, 15, 19 are the first representatives of the first class below 20. Only 7 has remainder 2 modulo 5. Check both equations: 7 = 1 × 4 + 3 and 7 = 1 × 5 + 2. The integer 17 meets the second condition but not the first.",
+      "transfer": "Find the next positive solution and one negative solution. Verify both remainders using nonnegative canonical residues."
+    },
+    {
+      "id": "congruences-construct-2",
+      "concept": "Constructing a solution",
+      "prerequisites": [
+        "Modular inverses",
+        "Compatibility"
+      ],
+      "prompt": "For x = 2 + 6k to also satisfy x ≡ 5 (mod 9), divide 6k ≡ 3 (mod 9) by gcd 3. The reduced equation is 2k ≡ 1 (mod 3). Which k is its canonical solution?",
+      "options": [
+        "0",
+        "1",
+        "3",
+        "2"
+      ],
+      "answer": 3,
+      "explanation": "Modulo 3, the inverse of 2 is 2 because 2 × 2 = 4 ≡ 1. Thus k ≡ 2, producing x = 2 + 6 × 2 = 14. Dividing the coefficient, target and modulus by their common gcd preserves the appropriate solution class for k; dividing only the target would not.",
+      "transfer": "Starting from the identity (−1) × 6 + 1 × 9 = 3, explain how the coefficient −1 becomes the inverse 2 of 6/3 modulo 9/3."
+    },
+    {
+      "id": "congruences-construct-3",
+      "concept": "Constructing a solution",
+      "prerequisites": [
+        "Modular inverses",
+        "Compatibility"
+      ],
+      "prompt": "For x ≡ 5 (mod 12) and x ≡ 1 (mod 4), the reduced second modulus is 4/gcd(12, 4) = 1. What does this mean?",
+      "options": [
+        "The second condition adds no restriction; x = 5 + 12k.",
+        "The input is invalid because a reduced modulus is 1.",
+        "The system has no solution because inverse modulo 1 is missing.",
+        "The period becomes 48 because both moduli must be multiplied."
+      ],
+      "answer": 0,
+      "explanation": "Every integer 5 + 12k has remainder 1 modulo 4. The canonical multiplier modulo 1 is zero, so no inverse operation is needed. The least nonnegative solution is 5 and the period remains 12. The explorer labels this case directly rather than inventing an ordinary inverse modulo 1.",
+      "transfer": "Reverse the order of the two congruences and show that the least nonnegative solution and period are unchanged."
+    },
+    {
+      "id": "congruences-class-1",
+      "concept": "Complete solution classes",
+      "prerequisites": [
+        "Constructing a solution"
+      ],
+      "prompt": "For the solution x ≡ 7 (mod 20), which description gives every integer solution?",
+      "options": [
+        "Only x = 7.",
+        "x = 7 + 20k for any integer k.",
+        "x = 7k for any integer k.",
+        "x = 20 + 7k for any integer k."
+      ],
+      "answer": 1,
+      "explanation": "The integer parameter k may be positive, zero or negative. For example, k = −1, 0, 1 gives −13, 7 and 27. A least nonnegative representative names a whole class; it is not the only solution and is not a promise about a physical schedule.",
+      "transfer": "If you want only solutions in the integer interval [0, 100], list them and explain why restricting the interval is a separate condition."
+    },
+    {
+      "id": "congruences-class-2",
+      "concept": "Complete solution classes",
+      "prerequisites": [
+        "Compatibility",
+        "Constructing a solution"
+      ],
+      "prompt": "Compatible conditions with moduli 6 and 9 repeat together after what least positive period?",
+      "options": [
+        "54",
+        "3",
+        "18",
+        "15"
+      ],
+      "answer": 2,
+      "explanation": "A difference between common solutions must be divisible by both moduli, so it must be a multiple of lcm(6, 9) = 6 × 9 / 3 = 18. The product 54 repeats but is not least; gcd 3 does not preserve either remainder in general. For the residues 2 and 5, the class is 14 + 18k.",
+      "transfer": "Give the least period for compatible constraints with moduli 8 and 12. Explain why their product is unnecessarily large."
+    },
+    {
+      "id": "congruences-class-3",
+      "concept": "Complete solution classes",
+      "prerequisites": [
+        "Constructing a solution"
+      ],
+      "prompt": "An inspector displays 24 consecutive integers and none matches both residue conditions. What can you conclude from that display alone?",
+      "options": [
+        "The whole system is incompatible.",
+        "The least solution must be negative.",
+        "The period must be less than 24.",
+        "That particular 24-integer window contains no solution."
+      ],
+      "answer": 3,
+      "explanation": "A compatible system may have a period much larger than the displayed window and its first solution may lie elsewhere. The exact gcd/difference test establishes compatibility; a bounded display only illustrates its chosen integers. For example, x ≡ 40 (mod 101) with a redundant modulus-1 condition has no solution among 0 through 23.",
+      "transfer": "Choose a compatible system whose first solution lies beyond 23. Explain how the exact result and the bounded display can agree."
+    }
+  ]
+}
