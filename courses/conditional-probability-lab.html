@@ -1,0 +1,451 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Conditional probability lab · RecallWeave</title>
+<meta name="description" content="Explore exact probabilities by changing the counts and conditioning group in a two-event table.">
+<style>
+:root{color-scheme:light;--paper:#f5f3ec;--white:#fffefa;--ink:#243730;--muted:#52635b;--line:#bac6bb;--green:#22654c;--soft-green:#d8eddf;--blue:#e3edf7;--blue-ink:#264c6c;--error:#9e3029}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.55 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}button,input,select{font:inherit}a{color:var(--green);text-underline-offset:3px}button,a,input,select,summary{touch-action:manipulation}button,input,select{min-height:44px}button{border:1px solid var(--green);border-radius:9px;padding:10px 16px;background:var(--green);color:#fff;cursor:pointer;font-weight:650}button:hover{background:#184d3a}button:disabled{opacity:.55;cursor:not-allowed}button.secondary{background:var(--white);color:var(--green)}button.secondary:hover{background:#e8f2ea}:focus-visible{outline:3px solid #9a5800;outline-offset:3px}input,select{width:100%;min-width:0;border:1px solid #7d9385;border-radius:7px;padding:9px 11px;color:var(--ink);background:#fff}input[aria-invalid=true]{border:2px solid var(--error);background:#fff2ef}label{display:block;font-weight:650;margin-bottom:5px}small,.small{font-size:.83rem}.muted{color:var(--muted)}[hidden]{display:none!important}
+header,main,footer{width:min(1120px,calc(100% - 40px));margin:auto}header{padding:35px 0 28px}.brand{display:flex;align-items:center;gap:9px;font-size:.82rem;font-weight:750;letter-spacing:.06em;text-transform:uppercase}.mark{display:grid;grid-template-columns:repeat(2,7px);gap:3px}.mark i{width:7px;height:7px;background:var(--green);border-radius:2px}.mark i:last-child{background:#91b999}h1{font-size:clamp(2rem,4.6vw,3.4rem);line-height:1.1;letter-spacing:-.045em;margin:24px 0 14px;max-width:850px}header>p{max-width:720px;color:var(--muted);font-size:1.08rem;margin:0}h2{font-size:1.2rem;line-height:1.3;margin:0 0 12px}h3{font-size:1rem;margin:0 0 10px}p{margin:0 0 14px}.workspace{display:grid;grid-template-columns:minmax(275px,.85fr) minmax(0,1.65fr);gap:23px;align-items:start}.panel{border:1px solid var(--line);border-radius:16px;background:var(--white);padding:23px;min-width:0}.eyebrow{color:var(--green);text-transform:uppercase;font-size:.72rem;letter-spacing:.11em;font-weight:750;margin-bottom:9px}.controls{position:sticky;top:16px}.field{margin:0 0 15px}.field small{display:block;color:var(--muted);margin-top:4px}.count-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.count-grid input{font-variant-numeric:tabular-nums}.count-grid label{font-size:.9rem}.count-grid label small{display:block;font-weight:400;color:var(--muted)}fieldset{border:0;padding:0;margin:22px 0 18px;min-width:0}legend{font-weight:750;margin-bottom:12px;padding:0}.preset-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:end}.preset-row button{padding:9px 13px}.rule{border-top:1px solid var(--line);padding-top:18px;margin-top:20px}#input-status{min-height:2.7em;font-size:.88rem;color:var(--muted);margin:16px 0 0}#input-status.has-error{color:var(--error)}.right-column{min-width:0}.selector-panel{margin-bottom:18px}.selector-panel label{font-size:1.03rem}.selector-panel p{margin:8px 0 0;font-size:.85rem;color:var(--muted)}
+.focus-card{padding:25px;border:1px solid #789e88;border-radius:16px;background:#f1f8ef;margin-bottom:18px}.focus-heading{display:flex;align-items:baseline;justify-content:space-between;gap:15px;flex-wrap:wrap}#focus-title{font-size:1.65rem;margin:0;font-weight:750;letter-spacing:-.03em}#focus-meaning{overflow-wrap:anywhere;color:var(--muted);font-size:.92rem;margin:7px 0 18px}.calculation{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:14px;align-items:center}.operand{min-width:0;background:var(--white);border:1px solid #9ab4a1;border-radius:10px;padding:13px}.operand small{display:block;color:var(--muted);font-weight:600}.operand strong{font-size:clamp(1.15rem,2.6vw,1.75rem);font-variant-numeric:tabular-nums;overflow-wrap:anywhere;display:block}.divide{font-size:1.7rem}.answer-line{display:flex;gap:14px;align-items:baseline;flex-wrap:wrap;margin:19px 0 6px}#focus-fraction{font-size:1.75rem;line-height:1.2;font-weight:780;overflow-wrap:anywhere}#focus-percentage{font-size:1rem;color:var(--green);font-weight:700}#focus-explanation{font-size:.86rem;color:var(--muted);margin:12px 0 0}.table-panel{margin-bottom:18px}.table-panel>p{font-size:.86rem;color:var(--muted)}table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}th,td{text-align:left;border-bottom:1px solid var(--line);padding:12px 10px;overflow-wrap:anywhere}#event-table{table-layout:fixed;font-size:.89rem}#event-table th{font-size:.78rem;font-weight:650}#event-table thead th{vertical-align:bottom}#event-table th:first-child{width:24%}#event-table td{border:1px solid var(--line);vertical-align:middle}#event-table [data-count]{font-weight:750;display:block;font-size:1rem}#event-table [data-badge]{display:block;font-size:.68rem;font-weight:700;margin-top:7px}#event-table .is-denominator{background:var(--blue);color:var(--blue-ink)}#event-table .is-numerator{background:var(--soft-green);color:#174c31}#event-table tfoot{font-weight:700}.legend{display:flex;flex-wrap:wrap;gap:8px 17px;font-size:.77rem;margin-top:14px}.legend span{display:flex;align-items:center;gap:6px}.legend i{width:13px;height:13px;border:1px solid #62796e;border-radius:3px;background:var(--soft-green)}.legend .d i{background:var(--blue)}
+.comparison{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-bottom:18px}.comparison .panel{padding:19px}.comparison h3{font-size:1.03rem}.comparison p{font-size:.82rem;color:var(--muted);overflow-wrap:anywhere;min-height:2.5em}.comparison strong{display:block;font-size:1.5rem;overflow-wrap:anywhere}.comparison small{display:block;color:var(--muted);margin-top:3px}.bar-track{height:7px;background:#dfe8df;border-radius:8px;margin:17px 0 8px;overflow:hidden}.bar{height:100%;background:var(--green);width:0}.independence{margin-bottom:18px}.independence>strong{display:block;font-size:1.08rem;margin:10px 0}.identity{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:10px;align-items:center;margin:16px 0}.identity div{background:var(--paper);border-radius:8px;padding:11px;min-width:0}.identity small{display:block;color:var(--muted)}.identity code{display:block;overflow-wrap:anywhere;font-size:.86rem;margin-top:5px}#independence-sign{font-size:1.6rem}.independence p{font-size:.86rem;color:var(--muted);margin-bottom:0}.all-values{margin:0 0 18px}.all-values summary{font-weight:700;cursor:pointer;padding:3px 0}.all-values table{font-size:.84rem;margin-top:15px;table-layout:fixed}.all-values th:first-child{width:49%}.all-values th small{display:block;color:var(--muted);font-weight:400;margin-top:3px}.selected-row{background:#e8f1e7}.download-row{display:flex;flex-wrap:wrap;gap:10px;margin:17px 0}.course-panel{margin-top:23px}.course-panel p{max-width:850px}.course-panel ol{padding-left:23px;margin:14px 0}.course-panel li{padding:3px 0}.scope{font-size:.85rem;color:var(--muted);max-width:900px}footer{padding:24px 0 40px;font-size:.8rem;color:var(--muted)}footer p{margin:0}.noscript{padding:16px;border:2px solid var(--error);margin-bottom:20px}
+@media(max-width:820px){.workspace{grid-template-columns:1fr}.controls{position:static}.controls .label-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px}.controls fieldset{margin-top:10px}.count-grid{grid-template-columns:repeat(4,minmax(0,1fr))}.preset-row{grid-template-columns:minmax(0,1fr) auto}.selector-panel{margin-top:0}}
+@media(max-width:520px){header,main,footer{width:calc(100% - 28px)}header{padding-top:24px}.panel,.focus-card{padding:17px}.workspace{gap:17px}.controls .label-grid{grid-template-columns:1fr;gap:0}.count-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.comparison{grid-template-columns:1fr}.comparison p{min-height:0}.calculation{gap:8px}.operand{padding:9px}.operand strong{font-size:1.2rem}#event-table th,#event-table td{padding:9px 5px}#event-table th{font-size:.7rem}#event-table [data-count]{font-size:.85rem}.identity{gap:7px}.identity div{padding:8px}.identity code{font-size:.75rem}.download-row button{width:100%}.all-values th,.all-values td{padding:10px 5px}}
+@media print{body{background:#fff;font-size:11pt}.controls,.selector-panel,.download-row,.course-panel,footer{display:none}.workspace{display:block}header,main{width:100%}header{padding:0 0 20px}.panel,.focus-card{break-inside:avoid;box-shadow:none}.all-values{display:block}button{display:none}}
+</style>
+</head>
+<body>
+<header>
+<div class="brand"><span class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>RecallWeave · Probability lab</div>
+<h1>Choose the right denominator.</h1>
+<p>Build a table of equally likely outcomes. Compare both conditional directions and see exactly which group you are counting.</p>
+</header>
+<main>
+<noscript><p class="noscript">This interactive lab needs JavaScript enabled in your browser. No network connection is required after saving the complete HTML file.</p></noscript>
+<div class="workspace">
+<section class="panel controls" aria-labelledby="table-heading">
+<p class="eyebrow">1 · Build your table</p><h2 id="table-heading">Two events, four counts</h2>
+<p class="small muted">Each outcome belongs to exactly one cell. “Not A” and “not B” mean the complements within this table.</p>
+<form id="table-form">
+<div class="label-grid">
+<div class="field"><label for="label-a">Event A</label><input id="label-a" value="Defective file" autocomplete="off" spellcheck="false" aria-describedby="label-help"></div>
+<div class="field"><label for="label-b">Event B</label><input id="label-b" value="Flagged file" autocomplete="off" spellcheck="false" aria-describedby="label-help"></div>
+</div>
+<p id="label-help" class="small muted">Use a short literal label, up to 80 characters. Control characters are not accepted.</p>
+<fieldset><legend>How many outcomes?</legend><div class="count-grid">
+<div><label for="count-ab">A and B<small>Both events</small></label><input id="count-ab" aria-label="Count for A and B" aria-describedby="count-help" inputmode="numeric" autocomplete="off" spellcheck="false" value="9"></div>
+<div><label for="count-aNotB">A and not B<small>A only</small></label><input id="count-aNotB" aria-label="Count for A and not B" aria-describedby="count-help" inputmode="numeric" autocomplete="off" spellcheck="false" value="1"></div>
+<div><label for="count-notAB">Not A and B<small>B only</small></label><input id="count-notAB" aria-label="Count for not A and B" aria-describedby="count-help" inputmode="numeric" autocomplete="off" spellcheck="false" value="99"></div>
+<div><label for="count-neither">Not A and not B<small>Neither event</small></label><input id="count-neither" aria-label="Count for neither A nor B" aria-describedby="count-help" inputmode="numeric" autocomplete="off" spellcheck="false" value="891"></div>
+</div></fieldset>
+<p id="count-help" class="small muted">Whole counts only: 0–999,999,999,999,999,999. Surrounding whitespace and leading zeros are accepted. Fractions, signs, grouping commas and exponents are not.</p>
+<div class="rule"><label for="preset-select">Try a fictional example</label><div class="preset-row"><select id="preset-select">
+<option value="rare">Rare defective files · 1%</option><option value="common">More defective files · 10%</option><option value="independent">Independent events</option><option value="emptyB">No outcomes in B</option><option value="empty">Empty table</option><option value="close">Almost equal is not equal</option>
+</select><button type="button" id="apply-preset" class="secondary">Load</button></div></div>
+<p id="input-status" role="status" aria-live="polite">Calculating the initial table…</p>
+</form>
+</section>
+<div class="right-column">
+<section class="panel selector-panel" aria-labelledby="inspect-heading">
+<p class="eyebrow">2 · Choose a counting question</p>
+<label id="inspect-heading" for="probability-select">Which probability do you want to inspect?</label><select id="probability-select"></select>
+<p>The event after the vertical bar is the condition. It determines your denominator.</p>
+</section>
+<div id="results" hidden>
+<section class="focus-card" aria-label="Selected probability">
+<div class="focus-heading"><h2 id="focus-title" data-output></h2><span class="small muted">Exact count calculation</span></div>
+<p id="focus-meaning" data-output></p>
+<div class="calculation"><div class="operand"><small>N · Numerator outcomes</small><strong id="focus-numerator" data-output></strong></div><span class="divide" aria-label="divided by">÷</span><div class="operand"><small>D · Denominator outcomes</small><strong id="focus-denominator" data-output></strong></div></div>
+<div class="answer-line"><strong id="focus-fraction" data-output></strong><span id="focus-percentage" data-output></span></div>
+<p id="focus-explanation" data-output></p>
+</section>
+<section class="panel table-panel" aria-labelledby="counted-heading">
+<h2 id="counted-heading">See the outcomes being counted</h2><p>The N cells count toward the numerator. Every highlighted cell belongs to the denominator.</p>
+<table id="event-table"><caption class="small muted">Exact counts from the current table</caption>
+<thead><tr><th scope="col">Outcomes</th><th scope="col" id="column-b" data-output></th><th scope="col" id="column-not-b" data-output></th><th scope="col">Row total</th></tr></thead>
+<tbody>
+<tr><th scope="row" id="row-a" data-output></th><td data-cell="ab"><span data-count data-output></span><small data-badge data-output></small></td><td data-cell="aNotB"><span data-count data-output></span><small data-badge data-output></small></td><td id="row-total-a" data-output></td></tr>
+<tr><th scope="row" id="row-not-a" data-output></th><td data-cell="notAB"><span data-count data-output></span><small data-badge data-output></small></td><td data-cell="neither"><span data-count data-output></span><small data-badge data-output></small></td><td id="row-total-not-a" data-output></td></tr>
+</tbody><tfoot><tr><th scope="row">Column total</th><td id="column-total-b" data-output></td><td id="column-total-not-b" data-output></td><td id="table-total" data-output></td></tr></tfoot></table>
+<div class="legend"><span><i aria-hidden="true"></i>N + D · Numerator and denominator</span><span class="d"><i aria-hidden="true"></i>D · Denominator only</span></div>
+</section>
+<div class="comparison">
+<section class="panel" aria-label="A given B"><p class="eyebrow">Condition on B</p><h3>P(A | B)</h3><p id="forward-meaning" data-output></p><strong id="forward-fraction" data-output></strong><small id="forward-counts" data-output></small><div class="bar-track" aria-hidden="true"><div class="bar" id="forward-bar"></div></div><small id="forward-percentage" data-output></small></section>
+<section class="panel" aria-label="B given A"><p class="eyebrow">Condition on A</p><h3>P(B | A)</h3><p id="reverse-meaning" data-output></p><strong id="reverse-fraction" data-output></strong><small id="reverse-counts" data-output></small><div class="bar-track" aria-hidden="true"><div class="bar" id="reverse-bar"></div></div><small id="reverse-percentage" data-output></small></section>
+</div>
+<section class="panel independence" aria-labelledby="independence-heading"><h2 id="independence-heading">Does the condition change the probability?</h2><strong id="independence-answer" data-output></strong>
+<p>For a nonempty table, independence means P(A and B) = P(A) × P(B). Compare the two integer products exactly:</p>
+<div class="identity"><div><small>Count(A and B) × total</small><code id="independence-left" data-output></code></div><strong id="independence-sign" data-output></strong><div><small>Count(A) × Count(B)</small><code id="independence-right" data-output></code></div></div>
+<p>Empty or certain events can satisfy this identity even when some conditionals are undefined. This describes your finite table; it does not establish causation or independence in an outside population.</p></section>
+<details class="panel all-values"><summary>Inspect all 16 probabilities</summary><p class="small muted">Fractions are exact and reduced. Percentages are rounded to two decimal places; ≈ marks a rounded value.</p><table><thead><tr><th scope="col">Probability and meaning</th><th scope="col">Exact fraction</th><th scope="col">Percent</th></tr></thead><tbody id="probability-results"></tbody></table></details>
+</div>
+<div class="download-row"><button id="download-result" type="button" disabled>Download this table and results</button></div>
+<p class="scope">The JSON download records your current admitted labels and counts, exact numerator and denominator counts, reduced ratios, undefined values and the selected question. It rereads the inputs when clicked.</p>
+</div>
+</div>
+<section class="panel course-panel" aria-labelledby="course-heading">
+<p class="eyebrow">3 · Put the ideas into practice</p><h2 id="course-heading">Continue with Probability foundations</h2>
+<p>The opening example comes from the existing course’s fictional file checker: 9 of 108 flagged files are defective, while 9 of 10 defective files are flagged. Try the 10% example to see how the base rate changes the first answer while the checker’s two flagging rates stay the same.</p>
+<div class="download-row"><button id="download-course" type="button" class="secondary" disabled>Download the 12-question course</button><a href="../demo.html">Open RecallWeave’s learner</a></div>
+<ol><li>Download the course JSON, then open RecallWeave.</li><li>Choose the file in the course picker, inspect the preview, and explicitly start the course.</li><li>Work through the questions, review your first answers, retry missed questions in practice, and save your study notes.</li></ol>
+<p class="scope">The course download preserves the existing <code>probability-foundations.json</code> bytes, including its authorship and license. It does not contain your custom table. Starting a course begins a new local lesson; save any notes you want to keep first.</p>
+</section>
+</main>
+<footer><p>Original interactive companion for RecallWeave. All preset counts are fictional. No account, network request or browser storage is used by the lab. Learn more in the <a href="conditional-probability-lab.md">lab guide</a>, the <a href="probability-foundations.md">existing course guide</a>, and MIT’s <a href="https://ocw.mit.edu/courses/18-05-introduction-to-probability-and-statistics-spring-2022/mit18_05_s22_class03-prep.pdf">reading on conditional probability and independence</a>. External resources open only when followed.</p></footer>
+<script>
+'use strict';
+(() => {
+const COURSE_TEXT = "{\n  \"format\": \"recallweave-deck/1\",\n  \"title\": \"Probability foundations: count, condition, and update\",\n  \"attribution\": \"Original questions, explanations and transfer prompts authored for RecallWeave by estate-7a9310dad255 with AI assistance. All scenarios and numerical data are fictional. Mathematical background: Jeremy Orloff and Jonathan Bloom, MIT 18.05 (Spring 2022), Readings 2 and 3; source links and worked derivations are in courses/probability-foundations.md. No source exercises or illustrations are reproduced.\",\n  \"license\": \"CC0-1.0 for this original course content. Referenced MIT materials retain their own terms; they are not included in this deck.\",\n  \"concepts\": [\n    \"Sample spaces\",\n    \"Conditional probability\",\n    \"Independence\",\n    \"Bayes' rule\"\n  ],\n  \"items\": [\n    {\n      \"id\": \"pf-s1\",\n      \"concept\": \"Sample spaces\",\n      \"prerequisites\": [],\n      \"prompt\": \"A spinner produces one of the integers 1 through 8, with all eight outcomes equally likely. What is the probability that the result is at least 6?\",\n      \"options\": [\n        \"1/8\",\n        \"3/8\",\n        \"3/5\",\n        \"5/8\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"The event contains three outcomes: 6, 7 and 8. Each has probability 1/8, so their probabilities add to 3/8. The denominator counts all eight possible outcomes. Using 5 counts the excluded outcomes instead; 5/8 is the probability of a result below 6.\",\n      \"transfer\": \"If the eight outcomes were not equally likely, what information would you need before adding the probabilities of 6, 7 and 8?\"\n    },\n    {\n      \"id\": \"pf-s2\",\n      \"concept\": \"Sample spaces\",\n      \"prerequisites\": [],\n      \"prompt\": \"In a fictional model, every manufactured part either needs rework or does not need rework. The probability that a randomly selected part needs rework is 0.27. What is the probability that it does not?\",\n      \"options\": [\n        \"0.27\",\n        \"0.37\",\n        \"0.63\",\n        \"0.73\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"These two events cover every outcome and cannot both happen, so their probabilities sum to 1. The complement therefore has probability 1 - 0.27 = 0.73. This conclusion uses the stated two-way classification; it does not require independence or a count of actual parts.\",\n      \"transfer\": \"A service reports a 0.08 probability of missing its deadline. State the complementary event and its probability.\"\n    },\n    {\n      \"id\": \"pf-s3\",\n      \"concept\": \"Sample spaces\",\n      \"prerequisites\": [],\n      \"prompt\": \"In a fictional group of 60 learners, 30 joined a drawing club, 24 joined a coding club, and 12 joined both. A learner is selected uniformly at random from the 60. What is the probability that they joined at least one of the two clubs?\",\n      \"options\": [\n        \"0.70\",\n        \"0.90\",\n        \"0.50\",\n        \"0.20\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"Adding the club counts counts the 12 shared members twice. There are 30 + 24 - 12 = 42 members in at least one club, so the probability is 42/60 = 0.70. The answer 0.90 double-counts the overlap, 0.50 counts only the drawing club, and 0.20 counts only those in both.\",\n      \"transfer\": \"How many learners joined neither club? Explain how the complement and the corrected club count give the same result.\"\n    },\n    {\n      \"id\": \"pf-c1\",\n      \"concept\": \"Conditional probability\",\n      \"prerequisites\": [\n        \"Sample spaces\"\n      ],\n      \"prompt\": \"A fictional log contains 100 builds: 30 ran on Windows and 70 on Linux. Of the Windows builds, 6 failed; of the Linux builds, 4 failed. A build is selected uniformly at random from the log. Given that it ran on Windows, what is the probability that it failed?\",\n      \"options\": [\n        \"0.06\",\n        \"0.60\",\n        \"0.20\",\n        \"0.80\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"The condition restricts the relevant group to the 30 Windows builds. Six of those failed, so P(failed given Windows) = 6/30 = 0.20. Dividing by 100 gives the joint probability of Windows and failure (0.06). Dividing by all 10 failures answers the reverse question, P(Windows given failed) = 0.60.\",\n      \"transfer\": \"Using the same log, compute P(failed given Linux). Name the group that supplies the denominator before calculating.\"\n    },\n    {\n      \"id\": \"pf-c2\",\n      \"concept\": \"Conditional probability\",\n      \"prerequisites\": [\n        \"Sample spaces\"\n      ],\n      \"prompt\": \"A fictional delivery list has 240 parcels. Exactly 60 were priority parcels. Of the 30 parcels that arrived late, 18 were priority parcels. A parcel is selected uniformly at random from this list. Given that it arrived late, what is the probability that it was a priority parcel?\",\n      \"options\": [\n        \"0.60\",\n        \"0.30\",\n        \"0.075\",\n        \"0.25\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"Conditioning on late delivery leaves 30 possible parcels, including 18 priority parcels. The probability is 18/30 = 0.60. The ratio 18/60 = 0.30 instead means late given priority. The ratio 18/240 = 0.075 is the joint probability, and 60/240 = 0.25 is the unconditional priority probability.\",\n      \"transfer\": \"Write the numerator and denominator for P(late given priority). Explain why it uses a different denominator from P(priority given late).\"\n    },\n    {\n      \"id\": \"pf-c3\",\n      \"concept\": \"Conditional probability\",\n      \"prerequisites\": [\n        \"Sample spaces\"\n      ],\n      \"prompt\": \"A bag contains 3 red tokens and 2 blue tokens. Two tokens are drawn uniformly at random, one at a time, without replacement. Given that the first token was red, what is the probability that the second token is red?\",\n      \"options\": [\n        \"3/5\",\n        \"1/2\",\n        \"2/5\",\n        \"3/4\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"After a red token is removed, 2 red and 2 blue tokens remain. The second draw is uniform over those four tokens, so its conditional probability of red is 2/4 = 1/2. Keeping 3/5 assumes the original bag is unchanged; 2/5 removes a red token from the numerator but not from the total.\",\n      \"transfer\": \"If the first token were returned and the bag mixed before the second draw, what would the conditional probability become?\"\n    },\n    {\n      \"id\": \"pf-i1\",\n      \"concept\": \"Independence\",\n      \"prerequisites\": [\n        \"Sample spaces\",\n        \"Conditional probability\"\n      ],\n      \"prompt\": \"A fully specified probability model gives P(A) = 0.4, P(B) = 0.5, and P(A and B) = 0.2. Are the two events independent in this model, and which calculation establishes your answer?\",\n      \"options\": [\n        \"No: 0.4 and 0.5 are different probabilities.\",\n        \"No: 0.2 is smaller than either event's probability.\",\n        \"Yes: 0.4 and 0.5 add to a number below 1.\",\n        \"Yes: 0.2 equals the product 0.4 × 0.5.\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"Two events are independent when P(A and B) = P(A) × P(B). Here 0.4 × 0.5 = 0.2, which matches the stated joint probability. Equivalently, P(A given B) = 0.2/0.5 = 0.4. Different event probabilities do not imply dependence. This checks an exact model, not evidence that a finite sample proves real-world independence.\",\n      \"transfer\": \"Keep P(A) = 0.4 and P(B) = 0.5, but change P(A and B) to 0.3. Compute P(A given B) and decide whether independence remains.\"\n    },\n    {\n      \"id\": \"pf-i2\",\n      \"concept\": \"Independence\",\n      \"prerequisites\": [\n        \"Sample spaces\",\n        \"Conditional probability\"\n      ],\n      \"prompt\": \"Events A and B are mutually exclusive: they cannot occur together. Their probabilities are P(A) = 0.3 and P(B) = 0.2. Which answer correctly states whether they are independent and explains why?\",\n      \"options\": [\n        \"Yes: never occurring together means observing either tells us nothing.\",\n        \"No: if B occurs, A has probability 0 instead of its original 0.3.\",\n        \"Yes: adding 0.3 and 0.2 gives 0.5, which is a valid probability.\",\n        \"No: every pair of different events must change each other's probability.\"\n      ],\n      \"answer\": 1,\n      \"explanation\": \"Because the events cannot occur together, P(A and B) = 0 and P(A given B) = 0/0.2 = 0. That differs from P(A) = 0.3, so knowing B occurred changes A's probability. Equivalently, 0 is not 0.3 × 0.2 = 0.06. Mutually exclusive events with positive probabilities are dependent; merely being different events is not enough.\",\n      \"transfer\": \"When selecting one integer uniformly from 1 through 10, let A mean 'at most 3' and B mean 'at least 9'. Identify their overlap and test independence.\"\n    },\n    {\n      \"id\": \"pf-i3\",\n      \"concept\": \"Independence\",\n      \"prerequisites\": [\n        \"Sample spaces\",\n        \"Conditional probability\"\n      ],\n      \"prompt\": \"In a fictional system model, module A fails during a run with probability 0.10 and module B fails with probability 0.20. The two failure events are explicitly assumed independent. What is the probability that at least one module fails during a run?\",\n      \"options\": [\n        \"0.02\",\n        \"0.30\",\n        \"0.28\",\n        \"0.70\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"Independence gives P(both fail) = 0.10 × 0.20 = 0.02. Correcting the overlap gives P(at least one fails) = 0.10 + 0.20 - 0.02 = 0.28. The complement agrees: P(neither fails) = 0.90 × 0.80 = 0.72, so 1 - 0.72 = 0.28. Adding without subtracting the overlap gives 0.30; 0.02 answers the different question 'both'.\",\n      \"transfer\": \"If the failure events were dependent, which additional joint or conditional probability would let you compute the probability of at least one failure?\"\n    },\n    {\n      \"id\": \"pf-b1\",\n      \"concept\": \"Bayes' rule\",\n      \"prerequisites\": [\n        \"Sample spaces\",\n        \"Conditional probability\"\n      ],\n      \"prompt\": \"In a fictional supply model, workshop A makes 60% of the sensors and workshop B makes 40%. A sensor from A is defective with probability 2%; one from B is defective with probability 6%. A sensor is selected uniformly at random from the combined supply. Given that it is defective, what is the probability it came from B?\",\n      \"options\": [\n        \"1/3\",\n        \"2/5\",\n        \"2/3\",\n        \"3/4\"\n      ],\n      \"answer\": 2,\n      \"explanation\": \"The probability of B and defective is 0.40 × 0.06 = 0.024. The total defective probability is 0.60 × 0.02 + 0.40 × 0.06 = 0.036. Therefore P(B given defective) = 0.024/0.036 = 2/3. The value 2/5 ignores the new information; 3/4 compares defect rates without weighting each workshop's share. No independence assumption between workshop and defect is used.\",\n      \"transfer\": \"If both workshops supplied equal shares while their defect probabilities stayed 2% and 6%, what would P(B given defective) become?\"\n    },\n    {\n      \"id\": \"pf-b2\",\n      \"concept\": \"Bayes' rule\",\n      \"prerequisites\": [\n        \"Sample spaces\",\n        \"Conditional probability\"\n      ],\n      \"prompt\": \"In a fictional collection, 1% of files are defective. A checker flags 90% of defective files and also flags 10% of nondefective files. A file is selected uniformly at random. Given that the checker flags it, what is the probability that it is defective?\",\n      \"options\": [\n        \"9/10\",\n        \"1/10\",\n        \"1/100\",\n        \"1/12\"\n      ],\n      \"answer\": 3,\n      \"explanation\": \"Use 1,000 equally likely files with the stated proportions: 10 are defective and 990 are not. The checker flags 9 defective files and 99 nondefective files. Among the 108 flagged files, 9 are defective, giving 9/108 = 1/12, about 8.33%. The 90% rate is P(flagged given defective), not its reverse. The much larger nondefective group contributes most flags.\",\n      \"transfer\": \"Using the same counts, what is the probability that a randomly selected file is both defective and flagged? Explain why its denominator differs from the question's.\"\n    },\n    {\n      \"id\": \"pf-b3\",\n      \"concept\": \"Bayes' rule\",\n      \"prerequisites\": [\n        \"Sample spaces\",\n        \"Conditional probability\"\n      ],\n      \"prompt\": \"A fictional checker flags 90% of defective files and 10% of nondefective files. Compare two collections where the defective share is 1% and 10%, respectively. A file is selected uniformly at random from each collection. The checker's conditional flagging rates stay the same. How does P(defective given flagged) change as the defective share rises?\",\n      \"options\": [\n        \"It rises from 1/12 to 1/2.\",\n        \"It stays at 9/10 in both collections.\",\n        \"It falls from 1/12 to 1/100.\",\n        \"It stays at 1/10 in both collections.\"\n      ],\n      \"answer\": 0,\n      \"explanation\": \"For a defective share p, the probability is (0.90 × p) / (0.90 × p + 0.10 × (1 - p)). At p = 0.01 this is 0.009/0.108 = 1/12. At p = 0.10 it is 0.09/0.18 = 1/2. The same conditional flagging rates can produce different probabilities among flagged files because the underlying group sizes changed.\",\n      \"transfer\": \"With the same checker but a defective share of 50%, compute the defective probability among flagged files. Which part of Bayes' rule accounts for the change?\"\n    }\n  ]\n}\n";
+// Exact probabilities for uniform selection from a finite two-event table.
+// Browser display and percentages belong to the UI; this module never rounds counts.
+
+const CELL_KEYS = Object.freeze(['ab', 'aNotB', 'notAB', 'neither']);
+
+const all = CELL_KEYS;
+const a = ['ab', 'aNotB'];
+const notA = ['notAB', 'neither'];
+const b = ['ab', 'notAB'];
+const notB = ['aNotB', 'neither'];
+
+function definition(id, symbol, kind, numeratorCells, denominatorCells) {
+  return Object.freeze({
+    id, symbol, kind,
+    numeratorCells: Object.freeze([...numeratorCells]),
+    denominatorCells: Object.freeze([...denominatorCells]),
+  });
+}
+
+const PROBABILITIES = Object.freeze([
+  definition('joint_ab', 'P(A ∩ B)', 'joint', ['ab'], all),
+  definition('joint_a_not_b', 'P(A ∩ not B)', 'joint', ['aNotB'], all),
+  definition('joint_not_a_b', 'P(not A ∩ B)', 'joint', ['notAB'], all),
+  definition('joint_neither', 'P(not A ∩ not B)', 'joint', ['neither'], all),
+  definition('marginal_a', 'P(A)', 'marginal', a, all),
+  definition('marginal_not_a', 'P(not A)', 'marginal', notA, all),
+  definition('marginal_b', 'P(B)', 'marginal', b, all),
+  definition('marginal_not_b', 'P(not B)', 'marginal', notB, all),
+  definition('a_given_b', 'P(A | B)', 'conditional', ['ab'], b),
+  definition('not_a_given_b', 'P(not A | B)', 'conditional', ['notAB'], b),
+  definition('a_given_not_b', 'P(A | not B)', 'conditional', ['aNotB'], notB),
+  definition('not_a_given_not_b', 'P(not A | not B)', 'conditional', ['neither'], notB),
+  definition('b_given_a', 'P(B | A)', 'conditional', ['ab'], a),
+  definition('not_b_given_a', 'P(not B | A)', 'conditional', ['aNotB'], a),
+  definition('b_given_not_a', 'P(B | not A)', 'conditional', ['notAB'], notA),
+  definition('not_b_given_not_a', 'P(not B | not A)', 'conditional', ['neither'], notA),
+]);
+
+/** Admit bounded decimal input before allocating a BigInt. Leading zeros count. */
+function parseCount(raw) {
+  if (typeof raw !== 'string') throw new TypeError('A count must be a string.');
+  if (raw.length > 128) throw new RangeError('A count input may contain at most 128 UTF-16 units.');
+  const value = raw.trim();
+  if (!/^[0-9]{1,18}$/.test(value)) {
+    throw new RangeError('A count must contain 1–18 ASCII digits after trimming.');
+  }
+  return BigInt(value);
+}
+
+/** Keep labels literal, rejecting controls before trimming surrounding whitespace. */
+function parseEventLabel(raw) {
+  if (typeof raw !== 'string') throw new TypeError('An event label must be a string.');
+  if (raw.length > 320) throw new RangeError('An event label may contain at most 320 UTF-16 units.');
+  if (/[\u0000-\u001f\u007f-\u009f]/u.test(raw)) {
+    throw new RangeError('An event label must not contain C0 or C1 control characters.');
+  }
+  const value = raw.trim();
+  const length = [...value].length;
+  if (length < 1 || length > 80) {
+    throw new RangeError('An event label must contain 1–80 Unicode code points after trimming.');
+  }
+  return value;
+}
+
+function record(value, name) {
+  if (value === null || typeof value !== 'object' || Array.isArray(value)) {
+    throw new TypeError(name + ' must be an object.');
+  }
+  return value;
+}
+
+function field(value, key, name) {
+  if (!Object.hasOwn(value, key)) throw new TypeError(name + ' is required.');
+  return value[key];
+}
+
+function gcd(left, right) {
+  while (right !== 0n) [left, right] = [right, left % right];
+  return left;
+}
+
+function sum(cells, keys) {
+  return keys.reduce((total, key) => total + cells[key], 0n);
+}
+
+/**
+ * Return an immutable JSON-safe snapshot. The original summed counts are retained
+ * beside each reduced ratio. A zero denominator has no ratio, including 0/0.
+ * Independence is defined for every positive-total table, even degenerate events.
+ */
+function analyzeTable(input) {
+  record(input, 'The table');
+  const rawCells = record(field(input, 'cells', 'Table cells'), 'Table cells');
+  const rawLabels = record(field(input, 'labels', 'Event labels'), 'Event labels');
+  const counts = Object.fromEntries(CELL_KEYS.map(key => [
+    key, parseCount(field(rawCells, key, 'Cell ' + key)),
+  ]));
+  const labels = Object.freeze({
+    a: parseEventLabel(field(rawLabels, 'a', 'Event A label')),
+    b: parseEventLabel(field(rawLabels, 'b', 'Event B label')),
+  });
+  const total = sum(counts, all);
+  const probabilities = Object.freeze(PROBABILITIES.map(item => {
+    const numerator = sum(counts, item.numeratorCells);
+    const denominator = sum(counts, item.denominatorCells);
+    const defined = denominator !== 0n;
+    const divisor = defined ? gcd(numerator, denominator) : null;
+    return Object.freeze({
+      ...item,
+      numerator: numerator.toString(),
+      denominator: denominator.toString(),
+      defined,
+      reducedNumerator: defined ? (numerator / divisor).toString() : null,
+      reducedDenominator: defined ? (denominator / divisor).toString() : null,
+    });
+  }));
+  const left = counts.ab * total;
+  const right = sum(counts, a) * sum(counts, b);
+  return Object.freeze({
+    format: 'recallweave-conditional-table/1',
+    labels,
+    cells: Object.freeze(Object.fromEntries(CELL_KEYS.map(key => [key, counts[key].toString()]))),
+    total: total.toString(),
+    probabilities,
+    independence: Object.freeze({
+      defined: total !== 0n,
+      independent: total === 0n ? null : left === right,
+      left: left.toString(),
+      right: right.toString(),
+    }),
+  });
+}
+
+
+const byId = id => document.getElementById(id);
+const countInputs = Object.fromEntries(CELL_KEYS.map(key => [key, byId('count-' + key)]));
+const labelInputs = { a: byId('label-a'), b: byId('label-b') };
+const selection = byId('probability-select');
+const results = byId('results');
+const status = byId('input-status');
+const resultButton = byId('download-result');
+const resultBody = byId('probability-results');
+const presets = {
+  rare: { cells: ['9', '1', '99', '891'], labels: ['Defective file', 'Flagged file'] },
+  common: { cells: ['90', '10', '90', '810'], labels: ['Defective file', 'Flagged file'] },
+  independent: { cells: ['20', '20', '30', '30'], labels: ['Event A', 'Event B'] },
+  emptyB: { cells: ['0', '10', '0', '90'], labels: ['Event A', 'Event B'] },
+  empty: { cells: ['0', '0', '0', '0'], labels: ['Event A', 'Event B'] },
+  close: { cells: ['889', '890', '890', '891'], labels: ['Event A', 'Event B'] },
+};
+const phrases = {
+  joint_ab: ['A and B'], joint_a_not_b: ['A and not B'],
+  joint_not_a_b: ['not A and B'], joint_neither: ['neither A nor B'],
+  marginal_a: ['A'], marginal_not_a: ['not A'], marginal_b: ['B'], marginal_not_b: ['not B'],
+  a_given_b: ['A', 'B'], not_a_given_b: ['not A', 'B'],
+  a_given_not_b: ['A', 'not B'], not_a_given_not_b: ['not A', 'not B'],
+  b_given_a: ['B', 'A'], not_b_given_a: ['not B', 'A'],
+  b_given_not_a: ['B', 'not A'], not_b_given_not_a: ['not B', 'not A'],
+};
+function named(token, labels) {
+  return token.replace(/\b[AB]\b/g, letter => '“' + labels[letter.toLowerCase()] + '”');
+}
+function meaning(id, labels) {
+  return phrases[id].map(part => named(part, labels)).join(', given ');
+}
+function countText(raw) { return BigInt(raw).toLocaleString('en-US'); }
+function fraction(row) {
+  return row.defined ? row.reducedNumerator + ' / ' + row.reducedDenominator : 'Undefined';
+}
+function percentage(row) {
+  if (!row.defined) return { text: 'No conditioning outcomes', width: '0%' };
+  const n = BigInt(row.numerator);
+  const d = BigInt(row.denominator);
+  const scaled = (n * 10000n + d / 2n) / d;
+  const value = String(scaled / 100n) + '.' + String(scaled % 100n).padStart(2, '0') + '%';
+  return { text: (n * 10000n % d === 0n ? '' : '≈ ') + value, width: value };
+}
+function text(id, value) { byId(id).textContent = value; }
+function readInput() {
+  const cells = Object.fromEntries(CELL_KEYS.map(key => [key, countInputs[key].value]));
+  const labels = { a: labelInputs.a.value, b: labelInputs.b.value };
+  const errors = [];
+  for (const key of CELL_KEYS) {
+    try {
+      parseCount(cells[key]);
+      countInputs[key].removeAttribute('aria-invalid');
+    } catch (error) {
+      countInputs[key].setAttribute('aria-invalid', 'true');
+      errors.push(countInputs[key].getAttribute('aria-label') + ': ' + error.message);
+    }
+  }
+  for (const key of ['a', 'b']) {
+    try {
+      parseEventLabel(labels[key]);
+      labelInputs[key].removeAttribute('aria-invalid');
+    } catch (error) {
+      labelInputs[key].setAttribute('aria-invalid', 'true');
+      errors.push('Event ' + key.toUpperCase() + ': ' + error.message);
+    }
+  }
+  if (errors.length) throw new Error(errors.join(' '));
+  if (!PROBABILITIES.some(row => row.id === selection.value)) throw new Error('Choose a probability to inspect.');
+  return { cells, labels };
+}
+function retire(message) {
+  results.hidden = true;
+  resultButton.disabled = true;
+  resultBody.replaceChildren();
+  for (const element of results.querySelectorAll('[data-output]')) element.textContent = '';
+  for (const cell of results.querySelectorAll('[data-cell]')) {
+    cell.classList.remove('is-numerator', 'is-denominator');
+    cell.removeAttribute('data-membership');
+  }
+  for (const id of ['forward-bar', 'reverse-bar']) byId(id).style.width = '0%';
+  status.textContent = message;
+  status.classList.add('has-error');
+}
+function renderTable(analysis, selected) {
+  const rows = Object.fromEntries(analysis.probabilities.map(row => [row.id, row]));
+  text('row-a', 'A: ' + analysis.labels.a);
+  text('row-not-a', 'Not A');
+  text('column-b', 'B: ' + analysis.labels.b);
+  text('column-not-b', 'Not B');
+  for (const key of CELL_KEYS) {
+    const cell = results.querySelector('[data-cell="' + key + '"]');
+    const n = selected.numeratorCells.includes(key);
+    const d = selected.denominatorCells.includes(key);
+    cell.classList.toggle('is-numerator', n);
+    cell.classList.toggle('is-denominator', d);
+    cell.dataset.membership = n ? 'numerator-and-denominator' : d ? 'denominator' : 'outside';
+    cell.querySelector('[data-count]').textContent = countText(analysis.cells[key]);
+    cell.querySelector('[data-badge]').textContent = n ? 'N + D' : d ? 'D' : 'Outside';
+  }
+  text('row-total-a', countText(rows.marginal_a.numerator));
+  text('row-total-not-a', countText(rows.marginal_not_a.numerator));
+  text('column-total-b', countText(rows.marginal_b.numerator));
+  text('column-total-not-b', countText(rows.marginal_not_b.numerator));
+  text('table-total', countText(analysis.total));
+}
+function render(analysis) {
+  const selected = analysis.probabilities.find(row => row.id === selection.value);
+  results.hidden = false;
+  resultButton.disabled = false;
+  status.classList.remove('has-error');
+  status.textContent = BigInt(analysis.total) === 0n
+    ? 'All four counts are zero. Probabilities and independence are undefined.'
+    : 'Updated from all four counts. Select a probability to inspect its counting group.';
+  text('focus-title', selected.symbol);
+  text('focus-meaning', meaning(selected.id, analysis.labels));
+  text('focus-numerator', countText(selected.numerator));
+  text('focus-denominator', countText(selected.denominator));
+  text('focus-fraction', fraction(selected));
+  text('focus-percentage', selected.defined ? percentage(selected).text : 'No probability: denominator is zero.');
+  text('focus-explanation', selected.defined
+    ? 'Count the N outcomes, then divide by all D outcomes. The highlighted N cells also belong to the denominator.'
+    : 'An empty denominator supplies no outcomes to condition on. Undefined is different from probability zero.');
+  renderTable(analysis, selected);
+  for (const [prefix, id] of [['forward', 'a_given_b'], ['reverse', 'b_given_a']]) {
+    const row = analysis.probabilities.find(value => value.id === id);
+    const percent = percentage(row);
+    text(prefix + '-meaning', meaning(id, analysis.labels));
+    text(prefix + '-fraction', fraction(row));
+    text(prefix + '-counts', countText(row.numerator) + ' out of ' + countText(row.denominator));
+    text(prefix + '-percentage', row.defined ? percent.text : 'Undefined: empty conditioning group');
+    byId(prefix + '-bar').style.width = percent.width;
+  }
+  const independent = analysis.independence;
+  text('independence-answer', !independent.defined ? 'Undefined: the table is empty'
+    : independent.independent ? 'Independent in this finite table' : 'Dependent in this finite table');
+  text('independence-left', independent.left === null ? 'Undefined' : countText(independent.left));
+  text('independence-right', independent.right === null ? 'Undefined' : countText(independent.right));
+  text('independence-sign', !independent.defined ? '—' : independent.independent ? '=' : '≠');
+  resultBody.replaceChildren();
+  for (const row of analysis.probabilities) {
+    const tr = document.createElement('tr');
+    tr.dataset.probabilityId = row.id;
+    if (row.id === selected.id) tr.classList.add('selected-row');
+    const name = document.createElement('th');
+    name.scope = 'row';
+    const symbol = document.createElement('strong');
+    symbol.textContent = row.symbol;
+    const description = document.createElement('small');
+    description.textContent = meaning(row.id, analysis.labels);
+    name.append(symbol, description);
+    const ratio = document.createElement('td');
+    ratio.dataset.role = 'fraction';
+    ratio.textContent = fraction(row);
+    const percent = document.createElement('td');
+    percent.textContent = row.defined ? percentage(row).text : '—';
+    tr.append(name, ratio, percent);
+    resultBody.append(tr);
+  }
+}
+function refresh() {
+  try {
+    const analysis = analyzeTable(readInput());
+    render(analysis);
+    return analysis;
+  } catch (error) {
+    retire(error.message);
+    return null;
+  }
+}
+function saveText(content, name, type) {
+  const url = URL.createObjectURL(new Blob([content], { type }));
+  const anchor = document.createElement('a');
+  anchor.href = url;
+  anchor.download = name;
+  document.body.append(anchor);
+  anchor.click();
+  anchor.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+for (const definition of PROBABILITIES) {
+  const option = document.createElement('option');
+  option.value = definition.id;
+  option.textContent = definition.symbol;
+  selection.append(option);
+}
+selection.value = 'a_given_b';
+for (const input of [...Object.values(countInputs), ...Object.values(labelInputs)]) {
+  input.addEventListener('input', refresh);
+  input.addEventListener('change', refresh);
+}
+selection.addEventListener('change', refresh);
+byId('table-form').addEventListener('submit', event => { event.preventDefault(); refresh(); });
+byId('apply-preset').addEventListener('click', () => {
+  const preset = presets[byId('preset-select').value];
+  if (!preset) return;
+  CELL_KEYS.forEach((key, index) => { countInputs[key].value = preset.cells[index]; });
+  labelInputs.a.value = preset.labels[0];
+  labelInputs.b.value = preset.labels[1];
+  refresh();
+});
+resultButton.addEventListener('click', () => {
+  // Read actual live values even when a caller changed a field without an input event.
+  const analysis = refresh();
+  if (!analysis) return;
+  saveText(JSON.stringify({ ...analysis, selectedProbability: selection.value }, null, 2) + '\n',
+    'conditional-probability-table.json', 'application/json;charset=utf-8');
+});
+byId('download-course').disabled = false;
+byId('download-course').addEventListener('click', () => {
+  saveText(COURSE_TEXT, 'probability-foundations.json', 'application/json;charset=utf-8');
+});
+refresh();
+
+})();
+</script>
+</body>
+</html>
