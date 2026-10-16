@@ -1,0 +1,9 @@
+# Receiver and source correction lineage
+
+The independent contract and native/browser executable freeze preceded candidate source and author test exposure at 2026-10-08 16:50:14 UTC. The frozen native v3 and browser v1 remain unchanged.
+
+Native v0 had a duplicate local identifier and an undefined-metadata default that would hide the missing-metadata input. Both were corrected before execution. Native v1 then failed syntax in the nested concept-count expression; no product ran. Native v2 parsed but its entry guard compared /tmp with /private/tmp and skipped all groups. Its zero exit is not a test result. Native v3 uses realpath for that guard and ran the baseline (two controls,20 missing-capability groups) and original converter (22/22 groups,90 successful accepts/refusals).
+
+After source exposure, a separate native probe showed a product inconsistency: the UI decoder consumed one leading UTF-8 BOM, then the converter consumed another. Direct conversion correctly refused the same two-BOM string. The product repair adds only `, ignoreBOM: true` to the UI decoder and regenerated standalone page; core47ea is unchanged. Zero/one/two-BOM end-to-end Chrome checks are pending. The post-review browser extension is explicitly separate from the original independent freeze.
+
+The author receiver successor adds encoding-only mode and records all actual downloaded bytes. Its first new refusal matcher assumed a particular diagnostic. Before any execution, that matcher was broadened to native CSV header/record errors while preserving exact acceptance/refusal and output assertions. The final intended20232-byte harness was recovered through seven exact line splices, verified against SHA256e34dbf70 and compiled by local Node24.19 vm.Script. This is syntax qualification only. A timed-out native write has unknown effects and is not claimed as completed.
