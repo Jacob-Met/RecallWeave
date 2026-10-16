@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Compare insertion and selection sort on complete records. Inspect every step, equal-key identity and declared operation counts offline.">
+  <title>Sorting with equal keys · RecallWeave</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <main>
+    <header class="hero">
+      <p class="eyebrow">RecallWeave · Algorithms lab</p>
+      <h1>Sorting with equal keys</h1>
+      <p class="lead">A sorted list can still lose its earlier order. Follow the <strong>whole record</strong> through two algorithms to see when that happens.</p>
+      <div class="principles"><span>2–8 records</span><span>Every identity stays visible</span><span>Complete traces to keep</span></div>
+    </header>
+
+    <section class="draft-section" aria-labelledby="draft-title">
+      <div class="section-heading"><div><p class="eyebrow">01 · Choose the input</p><h2 id="draft-title">Same records, two recipes</h2></div>
+        <label class="preset-label" for="preset">Example
+          <select id="preset">
+            <option value="crossing">A distant exchange crosses a tie</option>
+            <option value="ordered">Already in order</option>
+            <option value="reverse">Reverse order</option>
+            <option value="equal">All keys equal</option>
+            <option value="mixed">Negative keys and zero</option>
+          </select>
+        </label>
+      </div>
+      <p id="input-help">Keys are integers from −99 to 99. Labels can repeat; the numbered input badge is each record’s identity. Keep labels to 32 UTF-16 code units, with no control characters.</p>
+      <form id="draft-form" novalidate>
+        <div id="draft-rows" aria-describedby="input-help"></div>
+        <div class="draft-actions"><button id="add-record" type="button" class="secondary">Add record</button><span id="row-count"></span></div>
+        <div id="draft-status" class="status" role="status" aria-live="polite"></div>
+        <button id="start-comparison" type="submit" class="primary">Start comparison</button>
+      </form>
+    </section>
+
+    <section class="results-section" aria-labelledby="results-title">
+      <div class="section-heading"><div><p class="eyebrow">02 · Follow the records</p><h2 id="results-title" tabindex="-1">One decision at a time</h2></div>
+        <button id="restart-steps" type="button" class="secondary" disabled>Restart both traces</button>
+      </div>
+      <p class="count-note">One comparison is the recipe’s “is this key smaller?” decision. One exchange swaps two distinct positions. These are operation counts, not measured running times.</p>
+      <p id="comparison-status" class="status" role="status" aria-live="polite">Choose your records, then start a comparison.</p>
+      <div id="empty-results" class="empty-results"><strong>Equal keys make the difference visible.</strong><p>Try the first example. Selection’s distant exchange can move one tied record past another, even though the final keys are sorted.</p></div>
+      <div id="comparison-panels" class="panels" hidden>
+        <article class="algorithm-panel" data-algorithm="insertion" aria-labelledby="insertion-title">
+          <div class="panel-heading"><span class="algorithm-mark">I</span><div><h3 id="insertion-title">Insertion sort</h3><p class="guarantee">This recipe is stable for every admitted input.</p></div></div>
+          <p class="recipe">Move a record left by adjacent exchanges only while its key is strictly smaller. Stop on an equal key.</p>
+          <p class="step-count" data-step-count></p>
+          <ol class="record-track" data-record-track aria-label="Insertion record order"></ol>
+          <p class="step-message" data-step-message role="status" aria-live="polite"></p>
+          <p class="prefix-context" data-prefix-context></p>
+          <dl class="counts"><div><dt>Key comparisons</dt><dd data-comparisons>0</dd></div><div><dt>Exchanges</dt><dd data-exchanges>0</dd></div></dl>
+          <div class="step-controls"><button type="button" data-action="back">Back</button><button type="button" data-action="next">Next</button><button type="button" data-action="final" class="secondary">Show final</button></div>
+          <div class="tie-report" data-tie-report></div>
+        </article>
+        <article class="algorithm-panel" data-algorithm="selection" aria-labelledby="selection-title">
+          <div class="panel-heading"><span class="algorithm-mark selection">S</span><div><h3 id="selection-title">Selection sort</h3><p class="guarantee">This recipe has no general stability guarantee.</p></div></div>
+          <p class="recipe">Keep the earliest minimum in each remaining scan, then exchange it with the pass position if different.</p>
+          <p class="step-count" data-step-count></p>
+          <ol class="record-track" data-record-track aria-label="Selection record order"></ol>
+          <p class="step-message" data-step-message role="status" aria-live="polite"></p>
+          <p class="prefix-context" data-prefix-context></p>
+          <dl class="counts"><div><dt>Key comparisons</dt><dd data-comparisons>0</dd></div><div><dt>Exchanges</dt><dd data-exchanges>0</dd></div></dl>
+          <div class="step-controls"><button type="button" data-action="back">Back</button><button type="button" data-action="next">Next</button><button type="button" data-action="final" class="secondary">Show final</button></div>
+          <div class="tie-report" data-tie-report></div>
+        </article>
+      </div>
+      <div class="artifact-row"><div><h3>Keep the full comparison</h3><p>The JSON contains both complete traces, even while you are viewing an early step. It is an inspection file; this explorer does not restore it.</p></div>
+        <button id="download-comparison" type="button" class="secondary" disabled>Download complete comparison (.json)</button>
+      </div>
+    </section>
+
+    <section class="lesson-section" aria-labelledby="lesson-title">
+      <div><p class="eyebrow">03 · Recall, explain, transfer</p><h2 id="lesson-title">Take the twelve-question lesson</h2>
+        <p>Practice record identity, insertion’s equal-key rule, selection’s distant exchange and the meaning of operation counts.</p>
+        <p>Download the course, open the <a href="../demo.html">RecallWeave learner</a>, choose the course file and inspect its preview. Starting the imported course explicitly begins the new lesson. You can then review your first answers, practice misses and download study notes.</p>
+      </div>
+      <div class="lesson-action"><button id="download-lesson" type="button" class="primary" disabled>Download lesson (.json)</button><p id="lesson-status" class="small-status" role="status">Loading the original course…</p></div>
+    </section>
+    <footer><p>Original teaching examples and implementation. Conceptual references: Sedgewick and Wayne’s <a href="https://algs4.cs.princeton.edu/21elementary/">elementary sorts</a> and <a href="https://algs4.cs.princeton.edu/25applications/">stability discussion</a>. This selection recipe skips self-exchanges; compare counts using the rules shown here.</p><p>No account or browser storage. The standalone file includes the explorer and course.</p></footer>
+  </main>
+  <script type="module" src="./app.mjs"></script>
+</body>
+</html>

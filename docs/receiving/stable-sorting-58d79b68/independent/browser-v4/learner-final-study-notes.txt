@@ -1,0 +1,153 @@
+RecallWeave — study notes
+Sorting records without losing their identity
+Saved: 2026-10-08T15:38:48.637Z
+
+FIRST SESSION
+11 of 12 connections correct on the first try.
+This count describes this session; it is not a measure of your ability.
+
+ESTIMATED MASTERY — MODEL STATE, NOT A GRADE
+These estimates come from the demo’s learning model. They are not a validated assessment.
+Practice does not change the first-session estimates.
+Record identity: 98%
+Insertion passes: 98%
+Selection and stability: 63%
+Choosing and checking a sort: 98%
+
+PRACTICE
+Complete: 1 of 1 practice answers recorded; 1 correct on retry.
+Practice follows the explanations and is recorded separately from the first answers.
+
+REVIEW THE CONNECTIONS
+
+1. Use adjacent-exchange insertion sort on descending keys [4, 3, 2, 1]. Count only key comparisons and exchanges of two distinct positions; do not count index-bound checks. What totals result?
+Concept: Insertion passes
+Your first answer: 6 key comparisons and 6 exchanges
+First try: correct
+Correct answer: 6 key comparisons and 6 exchanges
+Explanation: The three insertion passes move the next record left by 1, 2 and 3 positions. Every compared pair is out of order, so each of the six key comparisons is followed by an exchange. Reaching the front adds no further key comparison.
+Apply the idea: Repeat the count for [3, 2, 1], writing down each compared pair so index checks do not get counted as key comparisons.
+Your explanation — reflection, not scored:
+  Not written.
+
+2. The selection scan keeps its earlier minimum when it encounters an equal key. Why can the overall sort still change the order of tied records?
+Concept: Selection and stability
+Your first answer: A distant exchange can move one tied record past another.
+First try: correct
+Correct answer: A distant exchange can move one tied record past another.
+Explanation: Choosing the first minimum controls the scan's tie choice, but it does not make the later exchange local. In [2A, 2B, 1C], selecting 1C and exchanging it with 2A moves A across B even though the scan kept the earlier key-2 minimum when those keys tied.
+Apply the idea: Compare a neighboring exchange with an exchange across several positions. Which intervening identities might the longer exchange pass?
+Your explanation — reflection, not scored:
+  Not written.
+
+3. Two distinct records have the same key. What additional promise does a stable sort make about them?
+Concept: Record identity
+Your first answer: It preserves their relative order from the input to that sort.
+First try: correct
+Correct answer: It preserves their relative order from the input to that sort.
+Explanation: Stability concerns the relative order of records whose comparison keys are equal. They can move to new positions together as smaller keys move ahead of them. It does not mean the array stays unchanged.
+Apply the idea: Explain how two tied records can both move several positions while still keeping their relative order.
+Your explanation — reflection, not scored:
+  Not written.
+
+4. During an insertion pass, the current record is (2, B) and its immediate predecessor is (2, A). This recipe exchanges neighbors only when the later key is strictly smaller. What happens here?
+Concept: Insertion passes
+Your first answer: The records are not exchanged, and this insertion pass stops.
+First try: correct
+Correct answer: The records are not exchanged, and this insertion pass stops.
+Explanation: The test 2 < 2 is false. Stopping on equality keeps the later record from crossing an earlier equal-key record. Using a non-strict test instead would change this tie behavior.
+Apply the idea: Change the comparison rule to exchange when the later key is less than or equal. What happens to [2A, 2B]?
+Your explanation — reflection, not scored:
+  Not written.
+
+5. On the input (2, A), (1, C), (2, B), this selection recipe finishes as (1, C), (2, A), (2, B). What does that observation establish?
+Concept: Selection and stability
+Your first answer: It kept the tied records in order for this input; that alone does not establish a general stability guarantee.
+First try: correct
+Correct answer: It kept the tied records in order for this input; that alone does not establish a general stability guarantee.
+Explanation: A and B retain their order in this example. A general stability claim concerns all allowed inputs; a different input, such as [2A, 2B, 1C], can reverse them. The explorer separates observed tie order from the algorithm's guarantee.
+Apply the idea: Test an all-distinct input. Why does that run provide no actual tied-key group whose order you can compare?
+Your explanation — reflection, not scored:
+  Not written.
+
+6. A record has a numeric key and a tag, such as (3, Amber). When sorting records by ascending key, which property must be preserved?
+Concept: Record identity
+Your first answer: Each original key stays with its tag, and every original record appears exactly once.
+First try: correct
+Correct answer: Each original key stays with its tag, and every original record appears exactly once.
+Explanation: Sorting rearranges complete records. Comparing only the key does not give permission to change its attached data, lose an entry or create a duplicate. A tag helps us follow identity through the rearrangement.
+Apply the idea: Name a real list with a sorting key and another field that must stay attached to the same record.
+Your explanation — reflection, not scored:
+  Not written.
+
+7. One displayed trace uses fewer key comparisons than another. Which conclusion is justified by that count alone?
+Concept: Choosing and checking a sort
+Your first answer: It used fewer key comparisons under the declared recipe; no elapsed-time measurement has been made.
+First try: correct
+Correct answer: It used fewer key comparisons under the declared recipe; no elapsed-time measurement has been made.
+Explanation: The explorer counts particular algorithm operations. It does not measure elapsed time, memory allocation, rendering or all language-runtime work. Stability is a separate ordering property. Operation counts can explain algorithm behavior without serving as a timing benchmark.
+Apply the idea: Name two costs that a browser timing measurement might include even though this comparison counter does not.
+Your explanation — reflection, not scored:
+  Not written.
+
+8. The five keys [1, 2, 3, 4, 5] are already ascending. Insertion uses strict adjacent comparisons. Selection scans every remaining position and skips self-exchanges. Which operation count is correct?
+Concept: Choosing and checking a sort
+Your first answer: Insertion: 4 comparisons; selection: 10 comparisons; both: 0 exchanges
+First try: correct
+Correct answer: Insertion: 4 comparisons; selection: 10 comparisons; both: 0 exchanges
+Explanation: Insertion makes one unsuccessful less-than comparison in each of four passes and never exchanges. Selection still scans 4 + 3 + 2 + 1 remaining keys, giving ten comparisons. The chosen minimum is already in place each time, and this recipe skips self-exchanges.
+Apply the idea: Keep the same number of records but reverse their keys. Which recipe's comparison total changes, and why?
+Your explanation — reflection, not scored:
+  Not written.
+
+9. In adjacent-exchange insertion sort, what is guaranteed after a completed pass has inserted the next record?
+Concept: Insertion passes
+Your first answer: The processed prefix is sorted; later records may still need to move into it.
+First try: correct
+Correct answer: The processed prefix is sorted; later records may still need to move into it.
+Explanation: An insertion pass places one additional record into the previously sorted prefix. Future records can be smaller and may shift that prefix later. The invariant describes the part processed so far, not a claim that all those positions are final.
+Apply the idea: Trace [4, 7, 2] and point to the prefix after the first pass. Why is that prefix not already the set of smallest keys?
+Your explanation — reflection, not scored:
+  Not written.
+
+10. Selection sort starts with (2, A), (2, B), (1, C). Its first pass selects C as the minimum and exchanges it with the first record. What order remains immediately after that exchange?
+Concept: Selection and stability
+Your first answer: (1, C), (2, A), (2, B)
+First try: needs review
+Correct answer: (1, C), (2, B), (2, A)
+Explanation: Exchanging the first and third positions moves A past B. The keys are already ascending afterward, but the key-2 identities have reversed from A then B to B then A. This is a concrete counterexample to stability for this selection recipe.
+Apply the idea: Mark which two positions are exchanged. Which tied record is crossed without being selected as the minimum?
+Your explanation — reflection, not scored:
+  Not written.
+Practice answer: (1, C), (2, B), (2, A)
+Practice result: correct on retry
+
+11. The input is (2, A), (2, B), (1, C). Which result is both ascending by key and stable?
+Concept: Record identity
+Your first answer: (1, C), (2, A), (2, B)
+First try: correct
+Correct answer: (1, C), (2, A), (2, B)
+Explanation: C must move before the two key-2 records. Stability then keeps A before B because that was their relative input order. Reversing A and B still sorts the keys, but it loses this stability property.
+Apply the idea: Create a four-record input with two equal keys and write two sorted outputs: one that keeps their order and one that changes it.
+Your explanation — reflection, not scored:
+  Not written.
+
+12. You first sort tickets by increasing arrival number (each number is distinct). You then use a stable sort by priority. Among tickets with the same priority, what order does the second sort preserve?
+Concept: Choosing and checking a sort
+Your first answer: Increasing arrival number, because those tied-priority tickets keep their relative input order.
+First try: correct
+Correct answer: Increasing arrival number, because those tied-priority tickets keep their relative input order.
+Explanation: Before the second sort, all tickets are ordered by arrival number. The stable priority sort forms priority groups while retaining that earlier relative order inside each equal-priority group. Stability is defined relative to the input of the current sort; it does not restore some earlier absolute positions.
+Apply the idea: Explain what could go wrong if the priority pass used a sort that can reorder tied records. Give a small ticket example.
+Your explanation — reflection, not scored:
+  Not written.
+
+YOUR APPLICATION REFLECTION — NOT SCORED
+Prompt: Choose one connection from this deck and explain how it relates to another idea in your own words.
+Not written.
+
+DECK ATTRIBUTION
+Original fictional examples, question wording and worked explanations by the RecallWeave project. Conceptual references: Robert Sedgewick and Kevin Wayne, Algorithms, 4th Edition, Section 2.1 Elementary Sorts, https://algs4.cs.princeton.edu/21elementary/ ; insertion and selection class documentation at https://algs4.cs.princeton.edu/code/edu/princeton/cs/algs4/Insertion.java.html and https://algs4.cs.princeton.edu/code/edu/princeton/cs/algs4/Selection.java.html .
+Original course wording and fictional examples may be used, copied and adapted with attribution to RecallWeave. Linked reference works retain their own licenses; no reference passages, figures or source code are reproduced.
+
+Saved from this browser session. The download does not upload the session or restore it after a refresh.
